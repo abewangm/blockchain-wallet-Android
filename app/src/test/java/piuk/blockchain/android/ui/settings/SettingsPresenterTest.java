@@ -1,44 +1,25 @@
 package piuk.blockchain.android.ui.settings;
 
-import android.app.Application;
-import android.content.Context;
-
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.settings.SettingsManager;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
-import piuk.blockchain.android.data.settings.SettingsService;
-import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
-import piuk.blockchain.android.util.AESUtilWrapper;
-import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -56,13 +37,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "AnonymousInnerClassMayBeStatic"})
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
-public class SettingsViewModelTest {
+public class SettingsPresenterTest {
 
-    private SettingsViewModel subject;
-    @Mock private SettingsViewModel.DataListener activity;
+    private SettingsPresenter subject;
+    @Mock private SettingsView activity;
     @Mock private FingerprintHelper fingerprintHelper;
     @Mock private AuthDataManager authDataManager;
     @Mock private SettingsDataManager settingsDataManager;
@@ -76,13 +54,15 @@ public class SettingsViewModelTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new MockApiModule(),
-                new MockDataManagerModule());
-
-        subject = new SettingsViewModel(activity);
+        subject = new SettingsPresenter(fingerprintHelper,
+                authDataManager,
+                settingsDataManager,
+                payloadManager,
+                payloadDataManager,
+                stringUtils,
+                prefsUtil,
+                accessState);
+        subject.initView(activity);
     }
 
     @Test
@@ -649,61 +629,4 @@ public class SettingsViewModelTest {
         verify(activity, times(2)).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
     }
 
-    private class MockDataManagerModule extends DataManagerModule {
-        @Override
-        protected FingerprintHelper provideFingerprintHelper(Context applicationContext, PrefsUtil prefsUtil) {
-            return fingerprintHelper;
-        }
-
-        @Override
-        protected SettingsDataManager provideSettingsDataManager(SettingsService settingsService,
-                                                                 SettingsDataStore settingsDataStore,
-                                                                 RxBus rxBus) {
-            return settingsDataManager;
-        }
-
-        @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
-            return payloadDataManager;
-        }
-
-        @Override
-        protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
-                                                         PrefsUtil prefsUtil,
-                                                         AppUtil appUtil,
-                                                         AccessState accessState,
-                                                         StringUtils stringUtils,
-                                                         AESUtilWrapper aesUtilWrapper,
-                                                         RxBus rxBus) {
-            return authDataManager;
-        }
-    }
-
-    private class MockApiModule extends ApiModule {
-        @Override
-        protected PayloadManager providePayloadManager() {
-            return payloadManager;
-        }
-    }
-
-    private class MockApplicationModule extends ApplicationModule {
-        public MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return prefsUtil;
-        }
-
-        @Override
-        protected AccessState provideAccessState() {
-            return accessState;
-        }
-
-        @Override
-        protected StringUtils provideStringUtils() {
-            return stringUtils;
-        }
-    }
 }

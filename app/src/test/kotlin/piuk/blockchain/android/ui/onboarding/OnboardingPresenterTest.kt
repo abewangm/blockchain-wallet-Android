@@ -1,29 +1,19 @@
 package piuk.blockchain.android.ui.onboarding
 
-import android.app.Application
-import android.content.Context
 import android.content.Intent
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.api.data.Settings
-import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.access.AccessState
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.settings.SettingsDataManager
-import piuk.blockchain.android.data.settings.SettingsService
-import piuk.blockchain.android.data.settings.datastore.SettingsDataStore
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper
 import piuk.blockchain.android.ui.onboarding.OnboardingActivity.EXTRAS_EMAIL_ONLY
 import piuk.blockchain.android.util.PrefsUtil
@@ -31,25 +21,19 @@ import java.lang.IllegalStateException
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class OnboardingViewModelTest {
+class OnboardingPresenterTest {
 
-    private lateinit var subject: OnboardingViewModel
+    private lateinit var subject: OnboardingPresenter
     private val mockFingerprintHelper: FingerprintHelper = mock()
     private val mockAccessState: AccessState = mock()
     private val mockSettingsDataManager: SettingsDataManager = mock()
-    private val mockPayloadDataManager: PayloadDataManager = mock(defaultAnswer = RETURNS_DEEP_STUBS)
-    private val mockActivity: OnboardingViewModel.DataListener = mock()
+    private val mockActivity: OnboardingView = mock()
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                ApiModule(),
-                MockDataManagerModule())
-
-        subject = OnboardingViewModel(mockActivity)
+        subject = OnboardingPresenter(mockFingerprintHelper, mockAccessState, mockSettingsDataManager)
+        subject.initView(mockActivity)
     }
 
     @Test
@@ -62,7 +46,6 @@ class OnboardingViewModelTest {
         // Act
         subject.onViewReady()
         // Assert
-        verifyNoMoreInteractions(mockPayloadDataManager)
         verify(mockSettingsDataManager).settings
         verifyNoMoreInteractions(mockSettingsDataManager)
         verify(mockActivity).pageIntent
@@ -80,7 +63,6 @@ class OnboardingViewModelTest {
         // Act
         subject.onViewReady()
         // Assert
-        verifyNoMoreInteractions(mockPayloadDataManager)
         verify(mockSettingsDataManager).settings
         verifyNoMoreInteractions(mockSettingsDataManager)
         verify(mockFingerprintHelper).isHardwareDetected()
@@ -100,7 +82,6 @@ class OnboardingViewModelTest {
         // Act
         subject.onViewReady()
         // Assert
-        verifyNoMoreInteractions(mockPayloadDataManager)
         verify(mockSettingsDataManager).settings
         verifyNoMoreInteractions(mockSettingsDataManager)
         verify(mockFingerprintHelper).isHardwareDetected()
@@ -214,34 +195,6 @@ class OnboardingViewModelTest {
         val result = subject.getEmail()
         // Assert
         result shouldEqual email
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun provideAccessState(): AccessState {
-            return mockAccessState
-        }
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun provideFingerprintHelper(applicationContext: Context?,
-                                              prefsUtil: PrefsUtil?): FingerprintHelper {
-            return mockFingerprintHelper
-        }
-
-        override fun provideSettingsDataManager(
-                settingsService: SettingsService?,
-                settingsDataStore: SettingsDataStore?,
-                rxBus: RxBus?
-        ): SettingsDataManager {
-            return mockSettingsDataManager
-        }
-
-        override fun providePayloadDataManager(
-                payloadManager: PayloadManager?,
-                rxBus: RxBus?
-        ): PayloadDataManager {
-            return mockPayloadDataManager
-        }
     }
 
 }

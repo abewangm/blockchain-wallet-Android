@@ -9,19 +9,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import io.reactivex.Observable;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -30,27 +24,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
-public class ReceiveQrViewModelTest {
+public class ReceiveQrPresenterTest {
 
-    private ReceiveQrViewModel subject;
-    @Mock private ReceiveQrViewModel.DataListener activity;
+    private ReceiveQrPresenter subject;
+    @Mock private ReceiveQrView activity;
     @Mock private QrCodeDataManager qrCodeDataManager;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new ApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new MockDataManagerModule()
-        );
-
-        subject = new ReceiveQrViewModel(activity);
+        subject = new ReceiveQrPresenter(qrCodeDataManager);
+        subject.initView(activity);
     }
 
     @Test
@@ -119,10 +106,4 @@ public class ReceiveQrViewModelTest {
         verify(activity).showClipboardWarning(address);
     }
 
-    private class MockDataManagerModule extends DataManagerModule {
-        @Override
-        protected QrCodeDataManager provideQrDataManager() {
-            return qrCodeDataManager;
-        }
-    }
 }

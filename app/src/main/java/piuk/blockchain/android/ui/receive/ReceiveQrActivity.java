@@ -13,26 +13,32 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-public class ReceiveQrActivity extends BaseAuthActivity implements ReceiveQrViewModel.DataListener {
+public class ReceiveQrActivity extends BaseMvpActivity<ReceiveQrView, ReceiveQrPresenter>
+        implements ReceiveQrView {
 
     public static final String INTENT_EXTRA_ADDRESS = "extra_address";
     public static final String INTENT_EXTRA_LABEL = "extra_label";
 
+    @Inject ReceiveQrPresenter receiveQrPresenter;
     private ImageView imageView;
     private TextView title;
     private TextView address;
-    private ReceiveQrViewModel viewModel;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receive_qr);
-
-        viewModel = new ReceiveQrViewModel(this);
 
         imageView = (ImageView) findViewById(R.id.imageview_qr);
         title = (TextView) findViewById(R.id.account_name);
@@ -40,10 +46,10 @@ public class ReceiveQrActivity extends BaseAuthActivity implements ReceiveQrView
         Button done = (Button) findViewById(R.id.action_done);
         Button copyAddress = (Button) findViewById(R.id.action_copy);
 
-        viewModel.onViewReady();
+        onViewReady();
 
         done.setOnClickListener(view -> finish());
-        copyAddress.setOnClickListener(view -> viewModel.onCopyClicked());
+        copyAddress.setOnClickListener(view -> getPresenter().onCopyClicked());
     }
 
     @Override
@@ -98,8 +104,12 @@ public class ReceiveQrActivity extends BaseAuthActivity implements ReceiveQrView
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
+    protected ReceiveQrPresenter createPresenter() {
+        return receiveQrPresenter;
+    }
+
+    @Override
+    protected ReceiveQrView getView() {
+        return this;
     }
 }

@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import dagger.Subcomponent;
 import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.websocket.WebSocketService;
+import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.account.AccountEditActivity;
-import piuk.blockchain.android.ui.account.AccountViewModel;
 import piuk.blockchain.android.ui.auth.PasswordRequiredActivity;
 import piuk.blockchain.android.ui.auth.PinEntryFragment;
 import piuk.blockchain.android.ui.backup.completed.BackupWalletCompletedFragment;
@@ -15,7 +15,7 @@ import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferDialogFrag
 import piuk.blockchain.android.ui.backup.verify.BackupWalletVerifyFragment;
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
-import piuk.blockchain.android.ui.buy.BuyViewModel;
+import piuk.blockchain.android.ui.buy.BuyActivity;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailFragment;
@@ -31,12 +31,12 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.login.LoginActivity;
 import piuk.blockchain.android.ui.login.ManualPairingActivity;
-import piuk.blockchain.android.ui.onboarding.OnboardingViewModel;
+import piuk.blockchain.android.ui.onboarding.OnboardingActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
-import piuk.blockchain.android.ui.receive.ReceiveQrViewModel;
+import piuk.blockchain.android.ui.receive.ReceiveQrActivity;
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
 import piuk.blockchain.android.ui.send.SendFragment;
-import piuk.blockchain.android.ui.settings.SettingsViewModel;
+import piuk.blockchain.android.ui.settings.SettingsFragment;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
@@ -50,17 +50,7 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 @Subcomponent(modules = DataManagerModule.class)
 public interface PresenterComponent {
 
-    @Deprecated void inject(AccountViewModel accountViewModel);
-
-    @Deprecated void inject(SettingsViewModel settingsViewModel);
-
-    @Deprecated void inject(ReceiveQrViewModel receiveQrViewModel);
-
-    @Deprecated void inject(WebSocketService webSocketService);
-
-    @Deprecated void inject(OnboardingViewModel onboardingViewModel);
-
-    @Deprecated void inject(BuyViewModel buyViewModel);
+    void inject(WebSocketService webSocketService);
 
     @Deprecated void inject(ExchangeService exchangeService);
 
@@ -124,4 +114,14 @@ public interface PresenterComponent {
     void inject(@NotNull ContactPaymentDialog contactPaymentDialog);
 
     void inject(@NotNull AccountChooserActivity accountChooserActivity);
+
+    void inject(@NotNull OnboardingActivity onboardingActivity);
+
+    void inject(@NotNull AccountActivity accountActivity);
+
+    void inject(@NotNull SettingsFragment settingsFragment);
+
+    void inject(@NotNull ReceiveQrActivity receiveQrActivity);
+
+    void inject(@NotNull BuyActivity buyActivity);
 }

@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.settings;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.api.data.Settings;
@@ -16,8 +15,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -25,91 +23,46 @@ import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
-@SuppressWarnings("WeakerAccess")
-public class SettingsViewModel extends BaseViewModel {
+public class SettingsPresenter extends BasePresenter<SettingsView> {
 
-    @Inject protected FingerprintHelper fingerprintHelper;
-    @Inject protected AuthDataManager authDataManager;
-    @Inject protected SettingsDataManager settingsDataManager;
-    @Inject protected PayloadManager payloadManager;
-    @Inject protected PayloadDataManager payloadDataManager;
-    @Inject protected StringUtils stringUtils;
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected AccessState accessState;
-    @VisibleForTesting Settings settings;
-    private DataListener dataListener;
+    private FingerprintHelper fingerprintHelper;
+    private AuthDataManager authDataManager;
+    private SettingsDataManager settingsDataManager;
+    private PayloadManager payloadManager;
+    private PayloadDataManager payloadDataManager;
+    private StringUtils stringUtils;
+    private PrefsUtil prefsUtil;
+    private AccessState accessState;
     private MonetaryUtil monetaryUtil;
+    @VisibleForTesting Settings settings;
 
-    interface DataListener {
+    @Inject
+    SettingsPresenter(FingerprintHelper fingerprintHelper,
+                      AuthDataManager authDataManager,
+                      SettingsDataManager settingsDataManager,
+                      PayloadManager payloadManager,
+                      PayloadDataManager payloadDataManager,
+                      StringUtils stringUtils,
+                      PrefsUtil prefsUtil,
+                      AccessState accessState) {
 
-        void setUpUi();
+        this.fingerprintHelper = fingerprintHelper;
+        this.authDataManager = authDataManager;
+        this.settingsDataManager = settingsDataManager;
+        this.payloadManager = payloadManager;
+        this.payloadDataManager = payloadDataManager;
+        this.stringUtils = stringUtils;
+        this.prefsUtil = prefsUtil;
+        this.accessState = accessState;
 
-        void showFingerprintDialog(String pincode);
-
-        void showDisableFingerprintDialog();
-
-        void updateFingerprintPreferenceStatus();
-
-        void showNoFingerprintsAddedDialog();
-
-        void showProgressDialog(@StringRes int message);
-
-        void hideProgressDialog();
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void setGuidSummary(String summary);
-
-        void setEmailSummary(String summary);
-
-        void setSmsSummary(String summary);
-
-        void setUnitsSummary(String summary);
-
-        void setFiatSummary(String summary);
-
-        void setEmailNotificationsVisibility(boolean visible);
-
-        void setSmsNotificationsVisibility(boolean visible);
-
-        void setEmailNotificationPref(boolean enabled);
-
-        void setSmsNotificationPref(boolean enabled);
-
-        void setFingerprintVisibility(boolean visible);
-
-        void setTwoFaPreference(boolean enabled);
-
-        void setTwoFaSummary(String summary);
-
-        void setTorBlocked(boolean blocked);
-
-        void setScreenshotsEnabled(boolean enabled);
-
-        void showDialogEmailVerification();
-
-        void showDialogVerifySms();
-
-        void showDialogSmsVerified();
-
-        void goToPinEntryPage();
-
-        void setLauncherShortcutVisibility(boolean visible);
-
-        void showWarningDialog(@StringRes int message);
-    }
-
-    SettingsViewModel(DataListener dataListener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        this.dataListener = dataListener;
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
 
     @Override
     public void onViewReady() {
-        dataListener.showProgressDialog(R.string.please_wait);
+        getView().showProgressDialog(R.string.please_wait);
         // Fetch updated settings
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 settingsDataManager.getSettings()
                         .doAfterTerminate(this::handleUpdate)
                         .subscribe(
@@ -120,19 +73,19 @@ public class SettingsViewModel extends BaseViewModel {
                                         settings = new Settings();
                                     }
                                     // Warn error when updating
-                                    dataListener.showToast(R.string.settings_error_updating, ToastCustom.TYPE_ERROR);
+                                    getView().showToast(R.string.settings_error_updating, ToastCustom.TYPE_ERROR);
                                 }));
     }
 
     private void handleUpdate() {
-        dataListener.hideProgressDialog();
-        dataListener.setUpUi();
+        getView().hideProgressDialog();
+        getView().setUpUi();
         updateUi();
     }
 
     private void updateUi() {
         // GUID
-        dataListener.setGuidSummary(settings.getGuid());
+        getView().setGuidSummary(settings.getGuid());
 
         // Email
         String emailAndStatus = settings.getEmail();
@@ -143,7 +96,7 @@ public class SettingsViewModel extends BaseViewModel {
         } else {
             emailAndStatus += "  (" + stringUtils.getString(R.string.unverified) + ")";
         }
-        dataListener.setEmailSummary(emailAndStatus);
+        getView().setEmailSummary(emailAndStatus);
 
         // Phone
         String smsAndStatus = settings.getSmsNumber();
@@ -154,58 +107,58 @@ public class SettingsViewModel extends BaseViewModel {
         } else {
             smsAndStatus += "  (" + stringUtils.getString(R.string.unverified) + ")";
         }
-        dataListener.setSmsSummary(smsAndStatus);
+        getView().setSmsSummary(smsAndStatus);
 
         // Units
-        dataListener.setUnitsSummary(getDisplayUnits());
+        getView().setUnitsSummary(getDisplayUnits());
 
         // Fiat
-        dataListener.setFiatSummary(getFiatUnits());
+        getView().setFiatSummary(getFiatUnits());
 
         // Email notifications
-        dataListener.setEmailNotificationsVisibility(settings.isEmailVerified());
+        getView().setEmailNotificationsVisibility(settings.isEmailVerified());
 
         // SMS notifications
-        dataListener.setSmsNotificationsVisibility(settings.isSmsVerified());
+        getView().setSmsNotificationsVisibility(settings.isSmsVerified());
 
         // SMS and Email notification status
-        dataListener.setEmailNotificationPref(false);
-        dataListener.setSmsNotificationPref(false);
+        getView().setEmailNotificationPref(false);
+        getView().setSmsNotificationPref(false);
 
         if (settings.isNotificationsOn() && !settings.getNotificationsType().isEmpty()) {
             for (int type : settings.getNotificationsType()) {
                 if (type == Settings.NOTIFICATION_TYPE_EMAIL) {
-                    dataListener.setEmailNotificationPref(true);
+                    getView().setEmailNotificationPref(true);
                 }
 
                 if (type == Settings.NOTIFICATION_TYPE_SMS) {
-                    dataListener.setSmsNotificationPref(true);
+                    getView().setSmsNotificationPref(true);
                 }
 
                 if (type == Settings.NOTIFICATION_TYPE_ALL) {
-                    dataListener.setSmsNotificationPref(true);
-                    dataListener.setEmailNotificationPref(true);
+                    getView().setSmsNotificationPref(true);
+                    getView().setEmailNotificationPref(true);
                     break;
                 }
             }
         }
 
         // Fingerprint
-        dataListener.setFingerprintVisibility(getIfFingerprintHardwareAvailable());
-        dataListener.updateFingerprintPreferenceStatus();
+        getView().setFingerprintVisibility(getIfFingerprintHardwareAvailable());
+        getView().updateFingerprintPreferenceStatus();
 
         // 2FA
-        dataListener.setTwoFaPreference(settings.getAuthType() != Settings.AUTH_TYPE_OFF);
-        dataListener.setTwoFaSummary(getTwoFaSummary(settings.getAuthType()));
+        getView().setTwoFaPreference(settings.getAuthType() != Settings.AUTH_TYPE_OFF);
+        getView().setTwoFaSummary(getTwoFaSummary(settings.getAuthType()));
 
         // Tor
-        dataListener.setTorBlocked(settings.isBlockTorIps());
+        getView().setTorBlocked(settings.isBlockTorIps());
 
         // Screenshots
-        dataListener.setScreenshotsEnabled(prefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false));
+        getView().setScreenshotsEnabled(prefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false));
 
         // Launcher shortcuts
-        dataListener.setLauncherShortcutVisibility(AndroidUtils.is25orHigher());
+        getView().setLauncherShortcutVisibility(AndroidUtils.is25orHigher());
     }
 
     private String getTwoFaSummary(int type) {
@@ -259,13 +212,13 @@ public class SettingsViewModel extends BaseViewModel {
     void onFingerprintClicked() {
         if (getIfFingerprintUnlockEnabled()) {
             // Show dialog "are you sure you want to disable fingerprint login?
-            dataListener.showDisableFingerprintDialog();
+            getView().showDisableFingerprintDialog();
         } else if (!fingerprintHelper.areFingerprintsEnrolled()) {
             // No fingerprints enrolled, prompt user to add some
-            dataListener.showNoFingerprintsAddedDialog();
+            getView().showNoFingerprintsAddedDialog();
         } else {
             if (accessState.getPIN() != null && !accessState.getPIN().isEmpty()) {
-                dataListener.showFingerprintDialog(accessState.getPIN());
+                getView().showFingerprintDialog(accessState.getPIN());
             } else {
                 throw new IllegalStateException("PIN code not found in AccessState");
             }
@@ -287,7 +240,7 @@ public class SettingsViewModel extends BaseViewModel {
      * @return the user's preferred BTC units
      */
     @NonNull
-    String getDisplayUnits() {
+    private String getDisplayUnits() {
         return (String) monetaryUtil.getBTCUnits()[getBtcUnitsPosition()];
     }
 
@@ -386,15 +339,15 @@ public class SettingsViewModel extends BaseViewModel {
      */
     void updateEmail(String email) {
         if (!isStringValid(email)) {
-            dataListener.setEmailSummary(stringUtils.getString(R.string.not_specified));
+            getView().setEmailSummary(stringUtils.getString(R.string.not_specified));
         } else {
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     settingsDataManager.updateEmail(email)
                             .subscribe(settings -> {
                                 this.settings = settings;
                                 updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, false);
-                                dataListener.showDialogEmailVerification();
-                            }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                                getView().showDialogEmailVerification();
+                            }, throwable -> getView().showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
         }
     }
 
@@ -405,15 +358,15 @@ public class SettingsViewModel extends BaseViewModel {
      */
     void updateSms(String sms) {
         if (!isStringValid(sms)) {
-            dataListener.setSmsSummary(stringUtils.getString(R.string.not_specified));
+            getView().setSmsSummary(stringUtils.getString(R.string.not_specified));
         } else {
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     settingsDataManager.updateSms(sms)
                             .subscribe(settings -> {
                                 this.settings = settings;
                                 updateNotification(Settings.NOTIFICATION_TYPE_SMS, false);
-                                dataListener.showDialogVerifySms();
-                            }, throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                                getView().showDialogVerifySms();
+                            }, throwable -> getView().showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
         }
     }
 
@@ -423,17 +376,17 @@ public class SettingsViewModel extends BaseViewModel {
      * @param code The verification code which has been sent to the user
      */
     void verifySms(@NonNull String code) {
-        dataListener.showProgressDialog(R.string.please_wait);
-        compositeDisposable.add(
+        getView().showProgressDialog(R.string.please_wait);
+        getCompositeDisposable().add(
                 settingsDataManager.verifySms(code)
                         .doAfterTerminate(() -> {
-                            dataListener.hideProgressDialog();
+                            getView().hideProgressDialog();
                             updateUi();
                         })
                         .subscribe(settings -> {
                             this.settings = settings;
-                            dataListener.showDialogSmsVerified();
-                        }, throwable -> dataListener.showWarningDialog(R.string.verify_sms_failed)));
+                            getView().showDialogSmsVerified();
+                        }, throwable -> getView().showWarningDialog(R.string.verify_sms_failed)));
     }
 
     /**
@@ -442,12 +395,12 @@ public class SettingsViewModel extends BaseViewModel {
      * @param blocked Whether or not to block Tor requests
      */
     void updateTor(boolean blocked) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 settingsDataManager.updateTor(blocked)
                         .doAfterTerminate(this::updateUi)
                         .subscribe(
                                 settings -> this.settings = settings,
-                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                                throwable -> getView().showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -457,12 +410,12 @@ public class SettingsViewModel extends BaseViewModel {
      * @see Settings
      */
     void updateTwoFa(int type) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 settingsDataManager.updateTwoFactor(type)
                         .doAfterTerminate(this::updateUi)
                         .subscribe(
                                 settings -> this.settings = settings,
-                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                                throwable -> getView().showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
@@ -483,7 +436,7 @@ public class SettingsViewModel extends BaseViewModel {
             return;
         }
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 Observable.just(enable)
                         .flatMap(aBoolean -> {
                             if (aBoolean) {
@@ -505,7 +458,7 @@ public class SettingsViewModel extends BaseViewModel {
                                 () -> {
                                     // No-op
                                 },
-                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                                throwable -> getView().showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     private boolean isNotificationTypeEnabled(int type) {
@@ -527,7 +480,7 @@ public class SettingsViewModel extends BaseViewModel {
         prefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
         prefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
 
-        dataListener.goToPinEntryPage();
+        getView().goToPinEntryPage();
     }
 
     /**
@@ -537,59 +490,61 @@ public class SettingsViewModel extends BaseViewModel {
      * @param fallbackPassword The user's current password as a fallback
      */
     void updatePassword(@NonNull String password, @NonNull String fallbackPassword) {
-        dataListener.showProgressDialog(R.string.please_wait);
+        getView().showProgressDialog(R.string.please_wait);
         payloadManager.setTempPassword(password);
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 authDataManager.createPin(password, accessState.getPIN())
                         .andThen(payloadDataManager.syncPayloadWithServer())
-                        .doAfterTerminate(() -> dataListener.hideProgressDialog())
+                        .doAfterTerminate(() -> getView().hideProgressDialog())
                         .subscribe(
-                                () -> dataListener.showToast(R.string.password_changed, ToastCustom.TYPE_OK),
+                                () -> getView().showToast(R.string.password_changed, ToastCustom.TYPE_OK),
                                 throwable -> showUpdatePasswordFailed(fallbackPassword)));
     }
 
     private void showUpdatePasswordFailed(@NonNull String fallbackPassword) {
         payloadManager.setTempPassword(fallbackPassword);
 
-        dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
-        dataListener.showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
+        getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+        getView().showToast(R.string.password_unchanged, ToastCustom.TYPE_ERROR);
     }
 
     /**
      * Updates the user's btcUnit unit preference
-     *
-     * @param btcUnitIndex
      */
     void updateBtcUnit(int btcUnitIndex) {
 
         String btcUnit = Settings.UNIT_BTC;
 
         switch (btcUnitIndex) {
-            case 0: btcUnit = Settings.UNIT_BTC; break;
-            case 1: btcUnit = Settings.UNIT_MBC; break;
-            case 2: btcUnit = Settings.UNIT_UBC; break;
+            case 0:
+                btcUnit = Settings.UNIT_BTC;
+                break;
+            case 1:
+                btcUnit = Settings.UNIT_MBC;
+                break;
+            case 2:
+                btcUnit = Settings.UNIT_UBC;
+                break;
         }
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 settingsDataManager.updateBtcUnit(btcUnit)
                         .doAfterTerminate(this::updateUi)
                         .subscribe(
                                 settings -> this.settings = settings,
-                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                                throwable -> getView().showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 
     /**
      * Updates the user's fiat unit preference
-     *
-     * @param fiatUnit
      */
     void updateFiatUnit(String fiatUnit) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 settingsDataManager.updateFiatUnit(fiatUnit)
                         .doAfterTerminate(this::updateUi)
                         .subscribe(
                                 settings -> this.settings = settings,
-                                throwable -> dataListener.showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
+                                throwable -> getView().showToast(R.string.update_failed, ToastCustom.TYPE_ERROR)));
     }
 }

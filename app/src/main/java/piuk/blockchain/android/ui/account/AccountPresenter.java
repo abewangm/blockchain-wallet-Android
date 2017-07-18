@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.account;
 
 import android.content.Intent;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -27,62 +26,44 @@ import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.base.BaseViewModel;
+import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.LabelUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.annotations.Thunk;
 import timber.log.Timber;
 
-@SuppressWarnings("WeakerAccess")
-public class AccountViewModel extends BaseViewModel {
-
-    private static final String TAG = AccountViewModel.class.getSimpleName();
+public class AccountPresenter extends BasePresenter<AccountView> {
 
     public static final String KEY_WARN_TRANSFER_ALL = "WARN_TRANSFER_ALL";
-    public static final String KEY_XPUB = "xpub";
+    private static final String KEY_XPUB = "xpub";
     private static final String KEY_ADDRESS = "address";
 
-    @Thunk DataListener dataListener;
-    @Inject PayloadDataManager payloadDataManager;
-    @Inject AccountDataManager accountDataManager;
-    @Inject TransferFundsDataManager fundsDataManager;
-    @Inject PrefsUtil prefsUtil;
-    @Inject AppUtil appUtil;
-    @Inject PrivateKeyFactory privateKeyFactory;
-    @Inject EnvironmentSettings environmentSettings;
+    private PayloadDataManager payloadDataManager;
+    private AccountDataManager accountDataManager;
+    private TransferFundsDataManager fundsDataManager;
+    private PrefsUtil prefsUtil;
+    private AppUtil appUtil;
+    private PrivateKeyFactory privateKeyFactory;
+    private EnvironmentSettings environmentSettings;
     @VisibleForTesting String doubleEncryptionPassword;
 
-    AccountViewModel(DataListener dataListener) {
-        Injector.getInstance().getPresenterComponent().inject(this);
-        this.dataListener = dataListener;
-    }
+    @Inject
+    AccountPresenter(PayloadDataManager payloadDataManager,
+                     AccountDataManager accountDataManager,
+                     TransferFundsDataManager fundsDataManager,
+                     PrefsUtil prefsUtil,
+                     AppUtil appUtil,
+                     PrivateKeyFactory privateKeyFactory,
+                     EnvironmentSettings environmentSettings) {
 
-    public interface DataListener {
-
-        void onShowTransferableLegacyFundsWarning(boolean isAutoPopup);
-
-        void onSetTransferLegacyFundsMenuItemVisible(boolean visible);
-
-        void showProgressDialog(@StringRes int message);
-
-        void dismissProgressDialog();
-
-        void onUpdateAccountsList();
-
-        void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
-
-        void broadcastIntent(Intent intent);
-
-        void showWatchOnlyWarningDialog(String address);
-
-        void showRenameImportedAddressDialog(LegacyAddress address);
-
-        void startScanForResult();
-
-        void showBip38PasswordDialog(String data);
+        this.payloadDataManager = payloadDataManager;
+        this.accountDataManager = accountDataManager;
+        this.fundsDataManager = fundsDataManager;
+        this.prefsUtil = prefsUtil;
+        this.appUtil = appUtil;
+        this.privateKeyFactory = privateKeyFactory;
+        this.environmentSettings = environmentSettings;
     }
 
     @Override
@@ -99,20 +80,20 @@ public class AccountViewModel extends BaseViewModel {
      * account. Prompt user when done calculating.
      */
     void checkTransferableLegacyFunds(boolean isAutoPopup, boolean showWarningDialog) {
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 fundsDataManager.getTransferableFundTransactionListForDefaultAccount()
                         .subscribe(triple -> {
                             if (payloadDataManager.getWallet().isUpgraded() && !triple.getLeft().isEmpty()) {
-                                dataListener.onSetTransferLegacyFundsMenuItemVisible(true);
+                                getView().onSetTransferLegacyFundsMenuItemVisible(true);
 
                                 if ((prefsUtil.getValue(KEY_WARN_TRANSFER_ALL, true) || !isAutoPopup) && showWarningDialog) {
-                                    dataListener.onShowTransferableLegacyFundsWarning(isAutoPopup);
+                                    getView().onShowTransferableLegacyFundsWarning(isAutoPopup);
                                 }
                             } else {
-                                dataListener.onSetTransferLegacyFundsMenuItemVisible(false);
+                                getView().onSetTransferLegacyFundsMenuItemVisible(false);
                             }
-                            dataListener.dismissProgressDialog();
-                        }, throwable -> dataListener.onSetTransferLegacyFundsMenuItemVisible(false)));
+                            getView().dismissProgressDialog();
+                        }, throwable -> getView().onSetTransferLegacyFundsMenuItemVisible(false)));
     }
 
     /**
@@ -122,29 +103,29 @@ public class AccountViewModel extends BaseViewModel {
      */
     void createNewAccount(String accountLabel) {
         if (LabelUtil.isExistingLabel(payloadDataManager, accountLabel)) {
-            dataListener.showToast(R.string.label_name_match, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.label_name_match, ToastCustom.TYPE_ERROR);
             return;
         }
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 accountDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
-                        .doOnSubscribe(disposable -> dataListener.showProgressDialog(R.string.please_wait))
+                        .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.please_wait))
                         .subscribe(account -> {
-                            dataListener.dismissProgressDialog();
-                            dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                            getView().dismissProgressDialog();
+                            getView().showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
                             Intent intent = new Intent(WebSocketService.ACTION_INTENT);
                             intent.putExtra(KEY_XPUB, account.getXpub());
-                            dataListener.broadcastIntent(intent);
-                            dataListener.onUpdateAccountsList();
+                            getView().broadcastIntent(intent);
+                            getView().onUpdateAccountsList();
 
                         }, throwable -> {
-                            dataListener.dismissProgressDialog();
+                            getView().dismissProgressDialog();
                             if (throwable instanceof DecryptionException) {
-                                dataListener.showToast(R.string.double_encryption_password_error, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.double_encryption_password_error, ToastCustom.TYPE_ERROR);
                             } else if (throwable instanceof PayloadException) {
-                                dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
                             } else {
-                                dataListener.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                                getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
                             }
                         }));
     }
@@ -156,19 +137,19 @@ public class AccountViewModel extends BaseViewModel {
      * @param address The {@link LegacyAddress} to be sync'd with the server
      */
     void updateLegacyAddress(LegacyAddress address) {
-        dataListener.showProgressDialog(R.string.saving_address);
-        compositeDisposable.add(
+        getView().showProgressDialog(R.string.saving_address);
+        getCompositeDisposable().add(
                 accountDataManager.updateLegacyAddress(address)
                         .subscribe(() -> {
-                            dataListener.dismissProgressDialog();
-                            dataListener.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                            getView().dismissProgressDialog();
+                            getView().showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
                             Intent intent = new Intent(WebSocketService.ACTION_INTENT);
                             intent.putExtra(KEY_ADDRESS, address.getAddress());
-                            dataListener.broadcastIntent(intent);
-                            dataListener.onUpdateAccountsList();
+                            getView().broadcastIntent(intent);
+                            getView().onUpdateAccountsList();
                         }, throwable -> {
-                            dataListener.dismissProgressDialog();
-                            dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
+                            getView().dismissProgressDialog();
+                            getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
                         }));
     }
 
@@ -177,9 +158,9 @@ public class AccountViewModel extends BaseViewModel {
      */
     void onScanButtonClicked() {
         if (!appUtil.isCameraOpen()) {
-            dataListener.startScanForResult();
+            getView().startScanForResult();
         } else {
-            dataListener.showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -190,16 +171,16 @@ public class AccountViewModel extends BaseViewModel {
      * @param password The BIP38 encryption passphrase
      */
     void importBip38Address(String data, String password) {
-        dataListener.showProgressDialog(R.string.please_wait);
+        getView().showProgressDialog(R.string.please_wait);
         try {
             BIP38PrivateKey bip38 = BIP38PrivateKey.fromBase58(environmentSettings.getNetworkParameters(), data);
             ECKey key = bip38.decrypt(password);
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {
             Timber.e("importBip38Address: ", e);
-            dataListener.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
         } finally {
-            dataListener.dismissProgressDialog();
+            getView().dismissProgressDialog();
         }
     }
 
@@ -216,7 +197,7 @@ public class AccountViewModel extends BaseViewModel {
                 if (!format.equals(PrivateKeyFactory.BIP38)) {
                     importNonBip38Address(format, data, doubleEncryptionPassword);
                 } else {
-                    dataListener.showBip38PasswordDialog(data);
+                    getView().showBip38PasswordDialog(data);
                 }
             } else {
                 // Watch-only address scanned
@@ -224,7 +205,7 @@ public class AccountViewModel extends BaseViewModel {
             }
         } catch (Exception e) {
             Timber.e(e);
-            dataListener.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR);
         }
     }
 
@@ -241,11 +222,11 @@ public class AccountViewModel extends BaseViewModel {
         legacyAddress.setCreatedTime(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 accountDataManager.addLegacyAddress(legacyAddress)
                         .subscribe(
-                                () -> dataListener.showRenameImportedAddressDialog(legacyAddress),
-                                throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+                                () -> getView().showRenameImportedAddressDialog(legacyAddress),
+                                throwable -> getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -277,12 +258,12 @@ public class AccountViewModel extends BaseViewModel {
         address = correctAddressFormatting(address);
 
         if (!FormatsUtil.isValidBitcoinAddress(address)) {
-            dataListener.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR);
         } else if (payloadDataManager.getWallet().getLegacyAddressStringList().contains(address)) {
-            dataListener.showToast(R.string.address_already_in_wallet, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.address_already_in_wallet, ToastCustom.TYPE_ERROR);
         } else {
             // Do some things
-            dataListener.showWatchOnlyWarningDialog(address);
+            getView().showWatchOnlyWarningDialog(address);
         }
     }
 
@@ -300,16 +281,16 @@ public class AccountViewModel extends BaseViewModel {
     }
 
     private void importNonBip38Address(String format, String data, @Nullable String secondPassword) {
-        dataListener.showProgressDialog(R.string.please_wait);
+        getView().showProgressDialog(R.string.please_wait);
 
-        compositeDisposable.add(
+        getCompositeDisposable().add(
                 accountDataManager.getKeyFromImportedData(format, data)
                         .subscribe(key -> {
                             handlePrivateKey(key, secondPassword);
-                            dataListener.dismissProgressDialog();
+                            getView().dismissProgressDialog();
                         }, throwable -> {
-                            dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
-                            dataListener.dismissProgressDialog();
+                            getView().showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+                            getView().dismissProgressDialog();
                         }));
     }
 
@@ -317,15 +298,15 @@ public class AccountViewModel extends BaseViewModel {
     void handlePrivateKey(ECKey key, @Nullable String secondPassword) {
         if (key != null && key.hasPrivKey()) {
             // A private key to an existing address has been scanned
-            compositeDisposable.add(
+            getCompositeDisposable().add(
                     accountDataManager.setKeyForLegacyAddress(key, secondPassword)
                             .subscribe(legacyAddress -> {
-                                dataListener.showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
-                                dataListener.onUpdateAccountsList();
-                                dataListener.showRenameImportedAddressDialog(legacyAddress);
-                            }, throwable -> dataListener.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
+                                getView().showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
+                                getView().onUpdateAccountsList();
+                                getView().showRenameImportedAddressDialog(legacyAddress);
+                            }, throwable -> getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
         } else {
-            dataListener.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
+            getView().showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);
         }
     }
 

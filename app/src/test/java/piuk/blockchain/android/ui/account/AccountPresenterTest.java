@@ -1,12 +1,10 @@
 package piuk.blockchain.android.ui.account;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Intent;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
@@ -20,7 +18,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.math.BigInteger;
@@ -31,17 +28,10 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
-import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.util.AppUtil;
@@ -59,32 +49,34 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static piuk.blockchain.android.ui.account.AccountViewModel.KEY_WARN_TRANSFER_ALL;
+import static piuk.blockchain.android.ui.account.AccountPresenter.KEY_WARN_TRANSFER_ALL;
 
-@SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "AnonymousInnerClassMayBeStatic", "unchecked"})
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
-public class AccountViewModelTest {
+public class AccountPresenterTest {
 
-    private AccountViewModel subject;
-    @Mock private AccountViewModel.DataListener activity;
+    private AccountPresenter subject;
+    @Mock private AccountView activity;
     @Mock private PayloadDataManager payloadDataManager;
     @Mock private AccountDataManager accountDataManager;
     @Mock private TransferFundsDataManager fundsDataManager;
     @Mock private PrefsUtil prefsUtil;
     @Mock private AppUtil appUtil;
+    @Mock private EnvironmentSettings environmentSettings;
+    private PrivateKeyFactory privateKeyFactory = new PrivateKeyFactory();
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new MockDataManagerModule());
-
-        subject = new AccountViewModel(activity);
+        subject = new AccountPresenter(payloadDataManager,
+                accountDataManager,
+                fundsDataManager,
+                prefsUtil,
+                appUtil,
+                privateKeyFactory,
+                environmentSettings);
+        subject.initView(activity);
     }
 
     @Test
@@ -562,44 +554,6 @@ public class AccountViewModelTest {
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verifyNoMoreInteractions(activity);
-    }
-
-    private class MockApplicationModule extends ApplicationModule {
-        public MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return prefsUtil;
-        }
-
-        @Override
-        protected AppUtil provideAppUtil() {
-            return appUtil;
-        }
-    }
-
-    private class MockDataManagerModule extends DataManagerModule {
-        @Override
-        protected TransferFundsDataManager provideTransferFundsDataManager(PayloadDataManager payloadDataManager,
-                                                                           SendDataManager sendDataManager,
-                                                                           DynamicFeeCache dynamicFeeCache) {
-            return fundsDataManager;
-        }
-
-        @Override
-        protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
-                                                               PrivateKeyFactory privateKeyFactory,
-                                                               RxBus rxBus) {
-            return accountDataManager;
-        }
-
-        @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
-                                                               RxBus rxBus) {
-            return payloadDataManager;
-        }
     }
 
 }
