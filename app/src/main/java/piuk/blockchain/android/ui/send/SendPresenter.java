@@ -49,7 +49,7 @@ import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
-import piuk.blockchain.android.data.services.WalletService;
+import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -889,7 +889,7 @@ public class SendPresenter extends BasePresenter<SendView> {
     }
 
     private void logAddressInputMetric() {
-        EventService handler = new EventService(prefsUtil, new WalletService(new WalletApi()));
+        EventService handler = new EventService(prefsUtil, new AuthService(new WalletApi()));
         if (metricInputFlag != null) handler.logAddressInputEvent(metricInputFlag);
     }
 

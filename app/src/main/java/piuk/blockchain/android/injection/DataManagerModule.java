@@ -15,7 +15,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsService;
 import piuk.blockchain.android.data.contacts.datastore.ContactsMapStore;
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
@@ -29,7 +29,7 @@ import piuk.blockchain.android.data.payload.PayloadService;
 import piuk.blockchain.android.data.payments.PaymentService;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.WalletService;
+import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
@@ -59,7 +59,7 @@ public class DataManagerModule {
                                                      RxBus rxBus) {
         return new AuthDataManager(
                 prefsUtil,
-                new WalletService(new WalletApi()),
+                new AuthService(new WalletApi()),
                 appUtil,
                 accessState,
                 aesUtilWrapper,

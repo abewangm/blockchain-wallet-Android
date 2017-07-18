@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.services;
+package piuk.blockchain.android.data.auth;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Status;
@@ -8,14 +8,15 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
+import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.annotations.WebRequest;
 import retrofit2.Response;
 
-public class WalletService {
+public class AuthService {
 
     private WalletApi walletApi;
 
-    public WalletService(WalletApi walletApi) {
+    public AuthService(WalletApi walletApi) {
         this.walletApi = walletApi;
     }
 
@@ -27,7 +28,7 @@ public class WalletService {
      * @return {@link Observable<ResponseBody>} wrapping an encrypted Payload
      */
     @WebRequest
-    public Observable<Response<ResponseBody>> getEncryptedPayload(String guid, String sessionId) {
+    Observable<Response<ResponseBody>> getEncryptedPayload(String guid, String sessionId) {
         return walletApi.fetchEncryptedPayload(guid, sessionId);
     }
 
@@ -41,7 +42,7 @@ public class WalletService {
      * @return An {@link Observable} which may contain an encrypted Payload
      */
     @WebRequest
-    public Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
+    Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
         return walletApi.submitTwoFactorCode(sessionId, guid, twoFactorCode);
     }
 
@@ -52,7 +53,7 @@ public class WalletService {
      * @return {@link Observable<ResponseBody>}
      */
     @WebRequest
-    public Observable<String> getSessionId(String guid) {
+    Observable<String> getSessionId(String guid) {
         return walletApi.getSessionId(guid)
                 .map(responseBodyResponse -> {
                     String headers = responseBodyResponse.headers().get("Set-Cookie");
@@ -77,7 +78,7 @@ public class WalletService {
      * @return {@link Observable<ResponseBody>} wrapping the pairing encryption password
      */
     @WebRequest
-    public Observable<ResponseBody> getPairingEncryptionPassword(String guid) {
+    Observable<ResponseBody> getPairingEncryptionPassword(String guid) {
         return walletApi.fetchPairingEncryptionPassword(guid);
     }
 
@@ -90,7 +91,7 @@ public class WalletService {
      * @return An {@link Observable<Boolean>} where the boolean represents success
      */
     @WebRequest
-    public Observable<Response<Status>> setAccessKey(String key, String value, String pin) {
+    Observable<Response<Status>> setAccessKey(String key, String value, String pin) {
         return walletApi.setAccess(key, value, pin);
     }
 
@@ -102,7 +103,7 @@ public class WalletService {
      * @return A {@link Response<Status>} which may or may not contain the field "success"
      */
     @WebRequest
-    public Observable<Response<Status>> validateAccess(String key, String pin) {
+    Observable<Response<Status>> validateAccess(String key, String pin) {
         return walletApi.validateAccess(key, pin)
                 .doOnError(throwable -> {
                     if (throwable.getMessage().contains("Incorrect PIN")) {
@@ -129,7 +130,7 @@ public class WalletService {
      * needed for determining buy/sell regions.
      */
     @WebRequest
-    public Observable<WalletOptions> getWalletOptions() {
+    Observable<WalletOptions> getWalletOptions() {
         return walletApi.getWalletOptions();
     }
 

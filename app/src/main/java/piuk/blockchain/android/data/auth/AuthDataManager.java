@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.datamanagers;
+package piuk.blockchain.android.data.auth;
 
 import android.support.annotation.VisibleForTesting;
 
@@ -21,7 +21,6 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -32,7 +31,7 @@ public class AuthDataManager {
 
     @VisibleForTesting static final String AUTHORIZATION_REQUIRED = "authorization_required";
 
-    private WalletService walletService;
+    private AuthService authService;
     private AppUtil appUtil;
     private AccessState accessState;
     private RxPinning rxPinning;
@@ -41,14 +40,14 @@ public class AuthDataManager {
     @VisibleForTesting int timer;
 
     public AuthDataManager(PrefsUtil prefsUtil,
-                           WalletService walletService,
+                           AuthService authService,
                            AppUtil appUtil,
                            AccessState accessState,
                            AESUtilWrapper aesUtilWrapper,
                            RxBus rxBus) {
 
         this.prefsUtil = prefsUtil;
-        this.walletService = walletService;
+        this.authService = authService;
         this.appUtil = appUtil;
         this.accessState = accessState;
         this.aesUtilWrapper = aesUtilWrapper;
@@ -66,7 +65,7 @@ public class AuthDataManager {
      * @see #getSessionId(String)
      */
     public Observable<Response<ResponseBody>> getEncryptedPayload(String guid, String sessionId) {
-        return rxPinning.call(() -> walletService.getEncryptedPayload(guid, sessionId))
+        return rxPinning.call(() -> authService.getEncryptedPayload(guid, sessionId))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -77,7 +76,7 @@ public class AuthDataManager {
      * @return An {@link Observable} wrapping a session ID as a String
      */
     public Observable<String> getSessionId(String guid) {
-        return rxPinning.call(() -> walletService.getSessionId(guid))
+        return rxPinning.call(() -> authService.getSessionId(guid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -91,7 +90,7 @@ public class AuthDataManager {
      * @see #getSessionId(String)
      */
     public Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
-        return rxPinning.call(() -> walletService.submitTwoFactorCode(sessionId, guid, twoFactorCode))
+        return rxPinning.call(() -> authService.submitTwoFactorCode(sessionId, guid, twoFactorCode))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -102,7 +101,7 @@ public class AuthDataManager {
      * @return An {@link Observable} wrapping a {@link WalletOptions} object
      */
     public Observable<WalletOptions> getWalletOptions() {
-        return rxPinning.call(() -> walletService.getWalletOptions())
+        return rxPinning.call(() -> authService.getWalletOptions())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -177,7 +176,7 @@ public class AuthDataManager {
         accessState.setPIN(passedPin);
         String key = prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         String encryptedPassword = prefsUtil.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
-        return walletService.validateAccess(key, passedPin)
+        return authService.validateAccess(key, passedPin)
                 .map(response -> {
 
                     /*
@@ -219,7 +218,7 @@ public class AuthDataManager {
             random.nextBytes(bytes);
             String value = new String(Hex.encode(bytes), "UTF-8");
 
-            walletService.setAccessKey(key, value, passedPin)
+            authService.setAccessKey(key, value, passedPin)
                     .subscribe(response -> {
                         if (response.isSuccessful()) {
                             String encryptionKey = Hex.toHexString(value.getBytes("UTF-8"));
@@ -254,7 +253,7 @@ public class AuthDataManager {
      * @return {@link Observable<ResponseBody>} wrapping the pairing encryption password
      */
     public Observable<ResponseBody> getPairingEncryptionPassword(String guid) {
-        return rxPinning.call(() -> walletService.getPairingEncryptionPassword(guid))
+        return rxPinning.call(() -> authService.getPairingEncryptionPassword(guid))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 }

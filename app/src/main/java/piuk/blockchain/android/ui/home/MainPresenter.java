@@ -30,7 +30,7 @@ import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
-import piuk.blockchain.android.data.services.WalletService;
+import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -273,7 +273,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void logEvents() {
-        EventService handler = new EventService(prefs, new WalletService(new WalletApi()));
+        EventService handler = new EventService(prefs, new AuthService(new WalletApi()));
         handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncryption());
         handler.logBackupEvent(payloadManager.getPayload().getHdWallets().get(0).isMnemonicVerified());
 

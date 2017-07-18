@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.datamanagers;
+package piuk.blockchain.android.data.auth;
 
 import info.blockchain.wallet.api.data.Status;
 import info.blockchain.wallet.api.data.WalletOptions;
@@ -20,7 +20,6 @@ import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -43,7 +42,7 @@ public class AuthDataManagerTest extends RxTest {
             "}";
 
     @Mock private PrefsUtil prefsUtil;
-    @Mock private WalletService walletService;
+    @Mock private AuthService authService;
     @Mock private AppUtil appUtil;
     @Mock private AccessState accessState;
     @Mock private AESUtilWrapper aesUtilWrapper;
@@ -60,12 +59,12 @@ public class AuthDataManagerTest extends RxTest {
     public void getEncryptedPayload() throws Exception {
         // Arrange
         ResponseBody mockResponseBody = mock(ResponseBody.class);
-        when(walletService.getEncryptedPayload(anyString(), anyString()))
+        when(authService.getEncryptedPayload(anyString(), anyString()))
                 .thenReturn(Observable.just(Response.success(mockResponseBody)));
         // Act
         TestObserver<Response<ResponseBody>> observer = subject.getEncryptedPayload("1234567890", "1234567890").test();
         // Assert
-        verify(walletService).getEncryptedPayload(anyString(), anyString());
+        verify(authService).getEncryptedPayload(anyString(), anyString());
         observer.assertComplete();
         observer.assertNoErrors();
         assertTrue(observer.values().get(0).isSuccessful());
@@ -75,11 +74,11 @@ public class AuthDataManagerTest extends RxTest {
     public void getSessionId() throws Exception {
         // Arrange
         String sessionId = "SESSION_ID";
-        when(walletService.getSessionId(anyString())).thenReturn(Observable.just(sessionId));
+        when(authService.getSessionId(anyString())).thenReturn(Observable.just(sessionId));
         // Act
         TestObserver<String> testObserver = subject.getSessionId("1234567890").test();
         // Assert
-        verify(walletService).getSessionId(anyString());
+        verify(authService).getSessionId(anyString());
         testObserver.assertComplete();
         testObserver.onNext(sessionId);
         testObserver.assertNoErrors();
@@ -92,12 +91,12 @@ public class AuthDataManagerTest extends RxTest {
         String guid = "GUID";
         String code = "123456";
         ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), "{}");
-        when(walletService.submitTwoFactorCode(sessionId, guid, code))
+        when(authService.submitTwoFactorCode(sessionId, guid, code))
                 .thenReturn(Observable.just(responseBody));
         // Act
         TestObserver<ResponseBody> testObserver = subject.submitTwoFactorCode(sessionId, guid, code).test();
         // Assert
-        verify(walletService).submitTwoFactorCode(sessionId, guid, code);
+        verify(authService).submitTwoFactorCode(sessionId, guid, code);
         testObserver.assertComplete();
         testObserver.onNext(responseBody);
         testObserver.assertNoErrors();
@@ -116,7 +115,7 @@ public class AuthDataManagerTest extends RxTest {
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn(key);
         when(prefsUtil.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, ""))
                 .thenReturn(encryptedPassword);
-        when(walletService.validateAccess(key, pin))
+        when(authService.validateAccess(key, pin))
                 .thenReturn(Observable.just(Response.success(status)));
         when(aesUtilWrapper.decrypt(encryptedPassword, decryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS))
                 .thenReturn(plaintextPassword);
@@ -128,8 +127,8 @@ public class AuthDataManagerTest extends RxTest {
         verify(prefsUtil).getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         verify(prefsUtil).getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
         verifyNoMoreInteractions(prefsUtil);
-        verify(walletService).validateAccess(key, pin);
-        verifyNoMoreInteractions(walletService);
+        verify(authService).validateAccess(key, pin);
+        verifyNoMoreInteractions(authService);
         verify(aesUtilWrapper).decrypt(encryptedPassword, decryptionKey, AESUtil.PIN_PBKDF2_ITERATIONS);
         verifyNoMoreInteractions(aesUtilWrapper);
         verify(appUtil).setNewlyCreated(false);
@@ -151,7 +150,7 @@ public class AuthDataManagerTest extends RxTest {
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn(key);
         when(prefsUtil.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, ""))
                 .thenReturn(encryptedPassword);
-        when(walletService.validateAccess(key, pin))
+        when(authService.validateAccess(key, pin))
                 .thenReturn(Observable.just(Response.error(
                         500,
                         ResponseBody.create(MediaType.parse("application/json"), "{}"))));
@@ -163,8 +162,8 @@ public class AuthDataManagerTest extends RxTest {
         verify(prefsUtil).getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         verify(prefsUtil).getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
         verifyNoMoreInteractions(prefsUtil);
-        verify(walletService).validateAccess(key, pin);
-        verifyNoMoreInteractions(walletService);
+        verify(authService).validateAccess(key, pin);
+        verifyNoMoreInteractions(authService);
         verifyZeroInteractions(aesUtilWrapper);
         observer.assertNotComplete();
         observer.assertNoValues();
@@ -181,7 +180,7 @@ public class AuthDataManagerTest extends RxTest {
         // Assert
         verifyZeroInteractions(accessState);
         verifyZeroInteractions(prefsUtil);
-        verifyZeroInteractions(walletService);
+        verifyZeroInteractions(authService);
         verifyZeroInteractions(aesUtilWrapper);
         observer.assertNotComplete();
         observer.assertError(Throwable.class);
@@ -194,7 +193,7 @@ public class AuthDataManagerTest extends RxTest {
         String pin = "1234";
         String encryptedPassword = "ENCRYPTED_PASSWORD";
         Status status = new Status();
-        when(walletService.setAccessKey(anyString(), anyString(), eq(pin)))
+        when(authService.setAccessKey(anyString(), anyString(), eq(pin)))
                 .thenReturn(Observable.just(Response.success(status)));
         when(aesUtilWrapper.encrypt(eq(password), anyString(), eq(AESUtil.PIN_PBKDF2_ITERATIONS)))
                 .thenReturn(encryptedPassword);
@@ -205,8 +204,8 @@ public class AuthDataManagerTest extends RxTest {
         verifyNoMoreInteractions(accessState);
         verify(appUtil).applyPRNGFixes();
         verifyNoMoreInteractions(appUtil);
-        verify(walletService).setAccessKey(anyString(), anyString(), eq(pin));
-        verifyNoMoreInteractions(walletService);
+        verify(authService).setAccessKey(anyString(), anyString(), eq(pin));
+        verifyNoMoreInteractions(authService);
         verify(aesUtilWrapper).encrypt(eq(password), anyString(), eq(AESUtil.PIN_PBKDF2_ITERATIONS));
         verifyNoMoreInteractions(aesUtilWrapper);
         verify(prefsUtil).setValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, encryptedPassword);
@@ -221,7 +220,7 @@ public class AuthDataManagerTest extends RxTest {
         // Arrange
         String password = "PASSWORD";
         String pin = "1234";
-        when(walletService.setAccessKey(anyString(), anyString(), eq(pin)))
+        when(authService.setAccessKey(anyString(), anyString(), eq(pin)))
                 .thenReturn(Observable.just(Response.error(
                         500,
                         ResponseBody.create(MediaType.parse("application/json"), "{}"))));
@@ -232,8 +231,8 @@ public class AuthDataManagerTest extends RxTest {
         verifyNoMoreInteractions(accessState);
         verify(appUtil).applyPRNGFixes();
         verifyNoMoreInteractions(appUtil);
-        verify(walletService).setAccessKey(anyString(), anyString(), eq(pin));
-        verifyNoMoreInteractions(walletService);
+        verify(authService).setAccessKey(anyString(), anyString(), eq(pin));
+        verifyNoMoreInteractions(authService);
         verifyZeroInteractions(aesUtilWrapper);
         verifyZeroInteractions(prefsUtil);
         observer.assertNotComplete();
@@ -244,11 +243,11 @@ public class AuthDataManagerTest extends RxTest {
     public void getWalletOptions() throws Exception {
         // Arrange
         WalletOptions walletOptions = new WalletOptions();
-        when(walletService.getWalletOptions()).thenReturn(Observable.just(walletOptions));
+        when(authService.getWalletOptions()).thenReturn(Observable.just(walletOptions));
         // Act
         TestObserver<WalletOptions> observer = subject.getWalletOptions().test();
         // Assert
-        verify(walletService).getWalletOptions();
+        verify(authService).getWalletOptions();
         observer.assertComplete();
         observer.assertNoErrors();
         observer.assertValue(walletOptions);
@@ -263,12 +262,12 @@ public class AuthDataManagerTest extends RxTest {
         // Arrange
         String sessionId = "SESSION_ID";
         String guid = "GUID";
-        when(walletService.getEncryptedPayload(guid, sessionId)).thenReturn(Observable.error(new Throwable()));
+        when(authService.getEncryptedPayload(guid, sessionId)).thenReturn(Observable.error(new Throwable()));
         // Act
         TestObserver<String> testObserver = subject.startPollingAuthStatus(guid, sessionId).test();
         getTestScheduler().advanceTimeBy(3, TimeUnit.SECONDS);
         // Assert
-        verify(walletService).getEncryptedPayload(guid, sessionId);
+        verify(authService).getEncryptedPayload(guid, sessionId);
         testObserver.assertComplete();
         testObserver.assertValue(AuthDataManager.AUTHORIZATION_REQUIRED);
         testObserver.assertNoErrors();
@@ -283,13 +282,13 @@ public class AuthDataManagerTest extends RxTest {
         String sessionId = "SESSION_ID";
         String guid = "GUID";
         ResponseBody responseBody = ResponseBody.create(MediaType.parse("application/json"), ERROR_BODY);
-        when(walletService.getEncryptedPayload(guid, sessionId))
+        when(authService.getEncryptedPayload(guid, sessionId))
                 .thenReturn(Observable.just(Response.error(500, responseBody)));
         // Act
         TestObserver<String> testObserver = subject.startPollingAuthStatus(guid, sessionId).test();
         getTestScheduler().advanceTimeBy(2, TimeUnit.SECONDS);
         // Assert
-        verify(walletService).getEncryptedPayload(guid, sessionId);
+        verify(authService).getEncryptedPayload(guid, sessionId);
         testObserver.assertNotComplete();
         testObserver.assertNoValues();
         testObserver.assertNoErrors();
