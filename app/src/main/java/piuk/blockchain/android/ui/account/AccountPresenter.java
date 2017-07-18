@@ -22,9 +22,8 @@ import javax.inject.Inject;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.datamanagers.AccountDataManager;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -40,7 +39,6 @@ public class AccountPresenter extends BasePresenter<AccountView> {
     private static final String KEY_ADDRESS = "address";
 
     private PayloadDataManager payloadDataManager;
-    private AccountDataManager accountDataManager;
     private TransferFundsDataManager fundsDataManager;
     private PrefsUtil prefsUtil;
     private AppUtil appUtil;
@@ -50,7 +48,6 @@ public class AccountPresenter extends BasePresenter<AccountView> {
 
     @Inject
     AccountPresenter(PayloadDataManager payloadDataManager,
-                     AccountDataManager accountDataManager,
                      TransferFundsDataManager fundsDataManager,
                      PrefsUtil prefsUtil,
                      AppUtil appUtil,
@@ -58,7 +55,6 @@ public class AccountPresenter extends BasePresenter<AccountView> {
                      EnvironmentSettings environmentSettings) {
 
         this.payloadDataManager = payloadDataManager;
-        this.accountDataManager = accountDataManager;
         this.fundsDataManager = fundsDataManager;
         this.prefsUtil = prefsUtil;
         this.appUtil = appUtil;
@@ -108,7 +104,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
         }
 
         getCompositeDisposable().add(
-                accountDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
+                payloadDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
                         .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.please_wait))
                         .subscribe(account -> {
                             getView().dismissProgressDialog();
@@ -139,7 +135,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
     void updateLegacyAddress(LegacyAddress address) {
         getView().showProgressDialog(R.string.saving_address);
         getCompositeDisposable().add(
-                accountDataManager.updateLegacyAddress(address)
+                payloadDataManager.updateLegacyAddress(address)
                         .subscribe(() -> {
                             getView().dismissProgressDialog();
                             getView().showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
@@ -223,7 +219,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
         legacyAddress.setCreatedDeviceVersion(BuildConfig.VERSION_NAME);
 
         getCompositeDisposable().add(
-                accountDataManager.addLegacyAddress(legacyAddress)
+                payloadDataManager.addLegacyAddress(legacyAddress)
                         .subscribe(
                                 () -> getView().showRenameImportedAddressDialog(legacyAddress),
                                 throwable -> getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
@@ -284,7 +280,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
         getView().showProgressDialog(R.string.please_wait);
 
         getCompositeDisposable().add(
-                accountDataManager.getKeyFromImportedData(format, data)
+                payloadDataManager.getKeyFromImportedData(format, data)
                         .subscribe(key -> {
                             handlePrivateKey(key, secondPassword);
                             getView().dismissProgressDialog();
@@ -299,7 +295,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
         if (key != null && key.hasPrivKey()) {
             // A private key to an existing address has been scanned
             getCompositeDisposable().add(
-                    accountDataManager.setKeyForLegacyAddress(key, secondPassword)
+                    payloadDataManager.setKeyForLegacyAddress(key, secondPassword)
                             .subscribe(legacyAddress -> {
                                 getView().showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
                                 getView().onUpdateAccountsList();

@@ -5,7 +5,7 @@ import io.reactivex.Observable
 import okhttp3.ResponseBody
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.AuthDataManager
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.base.BasePresenter

@@ -21,6 +21,7 @@ import io.reactivex.exceptions.Exceptions;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -271,11 +272,11 @@ public class AuthDataManager {
                                 decryptionKey,
                                 AESUtil.PIN_PBKDF2_ITERATIONS);
                     } else {
-                        if(response.code() == 500) {
+                        if (response.code() == 500) {
                             // Invalid PIN
                             throw new InvalidCredentialsException("Validate access failed");
                         } else {
-                            throw new ServerConnectionException(response.code()+" "+response.message());
+                            throw new ServerConnectionException(response.code() + " " + response.message());
                         }
                     }
                 });

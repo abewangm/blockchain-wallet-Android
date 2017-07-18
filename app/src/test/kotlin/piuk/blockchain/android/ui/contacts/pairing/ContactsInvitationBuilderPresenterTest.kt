@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull

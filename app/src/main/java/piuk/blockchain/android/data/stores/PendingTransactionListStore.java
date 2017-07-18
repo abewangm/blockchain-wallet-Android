@@ -2,7 +2,7 @@ package piuk.blockchain.android.data.stores;
 
 import java.util.List;
 
-import piuk.blockchain.android.data.contacts.ContactTransactionModel;
+import piuk.blockchain.android.data.contacts.models.ContactTransactionModel;
 
 public class PendingTransactionListStore extends ListStore<ContactTransactionModel> {
 

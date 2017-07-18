@@ -1,6 +1,6 @@
 package piuk.blockchain.android.util
 
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import java.security.SecureRandom

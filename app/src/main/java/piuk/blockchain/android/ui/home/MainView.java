@@ -6,7 +6,7 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 
-import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
+import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.ui.base.View;
 
 interface MainView extends View {

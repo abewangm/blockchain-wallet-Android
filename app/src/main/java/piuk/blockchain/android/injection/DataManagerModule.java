@@ -12,24 +12,23 @@ import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.data.contacts.ContactsMapStore;
-import piuk.blockchain.android.data.datamanagers.AccountDataManager;
+import piuk.blockchain.android.data.contacts.ContactsDataManager;
+import piuk.blockchain.android.data.contacts.ContactsService;
+import piuk.blockchain.android.data.contacts.datastore.ContactsMapStore;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
-import piuk.blockchain.android.data.datamanagers.BuyDataManager;
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.exchange.BuyDataManager;
+import piuk.blockchain.android.data.exchange.ExchangeService;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.payload.PayloadService;
 import piuk.blockchain.android.data.payments.PaymentService;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.ContactsService;
-import piuk.blockchain.android.data.services.ExchangeService;
-import piuk.blockchain.android.data.services.PayloadService;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
@@ -107,16 +106,10 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager, RxBus rxBus) {
-        return new PayloadDataManager(new PayloadService(payloadManager), payloadManager, rxBus);
-    }
-
-    @Provides
-    @PresenterScope
-    protected AccountDataManager provideAccountDataManager(PayloadManager payloadManager,
+    protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
                                                            PrivateKeyFactory privateKeyFactory,
                                                            RxBus rxBus) {
-        return new AccountDataManager(new PayloadService(payloadManager), privateKeyFactory, rxBus);
+        return new PayloadDataManager(new PayloadService(payloadManager), privateKeyFactory, payloadManager, rxBus);
     }
 
     @Provides

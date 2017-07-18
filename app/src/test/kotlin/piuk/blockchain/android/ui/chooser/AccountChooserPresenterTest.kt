@@ -7,8 +7,8 @@ import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.data.access.AccessState
-import piuk.blockchain.android.data.contacts.PaymentRequestType
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType
+import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.util.StringUtils

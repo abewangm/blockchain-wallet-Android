@@ -12,7 +12,7 @@ import android.widget.TextView
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import kotlinx.android.synthetic.main.item_contact_transactions.view.*
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.contacts.ContactTransactionModel
+import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil

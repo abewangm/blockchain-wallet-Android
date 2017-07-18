@@ -1,14 +1,13 @@
 package piuk.blockchain.android.data.datamanagers
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatDialogFragment
 import info.blockchain.wallet.api.data.Settings
 import io.reactivex.Observable
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.auth.LandingActivity
 import piuk.blockchain.android.ui.auth.PinEntryActivity
 import piuk.blockchain.android.ui.backup.BackupWalletActivity
@@ -18,7 +17,6 @@ import piuk.blockchain.android.ui.settings.SettingsFragment
 import piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.RootUtil
-import java.util.*
 
 class PromptManager(
         private val prefsUtil: PrefsUtil,

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.ui.base.View;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
