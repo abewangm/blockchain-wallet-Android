@@ -31,6 +31,7 @@ import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.login.LoginActivity;
 import piuk.blockchain.android.ui.login.ManualPairingActivity;
 import piuk.blockchain.android.ui.onboarding.OnboardingActivity;
+import piuk.blockchain.android.ui.pairing_code.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.receive.ReceiveQrActivity;
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
@@ -122,4 +123,6 @@ public interface PresenterComponent {
     void inject(@NotNull ReceiveQrActivity receiveQrActivity);
 
     void inject(@NotNull BuyActivity buyActivity);
+
+    void inject(@NotNull PairingCodeActivity pairingCodeActivity);
 }

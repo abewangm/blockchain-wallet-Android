@@ -8,6 +8,7 @@ import android.view.View
 import kotlinx.android.synthetic.main.activity_pairing_code.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
@@ -20,6 +21,10 @@ import javax.inject.Inject
 class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresenter>(), PairingCodeView {
 
     @Inject lateinit var pairingCodePresenter: PairingCodePresenter
+
+    init {
+        Injector.getInstance().presenterComponent.inject(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,10 +69,8 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
     override fun getView(): PairingCodeView = this
 
     fun onClickQRToggle(view: View) {
-
         if (main_layout.visibility == View.VISIBLE) {
-
-            //Show pairing QR
+            // Show pairing QR
             main_layout.gone()
             btn_qr_toggle.setText(R.string.pairing_code_hide_qr)
             qr_layout.visible()
@@ -75,8 +78,7 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
 
             presenter.generatePairingQr()
         } else {
-
-            //Hide pairing QR
+            // Hide pairing QR
             tv_warning.setText(R.string.pairing_code_warning_1)
             main_layout.visible()
             btn_qr_toggle.setText(R.string.pairing_code_show_qr)

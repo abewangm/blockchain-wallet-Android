@@ -4,7 +4,6 @@ import android.content.Context;
 
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -190,11 +189,12 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected ContactsDataManager provideContactsManager(ContactsMapStore contactsMapStore,
+    protected ContactsDataManager provideContactsManager(ContactsService contactsService,
+                                                         ContactsMapStore contactsMapStore,
                                                          PendingTransactionListStore pendingTransactionListStore,
                                                          RxBus rxBus) {
         return new ContactsDataManager(
-                new ContactsService(new Contacts()),
+                contactsService,
                 contactsMapStore,
                 pendingTransactionListStore,
                 rxBus);
