@@ -52,20 +52,16 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected AuthDataManager provideAuthDataManager(PayloadDataManager payloadDataManager,
-                                                     PrefsUtil prefsUtil,
+    protected AuthDataManager provideAuthDataManager(PrefsUtil prefsUtil,
                                                      AppUtil appUtil,
                                                      AccessState accessState,
-                                                     StringUtils stringUtils,
                                                      AESUtilWrapper aesUtilWrapper,
                                                      RxBus rxBus) {
         return new AuthDataManager(
-                payloadDataManager,
                 prefsUtil,
                 new WalletService(new WalletApi()),
                 appUtil,
                 accessState,
-                stringUtils,
                 aesUtilWrapper,
                 rxBus);
     }

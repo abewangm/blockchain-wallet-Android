@@ -6,8 +6,9 @@ import info.blockchain.wallet.payload.data.Wallet
 import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.datamanagers.AuthDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity
 import piuk.blockchain.android.util.AppUtil
@@ -18,12 +19,12 @@ class CreateWalletPresenterTest {
     private lateinit var subject: CreateWalletPresenter
     private var view: CreateWalletView = mock()
     private var appUtil: AppUtil = mock()
-    private var authDataManager: AuthDataManager = mock()
+    private var payloadDataManager: PayloadDataManager = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
     private var prefsUtil: PrefsUtil = mock()
 
     @Before
     fun setUp() {
-        subject = CreateWalletPresenter(authDataManager, prefsUtil, appUtil)
+        subject = CreateWalletPresenter(payloadDataManager, prefsUtil, appUtil)
         subject.initView(view)
     }
 
@@ -114,21 +115,27 @@ class CreateWalletPresenterTest {
         val pw1 = "MyTestWallet"
         val pw2 = "MyTestWallet"
         val accountName = "AccountName"
+        val sharedKey = "SHARED_KEY"
+        val guid = "GUID"
         whenever(view.getDefaultAccountName()).thenReturn(accountName)
-        whenever(authDataManager.createHdWallet(any(), any(), any())).thenReturn(Observable.just(Wallet()))
-
+        whenever(payloadDataManager.createHdWallet(any(), any(), any())).thenReturn(Observable.just(Wallet()))
+        whenever(payloadDataManager.wallet.guid).thenReturn(guid)
+        whenever(payloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
         // Act
         subject.passwordStrength = 80
         subject.recoveryPhrase = ""
         subject.validateCredentials(email, pw1, pw2)
         // Assert
         verify(appUtil).applyPRNGFixes()
-        val observer = authDataManager.createHdWallet(pw1, accountName, email).test()
+        val observer = payloadDataManager.createHdWallet(pw1, accountName, email).test()
         observer.assertComplete()
         observer.assertNoErrors()
 
         verify(view).showProgressDialog(any())
         verify(prefsUtil).setValue(PrefsUtil.KEY_EMAIL, email)
+        verify(prefsUtil).setValue(PrefsUtil.KEY_GUID, guid)
+        verify(appUtil).isNewlyCreated = true
+        verify(appUtil).sharedKey = sharedKey
         verify(view).startPinEntryActivity()
         verify(view).dismissProgressDialog()
     }
@@ -140,21 +147,28 @@ class CreateWalletPresenterTest {
         val pw1 = "MyTestWallet"
         val pw2 = "MyTestWallet"
         val accountName = "AccountName"
+        val sharedKey = "SHARED_KEY"
+        val guid = "GUID"
         whenever(view.getDefaultAccountName()).thenReturn(accountName)
-        whenever(authDataManager.restoreHdWallet(any(), any(), any())).thenReturn(Observable.just(Wallet()))
-
+        whenever(payloadDataManager.restoreHdWallet(any(), any(), any(), any()))
+                .thenReturn(Observable.just(Wallet()))
+        whenever(payloadDataManager.wallet.guid).thenReturn(guid)
+        whenever(payloadDataManager.wallet.sharedKey).thenReturn(sharedKey)
         // Act
         subject.passwordStrength = 80
         subject.recoveryPhrase = "all all all all all all all all all all all all"
         subject.validateCredentials(email, pw1, pw2)
         // Assert
-        val observer = authDataManager.restoreHdWallet(email, pw1, subject.recoveryPhrase).test()
+        val observer = payloadDataManager.restoreHdWallet(email, pw1, accountName, subject.recoveryPhrase).test()
         observer.assertComplete()
         observer.assertNoErrors()
 
         verify(view).showProgressDialog(any())
         verify(prefsUtil).setValue(PrefsUtil.KEY_EMAIL, email)
         verify(prefsUtil).setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true)
+        verify(prefsUtil).setValue(PrefsUtil.KEY_GUID, guid)
+        verify(appUtil).isNewlyCreated = true
+        verify(appUtil).sharedKey = sharedKey
         verify(view).startPinEntryActivity()
         verify(view).dismissProgressDialog()
     }

@@ -6,8 +6,6 @@ import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.data.Wallet;
 
 import org.spongycastle.util.encoders.Hex;
 
@@ -19,9 +17,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.exceptions.Exceptions;
 import okhttp3.ResponseBody;
-import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -29,11 +25,9 @@ import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 import retrofit2.Response;
 
-@SuppressWarnings("WeakerAccess")
 public class AuthDataManager {
 
     @VisibleForTesting static final String AUTHORIZATION_REQUIRED = "authorization_required";
@@ -41,28 +35,22 @@ public class AuthDataManager {
     private WalletService walletService;
     private AppUtil appUtil;
     private AccessState accessState;
-    private StringUtils stringUtils;
-    private PayloadDataManager payloadDataManager;
     private RxPinning rxPinning;
     private AESUtilWrapper aesUtilWrapper;
-    @Thunk PrefsUtil prefsUtil;
-    @VisibleForTesting protected int timer;
+    @Thunk private PrefsUtil prefsUtil;
+    @VisibleForTesting int timer;
 
-    public AuthDataManager(PayloadDataManager payloadDataManager,
-                           PrefsUtil prefsUtil,
+    public AuthDataManager(PrefsUtil prefsUtil,
                            WalletService walletService,
                            AppUtil appUtil,
                            AccessState accessState,
-                           StringUtils stringUtils,
                            AESUtilWrapper aesUtilWrapper,
                            RxBus rxBus) {
 
-        this.payloadDataManager = payloadDataManager;
         this.prefsUtil = prefsUtil;
         this.walletService = walletService;
         this.appUtil = appUtil;
         this.accessState = accessState;
-        this.stringUtils = stringUtils;
         this.aesUtilWrapper = aesUtilWrapper;
         rxPinning = new RxPinning(rxBus);
     }
@@ -108,67 +96,14 @@ public class AuthDataManager {
     }
 
     /**
-     * Fetches the user's wallet payload, and then initializes the {@link PayloadManager} and
-     * decrypts a payload using the user's password.
-     *
-     * @param sharedKey The shared key negotiated between the server and the user
-     * @param guid      The user's unique GUID
-     * @param password  The user's password
-     * @return A {@link Completable} object
-     */
-    public Completable updatePayload(String sharedKey, String guid, String password) {
-        return payloadDataManager.initializeAndDecrypt(sharedKey, guid, password);
-    }
-
-    /**
      * Returns a {@link WalletOptions} object from the website. This object is used to get the
      * current buy/sell partner info as well as a list of countries where buy/sell is rolled out.
      *
-     * @return An {@link Observable} wraping a {@link WalletOptions} object
+     * @return An {@link Observable} wrapping a {@link WalletOptions} object
      */
     public Observable<WalletOptions> getWalletOptions() {
         return rxPinning.call(() -> walletService.getWalletOptions())
                 .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    /**
-     * Creates a new HD Wallet and saves it to the API.
-     *
-     * @param password   The user's chosen password
-     * @param walletName The name for the wallet, usually some default that has been localised
-     * @param email      The user's email address
-     * @return An {@link Observable} wrapping a {@link Wallet} object
-     */
-    public Observable<Wallet> createHdWallet(String password, String walletName, String email) {
-        return payloadDataManager.createHdWallet(password, walletName, email)
-                .doOnNext(payload -> {
-                    // Successfully created and saved
-                    appUtil.setNewlyCreated(true);
-                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
-                    appUtil.setSharedKey(payload.getSharedKey());
-                });
-    }
-
-    /**
-     * Restores a HD Wallet from a valid 12 word mnemonic whilst creating a new login on the
-     * website. Saves the wallet if successful.
-     *
-     * @param email    The user's email address
-     * @param password The user's chosen password
-     * @param mnemonic A valid 12 word mnemonic for an existing Wallet
-     * @return An {@link Observable} wrapping a {@link Wallet} object
-     */
-    public Observable<Wallet> restoreHdWallet(String email, String password, String mnemonic) {
-        return payloadDataManager.restoreHdWallet(
-                mnemonic,
-                stringUtils.getString(R.string.default_wallet_name),
-                email,
-                password)
-                .doOnNext(payload -> {
-                    appUtil.setNewlyCreated(true);
-                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payload.getGuid());
-                    appUtil.setSharedKey(payload.getSharedKey());
-                });
     }
 
     /**
@@ -213,20 +148,6 @@ public class AuthDataManager {
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(aLong -> timer--)
                 .takeUntil(aLong -> timer < 0);
-    }
-
-    /**
-     * Initializes the {@link PayloadManager} using an encrypted Payload response from the server.
-     *
-     * @return A {@link Completable} object
-     */
-    public Completable initializeFromPayload(String payload, String password) {
-        return payloadDataManager.initializeFromPayload(payload, password)
-                .doOnComplete(() -> {
-                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
-                    appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
-                    prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-                });
     }
 
     /**

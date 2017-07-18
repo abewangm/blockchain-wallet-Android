@@ -19,6 +19,7 @@ import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
@@ -32,20 +33,24 @@ public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredVie
 
     @VisibleForTesting static final String KEY_AUTH_REQUIRED = "authorization_required";
 
+    @SuppressWarnings("WeakerAccess")
     @Thunk AppUtil appUtil;
     private PrefsUtil prefsUtil;
     private AuthDataManager authDataManager;
+    private PayloadDataManager payloadDataManager;
     private String sessionId;
     @VisibleForTesting boolean waitingForAuth = false;
 
     @Inject
     PasswordRequiredPresenter(AppUtil appUtil,
                               PrefsUtil prefsUtil,
-                              AuthDataManager authDataManager) {
+                              AuthDataManager authDataManager,
+                              PayloadDataManager payloadDataManager) {
 
         this.appUtil = appUtil;
         this.prefsUtil = prefsUtil;
         this.authDataManager = authDataManager;
+        this.payloadDataManager = payloadDataManager;
     }
 
     @Override
@@ -112,7 +117,7 @@ public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredVie
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> handleResponse(password, guid, response),
                                 throwable -> {
-                                    Timber.e("verifyPassword: ", throwable);
+                                    Timber.e(throwable);
                                     showErrorToastAndRestartApp(R.string.auth_failed);
                                 }));
     }
@@ -170,7 +175,12 @@ public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredVie
 
     private void attemptDecryptPayload(String password, String payload) {
         getCompositeDisposable().add(
-                authDataManager.initializeFromPayload(payload, password)
+                payloadDataManager.initializeFromPayload(payload, password)
+                        .doOnComplete(() -> {
+                            prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
+                            appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
+                            prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+                        })
                         .subscribe(() -> getView().goToPinPage(),
                                 throwable -> {
                                     if (throwable instanceof HDWalletException) {
