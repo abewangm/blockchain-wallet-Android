@@ -25,28 +25,28 @@ import piuk.blockchain.android.util.StringUtils;
 @Module
 public class ApplicationModule {
 
-    private final Application mApplication;
+    private final Application application;
 
     public ApplicationModule(Application application) {
-        mApplication = application;
+        this.application = application;
     }
 
     @Provides
     @Singleton
     protected Context provideApplicationContext() {
-        return mApplication;
+        return application;
     }
 
     @Provides
     @Singleton
     protected PrefsUtil providePrefsUtil() {
-        return new PrefsUtil(mApplication);
+        return new PrefsUtil(application);
     }
 
     @Provides
     @Singleton
     protected AppUtil provideAppUtil() {
-        return new AppUtil(mApplication);
+        return new AppUtil(application);
     }
 
     @Provides
@@ -61,7 +61,7 @@ public class ApplicationModule {
 
     @Provides
     protected StringUtils provideStringUtils() {
-        return new StringUtils(mApplication);
+        return new StringUtils(application);
     }
 
     @Provides

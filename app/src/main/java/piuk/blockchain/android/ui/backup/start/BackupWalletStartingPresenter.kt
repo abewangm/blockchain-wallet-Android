@@ -1,17 +1,12 @@
 package piuk.blockchain.android.ui.backup.start
 
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BasePresenter
 import javax.inject.Inject
 
-class BackupWalletStartingPresenter : BasePresenter<BackupWalletStartingView>() {
-
-    @Inject lateinit var payloadDataManager: PayloadDataManager
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
+class BackupWalletStartingPresenter @Inject constructor(
+        private val payloadDataManager: PayloadDataManager
+) : BasePresenter<BackupWalletStartingView>() {
 
     override fun onViewReady() {
         // No-op

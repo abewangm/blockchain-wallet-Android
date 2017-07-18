@@ -3,7 +3,6 @@ package piuk.blockchain.android.injection;
 import android.util.Log;
 
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import java.security.KeyManagementException;
@@ -23,12 +22,9 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.ApiInterceptor;
 import piuk.blockchain.android.data.api.ConnectionApi;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.data.services.NotificationService;
-import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.TLSSocketFactory;
@@ -62,17 +58,6 @@ public class ApiModule {
                 accessState,
                 payloadManager,
                 prefsUtil,
-                rxBus);
-    }
-
-    // TODO: 09/02/2017 This should be moved to DataManagerModule eventually
-    @Provides
-    @Singleton
-    protected ContactsDataManager provideContactsManager(PendingTransactionListStore pendingTransactionListStore,
-                                                         RxBus rxBus) {
-        return new ContactsDataManager(
-                new ContactsService(new Contacts()),
-                pendingTransactionListStore,
                 rxBus);
     }
 

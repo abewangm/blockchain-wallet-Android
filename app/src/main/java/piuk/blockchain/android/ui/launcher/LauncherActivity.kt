@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.v7.app.AlertDialog
 import piuk.blockchain.android.R
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.auth.LandingActivity
 import piuk.blockchain.android.ui.auth.PasswordRequiredActivity
 import piuk.blockchain.android.ui.auth.PinEntryActivity
@@ -18,6 +19,12 @@ import javax.inject.Inject
 
 class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), LauncherView {
 
+    @Inject lateinit var launcherPresenter: LauncherPresenter
+
+    init {
+        Injector.getInstance().presenterComponent.inject(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launcher)
@@ -26,7 +33,7 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
         handler.postDelayed(DelayStartRunnable(this), 500)
     }
 
-    override fun createPresenter() = LauncherPresenter()
+    override fun createPresenter() = launcherPresenter
 
     override fun getView() = this
 

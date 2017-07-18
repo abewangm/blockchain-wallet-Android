@@ -1,12 +1,10 @@
 package piuk.blockchain.android.ui.balance
 
-import android.app.Application
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.multiaddress.TransactionSummary
-import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
@@ -15,25 +13,17 @@ import io.reactivex.Single
 import org.amshove.kluent.`should equal to`
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
-import piuk.blockchain.android.BlockchainTestApplication
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.contacts.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.ContactsEvent
-import piuk.blockchain.android.data.datamanagers.*
+import piuk.blockchain.android.data.datamanagers.BuyDataManager
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.notifications.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.services.ExchangeService
-import piuk.blockchain.android.data.settings.SettingsDataManager
-import piuk.blockchain.android.data.stores.PendingTransactionListStore
-import piuk.blockchain.android.data.stores.TransactionListStore
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -41,8 +31,6 @@ import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.*
 import java.math.BigInteger
 
-@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
-@RunWith(RobolectricTestRunner::class)
 class BalancePresenterTest {
 
     private lateinit var subject: BalancePresenter
@@ -61,14 +49,19 @@ class BalancePresenterTest {
 
     @Before
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                MockApiModule(),
-                MockDataManagerModule())
-
-        subject = BalancePresenter()
+        subject = BalancePresenter(
+                exchangeRateFactory,
+                transactionListDataManager,
+                contactsDataManager,
+                swipeToReceiveHelper,
+                payloadDataManager,
+                buyDataManager,
+                stringUtils,
+                prefsUtil,
+                accessState,
+                rxBus,
+                appUtil
+        )
         subject.initView(view)
     }
 
@@ -1009,51 +1002,6 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         // 2 accounts, "All" and "Imported"
         result.size `should equal to` 4
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun provideTransactionListDataManager(
-                payloadManager: PayloadManager?,
-                transactionListStore: TransactionListStore?,
-                rxBus: RxBus?
-        ) = transactionListDataManager
-
-        override fun provideSwipeToReceiveHelper(
-                payloadDataManager: PayloadDataManager?,
-                prefsUtil: PrefsUtil?
-        ) = swipeToReceiveHelper
-
-        override fun providePayloadDataManager(
-                payloadManager: PayloadManager?,
-                rxBus: RxBus?
-        ) = payloadDataManager
-
-        override fun provideBuyDataManager(settingsDataManager: SettingsDataManager?,
-                                           authDataManager: AuthDataManager?,
-                                           payloadDataManager: PayloadDataManager?,
-                                           accessState: AccessState?) =
-                buyDataManager
-    }
-
-    inner class MockApiModule : ApiModule() {
-        override fun provideContactsManager(
-                pendingTransactionListStore: PendingTransactionListStore?,
-                rxBus: RxBus?
-        ) = contactsDataManager
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun provideExchangeRateFactory() = exchangeRateFactory
-
-        override fun provideStringUtils() = stringUtils
-
-        override fun providePrefsUtil() = prefsUtil
-
-        override fun provideAccessState() = accessState
-
-        override fun provideRxBus() = rxBus
-
-        override fun provideAppUtil() = appUtil
     }
 
 }

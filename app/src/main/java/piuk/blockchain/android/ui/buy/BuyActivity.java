@@ -9,7 +9,6 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
-import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -17,12 +16,15 @@ import android.widget.FrameLayout;
 
 import com.facebook.device.yearclass.YearClass;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -30,24 +32,29 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ViewUtils;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.base.UiState.CONTENT;
 import static piuk.blockchain.android.ui.base.UiState.EMPTY;
 import static piuk.blockchain.android.ui.base.UiState.FAILURE;
 import static piuk.blockchain.android.ui.base.UiState.LOADING;
 
-public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataListener, FrontendJavascript<String> {
+public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
+        implements BuyView, FrontendJavascript<String> {
 
-    public static final String TAG = BuyActivity.class.getSimpleName();
+    @Inject BuyPresenter buyPresenter;
 
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;
-    private BuyViewModel viewModel;
     private MaterialProgressDialog progress;
     private ActivityBuyBinding binding;
 
     private boolean frontendInitialized = false;
     private boolean didBuyBitcoin = false;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     public static void start(Context context) {
         Intent intent = new Intent(context, BuyActivity.class);
@@ -61,7 +68,6 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
 
         setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.onboarding_buy_bitcoin);
-        viewModel = new BuyViewModel(this);
 
         if (AndroidUtils.is21orHigher()) {
             CookieManager.getInstance().setAcceptThirdPartyCookies(binding.webview, true);
@@ -75,8 +81,8 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         binding.webview.setWebViewClient(new WebViewClient());
         binding.webview.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
         binding.webview.getSettings().setJavaScriptEnabled(true);
-        binding.webview.loadUrl(viewModel.getCurrentServerUrl() + "wallet/#/intermediate");
-        viewModel.onViewReady();
+        binding.webview.loadUrl(getPresenter().getCurrentServerUrl() + "wallet/#/intermediate");
+        onViewReady();
     }
 
     @Override
@@ -86,32 +92,32 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
         binding.webview.reload();
 
         if (didBuyBitcoin) {
-            viewModel.reloadExchangeDate();
+            getPresenter().reloadExchangeDate();
         }
         dismissProgressDialog();
     }
 
     @Override
     public void onReceiveValue(String value) {
-        Log.d(TAG, "Received JS value: " + value);
+        Timber.d("Received JS value: " + value);
     }
 
     public void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails) {
-        Log.d(TAG, "setWebViewLoginDetails: done");
+        Timber.d("setWebViewLoginDetails: done");
         this.webViewLoginDetails = webViewLoginDetails;
         activateIfReady();
     }
 
     @Override
     public void onFrontendInitialized() {
-        Log.d(TAG, "onFrontendInitialized: done");
+        Timber.d("onFrontendInitialized: done");
         frontendInitialized = true;
         activateIfReady();
     }
 
     @Override
     public void onBuyCompleted() {
-        Log.d(TAG, "onBuyCompleted: done");
+        Timber.d("onBuyCompleted: done");
         didBuyBitcoin = true;
     }
 
@@ -147,7 +153,6 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
     }
 
     private void showProgressDialog() {
-
         int message = R.string.please_wait;
 
         int year = YearClass.get(this);
@@ -185,7 +190,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     ViewUtils.hideKeyboard(this);
-                    viewModel.generateMetadataNodes(editText.getText().toString());
+                    getPresenter().generateMetadataNodes(editText.getText().toString());
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> finish())
                 .create()
@@ -201,7 +206,7 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
             case CONTENT:
                 frontendJavascriptManager.activateMobileBuyFromJson(
                         webViewLoginDetails,
-                        viewModel.isNewlyCreated());
+                        getPresenter().isNewlyCreated());
                 dismissProgressDialog();
                 break;
             case FAILURE:
@@ -219,4 +224,15 @@ public class BuyActivity extends BaseAuthActivity implements BuyViewModel.DataLi
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
+
+    @Override
+    protected BuyPresenter createPresenter() {
+        return buyPresenter;
+    }
+
+    @Override
+    protected BuyView getView() {
+        return this;
+    }
+
 }

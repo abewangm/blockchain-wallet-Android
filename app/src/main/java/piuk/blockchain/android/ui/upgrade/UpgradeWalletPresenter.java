@@ -12,7 +12,6 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
@@ -21,15 +20,27 @@ import piuk.blockchain.android.util.StringUtils;
 
 public class UpgradeWalletPresenter extends BasePresenter<UpgradeWalletView> {
 
-    @Inject protected PrefsUtil prefs;
-    @Inject protected AppUtil appUtil;
-    @Inject protected AccessState accessState;
-    @Inject protected AuthDataManager authDataManager;
-    @Inject protected PayloadDataManager payloadDataManager;
-    @Inject protected StringUtils stringUtils;
+    private PrefsUtil prefs;
+    private AppUtil appUtil;
+    private AccessState accessState;
+    private AuthDataManager authDataManager;
+    private PayloadDataManager payloadDataManager;
+    private StringUtils stringUtils;
 
-    UpgradeWalletPresenter() {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+    @Inject
+    UpgradeWalletPresenter(PrefsUtil prefs,
+                           AppUtil appUtil,
+                           AccessState accessState,
+                           AuthDataManager authDataManager,
+                           PayloadDataManager payloadDataManager,
+                           StringUtils stringUtils) {
+
+        this.prefs = prefs;
+        this.appUtil = appUtil;
+        this.accessState = accessState;
+        this.authDataManager = authDataManager;
+        this.payloadDataManager = payloadDataManager;
+        this.stringUtils = stringUtils;
     }
 
     @Override

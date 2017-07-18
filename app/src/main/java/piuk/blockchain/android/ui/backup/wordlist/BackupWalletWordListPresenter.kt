@@ -1,23 +1,16 @@
 package piuk.blockchain.android.ui.backup.wordlist
 
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment.Companion.ARGUMENT_SECOND_PASSWORD
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.util.BackupWalletUtil
 import javax.inject.Inject
 
-class BackupWalletWordListPresenter : BasePresenter<BackupWalletWordListView>() {
-
-    @Inject lateinit var payloadDataManager: PayloadDataManager
-    @Inject lateinit var backupWalletUtil: BackupWalletUtil
+class BackupWalletWordListPresenter @Inject constructor(
+        private val backupWalletUtil: BackupWalletUtil
+) : BasePresenter<BackupWalletWordListView>() {
 
     internal var secondPassword: String? = null
     private var mnemonic: List<String>? = null
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
 
     override fun onViewReady() {
         val bundle = view.getPageBundle()

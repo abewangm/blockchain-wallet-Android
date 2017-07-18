@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
@@ -19,10 +18,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.FragmentPinEntryBinding;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.PinEntryKeypad;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -37,7 +40,7 @@ import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 @SuppressWarnings("WeakerAccess")
-public class PinEntryFragment extends Fragment implements PinEntryViewModel.DataListener {
+public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresenter> implements PinEntryView {
 
     public static final String KEY_VALIDATING_PIN_FOR_RESULT = "validating_pin";
     public static final String KEY_VALIDATED_PIN = "validated_pin";
@@ -47,6 +50,8 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     private static final int PIN_LENGTH = 4;
     private static final Handler HANDLER = new Handler();
 
+    @Inject PinEntryPresenter pinEntryPresenter;
+
     private ImageView[] pinBoxArray;
     private MaterialProgressDialog materialProgressDialog;
     private FragmentPinEntryBinding binding;
@@ -54,12 +59,11 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     private OnPinEntryFragmentInteractionListener listener;
     private ClearPinNumberRunnable clearPinNumberRunnable = new ClearPinNumberRunnable();
     private boolean isPaused = false;
-    @Thunk PinEntryViewModel viewModel;
 
     private long backPressed;
 
-    public PinEntryFragment() {
-        // Required empty public constructor
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static PinEntryFragment newInstance(boolean showSwipeHint) {
@@ -75,10 +79,8 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_pin_entry, container, false);
 
-        viewModel = new PinEntryViewModel(this);
-
         // Set title state
-        if (viewModel.isCreatingNewPin()) {
+        if (getPresenter().isCreatingNewPin()) {
             binding.titleBox.setText(R.string.create_pin);
         } else {
             binding.titleBox.setText(R.string.pin_entry);
@@ -94,7 +96,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
 
         binding.swipeHintLayout.setOnClickListener(view -> listener.onSwipePressed());
 
-        viewModel.onViewReady();
+        getPresenter().onViewReady();
 
         if (getArguments() != null) {
             boolean showSwipeHint = getArguments().getBoolean(KEY_SHOW_SWIPE_HINT);
@@ -106,12 +108,12 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         binding.keyboard.setPadClickedListener(new PinEntryKeypad.OnPinEntryPadClickedListener() {
             @Override
             public void onNumberClicked(String number) {
-                viewModel.onPadClicked(number);
+                getPresenter().onPadClicked(number);
             }
 
             @Override
             public void onDeleteClicked() {
-                viewModel.onDeleteClicked();
+                getPresenter().onDeleteClicked();
             }
         });
 
@@ -132,15 +134,15 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     public void showFingerprintDialog(String pincode) {
         // Show icon for relaunching dialog
         binding.fingerprintLogo.setVisibility(View.VISIBLE);
-        binding.fingerprintLogo.setOnClickListener(v -> viewModel.checkFingerprintStatus());
+        binding.fingerprintLogo.setOnClickListener(v -> getPresenter().checkFingerprintStatus());
         // Show dialog itself if not already showing
-        if (fingerprintDialog == null && viewModel.canShowFingerprintDialog()) {
+        if (fingerprintDialog == null && getPresenter().canShowFingerprintDialog()) {
             fingerprintDialog = FingerprintDialog.Companion.newInstance(pincode, FingerprintStage.AUTHENTICATE);
             fingerprintDialog.setAuthCallback(new FingerprintDialog.FingerprintAuthCallback() {
                 @Override
                 public void onAuthenticated(String data) {
                     dismissFingerprintDialog();
-                    viewModel.loginWithDecryptedPin(data);
+                    getPresenter().loginWithDecryptedPin(data);
                 }
 
                 @Override
@@ -200,15 +202,15 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                 .setMessage(R.string.password_or_wipe)
                 .setCancelable(false)
                 .setPositiveButton(R.string.use_password, (dialog, whichButton) -> showValidationDialog())
-                .setNegativeButton(R.string.wipe_wallet, (dialog, whichButton) -> viewModel.resetApp())
+                .setNegativeButton(R.string.wipe_wallet, (dialog, whichButton) -> getPresenter().resetApp())
                 .show();
     }
 
     public void onBackPressed() {
-        if (viewModel.isForValidatingPinForResult()) {
+        if (getPresenter().isForValidatingPinForResult()) {
             finishWithResultCanceled();
 
-        } else if (viewModel.allowExit()) {
+        } else if (getPresenter().allowExit()) {
             if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
                 AccessState.getInstance().logout(getContext());
                 return;
@@ -228,8 +230,8 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                 .setCancelable(false)
                 .setPositiveButton(R.string.exit, (dialog, whichButton) -> AccessState.getInstance().logout(getContext()))
                 .setNegativeButton(R.string.logout, (dialog, which) -> {
-                    viewModel.getAppUtil().clearCredentialsAndRestart();
-                    viewModel.getAppUtil().restartApp();
+                    getPresenter().getAppUtil().clearCredentialsAndRestart();
+                    getPresenter().getAppUtil().restartApp();
                 })
                 .show();
     }
@@ -264,15 +266,15 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     }
 
     public void resetPinEntry() {
-        viewModel.clearPinBoxes();
+        getPresenter().clearPinBoxes();
     }
 
     public boolean allowExit() {
-        return viewModel.allowExit();
+        return getPresenter().allowExit();
     }
 
     public boolean isValidatingPinForResult() {
-        return viewModel.isForValidatingPinForResult();
+        return getPresenter().isForValidatingPinForResult();
     }
 
     @Override
@@ -310,14 +312,14 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                 .setMessage(getString(R.string.password_entry))
                 .setView(ViewUtils.getAlertDialogPaddedView(getContext(), password))
                 .setCancelable(false)
-                .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> viewModel.getAppUtil().restartApp())
+                .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> getPresenter().getAppUtil().restartApp())
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
                     final String pw = password.getText().toString();
 
                     if (!pw.isEmpty()) {
-                        viewModel.validatePassword(pw);
+                        getPresenter().validatePassword(pw);
                     } else {
-                        viewModel.incrementFailureCountAndRestart();
+                        getPresenter().incrementFailureCountAndRestart();
                     }
                 }).show();
     }
@@ -364,8 +366,8 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     public void onResume() {
         super.onResume();
         isPaused = false;
-        viewModel.clearPinBoxes();
-        viewModel.checkFingerprintStatus();
+        getPresenter().clearPinBoxes();
+        getPresenter().checkFingerprintStatus();
     }
 
     @Override
@@ -399,7 +401,6 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
     @Override
     public void onDestroy() {
         dismissProgressDialog();
-        viewModel.destroy();
         super.onDestroy();
     }
 
@@ -411,7 +412,7 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
         }
 
         // Hide if fingerprint unlock has become unavailable
-        if (!viewModel.getIfShouldShowFingerprintLogin()) {
+        if (!getPresenter().getIfShouldShowFingerprintLogin()) {
             binding.fingerprintLogo.setVisibility(View.GONE);
         }
     }
@@ -428,6 +429,16 @@ public class PinEntryFragment extends Fragment implements PinEntryViewModel.Data
                 pinBox.setImageResource(R.drawable.rounded_view_blue_white_border);
             }
         }
+    }
+
+    @Override
+    protected PinEntryPresenter createPresenter() {
+        return pinEntryPresenter;
+    }
+
+    @Override
+    protected PinEntryView getMvpView() {
+        return this;
     }
 
     interface OnPinEntryFragmentInteractionListener {

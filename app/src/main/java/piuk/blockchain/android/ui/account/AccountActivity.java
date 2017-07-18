@@ -35,14 +35,17 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.adapter.AccountAdapter;
 import piuk.blockchain.android.ui.account.adapter.AccountHeadersListener;
 import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferDialogFragment;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
@@ -53,13 +56,16 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-import static piuk.blockchain.android.ui.account.AccountViewModel.KEY_WARN_TRANSFER_ALL;
+import static piuk.blockchain.android.ui.account.AccountPresenter.KEY_WARN_TRANSFER_ALL;
 
-public class AccountActivity extends BaseAuthActivity implements AccountViewModel.DataListener {
+public class AccountActivity extends BaseMvpActivity<AccountView, AccountPresenter>
+        implements AccountView {
 
     private static final int IMPORT_PRIVATE_REQUEST_CODE = 2006;
     private static final int EDIT_ACTIVITY_REQUEST_CODE = 2007;
     private static final int ADDRESS_LABEL_MAX_LENGTH = 17;
+
+    @Inject AccountPresenter accountPresenter;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -67,7 +73,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             if (BalanceFragment.ACTION_INTENT.equals(intent.getAction())) {
                 onUpdateAccountsList();
                 // Check if we need to hide/show the transfer funds icon in the Toolbar
-                viewModel.checkTransferableLegacyFunds(false, false);
+                getPresenter().checkTransferableLegacyFunds(false, false);
             }
         }
     };
@@ -78,8 +84,11 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     private PrefsUtil prefsUtil;
     private MonetaryUtil monetaryUtil;
     @Thunk MaterialProgressDialog progress;
-    @Thunk AccountViewModel viewModel;
     @Thunk ActivityAccountsBinding binding;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,8 +98,6 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_accounts);
-
-        viewModel = new AccountViewModel(this);
 
         setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.addresses);
 
@@ -104,8 +111,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     @Thunk
     void onRowClick(int position) {
         Intent intent = new Intent(this, AccountEditActivity.class);
-        if (position >= viewModel.getAccounts().size()) {
-            intent.putExtra("address_index", position - viewModel.getAccounts().size());
+        if (position >= getPresenter().getAccounts().size()) {
+            intent.putExtra("address_index", position - getPresenter().getAccounts().size());
         } else {
             intent.putExtra("account_index", position);
         }
@@ -117,7 +124,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_account, menu);
         transferFundsMenuItem = menu.findItem(R.id.action_transfer_funds);
-        viewModel.checkTransferableLegacyFunds(true, true);//Auto popup
+        getPresenter().checkTransferableLegacyFunds(true, true);//Auto popup
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -130,7 +137,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 return true;
             case R.id.action_transfer_funds:
                 showProgressDialog(R.string.please_wait);
-                viewModel.checkTransferableLegacyFunds(false, true);//Not auto popup
+                getPresenter().checkTransferableLegacyFunds(false, true);//Not auto popup
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -158,13 +165,13 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
             @Override
             public void onNoSecondPassword() {
-                viewModel.onScanButtonClicked();
+                getPresenter().onScanButtonClicked();
             }
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
-                viewModel.setDoubleEncryptionPassword(validateSecondPassword);
-                viewModel.onScanButtonClicked();
+                getPresenter().setDoubleEncryptionPassword(validateSecondPassword);
+                getPresenter().onScanButtonClicked();
             }
         });
     }
@@ -179,7 +186,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
-                viewModel.setDoubleEncryptionPassword(validateSecondPassword);
+                getPresenter().setDoubleEncryptionPassword(validateSecondPassword);
                 promptForAccountLabel();
             }
         });
@@ -209,7 +216,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         if (!ConnectivityStatus.hasConnectivity(AccountActivity.this)) {
             ToastCustom.makeText(AccountActivity.this, getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
         } else {
-            viewModel.createNewAccount(accountLabel);
+            getPresenter().createNewAccount(accountLabel);
         }
     }
 
@@ -218,15 +225,15 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 //        accountsAndImportedList is linked to AccountAdapter - do not reconstruct or loose reference otherwise notifyDataSetChanged won't work
         accountsAndImportedList.clear();
         int correctedPosition = 0;
-        List<Account> accounts = viewModel.getAccounts();
+        List<Account> accounts = getPresenter().getAccounts();
         List<Account> accountClone = new ArrayList<>(accounts.size());
         accountClone.addAll(accounts);
 
         // Create New Wallet button at top position
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_CREATE_NEW_WALLET_BUTTON));
 
-        int defaultIndex = viewModel.getDefaultAccountIndex();
-        Account defaultAccount = viewModel.getAccounts().get(defaultIndex);
+        int defaultIndex = getPresenter().getDefaultAccountIndex();
+        Account defaultAccount = getPresenter().getAccounts().get(defaultIndex);
 
         for (int i = 0; i < accountClone.size(); i++) {
             String label = accountClone.get(i).getLabel();
@@ -253,7 +260,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         // Import Address button at first position after wallets
         accountsAndImportedList.add(new AccountItem(AccountItem.TYPE_IMPORT_ADDRESS_BUTTON));
 
-        legacy = viewModel.getLegacyAddressList();
+        legacy = getPresenter().getLegacyAddressList();
         for (int j = 0; j < legacy.size(); j++) {
 
             String label = legacy.get(j).getLabel();
@@ -305,8 +312,8 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     }
 
     private String getAccountBalance(int index) {
-        String address = viewModel.getXpubFromIndex(index);
-        BigInteger addressBalance = viewModel.getBalanceFromAddress(address);
+        String address = getPresenter().getXpubFromIndex(index);
+        BigInteger addressBalance = getPresenter().getBalanceFromAddress(address);
         // Archived addresses/xPubs aren't parsed, so balance will be null
         Long amount = addressBalance != null ? addressBalance.longValue() : 0L;
 
@@ -317,7 +324,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
 
     private String getAddressBalance(int index) {
         String address = legacy.get(index).getAddress();
-        Long amount = viewModel.getBalanceFromAddress(address).longValue();
+        Long amount = getPresenter().getBalanceFromAddress(address).longValue();
         String unit = (String) monetaryUtil.getBTCUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
 
         return monetaryUtil.getDisplayAmount(amount) + " " + unit;
@@ -343,7 +350,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-            viewModel.onAddressScanned(strResult);
+            getPresenter().onAddressScanned(strResult);
             setResult(resultCode);
         } else if (resultCode == Activity.RESULT_OK && requestCode == EDIT_ACTIVITY_REQUEST_CODE) {
             onUpdateAccountsList();
@@ -362,7 +369,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setView(ViewUtils.getAlertDialogPaddedView(this, password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
-                        viewModel.importBip38Address(data, password.getText().toString()))
+                        getPresenter().importBip38Address(data, password.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
@@ -373,7 +380,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
                 .setTitle(R.string.warning)
                 .setCancelable(false)
                 .setMessage(getString(R.string.watch_only_import_warning))
-                .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> viewModel.confirmImportWatchOnly(address))
+                .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> getPresenter().confirmImportWatchOnly(address))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
@@ -414,7 +421,7 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
         if (!ConnectivityStatus.hasConnectivity(AccountActivity.this)) {
             ToastCustom.makeText(AccountActivity.this, getString(R.string.check_connectivity_exit), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
         } else {
-            viewModel.updateLegacyAddress(legacy);
+            getPresenter().updateLegacyAddress(legacy);
         }
     }
 
@@ -508,7 +515,16 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
     protected void onDestroy() {
         super.onDestroy();
         dismissProgressDialog();
-        viewModel.destroy();
+    }
+
+    @Override
+    protected AccountPresenter createPresenter() {
+        return accountPresenter;
+    }
+
+    @Override
+    protected AccountView getView() {
+        return this;
     }
 
     private class AccountLayoutManager extends LinearLayoutManager {
@@ -522,4 +538,5 @@ public class AccountActivity extends BaseAuthActivity implements AccountViewMode
             return false;
         }
     }
+
 }

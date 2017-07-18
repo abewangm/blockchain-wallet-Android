@@ -6,25 +6,30 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentContactsInvitationBuilderQrBinding;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-public class ContactsInvitationBuilderQrFragment extends Fragment implements ContactsQrViewModel.DataListener {
+public class ContactsInvitationBuilderQrFragment extends BaseFragment<ContactsQrView, ContactsQrPresenter>
+        implements ContactsQrView {
 
     public static final String ARGUMENT_URI = "uri";
     public static final String ARGUMENT_NAME = "name";
+
+    @Inject ContactsQrPresenter contactsQrPresenter;
     private FragmentContactsInvitationBuilderQrBinding binding;
     private FragmentInteractionListener listener;
-    private ContactsQrViewModel viewModel;
 
-    public ContactsInvitationBuilderQrFragment() {
-        // Required empty constructor
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static ContactsInvitationBuilderQrFragment newInstance(String uri, String name) {
@@ -49,11 +54,10 @@ public class ContactsInvitationBuilderQrFragment extends Fragment implements Con
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ContactsQrViewModel(this);
 
         binding.buttonDone.setOnClickListener(v -> finishPage());
 
-        viewModel.onViewReady();
+        getPresenter().onViewReady();
     }
 
     @Override
@@ -84,6 +88,16 @@ public class ContactsInvitationBuilderQrFragment extends Fragment implements Con
     }
 
     @Override
+    protected ContactsQrPresenter createPresenter() {
+        return contactsQrPresenter;
+    }
+
+    @Override
+    protected ContactsQrView getMvpView() {
+        return this;
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof FragmentInteractionListener) {
@@ -97,12 +111,6 @@ public class ContactsInvitationBuilderQrFragment extends Fragment implements Con
     public void onDetach() {
         super.onDetach();
         listener = null;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
     }
 
     interface FragmentInteractionListener {

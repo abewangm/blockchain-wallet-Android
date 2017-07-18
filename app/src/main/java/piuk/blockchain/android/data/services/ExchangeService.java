@@ -17,55 +17,47 @@ import org.spongycastle.util.encoders.Hex;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import io.reactivex.Observable;
 import io.reactivex.subjects.ReplaySubject;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeData;
 import piuk.blockchain.android.data.exchange.TradeData;
 import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.websocket.WebSocketReceiveEvent;
-import piuk.blockchain.android.injection.Injector;
 import timber.log.Timber;
 
 /**
  * Created by justin on 5/1/17.
  */
 
-@SuppressWarnings("WeakerAccess")
 public class ExchangeService {
-    private static ExchangeService instance;
+
     private static final int METADATA_TYPE_EXCHANGE = 3;
 
     private PayloadManager payloadManager;
+    private RxBus rxBus;
+
     private ReplaySubject<Metadata> metadataSubject;
     private CoinifyApi coinifyApi;
     private SFOXApi sfoxApi;
     private boolean didStartLoad;
 
-    @Inject PayloadDataManager payloadDataManager;
-    @Inject RxBus rxBus;
+    public ExchangeService(PayloadManager payloadManager,
+                           RxBus rxBus,
+                           CoinifyApi coinifyApi,
+                           SFOXApi sfoxApi) {
+        this.payloadManager = payloadManager;
+        this.rxBus = rxBus;
+        this.coinifyApi = coinifyApi;
+        this.sfoxApi = sfoxApi;
 
-    private ExchangeService() {
-        payloadManager = PayloadManager.getInstance();
         metadataSubject = ReplaySubject.create(1);
-        coinifyApi = new CoinifyApi();
-        sfoxApi = new SFOXApi();
-        Injector.getInstance().getDataManagerComponent().inject(this);
-    }
-
-    public static ExchangeService getInstance() {
-        if (instance == null) {
-            instance = new ExchangeService();
-        }
-        return instance;
     }
 
     public void wipe() {
-        instance = null;
+        metadataSubject = ReplaySubject.create(1);
+        didStartLoad = false;
     }
 
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
@@ -122,7 +114,7 @@ public class ExchangeService {
                         .compose(RxUtil.applySchedulersToObservable()))
                 .flatMapIterable(exchangeData -> {
 
-                    if(exchangeData.isEmpty())return new ArrayList<>();
+                    if (exchangeData.isEmpty()) return new ArrayList<>();
 
                     ObjectMapper mapper = new ObjectMapper();
                     ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
@@ -138,8 +130,8 @@ public class ExchangeService {
                 })
                 .filter(tradeData -> tradeData.isBuy() && !tradeData.isConfirmed())
                 .map(tradeData ->
-                        payloadDataManager.getReceiveAddressAtArbitraryPosition(
-                                payloadDataManager.getAccount(tradeData.getAccountIndex()),
+                        payloadManager.getReceiveAddressAtArbitraryPosition(
+                                payloadManager.getPayload().getHdWallets().get(0).getAccount(tradeData.getAccountIndex()),
                                 tradeData.getReceiveIndex()))
                 .distinct();
     }
@@ -148,7 +140,7 @@ public class ExchangeService {
         MetadataNodeFactory metadataNodeFactory = payloadManager.getMetadataNodeFactory();
         DeterministicKey metadataNode = metadataNodeFactory.getMetadataNode();
 
-        if(metadataNode != null) {
+        if (metadataNode != null) {
             Observable<Metadata> exchangeDataStream = getMetadata(metadataNode);
             exchangeDataStream.subscribeWith(metadataSubject);
         } else {
@@ -190,4 +182,5 @@ public class ExchangeService {
                     return data.getCoinify().getUser() != 0;
                 });
     }
+
 }

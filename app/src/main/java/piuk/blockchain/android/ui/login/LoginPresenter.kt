@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.login
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
@@ -11,15 +10,11 @@ import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
 import javax.net.ssl.SSLPeerUnverifiedException
 
-class LoginPresenter : BasePresenter<LoginView>() {
-
-    @Inject lateinit var appUtil: AppUtil
-    @Inject lateinit var payloadDataManager: PayloadDataManager
-    @Inject lateinit var prefsUtil: PrefsUtil
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
+class LoginPresenter @Inject constructor(
+        private val appUtil: AppUtil,
+        private val payloadDataManager: PayloadDataManager,
+        private val prefsUtil: PrefsUtil
+) : BasePresenter<LoginView>() {
 
     override fun onViewReady() {
         // No-op

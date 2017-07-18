@@ -1,7 +1,5 @@
 package piuk.blockchain.android.data.datamanagers;
 
-import android.support.annotation.VisibleForTesting;
-
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
@@ -20,6 +18,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import piuk.blockchain.android.data.contacts.ContactTransactionModel;
+import piuk.blockchain.android.data.contacts.ContactsMapStore;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxLambdas;
 import piuk.blockchain.android.data.rxjava.RxPinning;
@@ -53,15 +52,16 @@ import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 public class ContactsDataManager {
 
     private ContactsService contactsService;
+    private ContactsMapStore contactsMapStore;
     private PendingTransactionListStore pendingTransactionListStore;
     private RxPinning rxPinning;
-    @VisibleForTesting HashMap<String, String> contactsTransactionMap = new HashMap<>();
-    @VisibleForTesting HashMap<String, String> notesTransactionMap = new HashMap<>();
 
     public ContactsDataManager(ContactsService contactsService,
+                               ContactsMapStore contactsMapStore,
                                PendingTransactionListStore pendingTransactionListStore,
                                RxBus rxBus) {
         this.contactsService = contactsService;
+        this.contactsMapStore = contactsMapStore;
         this.pendingTransactionListStore = pendingTransactionListStore;
         rxPinning = new RxPinning(rxBus);
     }
@@ -103,9 +103,9 @@ public class ContactsDataManager {
                 .doOnNext(contact -> {
                     for (FacilitatedTransaction tx : contact.getFacilitatedTransactions().values()) {
                         if (tx.getTxHash() != null && !tx.getTxHash().isEmpty()) {
-                            contactsTransactionMap.put(tx.getTxHash(), contact.getName());
+                            contactsMapStore.getContactsTransactionMap().put(tx.getTxHash(), contact.getName());
                             if (tx.getNote() != null && !tx.getNote().isEmpty()) {
-                                notesTransactionMap.put(tx.getTxHash(), tx.getNote());
+                                contactsMapStore.getNotesTransactionMap().put(tx.getTxHash(), tx.getNote());
                             }
                         }
                     }
@@ -465,7 +465,7 @@ public class ContactsDataManager {
      * value is a {@link Contact#getName()}
      */
     public HashMap<String, String> getContactsTransactionMap() {
-        return contactsTransactionMap;
+        return contactsMapStore.getContactsTransactionMap();
     }
 
     /**
@@ -475,7 +475,7 @@ public class ContactsDataManager {
      * value is a {@link FacilitatedTransaction#getNote()}
      */
     public HashMap<String, String> getNotesTransactionMap() {
-        return notesTransactionMap;
+        return contactsMapStore.getNotesTransactionMap();
     }
 
     /**
@@ -484,8 +484,8 @@ public class ContactsDataManager {
     public void resetContacts() {
         contactsService.destroy();
         pendingTransactionListStore.clearList();
-        notesTransactionMap.clear();
-        contactsTransactionMap.clear();
+        contactsMapStore.clearContactsTransactionMap();
+        contactsMapStore.clearNotesTransactionMap();
     }
 
     ///////////////////////////////////////////////////////////////////////////

@@ -54,15 +54,13 @@ public class BuyDataManager {
      * @return An {@link Observable} wrapping a boolean value
      */
     boolean isRolloutAllowed() {
-
         String plainGuid = payloadDataManager.getWallet().getGuid().replace("-", "");
 
         byte[] guidHashBytes = Sha256Hash.hash(Hex.encode(plainGuid.getBytes()));
         int unsignedByte = guidHashBytes[0] & 0xff;
         double rolloutPercentage = accessState.getBuySellRolloutPercent();
 
-        boolean userHasAccess = ((unsignedByte + 1.0) / 256.0) <= rolloutPercentage;
-        return userHasAccess;
+        return ((unsignedByte + 1.0) / 256.0) <= rolloutPercentage;
     }
 
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
@@ -75,19 +73,16 @@ public class BuyDataManager {
 
     public synchronized Observable<Boolean> getCanBuy() {
 
-        return Observable.combineLatest(getIfSepaCountry(), exchangeService.hasCoinifyAccount(), (isSepa, hasAccount) -> {
-
-            if(hasAccount) {
-                return true;
-            } else if(isSepa) {
-                return isRolloutAllowed();
-            } else {
-                return false;
-            }
-        });
+        return Observable.combineLatest(getIfSepaCountry(), exchangeService.hasCoinifyAccount(),
+                (isSepa, hasAccount) -> hasAccount || isSepa && isRolloutAllowed());
     }
 
     public void reloadExchangeData() {
         exchangeService.reloadExchangeData();
     }
+
+    public void wipe() {
+        exchangeService.wipe();
+    }
+
 }

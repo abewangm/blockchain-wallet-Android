@@ -1,33 +1,18 @@
 package piuk.blockchain.android.ui.createwallet
 
-import android.app.Application
 import android.content.Intent
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.payload.data.Wallet
 import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
-import piuk.blockchain.android.BlockchainTestApplication
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.AuthDataManager
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity
-import piuk.blockchain.android.util.AESUtilWrapper
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.StringUtils
 
-@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
-@RunWith(RobolectricTestRunner::class)
 class CreateWalletPresenterTest {
 
     private lateinit var subject: CreateWalletPresenter
@@ -38,27 +23,20 @@ class CreateWalletPresenterTest {
 
     @Before
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                MockApiModule(),
-                MockDataManagerModule())
-
-        subject = CreateWalletPresenter()
+        subject = CreateWalletPresenter(authDataManager, prefsUtil, appUtil)
         subject.initView(view)
     }
 
     @Test
     fun onViewReady() {
-        //nothing to test
+        // Nothing to test
     }
 
     @Test
     fun `parseExtras for create`() {
         // Arrange
-        val intent = Intent().apply { putExtra(RecoverFundsActivity.RECOVERY_PHRASE, "") }
-
+        val intent: Intent = mock()
+        whenever(intent.getStringExtra(RecoverFundsActivity.RECOVERY_PHRASE)).thenReturn("")
         // Act
         subject.parseExtras(intent)
         // Assert
@@ -70,8 +48,9 @@ class CreateWalletPresenterTest {
     @Test
     fun `parseExtras for recover`() {
         // Arrange
-        val intent = Intent().apply { putExtra(RecoverFundsActivity.RECOVERY_PHRASE, "all all all all all all all all all all all all") }
-
+        val intent: Intent = mock()
+        whenever(intent.getStringExtra(RecoverFundsActivity.RECOVERY_PHRASE))
+                .thenReturn("all all all all all all all all all all all all")
         // Act
         subject.parseExtras(intent)
         // Assert
@@ -228,24 +207,4 @@ class CreateWalletPresenterTest {
         verifyNoMoreInteractions(view)
     }
 
-    inner class MockDataManagerModule : DataManagerModule() {
-
-        override fun provideAuthDataManager(payloadDataManager: PayloadDataManager?,
-                                            prefsUtil: PrefsUtil?,
-                                            appUtil: AppUtil?,
-                                            accessState: AccessState?,
-                                            stringUtils: StringUtils?,
-                                            aesUtilWrapper: AESUtilWrapper?,
-                                            rxBus: RxBus?) = authDataManager
-    }
-
-    inner class MockApiModule : ApiModule() {
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-
-        override fun provideAppUtil() = appUtil
-
-        override fun providePrefsUtil() = prefsUtil
-    }
 }

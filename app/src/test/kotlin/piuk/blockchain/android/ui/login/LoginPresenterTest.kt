@@ -1,28 +1,16 @@
 package piuk.blockchain.android.ui.login
 
-import android.app.Application
 import com.nhaarman.mockito_kotlin.*
-import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
-import piuk.blockchain.android.BlockchainTestApplication
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PrefsUtil
 import javax.net.ssl.SSLPeerUnverifiedException
 
-@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
-@RunWith(RobolectricTestRunner::class)
 class LoginPresenterTest {
 
     private lateinit var subject: LoginPresenter
@@ -33,14 +21,7 @@ class LoginPresenterTest {
 
     @Before
     fun setUp() {
-
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                MockApiModule(),
-                MockDataManagerModule())
-
-        subject = LoginPresenter()
+        subject = LoginPresenter(appUtil, payloadDataManager, prefsUtil)
         subject.initView(view)
     }
 
@@ -112,23 +93,6 @@ class LoginPresenterTest {
         verify(view).showProgressDialog(any())
         verify(view).dismissProgressDialog()
         verifyNoMoreInteractions(appUtil)
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-
-        override fun providePayloadDataManager(
-                payloadManager: PayloadManager?,
-                rxBus: RxBus?
-        ) = payloadDataManager
-    }
-
-    inner class MockApiModule : ApiModule()
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-
-        override fun provideAppUtil() = appUtil
-
-        override fun providePrefsUtil() = prefsUtil
     }
 
 }

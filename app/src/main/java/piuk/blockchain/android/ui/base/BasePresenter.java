@@ -44,7 +44,7 @@ public abstract class BasePresenter<VIEW extends View> implements Presenter<VIEW
         getCompositeDisposable().clear();
 
         /*
-         * Clear DataManagerComponent, thereby releasing all objects with a
+         * Clear PresenterComponent, thereby releasing all objects with a
          * {@link piuk.blockchain.android.injection.ViewModelScope} annotation for GC
          */
         Injector.getInstance().releaseViewModelScope();

@@ -51,7 +51,7 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
         final FragmentPagerAdapter fragmentPagerAdapter;
         if (shouldHideSwipeToReceive()) {
-            // Don't bother instantiating the QR fragment + ViewModel if not necessary
+            // Don't bother instantiating the QR fragment + Presenter if not necessary
             fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,

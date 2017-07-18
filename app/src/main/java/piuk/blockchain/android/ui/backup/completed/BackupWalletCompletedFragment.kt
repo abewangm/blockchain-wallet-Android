@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_backup_complete.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.backup.start.BackupWalletStartingFragment
 import piuk.blockchain.android.ui.backup.transfer.ConfirmFundsTransferDialogFragment
 import piuk.blockchain.android.ui.base.BaseFragment
@@ -17,9 +18,16 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 class BackupWalletCompletedFragment : BaseFragment<BackupWalletCompletedView, BackupWalletCompletedPresenter>(),
         BackupWalletCompletedView {
+
+    @Inject lateinit var backupWalletCompletedPresenter: BackupWalletCompletedPresenter
+
+    init {
+        Injector.getInstance().presenterComponent.inject(this)
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater?,
@@ -65,7 +73,7 @@ class BackupWalletCompletedFragment : BaseFragment<BackupWalletCompletedView, Ba
         }
     }
 
-    override fun createPresenter() = BackupWalletCompletedPresenter()
+    override fun createPresenter() = backupWalletCompletedPresenter
 
     override fun getMvpView() = this
 

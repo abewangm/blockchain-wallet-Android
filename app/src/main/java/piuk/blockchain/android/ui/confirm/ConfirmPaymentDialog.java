@@ -14,8 +14,11 @@ import android.view.WindowManager;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.DialogConfirmTransactionBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BaseDialogFragment;
 import piuk.blockchain.android.ui.base.UiState;
@@ -24,11 +27,17 @@ import piuk.blockchain.android.util.AndroidUtils;
 public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView, ConfirmPaymentPresenter>
         implements ConfirmPaymentView {
 
+    @Inject ConfirmPaymentPresenter confirmPaymentPresenter;
+
     private static final String ARGUMENT_PAYMENT_DETAILS = "argument_payment_details";
     private static final String ARGUMENT_SHOW_FEE_CHOICE = "argument_show_fee_choice";
 
     private DialogConfirmTransactionBinding binding;
     private OnConfirmDialogInteractionListener listener;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details,
                                                    boolean showFeeChoice) {
@@ -145,7 +154,7 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
 
     @Override
     protected ConfirmPaymentPresenter createPresenter() {
-        return new ConfirmPaymentPresenter();
+        return confirmPaymentPresenter;
     }
 
     @Override

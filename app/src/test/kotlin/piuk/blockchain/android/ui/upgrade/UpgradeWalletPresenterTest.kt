@@ -1,32 +1,19 @@
 package piuk.blockchain.android.ui.upgrade
 
-import android.app.Application
 import android.content.Context
 import com.nhaarman.mockito_kotlin.*
-import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
-import piuk.blockchain.android.BlockchainTestApplication
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.datamanagers.AuthDataManager
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.injection.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
-import piuk.blockchain.android.util.AESUtilWrapper
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 
-@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
-@RunWith(RobolectricTestRunner::class)
 class UpgradeWalletPresenterTest {
 
     private lateinit var subject: UpgradeWalletPresenter
@@ -41,13 +28,15 @@ class UpgradeWalletPresenterTest {
     @Before
     @Throws(Exception::class)
     fun setUp() {
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                MockApplicationModule(RuntimeEnvironment.application),
-                ApiModule(),
-                MockDataManagerModule())
 
-        subject = UpgradeWalletPresenter()
+        subject = UpgradeWalletPresenter(
+                mockPrefs,
+                mockAppUtil,
+                mockAccessState,
+                mockAuthDataManager,
+                mockPayloadDataManager,
+                mockStringUtils
+        )
         subject.initView(mockActivity)
     }
 
@@ -239,41 +228,6 @@ class UpgradeWalletPresenterTest {
         verifyNoMoreInteractions(mockAccessState)
         verify(mockActivity).onBackButtonPressed()
         verifyNoMoreInteractions(mockActivity)
-    }
-
-    inner class MockDataManagerModule : DataManagerModule() {
-        override fun provideAuthDataManager(payloadDataManager: PayloadDataManager?,
-                                            prefsUtil: PrefsUtil?,
-                                            appUtil: AppUtil?,
-                                            accessState: AccessState?,
-                                            stringUtils: StringUtils?,
-                                            aesUtilWrapper: AESUtilWrapper?,
-                                            rxBus: RxBus?): AuthDataManager {
-            return mockAuthDataManager
-        }
-
-        override fun providePayloadDataManager(payloadManager: PayloadManager?,
-                                               rxBus: RxBus?): PayloadDataManager {
-            return mockPayloadDataManager
-        }
-    }
-
-    inner class MockApplicationModule(application: Application?) : ApplicationModule(application) {
-        override fun providePrefsUtil(): PrefsUtil {
-            return mockPrefs
-        }
-
-        override fun provideAppUtil(): AppUtil {
-            return mockAppUtil
-        }
-
-        override fun provideAccessState(): AccessState {
-            return mockAccessState
-        }
-
-        override fun provideStringUtils(): StringUtils {
-            return mockStringUtils
-        }
     }
 
 }

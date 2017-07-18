@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.include_onboarding_complete.*
 import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
 import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
@@ -29,7 +30,6 @@ import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
-import piuk.blockchain.android.ui.home.MainActivity.ACCOUNT_EDIT
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerAdapter
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.ui.receive.ReceiveFragment
@@ -43,9 +43,11 @@ import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.OnItemSelectedListener
 import piuk.blockchain.android.util.helperfunctions.OnPageChangeListener
 import java.util.*
+import javax.inject.Inject
 
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 
+    @Inject lateinit var balancePresenter: BalancePresenter
     // Adapters
     private var accountsAdapter: BalanceHeaderAdapter? = null
     private var balanceAdapter: BalanceAdapter? = null
@@ -61,6 +63,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 recyclerview.scrollToPosition(0)
             }
         }
+    }
+
+    init {
+        Injector.getInstance().presenterComponent.inject(this)
     }
 
     override fun onCreateView(
@@ -317,13 +323,14 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun getIfContactsEnabled(): Boolean = BuildConfig.CONTACTS_ENABLED
+    // TODO: Remove me, but I break lots of tests
+    override fun getIfContactsEnabled() = true
 
     override fun getIfShouldShowBuy() = AndroidUtils.is19orHigher()
 
-    override fun createPresenter(): BalancePresenter = BalancePresenter()
+    override fun createPresenter() = balancePresenter
 
-    override fun getMvpView(): BalanceView = this
+    override fun getMvpView() = this
 
     /**
      * Position is offset to account for first item being "All Wallets". If returned result is -1,

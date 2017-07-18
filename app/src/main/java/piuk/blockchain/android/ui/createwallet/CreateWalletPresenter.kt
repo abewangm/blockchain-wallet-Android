@@ -6,38 +6,30 @@ import info.blockchain.wallet.util.PasswordUtil
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.AuthDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.StringUtils
 import javax.inject.Inject
 
-class CreateWalletPresenter : BasePresenter<CreateWalletView>() {
+class CreateWalletPresenter @Inject constructor(
+        private val authDataManager: AuthDataManager,
+        private val prefsUtil: PrefsUtil,
+        private val appUtil: AppUtil
+) : BasePresenter<CreateWalletView>() {
 
     var recoveryPhrase: String = ""
     var passwordStrength = 0
 
-    @Inject lateinit var authDataManager: AuthDataManager
-    @Inject lateinit var prefsUtil: PrefsUtil
-    @Inject lateinit var appUtil: AppUtil
-    @Inject lateinit var stringUtils: StringUtils
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
-
     override fun onViewReady() {
-
+        // No-op
     }
 
     fun parseExtras(intent: Intent) {
-
         val mnemonic = intent.getStringExtra(RecoverFundsActivity.RECOVERY_PHRASE)
 
-        if(mnemonic != null)recoveryPhrase = mnemonic
+        if (mnemonic != null) recoveryPhrase = mnemonic
 
         if (!recoveryPhrase.isEmpty()) {
             view.setTitleText(R.string.recover_funds)
@@ -61,21 +53,14 @@ class CreateWalletPresenter : BasePresenter<CreateWalletView>() {
     }
 
     fun validateCredentials(email: String, password1: String, password2: String) {
-
-        if (!FormatsUtil.isValidEmailAddress(email)) {
-            view.showToast(R.string.invalid_email, ToastCustom.TYPE_ERROR)
-        } else if (password1.length < 4) {
-            view.showToast(R.string.invalid_password_too_short, ToastCustom.TYPE_ERROR)
-        } else if (password1.length > 255) {
-            view.showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR)
-        } else if (password1 != password2) {
-            view.showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR)
-        } else if (passwordStrength < 50) {
-            view.showWeakPasswordDialog(email, password1)
-        } else if (!recoveryPhrase.isEmpty()) {
-            recoverWallet(email, password1)
-        } else {
-            createWallet(email, password1)
+        when {
+            !FormatsUtil.isValidEmailAddress(email) -> view.showToast(R.string.invalid_email, ToastCustom.TYPE_ERROR)
+            password1.length < 4 -> view.showToast(R.string.invalid_password_too_short, ToastCustom.TYPE_ERROR)
+            password1.length > 255 -> view.showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR)
+            password1 != password2 -> view.showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR)
+            passwordStrength < 50 -> view.showWeakPasswordDialog(email, password1)
+            !recoveryPhrase.isEmpty() -> recoverWallet(email, password1)
+            else -> createWallet(email, password1)
         }
     }
 
@@ -110,6 +95,6 @@ class CreateWalletPresenter : BasePresenter<CreateWalletView>() {
                     throwable.printStackTrace()
                     view.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR)
                 })
-
     }
+
 }

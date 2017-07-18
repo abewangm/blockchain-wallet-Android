@@ -4,7 +4,6 @@ import android.support.annotation.VisibleForTesting
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.backup.BackupWalletActivity
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment.Companion.ARGUMENT_SECOND_PASSWORD
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -15,17 +14,13 @@ import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import javax.inject.Inject
 
-class BackupVerifyPresenter : BasePresenter<BackupVerifyView>() {
-
-    @Inject lateinit var payloadDataManager: PayloadDataManager
-    @Inject lateinit var prefsUtil: PrefsUtil
-    @Inject lateinit var backupWalletUtil: BackupWalletUtil
+class BackupVerifyPresenter @Inject constructor(
+        private val payloadDataManager: PayloadDataManager,
+        private val prefsUtil: PrefsUtil,
+        private val backupWalletUtil: BackupWalletUtil
+) : BasePresenter<BackupVerifyView>() {
 
     private val sequence by unsafeLazy { getBackupConfirmSequence() }
-
-    init {
-        Injector.getInstance().dataManagerComponent.inject(this)
-    }
 
     override fun onViewReady() {
         view.showWordHints(listOf(sequence[0].first, sequence[1].first, sequence[2].first))

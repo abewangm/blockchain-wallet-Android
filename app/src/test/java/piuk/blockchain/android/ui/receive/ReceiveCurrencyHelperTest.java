@@ -1,23 +1,15 @@
 package piuk.blockchain.android.ui.receive;
 
-import android.app.Application;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RuntimeEnvironment;
 
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -41,14 +33,7 @@ public class ReceiveCurrencyHelperTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new DataManagerModule()
-        );
-
-        mSubject = new ReceiveCurrencyHelper(mMonetaryUtil, Locale.UK);
+        mSubject = new ReceiveCurrencyHelper(mMonetaryUtil, Locale.UK, mPrefsUtil, mExchangeRateFactory);
     }
 
     @Test
@@ -219,20 +204,4 @@ public class ReceiveCurrencyHelperTest {
         assertTrue(value);
     }
 
-    @SuppressWarnings("SyntheticAccessorCall")
-    private class MockApplicationModule extends ApplicationModule {
-        MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected ExchangeRateFactory provideExchangeRateFactory() {
-            return mExchangeRateFactory;
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return mPrefsUtil;
-        }
-    }
 }

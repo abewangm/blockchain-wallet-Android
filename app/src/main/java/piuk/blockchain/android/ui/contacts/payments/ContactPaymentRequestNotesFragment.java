@@ -5,34 +5,37 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.FragmentContactPaymentRequestNotesBinding;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ViewUtils;
 
-public class ContactPaymentRequestNotesFragment extends Fragment implements
-        ContactsPaymentRequestViewModel.DataListener {
+public class ContactPaymentRequestNotesFragment extends BaseFragment<ContactPaymentRequestView, ContactsPaymentRequestPresenter>
+        implements ContactPaymentRequestView {
 
     public static final String ARGUMENT_REQUEST_TYPE = "request_type";
     public static final String ARGUMENT_ACCOUNT_POSITION = "account_position";
     public static final String ARGUMENT_CONTACT_ID = "contact_id";
     public static final String ARGUMENT_SATOSHIS = "satoshis";
 
+    @Inject ContactsPaymentRequestPresenter paymentRequestPresenter;
     private FragmentContactPaymentRequestNotesBinding binding;
-    private ContactsPaymentRequestViewModel viewModel;
     private MaterialProgressDialog progressDialog;
     private FragmentInteractionListener listener;
 
-    public ContactPaymentRequestNotesFragment() {
-        // Required empty constructor
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static ContactPaymentRequestNotesFragment newInstance(PaymentRequestType requestType,
@@ -62,13 +65,12 @@ public class ContactPaymentRequestNotesFragment extends Fragment implements
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ContactsPaymentRequestViewModel(this);
         binding.buttonNext.setOnClickListener(v -> {
-            viewModel.sendRequest();
+            getPresenter().sendRequest();
             ViewUtils.hideKeyboard(getActivity());
         });
 
-        viewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -114,18 +116,13 @@ public class ContactPaymentRequestNotesFragment extends Fragment implements
             progressDialog = null;
         }
     }
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
-    }
 
-        @Override
+    @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(getContext(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
-        @Override
+    @Override
     public void showSendSuccessfulDialog(String name) {
         new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setTitle(getString(R.string.contacts_payment_success_waiting_title, name))
@@ -134,13 +131,23 @@ public class ContactPaymentRequestNotesFragment extends Fragment implements
                 .show();
     }
 
-        @Override
+    @Override
     public void showRequestSuccessfulDialog() {
         new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
                 .setTitle(R.string.contacts_payment_success_request_sent_title)
                 .setMessage(R.string.contacts_payment_success_waiting_message)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> finishPage())
                 .show();
+    }
+
+    @Override
+    protected ContactsPaymentRequestPresenter createPresenter() {
+        return paymentRequestPresenter;
+    }
+
+    @Override
+    protected ContactPaymentRequestView getMvpView() {
+        return this;
     }
 
     private void setSummary(PaymentRequestType paymentRequestType, String contactName) {

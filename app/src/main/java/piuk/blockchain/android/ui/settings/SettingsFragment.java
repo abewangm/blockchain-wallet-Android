@@ -49,8 +49,11 @@ import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PasswordUtil;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -74,7 +77,7 @@ import static piuk.blockchain.android.ui.auth.PinEntryFragment.REQUEST_CODE_VALI
 
 public class SettingsFragment extends PreferenceFragmentCompat
         implements Preference.OnPreferenceClickListener,
-        SettingsViewModel.DataListener {
+        SettingsView {
 
     public static final String EXTRA_SHOW_TWO_FA_DIALOG = "show_two_fa_dialog";
     public static final String EXTRA_SHOW_ADD_EMAIL_DIALOG = "show_add_email_dialog";
@@ -102,7 +105,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private SwitchPreferenceCompat swipeToReceivePrefs;
     private SwitchPreferenceCompat screenshotPref;
 
-    @Thunk SettingsViewModel viewModel;
+    @Inject SettingsPresenter settingsPresenter;
     private int pwStrength = 0;
     private MaterialProgressDialog progressDialog;
 
@@ -110,16 +113,20 @@ public class SettingsFragment extends PreferenceFragmentCompat
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT)) {
-                viewModel.onViewReady();
+                settingsPresenter.onViewReady();
             }
         }
     };
 
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new SettingsViewModel(this);
-        viewModel.onViewReady();
+        settingsPresenter.initView(this);
+        settingsPresenter.onViewReady();
     }
 
     @SuppressLint("NewApi")
@@ -180,13 +187,13 @@ public class SettingsFragment extends PreferenceFragmentCompat
                         .setMessage(R.string.enable_screenshots_warning)
                         .setCancelable(false)
                         .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) ->
-                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, true))
+                                settingsPresenter.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, true))
                         .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
-                                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false))
+                                settingsPresenter.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false))
                         .create()
                         .show();
             } else {
-                viewModel.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false);
+                settingsPresenter.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false);
             }
 
             return true;
@@ -365,7 +372,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void onFingerprintClicked() {
-        viewModel.onFingerprintClicked();
+        settingsPresenter.onFingerprintClicked();
     }
 
     @Override
@@ -374,7 +381,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.fingerprint_disable_message)
                 .setCancelable(true)
-                .setPositiveButton(R.string.yes, (dialog, which) -> viewModel.setFingerprintUnlockEnabled(false))
+                .setPositiveButton(R.string.yes, (dialog, which) -> settingsPresenter.setFingerprintUnlockEnabled(false))
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> updateFingerprintPreferenceStatus())
                 .show();
     }
@@ -394,7 +401,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public void updateFingerprintPreferenceStatus() {
-        fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
+        fingerprintPref.setChecked(settingsPresenter.getIfFingerprintUnlockEnabled());
     }
 
     @Override
@@ -404,14 +411,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
             @Override
             public void onAuthenticated(String data) {
                 dialog.dismissAllowingStateLoss();
-                viewModel.setFingerprintUnlockEnabled(true);
+                settingsPresenter.setFingerprintUnlockEnabled(true);
             }
 
             @Override
             public void onCanceled() {
                 dialog.dismissAllowingStateLoss();
-                viewModel.setFingerprintUnlockEnabled(false);
-                fingerprintPref.setChecked(viewModel.getIfFingerprintUnlockEnabled());
+                settingsPresenter.setFingerprintUnlockEnabled(false);
+                fingerprintPref.setChecked(settingsPresenter.getIfFingerprintUnlockEnabled());
             }
         });
         dialog.show(getFragmentManager(), FingerprintDialog.TAG);
@@ -504,8 +511,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .setTitle(R.string.tor_requests)
                 .setMessage(R.string.tor_summary)
                 .setCancelable(false)
-                .setPositiveButton(R.string.block, (dialogInterface, i) -> viewModel.updateTor(true))
-                .setNegativeButton(R.string.allow, (dialogInterface, i) -> viewModel.updateTor(false))
+                .setPositiveButton(R.string.block, (dialogInterface, i) -> settingsPresenter.updateTor(true))
+                .setNegativeButton(R.string.allow, (dialogInterface, i) -> settingsPresenter.updateTor(false))
                 .create()
                 .show();
     }
@@ -513,7 +520,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private void showDialogEmail() {
         AppCompatEditText editText = new AppCompatEditText(getActivity());
         editText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        editText.setText(viewModel.getEmail());
+        editText.setText(settingsPresenter.getEmail());
         editText.setSelection(editText.getText().length());
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
@@ -527,12 +534,12 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     if (!FormatsUtil.isValidEmailAddress(email)) {
                         ToastCustom.makeText(getActivity(), getString(R.string.invalid_email), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                     } else {
-                        viewModel.updateEmail(email);
+                        settingsPresenter.updateEmail(email);
                     }
                 })
                 .setNeutralButton(R.string.resend, (dialogInterface, i) -> {
                     // Resend verification code
-                    viewModel.updateEmail(viewModel.getEmail());
+                    settingsPresenter.updateEmail(settingsPresenter.getEmail());
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
@@ -556,7 +563,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void showDialogMobile() {
-        if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
+        if (settingsPresenter.getAuthType() != Settings.AUTH_TYPE_OFF) {
             new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.warning)
                     .setMessage(R.string.disable_2fa_first)
@@ -586,8 +593,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 });
             });
 
-            if (!viewModel.getSms().isEmpty()) {
-                mobileNumberTextView.setText(viewModel.getSms());
+            if (!settingsPresenter.getSms().isEmpty()) {
+                mobileNumberTextView.setText(settingsPresenter.getSms());
                 mobileNumberTextView.setVisibility(View.VISIBLE);
             }
 
@@ -599,9 +606,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     .setPositiveButton(R.string.update, null)
                     .setNegativeButton(android.R.string.cancel, null);
 
-            if (!viewModel.isSmsVerified() && !viewModel.getSms().isEmpty()) {
+            if (!settingsPresenter.isSmsVerified() && !settingsPresenter.getSms().isEmpty()) {
                 alertDialogSmsBuilder.setNeutralButton(R.string.verify, (dialogInterface, i) ->
-                        viewModel.updateSms(viewModel.getSms()));
+                        settingsPresenter.updateSms(settingsPresenter.getSms()));
             }
 
             AlertDialog dialog = alertDialogSmsBuilder.create();
@@ -613,7 +620,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     if (!FormatsUtil.isValidMobileNumber(sms)) {
                         ToastCustom.makeText(getActivity(), getString(R.string.invalid_mobile), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
                     } else {
-                        viewModel.updateSms(sms);
+                        settingsPresenter.updateSms(sms);
                         dialog.dismiss();
                     }
                 });
@@ -640,14 +647,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void showDialogBTCUnits() {
-        CharSequence[] units = viewModel.getBtcUnits();
-        int sel = viewModel.getBtcUnitsPosition();
+        CharSequence[] units = settingsPresenter.getBtcUnits();
+        int sel = settingsPresenter.getBtcUnitsPosition();
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.select_units)
                 .setSingleChoiceItems(units, sel, (dialog, which) -> {
-                    viewModel.updatePreferences(PrefsUtil.KEY_BTC_UNITS, which);
-                    viewModel.updateBtcUnit(which);
+                    settingsPresenter.updatePreferences(PrefsUtil.KEY_BTC_UNITS, which);
+                    settingsPresenter.updateBtcUnit(which);
                     dialog.dismiss();
                 })
                 .show();
@@ -655,7 +662,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     private void showDialogFiatUnits() {
         String[] currencies = ExchangeRateFactory.getInstance().getCurrencyLabels();
-        String strCurrency = viewModel.getFiatUnits();
+        String strCurrency = settingsPresenter.getFiatUnits();
         int selected = 0;
         for (int i = 0; i < currencies.length; i++) {
             if (currencies[i].endsWith(strCurrency)) {
@@ -668,8 +675,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .setTitle(R.string.select_currency)
                 .setSingleChoiceItems(currencies, selected, (dialog, which) -> {
                     String fiatUnit = currencies[which].substring(currencies[which].length() - 3);
-                    viewModel.updatePreferences(PrefsUtil.KEY_SELECTED_FIAT, fiatUnit);
-                    viewModel.updateFiatUnit(fiatUnit);
+                    settingsPresenter.updatePreferences(PrefsUtil.KEY_SELECTED_FIAT, fiatUnit);
+                    settingsPresenter.updateFiatUnit(fiatUnit);
                     dialog.dismiss();
                 })
                 .show();
@@ -687,7 +694,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .setCancelable(false)
                 .setPositiveButton(R.string.verify, null)
                 .setNegativeButton(android.R.string.cancel, null)
-                .setNeutralButton(R.string.resend, (dialogInterface, i) -> viewModel.updateSms(viewModel.getSms()))
+                .setNeutralButton(R.string.resend, (dialogInterface, i) -> settingsPresenter.updateSms(settingsPresenter.getSms()))
                 .create();
 
         dialog.setOnShowListener(dialogInterface -> {
@@ -695,7 +702,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             positive.setOnClickListener(view -> {
                 String codeS = editText.getText().toString();
                 if (!codeS.isEmpty()) {
-                    viewModel.verifySms(codeS);
+                    settingsPresenter.verifySms(codeS);
                     dialog.dismiss();
                     ViewUtils.hideKeyboard(getActivity());
                 }
@@ -715,7 +722,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_VALIDATE_PIN && resultCode == RESULT_OK) {
-            viewModel.pinCodeValidatedForChange();
+            settingsPresenter.pinCodeValidatedForChange();
         }
     }
 
@@ -724,9 +731,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .setTitle(R.string.email_notifications)
                 .setMessage(R.string.email_notifications_summary)
                 .setPositiveButton(R.string.enable, (dialogInterface, i) ->
-                        viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, true))
+                        settingsPresenter.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, true))
                 .setNegativeButton(R.string.disable, (dialogInterface, i) ->
-                        viewModel.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, false))
+                        settingsPresenter.updateNotification(Settings.NOTIFICATION_TYPE_EMAIL, false))
                 .create();
 
         dialog.setOnCancelListener(dialogInterface -> emailNotificationPref.setChecked(!emailNotificationPref.isChecked()));
@@ -738,9 +745,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .setTitle(R.string.sms_notifications)
                 .setMessage(R.string.sms_notifications_summary)
                 .setPositiveButton(R.string.enable, (dialogInterface, i) ->
-                        viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, true))
+                        settingsPresenter.updateNotification(Settings.NOTIFICATION_TYPE_SMS, true))
                 .setNegativeButton(R.string.disable, (dialogInterface, i) ->
-                        viewModel.updateNotification(Settings.NOTIFICATION_TYPE_SMS, false))
+                        settingsPresenter.updateNotification(Settings.NOTIFICATION_TYPE_SMS, false))
                 .create();
 
         dialog.setOnCancelListener(dialogInterface -> smsNotificationPref.setChecked(!smsNotificationPref.isChecked()));
@@ -804,7 +811,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 String currentPw = currentPassword.getText().toString();
                 String newPw = newPassword.getText().toString();
                 String newConfirmedPw = newPasswordConfirmation.getText().toString();
-                String walletPassword = viewModel.getTempPassword();
+                String walletPassword = settingsPresenter.getTempPassword();
 
                 if (!currentPw.equals(newPw)) {
                     if (currentPw.equals(walletPassword)) {
@@ -824,12 +831,12 @@ public class SettingsFragment extends PreferenceFragmentCompat
                                         })
                                         .setNegativeButton(R.string.polite_no, (dialog1, which) -> {
                                             alertDialog.dismiss();
-                                            viewModel.updatePassword(newConfirmedPw, walletPassword);
+                                            settingsPresenter.updatePassword(newConfirmedPw, walletPassword);
                                         })
                                         .show();
                             } else {
                                 alertDialog.dismiss();
-                                viewModel.updatePassword(newConfirmedPw, walletPassword);
+                                settingsPresenter.updatePassword(newConfirmedPw, walletPassword);
                             }
                         } else {
                             newPasswordConfirmation.setText("");
@@ -853,8 +860,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void showDialogTwoFA() {
-        if (viewModel.getAuthType() == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR
-                || viewModel.getAuthType() == Settings.AUTH_TYPE_YUBI_KEY) {
+        if (settingsPresenter.getAuthType() == Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR
+                || settingsPresenter.getAuthType() == Settings.AUTH_TYPE_YUBI_KEY) {
             twoStepVerificationPref.setChecked(true);
             new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.warning)
@@ -863,7 +870,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     .create()
                     .show();
 
-        } else if (!viewModel.isSmsVerified()) {
+        } else if (!settingsPresenter.isSmsVerified()) {
             twoStepVerificationPref.setChecked(false);
             showDialogMobile();
         } else {
@@ -875,18 +882,18 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     .setTitle(R.string.two_fa)
                     .setMessage(spannable)
                     .setNeutralButton(android.R.string.cancel, (dialogInterface, i) ->
-                            twoStepVerificationPref.setChecked(viewModel.getAuthType() != Settings.AUTH_TYPE_OFF));
+                            twoStepVerificationPref.setChecked(settingsPresenter.getAuthType() != Settings.AUTH_TYPE_OFF));
 
-            if (viewModel.getAuthType() != Settings.AUTH_TYPE_OFF) {
+            if (settingsPresenter.getAuthType() != Settings.AUTH_TYPE_OFF) {
                 alertDialogBuilder.setNegativeButton(R.string.disable, (dialogInterface, i) ->
-                        viewModel.updateTwoFa(Settings.AUTH_TYPE_OFF));
+                        settingsPresenter.updateTwoFa(Settings.AUTH_TYPE_OFF));
             } else {
                 alertDialogBuilder.setPositiveButton(R.string.enable, (dialogInterface, i) ->
-                        viewModel.updateTwoFa(Settings.AUTH_TYPE_SMS));
+                        settingsPresenter.updateTwoFa(Settings.AUTH_TYPE_SMS));
             }
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            ((TextView)alertDialog.findViewById(android.R.id.message))
+            ((TextView) alertDialog.findViewById(android.R.id.message))
                     .setMovementMethod(LinkMovementMethod.getInstance());
         }
     }
@@ -898,7 +905,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             int[] strengthColors = {R.drawable.progress_red, R.drawable.progress_orange, R.drawable.progress_blue, R.drawable.progress_green};
             pwStrength = (int) Math.round(PasswordUtil.getStrength(pw));
 
-            if (pw.equals(viewModel.getEmail())) pwStrength = 0;
+            if (pw.equals(settingsPresenter.getEmail())) pwStrength = 0;
 
             // red
             int pwStrengthLevel = 0;
@@ -931,6 +938,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     public void onDestroy() {
         super.onDestroy();
         hideProgressDialog();
-        viewModel.destroy();
+        settingsPresenter.onViewDestroyed();
     }
+
 }

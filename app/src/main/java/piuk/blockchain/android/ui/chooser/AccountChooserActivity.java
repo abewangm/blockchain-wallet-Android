@@ -13,15 +13,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import piuk.blockchain.android.BuildConfig;
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityAccountChooserBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 
 
-public class AccountChooserActivity extends BaseAuthActivity implements AccountChooserViewModel.DataListener {
+public class AccountChooserActivity extends BaseMvpActivity<AccountChooserView, AccountChooserPresenter>
+        implements AccountChooserView {
 
     public static final String EXTRA_REQUEST_TYPE = "request_type";
     public static final String EXTRA_REQUEST_CODE = "request_code";
@@ -32,16 +35,18 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
     public static final int REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND = 218;
     public static final int REQUEST_CODE_CHOOSE_CONTACT = 219;
 
+    @Inject AccountChooserPresenter accountChooserPresenter;
     private ActivityAccountChooserBinding binding;
-    private AccountChooserViewModel viewModel;
     private PaymentRequestType paymentRequestType;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_account_chooser);
-
-        viewModel = new AccountChooserViewModel(this);
 
         Intent intent = getIntent();
         if (!intent.hasExtra(EXTRA_REQUEST_TYPE) || intent.getSerializableExtra(EXTRA_REQUEST_TYPE) == null) {
@@ -59,7 +64,7 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        viewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -78,11 +83,6 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
     @Override
     public PaymentRequestType getPaymentRequestType() {
         return paymentRequestType;
-    }
-
-    @Override
-    public boolean getIfContactsEnabled() {
-        return BuildConfig.CONTACTS_ENABLED;
     }
 
     @Override
@@ -112,9 +112,13 @@ public class AccountChooserActivity extends BaseAuthActivity implements AccountC
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
+    protected AccountChooserPresenter createPresenter() {
+        return accountChooserPresenter;
+    }
+
+    @Override
+    protected AccountChooserView getView() {
+        return this;
     }
 
 }

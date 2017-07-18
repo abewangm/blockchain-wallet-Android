@@ -18,8 +18,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityUpgradeWalletBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -31,6 +34,11 @@ public class UpgradeWalletActivity extends BaseMvpActivity<UpgradeWalletView, Up
 
     private ActivityUpgradeWalletBinding binding;
     private MaterialProgressDialog progressDialog;
+    @Inject UpgradeWalletPresenter upgradeWalletPresenter;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +69,7 @@ public class UpgradeWalletActivity extends BaseMvpActivity<UpgradeWalletView, Up
 
     @Override
     protected UpgradeWalletPresenter createPresenter() {
-        return new UpgradeWalletPresenter();
+        return upgradeWalletPresenter;
     }
 
     @Override

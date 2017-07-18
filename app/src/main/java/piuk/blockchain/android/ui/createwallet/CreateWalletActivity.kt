@@ -6,10 +6,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
-import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ForegroundColorSpan
 import android.view.MenuItem
@@ -17,10 +15,13 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import com.jakewharton.rxbinding2.widget.RxTextView
 import kotlinx.android.synthetic.main.activity_create_wallet.*
 import kotlinx.android.synthetic.main.include_entropy_meter.view.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.auth.PinEntryActivity
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
@@ -30,12 +31,13 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
+import javax.inject.Inject
 
 class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPresenter>(),
         CreateWalletView,
-        TextWatcher,
         View.OnFocusChangeListener {
 
+    @Inject lateinit var createWalletPresenter: CreateWalletPresenter
     private var progressDialog: MaterialProgressDialog? = null
 
     private val strengthVerdicts = intArrayOf(
@@ -51,6 +53,10 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
             R.drawable.progress_green
     )
 
+    init {
+        Injector.getInstance().presenterComponent.inject(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_wallet)
@@ -62,7 +68,12 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         entropy_container.pass_strength_bar.max = 100 * 10
 
         wallet_pass.onFocusChangeListener = this
-        wallet_pass.addTextChangedListener(this)
+        RxTextView.afterTextChangeEvents(wallet_pass)
+                .doOnNext({
+                    showEntropyContainer()
+                    presenter.calculateEntropy(it.toString())
+                })
+                .subscribe(IgnorableDefaultObserver())
 
         command_next.setOnClickListener { onNextClicked() }
 
@@ -94,7 +105,7 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
 
     override fun getView() = this
 
-    override fun createPresenter() = CreateWalletPresenter()
+    override fun createPresenter() = createWalletPresenter
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
@@ -119,25 +130,9 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         entropy_container.visible()
     }
 
-    override fun afterTextChanged(editable: Editable?) {
-        showEntropyContainer()
-        presenter.calculateEntropy(editable.toString())
-    }
-
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-        // No-op
-    }
-
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-        // No-op
-    }
-
-    override fun onFocusChange(v: View?, hasFocus: Boolean) {
-        if (hasFocus) {
-            showEntropyContainer()
-        } else {
-            hideEntropyContainer()
-        }
+    override fun onFocusChange(v: View?, hasFocus: Boolean) = when {
+        hasFocus -> showEntropyContainer()
+        else -> hideEntropyContainer()
     }
 
     override fun setEntropyStrength(score: Int) {

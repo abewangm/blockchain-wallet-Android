@@ -9,36 +9,42 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactsInvitationBuilderBinding;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-public class ContactsInvitationBuilderActivity extends BaseAuthActivity
+public class ContactsInvitationBuilderActivity extends BaseMvpActivity<ContactsInvitationBuilderView, ContactsInvitationBuilderPresenter>
         implements ContactsInvitationBuilderRecipientFragment.FragmentInteractionListener,
         ContactsInvitationBuilderSenderFragment.FragmentInteractionListener,
         ContactsInvitationShareMethodFragment.FragmentInteractionListener,
         ContactsInvitationBuilderQrFragment.FragmentInteractionListener,
-        ContactsInvitationBuilderViewModel.DataListener {
+        ContactsInvitationBuilderView {
 
-    private ActivityContactsInvitationBuilderBinding binding;
-    private ContactsInvitationBuilderViewModel viewModel;
+    @Inject ContactsInvitationBuilderPresenter invitationBuilderPresenter;
     private MaterialProgressDialog progressDialog;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts_invitation_builder);
-        viewModel = new ContactsInvitationBuilderViewModel(this);
+        final ActivityContactsInvitationBuilderBinding binding =
+                DataBindingUtil.setContentView(this, R.layout.activity_contacts_invitation_builder);
 
         setupToolbar(binding.toolbar.toolbarGeneral, R.string.contacts_add_contact_title);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         submitFragmentTransaction(new ContactsInvitationBuilderRecipientFragment());
 
-        viewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -54,21 +60,21 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
 
     @Override
     public void onRecipientNameSubmitted(String name) {
-        viewModel.setNameOfRecipient(name);
+        getPresenter().setNameOfRecipient(name);
 
         submitFragmentTransaction(ContactsInvitationBuilderSenderFragment.newInstance(name));
     }
 
     @Override
     public void onSenderNameSubmitted(String name) {
-        viewModel.setNameOfSender(name);
+        getPresenter().setNameOfSender(name);
 
         submitFragmentTransaction(new ContactsInvitationShareMethodFragment());
     }
 
     @Override
     public void onQrCodeSelected() {
-        viewModel.onQrCodeSelected();
+        getPresenter().onQrCodeSelected();
     }
 
     @Override
@@ -79,7 +85,7 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
 
     @Override
     public void onLinkSelected() {
-        viewModel.onLinkClicked();
+        getPresenter().onLinkClicked();
     }
 
     @Override
@@ -112,7 +118,7 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
 
     @Override
     public void onDoneSelected() {
-        viewModel.onDoneSelected();
+        getPresenter().onDoneSelected();
     }
 
     @Override
@@ -120,6 +126,16 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
         Intent intent = new Intent(this, ContactsListActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    @Override
+    protected ContactsInvitationBuilderPresenter createPresenter() {
+        return invitationBuilderPresenter;
+    }
+
+    @Override
+    protected ContactsInvitationBuilderView getView() {
+        return this;
     }
 
     private void submitFragmentTransaction(Fragment fragment) {
@@ -130,9 +146,4 @@ public class ContactsInvitationBuilderActivity extends BaseAuthActivity
                 .commit();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
-    }
 }

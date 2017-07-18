@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -26,7 +25,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,9 +52,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.subjects.PublishSubject;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
@@ -64,8 +63,10 @@ import piuk.blockchain.android.data.contacts.PaymentRequestType;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
@@ -78,13 +79,12 @@ import timber.log.Timber;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
-public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataListener {
+public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter> implements ReceiveView {
 
-    private static final String TAG = ReceiveFragment.class.getSimpleName();
     private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
-    @Thunk ReceiveViewModel viewModel;
+    @Inject ReceivePresenter receivePresenter;
     @Thunk FragmentReceiveBinding binding;
     private BottomSheetDialog bottomSheetDialog;
     private OnReceiveFragmentInteractionListener listener;
@@ -100,17 +100,17 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT)) {
-                if (viewModel != null) {
+                if (getPresenter() != null) {
                     // Update UI with new Address + QR
-                    viewModel.updateAccountList();
+                    getPresenter().updateAccountList();
                 }
             }
         }
     };
 
-    public ReceiveFragment() {
-        // Required empty public constructor
-    }
+   {
+       Injector.getInstance().getPresenterComponent().inject(this);
+   }
 
     public static ReceiveFragment newInstance(int selectedAccountPosition) {
         ReceiveFragment fragment = new ReceiveFragment();
@@ -142,13 +142,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                              Bundle savedInstanceState) {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_receive, container, false);
-        viewModel = new ReceiveViewModel(this, Locale.getDefault());
-        viewModel.onViewReady();
-
+        onViewReady();
         setupLayout();
-
         selectAccount(selectedAccountPosition != -1
-                ? selectedAccountPosition : viewModel.getDefaultAccountPosition());
+                ? selectedAccountPosition : getPresenter().getDefaultAccountPosition());
 
         binding.scrollView.post(() -> binding.scrollView.scrollTo(0, 0));
 
@@ -165,7 +162,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     private void setupLayout() {
-        if (viewModel.getReceiveToList().size() == 1) {
+        if (getPresenter().getReceiveToList().size() == 1) {
             binding.fromRow.setVisibility(View.GONE);
             binding.dividerFromRow.setVisibility(View.GONE);
         }
@@ -185,8 +182,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
 
         // Units
-        binding.amountContainer.currencyBtc.setText(viewModel.getCurrencyHelper().getBtcUnit());
-        binding.amountContainer.currencyFiat.setText(viewModel.getCurrencyHelper().getFiatUnit());
+        binding.amountContainer.currencyBtc.setText(getPresenter().getCurrencyHelper().getBtcUnit());
+        binding.amountContainer.currencyFiat.setText(getPresenter().getCurrencyHelper().getFiatUnit());
 
         // QR Code
         binding.qr.setOnClickListener(v -> showClipboardWarning());
@@ -205,12 +202,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                         PaymentRequestType.REQUEST));
 
-        if (BuildConfig.CONTACTS_ENABLED) {
-            binding.buttonSendToContact.setOnClickListener(v ->
-                    viewModel.onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
-        } else {
-            binding.buttonSendToContact.setVisibility(View.GONE);
-        }
+
+        binding.buttonSendToContact.setOnClickListener(v ->
+                getPresenter().onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
 
         textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -226,10 +220,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             binding.amountContainer.amountBtc.removeTextChangedListener(this);
             NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
-            btcFormat.setMaximumFractionDigits(viewModel.getCurrencyHelper().getMaxBtcDecimalLength() + 1);
+            btcFormat.setMaximumFractionDigits(getPresenter().getCurrencyHelper().getMaxBtcDecimalLength() + 1);
             btcFormat.setMinimumFractionDigits(0);
 
-            s = formatEditable(s, input, viewModel.getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
+            s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
 
             binding.amountContainer.amountBtc.addTextChangedListener(this);
 
@@ -238,7 +232,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 // Remove any possible decimal separators and replace with the localised version
                 String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
                         .replace(",", getDefaultDecimalSeparator());
-                viewModel.updateFiatTextField(sanitisedString);
+                getPresenter().updateFiatTextField(sanitisedString);
 
                 textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
@@ -276,7 +270,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 // Remove any possible decimal separators and replace with the localised version
                 String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
                         .replace(",", getDefaultDecimalSeparator());
-                viewModel.updateBtcTextField(sanitisedString);
+                getPresenter().updateBtcTextField(sanitisedString);
 
                 textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
@@ -337,7 +331,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     @Thunk
     void displayQRCode(int position) {
-        Object object = viewModel.getAccountItemForPosition(position);
+        Object object = getPresenter().getAccountItemForPosition(position);
         // Disable send to contact button if not using HD account
         binding.buttonSendToContact.setEnabled(object instanceof Account);
 
@@ -352,7 +346,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             }
         } else {
             Account account = (Account) object;
-            viewModel.getV3ReceiveAddress(account);
+            getPresenter().getV3ReceiveAddress(account);
             label = account.getLabel();
             if (label == null || label.isEmpty()) {
                 label = account.getXpub();
@@ -367,12 +361,12 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void updateReceiveAddress(String receiveAddress) {
         binding.receivingAddress.setText(receiveAddress);
 
-        long amountLong = viewModel.getCurrencyHelper().getLongAmount(
+        long amountLong = getPresenter().getCurrencyHelper().getLongAmount(
                 binding.amountContainer.amountBtc.getText().toString());
 
-        BigInteger amountBigInt = viewModel.getCurrencyHelper().getUndenominatedAmount(amountLong);
+        BigInteger amountBigInt = getPresenter().getCurrencyHelper().getUndenominatedAmount(amountLong);
 
-        if (viewModel.getCurrencyHelper().getIfAmountInvalid(amountBigInt)) {
+        if (getPresenter().getCurrencyHelper().getIfAmountInvalid(amountBigInt)) {
             ToastCustom.makeText(getContext(), getString(R.string.invalid_amount), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
             return;
         }
@@ -385,7 +379,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             } else {
                 uri = "bitcoin:" + receiveAddress;
             }
-            viewModel.generateQrCode(uri);
+            getPresenter().generateQrCode(uri);
         }
     }
 
@@ -403,7 +397,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onResume() {
         super.onResume();
         setupToolbar();
-        viewModel.updateAccountList();
+        getPresenter().updateAccountList();
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
     }
 
@@ -434,15 +428,15 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
                 Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
-                if (viewModel.warnWatchOnlySpend()) {
+                if (getPresenter().warnWatchOnlySpend()) {
                     promptWatchOnlySpendWarning(object);
                 }
 
-                selectAccount(viewModel.getObjectPosition(object));
+                selectAccount(getPresenter().getObjectPosition(object));
 
             } catch (ClassNotFoundException | IOException e) {
-                Log.e(TAG, "onActivityResult: ", e);
-                selectAccount(viewModel.getDefaultAccountPosition());
+                Timber.e(e);
+                selectAccount(getPresenter().getDefaultAccountPosition());
             }
             // Choose contact for request
         } else if (resultCode == Activity.RESULT_OK
@@ -457,9 +451,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 if (listener != null) {
                     listener.onTransactionNotesRequested(
                             contact.getId(),
-                            viewModel.getCorrectedAccountIndex(selectedAccountPosition),
+                            getPresenter().getCorrectedAccountIndex(selectedAccountPosition),
                             PaymentRequestType.REQUEST,
-                            viewModel.getCurrencyHelper().getLongAmount(
+                            getPresenter().getCurrencyHelper().getLongAmount(
                                     binding.amountContainer.amountBtc.getText().toString()));
                 }
             } catch (IOException e) {
@@ -471,7 +465,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     private void setupBottomSheet(String uri) {
-        List<ReceiveViewModel.SendPaymentCodeData> list = viewModel.getIntentDataList(uri);
+        List<ReceivePresenter.SendPaymentCodeData> list = getPresenter().getIntentDataList(uri);
         if (list != null) {
             ShareReceiveIntentAdapter adapter = new ShareReceiveIntentAdapter(list);
             adapter.setItemClickedListener(() -> bottomSheetDialog.dismiss());
@@ -553,13 +547,13 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                     .create();
 
             dialogBinding.confirmCancel.setOnClickListener(v -> {
-                selectAccount(viewModel.getDefaultAccountPosition());
-                viewModel.setWarnWatchOnlySpend(!dialogBinding.confirmDontAskAgain.isChecked());
+                selectAccount(getPresenter().getDefaultAccountPosition());
+                getPresenter().setWarnWatchOnlySpend(!dialogBinding.confirmDontAskAgain.isChecked());
                 alertDialog.dismiss();
             });
 
             dialogBinding.confirmContinue.setOnClickListener(v -> {
-                viewModel.setWarnWatchOnlySpend(!dialogBinding.confirmDontAskAgain.isChecked());
+                getPresenter().setWarnWatchOnlySpend(!dialogBinding.confirmDontAskAgain.isChecked());
                 alertDialog.dismiss();
             });
 
@@ -580,7 +574,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Override
     public void onAccountDataChanged() {
         selectAccount(selectedAccountPosition != -1
-                ? selectedAccountPosition : viewModel.getDefaultAccountPosition());
+                ? selectedAccountPosition : getPresenter().getDefaultAccountPosition());
     }
 
     @Override
@@ -626,16 +620,20 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         super.onPause();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
-    }
-
     public void finishPage() {
         if (listener != null) {
             listener.onReceiveFragmentClose();
         }
+    }
+
+    @Override
+    protected ReceivePresenter createPresenter() {
+        return receivePresenter;
+    }
+
+    @Override
+    protected ReceiveView getMvpView() {
+        return this;
     }
 
     @Override

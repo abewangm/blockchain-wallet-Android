@@ -18,7 +18,6 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -53,6 +52,8 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -62,11 +63,13 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
@@ -87,7 +90,7 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
 
-public class SendFragment extends Fragment implements SendContract.DataListener {
+public class SendFragment extends BaseFragment<SendView, SendPresenter> implements SendView {
 
     public static final String ARGUMENT_SCAN_DATA = "scan_data";
     public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
@@ -100,8 +103,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
     private static final int SCAN_PRIVX = 2011;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
+    @Inject SendPresenter sendPresenter;
+
     @Thunk FragmentSendBinding binding;
-    @Thunk SendViewModel viewModel;
     @Thunk AlertDialog transactionSuccessDialog;
     @Thunk boolean textChangeAllowed = true;
     private OnSendFragmentInteractionListener listener;
@@ -125,13 +129,13 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
-                viewModel.updateUI();
+                getPresenter().updateUI();
             }
         }
     };
 
-    public SendFragment() {
-        // Required empty public constructor
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static SendFragment newInstance(@Nullable String scanData,
@@ -159,15 +163,16 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
-        viewModel = new SendViewModel(this, Locale.getDefault());
-
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
         setupViews();
         setupFeesView();
-        viewModel.onViewReady();
-
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        onViewReady();
     }
 
     @Override
@@ -181,7 +186,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         setupToolbar();
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
-        viewModel.updateUI();
+        getPresenter().updateUI();
     }
 
     @Override
@@ -227,12 +232,12 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         if (resultCode == Activity.RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
-            viewModel.handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
+            getPresenter().handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
                     EventService.EVENT_TX_INPUT_FROM_QR);
 
         } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
             final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-            viewModel.handleScannedDataForWatchOnlySpend(scanData);
+            getPresenter().handleScannedDataForWatchOnlySpend(scanData);
 
             // Set Receiving account
         } else if (resultCode == Activity.RESULT_OK
@@ -244,10 +249,10 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
                 if (object instanceof Contact) {
-                    viewModel.setContact(((Contact) object));
+                    getPresenter().setContact(((Contact) object));
                 } else if (object instanceof Account) {
                     Account account = ((Account) object);
-                    viewModel.setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account, null));
+                    getPresenter().setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account, null));
 
                     String label = account.getLabel();
                     if (label == null || label.isEmpty()) {
@@ -256,7 +261,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                     binding.destination.setText(StringUtils.abbreviate(label, 32));
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
-                    viewModel.setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress()));
+                    getPresenter().setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress()));
 
                     String label = legacyAddress.getLabel();
                     if (label == null || label.isEmpty()) {
@@ -299,7 +304,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                     binding.from.setText(StringUtils.abbreviate(label, 32));
                 }
 
-                viewModel.setSendingAddress(chosenItem);
+                getPresenter().setSendingAddress(chosenItem);
 
                 updateTotals(chosenItem);
 
@@ -345,13 +350,12 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
     }
 
     private void startScanActivity(int code) {
-        // STOPSHIP: 14/07/2017 Fix me
-//        if (!new AppUtil(getActivity()).isCameraOpen()) {
-//            Intent intent = new Intent(getActivity(), CaptureActivity.class);
-//            startActivityForResult(intent, code);
-//        } else {
-//            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
-//        }
+        if (!new AppUtil(getActivity()).isCameraOpen()) {
+            Intent intent = new Intent(getActivity(), CaptureActivity.class);
+            startActivityForResult(intent, code);
+        } else {
+            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
+        }
     }
 
     private void setupViews() {
@@ -363,7 +367,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         setupFiatTextField();
 
         binding.max.setOnClickListener(view ->
-                viewModel.spendAllClicked(viewModel.getSendingItemAccount(), getFeePriority()));
+                getPresenter().spendAllClicked(getPresenter().getSendingItemAccount(), getFeePriority()));
 
         binding.buttonSend.setOnClickListener(v -> {
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
@@ -376,7 +380,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
     private void setupFeesView() {
         FeePriorityAdapter adapter = new FeePriorityAdapter(getActivity(),
-                viewModel.getFeeOptionsForDropDown());
+                getPresenter().getFeeOptionsForDropDown());
 
         binding.spinnerPriority.setAdapter(adapter);
 
@@ -392,7 +396,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                         binding.textInputLayout.setVisibility(View.GONE);
                         break;
                     case 2:
-                        if (viewModel.shouldShowAdvancedFeeWarning()) {
+                        if (getPresenter().shouldShowAdvancedFeeWarning()) {
                             alertCustomSpend();
                         } else {
                             displayCustomFeeField();
@@ -400,7 +404,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                         break;
                 }
 
-                DisplayFeeOptions options = viewModel.getFeeOptionsForDropDown().get(position);
+                DisplayFeeOptions options = getPresenter().getFeeOptionsForDropDown().get(position);
                 binding.textviewFeeType.setText(options.getTitle());
                 binding.textviewFeeTime.setText(position != 2 ? options.getDescription() : null);
             }
@@ -420,7 +424,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        value -> updateTotals(getPresenter().getSendingItemAccount()),
                         Throwable::printStackTrace);
 
         RxTextView.textChanges(binding.amountRow.amountFiat)
@@ -428,12 +432,12 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        value -> updateTotals(getPresenter().getSendingItemAccount()),
                         Throwable::printStackTrace);
     }
 
     private void requestSendPayment() {
-        viewModel.onSendClicked(
+        getPresenter().onSendClicked(
                 binding.amountRow.amountBtc.getText().toString(),
                 binding.destination.getText().toString(),
                 getFeePriority());
@@ -446,12 +450,12 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         //Avoid OntouchListener - causes paste issues on some Samsung devices
         binding.destination.setOnClickListener(v -> {
             binding.destination.setText("");
-            viewModel.setReceivingAddress(null);
+            getPresenter().setReceivingAddress(null);
         });
         //LongClick listener required to clear receive address in memory when user long clicks to paste
         binding.destination.setOnLongClickListener(v -> {
             binding.destination.setText("");
-            viewModel.setReceivingAddress(null);
+            getPresenter().setReceivingAddress(null);
             v.performClick();
             return false;
         });
@@ -461,7 +465,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         RxTextView.textChanges(binding.destination)
                 .doOnNext(ignored -> {
                     if (getActivity().getCurrentFocus() == binding.destination) {
-                        viewModel.setReceivingAddress(null);
+                        getPresenter().setReceivingAddress(null);
                     }
                 })
                 .subscribe(new IgnorableDefaultObserver<>());
@@ -470,12 +474,12 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
     private void setupSendFromView() {
         ItemAccount itemAccount;
         if (selectedAccountPosition != -1) {
-            itemAccount = viewModel.getAddressList(getFeePriority()).get(selectedAccountPosition);
+            itemAccount = getPresenter().getAddressList(getFeePriority()).get(selectedAccountPosition);
         } else {
-            itemAccount = viewModel.getAddressList(getFeePriority()).get(viewModel.getDefaultAccount());
+            itemAccount = getPresenter().getAddressList(getFeePriority()).get(getPresenter().getDefaultAccount());
         }
 
-        viewModel.setSendingAddress(itemAccount);
+        getPresenter().setSendingAddress(itemAccount);
         binding.from.setText(itemAccount.getLabel());
 
         binding.from.setOnClickListener(v -> startFromFragment());
@@ -484,7 +488,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
     @Thunk
     void updateTotals(ItemAccount itemAccount) {
-        viewModel.calculateTransactionAmounts(itemAccount,
+        getPresenter().calculateTransactionAmounts(itemAccount,
                 binding.amountRow.amountBtc.getText().toString(),
                 getFeePriority(),
                 null);
@@ -599,12 +603,12 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         new SecondPasswordHandler(getContext()).validate(new SecondPasswordHandler.ResultListener() {
             @Override
             public void onNoSecondPassword() {
-                viewModel.onNoSecondPassword();
+                getPresenter().onNoSecondPassword();
             }
 
             @Override
             public void onSecondPasswordValidated(String validateSecondPassword) {
-                viewModel.onSecondPasswordValidated(validateSecondPassword);
+                getPresenter().onSecondPasswordValidated(validateSecondPassword);
             }
         });
     }
@@ -652,7 +656,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 .setView(ViewUtils.getAlertDialogPaddedView(getContext(), password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
-                        viewModel.spendFromWatchOnlyBIP38(password.getText().toString(), scanData))
+                        getPresenter().spendFromWatchOnlyBIP38(password.getText().toString(), scanData))
                 .setNegativeButton(android.R.string.cancel, null).show();
     }
 
@@ -768,10 +772,10 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
             binding.amountRow.amountBtc.removeTextChangedListener(this);
             NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
-            btcFormat.setMaximumFractionDigits(viewModel.getCurrencyHelper().getMaxBtcDecimalLength() + 1);
+            btcFormat.setMaximumFractionDigits(getPresenter().getCurrencyHelper().getMaxBtcDecimalLength() + 1);
             btcFormat.setMinimumFractionDigits(0);
 
-            s = formatEditable(s, input, viewModel.getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountRow.amountBtc);
+            s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountRow.amountBtc);
 
             binding.amountRow.amountBtc.addTextChangedListener(this);
 
@@ -780,7 +784,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 // Remove any possible decimal separators and replace with the localised version
                 String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
                         .replace(",", getDefaultDecimalSeparator());
-                viewModel.updateFiatTextField(sanitisedString);
+                getPresenter().updateFiatTextField(sanitisedString);
 
                 textChangeAllowed = true;
             }
@@ -822,7 +826,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 // Remove any possible decimal separators and replace with the localised version
                 String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
                         .replace(",", getDefaultDecimalSeparator());
-                viewModel.updateBtcTextField(sanitisedString);
+                getPresenter().updateBtcTextField(sanitisedString);
                 textChangeAllowed = true;
             }
         }
@@ -834,7 +838,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         confirmPaymentDialog
                 .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 
-        if (viewModel.isLargeTransaction()) {
+        if (getPresenter().isLargeTransaction()) {
             binding.getRoot().postDelayed(this::onShowLargeTransactionWarning, 500);
         }
     }
@@ -853,14 +857,14 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
             binding.destination.setText("");
             if (dialogBinding.confirmDontAskAgain.isChecked())
-                viewModel.disableWatchOnlySpendWarning();
+                getPresenter().disableWatchOnlySpendWarning();
             alertDialog.dismiss();
         });
 
         dialogBinding.confirmContinue.setOnClickListener(v -> {
             binding.destination.setText(address);
             if (dialogBinding.confirmDontAskAgain.isChecked())
-                viewModel.disableWatchOnlySpendWarning();
+                getPresenter().disableWatchOnlySpendWarning();
             alertDialog.dismiss();
         });
 
@@ -922,7 +926,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 .setTitle(R.string.transaction_fee)
                 .setMessage(R.string.fee_options_advanced_warning)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    viewModel.disableAdvancedFeeWarning();
+                    getPresenter().disableAdvancedFeeWarning();
                     displayCustomFeeField();
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) ->
@@ -941,8 +945,8 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
         binding.edittextCustomFee.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus || !binding.edittextCustomFee.getText().toString().isEmpty()) {
                 binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_inline_hint,
-                        String.valueOf(viewModel.getFeeOptions().getRegularFee()),
-                        String.valueOf(viewModel.getFeeOptions().getPriorityFee())));
+                        String.valueOf(getPresenter().getFeeOptions().getRegularFee()),
+                        String.valueOf(getPresenter().getFeeOptions().getPriorityFee())));
             } else if (binding.edittextCustomFee.getText().toString().isEmpty()) {
                 binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
             } else {
@@ -957,9 +961,9 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 .map(Long::valueOf)
                 .onErrorReturnItem(0L)
                 .doOnNext(value -> {
-                    if (value < viewModel.getFeeOptions().getLimits().getMin()) {
+                    if (value < getPresenter().getFeeOptions().getLimits().getMin()) {
                         binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
-                    } else if (value > viewModel.getFeeOptions().getLimits().getMax()) {
+                    } else if (value > getPresenter().getFeeOptions().getLimits().getMax()) {
                         binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_high));
                     } else {
                         binding.textInputLayout.setError(null);
@@ -969,7 +973,7 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        value -> updateTotals(viewModel.getSendingItemAccount()),
+                        value -> updateTotals(getPresenter().getSendingItemAccount()),
                         Throwable::printStackTrace);
     }
 
@@ -986,21 +990,25 @@ public class SendFragment extends Fragment implements SendContract.DataListener 
 
     public void onSendClicked() {
         if (ConnectivityStatus.hasConnectivity(getActivity())) {
-            viewModel.submitPayment();
+            getPresenter().submitPayment();
         } else {
             showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
         }
     }
 
     @Override
-    public void dismissConfirmationDialog() {
-        confirmPaymentDialog.dismiss();
+    protected SendPresenter createPresenter() {
+        return sendPresenter;
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
+    protected SendView getMvpView() {
+        return this;
+    }
+
+    @Override
+    public void dismissConfirmationDialog() {
+        confirmPaymentDialog.dismiss();
     }
 
     @Override
