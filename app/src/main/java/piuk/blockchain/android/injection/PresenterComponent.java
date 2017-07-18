@@ -49,6 +49,7 @@ import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 @Subcomponent(modules = DataManagerModule.class)
 public interface PresenterComponent {
 
+    // Requires access to DataManagers
     void inject(WebSocketService webSocketService);
 
     // Activity/Fragment injection
@@ -99,7 +100,7 @@ public interface PresenterComponent {
     void inject(@NotNull ContactsAcceptInviteActivity contactsAcceptInviteActivity);
 
     void inject(@NotNull ContactsInvitationBuilderQrFragment contactsInvitationBuilderQrFragment);
-    
+
     void inject(@NotNull ContactsListActivity contactsListActivity);
 
     void inject(@NotNull ContactDetailFragment contactDetailFragment);

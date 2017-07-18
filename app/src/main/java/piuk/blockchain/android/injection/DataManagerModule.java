@@ -4,6 +4,7 @@ import android.content.Context;
 
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -12,9 +13,11 @@ import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.contacts.ContactsMapStore;
 import piuk.blockchain.android.data.datamanagers.AccountDataManager;
 import piuk.blockchain.android.data.datamanagers.AuthDataManager;
 import piuk.blockchain.android.data.datamanagers.BuyDataManager;
+import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
@@ -25,12 +28,14 @@ import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
 import piuk.blockchain.android.data.payments.PaymentService;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
+import piuk.blockchain.android.data.services.ContactsService;
 import piuk.blockchain.android.data.services.ExchangeService;
 import piuk.blockchain.android.data.services.PayloadService;
 import piuk.blockchain.android.data.services.WalletService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
+import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
@@ -181,6 +186,18 @@ public class DataManagerModule {
     @PresenterScope
     protected BackupWalletUtil provideBackupWalletUtil(PayloadDataManager payloadDataManager) {
         return new BackupWalletUtil(payloadDataManager);
+    }
+
+    @Provides
+    @PresenterScope
+    protected ContactsDataManager provideContactsManager(ContactsMapStore contactsMapStore,
+                                                         PendingTransactionListStore pendingTransactionListStore,
+                                                         RxBus rxBus) {
+        return new ContactsDataManager(
+                new ContactsService(new Contacts()),
+                contactsMapStore,
+                pendingTransactionListStore,
+                rxBus);
     }
 
 }

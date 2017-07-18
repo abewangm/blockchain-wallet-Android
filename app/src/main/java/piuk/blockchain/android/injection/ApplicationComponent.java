@@ -6,7 +6,6 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import piuk.blockchain.android.BlockchainApplication;
-import piuk.blockchain.android.data.datamanagers.BuyDataManager;
 import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.InstanceIdService;
@@ -29,6 +28,7 @@ import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
 })
 public interface ApplicationComponent {
 
+    // Subcomponent with its own scope
     PresenterComponent plus(DataManagerModule userModule);
 
     void inject(AppUtil appUtil);
@@ -48,6 +48,4 @@ public interface ApplicationComponent {
     void inject(FcmCallbackService fcmCallbackService);
 
     void inject(BaseAuthActivity baseAuthActivity);
-
-    void inject(BuyDataManager buyDataManager);
 }
