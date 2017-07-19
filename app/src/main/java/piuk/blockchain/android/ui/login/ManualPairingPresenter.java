@@ -28,7 +28,6 @@ import piuk.blockchain.android.util.annotations.Thunk;
 import retrofit2.Response;
 import timber.log.Timber;
 
-@SuppressWarnings("WeakerAccess")
 public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
 
     @VisibleForTesting static final String KEY_AUTH_REQUIRED = "authorization_required";
@@ -111,40 +110,32 @@ public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
 
     private void handleResponse(String password, String guid, Response<ResponseBody> response) throws IOException, JSONException {
         String errorBody = response.errorBody() != null ? response.errorBody().string() : "";
-        if (response.isSuccessful()) {
-            if (errorBody.contains(KEY_AUTH_REQUIRED)) {
-                //2FA
-                showCheckEmailDialog();
+        if (errorBody.contains(KEY_AUTH_REQUIRED)) {
+            //2FA
+            showCheckEmailDialog();
 
-                getCompositeDisposable().add(
-                        authDataManager.startPollingAuthStatus(guid, sessionId)
-                                .subscribe(payloadResponse -> {
-                                    waitingForAuth = false;
+            getCompositeDisposable().add(
+                    authDataManager.startPollingAuthStatus(guid, sessionId)
+                            .subscribe(payloadResponse -> {
+                                waitingForAuth = false;
 
-                                    if (payloadResponse == null || payloadResponse.contains(KEY_AUTH_REQUIRED)) {
-                                        showErrorToast(R.string.auth_failed);
-                                        return;
-                                    }
-
-                                    ResponseBody responseBody = ResponseBody.create(
-                                            MediaType.parse("application/json"),
-                                            payloadResponse);
-                                    checkTwoFactor(password, guid, Response.success(responseBody));
-                                }, throwable -> {
-                                    waitingForAuth = false;
+                                if (payloadResponse == null || payloadResponse.contains(KEY_AUTH_REQUIRED)) {
                                     showErrorToast(R.string.auth_failed);
-                                }));
-            } else {
-                //No 2FA
-                waitingForAuth = false;
-                checkTwoFactor(password, guid, response);
-            }
+                                    return;
+                                }
+
+                                ResponseBody responseBody = ResponseBody.create(
+                                        MediaType.parse("application/json"),
+                                        payloadResponse);
+                                checkTwoFactor(password, guid, Response.success(responseBody));
+                            }, throwable -> {
+                                waitingForAuth = false;
+                                showErrorToast(R.string.auth_failed);
+                            }));
         } else {
-            if (response.code() == 500) {
-                showErrorToast(R.string.invalid_guid);
-            } else {
-                showErrorToast(R.string.unexpected_error);
-            }
+            //No 2FA
+            waitingForAuth = false;
+            checkTwoFactor(password, guid, response);
         }
     }
 
