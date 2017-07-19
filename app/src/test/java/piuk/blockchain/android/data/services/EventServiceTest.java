@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.IOException;
 
 import io.reactivex.Observable;
+import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.anyBoolean;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 public class EventServiceTest {
 
     @Mock private PrefsUtil prefsUtil;
-    @Mock private WalletService walletService;
+    @Mock private AuthService authService;
 
     private static final String SUCCESS_TRUE = "{\"success\":true}";
 
@@ -36,7 +37,7 @@ public class EventServiceTest {
     }
 
     private void arrangeShouldLog() throws Exception {
-        when(walletService.logEvent(anyString())).thenReturn(getSuccess());
+        when(authService.logEvent(anyString())).thenReturn(getSuccess());
         when(prefsUtil.getValue(anyString(), anyBoolean())).thenReturn(false);//has not been logged
     }
 
@@ -45,7 +46,7 @@ public class EventServiceTest {
     }
 
     private void arrangeShouldNotLog() throws Exception {
-        when(walletService.logEvent(anyString())).thenReturn(getSuccess());
+        when(authService.logEvent(anyString())).thenReturn(getSuccess());
         when(prefsUtil.getValue(anyString(), anyBoolean())).thenReturn(true);//has been logged
     }
 
@@ -55,11 +56,11 @@ public class EventServiceTest {
         arrangeShouldLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.log2ndPwEvent(true);
 
         // Assert
-        verify(walletService).logEvent(EventService.EVENT_2ND_PW + "1");
+        verify(authService).logEvent(EventService.EVENT_2ND_PW + "1");
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_2ND_PW, true);
     }
 
@@ -69,12 +70,12 @@ public class EventServiceTest {
         arrangeShouldNotLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.log2ndPwEvent(true);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService, never()).logEvent(EventService.EVENT_2ND_PW + "0");
+        verify(authService, never()).logEvent(EventService.EVENT_2ND_PW + "0");
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_2ND_PW, true);
     }
 
@@ -85,12 +86,12 @@ public class EventServiceTest {
         arrangeShouldLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logLegacyEvent(true);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService).logEvent(EventService.EVENT_LEGACY + "1");
+        verify(authService).logEvent(EventService.EVENT_LEGACY + "1");
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_LEGACY, true);
     }
 
@@ -101,12 +102,12 @@ public class EventServiceTest {
         arrangeShouldNotLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logLegacyEvent(true);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService, never()).logEvent(EventService.EVENT_LEGACY + "0");
+        verify(authService, never()).logEvent(EventService.EVENT_LEGACY + "0");
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_LEGACY, false);
     }
 
@@ -117,12 +118,12 @@ public class EventServiceTest {
         arrangeShouldLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logBackupEvent(true);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService).logEvent(EventService.EVENT_BACKUP + "1");
+        verify(authService).logEvent(EventService.EVENT_BACKUP + "1");
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_BACKUP, true);
     }
 
@@ -133,12 +134,12 @@ public class EventServiceTest {
         arrangeShouldNotLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logBackupEvent(true);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService, never()).logEvent(EventService.EVENT_BACKUP + "0");
+        verify(authService, never()).logEvent(EventService.EVENT_BACKUP + "0");
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_BACKUP, false);
     }
 
@@ -148,12 +149,12 @@ public class EventServiceTest {
         arrangeShouldLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.log2ndPwEvent(false);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService).logEvent(EventService.EVENT_2ND_PW + "0");
+        verify(authService).logEvent(EventService.EVENT_2ND_PW + "0");
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_2ND_PW, true);
     }
 
@@ -163,12 +164,12 @@ public class EventServiceTest {
         arrangeShouldNotLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.log2ndPwEvent(false);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService, never()).logEvent(EventService.EVENT_2ND_PW + "0");
+        verify(authService, never()).logEvent(EventService.EVENT_2ND_PW + "0");
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_2ND_PW, true);
     }
 
@@ -179,12 +180,12 @@ public class EventServiceTest {
         arrangeShouldLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logLegacyEvent(false);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService).logEvent(EventService.EVENT_LEGACY + "0");
+        verify(authService).logEvent(EventService.EVENT_LEGACY + "0");
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_LEGACY, true);
     }
 
@@ -195,12 +196,12 @@ public class EventServiceTest {
         arrangeShouldNotLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logLegacyEvent(false);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService, never()).logEvent(EventService.EVENT_LEGACY + "0");
+        verify(authService, never()).logEvent(EventService.EVENT_LEGACY + "0");
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_LEGACY, false);
     }
 
@@ -211,12 +212,12 @@ public class EventServiceTest {
         arrangeShouldLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logBackupEvent(false);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService).logEvent(EventService.EVENT_BACKUP + "0");
+        verify(authService).logEvent(EventService.EVENT_BACKUP + "0");
         verify(prefsUtil).setValue(PrefsUtil.KEY_EVENT_BACKUP, true);
     }
 
@@ -227,12 +228,12 @@ public class EventServiceTest {
         arrangeShouldNotLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logBackupEvent(false);
 
         // Assert
         Thread.sleep(200);
-        verify(walletService, never()).logEvent(EventService.EVENT_BACKUP + "0");
+        verify(authService, never()).logEvent(EventService.EVENT_BACKUP + "0");
         verify(prefsUtil, never()).setValue(PrefsUtil.KEY_EVENT_BACKUP, false);
     }
 
@@ -242,10 +243,10 @@ public class EventServiceTest {
         arrangeShouldLog();
 
         // Act
-        EventService handler = new EventService(prefsUtil, walletService);
+        EventService handler = new EventService(prefsUtil, authService);
         handler.logAddressInputEvent(EventService.EVENT_TX_INPUT_FROM_DROPDOWN);
 
         // Assert
-        verify(walletService).logEvent(EventService.EVENT_TX_INPUT_FROM_DROPDOWN);
+        verify(authService).logEvent(EventService.EVENT_TX_INPUT_FROM_DROPDOWN);
     }
 }

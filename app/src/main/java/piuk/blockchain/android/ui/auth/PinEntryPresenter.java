@@ -15,7 +15,6 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
-import info.blockchain.wallet.payload.PayloadManager;
 
 import org.spongycastle.crypto.InvalidCipherTextException;
 
@@ -26,7 +25,8 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
@@ -47,7 +47,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
     private AuthDataManager mAuthDataManager;
     private AppUtil mAppUtil;
     private PrefsUtil mPrefsUtil;
-    private PayloadManager mPayloadManager;
+    private PayloadDataManager mPayloadDataManager;
     private StringUtils mStringUtils;
     private SSLVerifyUtil mSSLVerifyUtil;
     private FingerprintHelper mFingerprintHelper;
@@ -63,7 +63,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
     PinEntryPresenter(AuthDataManager mAuthDataManager,
                       AppUtil mAppUtil,
                       PrefsUtil mPrefsUtil,
-                      PayloadManager mPayloadManager,
+                      PayloadDataManager mPayloadDataManager,
                       StringUtils mStringUtils,
                       SSLVerifyUtil mSSLVerifyUtil,
                       FingerprintHelper mFingerprintHelper,
@@ -72,7 +72,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
         this.mAuthDataManager = mAuthDataManager;
         this.mAppUtil = mAppUtil;
         this.mPrefsUtil = mPrefsUtil;
-        this.mPayloadManager = mPayloadManager;
+        this.mPayloadDataManager = mPayloadDataManager;
         this.mStringUtils = mStringUtils;
         this.mSSLVerifyUtil = mSSLVerifyUtil;
         this.mFingerprintHelper = mFingerprintHelper;
@@ -230,7 +230,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
         getView().showProgressDialog(R.string.decrypting_wallet, null);
 
         getCompositeDisposable().add(
-                mAuthDataManager.updatePayload(
+                mPayloadDataManager.initializeAndDecrypt(
                         mPrefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""),
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
@@ -239,11 +239,11 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                             mCanShowFingerprintDialog = true;
                         })
                         .subscribe(() -> {
-                            mAppUtil.setSharedKey(mPayloadManager.getPayload().getSharedKey());
+                            mAppUtil.setSharedKey(mPayloadDataManager.getWallet().getSharedKey());
 
                             setAccountLabelIfNecessary();
 
-                            if (!mPayloadManager.getPayload().isUpgraded()) {
+                            if (!mPayloadDataManager.getWallet().isUpgraded()) {
                                 getView().goToUpgradeWalletActivity();
                             } else {
                                 mAppUtil.restartAppWithVerifiedPin();
@@ -299,7 +299,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
         getView().showProgressDialog(R.string.validating_password, null);
 
         getCompositeDisposable().add(
-                mAuthDataManager.updatePayload(
+                mPayloadDataManager.initializeAndDecrypt(
                         mPrefsUtil.getValue(PrefsUtil.KEY_SHARED_KEY, ""),
                         mPrefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                         password)
@@ -338,13 +338,13 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
         getView().showProgressDialog(R.string.creating_pin, null);
 
         getCompositeDisposable().add(
-                mAuthDataManager.createPin(mPayloadManager.getTempPassword(), pin)
+                mAuthDataManager.createPin(mPayloadDataManager.getTempPassword(), pin)
                         .subscribe(() -> {
                             getView().dismissProgressDialog();
                             mFingerprintHelper.clearEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE);
                             mFingerprintHelper.setFingerprintUnlockEnabled(false);
                             mPrefsUtil.setValue(PrefsUtil.KEY_PIN_FAILS, 0);
-                            updatePayload(mPayloadManager.getTempPassword());
+                            updatePayload(mPayloadDataManager.getTempPassword());
                         }, throwable -> {
                             showErrorToast(R.string.create_pin_failed);
                             mPrefsUtil.clear();
@@ -416,11 +416,11 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
 
     private void setAccountLabelIfNecessary() {
         if (mAppUtil.isNewlyCreated()
-                && mPayloadManager.getPayload().getHdWallets() != null
-                && (mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).getLabel() == null
-                || mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).getLabel().isEmpty())) {
+                && mPayloadDataManager.getAccount(0) != null
+                && mPayloadDataManager.getAccount(0).getLabel() == null
+                || mPayloadDataManager.getAccount(0).getLabel().isEmpty()) {
 
-            mPayloadManager.getPayload().getHdWallets().get(0).getAccounts().get(0).setLabel(mStringUtils.getString(R.string.default_wallet_name));
+            mPayloadDataManager.getAccount(0).setLabel(mStringUtils.getString(R.string.default_wallet_name));
         }
     }
 

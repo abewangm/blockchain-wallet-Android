@@ -10,7 +10,7 @@ import org.amshove.kluent.`should equal`
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 
 class BackupWalletUtilTest {
 

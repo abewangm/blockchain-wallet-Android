@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import piuk.blockchain.android.BlockchainApplication;
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.InstanceIdService;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;

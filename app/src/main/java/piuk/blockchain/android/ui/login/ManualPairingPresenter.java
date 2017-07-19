@@ -18,10 +18,12 @@ import javax.inject.Inject;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import retrofit2.Response;
 import timber.log.Timber;
@@ -34,14 +36,20 @@ public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
     private String sessionId;
     private AppUtil appUtil;
     private AuthDataManager authDataManager;
+    private final PayloadDataManager payloadDataManager;
+    private final PrefsUtil prefsUtil;
     @VisibleForTesting boolean waitingForAuth = false;
 
     @Inject
     ManualPairingPresenter(AppUtil appUtil,
-                           AuthDataManager authDataManager) {
+                           AuthDataManager authDataManager,
+                           PayloadDataManager payloadDataManager,
+                           PrefsUtil prefsUtil) {
 
         this.appUtil = appUtil;
         this.authDataManager = authDataManager;
+        this.payloadDataManager = payloadDataManager;
+        this.prefsUtil = prefsUtil;
     }
 
     @Override
@@ -164,7 +172,12 @@ public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
 
     private void attemptDecryptPayload(String password, String payload) {
         getCompositeDisposable().add(
-                authDataManager.initializeFromPayload(payload, password)
+                payloadDataManager.initializeFromPayload(payload, password)
+                        .doOnComplete(() -> {
+                            prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
+                            appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
+                            prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+                        })
                         .subscribe(() -> getView().goToPinPage(),
                                 throwable -> {
                                     if (throwable instanceof HDWalletException) {

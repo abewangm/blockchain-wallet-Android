@@ -10,22 +10,21 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.PrefsUtil;
+import timber.log.Timber;
 
 public class FcmCallbackService extends FirebaseMessagingService {
-
-    private static final String TAG = FcmCallbackService.class.getSimpleName();
 
     public static final String EXTRA_CONTACT_ACCEPTED = "contact_accepted";
     public static final int ID_BACKGROUND_NOTIFICATION = 1337;
@@ -43,7 +42,7 @@ public class FcmCallbackService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // Check if message contains a data payload.
         if (!remoteMessage.getData().isEmpty()) {
-            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+            Timber.d("Message data payload: " + remoteMessage.getData());
 
             // Parse data, emit events
             NotificationPayload payload = new NotificationPayload(remoteMessage.getData());

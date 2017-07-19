@@ -2,7 +2,7 @@ package piuk.blockchain.android.ui.swipetoreceive
 
 import info.blockchain.api.data.Balance
 import io.reactivex.Observable
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.annotations.Mockable

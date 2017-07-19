@@ -1,7 +1,7 @@
 package piuk.blockchain.android.ui.login
 
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom

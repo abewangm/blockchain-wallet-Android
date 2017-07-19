@@ -12,29 +12,26 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
-import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.datamanagers.AuthDataManager;
+import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.AppUtil;
@@ -50,6 +47,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -68,7 +66,7 @@ public class PinEntryPresenterTest {
     @Mock private AuthDataManager authDataManager;
     @Mock private AppUtil appUtil;
     @Mock private PrefsUtil prefsUtil;
-    @Mock private PayloadManager payloadManager;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private PayloadDataManager payloadManager;
     @Mock private StringUtils stringUtils;
     @Mock private FingerprintHelper fingerprintHelper;
     @Mock private AccessState accessState;
@@ -111,7 +109,7 @@ public class PinEntryPresenterTest {
         // Arrange
         when(activity.getPageIntent()).thenReturn(new Intent());
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_FAILS, 0)).thenReturn(4);
-        when(payloadManager.getPayload()).thenReturn(mock(Wallet.class));
+        when(payloadManager.getWallet()).thenReturn(mock(Wallet.class));
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "")).thenReturn("");
         when(fingerprintHelper.getEncryptedData(PrefsUtil.KEY_ENCRYPTED_PIN_CODE)).thenReturn("");
         // Act
@@ -348,7 +346,7 @@ public class PinEntryPresenterTest {
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
                 .thenReturn("1234567890");
         when(authDataManager.validatePin(anyString())).thenReturn(just(""));
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new InvalidCipherTextException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         // Act
@@ -357,7 +355,7 @@ public class PinEntryPresenterTest {
         verify(activity).setTitleVisibility(View.INVISIBLE);
         verify(activity, times(2)).showProgressDialog(anyInt(), isNull());
         verify(authDataManager).validatePin(anyString());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(prefsUtil).setValue(anyString(), anyInt());
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
@@ -372,7 +370,7 @@ public class PinEntryPresenterTest {
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
                 .thenReturn("1234567890");
         when(authDataManager.validatePin(anyString())).thenReturn(just(""));
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new Exception()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         // Act
@@ -381,7 +379,7 @@ public class PinEntryPresenterTest {
         verify(activity).setTitleVisibility(View.INVISIBLE);
         verify(activity, times(2)).showProgressDialog(anyInt(), isNull());
         verify(authDataManager).validatePin(anyString());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(prefsUtil).setValue(anyString(), anyInt());
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
@@ -469,7 +467,7 @@ public class PinEntryPresenterTest {
     public void validatePasswordSuccessful() throws Exception {
         // Arrange
         String password = "1234567890";
-        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), eq(password)))
 
                 .thenReturn(Completable.complete());
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
@@ -477,7 +475,7 @@ public class PinEntryPresenterTest {
         subject.validatePassword(password);
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), eq(password));
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
@@ -489,14 +487,14 @@ public class PinEntryPresenterTest {
     public void validatePasswordThrowsGenericException() throws Exception {
         // Arrange
         String password = "1234567890";
-        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), eq(password)))
                 .thenReturn(Completable.error(new Throwable()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         // Act
         subject.validatePassword(password);
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), eq(password));
         verify(activity, times(2)).dismissProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
@@ -507,14 +505,14 @@ public class PinEntryPresenterTest {
     public void validatePasswordThrowsServerConnectionException() throws Exception {
         // Arrange
         String password = "1234567890";
-        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), eq(password)))
                 .thenReturn(Completable.error(new ServerConnectionException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         // Act
         subject.validatePassword(password);
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), eq(password));
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
@@ -524,14 +522,14 @@ public class PinEntryPresenterTest {
     public void validatePasswordThrowsHDWalletExceptionException() throws Exception {
         // Arrange
         String password = "1234567890";
-        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), eq(password)))
                 .thenReturn(Completable.error(new HDWalletException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         // Act
         subject.validatePassword(password);
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), eq(password));
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
@@ -542,14 +540,14 @@ public class PinEntryPresenterTest {
     public void validatePasswordThrowsAccountLockedException() throws Exception {
         // Arrange
         String password = "1234567890";
-        when(authDataManager.updatePayload(anyString(), anyString(), eq(password)))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), eq(password)))
                 .thenReturn(Completable.error(new AccountLockedException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         // Act
         subject.validatePassword(password);
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), eq(password));
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), eq(password));
         verify(activity).dismissProgressDialog();
         verify(activity).showAccountLockedDialog();
     }
@@ -558,17 +556,17 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadInvalidCredentialsException() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new InvalidCredentialsException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(activity).goToPasswordRequiredActivity();
     }
 
@@ -576,17 +574,17 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadServerConnectionException() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new ServerConnectionException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
     }
@@ -595,17 +593,17 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadDecryptionException() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new DecryptionException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(activity).goToPasswordRequiredActivity();
     }
 
@@ -613,17 +611,17 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadPayloadExceptionException() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new PayloadException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
         verify(appUtil).restartApp();
@@ -633,17 +631,17 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadHDWalletException() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new HDWalletException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
         verify(appUtil).restartApp();
@@ -653,17 +651,17 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadVersionNotSupported() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new UnsupportedVersionException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(activity).showWalletVersionNotSupportedDialog(isNull());
     }
 
@@ -671,17 +669,17 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadAccountLocked() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.error(new AccountLockedException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         Wallet mockPayload = mock(Wallet.class);
         when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
+        when(payloadManager.getWallet()).thenReturn(mockPayload);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(activity).showAccountLockedDialog();
     }
 
@@ -689,28 +687,22 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadSuccessfulSetLabels() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.complete());
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-        Wallet mockPayload = mock(Wallet.class);
-        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        HDWallet mockHdWallet = mock(HDWallet.class);
-        when(mockPayload.getHdWallets()).thenReturn(Collections.singletonList(mockHdWallet));
         Account mockAccount = mock(Account.class);
         when(mockAccount.getLabel()).thenReturn(null);
-        ArrayList<Account> accountsList = new ArrayList<>();
-        accountsList.add(mockAccount);
-        when(mockHdWallet.getAccounts()).thenReturn(accountsList);
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
+        when(payloadManager.getAccount(0)).thenReturn(mockAccount);
+        when(payloadManager.getWallet().getSharedKey()).thenReturn("shared_key");
+        when(payloadManager.getWallet().isUpgraded()).thenReturn(true);
         when(appUtil.isNewlyCreated()).thenReturn(true);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(appUtil).setSharedKey(anyString());
-        verify(payloadManager, times(5)).getPayload();
+        verify(payloadManager, atLeastOnce()).getWallet();
         verify(stringUtils).getString(anyInt());
         verify(activity).dismissProgressDialog();
         assertEquals(true, subject.mCanShowFingerprintDialog);
@@ -720,19 +712,20 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadSuccessfulUpgradeWallet() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.complete());
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-        Wallet mockPayload = mock(Wallet.class);
-        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(false);
+        Account mockAccount = mock(Account.class);
+        when(mockAccount.getLabel()).thenReturn("label");
+        when(payloadManager.getAccount(0)).thenReturn(mockAccount);
+        when(payloadManager.getWallet().getSharedKey()).thenReturn("shared_key");
+        when(payloadManager.getWallet().isUpgraded()).thenReturn(false);
         when(appUtil.isNewlyCreated()).thenReturn(false);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(appUtil).setSharedKey(anyString());
         verify(activity).goToUpgradeWalletActivity();
         verify(activity).dismissProgressDialog();
@@ -743,19 +736,20 @@ public class PinEntryPresenterTest {
     @Test
     public void updatePayloadSuccessfulVerifyPin() throws Exception {
         // Arrange
-        when(authDataManager.updatePayload(anyString(), anyString(), anyString()))
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), anyString()))
                 .thenReturn(Completable.complete());
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
-        Wallet mockPayload = mock(Wallet.class);
-        when(mockPayload.getSharedKey()).thenReturn("1234567890");
-        when(payloadManager.getPayload()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
+        Account mockAccount = mock(Account.class);
+        when(mockAccount.getLabel()).thenReturn("label");
+        when(payloadManager.getAccount(0)).thenReturn(mockAccount);
+        when(payloadManager.getWallet().getSharedKey()).thenReturn("shared_key");
+        when(payloadManager.getWallet().isUpgraded()).thenReturn(true);
         when(appUtil.isNewlyCreated()).thenReturn(false);
         // Act
         subject.updatePayload("");
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull());
-        verify(authDataManager).updatePayload(anyString(), anyString(), anyString());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), anyString());
         verify(appUtil).setSharedKey(anyString());
         verify(appUtil).restartAppWithVerifiedPin();
         verify(activity).dismissProgressDialog();

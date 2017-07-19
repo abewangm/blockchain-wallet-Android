@@ -5,7 +5,6 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
-import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
@@ -16,13 +15,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
-import piuk.blockchain.android.data.contacts.PaymentRequestType
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.stores.PendingTransactionListStore
-import piuk.blockchain.android.injection.ApiModule
-import piuk.blockchain.android.injection.DataManagerModule
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType
+import piuk.blockchain.android.data.contacts.ContactsDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID

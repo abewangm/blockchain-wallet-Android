@@ -6,6 +6,7 @@ import info.blockchain.wallet.api.data.Settings
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.RxTest
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.util.PrefsUtil
 
 class PromptManagerTest : RxTest() {

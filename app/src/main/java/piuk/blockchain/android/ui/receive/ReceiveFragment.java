@@ -59,7 +59,7 @@ import io.reactivex.subjects.PublishSubject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;

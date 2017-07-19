@@ -29,8 +29,7 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.datamanagers.AccountDataManager;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
@@ -58,7 +57,6 @@ public class AccountPresenterTest {
     private AccountPresenter subject;
     @Mock private AccountView activity;
     @Mock private PayloadDataManager payloadDataManager;
-    @Mock private AccountDataManager accountDataManager;
     @Mock private TransferFundsDataManager fundsDataManager;
     @Mock private PrefsUtil prefsUtil;
     @Mock private AppUtil appUtil;
@@ -70,7 +68,6 @@ public class AccountPresenterTest {
         MockitoAnnotations.initMocks(this);
 
         subject = new AccountPresenter(payloadDataManager,
-                accountDataManager,
                 fundsDataManager,
                 prefsUtil,
                 appUtil,
@@ -171,7 +168,7 @@ public class AccountPresenterTest {
     @Test
     public void createNewAccountSuccessful() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), isNull()))
+        when(payloadDataManager.createNewAccount(anyString(), isNull()))
                 .thenReturn(Observable.just(new Account()));
         // Act
         subject.createNewAccount("");
@@ -188,7 +185,7 @@ public class AccountPresenterTest {
     @Test
     public void createNewAccountDecryptionException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), isNull()))
+        when(payloadDataManager.createNewAccount(anyString(), isNull()))
                 .thenReturn(Observable.error(new DecryptionException()));
         // Act
         subject.createNewAccount("");
@@ -203,7 +200,7 @@ public class AccountPresenterTest {
     @Test
     public void createNewAccountPayloadException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), isNull()))
+        when(payloadDataManager.createNewAccount(anyString(), isNull()))
                 .thenReturn(Observable.error(new PayloadException()));
         // Act
         subject.createNewAccount("");
@@ -218,7 +215,7 @@ public class AccountPresenterTest {
     @Test
     public void createNewAccountUnknownException() throws Exception {
         // Arrange
-        when(accountDataManager.createNewAccount(anyString(), isNull()))
+        when(payloadDataManager.createNewAccount(anyString(), isNull()))
                 .thenReturn(Observable.error(new Exception()));
         // Act
         subject.createNewAccount("");
@@ -234,13 +231,13 @@ public class AccountPresenterTest {
     public void updateLegacyAddressSuccessful() throws Exception {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
-        when(accountDataManager.updateLegacyAddress(legacyAddress))
+        when(payloadDataManager.updateLegacyAddress(legacyAddress))
                 .thenReturn(Completable.complete());
         // Act
         subject.updateLegacyAddress(legacyAddress);
         // Assert
-        verify(accountDataManager).updateLegacyAddress(legacyAddress);
-        verifyNoMoreInteractions(accountDataManager);
+        verify(payloadDataManager).updateLegacyAddress(legacyAddress);
+        verifyNoMoreInteractions(payloadDataManager);
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
@@ -254,13 +251,13 @@ public class AccountPresenterTest {
     public void updateLegacyAddressFailed() throws Exception {
         // Arrange
         LegacyAddress legacyAddress = new LegacyAddress();
-        when(accountDataManager.updateLegacyAddress(legacyAddress))
+        when(payloadDataManager.updateLegacyAddress(legacyAddress))
                 .thenReturn(Completable.error(new Throwable()));
         // Act
         subject.updateLegacyAddress(legacyAddress);
         // Assert
-        verify(accountDataManager).updateLegacyAddress(legacyAddress);
-        verifyNoMoreInteractions(accountDataManager);
+        verify(payloadDataManager).updateLegacyAddress(legacyAddress);
+        verifyNoMoreInteractions(payloadDataManager);
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
@@ -335,12 +332,12 @@ public class AccountPresenterTest {
     @Test
     public void onAddressScannedNonBip38() throws Exception {
         // Arrange
-        when(accountDataManager.getKeyFromImportedData(anyString(), anyString()))
+        when(payloadDataManager.getKeyFromImportedData(anyString(), anyString()))
                 .thenReturn(Observable.just(mock(ECKey.class)));
         // Act
         subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
         // Assert
-        verify(accountDataManager).getKeyFromImportedData(anyString(), anyString());
+        verify(payloadDataManager).getKeyFromImportedData(anyString(), anyString());
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
     }
@@ -348,14 +345,14 @@ public class AccountPresenterTest {
     @Test
     public void onAddressScannedNonBip38Failure() throws Exception {
         // Arrange
-        when(accountDataManager.getKeyFromImportedData(anyString(), anyString()))
+        when(payloadDataManager.getKeyFromImportedData(anyString(), anyString()))
                 .thenReturn(Observable.error(new Throwable()));
         // Act
         subject.onAddressScanned("L1FQxC7wmmRNNe2YFPNXscPq3kaheiA4T7SnTr7vYSBW7Jw1A7PD");
-        when(accountDataManager.getKeyFromImportedData(anyString(), anyString()))
+        when(payloadDataManager.getKeyFromImportedData(anyString(), anyString()))
                 .thenReturn(Observable.just(mock(ECKey.class)));
         // Assert
-        verify(accountDataManager).getKeyFromImportedData(anyString(), anyString());
+        verify(payloadDataManager).getKeyFromImportedData(anyString(), anyString());
         verify(activity).showProgressDialog(anyInt());
         verify(activity).dismissProgressDialog();
         //noinspection WrongConstant
@@ -420,14 +417,14 @@ public class AccountPresenterTest {
     public void confirmImportWatchOnlySuccess() throws Exception {
         // Arrange
         String address = "17UovdU9ZvepPe75igTQwxqNME1HbnvMB7";
-        when(accountDataManager.addLegacyAddress(any(LegacyAddress.class)))
+        when(payloadDataManager.addLegacyAddress(any(LegacyAddress.class)))
                 .thenReturn(Completable.complete());
         // Act
         subject.confirmImportWatchOnly(address);
         // Assert
         //noinspection WrongConstant
-        verify(accountDataManager).addLegacyAddress(any(LegacyAddress.class));
-        verifyNoMoreInteractions(accountDataManager);
+        verify(payloadDataManager).addLegacyAddress(any(LegacyAddress.class));
+        verifyNoMoreInteractions(payloadDataManager);
         verify(activity).showRenameImportedAddressDialog(any(LegacyAddress.class));
         verifyNoMoreInteractions(activity);
     }
@@ -436,13 +433,13 @@ public class AccountPresenterTest {
     public void confirmImportWatchOnlyFailure() throws Exception {
         // Arrange
         String address = "17UovdU9ZvepPe75igTQwxqNME1HbnvMB7";
-        when(accountDataManager.addLegacyAddress(any(LegacyAddress.class)))
+        when(payloadDataManager.addLegacyAddress(any(LegacyAddress.class)))
                 .thenReturn(Completable.error(new Throwable()));
         // Act
         subject.confirmImportWatchOnly(address);
         // Assert
-        verify(accountDataManager).addLegacyAddress(any(LegacyAddress.class));
-        verifyNoMoreInteractions(accountDataManager);
+        verify(payloadDataManager).addLegacyAddress(any(LegacyAddress.class));
+        verifyNoMoreInteractions(payloadDataManager);
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verifyNoMoreInteractions(activity);
     }
@@ -528,7 +525,7 @@ public class AccountPresenterTest {
         ECKey mockECKey = mock(ECKey.class);
         when(mockECKey.hasPrivKey()).thenReturn(true);
         LegacyAddress legacyAddress = new LegacyAddress();
-        when(accountDataManager.setKeyForLegacyAddress(mockECKey, null))
+        when(payloadDataManager.setKeyForLegacyAddress(mockECKey, null))
                 .thenReturn(Observable.just(legacyAddress));
         // Act
         subject.handlePrivateKey(mockECKey, null);
@@ -546,7 +543,7 @@ public class AccountPresenterTest {
         // Arrange
         ECKey mockECKey = mock(ECKey.class);
         when(mockECKey.hasPrivKey()).thenReturn(true);
-        when(accountDataManager.setKeyForLegacyAddress(mockECKey, null))
+        when(payloadDataManager.setKeyForLegacyAddress(mockECKey, null))
                 .thenReturn(Observable.error(new Throwable()));
         // Act
         subject.handlePrivateKey(mockECKey, null);

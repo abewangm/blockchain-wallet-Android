@@ -60,14 +60,12 @@ class FingerprintHelper(
      * *
      * @return Returns true if data stored successfully
      */
-    fun storeEncryptedData(key: String, data: String): Boolean {
-        try {
-            val base64 = Base64.encodeToString(data.toByteArray(charset("UTF-8")), Base64.DEFAULT)
-            prefsUtil.setValue(key, base64)
-            return true
-        } catch (e: UnsupportedEncodingException) {
-            return false
-        }
+    fun storeEncryptedData(key: String, data: String) = try {
+        val base64 = Base64.encodeToString(data.toByteArray(charset("UTF-8")), Base64.DEFAULT)
+        prefsUtil.setValue(key, base64)
+        true
+    } catch (e: UnsupportedEncodingException) {
+        false
     }
 
     /**

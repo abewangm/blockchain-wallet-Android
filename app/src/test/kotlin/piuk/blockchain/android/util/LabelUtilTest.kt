@@ -8,7 +8,7 @@ import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import org.amshove.kluent.shouldEqual
 import org.junit.Test
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 
 class LabelUtilTest {
 

@@ -4,7 +4,7 @@ import android.content.Intent
 import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PasswordUtil
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.datamanagers.AuthDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -14,7 +14,7 @@ import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
 
 class CreateWalletPresenter @Inject constructor(
-        private val authDataManager: AuthDataManager,
+        private val payloadDataManager: PayloadDataManager,
         private val prefsUtil: PrefsUtil,
         private val appUtil: AppUtil
 ) : BasePresenter<CreateWalletView>() {
@@ -67,10 +67,15 @@ class CreateWalletPresenter @Inject constructor(
     fun createWallet(email: String, password: String) {
         appUtil.applyPRNGFixes()
 
-        authDataManager.createHdWallet(password, view.getDefaultAccountName(), email)
+        payloadDataManager.createHdWallet(password, view.getDefaultAccountName(), email)
+                .doOnNext {
+                    appUtil.isNewlyCreated = true
+                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.wallet.guid)
+                    appUtil.sharedKey = payloadDataManager.wallet.sharedKey
+                }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnSubscribe({ view.showProgressDialog(R.string.creating_wallet) })
-                .doAfterTerminate({ view.dismissProgressDialog() })
+                .doOnSubscribe { view.showProgressDialog(R.string.creating_wallet) }
+                .doAfterTerminate { view.dismissProgressDialog() }
                 .subscribe({
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL, email)
                     view.startPinEntryActivity()
@@ -81,12 +86,19 @@ class CreateWalletPresenter @Inject constructor(
     }
 
     fun recoverWallet(email: String, password: String) {
-        authDataManager.restoreHdWallet(email, password, recoveryPhrase)
+        payloadDataManager.restoreHdWallet(
+                recoveryPhrase,
+                view.getDefaultAccountName(),
+                email,
+                password)
+                .doOnNext {
+                    appUtil.isNewlyCreated = true
+                    prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.wallet.guid)
+                    appUtil.sharedKey = payloadDataManager.wallet.sharedKey
+                }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnSubscribe({ view.showProgressDialog(R.string.restoring_wallet) })
-                .doAfterTerminate({
-                    view.dismissProgressDialog()
-                })
+                .doOnSubscribe { view.showProgressDialog(R.string.restoring_wallet) }
+                .doAfterTerminate { view.dismissProgressDialog() }
                 .subscribe({
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL, email)
                     prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true)

@@ -13,7 +13,6 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.anyString;

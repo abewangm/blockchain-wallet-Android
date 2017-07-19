@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
-import piuk.blockchain.android.data.notifications.NotificationPayload
+import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.ui.contacts.pairing.ContactsQrPresenter.DIMENSION_QR_CODE
 import piuk.blockchain.android.ui.customviews.ToastCustom

@@ -25,7 +25,7 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;

@@ -7,7 +7,7 @@ import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
 

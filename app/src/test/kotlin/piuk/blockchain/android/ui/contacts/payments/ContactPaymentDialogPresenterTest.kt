@@ -22,9 +22,9 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.cache.DynamicFeeCache
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager
+import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.datamanagers.FeeDataManager
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog.ARGUMENT_CONTACT_ID

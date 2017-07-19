@@ -2,7 +2,7 @@ package piuk.blockchain.android.ui.backup.verify
 
 import android.support.annotation.VisibleForTesting
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.backup.BackupWalletActivity
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment.Companion.ARGUMENT_SECOND_PASSWORD

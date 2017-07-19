@@ -7,7 +7,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.backup.BackupWalletActivity
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.BackupWalletUtil

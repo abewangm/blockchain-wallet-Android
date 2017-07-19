@@ -3,7 +3,7 @@ package piuk.blockchain.android.ui.backup.transfer
 import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.payload.data.LegacyAddress
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.ItemAccount

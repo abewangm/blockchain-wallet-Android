@@ -1,6 +1,6 @@
 package piuk.blockchain.android.ui.backup.start
 
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import javax.inject.Inject
 

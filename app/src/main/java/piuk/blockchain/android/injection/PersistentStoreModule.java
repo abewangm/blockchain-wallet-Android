@@ -4,7 +4,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import piuk.blockchain.android.data.contacts.ContactsMapStore;
+import piuk.blockchain.android.data.contacts.datastore.ContactsMapStore;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.data.settings.datastore.SettingsMemoryStore;

@@ -16,7 +16,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityAccountChooserBinding;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;

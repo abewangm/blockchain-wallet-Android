@@ -11,8 +11,8 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.ContactsService;
-import piuk.blockchain.android.data.services.ExchangeService;
+import piuk.blockchain.android.data.contacts.ContactsService;
+import piuk.blockchain.android.data.exchange.ExchangeService;
 import piuk.blockchain.android.data.settings.SettingsService;
 
 @Module
