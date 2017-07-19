@@ -9,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.AppCompatSpinner
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -19,7 +20,6 @@ import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import kotlinx.android.synthetic.main.include_onboarding_complete.*
 import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -323,9 +323,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    // TODO: Remove me, but I break lots of tests
-    override fun getIfContactsEnabled() = true
-
     override fun getIfShouldShowBuy() = AndroidUtils.is19orHigher()
 
     override fun createPresenter() = balancePresenter
@@ -422,6 +419,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         val layoutManager = LinearLayoutManager(context)
         recyclerview.layoutManager = layoutManager
         recyclerview.adapter = balanceAdapter
+        // Disable blinking animations in RecyclerView
+        val animator = recyclerview.itemAnimator
+        if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
     }
 
     private fun goToTransactionDetail(position: Int) {

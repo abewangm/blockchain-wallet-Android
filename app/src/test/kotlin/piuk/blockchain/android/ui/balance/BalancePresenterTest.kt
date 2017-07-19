@@ -16,13 +16,13 @@ import org.junit.Test
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
+import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
-import piuk.blockchain.android.data.exchange.BuyDataManager
-import piuk.blockchain.android.data.contacts.ContactsDataManager
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
+import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
@@ -224,7 +224,8 @@ class BalancePresenterTest {
                 .thenReturn(Completable.error { Throwable() })
         whenever(transactionListDataManager.fetchTransactions(itemAccount, 50, 0))
                 .thenReturn(Observable.just(listOf(transactionSummary)))
-        whenever(view.getIfContactsEnabled()).thenReturn(false)
+        whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
+        whenever(contactsDataManager.contactsWithUnreadPaymentRequests).thenReturn(Observable.empty())
         // Act
         subject.onRefreshRequested()
         // Assert
@@ -232,8 +233,10 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(payloadDataManager)
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
+        verify(contactsDataManager).fetchContacts()
+        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verifyNoMoreInteractions(contactsDataManager)
         verify(view).setUiState(UiState.FAILURE)
-        verify(view).getIfContactsEnabled()
         verifyNoMoreInteractions(view)
     }
 
@@ -252,7 +255,9 @@ class BalancePresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
         whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
-        whenever(view.getIfContactsEnabled()).thenReturn(false)
+        whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
+        whenever(contactsDataManager.contactsWithUnreadPaymentRequests).thenReturn(Observable.empty())
+        whenever(contactsDataManager.refreshFacilitatedTransactions()).thenReturn(Observable.empty())
         whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
         // Act
         subject.onRefreshRequested()
@@ -262,6 +267,12 @@ class BalancePresenterTest {
         verify(transactionListDataManager).getBtcBalance(itemAccount)
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
+        verify(contactsDataManager).fetchContacts()
+        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).refreshFacilitatedTransactions()
+        verify(contactsDataManager).contactsTransactionMap
+        verify(contactsDataManager).notesTransactionMap
+        verifyNoMoreInteractions(contactsDataManager)
         verify(accessState).isBtc
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
@@ -274,8 +285,9 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(buyDataManager)
         verify(view).onTotalBalanceUpdated("0.0 BTC")
         verify(view).setUiState(UiState.CONTENT)
-        verify(view).onTransactionsUpdated(listOf(transactionSummary))
-        verify(view).getIfContactsEnabled()
+        verify(view, times(2)).onTransactionsUpdated(listOf(transactionSummary))
+        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).showFctxRequiringAttention(any())
         verifyNoMoreInteractions(view)
     }
 
@@ -301,7 +313,6 @@ class BalancePresenterTest {
                 .thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)).thenReturn(true)
         whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
-        whenever(view.getIfContactsEnabled()).thenReturn(true)
         whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
         whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
                 .thenReturn(Observable.empty())
@@ -340,7 +351,6 @@ class BalancePresenterTest {
         verify(view).onTotalBalanceUpdated("0.0 BTC")
         verify(view, times(2)).setUiState(UiState.CONTENT)
         verify(view, times(2)).onTransactionsUpdated(any())
-        verify(view).getIfContactsEnabled()
         verify(view).onContactsHashMapUpdated(HashMap(), HashMap())
         verify(view).showFctxRequiringAttention(1)
         verifyNoMoreInteractions(view)
@@ -708,6 +718,12 @@ class BalancePresenterTest {
             this.mdid = mdid
         }
         whenever(contactsDataManager.getContactFromFctxId(fctxId)).thenReturn(Single.just(contact))
+        whenever(contactsDataManager.fetchContacts())
+                .thenReturn(Completable.complete())
+        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+                .thenReturn(Observable.empty())
+        whenever(contactsDataManager.refreshFacilitatedTransactions())
+                .thenReturn(Observable.empty())
         whenever(payloadDataManager.getPositionOfAccountInActiveList(accountPosition))
                 .thenReturn(correctedPosition)
         whenever(payloadDataManager.getNextReceiveAddressAndReserve(
@@ -723,6 +739,11 @@ class BalancePresenterTest {
         subject.onAccountChosen(accountPosition, fctxId)
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
+        verify(contactsDataManager).fetchContacts()
+        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).refreshFacilitatedTransactions()
+        verify(contactsDataManager).notesTransactionMap
+        verify(contactsDataManager).contactsTransactionMap
         verify(contactsDataManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(contactsDataManager)
         verify(payloadDataManager).getNextReceiveAddressAndReserve(
@@ -796,18 +817,31 @@ class BalancePresenterTest {
                 .thenReturn(Single.just(contact))
         whenever(contactsDataManager.sendPaymentDeclinedResponse(mdid, fctxId))
                 .thenReturn(Completable.complete())
-        whenever(view.getIfContactsEnabled()).thenReturn(false)
+        whenever(contactsDataManager.fetchContacts())
+                .thenReturn(Completable.complete())
+        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+                .thenReturn(Observable.empty())
+        whenever(contactsDataManager.refreshFacilitatedTransactions())
+                .thenReturn(Observable.empty())
         // Act
         subject.confirmDeclineTransaction(fctxId)
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verify(contactsDataManager).sendPaymentDeclinedResponse(mdid, fctxId)
+        verify(contactsDataManager).fetchContacts()
+        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).refreshFacilitatedTransactions()
+        verify(contactsDataManager).notesTransactionMap
+        verify(contactsDataManager).contactsTransactionMap
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).getIfContactsEnabled()
+
         verify(view).showToast(
                 R.string.contacts_pending_transaction_decline_success,
                 ToastCustom.TYPE_OK
         )
+        verify(view).showFctxRequiringAttention(any())
+        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onTransactionsUpdated(any())
         verifyNoMoreInteractions(view)
     }
 
@@ -819,18 +853,27 @@ class BalancePresenterTest {
                 .thenReturn(Single.error { Throwable() })
         whenever(contactsDataManager.fetchContacts())
                 .thenReturn(Completable.complete())
-        whenever(view.getIfContactsEnabled()).thenReturn(false)
+        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+                .thenReturn(Observable.empty())
+        whenever(contactsDataManager.refreshFacilitatedTransactions())
+                .thenReturn(Observable.empty())
         // Act
         subject.confirmDeclineTransaction(fctxId)
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
-        verify(contactsDataManager).fetchContacts()
+        verify(contactsDataManager, times(2)).fetchContacts()
+        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).refreshFacilitatedTransactions()
+        verify(contactsDataManager).notesTransactionMap
+        verify(contactsDataManager).contactsTransactionMap
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).getIfContactsEnabled()
         verify(view).showToast(
                 R.string.contacts_pending_transaction_decline_failure,
                 ToastCustom.TYPE_ERROR
         )
+        verify(view).showFctxRequiringAttention(any())
+        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onTransactionsUpdated(any())
         verifyNoMoreInteractions(view)
     }
 
@@ -844,18 +887,30 @@ class BalancePresenterTest {
                 .thenReturn(Single.just(contact))
         whenever(contactsDataManager.sendPaymentCancelledResponse(mdid, fctxId))
                 .thenReturn(Completable.complete())
-        whenever(view.getIfContactsEnabled()).thenReturn(false)
+        whenever(contactsDataManager.fetchContacts())
+                .thenReturn(Completable.complete())
+        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+                .thenReturn(Observable.empty())
+        whenever(contactsDataManager.refreshFacilitatedTransactions())
+                .thenReturn(Observable.empty())
         // Act
         subject.confirmCancelTransaction(fctxId)
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verify(contactsDataManager).sendPaymentCancelledResponse(mdid, fctxId)
+        verify(contactsDataManager).fetchContacts()
+        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).refreshFacilitatedTransactions()
+        verify(contactsDataManager).notesTransactionMap
+        verify(contactsDataManager).contactsTransactionMap
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).getIfContactsEnabled()
         verify(view).showToast(
                 R.string.contacts_pending_transaction_cancel_success,
                 ToastCustom.TYPE_OK
         )
+        verify(view).showFctxRequiringAttention(any())
+        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onTransactionsUpdated(any())
         verifyNoMoreInteractions(view)
     }
 
@@ -867,18 +922,29 @@ class BalancePresenterTest {
                 .thenReturn(Single.error { Throwable() })
         whenever(contactsDataManager.fetchContacts())
                 .thenReturn(Completable.complete())
-        whenever(view.getIfContactsEnabled()).thenReturn(false)
+        whenever(contactsDataManager.fetchContacts())
+                .thenReturn(Completable.complete())
+        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+                .thenReturn(Observable.empty())
+        whenever(contactsDataManager.refreshFacilitatedTransactions())
+                .thenReturn(Observable.empty())
         // Act
         subject.confirmCancelTransaction(fctxId)
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
-        verify(contactsDataManager).fetchContacts()
+        verify(contactsDataManager, times(2)).fetchContacts()
+        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).refreshFacilitatedTransactions()
+        verify(contactsDataManager).notesTransactionMap
+        verify(contactsDataManager).contactsTransactionMap
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).getIfContactsEnabled()
         verify(view).showToast(
                 R.string.contacts_pending_transaction_cancel_failure,
                 ToastCustom.TYPE_ERROR
         )
+        verify(view).showFctxRequiringAttention(any())
+        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onTransactionsUpdated(any())
         verifyNoMoreInteractions(view)
     }
 

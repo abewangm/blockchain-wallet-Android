@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.balance
 
 import android.support.annotation.VisibleForTesting
-import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.multiaddress.TransactionSummary
@@ -12,14 +11,14 @@ import io.reactivex.schedulers.Schedulers
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
+import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.comparators.ContactTransactionDateComparator
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
-import piuk.blockchain.android.data.exchange.BuyDataManager
-import piuk.blockchain.android.data.contacts.ContactsDataManager
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
+import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -71,7 +70,8 @@ class BalancePresenter @Inject constructor(
             Observable.merge(
                     getBalanceObservable(it),
                     getTransactionsListObservable(it),
-                    getUpdateTickerObservable()
+                    getUpdateTickerObservable(),
+                    getFacilitatedTransactionsObservable()
             ).compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnError { Timber.e(it) }
                     .subscribe(
@@ -390,24 +390,20 @@ class BalancePresenter @Inject constructor(
                     }.toObservable<Nothing>()
 
     private fun getFacilitatedTransactionsObservable(): Observable<MutableList<ContactTransactionModel>> {
-        if (view.getIfContactsEnabled()) {
-            return contactsDataManager.fetchContacts()
-                    .andThen<Contact>(contactsDataManager.contactsWithUnreadPaymentRequests)
-                    .toList()
-                    .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
-                    .toList()
-                    .onErrorReturnItem(emptyList())
-                    .toObservable()
-                    .doOnNext {
-                        handlePendingTransactions(it)
-                        view.onContactsHashMapUpdated(
-                                contactsDataManager.contactsTransactionMap,
-                                contactsDataManager.notesTransactionMap
-                        )
-                    }
-        } else {
-            return Observable.empty<MutableList<ContactTransactionModel>>()
-        }
+        return contactsDataManager.fetchContacts()
+                .andThen(contactsDataManager.contactsWithUnreadPaymentRequests)
+                .toList()
+                .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
+                .toList()
+                .onErrorReturnItem(emptyList())
+                .toObservable()
+                .doOnNext {
+                    handlePendingTransactions(it)
+                    view.onContactsHashMapUpdated(
+                            contactsDataManager.contactsTransactionMap,
+                            contactsDataManager.notesTransactionMap
+                    )
+                }
     }
 
     private fun refreshFacilitatedTransactions() {
@@ -443,7 +439,8 @@ class BalancePresenter @Inject constructor(
 
         notificationObservable = rxBus.register(NotificationPayload::class.java)
         notificationObservable?.subscribe({ notificationPayload ->
-            if (notificationPayload?.type == NotificationPayload.NotificationType.PAYMENT) {
+            if (notificationPayload.type != null
+                    && notificationPayload.type == NotificationPayload.NotificationType.PAYMENT) {
                 refreshFacilitatedTransactions()
             }
         })

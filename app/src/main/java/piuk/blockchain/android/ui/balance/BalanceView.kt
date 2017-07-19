@@ -11,8 +11,6 @@ import java.util.*
 
 interface BalanceView : View {
 
-    fun getIfContactsEnabled(): Boolean
-
     fun getIfShouldShowBuy(): Boolean
 
     fun onTransactionsUpdated(displayObjects: List<Any>)
