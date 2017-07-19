@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
@@ -93,16 +94,26 @@ public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
         }
     }
 
+    private Observable<String> getSessionId(String guid) {
+
+        if(sessionId == null) {
+            return authDataManager.getSessionId(guid);
+        } else {
+            return Observable.just(sessionId);
+        }
+    }
+
     private void verifyPassword(String password, String guid) {
         waitingForAuth = true;
 
         getCompositeDisposable().add(
-                authDataManager.getSessionId(guid)
+                getSessionId(guid)
                         .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.validating_password, null, false))
                         .doOnNext(s -> sessionId = s)
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> handleResponse(password, guid, response),
                                 throwable -> {
+                                    sessionId = null;
                                     Timber.e("verifyPassword: ", throwable);
                                     showErrorToast(R.string.auth_failed);
                                 }));
