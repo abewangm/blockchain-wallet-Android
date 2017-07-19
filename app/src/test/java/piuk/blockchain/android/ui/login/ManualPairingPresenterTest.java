@@ -15,7 +15,6 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
-import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -203,7 +202,6 @@ public class ManualPairingPresenterTest {
         verify(mActivity).dismissProgressDialog();
     }
 
-
     /**
      * AuthDataManager returns a {@link DecryptionException}, should trigger {@link
      * ManualPairingActivity#showToast(int, String)}.
@@ -389,7 +387,7 @@ public class ManualPairingPresenterTest {
         // Act
         mSubject.onContinueClicked();
         // Assert
-        verify(mActivity).showToast(R.string.invalid_guid, ToastCustom.TYPE_ERROR);
+        verify(mPayloadDataManager).initializeFromPayload(anyString(), anyString());
     }
 
     /**
@@ -456,7 +454,6 @@ public class ManualPairingPresenterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void onContinueClickedWaitingForAuthCountdownComplete() throws Exception {
-        // Arrange
         when(mActivity.getGuid()).thenReturn("1234567890");
         when(mActivity.getPassword()).thenReturn("1234567890");
 
@@ -472,7 +469,9 @@ public class ManualPairingPresenterTest {
         mSubject.onContinueClicked();
         // Assert
         // noinspection WrongConstant
-        verify(mActivity, times(1)).showToast(R.string.invalid_guid, ToastCustom.TYPE_ERROR);
+        verify(mActivity, times(2)).showToast(anyInt(), anyString());
+        verify(mActivity, times(2)).resetPasswordField();
+        verify(mAppUtil).clearCredentialsAndRestart();
     }
 
     @Test
