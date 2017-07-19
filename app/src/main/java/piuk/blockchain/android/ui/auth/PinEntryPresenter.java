@@ -8,6 +8,8 @@ import android.support.annotation.VisibleForTesting;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.crashlytics.android.answers.LoginEvent;
+
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -25,6 +27,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -187,8 +190,9 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     @Thunk
-    private void validateAndConfirmPin() {
+    void validateAndConfirmPin() {
         // Validate
         if (!mPrefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "").isEmpty()) {
             getView().setTitleVisibility(View.INVISIBLE);
@@ -213,8 +217,9 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
     /**
      * Resets the view without restarting the page
      */
+    @SuppressWarnings("WeakerAccess")
     @Thunk
-    private void clearPinViewAndReset() {
+    void clearPinViewAndReset() {
         clearPinBoxes();
         mUserEnteredConfirmationPin = null;
         checkFingerprintStatus();
@@ -249,7 +254,10 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                                 mAppUtil.restartAppWithVerifiedPin();
                             }
 
+                            Logging.INSTANCE.logLogin(new LoginEvent().putSuccess(true));
+
                         }, throwable -> {
+                            Logging.INSTANCE.logLogin(new LoginEvent().putSuccess(false));
 
                             if (throwable instanceof InvalidCredentialsException) {
                                 getView().goToPasswordRequiredActivity();

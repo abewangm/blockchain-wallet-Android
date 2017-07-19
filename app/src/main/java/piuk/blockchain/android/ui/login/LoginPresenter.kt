@@ -1,6 +1,9 @@
 package piuk.blockchain.android.ui.login
 
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.answers.Logging
+import piuk.blockchain.android.data.answers.PairingEvent
+import piuk.blockchain.android.data.answers.PairingMethod
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -33,7 +36,15 @@ class LoginPresenter @Inject constructor(
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true)
                     prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true)
                     view.startPinEntryActivity()
+
+                    Logging.logCustom(PairingEvent()
+                            .putMethod(PairingMethod.QR_CODE)
+                            .putSuccess(true))
                 }, { throwable ->
+                    Logging.logCustom(PairingEvent()
+                            .putMethod(PairingMethod.QR_CODE)
+                            .putSuccess(false))
+
                     if (throwable is SSLPeerUnverifiedException) {
                         // BaseActivity handles message
                         appUtil.clearCredentials()

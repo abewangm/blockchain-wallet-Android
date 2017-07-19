@@ -12,6 +12,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
@@ -87,7 +88,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
         super.onCreate();
         if (BuildConfig.USE_CRASHLYTICS) {
             // Init crash reporting
-            Fabric.with(this, new Crashlytics());
+            Fabric.with(this, new Crashlytics(), new Answers());
         }
         // Init Timber
         if (BuildConfig.DEBUG) {

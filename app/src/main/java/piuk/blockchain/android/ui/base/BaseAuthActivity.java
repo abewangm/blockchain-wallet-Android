@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
 
+import com.crashlytics.android.answers.ContentViewEvent;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
@@ -24,6 +26,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.connectivity.ConnectionEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
@@ -68,6 +71,9 @@ public class BaseAuthActivity extends AppCompatActivity {
                                 showAlertDialog(getString(R.string.ssl_no_connection), false);
                             }
                         }));
+
+        Logging.INSTANCE.logContentView(new ContentViewEvent()
+                .putContentName(getClass().getSimpleName()));
     }
 
     /**
