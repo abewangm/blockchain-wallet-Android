@@ -137,10 +137,6 @@ android {
             includeNoLocationClasses = true
         }
     }
-    sourceSets {
-        test.java.srcDirs += 'src/test/kotlin'
-        androidTest.java.srcDirs += 'src/androidTest/kotlin'
-    }
 }
 
 allOpen {
