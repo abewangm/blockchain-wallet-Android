@@ -42,6 +42,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.crashlytics.android.answers.ContentViewEvent;
 import com.mukesh.countrypicker.fragments.CountryPicker;
 import com.mukesh.countrypicker.models.Country;
 
@@ -53,6 +54,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.auth.PinEntryActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
@@ -127,6 +129,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
         super.onCreate(savedInstanceState);
         settingsPresenter.initView(this);
         settingsPresenter.onViewReady();
+
+        Logging.INSTANCE.logContentView(new ContentViewEvent()
+                .putContentName(getClass().getSimpleName()));
     }
 
     @SuppressLint("NewApi")

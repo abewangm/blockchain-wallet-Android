@@ -58,7 +58,8 @@
             android:layout_height="wrap_content"
             android:text="@string/copy_address"
             android:textColor="@color/primary_blue_accent"
-            android:theme="@style/PlainTheme" />
+            android:theme="@style/PlainTheme"
+            tools:ignore="NewApi" />
 
         <Button
             android:id="@+id/action_done"
@@ -67,6 +68,7 @@
             android:layout_height="wrap_content"
             android:text="@string/done"
             android:textColor="@color/primary_blue_accent"
-            android:theme="@style/PlainTheme" />
+            android:theme="@style/PlainTheme"
+            tools:ignore="NewApi" />
     </LinearLayout>
 </RelativeLayout>
