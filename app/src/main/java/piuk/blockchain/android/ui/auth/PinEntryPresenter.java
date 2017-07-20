@@ -248,13 +248,13 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
 
                             setAccountLabelIfNecessary();
 
+                            Logging.INSTANCE.logLogin(new LoginEvent().putSuccess(true));
+
                             if (!mPayloadDataManager.getWallet().isUpgraded()) {
                                 getView().goToUpgradeWalletActivity();
                             } else {
                                 mAppUtil.restartAppWithVerifiedPin();
                             }
-
-                            Logging.INSTANCE.logLogin(new LoginEvent().putSuccess(true));
 
                         }, throwable -> {
                             Logging.INSTANCE.logLogin(new LoginEvent().putSuccess(false));

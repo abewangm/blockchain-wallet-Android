@@ -4,9 +4,12 @@ import android.graphics.Bitmap
 import io.reactivex.Observable
 import okhttp3.ResponseBody
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.answers.Logging
+import piuk.blockchain.android.data.answers.PairingEvent
+import piuk.blockchain.android.data.answers.PairingMethod
 import piuk.blockchain.android.data.auth.AuthDataManager
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -34,7 +37,11 @@ class PairingCodePresenter @Inject constructor(
                 .flatMap { encryptionPassword -> generatePairingCodeObservable(encryptionPassword.string()) }
                 .compose(RxUtil.addObservableToCompositeDisposable<Bitmap>(this))
                 .subscribe(
-                        { bitmap -> view.onQrLoaded(bitmap) },
+                        { bitmap ->
+                            view.onQrLoaded(bitmap)
+                            Logging.logCustom(PairingEvent()
+                                    .putMethod(PairingMethod.REVERSE))
+                        },
                         { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
     }
 

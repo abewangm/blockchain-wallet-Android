@@ -5,6 +5,10 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatDialogFragment;
 
+import com.crashlytics.android.answers.ContentViewEvent;
+
+import piuk.blockchain.android.data.answers.Logging;
+
 public abstract class BaseDialogFragment<VIEW extends View, PRESENTER extends BasePresenter<VIEW>>
         extends AppCompatDialogFragment {
 
@@ -17,6 +21,9 @@ public abstract class BaseDialogFragment<VIEW extends View, PRESENTER extends Ba
 
         presenter = createPresenter();
         presenter.initView(getMvpView());
+
+        Logging.INSTANCE.logContentView(new ContentViewEvent()
+                .putContentName(getClass().getSimpleName()));
     }
 
     @CallSuper

@@ -38,18 +38,20 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.Logging;
+import piuk.blockchain.android.data.answers.PaymentSentEvent;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
-import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
-import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -78,7 +80,7 @@ public class SendPresenter extends BasePresenter<SendView> {
 
     private MonetaryUtil monetaryUtil;
     private ReceiveCurrencyHelper currencyHelper;
-    public SendModel sendModel;
+    private SendModel sendModel;
     @Nullable private String contactMdid;
     @Nullable private String fctxId;
     private String metricInputFlag;
@@ -843,7 +845,17 @@ public class SendPresenter extends BasePresenter<SendView> {
                                     clearUnspentResponseCache();
                                     getView().dismissConfirmationDialog();
                                     handleSuccessfulPayment(hash);
-                                }, throwable -> showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)));
+
+                                    Logging.INSTANCE.logCustom(new PaymentSentEvent()
+                                            .putSuccess(true)
+                                            .putAmountForRange(sendModel.pendingTransaction.bigIntAmount));
+                                }, throwable -> {
+                                    showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
+
+                                    Logging.INSTANCE.logCustom(new PaymentSentEvent()
+                                            .putSuccess(false)
+                                            .putAmountForRange(sendModel.pendingTransaction.bigIntAmount));
+                                }));
     }
 
     private void handleSuccessfulPayment(String hash) {
