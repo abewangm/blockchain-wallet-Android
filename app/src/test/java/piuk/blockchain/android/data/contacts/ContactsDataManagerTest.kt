@@ -73,17 +73,17 @@ class ContactsDataManagerTest : RxTest() {
         contact2.addFacilitatedTransaction(facilitatedTransaction0)
         contact2.addFacilitatedTransaction(facilitatedTransaction1)
         whenever(contactsService.fetchContacts()).thenReturn(Completable.complete())
-        whenever(contactsService.contactList).thenReturn(
+        whenever(contactsService.getContactList()).thenReturn(
                 Observable.fromIterable(listOf(contact0, contact1, contact2)))
         // Act
         val testObserver = subject.fetchContacts().test()
         // Assert
         verify(contactsService).fetchContacts()
-        verify(contactsService).contactList
+        verify(contactsService).getContactList()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        subject.contactsTransactionMap.size shouldEqual 1
-        subject.contactsTransactionMap[facilitatedTransaction1.txHash]
+        subject.getContactsTransactionMap().size shouldEqual 1
+        subject.getContactsTransactionMap()[facilitatedTransaction1.txHash]
                 as String shouldEqual contact2.name
     }
 
@@ -120,12 +120,12 @@ class ContactsDataManagerTest : RxTest() {
         val contact0 = Contact()
         val contact1 = Contact()
         val contact2 = Contact()
-        whenever(contactsService.contactList).thenReturn(
+        whenever(contactsService.getContactList()).thenReturn(
                 Observable.fromIterable(listOf(contact0, contact1, contact2)))
         // Act
-        val testObserver = subject.contactList.toList().test()
+        val testObserver = subject.getContactList().toList().test()
         // Assert
-        verify(contactsService).contactList
+        verify(contactsService).getContactList()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         testObserver.values()[0].size shouldEqual 3
@@ -138,12 +138,12 @@ class ContactsDataManagerTest : RxTest() {
         val contact0 = Contact()
         val contact1 = Contact()
         val contact2 = Contact()
-        whenever(contactsService.contactsWithUnreadPaymentRequests)
+        whenever(contactsService.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         // Act
-        val testObserver = subject.contactsWithUnreadPaymentRequests.toList().test()
+        val testObserver = subject.getContactsWithUnreadPaymentRequests().toList().test()
         // Assert
-        verify(contactsService).contactsWithUnreadPaymentRequests
+        verify(contactsService).getContactsWithUnreadPaymentRequests()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         testObserver.values()[0].size shouldEqual 3
@@ -457,12 +457,12 @@ class ContactsDataManagerTest : RxTest() {
         contact1.addFacilitatedTransaction(facilitatedTransaction1)
         // Has no transactions
         val contact2 = Contact().apply { name = "contact2" }
-        whenever(contactsService.contactList)
+        whenever(contactsService.getContactList())
                 .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         // Act
         val testObserver = subject.refreshFacilitatedTransactions().toList().test()
         // Assert
-        verify(contactsService).contactList
+        verify(contactsService).getContactList()
         verify(pendingTransactionListStore).insertTransaction(any<ContactTransactionModel>())
         testObserver.assertComplete()
         testObserver.assertNoErrors()
@@ -495,12 +495,12 @@ class ContactsDataManagerTest : RxTest() {
             state = FacilitatedTransaction.STATE_CANCELLED
         }
         contact2.addFacilitatedTransaction(facilitatedTransaction2)
-        whenever(contactsService.contactList)
+        whenever(contactsService.getContactList())
                 .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         // Act
         val testObserver = subject.refreshFacilitatedTransactions().toList().test()
         // Assert
-        verify(contactsService).contactList
+        verify(contactsService).getContactList()
         verify(pendingTransactionListStore).insertTransaction(any<ContactTransactionModel>())
         testObserver.assertComplete()
         testObserver.assertNoErrors()
@@ -520,7 +520,7 @@ class ContactsDataManagerTest : RxTest() {
         whenever(pendingTransactionListStore.list)
                 .thenReturn(listOf(contactTransactionModel0, contactTransactionModel1, contactTransactionModel2))
         // Act
-        val testObserver = subject.facilitatedTransactions.toList().test()
+        val testObserver = subject.getFacilitatedTransactions().toList().test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
@@ -542,12 +542,12 @@ class ContactsDataManagerTest : RxTest() {
         contact0.addFacilitatedTransaction(facilitatedTransaction2)
         val contact1 = Contact()
         val contact2 = Contact()
-        whenever(contactsService.contactList)
+        whenever(contactsService.getContactList())
                 .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         // Act
         val testObserver = subject.getContactFromFctxId(fctxId).test()
         // Assert
-        verify(contactsService).contactList
+        verify(contactsService).getContactList()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         testObserver.values()[0] shouldEqual contact0
@@ -567,12 +567,12 @@ class ContactsDataManagerTest : RxTest() {
         contact0.addFacilitatedTransaction(facilitatedTransaction2)
         val contact1 = Contact()
         val contact2 = Contact()
-        whenever(contactsService.contactList)
+        whenever(contactsService.getContactList())
                 .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         // Act
         val testObserver = subject.getContactFromFctxId(fctxId).test()
         // Assert
-        verify(contactsService).contactList
+        verify(contactsService).getContactList()
         testObserver.assertError(NoSuchElementException::class.java)
         testObserver.assertNotComplete()
         testObserver.assertNoValues()
@@ -599,9 +599,9 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
 
         // Act
-        val result = subject.contactsTransactionMap
+        val result = subject.getContactsTransactionMap()
         // Assert
-        result shouldEqual subject.contactsTransactionMap
+        result shouldEqual subject.getContactsTransactionMap()
     }
 
     @Test
@@ -610,9 +610,9 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
 
         // Act
-        val result = subject.notesTransactionMap
+        val result = subject.getNotesTransactionMap()
         // Assert
-        result shouldEqual subject.notesTransactionMap
+        result shouldEqual subject.getNotesTransactionMap()
     }
 
     @Test
@@ -625,8 +625,8 @@ class ContactsDataManagerTest : RxTest() {
         // Assert
         verify(pendingTransactionListStore).clearList()
         verify(contactsService).destroy()
-        subject.notesTransactionMap.size shouldEqual 0
-        subject.contactsTransactionMap.size shouldEqual 0
+        subject.getNotesTransactionMap().size shouldEqual 0
+        subject.getContactsTransactionMap().size shouldEqual 0
     }
 
 }

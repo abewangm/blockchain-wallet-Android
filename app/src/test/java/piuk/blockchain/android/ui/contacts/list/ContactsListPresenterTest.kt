@@ -53,7 +53,7 @@ class ContactsListPresenterTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         whenever(mockContactsManager.acceptInvitation(uri)).thenReturn(Observable.just(Contact()))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.empty())
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.empty())
         // Act
         subject.handleLink(uri)
         // Assert
@@ -62,7 +62,7 @@ class ContactsListPresenterTest {
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
         verify(mockContactsManager).acceptInvitation(uri)
         verify(mockContactsManager).fetchContacts()
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         assertNull(subject.link)
     }
 
@@ -94,7 +94,7 @@ class ContactsListPresenterTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         whenever(mockPayloadDataManager.loadNodes()).thenReturn(Observable.just(true))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(Collections.emptyList()))
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.fromIterable(Collections.emptyList()))
         // Act
         subject.onViewReady()
         notificationObservable.onNext(notificationPayload)
@@ -104,7 +104,7 @@ class ContactsListPresenterTest {
         verify(mockActivity, times(3)).setUiState(UiState.LOADING)
         verify(mockPayloadDataManager).loadNodes()
         verify(mockContactsManager, times(2)).fetchContacts()
-        verify(mockContactsManager, times(2)).contactList
+        verify(mockContactsManager, times(2)).getContactList()
     }
 
     @Test
@@ -115,7 +115,7 @@ class ContactsListPresenterTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         whenever(mockPayloadDataManager.loadNodes()).thenReturn(Observable.just(true))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(Collections.emptyList()))
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.fromIterable(Collections.emptyList()))
         // Act
         subject.onViewReady()
         notificationObservable.onError(Throwable())
@@ -125,7 +125,7 @@ class ContactsListPresenterTest {
         verify(mockActivity, times(2)).setUiState(UiState.LOADING)
         verify(mockPayloadDataManager).loadNodes()
         verify(mockContactsManager).fetchContacts()
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
     }
 
     @Test
@@ -201,8 +201,8 @@ class ContactsListPresenterTest {
                 })
         val notificationObservable = PublishSubject.create<NotificationPayload>()
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(contacts))
-        whenever(mockContactsManager.contactsWithUnreadPaymentRequests)
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.fromIterable(contacts))
+        whenever(mockContactsManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.fromIterable(listOf(Contact().apply {
                     mdid = "mdid"
                     this.id = id
@@ -225,8 +225,8 @@ class ContactsListPresenterTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         whenever(mockPayloadDataManager.loadNodes()).thenReturn(Observable.just(true))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(listOf<Contact>()))
-        whenever(mockContactsManager.contactsWithUnreadPaymentRequests)
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.fromIterable(listOf<Contact>()))
+        whenever(mockContactsManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.fromIterable(listOf<Contact>()))
         whenever(mockContactsManager.readInvitationSent(any())).thenReturn(Observable.just(true))
         // Act
@@ -247,9 +247,9 @@ class ContactsListPresenterTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         whenever(mockPayloadDataManager.loadNodes()).thenReturn(Observable.just(true))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.contactList)
+        whenever(mockContactsManager.getContactList())
                 .thenReturn(Observable.fromIterable(listOf<Contact>()))
-        whenever(mockContactsManager.contactsWithUnreadPaymentRequests)
+        whenever(mockContactsManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.error { Throwable() })
         // Act
         subject.onViewReady()
@@ -336,12 +336,12 @@ class ContactsListPresenterTest {
         // Arrange
         whenever(mockContactsManager.readInvitationSent(any<Contact>()))
                 .thenReturn(Observable.just(true))
-        whenever(mockContactsManager.contactList).thenReturn(Observable.error { Throwable() })
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.error { Throwable() })
         // Act
         subject.checkStatusOfPendingContacts(listOf(Contact(), Contact(), Contact()))
         // Assert
         verify(mockContactsManager, times(3)).readInvitationSent(any<Contact>())
-        verify(mockContactsManager, times(3)).contactList
+        verify(mockContactsManager, times(3)).getContactList()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity, times(3)).setUiState(UiState.LOADING)
         verify(mockActivity, times(3)).setUiState(UiState.FAILURE)
@@ -353,12 +353,12 @@ class ContactsListPresenterTest {
     fun refreshContactsFailure() {
         // Arrange
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.error { Throwable() })
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.error { Throwable() })
         // Act
         subject.refreshContacts()
         // Assert
         verify(mockContactsManager).fetchContacts()
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).setUiState(UiState.LOADING)
         verify(mockActivity).setUiState(UiState.FAILURE)

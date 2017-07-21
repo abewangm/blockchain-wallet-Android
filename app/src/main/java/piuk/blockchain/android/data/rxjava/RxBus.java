@@ -27,10 +27,6 @@ public class RxBus {
     @VisibleForTesting
     ConcurrentHashMap<Object, List<Subject>> subjectsMap = new ConcurrentHashMap<>();
 
-    public RxBus() {
-        // Constructor intentionally empty for injection
-    }
-
     /**
      * Registers a new {@link PublishSubject} whose type matches the class {@code type} passed to
      * the method. Returns the PublishSubject so it can be subscribed to, events acted upon and

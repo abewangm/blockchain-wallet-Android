@@ -225,7 +225,7 @@ class BalancePresenterTest {
         whenever(transactionListDataManager.fetchTransactions(itemAccount, 50, 0))
                 .thenReturn(Observable.just(listOf(transactionSummary)))
         whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(contactsDataManager.contactsWithUnreadPaymentRequests).thenReturn(Observable.empty())
+        whenever(contactsDataManager.getContactsWithUnreadPaymentRequests()).thenReturn(Observable.empty())
         // Act
         subject.onRefreshRequested()
         // Assert
@@ -234,7 +234,7 @@ class BalancePresenterTest {
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
         verify(contactsDataManager).fetchContacts()
-        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).setUiState(UiState.FAILURE)
         verifyNoMoreInteractions(view)
@@ -256,7 +256,7 @@ class BalancePresenterTest {
                 .thenReturn(0)
         whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
         whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(contactsDataManager.contactsWithUnreadPaymentRequests).thenReturn(Observable.empty())
+        whenever(contactsDataManager.getContactsWithUnreadPaymentRequests()).thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions()).thenReturn(Observable.empty())
         whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
         // Act
@@ -268,10 +268,10 @@ class BalancePresenterTest {
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
         verify(contactsDataManager).fetchContacts()
-        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).contactsTransactionMap
-        verify(contactsDataManager).notesTransactionMap
+        verify(contactsDataManager).getContactsTransactionMap()
+        verify(contactsDataManager).getNotesTransactionMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(accessState).isBtc
         verifyNoMoreInteractions(accessState)
@@ -314,12 +314,12 @@ class BalancePresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)).thenReturn(true)
         whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
         whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+        whenever(contactsDataManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions())
                 .thenReturn(Observable.just(transactionModel))
-        whenever(contactsDataManager.contactsTransactionMap).thenReturn(HashMap())
-        whenever(contactsDataManager.notesTransactionMap).thenReturn(HashMap())
+        whenever(contactsDataManager.getContactsTransactionMap()).thenReturn(HashMap())
+        whenever(contactsDataManager.getNotesTransactionMap()).thenReturn(HashMap())
         whenever(stringUtils.getString(R.string.contacts_pending_transaction)).thenReturn("")
         whenever(stringUtils.getString(R.string.contacts_transaction_history)).thenReturn("")
         whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
@@ -340,10 +340,10 @@ class BalancePresenterTest {
         verify(exchangeRateFactory).getLastPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(contactsDataManager).fetchContacts()
-        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).contactsTransactionMap
-        verify(contactsDataManager).notesTransactionMap
+        verify(contactsDataManager).getContactsTransactionMap()
+        verify(contactsDataManager).getNotesTransactionMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(stringUtils).getString(R.string.contacts_pending_transaction)
         verify(stringUtils).getString(R.string.contacts_transaction_history)
@@ -576,12 +576,12 @@ class BalancePresenterTest {
         val facilitatedTransactions = mutableListOf<ContactTransactionModel>().apply {
             add(transactionModel)
         }
-        whenever(contactsDataManager.facilitatedTransactions)
+        whenever(contactsDataManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(facilitatedTransactions))
         // Act
         subject.onPendingTransactionLongClicked(fctxId)
         // Assert
-        verify(contactsDataManager).facilitatedTransactions
+        verify(contactsDataManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showTransactionDeclineDialog(fctxId)
         verifyNoMoreInteractions(view)
@@ -600,12 +600,12 @@ class BalancePresenterTest {
         val facilitatedTransactions = mutableListOf<ContactTransactionModel>().apply {
             add(transactionModel)
         }
-        whenever(contactsDataManager.facilitatedTransactions)
+        whenever(contactsDataManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(facilitatedTransactions))
         // Act
         subject.onPendingTransactionLongClicked(fctxId)
         // Assert
-        verify(contactsDataManager).facilitatedTransactions
+        verify(contactsDataManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showTransactionCancelDialog(fctxId)
         verifyNoMoreInteractions(view)
@@ -624,12 +624,12 @@ class BalancePresenterTest {
         val facilitatedTransactions = mutableListOf<ContactTransactionModel>().apply {
             add(transactionModel)
         }
-        whenever(contactsDataManager.facilitatedTransactions)
+        whenever(contactsDataManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(facilitatedTransactions))
         // Act
         subject.onPendingTransactionLongClicked(fctxId)
         // Assert
-        verify(contactsDataManager).facilitatedTransactions
+        verify(contactsDataManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showTransactionDeclineDialog(fctxId)
         verifyNoMoreInteractions(view)
@@ -648,12 +648,12 @@ class BalancePresenterTest {
         val facilitatedTransactions = mutableListOf<ContactTransactionModel>().apply {
             add(transactionModel)
         }
-        whenever(contactsDataManager.facilitatedTransactions)
+        whenever(contactsDataManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(facilitatedTransactions))
         // Act
         subject.onPendingTransactionLongClicked(fctxId)
         // Assert
-        verify(contactsDataManager).facilitatedTransactions
+        verify(contactsDataManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showTransactionCancelDialog(fctxId)
         verifyNoMoreInteractions(view)
@@ -670,12 +670,12 @@ class BalancePresenterTest {
         }
         val transactionModel = ContactTransactionModel("Contact name", fctx)
         val facilitatedTransactions = listOf(transactionModel)
-        whenever(contactsDataManager.facilitatedTransactions)
+        whenever(contactsDataManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(facilitatedTransactions))
         // Act
         subject.onPendingTransactionLongClicked(fctxId)
         // Assert
-        verify(contactsDataManager).facilitatedTransactions
+        verify(contactsDataManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(contactsDataManager)
         verifyZeroInteractions(view)
     }
@@ -720,7 +720,7 @@ class BalancePresenterTest {
         whenever(contactsDataManager.getContactFromFctxId(fctxId)).thenReturn(Single.just(contact))
         whenever(contactsDataManager.fetchContacts())
                 .thenReturn(Completable.complete())
-        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+        whenever(contactsDataManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions())
                 .thenReturn(Observable.empty())
@@ -740,10 +740,10 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verify(contactsDataManager).fetchContacts()
-        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).notesTransactionMap
-        verify(contactsDataManager).contactsTransactionMap
+        verify(contactsDataManager).getNotesTransactionMap()
+        verify(contactsDataManager).getContactsTransactionMap()
         verify(contactsDataManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(contactsDataManager)
         verify(payloadDataManager).getNextReceiveAddressAndReserve(
@@ -819,7 +819,7 @@ class BalancePresenterTest {
                 .thenReturn(Completable.complete())
         whenever(contactsDataManager.fetchContacts())
                 .thenReturn(Completable.complete())
-        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+        whenever(contactsDataManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions())
                 .thenReturn(Observable.empty())
@@ -829,10 +829,10 @@ class BalancePresenterTest {
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verify(contactsDataManager).sendPaymentDeclinedResponse(mdid, fctxId)
         verify(contactsDataManager).fetchContacts()
-        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).notesTransactionMap
-        verify(contactsDataManager).contactsTransactionMap
+        verify(contactsDataManager).getNotesTransactionMap()
+        verify(contactsDataManager).getContactsTransactionMap()
         verifyNoMoreInteractions(contactsDataManager)
 
         verify(view).showToast(
@@ -853,7 +853,7 @@ class BalancePresenterTest {
                 .thenReturn(Single.error { Throwable() })
         whenever(contactsDataManager.fetchContacts())
                 .thenReturn(Completable.complete())
-        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+        whenever(contactsDataManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions())
                 .thenReturn(Observable.empty())
@@ -862,10 +862,10 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verify(contactsDataManager, times(2)).fetchContacts()
-        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).notesTransactionMap
-        verify(contactsDataManager).contactsTransactionMap
+        verify(contactsDataManager).getNotesTransactionMap()
+        verify(contactsDataManager).getContactsTransactionMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showToast(
                 R.string.contacts_pending_transaction_decline_failure,
@@ -889,7 +889,7 @@ class BalancePresenterTest {
                 .thenReturn(Completable.complete())
         whenever(contactsDataManager.fetchContacts())
                 .thenReturn(Completable.complete())
-        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+        whenever(contactsDataManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions())
                 .thenReturn(Observable.empty())
@@ -899,10 +899,10 @@ class BalancePresenterTest {
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verify(contactsDataManager).sendPaymentCancelledResponse(mdid, fctxId)
         verify(contactsDataManager).fetchContacts()
-        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).notesTransactionMap
-        verify(contactsDataManager).contactsTransactionMap
+        verify(contactsDataManager).getNotesTransactionMap()
+        verify(contactsDataManager).getContactsTransactionMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showToast(
                 R.string.contacts_pending_transaction_cancel_success,
@@ -924,7 +924,7 @@ class BalancePresenterTest {
                 .thenReturn(Completable.complete())
         whenever(contactsDataManager.fetchContacts())
                 .thenReturn(Completable.complete())
-        whenever(contactsDataManager.contactsWithUnreadPaymentRequests)
+        whenever(contactsDataManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions())
                 .thenReturn(Observable.empty())
@@ -933,10 +933,10 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verify(contactsDataManager, times(2)).fetchContacts()
-        verify(contactsDataManager).contactsWithUnreadPaymentRequests
+        verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).notesTransactionMap
-        verify(contactsDataManager).contactsTransactionMap
+        verify(contactsDataManager).getNotesTransactionMap()
+        verify(contactsDataManager).getContactsTransactionMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showToast(
                 R.string.contacts_pending_transaction_cancel_failure,

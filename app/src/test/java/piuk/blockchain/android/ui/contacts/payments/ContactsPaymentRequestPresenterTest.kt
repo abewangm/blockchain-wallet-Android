@@ -93,11 +93,11 @@ class ContactsPaymentRequestPresenterTest {
         val contact2 = Contact()
         val contactList = listOf(contact0, contact1, contact2)
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(contactList))
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.fromIterable(contactList))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).fragmentBundle
         verify(mockActivity).contactLoaded(contactName, paymentRequestType)
@@ -120,11 +120,11 @@ class ContactsPaymentRequestPresenterTest {
             putSerializable(ARGUMENT_REQUEST_TYPE, paymentRequestType)
         }
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
-        whenever(mockContactsManager.contactList).thenReturn(Observable.error { Throwable() })
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.error { Throwable() })
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).fragmentBundle
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
@@ -152,11 +152,11 @@ class ContactsPaymentRequestPresenterTest {
         val contact2 = Contact()
         val contactList = listOf(contact0, contact1, contact2)
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
-        whenever(mockContactsManager.contactList).thenReturn(Observable.fromIterable(contactList))
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.fromIterable(contactList))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).fragmentBundle
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))

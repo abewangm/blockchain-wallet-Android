@@ -3,11 +3,11 @@ package piuk.blockchain.android.data.datamanagers;
 import com.google.zxing.BarcodeFormat;
 
 import android.graphics.Bitmap;
-import android.util.Log;
+
+import info.blockchain.wallet.crypto.AESUtil;
 
 import org.spongycastle.util.encoders.Hex;
 
-import info.blockchain.wallet.crypto.AESUtil;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -33,14 +33,14 @@ public class QrCodeDataManager {
     }
 
     /**
-     * Generates a pairing QR code in Bitmap format from a given password, sharedkey and encryption phrase to specified dimensions, wrapped in an
-     * Observable. Will throw an error if the Bitmap is null.
+     * Generates a pairing QR code in Bitmap format from a given password, sharedkey and encryption
+     * phrase to specified dimensions, wrapped in an Observable. Will throw an error if the Bitmap
+     * is null.
      *
-     * @param password          Wallet's plain text password
-     * @param sharedKey         Wallet's plain text sharedkey
-     * @param encryptionPhrase  The pairing encryption password
-     * @param dimensions        The dimensions of the QR code to be returned
-     * @return
+     * @param password         Wallet's plain text password
+     * @param sharedKey        Wallet's plain text sharedkey
+     * @param encryptionPhrase The pairing encryption password
+     * @param dimensions       The dimensions of the QR code to be returned
      */
     public Observable<Bitmap> generatePairingCode(String guid, String password, String sharedKey, String encryptionPhrase, int dimensions) {
         return generatePairingCodeObservable(guid, password, sharedKey, encryptionPhrase, dimensions)
@@ -60,7 +60,11 @@ public class QrCodeDataManager {
         });
     }
 
-    private Observable<Bitmap> generatePairingCodeObservable(String guid, String password, String sharedKey, String encryptionPhrase, int dimensions) {
+    private Observable<Bitmap> generatePairingCodeObservable(String guid,
+                                                             String password,
+                                                             String sharedKey,
+                                                             String encryptionPhrase,
+                                                             int dimensions) {
         return Observable.fromCallable(() -> {
 
             String pwHex = Hex.toHexString(password.getBytes("utf-8"));

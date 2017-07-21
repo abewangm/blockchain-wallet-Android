@@ -110,7 +110,7 @@ class ContactPaymentDialogPresenterTest {
         val contactId = "CONTACT_ID"
         bundle.putString(ARGUMENT_CONTACT_ID, contactId)
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
-        whenever(mockContactsDataManager.contactList).thenReturn(Observable.just(Contact()))
+        whenever(mockContactsDataManager.getContactList()).thenReturn(Observable.just(Contact()))
         // Act
         subject.onViewReady()
         // Assert
@@ -135,7 +135,7 @@ class ContactPaymentDialogPresenterTest {
         bundle.putString(ARGUMENT_CONTACT_ID, contactId)
         bundle.putString(ARGUMENT_URI, uri)
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
-        whenever(mockContactsDataManager.contactList).thenReturn(Observable.just(contact))
+        whenever(mockContactsDataManager.getContactList()).thenReturn(Observable.just(contact))
         // Act
         subject.onViewReady()
         // Assert
@@ -161,7 +161,7 @@ class ContactPaymentDialogPresenterTest {
         bundle.putString(ARGUMENT_CONTACT_ID, contactId)
         bundle.putString(ARGUMENT_URI, uri)
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
-        whenever(mockContactsDataManager.contactList).thenReturn(Observable.just(contact))
+        whenever(mockContactsDataManager.getContactList()).thenReturn(Observable.just(contact))
         // Act
         subject.onViewReady()
         // Assert
