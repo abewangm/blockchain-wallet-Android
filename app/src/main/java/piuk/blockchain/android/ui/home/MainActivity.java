@@ -837,15 +837,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void showDefaultPrompt(AlertDialog alertDialog) {
-        binding.getRoot().postDelayed(() -> {
-            if (!isFinishing()) {
-                alertDialog.show();
-            }
-        }, 1000);
-    }
-
-    @Override
     public void showCustomPrompt(AppCompatDialogFragment alertFragments) {
         if (!isFinishing()) {
             alertFragments.show(getSupportFragmentManager(), alertFragments.getTag());

@@ -72,7 +72,7 @@
                     android:theme="@style/ButtonBlueTheme" />
 
                 <TextView
-                    android:id="@+id/recover_funds"
+                    android:id="@+id/recoverFunds"
                     fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/button_settings"
+            android:id="@+id/buttonSettings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"

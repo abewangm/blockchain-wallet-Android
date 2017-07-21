@@ -5,13 +5,14 @@ import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import piuk.blockchain.android.BaseEspressoTest;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.util.PrefsUtil;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -29,7 +30,12 @@ public class LandingActivityTest extends BaseEspressoTest {
 
     private static final ViewInteraction BUTTON_LOGIN = onView(withId(R.id.login));
     private static final ViewInteraction BUTTON_CREATE = onView(withId(R.id.create));
-    private static final ViewInteraction BUTTON_RECOVER = onView(withId(R.id.recover_funds));
+    private static final ViewInteraction BUTTON_RECOVER = onView(withId(R.id.recoverFunds));
+
+    @Before
+    public void setUp() throws Exception {
+        new PrefsUtil(activityRule.getActivity()).setValue("disable_root_warning", true);
+    }
 
     @Rule
     public ActivityTestRule<LandingActivity> activityRule =
@@ -68,7 +74,7 @@ public class LandingActivityTest extends BaseEspressoTest {
         onView(withId(android.R.id.button1)).perform(click());
         sleep(500);
         // Check recover funds activity launched
-        onView(withText(R.string.recover_funds)).check(matches(isDisplayed()));
+        onView(withText(R.string.recover_funds_instructions)).check(matches(isDisplayed()));
     }
 
 }

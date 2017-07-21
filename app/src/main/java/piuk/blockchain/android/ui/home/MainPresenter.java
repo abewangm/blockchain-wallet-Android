@@ -101,11 +101,6 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     private void initPrompts(Context context) {
         getCompositeDisposable().add(
-                promptManager.getDefaultPrompts(context)
-                        .flatMap(Observable::fromIterable)
-                        .forEach(getView()::showDefaultPrompt));
-
-        getCompositeDisposable().add(
                 settingsDataManager.getSettings()
                         .flatMap(settings -> promptManager.getCustomPrompts(context, settings))
                         .flatMap(Observable::fromIterable)

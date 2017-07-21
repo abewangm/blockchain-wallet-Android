@@ -41,8 +41,6 @@ interface MainView extends View {
 
     void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails);
 
-    void showDefaultPrompt(AlertDialog alertDialog);
-
     void showCustomPrompt(AppCompatDialogFragment alertFragment);
 
     Context getActivityContext();

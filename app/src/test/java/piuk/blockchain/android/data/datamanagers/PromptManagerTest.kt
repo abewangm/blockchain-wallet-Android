@@ -27,11 +27,11 @@ class PromptManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun getDefaultPrompts() {
+    fun getPreLoginPrompts() {
         // Arrange
         val context: Context = mock()
         // Act
-        val testObserver = subject.getDefaultPrompts(context).test()
+        val testObserver = subject.getPreLoginPrompts(context).test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
