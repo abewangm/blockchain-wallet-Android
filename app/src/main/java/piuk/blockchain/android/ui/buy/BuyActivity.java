@@ -14,12 +14,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
+import com.crashlytics.android.answers.PurchaseEvent;
 import com.facebook.device.yearclass.YearClass;
 
 import javax.inject.Inject;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.databinding.ActivityBuyBinding;
 import piuk.blockchain.android.injection.Injector;
@@ -119,6 +121,9 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
     public void onBuyCompleted() {
         Timber.d("onBuyCompleted: done");
         didBuyBitcoin = true;
+        Logging.INSTANCE.logPurchase(new PurchaseEvent()
+                .putItemName("Bitcoin")
+                .putSuccess(true));
     }
 
     @Override

@@ -6,7 +6,7 @@ import retrofit2.http.GET;
 
 public interface ConnectionEndpoint {
 
-    @GET
+    @GET(".")
     Observable<ResponseBody> pingExplorer();
 
 }

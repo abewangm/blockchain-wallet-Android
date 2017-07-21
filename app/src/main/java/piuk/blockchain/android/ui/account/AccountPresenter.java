@@ -21,6 +21,10 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.answers.AddressType;
+import piuk.blockchain.android.data.answers.CreateAccountEvent;
+import piuk.blockchain.android.data.answers.ImportEvent;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
@@ -113,6 +117,9 @@ public class AccountPresenter extends BasePresenter<AccountView> {
                             intent.putExtra(KEY_XPUB, account.getXpub());
                             getView().broadcastIntent(intent);
                             getView().onUpdateAccountsList();
+
+                            Logging.INSTANCE.logCustom(
+                                    new CreateAccountEvent(payloadDataManager.getAccounts().size()));
 
                         }, throwable -> {
                             getView().dismissProgressDialog();
@@ -221,7 +228,10 @@ public class AccountPresenter extends BasePresenter<AccountView> {
         getCompositeDisposable().add(
                 payloadDataManager.addLegacyAddress(legacyAddress)
                         .subscribe(
-                                () -> getView().showRenameImportedAddressDialog(legacyAddress),
+                                () -> {
+                                    getView().showRenameImportedAddressDialog(legacyAddress);
+                                    Logging.INSTANCE.logCustom(new ImportEvent(AddressType.WATCH_ONLY));
+                                },
                                 throwable -> getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
@@ -300,6 +310,9 @@ public class AccountPresenter extends BasePresenter<AccountView> {
                                 getView().showToast(R.string.private_key_successfully_imported, ToastCustom.TYPE_OK);
                                 getView().onUpdateAccountsList();
                                 getView().showRenameImportedAddressDialog(legacyAddress);
+
+                                Logging.INSTANCE.logCustom(new ImportEvent(AddressType.PRIVATE_KEY));
+
                             }, throwable -> getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
         } else {
             getView().showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR);

@@ -18,6 +18,8 @@ import android.util.Pair;
 import android.util.SparseIntArray;
 import android.webkit.MimeTypeMap;
 
+import com.crashlytics.android.answers.ShareEvent;
+
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
@@ -38,8 +40,9 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -325,6 +328,9 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
 
                 it.remove();
             }
+
+            Logging.INSTANCE.logShare(new ShareEvent()
+                    .putContentName("QR Code + URI"));
 
             return dataList;
 

@@ -1,9 +1,12 @@
 package piuk.blockchain.android.ui.createwallet
 
 import android.content.Intent
+import com.crashlytics.android.answers.SignUpEvent
 import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PasswordUtil
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.answers.Logging
+import piuk.blockchain.android.data.answers.RecoverWalletEvent
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -11,6 +14,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PrefsUtil
+import timber.log.Timber
 import javax.inject.Inject
 
 class CreateWalletPresenter @Inject constructor(
@@ -75,13 +79,17 @@ class CreateWalletPresenter @Inject constructor(
                 }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.creating_wallet) }
-                .doAfterTerminate { view.dismissProgressDialog() }
+                .doOnTerminate{ view.dismissProgressDialog() }
                 .subscribe({
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL, email)
                     view.startPinEntryActivity()
+                    Logging.logSignUp(SignUpEvent()
+                            .putSuccess(true))
                 }, {
                     view.showToast(R.string.hd_error, ToastCustom.TYPE_ERROR)
                     appUtil.clearCredentialsAndRestart()
+                    Logging.logSignUp(SignUpEvent()
+                            .putSuccess(false))
                 })
     }
 
@@ -98,14 +106,18 @@ class CreateWalletPresenter @Inject constructor(
                 }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.restoring_wallet) }
-                .doAfterTerminate { view.dismissProgressDialog() }
+                .doOnTerminate{ view.dismissProgressDialog() }
                 .subscribe({
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL, email)
                     prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true)
                     view.startPinEntryActivity()
+                    Logging.logCustom(RecoverWalletEvent()
+                            .putSuccess(true))
                 }, { throwable ->
-                    throwable.printStackTrace()
+                    Timber.e(throwable)
                     view.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR)
+                    Logging.logCustom(RecoverWalletEvent()
+                            .putSuccess(false))
                 })
     }
 

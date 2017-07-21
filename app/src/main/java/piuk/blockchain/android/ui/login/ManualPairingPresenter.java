@@ -19,6 +19,9 @@ import io.reactivex.Observable;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.answers.Logging;
+import piuk.blockchain.android.data.answers.PairingEvent;
+import piuk.blockchain.android.data.answers.PairingMethod;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -113,8 +116,8 @@ public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
                         .flatMap(sessionId -> authDataManager.getEncryptedPayload(guid, sessionId))
                         .subscribe(response -> handleResponse(password, guid, response),
                                 throwable -> {
+                                    Timber.e(throwable);
                                     sessionId = null;
-                                    Timber.e("verifyPassword: ", throwable);
                                     showErrorToast(R.string.auth_failed);
                                 }));
     }
@@ -180,8 +183,17 @@ public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
                             appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
                             prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
                         })
-                        .subscribe(() -> getView().goToPinPage(),
+                        .subscribe(() -> {
+                                    getView().goToPinPage();
+                                    Logging.INSTANCE.logCustom(new PairingEvent()
+                                            .putMethod(PairingMethod.MANUAL)
+                                            .putSuccess(true));
+                                },
                                 throwable -> {
+                                    Logging.INSTANCE.logCustom(new PairingEvent()
+                                            .putMethod(PairingMethod.MANUAL)
+                                            .putSuccess(false));
+
                                     if (throwable instanceof HDWalletException) {
                                         showErrorToast(R.string.pairing_failed);
                                     } else if (throwable instanceof DecryptionException) {

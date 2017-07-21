@@ -71,7 +71,7 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         RxTextView.afterTextChangeEvents(wallet_pass)
                 .doOnNext({
                     showEntropyContainer()
-                    presenter.calculateEntropy(it.toString())
+                    presenter.calculateEntropy(it.editable().toString())
                 })
                 .subscribe(IgnorableDefaultObserver())
 
