@@ -180,7 +180,7 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun onPendingTransactionLongClicked(fctxId: String) {
-        contactsDataManager.facilitatedTransactions
+        contactsDataManager.getFacilitatedTransactions()
                 .filter { it.facilitatedTransaction.id == fctxId }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
@@ -391,7 +391,7 @@ class BalancePresenter @Inject constructor(
 
     private fun getFacilitatedTransactionsObservable(): Observable<MutableList<ContactTransactionModel>> {
         return contactsDataManager.fetchContacts()
-                .andThen(contactsDataManager.contactsWithUnreadPaymentRequests)
+                .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
                 .toList()
                 .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
                 .toList()
@@ -400,8 +400,8 @@ class BalancePresenter @Inject constructor(
                 .doOnNext {
                     handlePendingTransactions(it)
                     view.onContactsHashMapUpdated(
-                            contactsDataManager.contactsTransactionMap,
-                            contactsDataManager.notesTransactionMap
+                            contactsDataManager.getContactsTransactionMap(),
+                            contactsDataManager.getNotesTransactionMap()
                     )
                 }
     }

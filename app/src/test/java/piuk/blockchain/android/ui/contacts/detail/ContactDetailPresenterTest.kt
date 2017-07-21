@@ -86,7 +86,7 @@ class ContactDetailPresenterTest {
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
         bundle.putString(KEY_BUNDLE_CONTACT_ID, contactId)
         whenever(mockActivity.pageBundle).thenReturn(bundle)
-        whenever(mockContactsManager.contactList)
+        whenever(mockContactsManager.getContactList())
                 .thenReturn(Observable.error { Throwable() })
         // Act
         subject.onViewReady()
@@ -114,7 +114,7 @@ class ContactDetailPresenterTest {
             id = contactId
             name = contactName
         }
-        whenever(mockContactsManager.contactList)
+        whenever(mockContactsManager.getContactList())
                 .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
         whenever(mockAccessState.isBtc).thenReturn(true)
@@ -127,7 +127,7 @@ class ContactDetailPresenterTest {
         verifyNoMoreInteractions(mockActivity)
         verify(mockAccessState, times(2)).isBtc
         verifyNoMoreInteractions(mockAccessState)
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
         subject.contact shouldEqual contact2
@@ -217,11 +217,11 @@ class ContactDetailPresenterTest {
     @Throws(Exception::class)
     fun getContactsTransactionMap() {
         // Arrange
-        whenever(mockContactsManager.contactsTransactionMap).thenReturn(HashMap())
+        whenever(mockContactsManager.getContactsTransactionMap()).thenReturn(HashMap())
         // Act
         val result = subject.contactsTransactionMap
         // Assert
-        verify(mockContactsManager).contactsTransactionMap
+        verify(mockContactsManager).getContactsTransactionMap()
         result shouldBeInstanceOf HashMap::class
     }
 
@@ -229,11 +229,11 @@ class ContactDetailPresenterTest {
     @Throws(Exception::class)
     fun getNotesTransactionMap() {
         // Arrange
-        whenever(mockContactsManager.notesTransactionMap).thenReturn(HashMap())
+        whenever(mockContactsManager.getNotesTransactionMap()).thenReturn(HashMap())
         // Act
         val result = subject.notesTransactionMap
         // Assert
-        verify(mockContactsManager).notesTransactionMap
+        verify(mockContactsManager).getNotesTransactionMap()
         result shouldBeInstanceOf HashMap::class
     }
 
@@ -368,7 +368,7 @@ class ContactDetailPresenterTest {
         whenever(mockActivity.pageBundle).thenReturn(bundle)
         whenever(mockContactsManager.renameContact(contactId, newName))
                 .thenReturn(Completable.complete())
-        whenever(mockContactsManager.contactList).thenReturn(Observable.just(contact))
+        whenever(mockContactsManager.getContactList()).thenReturn(Observable.just(contact))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
         val notificationObservable = PublishSubject.create<NotificationPayload>()
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
@@ -386,7 +386,7 @@ class ContactDetailPresenterTest {
         verify(mockAccessState, times(2)).isBtc
         verifyNoMoreInteractions(mockAccessState)
         verify(mockContactsManager).renameContact(contactId, newName)
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         verify(mockContactsManager).fetchContacts()
         verifyNoMoreInteractions(mockContactsManager)
     }
@@ -550,12 +550,12 @@ class ContactDetailPresenterTest {
     fun onTransactionLongClickedError() {
         // Arrange
         val fctxId = "FCTX_ID"
-        whenever(mockContactsManager.facilitatedTransactions)
+        whenever(mockContactsManager.getFacilitatedTransactions())
                 .thenReturn(Observable.error { Throwable() })
         // Act
         subject.onTransactionLongClicked(fctxId)
         // Assert
-        verify(mockContactsManager).facilitatedTransactions
+        verify(mockContactsManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verify(mockActivity).finishPage()
@@ -573,12 +573,12 @@ class ContactDetailPresenterTest {
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
         }
         val contactTransaction = ContactTransactionModel("", transaction)
-        whenever(mockContactsManager.facilitatedTransactions)
+        whenever(mockContactsManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
         // Act
         subject.onTransactionLongClicked(fctxId)
         // Assert
-        verify(mockContactsManager).facilitatedTransactions
+        verify(mockContactsManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showTransactionDeclineDialog(fctxId)
         verifyNoMoreInteractions(mockActivity)
@@ -595,12 +595,12 @@ class ContactDetailPresenterTest {
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
         }
         val contactTransaction = ContactTransactionModel("", transaction)
-        whenever(mockContactsManager.facilitatedTransactions)
+        whenever(mockContactsManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
         // Act
         subject.onTransactionLongClicked(fctxId)
         // Assert
-        verify(mockContactsManager).facilitatedTransactions
+        verify(mockContactsManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showTransactionCancelDialog(fctxId)
         verifyNoMoreInteractions(mockActivity)
@@ -617,12 +617,12 @@ class ContactDetailPresenterTest {
             state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
         }
         val contactTransaction = ContactTransactionModel("", transaction)
-        whenever(mockContactsManager.facilitatedTransactions)
+        whenever(mockContactsManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
         // Act
         subject.onTransactionLongClicked(fctxId)
         // Assert
-        verify(mockContactsManager).facilitatedTransactions
+        verify(mockContactsManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showTransactionDeclineDialog(fctxId)
         verifyNoMoreInteractions(mockActivity)
@@ -639,12 +639,12 @@ class ContactDetailPresenterTest {
             state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
         }
         val contactTransaction = ContactTransactionModel("", transaction)
-        whenever(mockContactsManager.facilitatedTransactions)
+        whenever(mockContactsManager.getFacilitatedTransactions())
                 .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
         // Act
         subject.onTransactionLongClicked(fctxId)
         // Assert
-        verify(mockContactsManager).facilitatedTransactions
+        verify(mockContactsManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showTransactionCancelDialog(fctxId)
         verifyNoMoreInteractions(mockActivity)

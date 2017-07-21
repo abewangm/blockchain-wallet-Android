@@ -116,7 +116,7 @@ class ContactsServiceTest : RxTest() {
         map.put("2", mock())
         whenever(mockContacts.contactList).thenReturn(map)
         // Act
-        val testObserver = subject.contactList.toList().test()
+        val testObserver = subject.getContactList().toList().test()
         // Assert
         verify(mockContacts).contactList
         testObserver.assertComplete()
@@ -130,7 +130,7 @@ class ContactsServiceTest : RxTest() {
         // Arrange
         whenever(mockContacts.digestUnreadPaymentRequests()).thenReturn(listOf(mock(), mock(), mock()))
         // Act
-        val testObserver = subject.contactsWithUnreadPaymentRequests.test()
+        val testObserver = subject.getContactsWithUnreadPaymentRequests().test()
         // Assert
         verify(mockContacts).digestUnreadPaymentRequests()
         testObserver.assertComplete()

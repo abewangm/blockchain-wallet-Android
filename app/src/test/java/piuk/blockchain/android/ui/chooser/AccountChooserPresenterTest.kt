@@ -57,12 +57,12 @@ class AccountChooserPresenterTest {
         val contact1 = Contact()
         contact1.mdid = "mdid"
         val contact2 = Contact()
-        whenever(mockContactsManager.contactList)
+        whenever(mockContactsManager.getContactList())
                 .thenReturn(Observable.just(contact0, contact1, contact2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value is 3 as only 2 confirmed contacts plus header
@@ -77,12 +77,12 @@ class AccountChooserPresenterTest {
         val contact0 = Contact()
         val contact1 = Contact()
         val contact2 = Contact()
-        whenever(mockContactsManager.contactList)
+        whenever(mockContactsManager.getContactList())
                 .thenReturn(Observable.just(contact0, contact1, contact2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         verify(mockActivity).showNoContacts()
     }
 
@@ -119,7 +119,7 @@ class AccountChooserPresenterTest {
         val contact1 = Contact()
         contact1.mdid = "mdid"
         val contact2 = Contact()
-        whenever(mockContactsManager.contactList)
+        whenever(mockContactsManager.getContactList())
                 .thenReturn(Observable.just(contact0, contact1, contact2))
         val itemAccount0 = ItemAccount()
         val itemAccount1 = ItemAccount()
@@ -131,7 +131,7 @@ class AccountChooserPresenterTest {
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).contactList
+        verify(mockContactsManager).getContactList()
         verify(mockWalletAccountHelper).getHdAccounts(any())
         verify(mockWalletAccountHelper).getLegacyAddresses(any())
         val captor = argumentCaptor<List<ItemAccount>>()
