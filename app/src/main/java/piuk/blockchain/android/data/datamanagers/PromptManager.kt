@@ -18,7 +18,7 @@ import piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.RootUtil
 
-class PromptManager(
+open class PromptManager(
         private val prefsUtil: PrefsUtil,
         private val payloadDataManager: PayloadDataManager,
         private val transactionListDataManager: TransactionListDataManager
@@ -26,7 +26,7 @@ class PromptManager(
 
     private val ONE_MONTH = 28 * 24 * 60 * 60 * 1000L
 
-    fun getDefaultPrompts(context: Context): Observable<List<AlertDialog>> {
+    fun getPreLoginPrompts(context: Context): Observable<List<AlertDialog>> {
         val list = mutableListOf<AlertDialog>()
 
         if (isRooted()) list.add(getRootWarningDialog(context))

@@ -6,6 +6,7 @@ import dagger.Subcomponent;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.account.AccountActivity;
 import piuk.blockchain.android.ui.account.AccountEditActivity;
+import piuk.blockchain.android.ui.auth.LandingActivity;
 import piuk.blockchain.android.ui.auth.PasswordRequiredActivity;
 import piuk.blockchain.android.ui.auth.PinEntryFragment;
 import piuk.blockchain.android.ui.backup.completed.BackupWalletCompletedFragment;
@@ -125,4 +126,6 @@ public interface PresenterComponent {
     void inject(@NotNull BuyActivity buyActivity);
 
     void inject(@NotNull PairingCodeActivity pairingCodeActivity);
+
+    void inject(@NotNull LandingActivity landingActivity);
 }
