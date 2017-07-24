@@ -162,13 +162,18 @@ dependencies {
     compile "com.android.support:support-v13:$supportVersion"
     compile "com.android.support:preference-v7:$supportVersion"
     compile "com.android.support:preference-v14:$supportVersion"
+    // Play Services
     compile "com.google.firebase:firebase-messaging:$googleServicesVersion"
     compile "com.google.android.gms:play-services-maps:$googleServicesVersion"
+    // Constraint Layout
+    compile "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
+    // MultiDex
+    compile 'com.android.support:multidex:1.0.1'
+    // BitcoinJ
     compile 'org.bitcoinj:bitcoinj-core:0.14.4'
     // Keep at 1.3 to match Android implementation
     compile 'commons-codec:commons-codec:1.3'
     compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'com.android.support:multidex:1.0.1'
     compile('com.google.zxing:core:3.3.0') { transitive = true }
     compile 'com.github.mukeshsolanki:country-picker-android:1.1.7'
     compile 'com.aurelhubert:ahbottomnavigation:2.0.6'
@@ -187,9 +192,7 @@ dependencies {
     compile "com.squareup.okhttp3:okhttp:$okHttpVersion"
     // Dagger2
     compile "com.google.dagger:dagger:$daggerVersion"
-    compile "com.google.dagger:dagger-android-support:$daggerVersion"
     annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
-    annotationProcessor "com.google.dagger:dagger-android-processor:$daggerVersion"
     // Fingerprint authentication
     compile 'com.mtramin:rxfingerprint:2.1.0'
     // Custom fonts
@@ -219,7 +222,6 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
-    androidTestCompile 'com.google.code.findbugs:jsr305:3.0.1'
 
     // Unit Tests
     testCompile 'org.json:json:20140107'
