@@ -18,7 +18,10 @@ class LandingPresenter @Inject constructor(
     override fun onViewReady() {
 
         if (environmentSettings.shouldShowDebugMenu()) {
-            view.showToast("Current environment: " + environmentSettings.environment.getName(), ToastCustom.TYPE_GENERAL)
+            view.showToast(
+                    "Current environment: ${environmentSettings.environment.getName()}",
+                    ToastCustom.TYPE_GENERAL
+            )
             view.showDebugMenu()
         }
     }
@@ -27,7 +30,6 @@ class LandingPresenter @Inject constructor(
         promptManager.getPreLoginPrompts(context)
                 .flatMap { Observable.fromIterable(it) }
                 .forEach { view.showWarningPrompt(it) }
-
     }
 
     fun getAppUtil(): AppUtil {
