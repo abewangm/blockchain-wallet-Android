@@ -70,6 +70,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.createwallet.CreateWalletActivity"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity android:name=".ui.directory.MapActivity" />
         <!-- TODO: Remove me once a solid decision has been made -->

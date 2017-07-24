@@ -4,6 +4,8 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.support.constraint.ConstraintSet
+import android.support.transition.TransitionManager
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.text.Spannable
@@ -27,9 +29,7 @@ import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.settings.SettingsFragment
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
-import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 import javax.inject.Inject
 
@@ -39,6 +39,7 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
 
     @Inject lateinit var createWalletPresenter: CreateWalletPresenter
     private var progressDialog: MaterialProgressDialog? = null
+    private var applyConstraintSet: ConstraintSet = ConstraintSet()
 
     private val strengthVerdicts = intArrayOf(
             R.string.strength_weak,
@@ -60,6 +61,7 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_wallet)
+        applyConstraintSet.clone(mainConstraintLayout)
 
         presenter.parseExtras(intent)
 
@@ -72,6 +74,13 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
                 .doOnNext({
                     showEntropyContainer()
                     presenter.calculateEntropy(it.editable().toString())
+                    hideShowCreateButton(it.editable().toString()?.length, wallet_pass_confirm.text.toString()?.length)
+                })
+                .subscribe(IgnorableDefaultObserver())
+
+        RxTextView.afterTextChangeEvents(wallet_pass_confirm)
+                .doOnNext({
+                    hideShowCreateButton(wallet_pass.text.toString()?.length, it.editable().toString()?.length)
                 })
                 .subscribe(IgnorableDefaultObserver())
 
@@ -103,6 +112,14 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         onViewReady()
     }
 
+    private fun hideShowCreateButton(password1Length: Int, password2Length: Int) {
+        if (password1Length > 0 && password1Length == password2Length) {
+            showCreateWalletButton()
+        } else {
+            hideCreateWalletButton()
+        }
+    }
+
     override fun getView() = this
 
     override fun createPresenter() = createWalletPresenter
@@ -123,11 +140,27 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
     }
 
     private fun hideEntropyContainer() {
-        entropy_container.gone()
+        TransitionManager.beginDelayedTransition(mainConstraintLayout);
+        applyConstraintSet.setVisibility(R.id.entropy_container, ConstraintSet.INVISIBLE)
+        applyConstraintSet.applyTo(mainConstraintLayout)
     }
 
     private fun showEntropyContainer() {
-        entropy_container.visible()
+        TransitionManager.beginDelayedTransition(mainConstraintLayout);
+        applyConstraintSet.setVisibility(R.id.entropy_container, ConstraintSet.VISIBLE)
+        applyConstraintSet.applyTo(mainConstraintLayout)
+    }
+
+    private fun showCreateWalletButton() {
+        TransitionManager.beginDelayedTransition(mainConstraintLayout);
+        applyConstraintSet.setVisibility(R.id.command_next, ConstraintSet.VISIBLE)
+        applyConstraintSet.applyTo(mainConstraintLayout)
+    }
+
+    private fun hideCreateWalletButton() {
+        TransitionManager.beginDelayedTransition(mainConstraintLayout);
+        applyConstraintSet.setVisibility(R.id.command_next, ConstraintSet.GONE)
+        applyConstraintSet.applyTo(mainConstraintLayout)
     }
 
     override fun onFocusChange(v: View?, hasFocus: Boolean) = when {
