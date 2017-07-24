@@ -208,7 +208,7 @@ class ContactDetailPresenterTest {
         // Arrange
 
         // Act
-        val result = subject.getPrefsUtil()
+        val result = subject.prefsUtil
         // Assert
         result shouldEqual mockPrefsUtil
     }

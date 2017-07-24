@@ -1,5 +1,6 @@
 package piuk.blockchain.android.util;
 
+import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -15,6 +16,7 @@ import java.text.DecimalFormatSymbols;
  * This file is intentionally left in Java with Hungarian notation as to make it easier to compare
  * with/maintain against the AOSP implementation of {@link android.text.method.DigitsKeyListener}.
  */
+@SuppressWarnings("WeakerAccess")
 public class CommaEnabledDigitsKeyListener extends NumberKeyListener {
 
     private static final char DECIMAL_POINT = DecimalFormatSymbols.getInstance().getDecimalSeparator();
@@ -41,6 +43,7 @@ public class CommaEnabledDigitsKeyListener extends NumberKeyListener {
 
     private static CommaEnabledDigitsKeyListener[] sInstance = new CommaEnabledDigitsKeyListener[4];
 
+    @NonNull
     @Override
     protected char[] getAcceptedChars() {
         return mAccepted;
@@ -128,7 +131,7 @@ public class CommaEnabledDigitsKeyListener extends NumberKeyListener {
                                Spanned dest, int dstart, int dend) {
         CharSequence out = super.filter(source, start, end, dest, dstart, dend);
 
-        if (mSign == false && mDecimal == false) {
+        if (!mSign && !mDecimal) {
             return out;
         }
 

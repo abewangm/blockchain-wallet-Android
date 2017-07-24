@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.home;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;

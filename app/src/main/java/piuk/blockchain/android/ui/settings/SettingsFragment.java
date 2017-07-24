@@ -642,8 +642,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
                     ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = null;
-                    clip = ClipData.newPlainText("guid", guidPref.getSummary());
+                    ClipData clip = ClipData.newPlainText("guid", guidPref.getSummary());
                     clipboard.setPrimaryClip(clip);
                     ToastCustom.makeText(getActivity(), getString(R.string.copied_to_clipboard), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
                 })
