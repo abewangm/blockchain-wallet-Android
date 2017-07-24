@@ -134,10 +134,10 @@ public class AccessState {
     }
 
     public void disableAutoLogout() {
-        this.canAutoLogout = false;
+        canAutoLogout = false;
     }
 
     public void enableAutoLogout() {
-        this.canAutoLogout = true;
+        canAutoLogout = true;
     }
 }

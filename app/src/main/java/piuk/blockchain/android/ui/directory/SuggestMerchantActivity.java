@@ -78,7 +78,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /**
+        /*
          * TODO: Remove me once a decision has been made
          */
         throw new IllegalArgumentException("This activity isn't intended to be launched");
@@ -173,7 +173,7 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
 
                     String res = null;
                     try {
-                        /**
+                        /*
                          * TODO: Remove me once a decision has been made
                          */
 //                        res = WebUtil.getInstance().postURLJson(SUGGEST_MERCHANT_URL, args.toString());

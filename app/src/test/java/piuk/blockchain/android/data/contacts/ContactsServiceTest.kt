@@ -14,7 +14,6 @@ import org.bitcoinj.crypto.DeterministicKey
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.RxTest
-import piuk.blockchain.android.data.contacts.ContactsService
 import java.util.*
 
 class ContactsServiceTest : RxTest() {

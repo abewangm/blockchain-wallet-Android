@@ -262,7 +262,7 @@ public class ReceivePresenterTest {
     @Test
     public void updateFiatTextField() throws Exception {
         // Arrange
-        /**
+        /*
          * This isn't reasonably testable in it's current form. The method relies on the
          * {@link ReceiveCurrencyHelper}, which needs to be injected. This is simple, but
          * would be best done after a large package refactor so that it can be scoped correctly.
