@@ -141,11 +141,11 @@ public class BaseAuthActivity extends AppCompatActivity {
         stopLogoutTimer();
         ApplicationLifeCycle.getInstance().onActivityResumed();
 
-//        if (mPrefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false)) {
+        if (mPrefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false)) {
             enableScreenshots();
-//        } else {
-//            disallowScreenshots();
-//        }
+        } else {
+            disallowScreenshots();
+        }
     }
 
     @CallSuper
