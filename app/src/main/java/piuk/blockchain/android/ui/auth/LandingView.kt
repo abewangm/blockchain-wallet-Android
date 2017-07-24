@@ -10,6 +10,6 @@ interface LandingView: View {
 
     fun showToast(message: String, @ToastCustom.ToastType toastType: String)
 
-    fun showWarningPrompt(it: AlertDialog)
+    fun showWarningPrompt(alertDialog: AlertDialog)
 
 }

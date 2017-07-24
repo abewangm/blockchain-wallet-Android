@@ -57,9 +57,9 @@ class LandingActivity : BaseMvpActivity<LandingView, LandingPresenter>(), Landin
 
     override fun showDebugMenu() {
         buttonSettings.visible()
-        buttonSettings.setOnClickListener({ view ->
+        buttonSettings.setOnClickListener {
             EnvironmentSwitcher(this, PrefsUtil(this)).showDebugMenu()
-        })
+        }
     }
 
     override fun showToast(message: String, toastType: String) = toast(message, toastType)
@@ -83,7 +83,7 @@ class LandingActivity : BaseMvpActivity<LandingView, LandingPresenter>(), Landin
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.recover_funds_warning_message)
-                .setPositiveButton(R.string.dialog_continue) { dialogInterface, i -> startRecoveryActivityFlow() }
+                .setPositiveButton(R.string.dialog_continue) { _, _ -> startRecoveryActivityFlow() }
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
                 .show()
@@ -93,8 +93,8 @@ class LandingActivity : BaseMvpActivity<LandingView, LandingPresenter>(), Landin
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setMessage(getString(R.string.check_connectivity_exit))
                 .setCancelable(false)
-                .setNegativeButton(R.string.exit) {d, id -> finishAffinity()}
-                .setPositiveButton(R.string.retry) { d, id ->
+                .setNegativeButton(R.string.exit) { _, _ -> finishAffinity()}
+                .setPositiveButton(R.string.retry) { _, _ ->
                     val intent = Intent(this, LandingActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(intent)
