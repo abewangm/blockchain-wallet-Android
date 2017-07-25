@@ -26,7 +26,7 @@ public class SettingsActivity extends BaseAuthActivity {
     }
 
     private void setupToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        Toolbar toolbar = findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.action_settings);
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_arrow_back_white_24dp));

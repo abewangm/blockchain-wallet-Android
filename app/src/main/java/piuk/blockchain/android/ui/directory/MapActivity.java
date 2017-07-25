@@ -103,7 +103,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        Toolbar toolbar = findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.merchant_map);
 
         markerValues = new HashMap<>();
@@ -116,7 +116,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
                 LocationManager.GPS_PROVIDER :
                 LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this);
 
-        infoLayout = ((LinearLayout) findViewById(R.id.info));
+        infoLayout = findViewById(R.id.info);
         infoLayout.setOnTouchListener(new OnSwipeTouchListener(this) {
             public void onSwipeBottom() {
                 if (infoLayout.getVisibility() == View.VISIBLE) {
@@ -127,11 +127,11 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
         });
         infoLayout.setVisibility(View.GONE);
 
-        tvName = (TextView) findViewById(R.id.tv_name);
-        tvAddress = (TextView) findViewById(R.id.tv_address);
-        tvTel = (TextView) findViewById(R.id.tv_tel);
-        tvWeb = (TextView) findViewById(R.id.tv_web);
-        tvDesc = (TextView) findViewById(R.id.tv_desc);
+        tvName = findViewById(R.id.tv_name);
+        tvAddress = findViewById(R.id.tv_address);
+        tvTel = findViewById(R.id.tv_tel);
+        tvWeb = findViewById(R.id.tv_web);
+        tvDesc = findViewById(R.id.tv_desc);
 
         ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
     }
@@ -218,21 +218,21 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             return true;
         });
 
-        imgCafe = ((ImageView) findViewById(R.id.cafe));
-        layoutCafe = ((LinearLayout) findViewById(R.id.layout_cafe));
-        dividerCafe = ((LinearLayout) findViewById(R.id.divider_cafe));
-        imgDrink = ((ImageView) findViewById(R.id.drink));
-        layoutDrink = ((LinearLayout) findViewById(R.id.layout_drink));
-        dividerDrink = ((LinearLayout) findViewById(R.id.divider_drink));
-        imgEat = ((ImageView) findViewById(R.id.eat));
-        layoutEat = ((LinearLayout) findViewById(R.id.layout_eat));
-        dividerEat = ((LinearLayout) findViewById(R.id.divider_eat));
-        imgSpend = ((ImageView) findViewById(R.id.spend));
-        layoutSpend = ((LinearLayout) findViewById(R.id.layout_spend));
-        dividerSpend = ((LinearLayout) findViewById(R.id.divider_spend));
-        imgATM = ((ImageView) findViewById(R.id.atm));
-        layoutATM = ((LinearLayout) findViewById(R.id.layout_atm));
-        dividerATM = ((LinearLayout) findViewById(R.id.divider_atm));
+        imgCafe = findViewById(R.id.cafe);
+        layoutCafe = findViewById(R.id.layout_cafe);
+        dividerCafe = findViewById(R.id.divider_cafe);
+        imgDrink = findViewById(R.id.drink);
+        layoutDrink = findViewById(R.id.layout_drink);
+        dividerDrink = findViewById(R.id.divider_drink);
+        imgEat = findViewById(R.id.eat);
+        layoutEat = findViewById(R.id.layout_eat);
+        dividerEat = findViewById(R.id.divider_eat);
+        imgSpend = findViewById(R.id.spend);
+        layoutSpend = findViewById(R.id.layout_spend);
+        dividerSpend = findViewById(R.id.divider_spend);
+        imgATM = findViewById(R.id.atm);
+        layoutATM = findViewById(R.id.layout_atm);
+        dividerATM = findViewById(R.id.divider_atm);
         imgCafe.setBackgroundColor(color_category_selected);
         layoutCafe.setBackgroundColor(color_category_selected);
         dividerCafe.setBackgroundColor(color_cafe_selected);

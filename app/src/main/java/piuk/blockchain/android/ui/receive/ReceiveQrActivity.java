@@ -40,11 +40,11 @@ public class ReceiveQrActivity extends BaseMvpActivity<ReceiveQrView, ReceiveQrP
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receive_qr);
 
-        imageView = (ImageView) findViewById(R.id.imageview_qr);
-        title = (TextView) findViewById(R.id.account_name);
-        address = (TextView) findViewById(R.id.address_info);
-        Button done = (Button) findViewById(R.id.action_done);
-        Button copyAddress = (Button) findViewById(R.id.action_copy);
+        imageView = findViewById(R.id.imageview_qr);
+        title = findViewById(R.id.account_name);
+        address = findViewById(R.id.address_info);
+        Button done = findViewById(R.id.action_done);
+        Button copyAddress = findViewById(R.id.action_copy);
 
         onViewReady();
 

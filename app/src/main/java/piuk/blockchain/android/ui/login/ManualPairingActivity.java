@@ -47,7 +47,7 @@ public class ManualPairingActivity extends BaseMvpActivity<ManualPairingView, Ma
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_manual_pairing);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        Toolbar toolbar = findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.manual_pairing);
 
         mBinding.commandNext.setOnClickListener(v -> getPresenter().onContinueClicked());

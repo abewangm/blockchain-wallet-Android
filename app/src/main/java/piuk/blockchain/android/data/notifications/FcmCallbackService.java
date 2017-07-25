@@ -103,18 +103,14 @@ public class FcmCallbackService extends FirebaseMessagingService {
     private void triggerHeadsUpNotification(NotificationPayload payload,
                                             PendingIntent pendingIntent,
                                             int notificationId) {
-        NotificationManager notificationManager =
-                (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
 
-        if (notificationManager != null) {
-            new NotificationsUtil(getApplicationContext(), notificationManager).triggerNotification(
-                    payload.getTitle() != null ? payload.getTitle() : "",
-                    payload.getTitle() != null ? payload.getTitle() : "",
-                    payload.getBody() != null ? payload.getBody() : "",
-                    R.drawable.ic_notification_white,
-                    pendingIntent,
-                    notificationId);
-        }
+        new NotificationsUtil(getApplicationContext(), notificationManager).triggerNotification(
+                payload.getTitle() != null ? payload.getTitle() : "",
+                payload.getTitle() != null ? payload.getTitle() : "",
+                payload.getBody() != null ? payload.getBody() : "",
+                R.drawable.ic_notification_white,
+                pendingIntent,
+                notificationId);
     }
 
 }

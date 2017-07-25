@@ -54,7 +54,7 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_transaction_details);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        Toolbar toolbar = findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.transaction_detail_title);
 
         binding.editIcon.setOnClickListener(v -> binding.descriptionField.performClick());

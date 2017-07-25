@@ -41,7 +41,7 @@ public class PinEntryKeypad extends LinearLayout implements View.OnClickListener
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_pin_entry_keyboard, this, true);
 
-        LinearLayout keypad = (LinearLayout) findViewById(R.id.numericPad);
+        LinearLayout keypad = findViewById(R.id.numericPad);
 
         keypad.findViewById(R.id.button0).setOnClickListener(this);
         keypad.findViewById(R.id.button1).setOnClickListener(this);
