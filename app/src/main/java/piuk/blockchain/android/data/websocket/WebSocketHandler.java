@@ -364,7 +364,7 @@ class WebSocketHandler extends WebSocketListener {
     }
 
     private void triggerNotification(String title, String marquee, String text) {
-        new NotificationsUtil(context, notificationManager).setNotification(
+        new NotificationsUtil(context, notificationManager).triggerNotification(
                 title,
                 marquee,
                 text,
