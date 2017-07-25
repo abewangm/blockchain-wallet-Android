@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
-import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -65,7 +64,7 @@ public class ContactsQrPresenter extends BasePresenter<ContactsQrView> {
                                     if (notificationPayload.getType() != null
                                             && notificationPayload.getType().equals(NotificationPayload.NotificationType.CONTACT_REQUEST)) {
                                         // TODO: 31/01/2017 Currently neither of these work for some reason
-                                        notificationManager.cancel(FcmCallbackService.ID_FOREGROUND_NOTIFICATION);
+                                        notificationManager.cancelAll();
                                         getView().finishPage();
                                     }
                                 },

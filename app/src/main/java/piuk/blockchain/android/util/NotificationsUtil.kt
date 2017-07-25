@@ -5,8 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
+import android.support.annotation.DrawableRes
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import piuk.blockchain.android.R
@@ -19,25 +19,15 @@ class NotificationsUtil(
     fun triggerNotification(title: String,
                             marquee: String,
                             text: String,
-                            drawablePostLollipop: Int,
-                            drawablePreLollipop: Int,
-                            activityToLaunch: Class<*>,
+                            @DrawableRes icon: Int,
+                            pendingIntent: PendingIntent,
                             id: Int) {
 
-        val drawableCompat = if (AndroidUtils.is21orHigher()) drawablePostLollipop else drawablePreLollipop
-        val notifyIntent = Intent(context, activityToLaunch)
-        val intent = PendingIntent.getActivity(
-                context,
-                0,
-                notifyIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
         val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(drawableCompat)
+                .setSmallIcon(icon)
                 .setColor(ContextCompat.getColor(context, R.color.primary_navy_medium))
                 .setContentTitle(title)
-                .setContentIntent(intent)
+                .setContentIntent(pendingIntent)
                 .setWhen(System.currentTimeMillis())
                 .setSound(Uri.parse("android.resource://${context.packageName}/${R.raw.beep}"))
                 .setTicker(marquee)
@@ -50,6 +40,7 @@ class NotificationsUtil(
                 .setContentText(text)
 
         if (AndroidUtils.is26orHigher()) {
+            // TODO: Maybe pass in specific channel names here, such as "payments" and "contacts"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val notificationChannel = NotificationChannel(
                     NOTIFICATION_CHANNEL_ID,
