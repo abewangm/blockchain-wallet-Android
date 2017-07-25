@@ -125,7 +125,7 @@ class ContactsQrPresenterTest {
         verifyZeroInteractions(mockQrCodeDataManager)
         verify(mockRxBus).register(NotificationPayload::class.java)
         verifyNoMoreInteractions(mockRxBus)
-        verify(mockNotificationManager).cancel(any())
+        verify(mockNotificationManager).cancelAll()
         verifyNoMoreInteractions(mockNotificationManager)
     }
 
