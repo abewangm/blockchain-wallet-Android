@@ -10,22 +10,22 @@
         android:id="@+id/imageView3"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="100dp"
         android:gravity="center_horizontal"
+        app:layout_constraintDimensionRatio="h,1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/vector_icon_blue"
-        app:layout_constraintDimensionRatio="h,1:1" />
+        app:srcCompat="@drawable/vector_icon_blue" />
 
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="0dp"
         android:layout_height="22dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="24dp"
         android:gravity="center_horizontal"
         android:tint="@color/primary_navy_medium"
@@ -41,18 +41,18 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
+        android:layout_marginTop="48dp"
         android:paddingBottom="16dp"
         android:paddingLeft="48dp"
         android:paddingRight="48dp"
         android:paddingTop="16dp"
         android:text="@string/create_a_wallet"
         android:theme="@style/ButtonLightBlueTheme"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="48dp"
-        android:layout_marginEnd="48dp"
-        android:layout_marginTop="48dp"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
     <Button
@@ -60,6 +60,9 @@
         style="@style/ButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         android:paddingBottom="16dp"
         android:paddingLeft="48dp"
@@ -67,12 +70,9 @@
         android:paddingTop="16dp"
         android:text="@string/log_in"
         android:theme="@style/ButtonBlueTheme"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="48dp"
-        android:layout_marginEnd="48dp"
-        android:layout_marginTop="8dp"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/create" />
 
     <TextView
@@ -80,6 +80,9 @@
         fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         android:paddingLeft="48dp"
         android:paddingRight="48dp"
@@ -87,14 +90,11 @@
         android:textAllCaps="true"
         android:textColor="@color/primary_navy_medium"
         android:textSize="16sp"
-        tools:ignore="MissingPrefix"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="48dp"
-        android:layout_marginEnd="48dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/login" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/login"
+        tools:ignore="MissingPrefix" />
 
     <ImageView
         android:id="@+id/buttonSettings"
@@ -105,6 +105,8 @@
         android:padding="16dp"
         android:tint="@color/primary_navy_medium"
         android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/vector_settings"
         tools:visibility="visible" />
 

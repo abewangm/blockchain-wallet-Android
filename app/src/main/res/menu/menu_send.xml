@@ -2,7 +2,7 @@
     xmlns:auto="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_qr"
-        android:icon="@drawable/icon_qrcode"
+        android:icon="@drawable/vector_material_qr"
         auto:showAsAction="always"
         android:title="@string/scan_qr" />
 </menu>

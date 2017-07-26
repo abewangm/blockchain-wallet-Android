@@ -31,15 +31,17 @@ class LandingActivity : BaseMvpActivity<LandingView, LandingPresenter>(), Landin
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landing)
 
-        create.setOnClickListener({ startCreateActivity() })
-        login.setOnClickListener({ startLoginActivity() })
-        recoverFunds.setOnClickListener({ showFundRecoveryWarning() })
+        create.setOnClickListener { startCreateActivity() }
+        login.setOnClickListener { startLoginActivity() }
+        recoverFunds.setOnClickListener { showFundRecoveryWarning() }
 
         if (!ConnectivityStatus.hasConnectivity(this)) {
             showConnectivityWarning()
         } else {
             presenter.initPreLoginPrompts(this)
         }
+
+        onViewReady()
     }
 
     override fun createPresenter() = landingPresenter

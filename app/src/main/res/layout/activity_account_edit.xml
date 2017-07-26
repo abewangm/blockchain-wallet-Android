@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -168,12 +169,14 @@
                             android:layout_height="wrap_content"
                             android:duplicateParentState="true"
                             android:gravity="center_vertical"
+                            android:minHeight="50dp"
+                            android:minWidth="50dp"
                             android:paddingBottom="8dp"
                             android:paddingLeft="4dp"
                             android:paddingRight="16dp"
                             android:paddingTop="8dp"
-                            android:src="@drawable/icon_qrcode"
-                            android:tint="@color/black" />
+                            android:tint="@color/black"
+                            app:srcCompat="@drawable/vector_material_qr" />
 
                     </LinearLayout>
 
@@ -239,12 +242,14 @@
                             android:layout_height="wrap_content"
                             android:duplicateParentState="true"
                             android:gravity="center_vertical"
+                            android:minHeight="50dp"
+                            android:minWidth="50dp"
                             android:paddingBottom="8dp"
                             android:paddingLeft="4dp"
                             android:paddingRight="16dp"
                             android:paddingTop="8dp"
-                            android:src="@drawable/icon_qrcode"
-                            android:tint="@color/black" />
+                            android:tint="@color/black"
+                            app:srcCompat="@drawable/vector_material_qr" />
 
                     </LinearLayout>
 

@@ -578,9 +578,9 @@ public class SettingsFragment extends PreferenceFragmentCompat
         } else {
             LayoutInflater inflater = getActivity().getLayoutInflater();
             View smsPickerView = inflater.inflate(R.layout.include_sms_update, null);
-            EditText mobileNumber = (EditText) smsPickerView.findViewById(R.id.etSms);
-            TextView countryTextView = (TextView) smsPickerView.findViewById(R.id.tvCountry);
-            TextView mobileNumberTextView = (TextView) smsPickerView.findViewById(R.id.tvSms);
+            EditText mobileNumber = smsPickerView.findViewById(R.id.etSms);
+            TextView countryTextView = smsPickerView.findViewById(R.id.tvCountry);
+            TextView mobileNumberTextView = smsPickerView.findViewById(R.id.tvSms);
 
             CountryPicker picker = CountryPicker.newInstance(getString(R.string.select_country));
             Country country = picker.getUserCountryInfo(getActivity());
@@ -770,14 +770,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
         LayoutInflater inflater = getActivity().getLayoutInflater();
         LinearLayout pwLayout = (LinearLayout) inflater.inflate(R.layout.modal_change_password2, null);
 
-        AppCompatEditText currentPassword = (AppCompatEditText) pwLayout.findViewById(R.id.current_password);
-        AppCompatEditText newPassword = (AppCompatEditText) pwLayout.findViewById(R.id.new_password);
-        AppCompatEditText newPasswordConfirmation = (AppCompatEditText) pwLayout.findViewById(R.id.confirm_password);
+        AppCompatEditText currentPassword = pwLayout.findViewById(R.id.current_password);
+        AppCompatEditText newPassword = pwLayout.findViewById(R.id.new_password);
+        AppCompatEditText newPasswordConfirmation = pwLayout.findViewById(R.id.confirm_password);
 
-        RelativeLayout entropyMeter = (RelativeLayout) pwLayout.findViewById(R.id.entropy_meter);
-        ProgressBar passStrengthBar = (ProgressBar) pwLayout.findViewById(R.id.pass_strength_bar);
+        RelativeLayout entropyMeter = pwLayout.findViewById(R.id.entropy_meter);
+        ProgressBar passStrengthBar = pwLayout.findViewById(R.id.pass_strength_bar);
         passStrengthBar.setMax(100);
-        TextView passStrengthVerdict = (TextView) pwLayout.findViewById(R.id.pass_strength_verdict);
+        TextView passStrengthVerdict = pwLayout.findViewById(R.id.pass_strength_verdict);
 
         newPassword.addTextChangedListener(new TextWatcher() {
             @Override

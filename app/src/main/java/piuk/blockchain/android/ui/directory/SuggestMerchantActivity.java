@@ -141,12 +141,12 @@ public class SuggestMerchantActivity extends BaseAuthActivity implements OnMapRe
         categories.add(getString(R.string.merchant_cat4));
         categories.add(getString(R.string.merchant_cat5));
 
-        final Spinner spCategory = (Spinner) findViewById(R.id.merchant_category_spinner);
+        final Spinner spCategory = findViewById(R.id.merchant_category_spinner);
         ArrayAdapter<String> categorySpinnerArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, categories);
         categorySpinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
         spCategory.setAdapter(categorySpinnerArrayAdapter);
 
-        commandSave = (TextView) findViewById(R.id.command_save);
+        commandSave = findViewById(R.id.command_save);
         commandSave.setOnClickListener(v -> {
 
             if (commandSave.getText().toString().equals(getResources().getString(R.string.save))) {

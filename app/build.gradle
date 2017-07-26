@@ -9,13 +9,13 @@ apply from: '../quality/jacoco.gradle'
 apply from: '../quality/releasechecks.gradle'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 26
+    buildToolsVersion '26.0.1'
     dexOptions.javaMaxHeapSize "3g"
 
     defaultConfig {
         applicationId "piuk.blockchain.android"
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 266
         versionName "6.6.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -160,7 +160,6 @@ dependencies {
     compile "com.android.support:gridlayout-v7:$supportVersion"
     compile "com.android.support:design:$supportVersion"
     compile "com.android.support:support-v13:$supportVersion"
-    compile "com.android.support:preference-v7:$supportVersion"
     compile "com.android.support:preference-v14:$supportVersion"
     // Play Services
     compile "com.google.firebase:firebase-messaging:$googleServicesVersion"
@@ -215,11 +214,11 @@ dependencies {
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile "org.mockito:mockito-core:$mockitoVersion"
     androidTestCompile "com.android.support:support-annotations:$supportVersion"
-    androidTestCompile 'com.android.support.test:rules:0.5'
-    androidTestCompile('com.android.support.test:runner:0.5') {
+    androidTestCompile 'com.android.support.test:rules:1.0.0'
+    androidTestCompile('com.android.support.test:runner:1.0.0') {
         exclude module: 'support-annotations'
     }
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
+    androidTestCompile('com.android.support.test.espresso:espresso-core:3.0.0') {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
 

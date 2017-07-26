@@ -49,7 +49,7 @@ public class PasswordRequiredActivity extends BaseMvpActivity<PasswordRequiredVi
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_password_required);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        Toolbar toolbar = findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.confirm_password);
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 

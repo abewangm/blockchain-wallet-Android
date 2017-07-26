@@ -37,7 +37,7 @@ public class RecoverFundsActivity extends BaseMvpActivity<RecoverFundsView, Reco
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_recover_funds);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        Toolbar toolbar = findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.recover_funds);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

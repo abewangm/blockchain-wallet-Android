@@ -42,7 +42,7 @@ public class AnimatedPasswordInputLayout extends TextInputLayout {
 
     private void initListener() {
         if (isPasswordVisibilityToggleEnabled()) {
-            mToggle = (ImageButton) findViewById(R.id.text_input_password_toggle);
+            mToggle = findViewById(R.id.text_input_password_toggle);
             mToggle.setOnTouchListener((v, event) -> {
                 if (event != null && event.getAction() == MotionEvent.ACTION_UP) {
                     if (!mPasswordWarningSeen

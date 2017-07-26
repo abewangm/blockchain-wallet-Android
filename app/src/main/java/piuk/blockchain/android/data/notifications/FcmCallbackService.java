@@ -3,13 +3,9 @@ package piuk.blockchain.android.data.notifications;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 
 import javax.inject.Inject;
 
@@ -21,6 +17,7 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
+import piuk.blockchain.android.util.NotificationsUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import timber.log.Timber;
 
@@ -74,7 +71,7 @@ public class FcmCallbackService extends FirebaseMessagingService {
         PendingIntent intent =
                 PendingIntent.getActivity(getApplicationContext(), 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        triggerHeadsUpNotification(payload, intent);
+        triggerHeadsUpNotification(payload, intent, ID_BACKGROUND_NOTIFICATION);
     }
 
     /**
@@ -91,38 +88,29 @@ public class FcmCallbackService extends FirebaseMessagingService {
         PendingIntent intent =
                 PendingIntent.getActivity(getApplicationContext(), 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        triggerHeadsUpNotification(payload, intent);
+        triggerHeadsUpNotification(payload, intent, ID_FOREGROUND_NOTIFICATION);
     }
 
     /**
      * Triggers a notification with the "Heads Up" feature on >21, with the "beep" sound and a short
      * vibration enabled.
      *
-     * @param payload       A {@link NotificationPayload} object from the Notification Service
-     * @param pendingIntent The {@link PendingIntent} that you wish to be called when the
-     *                      notification is selected
+     * @param payload        A {@link NotificationPayload} object from the Notification Service
+     * @param pendingIntent  The {@link PendingIntent} that you wish to be called when the
+     *                       notification is selected
+     * @param notificationId The ID of the notification
      */
-    private void triggerHeadsUpNotification(NotificationPayload payload, PendingIntent pendingIntent) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                .setSmallIcon(R.drawable.ic_notification_white)
-                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.primary_navy_medium))
-                .setContentTitle(payload.getTitle())
-                .setTicker(payload.getTitle())
-                .setContentText(payload.getBody())
-                .setContentIntent(pendingIntent)
-                .setWhen(System.currentTimeMillis())
-                .setSound(Uri.parse("android.resource://"
-                        + getApplicationContext().getPackageName()
-                        + "/"
-                        + R.raw.beep))
-                .setAutoCancel(true)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setVibrate(new long[0])
-                .setOnlyAlertOnce(true)
-                .setDefaults(Notification.DEFAULT_LIGHTS);
+    private void triggerHeadsUpNotification(NotificationPayload payload,
+                                            PendingIntent pendingIntent,
+                                            int notificationId) {
 
-        notificationManager.notify(ID_BACKGROUND_NOTIFICATION, builder.build());
+        new NotificationsUtil(getApplicationContext(), notificationManager).triggerNotification(
+                payload.getTitle() != null ? payload.getTitle() : "",
+                payload.getTitle() != null ? payload.getTitle() : "",
+                payload.getBody() != null ? payload.getBody() : "",
+                R.drawable.ic_notification_white,
+                pendingIntent,
+                notificationId);
     }
 
 }

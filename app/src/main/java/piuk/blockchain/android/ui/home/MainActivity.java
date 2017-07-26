@@ -185,7 +185,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         });
 
         // Set up toolbar
-        toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        toolbar = findViewById(R.id.toolbar_general);
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.vector_menu));
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -458,7 +458,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void updateCurrentPrice(String price) {
         View headerView = binding.navigationView.getHeaderView(0);
-        TextView currentPrice = (TextView) headerView.findViewById(R.id.textview_current_price);
+        TextView currentPrice = headerView.findViewById(R.id.textview_current_price);
 
         runOnUiThread(() -> currentPrice.setText(price));
     }
