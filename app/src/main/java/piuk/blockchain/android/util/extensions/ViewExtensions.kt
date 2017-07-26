@@ -5,6 +5,7 @@ package piuk.blockchain.android.util.extensions
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 
 /**
  * Sets the visibility of a [View] to [View.VISIBLE]
@@ -37,4 +38,11 @@ fun View?.gone() {
  */
 fun ViewGroup.inflate(layoutId: Int, attachToRoot: Boolean = false): View {
     return LayoutInflater.from(context).inflate(layoutId, this, attachToRoot)
+}
+
+/**
+ * Returns the current [String] entered into an [EditText]. Non-null, ie can return an empty String.
+ */
+fun EditText.getTextString(): String {
+    return this.text.toString()
 }

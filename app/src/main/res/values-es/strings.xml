@@ -675,6 +675,6 @@
     <string name="fee_options_fee_too_high">Comisión alta innecesaria.</string>
     <string name="fee_options_advanced_warning">Esta función solo se recomienda para usuarios avanzados. Al elegir una comisión personalizada, te arriesgas a pagar de más o que tu transacción nunca se confirme.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
-    <string name="fee_options_sat_byte_inline_hint">Regular: %1$s prioritaria: 2$s</string>
+    <string name="fee_options_sat_byte_inline_hint">Regular: %1$s prioritaria: %2$s</string>
 
 </resources>

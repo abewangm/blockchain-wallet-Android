@@ -64,6 +64,7 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
 import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.base.BaseFragment;
@@ -450,6 +451,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
                 if (listener != null) {
                     listener.onTransactionNotesRequested(
+                            null,
                             contact.getId(),
                             getPresenter().getCorrectedAccountIndex(selectedAccountPosition),
                             PaymentRequestType.REQUEST,
@@ -656,7 +658,11 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
         void onReceiveFragmentClose();
 
-        void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis);
+        void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
+                                         String contactId,
+                                         int accountPosition,
+                                         PaymentRequestType paymentRequestType,
+                                         long satoshis);
 
     }
 }
