@@ -4,11 +4,16 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import org.apache.commons.lang3.NotImplementedException;
+
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.DecryptionException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -31,6 +36,7 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     private ContactsDataManager contactsDataManager;
     private PayloadDataManager payloadDataManager;
     private RxBus rxBus;
+    private TreeMap<String, Contact> contactList;
 
     @VisibleForTesting Contact recipient;
     @VisibleForTesting Contact sender;
@@ -122,7 +128,10 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
                 contactsDataManager.getContactsWithUnreadPaymentRequests()
                         .toList()
                         .subscribe(actionRequired -> {
+                            contactList = new TreeMap<>();
                             for (Contact contact : contacts) {
+                                contactList.put(contact.getId(), contact);
+
                                 list.add(new ContactsListItem(
                                         contact.getId(),
                                         contact.getName(),
@@ -286,5 +295,19 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
         intent.putExtra(Intent.EXTRA_TEXT, uri);
         intent.setType("text/plain");
         getView().onLinkGenerated(intent);
+    }
+
+    public void resendInvite(String id) {
+    }
+
+    void onDeleteContactConfirmed(String id) {
+        getView().showProgressDialog();
+        getCompositeDisposable().add(
+                contactsDataManager.removeContact(contactList.get(id))
+                        .doAfterTerminate(() -> getView().dismissProgressDialog())
+                        .subscribe(() -> {
+                            getView().showToast(R.string.contacts_delete_contact_success, ToastCustom.TYPE_OK);
+                            refreshContacts();
+                        }, throwable -> getView().showToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR)));
     }
 }

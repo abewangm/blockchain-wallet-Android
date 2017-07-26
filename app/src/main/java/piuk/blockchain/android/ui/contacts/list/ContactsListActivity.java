@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.contacts.list;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -39,7 +40,7 @@ import static piuk.blockchain.android.ui.base.UiState.LOADING;
 
 
 public class ContactsListActivity extends BaseMvpActivity<ContactsListView, ContactsListPresenter>
-        implements ContactsListView {
+        implements ContactsListView, ContactsListAdapter.ContactsClickListener {
 
     public static final String EXTRA_METADATA_URI = "metadata_uri";
     public static final String KEY_BUNDLE_CONTACT_ID = "contact_id";
@@ -73,11 +74,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         binding.swipeRefreshLayout.setOnRefreshListener(() -> getPresenter().onViewReady());
         // Contacts list
         contactsListAdapter = new ContactsListAdapter(new ArrayList<>(), new StringUtils(this));
-        contactsListAdapter.setContactsClickListener(id -> {
-            Bundle bundle = new Bundle();
-            bundle.putString(KEY_BUNDLE_CONTACT_ID, id);
-            ContactDetailActivity.start(this, bundle);
-        });
+        contactsListAdapter.setContactsClickListener(this);
         binding.recyclerviewContacts.setAdapter(contactsListAdapter);
         binding.recyclerviewContacts.setLayoutManager(new LinearLayoutManager(this));
 
@@ -284,4 +281,35 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         return this;
     }
 
+    @Override
+    public void onContactClick(String id) {
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_BUNDLE_CONTACT_ID, id);
+        ContactDetailActivity.start(this, bundle);
+    }
+
+    @Override
+    public void onMoreClick(String id) {
+        CharSequence actions[] = new CharSequence[] {"Re-send Invite", "Delete Contact"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setItems(actions, (dialog, which) -> {
+            // the user clicked on colors[which]
+            switch (which) {
+                case 0: getPresenter().resendInvite(id); break;
+                case 1: showDeleteUserConfirmationDialog(id); break;
+            }
+        });
+        builder.show();
+    }
+
+    public void showDeleteUserConfirmationDialog(String id) {
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_delete)
+                .setMessage(R.string.contacts_delete_message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onDeleteContactConfirmed(id))
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
 }

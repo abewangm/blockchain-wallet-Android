@@ -666,6 +666,7 @@
     <string name="contacts_no_contacts_yet">No contacts yet</string>
     <string name="contacts_invite_contact">Invite contact</string>
     <string name="confirm">Confirm</string>
+    <string name="pending">Pending</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
