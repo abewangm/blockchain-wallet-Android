@@ -305,7 +305,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
 
     public void showDeleteUserConfirmationDialog(String id) {
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.contacts_delete)
+                .setTitle(getString(R.string.contacts_delete)+"?")
                 .setMessage(R.string.contacts_delete_message)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onDeleteContactConfirmed(id))
                 .setNegativeButton(android.R.string.cancel, null)

@@ -13,6 +13,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -64,6 +67,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_contact_detail, container, false);
         return binding.getRoot();
@@ -72,11 +76,30 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        binding.buttonDelete.setOnClickListener(v -> getPresenter().onDeleteContactClicked());
-        binding.buttonRename.setOnClickListener(v -> getPresenter().onRenameContactClicked());
-
+        ((ContactDetailActivity) getActivity()).setupToolbar(
+                ((ContactDetailActivity) getActivity()).getToolbar(), getString(R.string.transactions));
         onViewReady();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (menu != null) menu.clear();
+        inflater.inflate(R.menu.menu_contact_details, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                getPresenter().onDeleteContactClicked();
+                return true;
+            case R.id.action_rename:
+                getPresenter().onRenameContactClicked();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -102,7 +125,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
         editText.setSelection(name.length());
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
+                .setTitle(R.string.contacts_rename)
                 .setView(ViewUtils.getAlertDialogPaddedView(getActivity(), editText))
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onContactRenamed(editText.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null)
@@ -113,7 +136,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
     @Override
     public void showDeleteUserDialog() {
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.contacts_delete)
+                .setTitle(getString(R.string.contacts_delete)+"?")
                 .setMessage(R.string.contacts_delete_message)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onDeleteContactConfirmed())
                 .setNegativeButton(android.R.string.cancel, null)
@@ -295,9 +318,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
 
     @Override
     public void updateContactName(String name) {
-        ((ContactDetailActivity) getActivity()).setupToolbar(
-                ((ContactDetailActivity) getActivity()).getToolbar(), name);
-        binding.textviewTransactionListHeader.setText(getString(R.string.contacts_detail_transactions, name));
+        binding.textNoTransactionsHelper.setText(getString(R.string.contacts_transaction_helper_text_1, name));
     }
 
     @Override
