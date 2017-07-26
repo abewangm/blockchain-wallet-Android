@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.contacts.list;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,11 +10,11 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
-
-import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,6 @@ import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailActivity;
-import piuk.blockchain.android.ui.contacts.pairing.ContactInviteActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
@@ -47,8 +45,10 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
     public static final String KEY_BUNDLE_CONTACT_ID = "contact_id";
 
     private static final int REQUEST_PAIRING = 98;
+    private static final int NAME_MAX_LENGTH = 17;
 
-    @Inject ContactsListPresenter contactsListPresenter;
+    @Inject
+    ContactsListPresenter contactsListPresenter;
     private ActivityContactsBinding binding;
     private ContactsListAdapter contactsListAdapter;
     private MaterialProgressDialog progressDialog;
@@ -62,11 +62,11 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contacts);
 
-        setupToolbar(binding.toolbar, R.string.contacts_title);
+        setupToolbar(binding.toolbarLayout.toolbarGeneral, R.string.contacts_title);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Buttons
-        binding.fab.setOnClickListener(view -> ContactInviteActivity.start(this));
+        binding.fab.setOnClickListener(view -> showRecipientNameDialog());
         binding.buttonRetry.setOnClickListener(view -> getPresenter().onViewReady());
         // Swipe to refresh layout
         binding.swipeRefreshLayout.setColorSchemeResources(R.color.primary_blue_accent);
@@ -81,9 +81,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         binding.recyclerviewContacts.setAdapter(contactsListAdapter);
         binding.recyclerviewContacts.setLayoutManager(new LinearLayoutManager(this));
 
-        Typeface typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
-        binding.toolbarLayout.setExpandedTitleTypeface(typeface);
-        binding.toolbarLayout.setCollapsedTitleTypeface(typeface);
+        binding.buttonInviteContact.setOnClickListener(view -> showRecipientNameDialog());
     }
 
     @Override
@@ -167,25 +165,113 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         switch (uiState) {
             case LOADING:
                 binding.swipeRefreshLayout.setRefreshing(true);
+                binding.swipeRefreshLayout.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
-                binding.layoutEmpty.setVisibility(View.GONE);
+                binding.layoutNoContacts.setVisibility(View.GONE);
+                binding.fab.setVisibility(View.GONE);
                 break;
             case CONTENT:
                 binding.swipeRefreshLayout.setRefreshing(false);
+                binding.swipeRefreshLayout.setVisibility(View.VISIBLE);
                 binding.layoutFailure.setVisibility(View.GONE);
-                binding.layoutEmpty.setVisibility(View.GONE);
+                binding.layoutNoContacts.setVisibility(View.GONE);
+                binding.fab.setVisibility(View.VISIBLE);
                 break;
             case FAILURE:
                 binding.swipeRefreshLayout.setRefreshing(false);
+                binding.swipeRefreshLayout.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.VISIBLE);
-                binding.layoutEmpty.setVisibility(View.GONE);
+                binding.layoutNoContacts.setVisibility(View.GONE);
+                binding.fab.setVisibility(View.GONE);
                 break;
             case EMPTY:
                 binding.swipeRefreshLayout.setRefreshing(false);
+                binding.swipeRefreshLayout.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
-                binding.layoutEmpty.setVisibility(View.VISIBLE);
+                binding.layoutNoContacts.setVisibility(View.VISIBLE);
+                binding.fab.setVisibility(View.GONE);
                 break;
         }
+    }
+
+    public void showRecipientNameDialog() {
+        AppCompatEditText editText = getNameEditText();
+
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_invite_contact)
+                .setMessage(R.string.contacts_who_are_you_inviting_header)
+                .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
+                .setCancelable(false)
+                .setPositiveButton(R.string.next, null)
+                .setNegativeButton(R.string.cancel, null).create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            positiveButton.setOnClickListener(view -> {
+                String name = editText.getText().toString();
+                if (name.isEmpty()) {
+                    editText.setError(getString(R.string.contacts_field_error_empty));
+                } else {
+                    getPresenter().setNameOfRecipient(name);
+                    showSenderNameDialog();
+                    dialog.dismiss();
+                }
+            });
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            negativeButton.setOnClickListener(view -> {
+                getPresenter().clearContactNames();
+                dialog.dismiss();
+            });
+        });
+
+        dialog.show();
+    }
+
+    public void showSenderNameDialog() {
+        AppCompatEditText editText = getNameEditText();
+
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_invite_contact)
+                .setMessage(getString(R.string.contacts_how_are_you_known_header, getPresenter().getRecipient()))
+                .setView(ViewUtils.getAlertDialogPaddedView(this, editText))
+                .setCancelable(false)
+                .setPositiveButton(R.string.confirm, null)
+                .setNegativeButton(R.string.cancel, null).create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            positiveButton.setOnClickListener(view -> {
+                String name = editText.getText().toString();
+                if (name.isEmpty()) {
+                    editText.setError(getString(R.string.contacts_field_error_empty));
+                } else {
+                    getPresenter().setNameOfSender(name);
+                    getPresenter().createLink();
+                    dialog.dismiss();
+                }
+            });
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            negativeButton.setOnClickListener(view -> {
+                getPresenter().clearContactNames();
+                dialog.dismiss();
+            });
+        });
+
+        dialog.show();
+    }
+
+    @NonNull
+    private AppCompatEditText getNameEditText() {
+        AppCompatEditText editText = new AppCompatEditText(this);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(NAME_MAX_LENGTH)});
+        editText.setHint(R.string.name);
+        return editText;
+    }
+
+    @Override
+    public void onLinkGenerated(Intent intent) {
+        startActivity(Intent.createChooser(intent, getString(R.string.contacts_share_invitation)));
     }
 
     @Override

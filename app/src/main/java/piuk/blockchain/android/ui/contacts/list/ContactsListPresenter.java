@@ -32,6 +32,10 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     private PayloadDataManager payloadDataManager;
     private RxBus rxBus;
 
+    @VisibleForTesting Contact recipient;
+    @VisibleForTesting Contact sender;
+    @VisibleForTesting String uri;
+
     @Inject
     ContactsListPresenter(ContactsDataManager contactsDataManager,
                           PayloadDataManager payloadDataManager,
@@ -237,4 +241,50 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
         rxBus.unregister(NotificationPayload.class, notificationObservable);
     }
 
+    void setNameOfSender(String nameOfSender) {
+        sender = new Contact();
+        sender.setName(nameOfSender);
+    }
+
+    void setNameOfRecipient(String nameOfRecipient) {
+        recipient = new Contact();
+        recipient.setName(nameOfRecipient);
+    }
+
+    String getRecipient() {
+        return recipient.getName();
+    }
+
+    void clearContactNames() {
+        recipient = null;
+        sender = null;
+    }
+
+    void createLink() {
+        if (uri == null) {
+            getView().showProgressDialog();
+
+            getCompositeDisposable().add(
+                    contactsDataManager.createInvitation(sender, recipient)
+                            .map(Contact::createURI)
+                            .doAfterTerminate(() -> getView().dismissProgressDialog())
+                            .subscribe(
+                                    uri -> {
+                                        this.uri = uri;
+                                        generateIntent(uri);
+                                    },
+                                    throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+        } else {
+            // Prevents contact being added more than once, as well as unnecessary web calls
+            generateIntent(uri);
+        }
+    }
+
+    private void generateIntent(String uri) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, uri);
+        intent.setType("text/plain");
+        getView().onLinkGenerated(intent);
+    }
 }

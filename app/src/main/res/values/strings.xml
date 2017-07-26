@@ -662,6 +662,10 @@
     <string name="contacts_receive_complete">Received %1$s from %2$s</string>
     <string name="contacts_received">Received from %1$s</string>
     <string name="contacts_sent">Sent to %1$s</string>
+    <string name="contacts_helper_text_1">Contacts make it easy to send and receive money from others.</string>
+    <string name="contacts_no_contacts_yet">No contacts yet</string>
+    <string name="contacts_invite_contact">Invite contact</string>
+    <string name="confirm">Confirm</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
