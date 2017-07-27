@@ -36,7 +36,7 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     private ContactsDataManager contactsDataManager;
     private PayloadDataManager payloadDataManager;
     private RxBus rxBus;
-    private TreeMap<String, Contact> contactList;
+    @VisibleForTesting TreeMap<String, Contact> contactList;
 
     @VisibleForTesting Contact recipient;
     @VisibleForTesting Contact sender;
