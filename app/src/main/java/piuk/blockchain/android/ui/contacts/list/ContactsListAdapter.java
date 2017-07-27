@@ -6,14 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.List;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.util.StringUtils;
-import piuk.blockchain.android.util.TimeUtil;
 
 class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.ContactsViewHolder> {
 
@@ -42,7 +40,10 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
 
         // Click listener
         holder.itemView.setOnClickListener(view -> {
-            if (contactsClickListener != null) contactsClickListener.onClick(listItem.getId());
+            if (contactsClickListener != null) contactsClickListener.onContactClick(listItem.getId());
+        });
+        holder.more.setOnClickListener(view -> {
+            if (contactsClickListener != null) contactsClickListener.onMoreClick(listItem.getId());
         });
 
         // Name
@@ -50,9 +51,11 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
 
         // Progress bar for pending contacts
         if (listItem.getStatus().equals(ContactsListItem.Status.PENDING)) {
-            holder.progressBar.setVisibility(View.VISIBLE);
+            holder.more.setVisibility(View.VISIBLE);
+            holder.name.setAlpha(0.5f);
         } else {
-            holder.progressBar.setVisibility(View.GONE);
+            holder.more.setVisibility(View.GONE);
+            holder.name.setAlpha(1.0f);
         }
 
         // Notification indicator
@@ -61,14 +64,10 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
         // Status field
         switch (listItem.getStatus()) {
             case ContactsListItem.Status.PENDING:
-                holder.status.setText(stringUtils.getString(R.string.contacts_request_sent));
+                holder.status.setText("("+stringUtils.getString(R.string.pending)+")");
                 break;
             case ContactsListItem.Status.TRUSTED:
-                if (TimeUtil.getIfTimeElapsed(listItem.getInviteTime(), TimeUtil.HOURS_24)) {
-                    holder.status.setText(stringUtils.getString(R.string.contacts_request_trusted));
-                } else {
-                    holder.status.setText(stringUtils.getString(R.string.contacts_request_just_added));
-                }
+                holder.status.setText("");
                 break;
             default:
                 holder.status.setText("");
@@ -92,21 +91,22 @@ class ContactsListAdapter extends RecyclerView.Adapter<ContactsListAdapter.Conta
         TextView name;
         TextView status;
         ImageView indicator;
-        ProgressBar progressBar;
+        ImageView more;
 
         ContactsViewHolder(View itemView) {
             super(itemView);
 
-            name = (TextView) itemView.findViewById(R.id.contact_name);
-            status = (TextView) itemView.findViewById(R.id.contact_status);
-            indicator = (ImageView) itemView.findViewById(R.id.imageview_indicator);
-            progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
+            name = itemView.findViewById(R.id.contactName);
+            status = itemView.findViewById(R.id.contactStatus);
+            indicator = itemView.findViewById(R.id.imageviewIndicator);
+            more = itemView.findViewById(R.id.imageViewMore);
         }
     }
 
     interface ContactsClickListener {
 
-        void onClick(String id);
+        void onContactClick(String id);
 
+        void onMoreClick(String id);
     }
 }

@@ -5,12 +5,14 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.exceptions.DecryptionException
 import info.blockchain.wallet.metadata.MetadataNodeFactory
+import info.blockchain.wallet.metadata.data.Invitation
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import okhttp3.MediaType
 import okhttp3.ResponseBody
 import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldNotBeNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,6 +27,7 @@ import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import java.util.*
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
@@ -376,4 +379,137 @@ class ContactsListPresenterTest {
         verify(mockRxBus).unregister(eq(NotificationPayload::class.java), anyOrNull())
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun setNameOfSender() {
+        // Arrange
+        val name = "Sender"
+        // Act
+        subject.setNameOfSender(name)
+        // Assert
+        assertNotNull(subject.sender)
+        subject.sender.name shouldEqual name
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun setNameOfRecipient() {
+        // Arrange
+        val name = "Recipient"
+        // Act
+        subject.setNameOfRecipient(name)
+        // Assert
+        assertNotNull(subject.recipient)
+        subject.recipient.name shouldEqual name
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun clearContactNames() {
+        // Arrange
+        // Act
+        subject.clearContactNames()
+        // Assert
+        assertNull(subject.sender)
+        assertNull(subject.recipient)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun createLink() {
+        // Arrange
+        val senderName = "SENDER_NAME"
+        val recipientName = "RECIPIENT_NAME"
+        val sender = Contact().apply {
+            name = senderName
+            invitationSent = Invitation().apply { id = "" }
+        }
+        val recipient = Contact().apply { name = recipientName }
+        subject.apply {
+            this.sender = sender
+            this.recipient = recipient
+        }
+        whenever(mockContactsManager.createInvitation(sender, recipient))
+                .thenReturn(Observable.just(sender))
+        // Act
+        subject.createLink()
+        // Assert
+        verify(mockContactsManager).createInvitation(sender, recipient)
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).showProgressDialog()
+        verify(mockActivity).dismissProgressDialog()
+        verify(mockActivity).onLinkGenerated(any())
+        verifyNoMoreInteractions(mockActivity)
+        assertNotNull(subject.uri)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun createLinkFailure() {
+        // Arrange
+        val senderName = "SENDER_NAME"
+        val recipientName = "RECIPIENT_NAME"
+        val sender = Contact().apply { name = senderName }
+        val recipient = Contact().apply { name = recipientName }
+        subject.apply {
+            this.sender = sender
+            this.recipient = recipient
+        }
+        whenever(mockContactsManager.createInvitation(sender, recipient))
+                .thenReturn(Observable.error { Throwable() })
+        // Act
+        subject.createLink()
+        // Assert
+        verify(mockContactsManager).createInvitation(sender, recipient)
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).showProgressDialog()
+        verify(mockActivity).dismissProgressDialog()
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verifyNoMoreInteractions(mockActivity)
+        assertNull(subject.uri)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun createLinkPreexistingUri() {
+        // Arrange
+        val uri = "URI"
+        val recipientName = "RECIPIENT_NAME"
+        val recipient = Contact().apply { name = recipientName }
+        subject.uri = uri
+        subject.apply { this.recipient = recipient }
+        // Act
+        subject.createLink()
+        // Assert
+        verify(mockActivity).onLinkGenerated(any())
+        verifyNoMoreInteractions(mockActivity)
+        verifyZeroInteractions(mockContactsManager)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onDeleteContactConfirmed() {
+        // Arrange
+        val recipientName = "RECIPIENT_NAME"
+        val recipient = Contact().apply { name = recipientName }
+        subject.apply {
+            this.recipient = recipient
+        }
+        subject.contactList = TreeMap()
+        subject.contactList.put(recipient.id, recipient)
+
+        whenever(mockContactsManager.removeContact(recipient))
+                .thenReturn(Completable.complete())
+        // Act
+        subject.onDeleteContactConfirmed(recipient.id)
+        // Assert
+        verify(mockContactsManager).removeContact(recipient)
+        verify(mockActivity).showProgressDialog()
+        verify(mockActivity).dismissProgressDialog()
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
+        verify(mockActivity).setUiState(UiState.LOADING)
+        verify(mockContactsManager).fetchContacts()
+        verify(mockContactsManager).getContactList()
+        verifyNoMoreInteractions(mockActivity)
+    }
 }
