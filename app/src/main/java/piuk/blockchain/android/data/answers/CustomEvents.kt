@@ -70,3 +70,11 @@ class CreateAccountEvent(number: Int) : CustomEvent("Account Created") {
 
 }
 
+class AppLaunchEvent(playServicesFound: Boolean) : CustomEvent("App Launched") {
+
+    init {
+        putCustomAttribute("Play Services found", if (playServicesFound) "true" else "false")
+    }
+
+}
+
