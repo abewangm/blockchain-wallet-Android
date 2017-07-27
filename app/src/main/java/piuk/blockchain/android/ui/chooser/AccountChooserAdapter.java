@@ -123,8 +123,8 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
 
         ContactViewHolder(View itemView) {
             super(itemView);
-            name = (TextView) itemView.findViewById(R.id.contact_name);
-            itemView.findViewById(R.id.contact_status).setVisibility(View.GONE);
+            name = (TextView) itemView.findViewById(R.id.contactName);
+            itemView.findViewById(R.id.contactStatus).setVisibility(View.GONE);
         }
     }
 

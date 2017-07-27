@@ -25,4 +25,6 @@ interface ContactsListView extends View {
     void dismissProgressDialog();
 
     void showSecondPasswordDialog();
+
+    void onLinkGenerated(Intent intent);
 }

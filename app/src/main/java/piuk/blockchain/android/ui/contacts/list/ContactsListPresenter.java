@@ -4,11 +4,16 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import org.apache.commons.lang3.NotImplementedException;
+
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.DecryptionException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -31,6 +36,11 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     private ContactsDataManager contactsDataManager;
     private PayloadDataManager payloadDataManager;
     private RxBus rxBus;
+    @VisibleForTesting TreeMap<String, Contact> contactList;
+
+    @VisibleForTesting Contact recipient;
+    @VisibleForTesting Contact sender;
+    @VisibleForTesting String uri;
 
     @Inject
     ContactsListPresenter(ContactsDataManager contactsDataManager,
@@ -118,7 +128,10 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
                 contactsDataManager.getContactsWithUnreadPaymentRequests()
                         .toList()
                         .subscribe(actionRequired -> {
+                            contactList = new TreeMap<>();
                             for (Contact contact : contacts) {
+                                contactList.put(contact.getId(), contact);
+
                                 list.add(new ContactsListItem(
                                         contact.getId(),
                                         contact.getName(),
@@ -237,4 +250,64 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
         rxBus.unregister(NotificationPayload.class, notificationObservable);
     }
 
+    void setNameOfSender(String nameOfSender) {
+        sender = new Contact();
+        sender.setName(nameOfSender);
+    }
+
+    void setNameOfRecipient(String nameOfRecipient) {
+        recipient = new Contact();
+        recipient.setName(nameOfRecipient);
+    }
+
+    String getRecipient() {
+        return recipient.getName();
+    }
+
+    void clearContactNames() {
+        recipient = null;
+        sender = null;
+    }
+
+    void createLink() {
+        if (uri == null) {
+            getView().showProgressDialog();
+
+            getCompositeDisposable().add(
+                    contactsDataManager.createInvitation(sender, recipient)
+                            .map(Contact::createURI)
+                            .doAfterTerminate(() -> getView().dismissProgressDialog())
+                            .subscribe(
+                                    uri -> {
+                                        this.uri = uri;
+                                        generateIntent(uri);
+                                    },
+                                    throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+        } else {
+            // Prevents contact being added more than once, as well as unnecessary web calls
+            generateIntent(uri);
+        }
+    }
+
+    private void generateIntent(String uri) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, uri);
+        intent.setType("text/plain");
+        getView().onLinkGenerated(intent);
+    }
+
+    public void resendInvite(String id) {
+    }
+
+    void onDeleteContactConfirmed(String id) {
+        getView().showProgressDialog();
+        getCompositeDisposable().add(
+                contactsDataManager.removeContact(contactList.get(id))
+                        .doAfterTerminate(() -> getView().dismissProgressDialog())
+                        .subscribe(() -> {
+                            getView().showToast(R.string.contacts_delete_contact_success, ToastCustom.TYPE_OK);
+                            refreshContacts();
+                        }, throwable -> getView().showToast(R.string.contacts_delete_contact_failed, ToastCustom.TYPE_ERROR)));
+    }
 }

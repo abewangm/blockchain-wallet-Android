@@ -116,15 +116,6 @@
             android:name=".ui.contacts.list.ContactsListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.contacts.pairing.ContactInviteActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".ui.contacts.pairing.ContactsInvitationBuilderActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".ui.contacts.pairing.ContactsAcceptInviteActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".ui.contacts.detail.ContactDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity

@@ -1,5 +1,6 @@
 package piuk.blockchain.android;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.security.ProviderInstaller;
 
@@ -29,6 +30,8 @@ import dagger.Lazy;
 import io.fabric.sdk.android.Fabric;
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.AppLaunchEvent;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -129,6 +132,9 @@ public class BlockchainApplication extends Application implements FrameworkInter
                 // No-op
             }
         });
+
+        // Report Google Play Services availability
+        Logging.INSTANCE.logCustom(new AppLaunchEvent(isGooglePlayServicesAvailable(this)));
     }
 
     // Pass instances to JAR Framework, evaluate after object graph instantiated fully
@@ -228,4 +234,15 @@ public class BlockchainApplication extends Application implements FrameworkInter
         // TODO: 05/08/2016 Decide if we should take action here or not
         Timber.wtf("Security Provider Installer not available");
     }
+
+    /**
+     * Returns true if Google Play Services are found and ready to use.
+     *
+     * @param context The current Application Context
+     */
+    private boolean isGooglePlayServicesAvailable(Context context) {
+        GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
+        return availability.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;
+    }
+
 }
