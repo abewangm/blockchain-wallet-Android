@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.contacts.payments
 import android.content.Context
 import android.os.Bundle
 import android.support.annotation.StringRes
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
@@ -18,21 +17,18 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.getTextString
-import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
-import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.extensions.*
 import javax.inject.Inject
 
-class ContactPaymentRequestNotesFragment : BaseFragment<ContactPaymentRequestView, ContactsPaymentRequestPresenter>(),
-        ContactPaymentRequestView {
+class ContactConfirmRequestFragment : BaseFragment<ContactConfirmRequestView, ContactConfirmRequestPresenter>(),
+        ContactConfirmRequestView {
 
     override val fragmentBundle: Bundle
         get() = arguments
     override val note: String
         get() = edittext_description.getTextString()
 
-    @Inject lateinit var paymentRequestPresenter: ContactsPaymentRequestPresenter
+    @Inject lateinit var paymentRequestPresenter: ContactConfirmRequestPresenter
     private var progressDialog: MaterialProgressDialog? = null
     private var listener: FragmentInteractionListener? = null
 
@@ -98,16 +94,11 @@ class ContactPaymentRequestNotesFragment : BaseFragment<ContactPaymentRequestVie
     }
 
     override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
-        ToastCustom.makeText(context, getString(message), ToastCustom.LENGTH_SHORT, toastType)
+        activity.toast(message, toastType)
     }
 
-    override fun showRequestSuccessfulDialog() {
-        // TODO: Remove me and show success fragment instead by triggering callback
-        AlertDialog.Builder(context, R.style.AlertDialogStyle)
-                .setTitle(getString(R.string.contacts_payment_success_waiting_title))
-                .setMessage(R.string.contacts_payment_success_waiting_message)
-                .setPositiveButton(android.R.string.ok) { _, _ -> finishPage() }
-                .show()
+    override fun onRequestSuccessful(contactName: String, btcAmount: String) {
+        listener?.onRequestSuccessful(contactName, btcAmount)
     }
 
     override fun createPresenter() = paymentRequestPresenter
@@ -129,7 +120,7 @@ class ContactPaymentRequestNotesFragment : BaseFragment<ContactPaymentRequestVie
     }
 
     private fun setupToolbar() {
-        // TODO: For now this isn't reset when leaving this page  
+        // TODO: For now this isn't reset when leaving this page as onResume isn't triggered ¯\_(ツ)_/¯
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
                     (activity as MainActivity).supportActionBar, R.string.contacts_confirm_title)
@@ -141,6 +132,8 @@ class ContactPaymentRequestNotesFragment : BaseFragment<ContactPaymentRequestVie
     interface FragmentInteractionListener {
 
         fun onPageFinished()
+
+        fun onRequestSuccessful(contactName: String, btcAmount: String)
 
     }
 
@@ -155,14 +148,14 @@ class ContactPaymentRequestNotesFragment : BaseFragment<ContactPaymentRequestVie
                 confirmationDetails: PaymentConfirmationDetails,
                 contactId: String,
                 satoshis: Int
-        ): ContactPaymentRequestNotesFragment {
+        ): ContactConfirmRequestFragment {
 
             val args = Bundle().apply {
                 putParcelable(ARGUMENT_CONFIRMATION_DETAILS, confirmationDetails)
                 putString(ARGUMENT_CONTACT_ID, contactId)
                 putInt(ARGUMENT_SATOSHIS, satoshis)
             }
-            return ContactPaymentRequestNotesFragment().apply { arguments = args }
+            return ContactConfirmRequestFragment().apply { arguments = args }
         }
     }
 

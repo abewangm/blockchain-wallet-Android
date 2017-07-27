@@ -9,30 +9,29 @@ import piuk.blockchain.android.data.contacts.ContactsPredicates
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BasePresenter
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.Companion.ARGUMENT_CONFIRMATION_DETAILS
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.Companion.ARGUMENT_CONTACT_ID
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.Companion.ARGUMENT_SATOSHIS
+import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment.Companion.ARGUMENT_CONFIRMATION_DETAILS
+import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment.Companion.ARGUMENT_CONTACT_ID
+import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment.Companion.ARGUMENT_SATOSHIS
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import javax.inject.Inject
 
-class ContactsPaymentRequestPresenter @Inject internal constructor(
+class ContactConfirmRequestPresenter @Inject internal constructor(
         private val contactsDataManager: ContactsDataManager
-) : BasePresenter<ContactPaymentRequestView>() {
+) : BasePresenter<ContactConfirmRequestView>() {
 
     @VisibleForTesting internal var recipient: Contact? = null
     @VisibleForTesting internal var satoshis: Int? = null
+    @VisibleForTesting internal var confirmationDetails: PaymentConfirmationDetails? = null
 
     override fun onViewReady() {
         val fragmentBundle = view.fragmentBundle
         val contactId = fragmentBundle.getString(ARGUMENT_CONTACT_ID)
-        val confirmationDetails: PaymentConfirmationDetails =
-                fragmentBundle.getParcelable(ARGUMENT_CONFIRMATION_DETAILS)
+        confirmationDetails = fragmentBundle.getParcelable(ARGUMENT_CONFIRMATION_DETAILS)
         satoshis = fragmentBundle.getInt(ARGUMENT_SATOSHIS)
 
-        @Suppress("SENSELESS_COMPARISON")
         if (contactId != null && confirmationDetails != null && satoshis != null) {
             loadContact(contactId)
-            updateUi(confirmationDetails)
+            updateUi(confirmationDetails!!)
         } else {
             throw IllegalArgumentException("Contact ID, confirmation details and satoshi amount must be passed to fragment")
         }
@@ -46,7 +45,12 @@ class ContactsPaymentRequestPresenter @Inject internal constructor(
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doAfterTerminate { view.dismissProgressDialog() }
                 .subscribe(
-                        { view.showRequestSuccessfulDialog() },
+                        {
+                            view.onRequestSuccessful(
+                                    recipient!!.name,
+                                    "${confirmationDetails!!.btcTotal} ${confirmationDetails!!.btcUnit}"
+                            )
+                        },
                         {
                             view.showToast(
                                     R.string.contacts_error_sending_payment_request,

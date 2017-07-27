@@ -6,7 +6,7 @@ import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
-interface ContactPaymentRequestView : View {
+interface ContactConfirmRequestView : View {
 
     val fragmentBundle: Bundle
 
@@ -22,7 +22,7 @@ interface ContactPaymentRequestView : View {
 
     fun dismissProgressDialog()
 
-    fun showRequestSuccessfulDialog()
+    fun onRequestSuccessful(contactName: String, btcAmount: String)
 
     fun updateTotalBtc(total: String)
 

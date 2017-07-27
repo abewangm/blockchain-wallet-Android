@@ -24,7 +24,7 @@ import piuk.blockchain.android.ui.contacts.pairing.ContactsAcceptInviteActivity;
 import piuk.blockchain.android.ui.contacts.pairing.ContactsInvitationBuilderActivity;
 import piuk.blockchain.android.ui.contacts.pairing.ContactsInvitationBuilderQrFragment;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
+import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment;
 import piuk.blockchain.android.ui.createwallet.CreateWalletActivity;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.home.MainActivity;
@@ -109,7 +109,7 @@ public interface PresenterComponent {
 
     void inject(@NotNull ContactsInvitationBuilderActivity contactsInvitationBuilderActivity);
 
-    void inject(@NotNull ContactPaymentRequestNotesFragment contactPaymentRequestNotesFragment);
+    void inject(@NotNull ContactConfirmRequestFragment contactConfirmRequestFragment);
 
     void inject(@NotNull ContactPaymentDialog contactPaymentDialog);
 

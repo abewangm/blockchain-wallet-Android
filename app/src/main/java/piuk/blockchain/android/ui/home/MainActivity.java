@@ -40,6 +40,7 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
@@ -69,7 +70,8 @@ import piuk.blockchain.android.ui.buy.FrontendJavascriptManager;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
+import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment;
+import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
@@ -92,7 +94,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         MainView,
         SendFragment.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
-        ContactPaymentRequestNotesFragment.FragmentInteractionListener,
+        ContactConfirmRequestFragment.FragmentInteractionListener,
         ContactPaymentDialog.OnContactPaymentDialogInteractionListener,
         FrontendJavascript<String>,
         ConfirmPaymentDialog.OnConfirmDialogInteractionListener {
@@ -336,7 +338,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             ((SendFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             ((ReceiveFragment) getCurrentFragment()).onBackPressed();
-        } else if (getCurrentFragment() instanceof ContactPaymentRequestNotesFragment) {
+        } else if (getCurrentFragment() instanceof ContactConfirmRequestFragment) {
             // Remove Notes fragment from stack
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
@@ -760,7 +762,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
                                             String contactId,
                                             int satoshis) {
-        addFragment(ContactPaymentRequestNotesFragment.newInstance(paymentConfirmationDetails,
+        addFragment(ContactConfirmRequestFragment.newInstance(paymentConfirmationDetails,
                 contactId,
                 satoshis));
     }
@@ -788,6 +790,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void onPageFinished() {
         onStartBalanceFragment(false);
+    }
+
+    @Override
+    public void onRequestSuccessful(@NotNull String contactName, @NotNull String btcAmount) {
+        addFragmentToBackStack(ContactRequestSuccessFragment.newInstance(PaymentRequestType.REQUEST, contactName, btcAmount));
     }
 
     private void startSendFragment(@Nullable String scanData, String scanRoute) {

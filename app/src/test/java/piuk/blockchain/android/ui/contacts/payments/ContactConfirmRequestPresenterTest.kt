@@ -18,24 +18,23 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment.*
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID
 import kotlin.test.assertNull
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @RunWith(RobolectricTestRunner::class)
-class ContactsPaymentRequestPresenterTest {
+class ContactConfirmRequestPresenterTest {
 
-    private lateinit var subject: ContactsPaymentRequestPresenter
-    private val mockActivity: ContactPaymentRequestView = mock()
+    private lateinit var subject: ContactConfirmRequestPresenter
+    private val mockActivity: ContactConfirmRequestView = mock()
     private val mockContactsManager: ContactsDataManager = mock()
     private val mockPayloadDataManager: PayloadDataManager = mock()
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
-        subject = ContactsPaymentRequestPresenter(mockContactsManager, mockPayloadDataManager)
+        subject = ContactConfirmRequestPresenter(mockContactsManager, mockPayloadDataManager)
         subject.initView(mockActivity)
     }
 
@@ -248,7 +247,7 @@ class ContactsPaymentRequestPresenterTest {
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).note
         verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).showRequestSuccessfulDialog()
+        verify(mockActivity).onRequestSuccessful()
         verifyNoMoreInteractions(mockActivity)
     }
 
