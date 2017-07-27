@@ -45,7 +45,6 @@ import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
-import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
@@ -195,16 +194,17 @@ public class SendPresenter extends BasePresenter<SendView> {
         if (fctxId == null && contactMdid != null) {
             setupTransaction(amount, feePriority, () -> {
                 if (isValidSpend(sendModel.pendingTransaction, true)) {
+                    //noinspection SuspiciousMethodCalls
                     getCompositeDisposable().add(
                             contactsDataManager.getContactList()
                                     .filter(ContactsPredicates.filterByMdid(contactMdid))
                                     .firstOrError()
                                     .subscribe(
                                             contact -> getView().navigateToAddNote(
+                                                    getConfirmationDetails(),
                                                     contact.getId(),
-                                                    PaymentRequestType.SEND,
                                                     sendModel.pendingTransaction.bigIntAmount.intValue()),
-                                            throwable -> showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR)));
+                            throwable -> showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR)));
                 }
             });
         } else {
@@ -613,6 +613,10 @@ public class SendPresenter extends BasePresenter<SendView> {
      */
     @Thunk
     void confirmPayment() {
+        if (getView() != null) getView().onShowPaymentDetails(getConfirmationDetails());
+    }
+
+    private PaymentConfirmationDetails getConfirmationDetails() {
         PendingTransaction pendingTransaction = sendModel.pendingTransaction;
 
         PaymentConfirmationDetails details = new PaymentConfirmationDetails();
@@ -647,7 +651,7 @@ public class SendPresenter extends BasePresenter<SendView> {
         details.isLargeTransaction = isLargeTransaction();
         details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.getConsumedAmount().compareTo(BigInteger.ZERO) == 1;
 
-        if (getView() != null) getView().onShowPaymentDetails(details);
+        return details;
     }
 
     /**

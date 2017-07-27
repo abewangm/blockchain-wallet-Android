@@ -39,6 +39,9 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
+import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -57,6 +60,7 @@ import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.ActivityMainBinding;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.AccountActivity;
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.backup.BackupWalletActivity;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseMvpActivity;
@@ -66,7 +70,8 @@ import piuk.blockchain.android.ui.buy.FrontendJavascriptManager;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentRequestNotesFragment;
+import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment;
+import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
@@ -89,7 +94,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         MainView,
         SendFragment.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
-        ContactPaymentRequestNotesFragment.FragmentInteractionListener,
+        ContactConfirmRequestFragment.FragmentInteractionListener,
         ContactPaymentDialog.OnContactPaymentDialogInteractionListener,
         FrontendJavascript<String>,
         ConfirmPaymentDialog.OnConfirmDialogInteractionListener {
@@ -333,7 +338,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             ((SendFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             ((ReceiveFragment) getCurrentFragment()).onBackPressed();
-        } else if (getCurrentFragment() instanceof ContactPaymentRequestNotesFragment) {
+        } else if (getCurrentFragment() instanceof ContactConfirmRequestFragment) {
             // Remove Notes fragment from stack
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
@@ -746,13 +751,26 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onSendPaymentSuccessful(@Nullable String mdid, String transactionHash, @Nullable String fctxId, long transactionValue) {
+    public void onSendPaymentSuccessful(@Nullable String mdid,
+                                        String transactionHash,
+                                        @Nullable String fctxId,
+                                        long transactionValue) {
         getPresenter().broadcastPaymentSuccess(mdid, transactionHash, fctxId, transactionValue);
     }
 
     @Override
-    public void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis) {
-        addFragment(ContactPaymentRequestNotesFragment.newInstance(paymentRequestType, accountPosition, contactId, satoshis));
+    public void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
+                                            String contactId,
+                                            int satoshis) {
+        addFragment(ContactConfirmRequestFragment.newInstance(paymentConfirmationDetails,
+                contactId,
+                satoshis));
+    }
+
+    @Override
+    public void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails, String contactId, int accountPosition, PaymentRequestType paymentRequestType, long satoshis) {
+        // STOPSHIP: 26/07/2017
+        throw new NotImplementedException("This is broken");
     }
 
     @Override
@@ -774,6 +792,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         onStartBalanceFragment(false);
     }
 
+    @Override
+    public void onRequestSuccessful(@NotNull String contactName, @NotNull String btcAmount) {
+        addFragmentToBackStack(ContactRequestSuccessFragment.newInstance(PaymentRequestType.REQUEST, contactName, btcAmount));
+    }
+
     private void startSendFragment(@Nullable String scanData, String scanRoute) {
         SendFragment sendFragment = SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
         addFragmentToBackStack(sendFragment);
@@ -785,15 +808,13 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     private int getSelectedAccountFromFragments() {
-        int selectedAccountPosition;
         if (getCurrentFragment() instanceof BalanceFragment) {
-            selectedAccountPosition = ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
+            return ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
-            selectedAccountPosition = ((ReceiveFragment) getCurrentFragment()).getSelectedAccountPosition();
+            return ((ReceiveFragment) getCurrentFragment()).getSelectedAccountPosition();
         } else {
-            selectedAccountPosition = -1;
+            return -1;
         }
-        return selectedAccountPosition;
     }
 
     private void replaceFragmentWithAnimation(Fragment fragment) {

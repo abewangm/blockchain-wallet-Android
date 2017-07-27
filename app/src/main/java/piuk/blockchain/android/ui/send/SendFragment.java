@@ -125,7 +125,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         }
     };
 
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
@@ -252,6 +252,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                     getPresenter().setContact(((Contact) object));
                 } else if (object instanceof Account) {
                     Account account = ((Account) object);
+                    getPresenter().setContact(null);
                     getPresenter().setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account, null));
 
                     String label = account.getLabel();
@@ -261,6 +262,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                     binding.destination.setText(StringUtils.abbreviate(label, 32));
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
+                    getPresenter().setContact(null);
                     getPresenter().setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress()));
 
                     String label = legacyAddress.getLabel();
@@ -466,6 +468,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                 .doOnNext(ignored -> {
                     if (getActivity().getCurrentFocus() == binding.destination) {
                         getPresenter().setReceivingAddress(null);
+                        getPresenter().setContact(null);
                     }
                 })
                 .subscribe(new IgnorableDefaultObserver<>());
@@ -692,9 +695,11 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     @Override
-    public void navigateToAddNote(String contactId, PaymentRequestType paymentRequestType, long satoshis) {
+    public void navigateToAddNote(PaymentConfirmationDetails paymentConfirmationDetails,
+                                  String contactId,
+                                  int satoshis) {
         if (listener != null) {
-            listener.onTransactionNotesRequested(contactId, null, paymentRequestType, satoshis);
+            listener.onTransactionNotesRequested(paymentConfirmationDetails, contactId, satoshis);
         }
     }
 
@@ -1031,9 +1036,8 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
         void onSendFragmentClose();
 
-        void onTransactionNotesRequested(String contactId,
-                                         @Nullable Integer accountPosition,
-                                         PaymentRequestType paymentRequestType,
-                                         long satoshis);
+        void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
+                                         String contactId,
+                                         int satoshis);
     }
 }
