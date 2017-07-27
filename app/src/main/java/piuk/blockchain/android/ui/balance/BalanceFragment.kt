@@ -239,7 +239,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun showFctxRequiringAttention(number: Int) {
-        (activity as MainActivity).setMessagesCount(number)
+        activity?.let {
+            (activity as MainActivity).setMessagesCount(number)
+        }
     }
 
     override fun showToast(message: Int, toastType: String) {

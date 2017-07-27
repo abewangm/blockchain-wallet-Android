@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import info.blockchain.wallet.contacts.data.Contact;
-
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+
 import java.util.List;
 
 import piuk.blockchain.android.R;
@@ -112,7 +112,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
 
         HeaderViewHolder(View itemView) {
             super(itemView);
-            header = (TextView) itemView.findViewById(R.id.header_name);
+            header = itemView.findViewById(R.id.header_name);
             itemView.findViewById(R.id.imageview_plus).setVisibility(View.GONE);
         }
     }
@@ -123,8 +123,9 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
 
         ContactViewHolder(View itemView) {
             super(itemView);
-            name = (TextView) itemView.findViewById(R.id.contactName);
+            name = itemView.findViewById(R.id.contactName);
             itemView.findViewById(R.id.contactStatus).setVisibility(View.GONE);
+            itemView.findViewById(R.id.imageviewIndicator).setVisibility(View.GONE);
         }
     }
 
@@ -137,10 +138,10 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
 
         AccountViewHolder(View itemView) {
             super(itemView);
-            label = (TextView) itemView.findViewById(R.id.my_account_row_label);
-            tag = (TextView) itemView.findViewById(R.id.my_account_row_tag);
-            balance = (TextView) itemView.findViewById(R.id.my_account_row_amount);
-            address = (TextView) itemView.findViewById(R.id.my_account_row_address);
+            label = itemView.findViewById(R.id.my_account_row_label);
+            tag = itemView.findViewById(R.id.my_account_row_tag);
+            balance = itemView.findViewById(R.id.my_account_row_amount);
+            address = itemView.findViewById(R.id.my_account_row_address);
         }
     }
 
