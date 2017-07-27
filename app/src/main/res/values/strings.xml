@@ -610,7 +610,7 @@
     <string name="contacts_request_sent">Contact request sent</string>
     <string name="contacts_request_just_added">Just added</string>
     <string name="contacts_request_trusted">Trusted</string>
-    <string name="contacts_delete_message">Once removed. you will have to invite this contact again.</string>
+    <string name="contacts_delete_message">Once removed, you will have to invite this contact again.</string>
     <string name="contacts_payment_request_title">Payment request</string>
     <string name="contacts_payment_request_send_note">Why would you like to send %1$s bitcoin? This is optional and will be shared with %1$s.</string>
     <string name="contacts_payment_request_receive_note">Why would you like %1$s to send you bitcoin? This is optional and will be shared with %1$s.</string>
