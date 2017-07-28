@@ -310,6 +310,8 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     }
 
     public void resendInvite(String id) {
+        setNameOfRecipient(contactList.get(id).getName());
+        getView().showSenderNameDialog();
     }
 
     void onDeleteContactConfirmed(String id) {

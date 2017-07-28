@@ -223,6 +223,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         dialog.show();
     }
 
+    @Override
     public void showSenderNameDialog() {
         AppCompatEditText editText = getNameEditText();
 
