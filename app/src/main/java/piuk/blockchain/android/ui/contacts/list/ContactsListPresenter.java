@@ -55,14 +55,15 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     public void onViewReady() {
         // Subscribe to notification events
         subscribeToNotifications();
-        // Set up page if Metadata initialized
-        attemptPageSetup(true);
 
         Intent intent = getView().getPageIntent();
         if (intent != null && intent.hasExtra(ContactsListActivity.EXTRA_METADATA_URI)) {
             link = intent.getStringExtra(ContactsListActivity.EXTRA_METADATA_URI);
             intent.removeExtra(ContactsListActivity.EXTRA_METADATA_URI);
         }
+
+        // Set up page if Metadata initialized
+        attemptPageSetup(true);
     }
 
     void initContactsService(@Nullable String secondPassword) {
@@ -212,8 +213,11 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
                                     link = null;
                                     refreshContacts();
                                     getView().showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
-                                }, throwable -> getView().showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
-
+                                }, throwable -> {
+                                    link = null;
+                                    refreshContacts();
+                                    getView().showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR);
+                                }));
     }
 
     private void attemptPageSetup(boolean firstAttempt) {
