@@ -473,7 +473,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             adapter.setItemClickedListener(() -> bottomSheetDialog.dismiss());
 
             View sheetView = View.inflate(getActivity(), R.layout.bottom_sheet_receive, null);
-            RecyclerView recyclerView = (RecyclerView) sheetView.findViewById(R.id.recycler_view);
+            RecyclerView recyclerView = sheetView.findViewById(R.id.recycler_view);
             recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

@@ -473,12 +473,6 @@
     <string name="contacts_pending_transaction_decline_failure">Rifiuto della transazione pendente fallito</string>
     <string name="contacts_pending_transaction_cancel_success">Transazione pendente annullata con successo</string>
     <string name="contacts_pending_transaction_cancel_failure">Annullamento della transazione pendente fallito</string>
-    <string name="contacts_sending_to_contact_waiting">Invio di %1$s a %2$s\nIn attesa che %2$s accetti</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s richiesti da %2$s\nPronti all\'invio</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Richiesti %1$s da %2$s\nIn attesa di pagamento</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Ricevuti %1$s da %2$s\nIn attesa che tu accetti</string>
-    <string name="contacts_receiving_declined">Pagamento rifiutato</string>
-    <string name="contacts_receiving_cancelled">Pagamento annullato</string>
     <string name="contacts_send_complete">Inviati %1$s a %2$s</string>
     <string name="contacts_receive_complete">Ricevuti %1$s da %2$s</string>
     <string name="contacts_received">Ricevuti da %1$s</string>

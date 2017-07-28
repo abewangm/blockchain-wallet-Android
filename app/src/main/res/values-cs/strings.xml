@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">Odmítnutí nevyřízené transakce se nezdařilo</string>
     <string name="contacts_pending_transaction_cancel_success">Nevyřízená transakce byla úspěšně zrušena</string>
     <string name="contacts_pending_transaction_cancel_failure">Zrušení nevyřízené transakce se nezdařilo</string>
-    <string name="contacts_sending_to_contact_waiting">Odesílání %1$s uživateli %2$s\nČekání na přijetí od uživatele %2$s</string>
-    <string name="contacts_payment_requested_ready_to_send">Požadováno %1$s od %2$s\nPřipraveno k odeslání</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Požadováno %1$s od %2$s\nČekání na platbu</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Příjem %1$s od %2$s\nČeká se na Vaše přijetí</string>
-    <string name="contacts_receiving_declined">Platba byla odmítnuta</string>
-    <string name="contacts_receiving_cancelled">Platba byla zrušena</string>
     <string name="contacts_send_complete">Odesláno %1$s uživateli %2$s</string>
     <string name="contacts_receive_complete">Přijato %1$s od %2$s</string>
     <string name="contacts_received">Přijato od %1$s</string>

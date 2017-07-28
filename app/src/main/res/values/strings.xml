@@ -25,8 +25,12 @@
     <string name="YESTERDAY">Yesterday</string>
 
     <string name="SENT">Sent</string>
+    <string name="sending">Sending</string>
     <string name="RECEIVED">Received</string>
+    <string name="receiving">Receiving</string>
     <string name="MOVED">Transferred</string>
+    <string name="paid">Paid</string>
+    <string name="payment_request">Payment Request</string>
 
     <string name="copied_to_clipboard">Copied to clipboard</string>
 
@@ -662,12 +666,14 @@
     <string name="contacts_request_success_sent_title">Request Sent</string>
     <string name="contacts_request_success_sent_description">Your payment request of %1$s has been sent to %2$s.</string>
     <!-- CONTACTS PENDING TRANSACTION STRINGS -->
-    <string name="contacts_sending_to_contact_waiting">Sending %1$s to %2$s\nWaiting for %2$s to accept</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s requested by %2$s\nReady to send</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Requested %1$s from %2$s\nWaiting for payment</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Receiving %1$s from %2$s\nWaiting for you to accept</string>
-    <string name="contacts_receiving_declined">Payment declined</string>
-    <string name="contacts_receiving_cancelled">Payment cancelled</string>
+    <string name="contacts_transaction_awaiting_response">Awaiting Response</string>
+    <string name="contacts_transaction_ready_to_send">● Ready to Send</string>
+    <string name="contacts_transaction_waiting_for_payment">Waiting for Payment</string>
+    <string name="contacts_transaction_accept_or_decline">● Accept or Decline</string>
+    <string name="contacts_transaction_payment_requested">Payment Requested</string>
+    <string name="contacts_transaction_pay_or_decline">● Pay or Decline</string>
+    <string name="contacts_receiving_declined">Declined</string>
+    <string name="contacts_receiving_cancelled">Cancelled</string>
     <string name="contacts_send_complete">Sent %1$s to %2$s</string>
     <string name="contacts_receive_complete">Received %1$s from %2$s</string>
     <string name="contacts_received">Received from %1$s</string>

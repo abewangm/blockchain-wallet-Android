@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">Die Ablehnung der ausstehenden Transaktion ist fehlgeschlagen</string>
     <string name="contacts_pending_transaction_cancel_success">Die ausstehende Transaktion wurde erfolgreich abgebrochen</string>
     <string name="contacts_pending_transaction_cancel_failure">Der Abbruch der ausstehenden Transaktion ist fehlgeschlagen</string>
-    <string name="contacts_sending_to_contact_waiting">%1$s werden zu %2$s gesendet\nEs wird auf Antwort von %2$s gewartet</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s angefordert von %2$s\nFertig zur Übersendung</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Forderte %1$s von %2$s an\nWarten auf Zahlung</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Empfang von %1$s seitens %2$s\nAuf Ihre Annahme wird gewartet</string>
-    <string name="contacts_receiving_declined">Zahlung abgelehnt</string>
-    <string name="contacts_receiving_cancelled">Zahlung abgebrochen</string>
     <string name="contacts_send_complete">Sendete %1$s an %2$s</string>
     <string name="contacts_receive_complete">Erhielt %1$s von %2$s</string>
     <string name="contacts_received">Erhalten von %1$s</string>

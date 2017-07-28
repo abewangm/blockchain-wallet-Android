@@ -469,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">보류 거래 거절 실패</string>
     <string name="contacts_pending_transaction_cancel_success">보류 거래 취소 성공</string>
     <string name="contacts_pending_transaction_cancel_failure">보류 거래 취소 실패</string>
-    <string name="contacts_sending_to_contact_waiting">%2$s에게 %1$s를 보내는 중\n%2$s 수령 대기 중</string>
-    <string name="contacts_payment_requested_ready_to_send">%2$s가 %1$s를 요청\n보낼 준비 됨</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">%2$s로부터 %1$s를 요청함\n지불 대기 중</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">%2$s로부터 %1$s를 받는 중\n귀하가 수령하기를 대기 중</string>
-    <string name="contacts_receiving_declined">지불 거절됨</string>
-    <string name="contacts_receiving_cancelled">지불 취소됨</string>
     <string name="contacts_send_complete">%2$s에게 %1$s를 보냄</string>
     <string name="contacts_receive_complete">%2$s로부터 %1$s를 받음</string>
     <string name="contacts_received">%1$s로부터 받음</string>

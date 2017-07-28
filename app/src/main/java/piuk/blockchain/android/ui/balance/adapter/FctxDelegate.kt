@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.balance.adapter
 
 import android.app.Activity
+import android.support.annotation.ColorRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.text.Spannable
@@ -10,15 +11,18 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
-import kotlinx.android.synthetic.main.item_contact_transactions.view.*
+import kotlinx.android.synthetic.main.item_balance.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
+import piuk.blockchain.android.util.DateUtil
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.SpanFormatter
 import piuk.blockchain.android.util.StringUtils
+import piuk.blockchain.android.util.extensions.getContext
+import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 
 class FctxDelegate<in T>(
@@ -28,6 +32,7 @@ class FctxDelegate<in T>(
         val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
+    val dateUtil = DateUtil(activity)
     val stringUtils = StringUtils(activity)
     val prefsUtil = PrefsUtil(activity)
     val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -36,7 +41,7 @@ class FctxDelegate<in T>(
             items[position] is ContactTransactionModel
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
-            FctxViewHolder(parent.inflate(R.layout.item_contact_transactions))
+            FctxViewHolder(parent.inflate(R.layout.item_balance))
 
     override fun onBindViewHolder(
             items: List<T>,
@@ -45,7 +50,7 @@ class FctxDelegate<in T>(
             payloads: List<*>
     ) {
 
-        val fctxViewHolder = holder as FctxViewHolder
+        val viewHolder = holder as FctxViewHolder
         val model = items[position] as ContactTransactionModel
         val transaction = model.facilitatedTransaction
         val contactName = model.contactName
@@ -57,60 +62,54 @@ class FctxDelegate<in T>(
             consume { listClickListener.onFctxLongClicked(transaction.id) }
         }
 
-        fctxViewHolder.indicator.visibility = View.GONE
-        fctxViewHolder.title.setTextColor(ContextCompat.getColor(fctxViewHolder.title.context, R.color.black))
-
         val btcBalance = transaction.intendedAmount / 1e8
         val fiatBalance = btcExchangeRate * btcBalance
 
         val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         val amountSpannable = getDisplaySpannable(transaction.intendedAmount.toDouble(), fiatBalance, fiatString)
 
+        viewHolder.result.text = amountSpannable
+        viewHolder.timeSince.text = dateUtil.formatted(transaction.lastUpdated)
+        viewHolder.contactName.text = contactName
+
         if (transaction.state == FacilitatedTransaction.STATE_DECLINED) {
-            fctxViewHolder.title.setText(R.string.contacts_receiving_declined)
+            // TODO: Received/Sent?
+            viewHolder.note.setText(R.string.contacts_receiving_declined)
+            viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
         } else if (transaction.state == FacilitatedTransaction.STATE_CANCELLED) {
-            fctxViewHolder.title.setText(R.string.contacts_receiving_cancelled)
+            // TODO: Received/Sent?
+            viewHolder.note.setText(R.string.contacts_receiving_cancelled)
+            viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
         } else if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
             if (transaction.role == FacilitatedTransaction.ROLE_PR_RECEIVER) {
 
-                val display = SpanFormatter.format(
-                        stringUtils.getString(R.string.contacts_receiving_from_contact_waiting_to_accept),
-                        amountSpannable,
-                        contactName)
-                fctxViewHolder.title.text = display
-                fctxViewHolder.indicator.visibility = View.VISIBLE
+                viewHolder.note.setText(R.string.contacts_transaction_accept_or_decline)
+                viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
+                displayReceiving(viewHolder)
 
             } else if (transaction.role == FacilitatedTransaction.ROLE_RPR_INITIATOR) {
 
-                val display = SpanFormatter.format(
-                        stringUtils.getString(R.string.contacts_sending_to_contact_waiting),
-                        amountSpannable,
-                        contactName)
-                fctxViewHolder.title.text = display
+                viewHolder.note.setText(R.string.contacts_transaction_awaiting_response)
+                viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
+                displaySending(viewHolder)
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
             if (transaction.role == FacilitatedTransaction.ROLE_RPR_RECEIVER) {
 
-                val display = SpanFormatter.format(
-                        stringUtils.getString(R.string.contacts_payment_requested_ready_to_send),
-                        amountSpannable,
-                        contactName)
-                fctxViewHolder.title.text = display
-                fctxViewHolder.indicator.visibility = View.VISIBLE
+                viewHolder.note.setText(R.string.contacts_transaction_ready_to_send)
+                viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
+                displaySending(viewHolder)
 
             } else if (transaction.role == FacilitatedTransaction.ROLE_PR_INITIATOR) {
 
-                val display = SpanFormatter.format(
-                        stringUtils.getString(R.string.contacts_requesting_from_contact_waiting_for_payment),
-                        amountSpannable,
-                        contactName)
-                fctxViewHolder.title.text = display
+                viewHolder.note.setText(R.string.contacts_transaction_payment_requested)
+                viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
+                displayReceiving(viewHolder)
             }
         }
 
-        fctxViewHolder.subtitle.text = transaction.note
     }
 
     fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
@@ -122,11 +121,39 @@ class FctxDelegate<in T>(
         this.btcExchangeRate = btcExchangeRate
     }
 
+    private fun displayReceiving(viewHolder: FctxViewHolder) {
+        viewHolder.direction.setText(R.string.receiving)
+        viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_green_received_50))
+        viewHolder.result.setBackgroundResource(R.drawable.rounded_view_green_50)
+    }
+
+    private fun displayReceived(viewHolder: FctxViewHolder) {
+        viewHolder.direction.setText(R.string.RECEIVED)
+        viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_green_received))
+        viewHolder.result.setBackgroundResource(R.drawable.rounded_view_green)
+    }
+
+    private fun displaySending(viewHolder: FctxViewHolder) {
+        viewHolder.direction.setText(R.string.sending)
+        viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_red_sent_50))
+        viewHolder.result.setBackgroundResource(R.drawable.rounded_view_red_50)
+    }
+
+    private fun displaySent(viewHolder: FctxViewHolder) {
+        viewHolder.direction.setText(R.string.SENT)
+        viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_red_sent))
+        viewHolder.result.setBackgroundResource(R.drawable.rounded_view_red)
+    }
+
+    private fun getResolvedColor(viewHolder: RecyclerView.ViewHolder, @ColorRes color: Int): Int {
+        return ContextCompat.getColor(viewHolder.getContext(), color)
+    }
+
     private fun getDisplaySpannable(btcAmount: Double, fiatAmount: Double, fiatString: String): Spannable {
         val spannable: Spannable
         if (isBtc) {
             spannable = Spannable.Factory.getInstance().newSpannable(
-                    monetaryUtil.getDisplayAmountWithFormatting(Math.abs(btcAmount)) + " " + getDisplayUnits())
+                    "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(btcAmount))} ${getDisplayUnits()}")
             spannable.setSpan(
                     RelativeSizeSpan(0.67f),
                     spannable.length - getDisplayUnits().length,
@@ -134,7 +161,7 @@ class FctxDelegate<in T>(
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         } else {
             spannable = Spannable.Factory.getInstance().newSpannable(
-                    monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount)) + " " + fiatString)
+                    "${monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount))} $fiatString")
             spannable.setSpan(
                     RelativeSizeSpan(0.67f),
                     spannable.length - 3,
@@ -150,9 +177,19 @@ class FctxDelegate<in T>(
 
     private class FctxViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        internal var indicator: ImageView = itemView.imageview_indicator
-        internal var title: TextView = itemView.transaction_title
-        internal var subtitle: TextView = itemView.transaction_subtitle
+        internal var result: TextView = itemView.result
+        internal var timeSince: TextView = itemView.date
+        internal var direction: TextView = itemView.direction
+        internal var watchOnly: TextView = itemView.watch_only
+        internal var note: TextView = itemView.note
+        internal var doubleSpend: ImageView = itemView.double_spend_warning
+        internal var contactName: TextView = itemView.contact_name
+
+        init {
+            doubleSpend.gone()
+            watchOnly.gone()
+            note.visible()
+        }
 
     }
 

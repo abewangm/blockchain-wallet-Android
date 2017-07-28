@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">保留中の取引の拒否に失敗しました</string>
     <string name="contacts_pending_transaction_cancel_success">保留中の取引のキャンセルが完了しました</string>
     <string name="contacts_pending_transaction_cancel_failure">保留中の取引の拒否に失敗しました</string>
-    <string name="contacts_sending_to_contact_waiting">%1$sを%2$sへ送信しています\n%2$sの同意を待機しています</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$sが%2$sよりリクエストされました\n送信の準備が完了しました</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">%2$sより%1$sがリクエストされています\n決済を待機しています</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">%2$sより%1$sを受け取っています\n同意を待機しています</string>
-    <string name="contacts_receiving_declined">決済が拒否されました</string>
-    <string name="contacts_receiving_cancelled">決済がキャンセルされました</string>
     <string name="contacts_send_complete">%1$sを%2$sに送信しました</string>
     <string name="contacts_receive_complete">%1$sを%2$sより受け取りました</string>
     <string name="contacts_received">%1$sよち受け取りました</string>

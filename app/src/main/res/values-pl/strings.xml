@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">Odrzucanie transakcji w toku nie powiodło się</string>
     <string name="contacts_pending_transaction_cancel_success">Pomyślnie anulowano transakcję w toku</string>
     <string name="contacts_pending_transaction_cancel_failure">Anulowanie transakcji w toku nie powiodło się</string>
-    <string name="contacts_sending_to_contact_waiting">Wysyłanie %1$s do %2$s\nOczekiwanie na zgodę od %2$s</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s żądane przez %2$s\nGotowe do wysłania</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Żądane %1$s od %2$s\nOczekiwanie na płatność</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Otrzymanie %1$s od %2$s\nOczekiwanie na Twoją zgodę</string>
-    <string name="contacts_receiving_declined">Odrzucono płatność</string>
-    <string name="contacts_receiving_cancelled">Anulowano płatność</string>
     <string name="contacts_send_complete">Wysłano %1$s do %2$s</string>
     <string name="contacts_receive_complete">Otrzymano %1$s od %2$s</string>
     <string name="contacts_received">Otrzymano od %1$s</string>

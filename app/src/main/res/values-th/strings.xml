@@ -472,12 +472,6 @@
     <string name="contacts_pending_transaction_decline_failure">การปฏิเสธธุรกรรมที่รอดำเนินการล้มเหลว</string>
     <string name="contacts_pending_transaction_cancel_success">ยกเลิกธุรกรรมที่รอดำเนินการเรียบร้อยแล้ว</string>
     <string name="contacts_pending_transaction_cancel_failure">การยกเลิกธุรกรรมที่รอดำเนินการล้มเหลว</string>
-    <string name="contacts_sending_to_contact_waiting">กำลังส่ง %1$s ไปยัง %2$s\nกำลังรอให้ %2$s รับ</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s ถูกร้องขอโดย %2$s\nพร้อมส่ง</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">ร้องขอ %1$s จาก %2$s\nกำลังรอการชำระเงิน</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">กำลังรับ %1$s จาก %2$s\nกำลังรอให้คุณรับ</string>
-    <string name="contacts_receiving_declined">การชำระเงินถูกปฏิเสธ</string>
-    <string name="contacts_receiving_cancelled">การชำระเงินถูกยกเลิก</string>
     <string name="contacts_send_complete">ส่ง %1$s ไปยัง %2$s</string>
     <string name="contacts_receive_complete">รับ %1$s จาก %2$s</string>
     <string name="contacts_received">ได้รับจาก %1$s</string>
