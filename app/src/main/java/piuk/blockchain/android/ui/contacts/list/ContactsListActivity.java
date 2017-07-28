@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.contacts.list;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -260,7 +259,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
     @NonNull
     private AppCompatEditText getNameEditText() {
         AppCompatEditText editText = new AppCompatEditText(this);
-        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(NAME_MAX_LENGTH)});
         editText.setHint(R.string.name);
         return editText;
