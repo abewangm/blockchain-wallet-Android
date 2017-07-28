@@ -13,6 +13,7 @@ import info.blockchain.wallet.exceptions.DecryptionException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
@@ -214,9 +215,15 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
                                     refreshContacts();
                                     getView().showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
                                 }, throwable -> {
+
+                                    if(throwable instanceof NoSuchElementException) {
+                                        getView().showToast(R.string.contacts_invite_uri_used, ToastCustom.TYPE_ERROR);
+                                    } else {
+                                        getView().showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR);
+                                    }
                                     link = null;
                                     refreshContacts();
-                                    getView().showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR);
+
                                 }));
     }
 
@@ -278,7 +285,8 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
             getView().showProgressDialog();
 
             getCompositeDisposable().add(
-                    contactsDataManager.createInvitation(sender, recipient)
+                    contactsDataManager.publishXpub()
+                            .andThen(contactsDataManager.createInvitation(sender, recipient))
                             .map(Contact::createURI)
                             .doAfterTerminate(() -> getView().dismissProgressDialog())
                             .subscribe(
