@@ -12,7 +12,6 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.contacts.ContactsDataManager
-import piuk.blockchain.android.data.contacts.comparators.ContactTransactionDateComparator
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
@@ -450,7 +449,7 @@ class BalancePresenter @Inject constructor(
         displayList.removeAll { it !is TransactionSummary }
         view.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions))
         if (transactions.isNotEmpty()) {
-            val reversed = transactions.sortedWith(ContactTransactionDateComparator()).reversed()
+            val reversed = transactions.sortedBy { it.facilitatedTransaction.lastUpdated }.reversed()
             displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction))
             displayList.addAll(1, reversed)
             displayList.add(reversed.size + 1, stringUtils.getString(R.string.contacts_transaction_history))

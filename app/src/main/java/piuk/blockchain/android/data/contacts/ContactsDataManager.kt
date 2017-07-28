@@ -85,14 +85,18 @@ class ContactsDataManager(
         return rxPinning.call { contactsService.fetchContacts() }
                 .andThen(contactsService.getContactList())
                 .doOnNext { contact ->
-                    for (tx in contact.facilitatedTransactions.values) {
-                        if (tx.txHash != null && !tx.txHash.isEmpty()) {
-                            contactsMapStore.contactsTransactionMap.put(tx.txHash, contact.name)
-                            if (tx.note != null && !tx.note.isEmpty()) {
-                                contactsMapStore.notesTransactionMap.put(tx.txHash, tx.note)
-                            }
-                        }
-                    }
+                    contactsMapStore.contactsTransactionMap.putAll(
+                            contact.facilitatedTransactions.values
+                                    .filter { !it.txHash.isNullOrEmpty() }
+                                    .associateBy({ it.txHash }, { contact.name })
+                    )
+                }
+                .doOnNext { contact ->
+                    contactsMapStore.notesTransactionMap.putAll(
+                            contact.facilitatedTransactions.values
+                                    .filter { !it.note.isNullOrEmpty() }
+                                    .associateBy({ it.txHash }, { it.note })
+                    )
                 }
                 .toList()
                 .toCompletable()

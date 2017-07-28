@@ -302,7 +302,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                     }
                 })
                 .flatMapCompletable(metadataNodeFactory -> contactsDataManager
-                        .initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode()));
+                        .initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode()))
+                .andThen(payloadDataManager.registerMdid())
+                .flatMapCompletable(ignored -> contactsDataManager.publishXpub());
     }
 
     private void initContactsService() {

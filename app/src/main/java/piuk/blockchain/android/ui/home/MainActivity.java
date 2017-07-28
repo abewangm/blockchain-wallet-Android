@@ -117,6 +117,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final int SCAN_URI = 2007;
     public static final int ACCOUNT_EDIT = 2008;
     public static final int SETTINGS_EDIT = 2009;
+    public static final int CONTACTS_EDIT = 2010;
 
     @Thunk boolean drawerIsOpen = false;
 
@@ -316,7 +317,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
-        } else if (requestCode == SETTINGS_EDIT) {
+        } else if (requestCode == SETTINGS_EDIT || requestCode == CONTACTS_EDIT) {
             // Reset state incase of changing currency etc
             binding.bottomNavigation.setCurrentItem(1);
             // Pass this result to balance fragment
@@ -382,25 +383,25 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void selectDrawerItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_backup:
-                startActivityForResult(new Intent(MainActivity.this, BackupWalletActivity.class), REQUEST_BACKUP);
+                startActivityForResult(new Intent(this, BackupWalletActivity.class), REQUEST_BACKUP);
                 break;
             case R.id.nav_addresses:
-                startActivityForResult(new Intent(MainActivity.this, AccountActivity.class), ACCOUNT_EDIT);
+                startActivityForResult(new Intent(this, AccountActivity.class), ACCOUNT_EDIT);
                 break;
             case R.id.nav_buy:
                 BuyActivity.start(this);
                 break;
             case R.id.nav_contacts:
-                ContactsListActivity.start(this, null);
+                startActivityForResult(new Intent(this, ContactsListActivity.class), CONTACTS_EDIT);
                 break;
             case R.id.nav_upgrade:
-                startActivity(new Intent(MainActivity.this, UpgradeWalletActivity.class));
+                startActivity(new Intent(this, UpgradeWalletActivity.class));
                 break;
             case R.id.nav_map:
                 startMerchantActivity();
                 break;
             case R.id.nav_settings:
-                startActivityForResult(new Intent(MainActivity.this, SettingsActivity.class), SETTINGS_EDIT);
+                startActivityForResult(new Intent(this, SettingsActivity.class), SETTINGS_EDIT);
                 break;
             case R.id.nav_support:
                 onSupportClicked();
