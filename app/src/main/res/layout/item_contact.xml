@@ -62,10 +62,11 @@
         <ImageView
             android:id="@+id/imageViewMore"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center_vertical|right"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
             android:tint="@color/primary_gray_light"
             app:srcCompat="@drawable/vector_more"
             android:visibility="visible" />
