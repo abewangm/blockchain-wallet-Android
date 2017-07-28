@@ -310,11 +310,6 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     }
 
     public void resendInvite(String id) {
-        try {
-            Timber.d(contactList.get(id).toJson());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
         setNameOfRecipient(contactList.get(id).getName());
         getView().showSenderNameDialog();
     }
