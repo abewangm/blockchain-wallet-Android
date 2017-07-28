@@ -13,6 +13,7 @@ import info.blockchain.wallet.exceptions.DecryptionException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
@@ -55,14 +56,15 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     public void onViewReady() {
         // Subscribe to notification events
         subscribeToNotifications();
-        // Set up page if Metadata initialized
-        attemptPageSetup(true);
 
         Intent intent = getView().getPageIntent();
         if (intent != null && intent.hasExtra(ContactsListActivity.EXTRA_METADATA_URI)) {
             link = intent.getStringExtra(ContactsListActivity.EXTRA_METADATA_URI);
             intent.removeExtra(ContactsListActivity.EXTRA_METADATA_URI);
         }
+
+        // Set up page if Metadata initialized
+        attemptPageSetup(true);
     }
 
     void initContactsService(@Nullable String secondPassword) {
@@ -212,8 +214,17 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
                                     link = null;
                                     refreshContacts();
                                     getView().showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
-                                }, throwable -> getView().showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR)));
+                                }, throwable -> {
 
+                                    if(throwable instanceof NoSuchElementException) {
+                                        getView().showToast(R.string.contacts_invite_uri_used, ToastCustom.TYPE_ERROR);
+                                    } else {
+                                        getView().showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR);
+                                    }
+                                    link = null;
+                                    refreshContacts();
+
+                                }));
     }
 
     private void attemptPageSetup(boolean firstAttempt) {
@@ -274,7 +285,8 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
             getView().showProgressDialog();
 
             getCompositeDisposable().add(
-                    contactsDataManager.createInvitation(sender, recipient)
+                    contactsDataManager.publishXpub()
+                            .andThen(contactsDataManager.createInvitation(sender, recipient))
                             .map(Contact::createURI)
                             .doAfterTerminate(() -> getView().dismissProgressDialog())
                             .subscribe(
