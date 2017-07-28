@@ -1,13 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:auto="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_delete"
-        android:icon="@drawable/vector_material_qr"
-        android:title="@string/contacts_delete"
-        auto:showAsAction="never" />
-    <item
         android:id="@+id/action_rename"
         android:icon="@drawable/vector_material_qr"
         android:title="@string/contacts_rename"
+        auto:showAsAction="never" />
+    <item
+        android:id="@+id/action_delete"
+        android:icon="@drawable/vector_material_qr"
+        android:title="@string/contacts_delete"
         auto:showAsAction="never" />
 </menu>
