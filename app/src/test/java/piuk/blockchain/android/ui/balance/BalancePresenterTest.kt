@@ -462,7 +462,7 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).showWaitingForAddressDialog()
+        verify(view).showWaitingForAddressDialog(transaction.note)
         verifyNoMoreInteractions(view)
     }
 
@@ -506,7 +506,7 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).showSendAddressDialog(fctxId)
+        verify(view).showSendAddressDialog(fctxId, note)
         verifyNoMoreInteractions(view)
     }
 
@@ -529,7 +529,7 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).showAccountChoiceDialog(listOf("", ""), fctxId)
+        verify(view).showAccountChoiceDialog(listOf("", ""), fctxId, note)
         verifyNoMoreInteractions(view)
     }
 

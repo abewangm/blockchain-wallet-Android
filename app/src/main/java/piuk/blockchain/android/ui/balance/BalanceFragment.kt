@@ -174,7 +174,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                     ViewUtils.convertDpToPixel(56f, context).toInt()
             )
         }
-        recyclerview.apply {
+        recyclerview?.apply {
             removeItemDecoration(spacerDecoration)
             addItemDecoration(spacerDecoration)
         }
@@ -243,37 +243,64 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun showToast(message: Int, toastType: String) {
-        context.toast(message, toastType)
-    }
+    override fun showToast(message: Int, toastType: String) = context.toast(message, toastType)
 
-    override fun showSendAddressDialog(fctxId: String) {
-        showDialog(
-                R.string.contacts_send_address_message,
-                DialogInterface.OnClickListener { _, _ -> presenter.onAccountChosen(0, fctxId) },
-                true
-        )
+    override fun showSendAddressDialog(
+            fctxId: String,
+            amount: String,
+            name: String,
+            note: String?
+    ) {
+        val message: String
+        if (!note.isNullOrEmpty()) {
+            message = getString(R.string.contacts_balance_dialog_description_note, name, amount, note)
+        } else {
+            message = getString(R.string.contacts_balance_dialog_description_no_note, name, amount)
+        }
+
+        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_balance_dialog_receiving_payment)
+                .setMessage(message)
+                .setPositiveButton(
+                        R.string.contacts_balance_dialog_accept,
+                        { _, _ -> presenter.onAccountChosen(0, fctxId) }
+                )
+                .setNegativeButton(
+                        R.string.contacts_balance_dialog_decline,
+                        { _, _ -> presenter.confirmDeclineTransaction(fctxId) }
+                )
+                .setNeutralButton(android.R.string.cancel, null)
+                .create()
+                .show()
     }
 
     override fun showWaitingForPaymentDialog() =
-            showDialog(R.string.contacts_waiting_for_payment_message, null, false)
+            showDialog(R.string.app_name, R.string.contacts_waiting_for_payment_message, null, false)
 
     override fun showWaitingForAddressDialog() =
-            showDialog(R.string.contacts_waiting_for_address_message, null, false)
+            showDialog(R.string.app_name, R.string.contacts_waiting_for_address_message, null, false)
 
     override fun showTransactionDeclineDialog(fctxId: String) = showDialog(
+            R.string.app_name,
             R.string.contacts_decline_pending_transaction,
             DialogInterface.OnClickListener { _, _ -> presenter.confirmDeclineTransaction(fctxId) },
             true
     )
 
     override fun showTransactionCancelDialog(fctxId: String) = showDialog(
+            R.string.app_name,
             R.string.contacts_cancel_pending_transaction,
             DialogInterface.OnClickListener { _, _ -> presenter.confirmCancelTransaction(fctxId) },
             true
     )
 
-    override fun showAccountChoiceDialog(accounts: List<String>, fctxId: String) {
+    override fun showAccountChoiceDialog(
+            accounts: List<String>,
+            fctxId: String,
+            amount: String,
+            name: String,
+            note: String?
+    ) {
         val spinner = AppCompatSpinner(activity)
         spinner.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, accounts)
         val selection = intArrayOf(0)
@@ -288,11 +315,28 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             }
         }
 
+        var message: String
+        if (!note.isNullOrEmpty()) {
+            message = getString(R.string.contacts_balance_dialog_description_note, name, amount, note)
+        } else {
+            message = getString(R.string.contacts_balance_dialog_description_no_note, name, amount)
+        }
+
+        message += "\n\n${getString(R.string.contacts_balance_dialog_choose_account_message)}\n"
+
         AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_choose_account_message)
+                .setTitle(R.string.contacts_balance_dialog_receiving_payment)
+                .setMessage(message)
                 .setView(ViewUtils.getAlertDialogPaddedView(context, spinner))
-                .setPositiveButton(android.R.string.ok, { _, _ -> presenter.onAccountChosen(selection[0], fctxId) })
+                .setPositiveButton(
+                        R.string.contacts_balance_dialog_accept,
+                        { _, _ -> presenter.onAccountChosen(selection[0], fctxId) }
+                )
+                .setNegativeButton(
+                        R.string.contacts_balance_dialog_decline,
+                        { _, _ -> presenter.confirmDeclineTransaction(fctxId) }
+                )
+                .setNeutralButton(android.R.string.cancel, null)
                 .create()
                 .show()
     }
@@ -443,12 +487,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     private fun showDialog(
-            @StringRes message: Int,
+            @StringRes title: Int,
+            message: String,
             clickListener: DialogInterface.OnClickListener?,
             showNegativeButton: Boolean
     ) {
         val builder = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
+                .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, clickListener)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -458,6 +503,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
         builder.show()
     }
+
+    private fun showDialog(
+            @StringRes title: Int,
+            @StringRes message: Int,
+            clickListener: DialogInterface.OnClickListener?,
+            showNegativeButton: Boolean
+    ) = showDialog(title, getString(message), clickListener, showNegativeButton)
 
     companion object {
 

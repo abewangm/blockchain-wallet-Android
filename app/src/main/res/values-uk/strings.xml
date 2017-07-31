@@ -516,7 +516,7 @@
     <string name="contacts_address_sent_success">Адресу успішно відправлено</string>
     <string name="contacts_being_invited">Прийняти запрошення</string>
     <string name="contacts_broadcasting_payment">Інформуємо вас, що ваш контакт відправив вам bitcoin, будь ласка, трохи зачекайте.</string>
-    <string name="contacts_choose_account_message">Виберіть, куди саме ви хочете отримати свої гроші</string>
+    <string name="contacts_balance_dialog_choose_account_message">Виберіть, куди саме ви хочете отримати свої гроші</string>
     <string name="contacts_choose_pairing_method">Щоб додати довірений контакт, виберіть метод створення пари, який хочете використати:</string>
     <string name="contacts_delete">Видалити контакт</string>
     <string name="contacts_delete_contact_success">Контакт видалено</string>

@@ -93,10 +93,14 @@ class FctxDelegate<in T>(
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
             when (transaction.role) {
-                FacilitatedTransaction.ROLE_RPR_INITIATOR -> TODO()
-                FacilitatedTransaction.ROLE_RPR_RECEIVER -> {
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> {
                     viewHolder.note.setText(R.string.contacts_transaction_ready_to_send)
                     viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
+                    displaySending(viewHolder)
+                }
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> {
+                    viewHolder.note.setText(R.string.contacts_transaction_waiting_for_payment)
+                    viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
                     displaySending(viewHolder)
                 }
                 FacilitatedTransaction.ROLE_PR_INITIATOR -> {
@@ -104,21 +108,28 @@ class FctxDelegate<in T>(
                     viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
                     displayReceiving(viewHolder)
                 }
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> {
+                    viewHolder.note.setText(R.string.contacts_transaction_pay_or_decline)
+                    viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
+                    displayPaymentRequest(viewHolder)
+                }
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_PAYMENT_BROADCASTED) {
+            viewHolder.note.text = transaction.note
+            viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
+
             when (transaction.role) {
-                FacilitatedTransaction.ROLE_RPR_INITIATOR -> TODO()
-                FacilitatedTransaction.ROLE_RPR_RECEIVER -> TODO()
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> TODO()
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> displaySent(viewHolder)
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> displayReceived(viewHolder)
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> displayReceived(viewHolder)
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayPaid(viewHolder)
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_DECLINED) {
             viewHolder.note.text = stringUtils.getString(R.string.contacts_receiving_declined).toUpperCase()
             viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
             when (transaction.role) {
-                // TODO:
+            // TODO:
                 FacilitatedTransaction.ROLE_RPR_INITIATOR -> Unit.toString()
                 FacilitatedTransaction.ROLE_RPR_RECEIVER -> Unit.toString()
                 FacilitatedTransaction.ROLE_PR_INITIATOR -> Unit.toString()
@@ -129,7 +140,7 @@ class FctxDelegate<in T>(
             viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
             when (transaction.role) {
-                // TODO:
+            // TODO:
                 FacilitatedTransaction.ROLE_RPR_INITIATOR -> Unit.toString()
                 FacilitatedTransaction.ROLE_RPR_RECEIVER -> Unit.toString()
                 FacilitatedTransaction.ROLE_PR_INITIATOR -> Unit.toString()
@@ -160,6 +171,12 @@ class FctxDelegate<in T>(
         viewHolder.result.setBackgroundResource(R.drawable.rounded_view_green)
     }
 
+    private fun displayPaymentRequest(viewHolder: FctxViewHolder) {
+        viewHolder.direction.setText(R.string.payment_request)
+        viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_red_sent_50))
+        viewHolder.result.setBackgroundResource(R.drawable.rounded_view_red_50)
+    }
+
     private fun displaySending(viewHolder: FctxViewHolder) {
         viewHolder.direction.setText(R.string.sending)
         viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_red_sent_50))
@@ -168,6 +185,12 @@ class FctxDelegate<in T>(
 
     private fun displaySent(viewHolder: FctxViewHolder) {
         viewHolder.direction.setText(R.string.SENT)
+        viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_red_sent))
+        viewHolder.result.setBackgroundResource(R.drawable.rounded_view_red)
+    }
+
+    private fun displayPaid(viewHolder: FctxViewHolder) {
+        viewHolder.direction.setText(R.string.paid)
         viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_red_sent))
         viewHolder.result.setBackgroundResource(R.drawable.rounded_view_red)
     }

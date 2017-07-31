@@ -518,7 +518,7 @@
     <string name="contacts_address_sent_success">Alamat berhasil dikirim</string>
     <string name="contacts_being_invited">Terima undangan</string>
     <string name="contacts_broadcasting_payment">Kami hanya menginformasikan kontak Anda bahwa Anda sudah mengirim mereka beberapa bitcoin, harap tunggu.</string>
-    <string name="contacts_choose_account_message">Pilih di mana Anda ingin menerima dana Anda.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Pilih di mana Anda ingin menerima dana Anda.</string>
     <string name="contacts_choose_pairing_method">Pilih metode pasangan yang ingin Anda gunakan untuk menambahkan kontak terpercaya:</string>
     <string name="contacts_delete">Hapus kontak</string>
     <string name="contacts_delete_contact_success">Kontak dihapus</string>

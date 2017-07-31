@@ -306,7 +306,10 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .flatMapCompletable(metadataNodeFactory -> contactsDataManager
                         .initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode()))
                 .andThen(payloadDataManager.registerMdid()
-                        .onErrorReturn(ignored -> ResponseBody.create(MediaType.parse("application/json"), "{}")))
+                        .onErrorReturn(throwable -> {
+                            Timber.e(throwable);
+                            return ResponseBody.create(MediaType.parse("application/json"), "{}");
+                        }))
                 .flatMapCompletable(ignored -> contactsDataManager.publishXpub());
     }
 

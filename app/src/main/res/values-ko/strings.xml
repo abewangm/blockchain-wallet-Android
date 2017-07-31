@@ -515,7 +515,7 @@
     <string name="contacts_address_sent_success">주소 보내기 성공</string>
     <string name="contacts_being_invited">초대 받아들이기</string>
     <string name="contacts_broadcasting_payment">귀하가 비트코인을 보냈다고 귀하 연락처에 방금 알렸습니다. 기다려 주세요.</string>
-    <string name="contacts_choose_account_message">어디로 돈을 받을지 선택하세요.</string>
+    <string name="contacts_balance_dialog_choose_account_message">어디로 돈을 받을지 선택하세요.</string>
     <string name="contacts_choose_pairing_method">믿을 수 있는 연락처 추가에 쓰려고 하는 페어링 방법을 선택하세요.</string>
     <string name="contacts_delete">연락처 삭제</string>
     <string name="contacts_delete_contact_success">연락처 삭제됨</string>

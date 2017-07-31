@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">L\'adresse a été envoyée avec succès</string>
     <string name="contacts_being_invited">Accepter l\'invitation</string>
     <string name="contacts_broadcasting_payment">Nous informons votre contact que vous lui avez envoyé une somme en bitcoin. Veuillez patienter.</string>
-    <string name="contacts_choose_account_message">Choisissez la destination des fonds à recevoir.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Choisissez la destination des fonds à recevoir.</string>
     <string name="contacts_choose_pairing_method">Choisissez la méthode de jumelage à utiliser pour ajouter un contact de confiance :</string>
     <string name="contacts_delete">Supprimer le contact</string>
     <string name="contacts_delete_contact_success">Contact supprimé</string>

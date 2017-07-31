@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">Адрес отправлен</string>
     <string name="contacts_being_invited">Принять приглашение</string>
     <string name="contacts_broadcasting_payment">Мы сообщаем вашему контакту, что вы отправили ему биткоины. Пожалуйста, ждите.</string>
-    <string name="contacts_choose_account_message">Выберите, где вы хотите получать средства.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Выберите, где вы хотите получать средства.</string>
     <string name="contacts_choose_pairing_method">Для добавления контакта выберите желаемый способ сопряжения:</string>
     <string name="contacts_delete">Удалить контакт</string>
     <string name="contacts_delete_contact_success">Контакт удален</string>
