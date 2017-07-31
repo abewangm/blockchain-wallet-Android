@@ -259,7 +259,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                     if (label == null || label.isEmpty()) {
                         label = account.getXpub();
                     }
-                    binding.destination.setText(StringUtils.abbreviate(label, 32));
+                    binding.toContainer.toAddressTextView.setText(StringUtils.abbreviate(label, 32));
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
                     getPresenter().setContact(null);
@@ -269,7 +269,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                     if (label == null || label.isEmpty()) {
                         label = legacyAddress.getAddress();
                     }
-                    binding.destination.setText(StringUtils.abbreviate(label, 32));
+                    binding.toContainer.toAddressTextView.setText(StringUtils.abbreviate(label, 32));
                 }
 
             } catch (ClassNotFoundException | IOException e) {
@@ -293,7 +293,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                     if (label == null || label.isEmpty()) {
                         label = account.getXpub();
                     }
-                    binding.from.setText(StringUtils.abbreviate(label, 32));
+                    binding.fromContainer.fromAddressTextView.setText(StringUtils.abbreviate(label, 32));
 
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
@@ -303,7 +303,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                     if (label == null || label.isEmpty()) {
                         label = legacyAddress.getAddress();
                     }
-                    binding.from.setText(StringUtils.abbreviate(label, 32));
+                    binding.fromContainer.fromAddressTextView.setText(StringUtils.abbreviate(label, 32));
                 }
 
                 getPresenter().setSendingAddress(chosenItem);
@@ -421,7 +421,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         binding.textviewFeeType.setText(R.string.fee_options_regular);
         binding.textviewFeeTime.setText(R.string.fee_options_regular_time);
 
-        RxTextView.textChanges(binding.amountRow.amountBtc)
+        RxTextView.textChanges(binding.amountContainer.amountBtc)
                 .debounce(400, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -429,7 +429,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                         value -> updateTotals(getPresenter().getSendingItemAccount()),
                         Throwable::printStackTrace);
 
-        RxTextView.textChanges(binding.amountRow.amountFiat)
+        RxTextView.textChanges(binding.amountContainer.amountFiat)
                 .debounce(400, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -440,23 +440,23 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     private void requestSendPayment() {
         getPresenter().onSendClicked(
-                binding.amountRow.amountBtc.getText().toString(),
-                binding.destination.getText().toString(),
+                binding.amountContainer.amountBtc.getText().toString(),
+                binding.toContainer.toAddressTextView.getText().toString(),
                 getFeePriority());
     }
 
     private void setupDestinationView() {
-        binding.destination.setHorizontallyScrolling(false);
-        binding.destination.setLines(3);
+        binding.toContainer.toAddressTextView.setHorizontallyScrolling(false);
+//        binding.toContainer.toAddressTextView.setLines(3);
 
         //Avoid OntouchListener - causes paste issues on some Samsung devices
-        binding.destination.setOnClickListener(v -> {
-            binding.destination.setText("");
+        binding.toContainer.toAddressTextView.setOnClickListener(v -> {
+            binding.toContainer.toAddressTextView.setText("");
             getPresenter().setReceivingAddress(null);
         });
         //LongClick listener required to clear receive address in memory when user long clicks to paste
-        binding.destination.setOnLongClickListener(v -> {
-            binding.destination.setText("");
+        binding.toContainer.toAddressTextView.setOnLongClickListener(v -> {
+            binding.toContainer.toAddressTextView.setText("");
             getPresenter().setReceivingAddress(null);
             v.performClick();
             return false;
@@ -464,9 +464,9 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
         //TextChanged listener required to invalidate receive address in memory when user
         //chooses to edit address populated via QR
-        RxTextView.textChanges(binding.destination)
+        RxTextView.textChanges(binding.toContainer.toAddressTextView)
                 .doOnNext(ignored -> {
-                    if (getActivity().getCurrentFocus() == binding.destination) {
+                    if (getActivity().getCurrentFocus() == binding.toContainer.toAddressTextView) {
                         getPresenter().setReceivingAddress(null);
                         getPresenter().setContact(null);
                     }
@@ -483,16 +483,16 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         }
 
         getPresenter().setSendingAddress(itemAccount);
-        binding.from.setText(itemAccount.getLabel());
+        binding.fromContainer.fromAddressTextView.setText(itemAccount.getLabel());
 
-        binding.from.setOnClickListener(v -> startFromFragment());
-        binding.imageviewDropdownSend.setOnClickListener(v -> startFromFragment());
+        binding.fromContainer.fromAddressTextView.setOnClickListener(v -> startFromFragment());
+        binding.fromContainer.fromArrowImage.setOnClickListener(v -> startFromFragment());
     }
 
     @Thunk
     void updateTotals(ItemAccount itemAccount) {
         getPresenter().calculateTransactionAmounts(itemAccount,
-                binding.amountRow.amountBtc.getText().toString(),
+                binding.amountContainer.amountBtc.getText().toString(),
                 getFeePriority(),
                 null);
     }
@@ -518,7 +518,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     private void setupReceiveToView() {
-        binding.imageviewDropdownReceive.setOnClickListener(v ->
+        binding.toContainer.toArrowImage.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                         PaymentRequestType.SEND));
@@ -526,12 +526,12 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void hideSendingAddressField() {
-        binding.fromRow.setVisibility(View.GONE);
+        binding.fromContainer.fromAddressTextView.setVisibility(View.GONE);
     }
 
     @Override
     public void hideReceivingAddressField() {
-        binding.destination.setHint(R.string.to_field_helper_no_dropdown);
+        binding.toContainer.toAddressTextView.setHint(R.string.to_field_helper_no_dropdown);
     }
 
     @Override
@@ -541,13 +541,13 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void updateBtcAmount(String amount) {
-        binding.amountRow.amountBtc.setText(amount);
-        binding.amountRow.amountBtc.setSelection(binding.amountRow.amountBtc.getText().length());
+        binding.amountContainer.amountBtc.setText(amount);
+        binding.amountContainer.amountBtc.setSelection(binding.amountContainer.amountBtc.getText().length());
     }
 
     @Override
     public void setDestinationAddress(String btcAddress) {
-        binding.destination.setText(btcAddress);
+        binding.toContainer.toAddressTextView.setText(btcAddress);
     }
 
     @Override
@@ -562,7 +562,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void setContactName(String name) {
-        binding.destination.setText(name);
+        binding.toContainer.toAddressTextView.setText(name);
     }
 
     @Override
@@ -583,17 +583,17 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void updateBtcUnit(String unit) {
-        binding.amountRow.currencyBtc.setText(unit);
+        binding.amountContainer.currencyBtc.setText(unit);
     }
 
     @Override
     public void updateFiatUnit(String unit) {
-        binding.amountRow.currencyFiat.setText(unit);
+        binding.amountContainer.currencyFiat.setText(unit);
     }
 
     @Override
     public void onSetSpendAllAmount(String textFromSatoshis) {
-        binding.amountRow.amountBtc.setText(textFromSatoshis);
+        binding.amountContainer.amountBtc.setText(textFromSatoshis);
     }
 
     @Override
@@ -711,32 +711,32 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     // BTC Field
     private void setupBtcTextField() {
-        binding.amountRow.amountBtc.setSelectAllOnFocus(true);
-        binding.amountRow.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountRow.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
-        binding.amountRow.amountBtc.addTextChangedListener(btcTextWatcher);
-        binding.amountRow.amountBtc.setKeyListener(
+        binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
+        binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountContainer.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
+        binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
+        binding.amountContainer.amountBtc.setKeyListener(
                 CommaEnabledDigitsKeyListener.getInstance(false, true));
     }
 
     // Fiat Field
     private void setupFiatTextField() {
-        binding.amountRow.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountRow.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
-        binding.amountRow.amountFiat.setSelectAllOnFocus(true);
-        binding.amountRow.amountFiat.addTextChangedListener(fiatTextWatcher);
-        binding.amountRow.amountFiat.setKeyListener(
+        binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountContainer.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
+        binding.amountContainer.amountFiat.setSelectAllOnFocus(true);
+        binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
+        binding.amountContainer.amountFiat.setKeyListener(
                 CommaEnabledDigitsKeyListener.getInstance(false, true));
     }
 
     @Override
     public void updateBtcTextField(String text) {
-        binding.amountRow.amountBtc.setText(text);
+        binding.amountContainer.amountBtc.setText(text);
     }
 
     @Override
     public void updateFiatTextField(String text) {
-        binding.amountRow.amountFiat.setText(text);
+        binding.amountContainer.amountFiat.setText(text);
     }
 
     @Thunk
@@ -781,14 +781,14 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         public void afterTextChanged(Editable s) {
             String input = s.toString();
 
-            binding.amountRow.amountBtc.removeTextChangedListener(this);
+            binding.amountContainer.amountBtc.removeTextChangedListener(this);
             NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
             btcFormat.setMaximumFractionDigits(getPresenter().getCurrencyHelper().getMaxBtcDecimalLength() + 1);
             btcFormat.setMinimumFractionDigits(0);
 
-            s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountRow.amountBtc);
+            s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
 
-            binding.amountRow.amountBtc.addTextChangedListener(this);
+            binding.amountContainer.amountBtc.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
@@ -822,15 +822,15 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         public void afterTextChanged(Editable s) {
             String input = s.toString();
 
-            binding.amountRow.amountFiat.removeTextChangedListener(this);
+            binding.amountContainer.amountFiat.removeTextChangedListener(this);
             int maxLength = 2;
             NumberFormat fiatFormat = NumberFormat.getInstance(Locale.getDefault());
             fiatFormat.setMaximumFractionDigits(maxLength + 1);
             fiatFormat.setMinimumFractionDigits(0);
 
-            s = formatEditable(s, input, maxLength, binding.amountRow.amountFiat);
+            s = formatEditable(s, input, maxLength, binding.amountContainer.amountFiat);
 
-            binding.amountRow.amountFiat.addTextChangedListener(this);
+            binding.amountContainer.amountFiat.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
@@ -866,14 +866,14 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         alertDialog.setCanceledOnTouchOutside(false);
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            binding.destination.setText("");
+            binding.toContainer.toAddressTextView.setText("");
             if (dialogBinding.confirmDontAskAgain.isChecked())
                 getPresenter().disableWatchOnlySpendWarning();
             alertDialog.dismiss();
         });
 
         dialogBinding.confirmContinue.setOnClickListener(v -> {
-            binding.destination.setText(address);
+            binding.toContainer.toAddressTextView.setText(address);
             if (dialogBinding.confirmDontAskAgain.isChecked())
                 getPresenter().disableWatchOnlySpendWarning();
             alertDialog.dismiss();

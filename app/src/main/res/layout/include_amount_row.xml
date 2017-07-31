@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <include layout="@layout/divider_grey" />
-
         <LinearLayout
-            android:baselineAligned="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -26,9 +23,8 @@
                 <TextView
                     android:id="@+id/currency_btc"
                     fontPath="fonts/Montserrat-Light.ttf"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:text="BTC"
                     android:textColor="@color/primary_gray_dark" />
@@ -45,7 +41,6 @@
                     android:imeOptions="actionDone"
                     android:inputType="numberDecimal|number"
                     android:maxLength="17"
-                    android:minHeight="48dp"
                     android:selectAllOnFocus="true"
                     android:textColor="@color/black"
                     android:textCursorDrawable="@null">
@@ -64,10 +59,8 @@
                 <TextView
                     android:id="@+id/currency_fiat"
                     fontPath="fonts/Montserrat-Light.ttf"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:text="USD"
                     android:textColor="@color/primary_gray_dark" />
@@ -77,7 +70,6 @@
                     fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
                     android:background="@android:color/transparent"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
@@ -85,7 +77,6 @@
                     android:imeOptions="actionDone"
                     android:inputType="numberDecimal|number"
                     android:maxLength="17"
-                    android:minHeight="48dp"
                     android:selectAllOnFocus="true"
                     android:textColor="@color/black"
                     android:textCursorDrawable="@null" />
