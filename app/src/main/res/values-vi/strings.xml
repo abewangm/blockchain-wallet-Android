@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">Giao dịch đang chờ duyệt đã từ chối thất bại</string>
     <string name="contacts_pending_transaction_cancel_success">Giao dịch đang chờ duyệt đã hủy thành công</string>
     <string name="contacts_pending_transaction_cancel_failure">Giao dịch đang chờ duyệt đã hủy thất bại</string>
-    <string name="contacts_sending_to_contact_waiting">Đang gửi %1$s đến %2$s\nĐang chờ %2$s chấp nhận</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s được yêu cầu bởi %2$s\nSẵn sàng để gửi</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Đã yêu cầu %1$s từ %2$s\nĐang chờ thanh toán</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Đang nhận %1$s từ %2$s\nĐang chờ bạn chấp nhận</string>
-    <string name="contacts_receiving_declined">Thanh toán bị từ chối</string>
-    <string name="contacts_receiving_cancelled">Thanh toán bị hủy</string>
     <string name="contacts_send_complete">Đã gửi %1$s đến %2$s</string>
     <string name="contacts_receive_complete">Đã nhận %1$s từ %2$s</string>
     <string name="contacts_received">Đã nhận từ %1$s</string>

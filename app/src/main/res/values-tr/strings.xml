@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">Bekleyen işlem geri çevrilemedi</string>
     <string name="contacts_pending_transaction_cancel_success">Bekleyen işlem başarıyla iptal edildi</string>
     <string name="contacts_pending_transaction_cancel_failure">Bekleyen işlem iptal edilemedi</string>
-    <string name="contacts_sending_to_contact_waiting">%1$s tutar %2$s için gönderiliyor\n%2$s kabul etmesi gerekiyor</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s tutar %2$s tarafından talep edildi\nGöndermek için hazır</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">%1$s tutar %2$s için talep edildi\nÖdeme yapılması gerekiyor</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">%1$s tutar %2$s tarafından alınıyor\nKabul etmenizi bekliyor</string>
-    <string name="contacts_receiving_declined">Ödeme geri çevrildi</string>
-    <string name="contacts_receiving_cancelled">Ödeme iptal edildi</string>
     <string name="contacts_send_complete">%1$s tutar %2$s için gönderildi</string>
     <string name="contacts_receive_complete">%1$s tutar %2$s tarafından alındı</string>
     <string name="contacts_received">%1$s tarafından alındı</string>

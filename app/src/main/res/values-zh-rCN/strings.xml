@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">拒绝待定交易失败</string>
     <string name="contacts_pending_transaction_cancel_success">已成功取消待定交易</string>
     <string name="contacts_pending_transaction_cancel_failure">取消待定交易失败</string>
-    <string name="contacts_sending_to_contact_waiting">正在向 %2$s 发送 %1$s\n正在等待%2$s 接受</string>
-    <string name="contacts_payment_requested_ready_to_send">%2$s 请求的 %1$s\n 准备发送</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">向 %2$s 请求了 %1$s\n 正在等待付款</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">正在从 %2$s 接收 %1$s\n 正在等待您接受</string>
-    <string name="contacts_receiving_declined">付款被拒绝</string>
-    <string name="contacts_receiving_cancelled">付款被取消</string>
     <string name="contacts_send_complete">已向 %2$s 发送 %1$s</string>
     <string name="contacts_receive_complete">从 %2$s 接收了 %1$s</string>
     <string name="contacts_received">从 %1$s 接收了</string>

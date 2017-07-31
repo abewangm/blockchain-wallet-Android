@@ -472,12 +472,6 @@
     <string name="contacts_pending_transaction_decline_failure">Penolakan transaksi yang tertunda gagal</string>
     <string name="contacts_pending_transaction_cancel_success">Transaksi yang tertunda berhasil dibatalkan</string>
     <string name="contacts_pending_transaction_cancel_failure">Pembatalan transaksi yang tertunda gagal</string>
-    <string name="contacts_sending_to_contact_waiting">Mengirimkan %1$s ke %2$s\nMenunggu %2$s untuk menerima</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s diminta oleh %2$s\nSiap untuk mengirim</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Diminta %1$s dari %2$s\nMenunggu pembayaran</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Menerima %1$s dari %2$s\nMenunggu Anda untuk menerima</string>
-    <string name="contacts_receiving_declined">Pembayaran ditolak</string>
-    <string name="contacts_receiving_cancelled">Pembayaran dibatalkan</string>
     <string name="contacts_send_complete">Kirim %1$s ke %2$s</string>
     <string name="contacts_receive_complete">Diterima %1$s dari %2$s</string>
     <string name="contacts_received">Diterima dari %1$s</string>

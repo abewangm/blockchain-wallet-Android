@@ -696,10 +696,16 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void navigateToAddNote(PaymentConfirmationDetails paymentConfirmationDetails,
+                                  PaymentRequestType paymentRequestType,
                                   String contactId,
-                                  int satoshis) {
+                                  long satoshis,
+                                  int accountPosition) {
         if (listener != null) {
-            listener.onTransactionNotesRequested(paymentConfirmationDetails, contactId, satoshis);
+            listener.onTransactionNotesRequested(paymentConfirmationDetails,
+                    paymentRequestType,
+                    contactId,
+                    satoshis,
+                    accountPosition);
         }
     }
 
@@ -1037,7 +1043,9 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         void onSendFragmentClose();
 
         void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
+                                         PaymentRequestType paymentRequestType,
                                          String contactId,
-                                         int satoshis);
+                                         long satoshis,
+                                         int accountPosition);
     }
 }

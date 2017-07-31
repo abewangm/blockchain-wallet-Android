@@ -30,6 +30,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,6 +48,7 @@ import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -71,6 +76,8 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
     private SSLVerifyUtil sslVerifyUtil;
     private Context applicationContext;
     private PayloadDataManager payloadDataManager;
+    private ExchangeRateFactory exchangeRateFactory;
+    private MonetaryUtil monetaryUtil;
     @VisibleForTesting HashBiMap<Integer, Object> accountMap;
     @VisibleForTesting SparseIntArray spinnerIndexMap;
 
@@ -94,9 +101,10 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
         this.sslVerifyUtil = sslVerifyUtil;
         this.applicationContext = applicationContext;
         this.payloadDataManager = payloadDataManager;
+        this.exchangeRateFactory = exchangeRateFactory;
 
         int btcUnitType = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
-        MonetaryUtil monetaryUtil = new MonetaryUtil(btcUnitType);
+        monetaryUtil = new MonetaryUtil(btcUnitType);
         currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory);
 
         accountMap = HashBiMap.create();
@@ -390,6 +398,81 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
             Timber.e(e);
             return null;
         }
+    }
+
+    PaymentConfirmationDetails getConfirmationDetails() {
+        PaymentConfirmationDetails details = new PaymentConfirmationDetails();
+        int position = getView().getSelectedAccountPosition();
+        details.fromLabel = payloadDataManager.getAccount(position).getLabel();
+        details.toLabel = getView().getContactName();
+
+        int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+        String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
+
+        BigInteger satoshis = getSatoshisFromText(getView().getBtcAmount());
+
+        details.btcAmount = getTextFromSatoshis(satoshis.longValue());
+        details.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
+        details.fiatUnit = fiatUnit;
+
+        details.fiatAmount = (monetaryUtil.getFiatFormat(fiatUnit)
+                .format(exchangeRate * (satoshis.doubleValue() / 1e8)));
+
+        details.fiatSymbol = exchangeRateFactory.getSymbol(fiatUnit);
+
+        return details;
+    }
+
+    /**
+     * Returns btc amount from satoshis.
+     *
+     * @return btc, mbtc or bits relative to what is set in monetaryUtil
+     */
+    private String getTextFromSatoshis(long satoshis) {
+        String displayAmount = monetaryUtil.getDisplayAmount(satoshis);
+        displayAmount = displayAmount.replace(".", getDefaultDecimalSeparator());
+        return displayAmount;
+    }
+
+    /**
+     * Gets device's specified locale decimal separator
+     *
+     * @return decimal separator
+     */
+    private String getDefaultDecimalSeparator() {
+        DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance(Locale.getDefault());
+        DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
+        return Character.toString(symbols.getDecimalSeparator());
+    }
+
+    /**
+     * Returns amount of satoshis from btc amount. This could be btc, mbtc or bits.
+     *
+     * @return satoshis
+     */
+    private BigInteger getSatoshisFromText(String text) {
+        if (text == null || text.isEmpty()) return BigInteger.ZERO;
+
+        String amountToSend = stripSeparator(text);
+
+        double amount;
+        try {
+            amount = Double.parseDouble(amountToSend);
+        } catch (NumberFormatException nfe) {
+            amount = 0.0;
+        }
+
+        long amountL = BigDecimal.valueOf(monetaryUtil.getUndenominatedAmount(amount))
+                .multiply(BigDecimal.valueOf(100000000))
+                .longValue();
+        return BigInteger.valueOf(amountL);
+    }
+
+    private String stripSeparator(String text) {
+        return text.trim()
+                .replace(" ", "")
+                .replace(getDefaultDecimalSeparator(), ".");
     }
 
     private Account getDefaultAccount() {

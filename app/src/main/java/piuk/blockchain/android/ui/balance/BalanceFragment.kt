@@ -171,7 +171,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
         if (spacerDecoration == null) {
             spacerDecoration = BottomSpacerDecoration(
-                    context,
                     ViewUtils.convertDpToPixel(56f, context).toInt()
             )
         }

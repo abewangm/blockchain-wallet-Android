@@ -126,6 +126,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
             name = itemView.findViewById(R.id.contactName);
             itemView.findViewById(R.id.contactStatus).setVisibility(View.GONE);
             itemView.findViewById(R.id.imageviewIndicator).setVisibility(View.GONE);
+            itemView.findViewById(R.id.imageViewMore).setVisibility(View.GONE);
         }
     }
 

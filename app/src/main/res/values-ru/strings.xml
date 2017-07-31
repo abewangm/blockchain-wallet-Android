@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">Отклонить ожидающую транзакцию не удалось</string>
     <string name="contacts_pending_transaction_cancel_success">Ожидающая транзакция отменена</string>
     <string name="contacts_pending_transaction_cancel_failure">Отменить ожидающую транзакцию не удалось</string>
-    <string name="contacts_sending_to_contact_waiting">Отправка %1$s получателю %2$s\nожидание приема от %2$s</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s, запрошенный %2$s\nГотово к отправке</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Запрошенный %1$s от %2$s\nОжидает платежа</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Получение %1$s от %2$s\nОжидает приема от вас</string>
-    <string name="contacts_receiving_declined">Платеж отклонен</string>
-    <string name="contacts_receiving_cancelled">Платеж отменен</string>
     <string name="contacts_send_complete">Отправлено %1$s получателю %2$s</string>
     <string name="contacts_receive_complete">Получено %1$s от %2$s</string>
     <string name="contacts_received">Получено от %1$s</string>

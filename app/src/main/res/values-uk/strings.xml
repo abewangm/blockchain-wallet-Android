@@ -471,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">Збій відхилення транзакції в очікуванні</string>
     <string name="contacts_pending_transaction_cancel_success">Скасування транзакції в очікуванні успішне</string>
     <string name="contacts_pending_transaction_cancel_failure">Збій скасування транзакції в очікуванні</string>
-    <string name="contacts_sending_to_contact_waiting">Відправка %1$s для %2$s\nОчікування на %2$s для схвалення</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s запитано %2$s\nГотово для відправлення</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Запитано %1$s від %2$s\nОчікування платежу</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Отримування %1$s від %2$s\nОчікування вашого схвалення</string>
-    <string name="contacts_receiving_declined">Платіж відхилено</string>
-    <string name="contacts_receiving_cancelled">Платіж скасований</string>
     <string name="contacts_send_complete">Відправлено %1$s для %2$s</string>
     <string name="contacts_receive_complete">Отримано %1$s від %2$s</string>
     <string name="contacts_received">Отримано від %1$s</string>

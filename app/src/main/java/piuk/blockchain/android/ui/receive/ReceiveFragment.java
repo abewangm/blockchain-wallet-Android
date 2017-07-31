@@ -109,9 +109,9 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         }
     };
 
-   {
-       Injector.getInstance().getPresenterComponent().inject(this);
-   }
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     public static ReceiveFragment newInstance(int selectedAccountPosition) {
         ReceiveFragment fragment = new ReceiveFragment();
@@ -321,8 +321,14 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         return String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator());
     }
 
+    @Override
     public int getSelectedAccountPosition() {
         return selectedAccountPosition;
+    }
+
+    @Override
+    public String getBtcAmount() {
+        return binding.amountContainer.amountBtc.getText().toString();
     }
 
     private void selectAccount(int position) {
@@ -382,6 +388,11 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             }
             getPresenter().generateQrCode(uri);
         }
+    }
+
+    @Override
+    public String getContactName() {
+        return binding.destination.getText().toString();
     }
 
     @Override
@@ -451,12 +462,12 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
                 if (listener != null) {
                     listener.onTransactionNotesRequested(
-                            null,
-                            contact.getId(),
-                            getPresenter().getCorrectedAccountIndex(selectedAccountPosition),
+                            getPresenter().getConfirmationDetails(),
                             PaymentRequestType.REQUEST,
+                            contact.getId(),
                             getPresenter().getCurrencyHelper().getLongAmount(
-                                    binding.amountContainer.amountBtc.getText().toString()));
+                                    binding.amountContainer.amountBtc.getText().toString()),
+                            getPresenter().getCorrectedAccountIndex(selectedAccountPosition));
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -473,7 +484,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             adapter.setItemClickedListener(() -> bottomSheetDialog.dismiss());
 
             View sheetView = View.inflate(getActivity(), R.layout.bottom_sheet_receive, null);
-            RecyclerView recyclerView = (RecyclerView) sheetView.findViewById(R.id.recycler_view);
+            RecyclerView recyclerView = sheetView.findViewById(R.id.recycler_view);
             recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -659,10 +670,10 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         void onReceiveFragmentClose();
 
         void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
-                                         String contactId,
-                                         int accountPosition,
                                          PaymentRequestType paymentRequestType,
-                                         long satoshis);
+                                         String contactId,
+                                         long satoshis,
+                                         int accountPosition);
 
     }
 }

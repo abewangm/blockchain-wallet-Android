@@ -433,12 +433,12 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR);
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "SameParameterValue"})
     public void onClickChangeLabel(View view) {
         getView().promptAccountLabel(accountModel.getLabel());
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "SameParameterValue"})
     public void onClickDefault(View view) {
         int revertDefault = payloadDataManager.getDefaultAccountIndex();
         payloadDataManager.getWallet().getHdWallets().get(0).setDefaultAccountIdx(accountIndex);

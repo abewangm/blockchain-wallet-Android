@@ -1,5 +1,6 @@
 package piuk.blockchain.android.util.extensions
 
+import android.content.Context
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 
@@ -28,3 +29,8 @@ fun <T> RecyclerView.Adapter<*>.autoNotify(oldList: List<T>, newList: List<T>, c
 
     diff.dispatchUpdatesTo(this)
 }
+
+/**
+ * Returns the current [Context] for the [RecyclerView.ViewHolder].
+ */
+fun RecyclerView.ViewHolder.getContext(): Context = this.itemView.context
