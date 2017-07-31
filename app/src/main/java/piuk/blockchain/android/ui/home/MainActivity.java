@@ -574,6 +574,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public void showProgressDialog(@StringRes int message) {
+        hideProgressDialog();
         materialProgressDialog = new MaterialProgressDialog(this);
         materialProgressDialog.setCancelable(false);
         materialProgressDialog.setMessage(message);
