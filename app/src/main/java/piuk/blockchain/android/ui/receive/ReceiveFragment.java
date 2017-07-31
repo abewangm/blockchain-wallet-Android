@@ -392,7 +392,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
     @Override
     public String getContactName() {
-        return binding.destination.getText().toString();
+        return binding.toContainer.toAddressTextView.getText().toString();
     }
 
     @Override
