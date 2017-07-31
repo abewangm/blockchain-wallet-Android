@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_contact_payment_request_notes.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BaseAuthActivity
@@ -142,18 +143,24 @@ class ContactConfirmRequestFragment : BaseFragment<ContactConfirmRequestView, Co
         const val ARGUMENT_CONFIRMATION_DETAILS = "ARGUMENT_CONFIRMATION_DETAILS"
         const val ARGUMENT_CONTACT_ID = "ARGUMENT_CONTACT_ID"
         const val ARGUMENT_SATOSHIS = "ARGUMENT_SATOSHIS"
+        const val ARGUMENT_REQUEST_TYPE = "ARGUMENT_REQUEST_TYPE"
+        const val ARGUMENT_ACCOUNT_POSITION = "ARGUMENT_ACCOUNT_POSITION"
 
         @JvmStatic
         fun newInstance(
                 confirmationDetails: PaymentConfirmationDetails,
+                requestType: PaymentRequestType,
                 contactId: String,
-                satoshis: Int
+                satoshis: Long,
+                accountPosition: Int
         ): ContactConfirmRequestFragment {
 
             val args = Bundle().apply {
                 putParcelable(ARGUMENT_CONFIRMATION_DETAILS, confirmationDetails)
+                putSerializable(ARGUMENT_REQUEST_TYPE, requestType)
                 putString(ARGUMENT_CONTACT_ID, contactId)
-                putInt(ARGUMENT_SATOSHIS, satoshis)
+                putLong(ARGUMENT_SATOSHIS, satoshis)
+                putInt(ARGUMENT_ACCOUNT_POSITION, accountPosition)
             }
             return ContactConfirmRequestFragment().apply { arguments = args }
         }

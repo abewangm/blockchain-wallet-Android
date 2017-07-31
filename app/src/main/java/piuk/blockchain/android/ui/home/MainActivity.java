@@ -39,7 +39,6 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
@@ -69,8 +68,8 @@ import piuk.blockchain.android.ui.buy.FrontendJavascript;
 import piuk.blockchain.android.ui.buy.FrontendJavascriptManager;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment;
+import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -97,7 +96,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         ContactConfirmRequestFragment.FragmentInteractionListener,
         ContactPaymentDialog.OnContactPaymentDialogInteractionListener,
         FrontendJavascript<String>,
-        ConfirmPaymentDialog.OnConfirmDialogInteractionListener {
+        ConfirmPaymentDialog.OnConfirmDialogInteractionListener,
+        ContactRequestSuccessFragment.ContactsRequestSuccessListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
@@ -761,17 +761,20 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
+                                            PaymentRequestType paymentRequestType,
                                             String contactId,
-                                            int satoshis) {
+                                            long satoshis,
+                                            int accountPosition) {
         addFragment(ContactConfirmRequestFragment.newInstance(paymentConfirmationDetails,
+                paymentRequestType,
                 contactId,
-                satoshis));
+                satoshis,
+                accountPosition));
     }
 
     @Override
-    public void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails, String contactId, int accountPosition, PaymentRequestType paymentRequestType, long satoshis) {
-        // STOPSHIP: 26/07/2017
-        throw new NotImplementedException("This is broken");
+    public void onRequestSuccessDismissed() {
+        binding.bottomNavigation.setCurrentItem(1);
     }
 
     @Override

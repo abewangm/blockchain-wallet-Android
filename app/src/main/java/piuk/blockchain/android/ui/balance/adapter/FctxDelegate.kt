@@ -72,41 +72,62 @@ class FctxDelegate<in T>(
         viewHolder.timeSince.text = dateUtil.formatted(transaction.lastUpdated)
         viewHolder.contactName.text = contactName
 
-        if (transaction.state == FacilitatedTransaction.STATE_DECLINED) {
-            // TODO: Received/Sent?
+        if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
+            when (transaction.role) {
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> {
+                    viewHolder.note.setText(R.string.contacts_transaction_awaiting_response)
+                    viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
+                    displaySending(viewHolder)
+                }
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> TODO()
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> TODO()
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> {
+                    viewHolder.note.setText(R.string.contacts_transaction_accept_or_decline)
+                    viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
+                    displayReceiving(viewHolder)
+                }
+            }
+        } else if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
+            when (transaction.role) {
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> TODO()
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> {
+                    viewHolder.note.setText(R.string.contacts_transaction_ready_to_send)
+                    viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
+                    displaySending(viewHolder)
+                }
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> {
+                    viewHolder.note.setText(R.string.contacts_transaction_payment_requested)
+                    viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
+                    displayReceiving(viewHolder)
+                }
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
+            }
+        } else if (transaction.state == FacilitatedTransaction.STATE_PAYMENT_BROADCASTED) {
+            when (transaction.role) {
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> TODO()
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> TODO()
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> TODO()
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
+            }
+        } else if (transaction.state == FacilitatedTransaction.STATE_DECLINED) {
             viewHolder.note.setText(R.string.contacts_receiving_declined)
             viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
+            when (transaction.role) {
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> TODO()
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> TODO()
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> TODO()
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
+            }
         } else if (transaction.state == FacilitatedTransaction.STATE_CANCELLED) {
-            // TODO: Received/Sent?
             viewHolder.note.setText(R.string.contacts_receiving_cancelled)
             viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
-        } else if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
-            if (transaction.role == FacilitatedTransaction.ROLE_PR_RECEIVER) {
-
-                viewHolder.note.setText(R.string.contacts_transaction_accept_or_decline)
-                viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
-                displayReceiving(viewHolder)
-
-            } else if (transaction.role == FacilitatedTransaction.ROLE_RPR_INITIATOR) {
-
-                viewHolder.note.setText(R.string.contacts_transaction_awaiting_response)
-                viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
-                displaySending(viewHolder)
-            }
-        } else if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
-            if (transaction.role == FacilitatedTransaction.ROLE_RPR_RECEIVER) {
-
-                viewHolder.note.setText(R.string.contacts_transaction_ready_to_send)
-                viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
-                displaySending(viewHolder)
-
-            } else if (transaction.role == FacilitatedTransaction.ROLE_PR_INITIATOR) {
-
-                viewHolder.note.setText(R.string.contacts_transaction_payment_requested)
-                viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
-                displayReceiving(viewHolder)
+            when (transaction.role) {
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> TODO()
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> TODO()
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> TODO()
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
             }
         }
 
@@ -175,7 +196,9 @@ class FctxDelegate<in T>(
     private fun getDisplayUnits(): String =
             monetaryUtil.btcUnits[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)].toString()
 
-    private class FctxViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private class FctxViewHolder internal constructor(
+            itemView: View
+    ) : RecyclerView.ViewHolder(itemView) {
 
         internal var result: TextView = itemView.result
         internal var timeSince: TextView = itemView.date

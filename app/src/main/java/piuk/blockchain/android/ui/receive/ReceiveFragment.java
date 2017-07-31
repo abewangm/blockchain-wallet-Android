@@ -109,9 +109,9 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         }
     };
 
-   {
-       Injector.getInstance().getPresenterComponent().inject(this);
-   }
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     public static ReceiveFragment newInstance(int selectedAccountPosition) {
         ReceiveFragment fragment = new ReceiveFragment();
@@ -451,12 +451,13 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
                 if (listener != null) {
                     listener.onTransactionNotesRequested(
+                            // TODO: 31/07/2017 Fix me
                             null,
-                            contact.getId(),
-                            getPresenter().getCorrectedAccountIndex(selectedAccountPosition),
                             PaymentRequestType.REQUEST,
+                            contact.getId(),
                             getPresenter().getCurrencyHelper().getLongAmount(
-                                    binding.amountContainer.amountBtc.getText().toString()));
+                                    binding.amountContainer.amountBtc.getText().toString()),
+                            getPresenter().getCorrectedAccountIndex(selectedAccountPosition));
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -659,10 +660,10 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         void onReceiveFragmentClose();
 
         void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
-                                         String contactId,
-                                         int accountPosition,
                                          PaymentRequestType paymentRequestType,
-                                         long satoshis);
+                                         String contactId,
+                                         long satoshis,
+                                         int accountPosition);
 
     }
 }

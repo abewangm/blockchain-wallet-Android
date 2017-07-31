@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.contacts.success
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -11,6 +12,8 @@ import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.util.extensions.inflate
 
 class ContactRequestSuccessFragment : Fragment() {
+
+    private var listener: ContactsRequestSuccessListener? = null
 
     override fun onCreateView(
             inflater: LayoutInflater?,
@@ -29,6 +32,8 @@ class ContactRequestSuccessFragment : Fragment() {
             PaymentRequestType.SEND -> updateForSend(contactName, btcAmount)
             PaymentRequestType.CONTACT -> throw IllegalArgumentException("This case is not handled by this fragment")
         }
+
+        button_done.setOnClickListener { listener?.onRequestSuccessDismissed() }
     }
 
     private fun updateForRequest(contactName: String) {
@@ -41,6 +46,26 @@ class ContactRequestSuccessFragment : Fragment() {
         textview_title.setText(R.string.contacts_request_success_sent_title)
         textview_description.text =
                 getString(R.string.contacts_request_success_sent_description, btcAmount, contactName)
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context is ContactsRequestSuccessListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context!!.toString() + " must implement ContactsRequestSuccessListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
+
+    interface ContactsRequestSuccessListener {
+
+        fun onRequestSuccessDismissed()
+
     }
 
     companion object {

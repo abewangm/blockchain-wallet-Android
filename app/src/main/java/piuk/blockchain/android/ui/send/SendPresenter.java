@@ -45,6 +45,7 @@ import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
@@ -202,8 +203,10 @@ public class SendPresenter extends BasePresenter<SendView> {
                                     .subscribe(
                                             contact -> getView().navigateToAddNote(
                                                     getConfirmationDetails(),
+                                                    PaymentRequestType.SEND,
                                                     contact.getId(),
-                                                    sendModel.pendingTransaction.bigIntAmount.intValue()),
+                                                    sendModel.pendingTransaction.bigIntAmount.longValue(),
+                                                    payloadDataManager.getAccounts().indexOf(sendModel.pendingTransaction.sendingObject)),
                             throwable -> showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR)));
                 }
             });

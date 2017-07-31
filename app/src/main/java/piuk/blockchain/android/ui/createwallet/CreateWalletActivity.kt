@@ -29,6 +29,7 @@ import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.settings.SettingsFragment
 import piuk.blockchain.android.util.ViewUtils
+import piuk.blockchain.android.util.extensions.getTextString
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.consume
 import javax.inject.Inject
@@ -74,13 +75,13 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
                 .doOnNext({
                     showEntropyContainer()
                     presenter.calculateEntropy(it.editable().toString())
-                    hideShowCreateButton(it.editable().toString()?.length, wallet_pass_confirm.text.toString()?.length)
+                    hideShowCreateButton(it.editable().toString().length, wallet_pass_confirm.getTextString().length)
                 })
                 .subscribe(IgnorableDefaultObserver())
 
         RxTextView.afterTextChangeEvents(wallet_pass_confirm)
                 .doOnNext({
-                    hideShowCreateButton(wallet_pass.text.toString()?.length, it.editable().toString()?.length)
+                    hideShowCreateButton(wallet_pass.getTextString().length, it.editable().toString().length)
                 })
                 .subscribe(IgnorableDefaultObserver())
 

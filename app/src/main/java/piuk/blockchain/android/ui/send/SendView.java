@@ -5,6 +5,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.View;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -66,7 +67,11 @@ interface SendView extends View {
 
     void showSecondPasswordDialog();
 
-    void navigateToAddNote(PaymentConfirmationDetails paymentConfirmationDetails, String contactId, int satoshis);
+    void navigateToAddNote(PaymentConfirmationDetails paymentConfirmationDetails,
+                           PaymentRequestType paymentRequestType,
+                           String contactId,
+                           long satoshis,
+                           int accountPosition);
 
     void dismissConfirmationDialog();
 

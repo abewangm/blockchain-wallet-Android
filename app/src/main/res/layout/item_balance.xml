@@ -8,6 +8,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_gravity="bottom"
         android:background="@color/primary_gray_light" />
 
     <RelativeLayout
@@ -118,6 +119,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/direction"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:orientation="horizontal">
 
             <ImageView
