@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_contact_payment_request_notes.*
+import kotlinx.android.synthetic.main.item_contact.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.injection.Injector
@@ -74,6 +75,14 @@ class ContactConfirmRequestFragment : BaseFragment<ContactConfirmRequestView, Co
         textview_total_fiat.text = total
     }
 
+    override fun updatePaymentType(paymentRequestType: PaymentRequestType) {
+        when (paymentRequestType) {
+            PaymentRequestType.SEND -> button_send.setText(R.string.contacts_confirm_start_transaction)
+            PaymentRequestType.REQUEST -> button_send.setText(R.string.contacts_confirm_request_payment)
+            else -> throw IllegalArgumentException("This payment type is not supported by this Fragment")
+        }
+    }
+
     override fun finishPage() {
         listener?.onPageFinished()
     }
@@ -98,8 +107,12 @@ class ContactConfirmRequestFragment : BaseFragment<ContactConfirmRequestView, Co
         activity.toast(message, toastType)
     }
 
-    override fun onRequestSuccessful(contactName: String, btcAmount: String) {
-        listener?.onRequestSuccessful(contactName, btcAmount)
+    override fun onRequestSuccessful(
+            paymentRequestType: PaymentRequestType,
+            contactName: String,
+            btcAmount: String
+    ) {
+        listener?.onRequestSuccessful(paymentRequestType, contactName, btcAmount)
     }
 
     override fun createPresenter() = paymentRequestPresenter
@@ -134,7 +147,11 @@ class ContactConfirmRequestFragment : BaseFragment<ContactConfirmRequestView, Co
 
         fun onPageFinished()
 
-        fun onRequestSuccessful(contactName: String, btcAmount: String)
+        fun onRequestSuccessful(
+                paymentRequestType: PaymentRequestType,
+                contactName: String,
+                btcAmount: String
+        )
 
     }
 

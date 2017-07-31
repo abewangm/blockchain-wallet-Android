@@ -24,6 +24,7 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
+import timber.log.Timber
 
 class FctxDelegate<in T>(
         val activity: Activity,
@@ -71,6 +72,9 @@ class FctxDelegate<in T>(
         viewHolder.result.text = amountSpannable
         viewHolder.timeSince.text = dateUtil.formatted(transaction.lastUpdated)
         viewHolder.contactName.text = contactName
+
+        Timber.d("State = ${transaction.state}")
+        Timber.d("Role = ${transaction.role}")
 
         if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
             when (transaction.role) {

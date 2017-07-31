@@ -10,6 +10,12 @@ interface ReceiveView extends View {
 
     Bitmap getQrBitmap();
 
+    String getContactName();
+
+    String getBtcAmount();
+
+    int getSelectedAccountPosition();
+
     void onAccountDataChanged();
 
     void showQrLoading();

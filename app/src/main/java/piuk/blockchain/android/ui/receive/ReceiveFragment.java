@@ -321,8 +321,14 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         return String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator());
     }
 
+    @Override
     public int getSelectedAccountPosition() {
         return selectedAccountPosition;
+    }
+
+    @Override
+    public String getBtcAmount() {
+        return binding.amountContainer.amountBtc.getText().toString();
     }
 
     private void selectAccount(int position) {
@@ -382,6 +388,11 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             }
             getPresenter().generateQrCode(uri);
         }
+    }
+
+    @Override
+    public String getContactName() {
+        return binding.destination.getText().toString();
     }
 
     @Override
@@ -451,8 +462,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
                 if (listener != null) {
                     listener.onTransactionNotesRequested(
-                            // TODO: 31/07/2017 Fix me
-                            null,
+                            getPresenter().getConfirmationDetails(),
                             PaymentRequestType.REQUEST,
                             contact.getId(),
                             getPresenter().getCurrencyHelper().getLongAmount(

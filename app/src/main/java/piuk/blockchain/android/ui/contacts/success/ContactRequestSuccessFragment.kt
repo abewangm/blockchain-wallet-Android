@@ -28,21 +28,21 @@ class ContactRequestSuccessFragment : Fragment() {
         val contactName = arguments.getString(ARGUMENT_CONTACT_NAME)
         val btcAmount = arguments.getString(ARGUMENT_BTC_AMOUNT)
         when (requestType) {
-            PaymentRequestType.REQUEST -> updateForRequest(contactName)
-            PaymentRequestType.SEND -> updateForSend(contactName, btcAmount)
+            PaymentRequestType.REQUEST -> updateUiForRequest(contactName, btcAmount)
+            PaymentRequestType.SEND -> updateUiForSend(contactName)
             PaymentRequestType.CONTACT -> throw IllegalArgumentException("This case is not handled by this fragment")
         }
 
         button_done.setOnClickListener { listener?.onRequestSuccessDismissed() }
     }
 
-    private fun updateForRequest(contactName: String) {
-        textview_title.setText(R.string.contacts_accept_invite_title)
+    private fun updateUiForSend(contactName: String) {
+        textview_title.setText(R.string.contacts_request_success_tx_started_title)
         textview_description.text =
                 getString(R.string.contacts_request_success_tx_started_description, contactName)
     }
 
-    private fun updateForSend(contactName: String, btcAmount: String) {
+    private fun updateUiForRequest(contactName: String, btcAmount: String) {
         textview_title.setText(R.string.contacts_request_success_sent_title)
         textview_description.text =
                 getString(R.string.contacts_request_success_sent_description, btcAmount, contactName)

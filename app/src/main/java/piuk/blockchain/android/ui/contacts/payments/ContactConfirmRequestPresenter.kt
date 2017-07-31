@@ -40,11 +40,11 @@ class ContactConfirmRequestPresenter @Inject internal constructor(
         confirmationDetails = fragmentBundle.getParcelable(ARGUMENT_CONFIRMATION_DETAILS)
         satoshis = fragmentBundle.getLong(ARGUMENT_SATOSHIS)
 
-        if (contactId != null && confirmationDetails != null) {
+        if (contactId != null && confirmationDetails != null && paymentRequestType != null) {
+            updateUi(confirmationDetails!!, paymentRequestType!!)
             loadContact(contactId)
-            updateUi(confirmationDetails!!)
         } else {
-            throw IllegalArgumentException("Contact ID, confirmation details and satoshi amount must be passed to fragment")
+            throw IllegalArgumentException("Contact ID, confirmation details, payment request type and satoshi amount must be passed to fragment")
         }
     }
 
@@ -61,8 +61,9 @@ class ContactConfirmRequestPresenter @Inject internal constructor(
                     .subscribe(
                             {
                                 view.onRequestSuccessful(
+                                        PaymentRequestType.SEND,
                                         recipient!!.name,
-                                        "${confirmationDetails!!.btcTotal} ${confirmationDetails!!.btcUnit}"
+                                        "${confirmationDetails!!.btcAmount} ${confirmationDetails!!.btcUnit}"
                                 )
                             },
                             {
@@ -83,8 +84,9 @@ class ContactConfirmRequestPresenter @Inject internal constructor(
                     .subscribe(
                             {
                                 view.onRequestSuccessful(
+                                        PaymentRequestType.REQUEST,
                                         recipient!!.name,
-                                        "${confirmationDetails!!.btcTotal} ${confirmationDetails!!.btcUnit}"
+                                        "${confirmationDetails!!.btcAmount} ${confirmationDetails!!.btcUnit}"
                                 )
                             },
                             {
@@ -96,10 +98,14 @@ class ContactConfirmRequestPresenter @Inject internal constructor(
         }
     }
 
-    private fun updateUi(confirmationDetails: PaymentConfirmationDetails) {
+    private fun updateUi(
+            confirmationDetails: PaymentConfirmationDetails,
+            paymentRequestType: PaymentRequestType
+    ) {
         view.updateAccountName(confirmationDetails.fromLabel)
-        view.updateTotalBtc("${confirmationDetails.btcTotal} ${confirmationDetails.btcUnit}")
-        view.updateTotalFiat(confirmationDetails.fiatSymbol + confirmationDetails.fiatTotal)
+        view.updateTotalBtc("${confirmationDetails.btcAmount} ${confirmationDetails.btcUnit}")
+        view.updateTotalFiat(confirmationDetails.fiatSymbol + confirmationDetails.fiatAmount)
+        view.updatePaymentType(paymentRequestType)
     }
 
     private fun loadContact(contactId: String) {

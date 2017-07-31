@@ -797,8 +797,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onRequestSuccessful(@NotNull String contactName, @NotNull String btcAmount) {
-        addFragmentToBackStack(ContactRequestSuccessFragment.newInstance(PaymentRequestType.REQUEST, contactName, btcAmount));
+    public void onRequestSuccessful(@NotNull PaymentRequestType paymentRequestType,
+                                    @NotNull String contactName,
+                                    @NotNull String btcAmount) {
+        addFragmentToBackStack(ContactRequestSuccessFragment.newInstance(paymentRequestType, contactName, btcAmount));
     }
 
     private void startSendFragment(@Nullable String scanData, String scanRoute) {
