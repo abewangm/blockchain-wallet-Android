@@ -641,7 +641,7 @@
     <string name="contacts_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to use the Contacts functionality.</string>
     <string name="contacts_pending_transaction">Pending Transactions</string>
     <string name="contacts_transaction_history">Transaction History</string>
-    <string name="contacts_request_money_receive">Send request to contact</string>
+    <string name="contacts_request_money_receive">Request payment</string>
     <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
     <string name="contacts_decline_pending_transaction">Are you sure you want to decline this pending transaction?</string>
     <string name="contacts_cancel_pending_transaction">Are you sure you want to cancel this pending transaction?</string>
