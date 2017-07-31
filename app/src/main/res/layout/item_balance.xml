@@ -104,10 +104,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@id/direction"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:gravity="right"
             android:textAppearance="?attr/textAppearanceListItemSmall"
             android:textColor="@color/product_gray_hint"
+            android:textSize="14sp"
             android:visibility="gone"
             tools:ignore="MissingPrefix"
             tools:text="Awaiting response"
@@ -118,8 +119,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/direction"
-            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <ImageView

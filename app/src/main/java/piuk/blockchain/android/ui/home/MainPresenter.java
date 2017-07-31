@@ -15,22 +15,24 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import okhttp3.MediaType;
+import okhttp3.ResponseBody;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
-import piuk.blockchain.android.data.contacts.models.ContactsEvent;
-import piuk.blockchain.android.data.contacts.ContactsPredicates;
-import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
+import piuk.blockchain.android.data.contacts.ContactsPredicates;
+import piuk.blockchain.android.data.contacts.models.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
+import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
-import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -303,7 +305,11 @@ public class MainPresenter extends BasePresenter<MainView> {
                 })
                 .flatMapCompletable(metadataNodeFactory -> contactsDataManager
                         .initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode()))
-                .andThen(payloadDataManager.registerMdid())
+                .andThen(payloadDataManager.registerMdid()
+                        .onErrorReturn(throwable -> {
+                            Timber.e(throwable);
+                            return ResponseBody.create(MediaType.parse("application/json"), "{}");
+                        }))
                 .flatMapCompletable(ignored -> contactsDataManager.publishXpub());
     }
 

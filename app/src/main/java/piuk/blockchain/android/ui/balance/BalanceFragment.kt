@@ -174,7 +174,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                     ViewUtils.convertDpToPixel(56f, context).toInt()
             )
         }
-        recyclerview.apply {
+        recyclerview?.apply {
             removeItemDecoration(spacerDecoration)
             addItemDecoration(spacerDecoration)
         }
