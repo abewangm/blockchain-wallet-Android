@@ -164,8 +164,8 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
     private void setupLayout() {
         if (getPresenter().getReceiveToList().size() == 1) {
-            binding.fromRow.setVisibility(View.GONE);
-            binding.dividerFromRow.setVisibility(View.GONE);
+            binding.toContainer.toConstraintLayout.setVisibility(View.GONE);
+            binding.divider2.setVisibility(View.GONE);
         }
 
         // BTC Field
@@ -187,24 +187,24 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         binding.amountContainer.currencyFiat.setText(getPresenter().getCurrencyHelper().getFiatUnit());
 
         // QR Code
-        binding.qr.setOnClickListener(v -> showClipboardWarning());
-        binding.qr.setOnLongClickListener(view -> {
+        binding.qrImage.setOnClickListener(v -> showClipboardWarning());
+        binding.qrImage.setOnLongClickListener(view -> {
             onShareClicked();
             return true;
         });
 
-        binding.destination.setOnClickListener(v ->
+        binding.toContainer.toAddressTextView.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                         PaymentRequestType.REQUEST));
 
-        binding.imageviewDropdownReceive.setOnClickListener(v ->
+        binding.toContainer.toArrowImage.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                         PaymentRequestType.REQUEST));
 
 
-        binding.buttonSendToContact.setOnClickListener(v ->
+        binding.buttonRequestPayment.setOnClickListener(v ->
                 getPresenter().onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
 
         textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
@@ -340,7 +340,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     void displayQRCode(int position) {
         Object object = getPresenter().getAccountItemForPosition(position);
         // Disable send to contact button if not using HD account
-        binding.buttonSendToContact.setEnabled(object instanceof Account);
+        binding.buttonRequestPayment.setEnabled(object instanceof Account);
 
         String label;
         String receiveAddress = null;
@@ -360,7 +360,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             }
         }
 
-        binding.destination.setText(StringUtils.abbreviate(label, 32));
+        binding.toContainer.toAddressTextView.setText(StringUtils.abbreviate(label, 32));
         updateReceiveAddress(receiveAddress);
     }
 
@@ -415,7 +415,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
     @Override
     public void showQrLoading() {
-        binding.qr.setVisibility(View.INVISIBLE);
+        binding.qrImage.setVisibility(View.INVISIBLE);
         binding.receivingAddress.setVisibility(View.INVISIBLE);
         binding.progressBar.setVisibility(View.VISIBLE);
     }
@@ -423,9 +423,9 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     @Override
     public void showQrCode(@Nullable Bitmap bitmap) {
         binding.progressBar.setVisibility(View.INVISIBLE);
-        binding.qr.setVisibility(View.VISIBLE);
+        binding.qrImage.setVisibility(View.VISIBLE);
         binding.receivingAddress.setVisibility(View.VISIBLE);
-        binding.qr.setImageBitmap(bitmap);
+        binding.qrImage.setImageBitmap(bitmap);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -576,7 +576,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
     @Override
     public Bitmap getQrBitmap() {
-        return ((BitmapDrawable) binding.qr.getDrawable()).getBitmap();
+        return ((BitmapDrawable) binding.qrImage.getDrawable()).getBitmap();
     }
 
     @Override
