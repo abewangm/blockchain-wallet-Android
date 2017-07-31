@@ -114,24 +114,26 @@ class FctxDelegate<in T>(
                 FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_DECLINED) {
-            viewHolder.note.setText(R.string.contacts_receiving_declined)
+            viewHolder.note.text = stringUtils.getString(R.string.contacts_receiving_declined).toUpperCase()
             viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
             when (transaction.role) {
-                FacilitatedTransaction.ROLE_RPR_INITIATOR -> TODO()
-                FacilitatedTransaction.ROLE_RPR_RECEIVER -> TODO()
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> TODO()
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
+                // TODO:
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> Unit.toString()
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> Unit.toString()
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> Unit.toString()
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> Unit.toString()
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_CANCELLED) {
-            viewHolder.note.setText(R.string.contacts_receiving_cancelled)
+            viewHolder.note.text = stringUtils.getString(R.string.contacts_receiving_cancelled).toUpperCase()
             viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
             when (transaction.role) {
-                FacilitatedTransaction.ROLE_RPR_INITIATOR -> TODO()
-                FacilitatedTransaction.ROLE_RPR_RECEIVER -> TODO()
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> TODO()
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> TODO()
+                // TODO:
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> Unit.toString()
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> Unit.toString()
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> Unit.toString()
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> Unit.toString()
             }
         }
 
