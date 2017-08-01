@@ -114,6 +114,13 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
     @Override
     public void onViewReady() {
         sslVerifyUtil.validateSSL();
+
+        if(prefsUtil.getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false)){
+            getView().hideContactsIntroduction();
+        } else {
+            getView().showContactsIntroduction();
+        }
+
         updateAccountList();
     }
 

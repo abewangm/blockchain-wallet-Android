@@ -38,6 +38,7 @@ interface PersistentPrefs {
     String KEY_SCREENSHOTS_ENABLED = "screenshots_enabled";
     String KEY_ONBOARDING_COMPLETE = "onboarding_complete";
     String KEY_OVERLAY_TRUSTED = "overlay_trusted";
+    String KEY_CONTACTS_INTRODUCTION_COMPLETE = "contacts_intro_complete";
 
     String KEY_LATEST_ANNOUNCEMENT_DISMISSED = "latest_announcement_dismissed";
     String KEY_LATEST_ANNOUNCEMENT_SEEN = "latest_announcement_seen";

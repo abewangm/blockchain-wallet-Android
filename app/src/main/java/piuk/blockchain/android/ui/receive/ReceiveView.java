@@ -32,4 +32,7 @@ interface ReceiveView extends View {
 
     void updateReceiveAddress(String address);
 
+    void hideContactsIntroduction();
+
+    void showContactsIntroduction();
 }

@@ -69,11 +69,13 @@ import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
+import piuk.blockchain.android.ui.contacts.IntroducingContactsPromptDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
 import piuk.blockchain.android.util.EditTextUtils;
 import piuk.blockchain.android.util.PermissionUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import timber.log.Timber;
 
@@ -212,6 +214,18 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(this::displayQRCode)
                 .subscribe(new IgnorableDefaultObserver<>());
+
+        binding.fromContainer.fromAddressTextView.setHint(R.string.contact_select);
+
+        binding.whatsThis.setOnClickListener(v -> {
+            IntroducingContactsPromptDialog dialog = IntroducingContactsPromptDialog.newInstance();
+            dialog.setDismissButtonListener(view -> {
+                new PrefsUtil(getActivity()).setValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, true);
+                dialog.dismiss();
+                hideContactsIntroduction();
+            });
+            dialog.showDialog(getFragmentManager());
+        });
     }
 
     private TextWatcher btcTextWatcher = new TextWatcher() {
@@ -388,6 +402,18 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             }
             getPresenter().generateQrCode(uri);
         }
+    }
+
+    @Override
+    public void hideContactsIntroduction() {
+        binding.fromContainer.fromArrowImage.setVisibility(View.VISIBLE);
+        binding.whatsThis.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showContactsIntroduction() {
+        binding.fromContainer.fromArrowImage.setVisibility(View.INVISIBLE);
+        binding.whatsThis.setVisibility(View.VISIBLE);
     }
 
     @Override
