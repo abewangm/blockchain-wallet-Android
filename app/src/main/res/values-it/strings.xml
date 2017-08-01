@@ -519,7 +519,7 @@
     <string name="contacts_address_sent_success">Indirizzo inviato correttamente</string>
     <string name="contacts_being_invited">Accetta invito</string>
     <string name="contacts_broadcasting_payment">Stiamo informando il tuo contatto dell\'invio di bitcoin da parte tua, attendi.</string>
-    <string name="contacts_choose_account_message">Scegli dove vuoi ricevere i tuoi fondi.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Scegli dove vuoi ricevere i tuoi fondi.</string>
     <string name="contacts_choose_pairing_method">Scegli il metodo di abbinamento da utilizzare per aggiungere un contatto di fiducia:</string>
     <string name="contacts_delete">Elimina contatto</string>
     <string name="contacts_delete_contact_success">Contatto eliminato</string>

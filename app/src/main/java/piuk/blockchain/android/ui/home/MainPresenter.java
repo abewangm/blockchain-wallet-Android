@@ -66,21 +66,21 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     @Inject
     MainPresenter(PrefsUtil prefs,
-                         AppUtil appUtil,
-                         AccessState accessState,
-                         PayloadManager payloadManager,
-                         PayloadDataManager payloadDataManager,
-                         ContactsDataManager contactsDataManager,
-                         Context applicationContext,
-                         StringUtils stringUtils,
-                         SettingsDataManager settingsDataManager,
-                         BuyDataManager buyDataManager,
-                         DynamicFeeCache dynamicFeeCache,
-                         ExchangeRateFactory exchangeRateFactory,
-                         RxBus rxBus,
-                         FeeDataManager feeDataManager,
-                         EnvironmentSettings environmentSettings,
-                         PromptManager promptManager) {
+                  AppUtil appUtil,
+                  AccessState accessState,
+                  PayloadManager payloadManager,
+                  PayloadDataManager payloadDataManager,
+                  ContactsDataManager contactsDataManager,
+                  Context applicationContext,
+                  StringUtils stringUtils,
+                  SettingsDataManager settingsDataManager,
+                  BuyDataManager buyDataManager,
+                  DynamicFeeCache dynamicFeeCache,
+                  ExchangeRateFactory exchangeRateFactory,
+                  RxBus rxBus,
+                  FeeDataManager feeDataManager,
+                  EnvironmentSettings environmentSettings,
+                  PromptManager promptManager) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;

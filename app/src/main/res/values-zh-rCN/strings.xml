@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">地址发送成功</string>
     <string name="contacts_being_invited">接受邀请</string>
     <string name="contacts_broadcasting_payment">我们刚刚通知了您的联系人，您向他们发送了一些比特币，请等待。</string>
-    <string name="contacts_choose_account_message">选择您希望在哪里接受您的资金。</string>
+    <string name="contacts_balance_dialog_choose_account_message">选择您希望在哪里接受您的资金。</string>
     <string name="contacts_choose_pairing_method">选择您希望用于添加一个受信任联系人的配对方式：</string>
     <string name="contacts_delete">删除联系人</string>
     <string name="contacts_delete_contact_success">已删除联系人</string>

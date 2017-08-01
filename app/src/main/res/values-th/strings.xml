@@ -518,7 +518,7 @@
     <string name="contacts_address_sent_success">ส่งที่อยู่สำเร็จแล้ว</string>
     <string name="contacts_being_invited">รับคำเชิญ</string>
     <string name="contacts_broadcasting_payment">เราเพิ่งแจ้งให้ผู้ติดต่อของคุณทราบว่าคุณได้ส่ง bitcoin ไปเล็กน้อย โปรดรอ</string>
-    <string name="contacts_choose_account_message">เลือกว่าคุณต้องการรับเงินของคุณไปยังที่ใด</string>
+    <string name="contacts_balance_dialog_choose_account_message">เลือกว่าคุณต้องการรับเงินของคุณไปยังที่ใด</string>
     <string name="contacts_choose_pairing_method">เลือกวิธีการจับคู่ที่คุณต้องการใช้เพื่อเพิ่มผู้ติดต่อที่ไว้วางใจ:</string>
     <string name="contacts_delete">ลบผู้ติดต่อ</string>
     <string name="contacts_delete_contact_success">ลบผู้ติดต่อแล้ว</string>

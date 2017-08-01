@@ -266,7 +266,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
 
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_choose_account_message)
+                .setMessage(R.string.contacts_balance_dialog_choose_account_message)
                 .setView(frameLayout)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onAccountChosen(selection[0], fctxId))
                 .create()

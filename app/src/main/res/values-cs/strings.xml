@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">Adresa úspěšně odeslána</string>
     <string name="contacts_being_invited">Přijmout pozvánku</string>
     <string name="contacts_broadcasting_payment">Právě informujeme kontakt, kterému jste poslali nějaké bitcoiny, čekejte prosím.</string>
-    <string name="contacts_choose_account_message">Zvolte si, kam chcete přijímat své prostředky.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Zvolte si, kam chcete přijímat své prostředky.</string>
     <string name="contacts_choose_pairing_method">Zvolte si párovací metodu, kterou si přejete používat k přidání důvěryhodného kontaktu:</string>
     <string name="contacts_delete">Odstranit kontakt</string>
     <string name="contacts_delete_contact_success">Kontakt odstraněn</string>

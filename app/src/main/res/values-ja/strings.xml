@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">アドレスの送信が完了しました</string>
     <string name="contacts_being_invited">招待を承認</string>
     <string name="contacts_broadcasting_payment">連絡先の相手にビットコインの送信について通知しています。お待ちください。</string>
-    <string name="contacts_choose_account_message">資金を受け取りたい場所を指定してください。</string>
+    <string name="contacts_balance_dialog_choose_account_message">資金を受け取りたい場所を指定してください。</string>
     <string name="contacts_choose_pairing_method">信頼できる連絡先の追加に使用するするペアリング方法を選択してください:</string>
     <string name="contacts_delete">連絡先を削除する</string>
     <string name="contacts_delete_contact_success">連絡先が削除されました</string>

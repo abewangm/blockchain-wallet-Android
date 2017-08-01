@@ -154,13 +154,28 @@ class BalancePresenter @Inject constructor(
                                 view.showWaitingForPaymentDialog()
 
                             transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                                    && transaction.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
+                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
                                 // Received payment request, need to send address to sender
-                                showSendAddressDialog(fctxId)
+                                showSendAddressDialog(
+                                        fctxId,
+                                        transaction.intendedAmount,
+                                        it.name,
+                                        transaction.note
+                                )
 
                             transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
+                                    && transaction.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
                                 // Waiting for payment
+                                view.initiatePayment(
+                                        transaction.toBitcoinURI(),
+                                        it.id,
+                                        it.mdid,
+                                        transaction.id
+                                )
+
+                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
+                                // Need to send payment to recipient
                                 view.initiatePayment(
                                         transaction.toBitcoinURI(),
                                         it.id,
@@ -334,17 +349,28 @@ class BalancePresenter @Inject constructor(
         return mutableList
     }
 
-    private fun showSendAddressDialog(fctxId: String) {
+    private fun showSendAddressDialog(fctxId: String, amount: Long, name: String, note: String?) {
         val accountNames = payloadDataManager.accounts
                 .filterNot { it.isArchived }
                 .mapTo(ArrayList<String>()) { it.label }
 
         if (accountNames.size == 1) {
             // Only one account, ask if you want to send an address
-            view.showSendAddressDialog(fctxId)
+            view.showSendAddressDialog(
+                    fctxId,
+                    getBalanceString(true, amount),
+                    name,
+                    note
+            )
         } else {
             // Show dialog allowing user to select which account they want to use
-            view.showAccountChoiceDialog(accountNames, fctxId)
+            view.showAccountChoiceDialog(
+                    accountNames,
+                    fctxId,
+                    getBalanceString(true, amount),
+                    name,
+                    note
+            )
         }
     }
 

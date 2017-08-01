@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">Gửi địa chỉ thành công</string>
     <string name="contacts_being_invited">Chấp nhận lời mời</string>
     <string name="contacts_broadcasting_payment">Chúng tôi vừa thông báo cho liên lạc của bạn về việc bạn đã gửi cho họ một số bitcoin, vui lòng chờ.</string>
-    <string name="contacts_choose_account_message">Chọn nơi bạn muốn nhận các khoản tiền của mình.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Chọn nơi bạn muốn nhận các khoản tiền của mình.</string>
     <string name="contacts_choose_pairing_method">Chọn phương pháp kết nối bạn muốn sử dụng để thêm một liên lạc tin cậy:</string>
     <string name="contacts_delete">Xóa liên lạc</string>
     <string name="contacts_delete_contact_success">Đã xóa liên lạc</string>

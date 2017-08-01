@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">Endereço enviado com sucesso</string>
     <string name="contacts_being_invited">Aceitar convite</string>
     <string name="contacts_broadcasting_payment">Estamos apenas informando a seu contato que você lhe enviou bitcoin. Por favor, aguarde.</string>
-    <string name="contacts_choose_account_message">Escolha onde deseja receber seus fundos.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Escolha onde deseja receber seus fundos.</string>
     <string name="contacts_choose_pairing_method">Escolha o método de emparelhamento que deseja usar para adicionar um contato confiável:</string>
     <string name="contacts_delete">Excluir contato</string>
     <string name="contacts_delete_contact_success">Contato excluído</string>

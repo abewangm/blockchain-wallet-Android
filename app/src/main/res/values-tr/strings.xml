@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">Adres başarıyla gönderildi</string>
     <string name="contacts_being_invited">Daveti kabul et</string>
     <string name="contacts_broadcasting_payment">Kişinize sizin biraz bitcoin gönderdiğiniz bilgisini veriyoruz, lütfen bekleyin.</string>
-    <string name="contacts_choose_account_message">Paranızı nereye almak istediğini seçin.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Paranızı nereye almak istediğini seçin.</string>
     <string name="contacts_choose_pairing_method">Güvenli bir kişi eklemek için kullanmak istediğiniz eşleştirme yöntemini seçin:</string>
     <string name="contacts_delete">Kişiyi sil</string>
     <string name="contacts_delete_contact_success">Kişi silindi</string>

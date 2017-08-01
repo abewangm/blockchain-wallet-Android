@@ -517,7 +517,7 @@
     <string name="contacts_address_sent_success">Adres is met succes verzonden</string>
     <string name="contacts_being_invited">Uitnodiging accepteren</string>
     <string name="contacts_broadcasting_payment">We informeren juist uw contactpersoon dat u ze een aantal Bitcoins hebt gestuurd, even geduld alstublieft.</string>
-    <string name="contacts_choose_account_message">Kies waar u uw tegoeden wenst te ontvangen.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Kies waar u uw tegoeden wenst te ontvangen.</string>
     <string name="contacts_choose_pairing_method">Kies de koppelmethode die u wilt gebruiken om een vertrouwd contact toe te voegen:</string>
     <string name="contacts_delete">Contactpersoon verwijderen</string>
     <string name="contacts_delete_contact_success">Contactpersoon verwijderd</string>
