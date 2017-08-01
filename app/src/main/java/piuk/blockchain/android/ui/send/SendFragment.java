@@ -526,7 +526,8 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void hideSendingAddressField() {
-        binding.fromContainer.fromAddressTextView.setVisibility(View.GONE);
+        binding.fromContainer.fromConstraintLayout.setVisibility(View.GONE);
+        binding.divider1.setVisibility(View.GONE);
     }
 
     @Override
