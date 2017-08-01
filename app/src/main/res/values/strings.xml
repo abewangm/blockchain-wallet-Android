@@ -691,6 +691,7 @@
     <string name="contacts_introducing_message">You can now transact without the hassle of Bitcoin addresses. Add your first contact via the sidebar.</string>
     <string name="contacts_introducing_subtitle">It\'s simple and secure</string>
     <string name="contact_select">Select Contact</string>
+    <string name="contact_select_first">Please select contact first.</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>

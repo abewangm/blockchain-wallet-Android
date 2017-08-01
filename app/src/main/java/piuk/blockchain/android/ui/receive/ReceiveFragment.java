@@ -205,10 +205,6 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                         PaymentRequestType.REQUEST));
 
-
-        binding.buttonRequestPayment.setOnClickListener(v ->
-                getPresenter().onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
-
         textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -225,6 +221,28 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
                 hideContactsIntroduction();
             });
             dialog.showDialog(getFragmentManager());
+        });
+
+        binding.fromContainer.fromArrowImage.setOnClickListener(v -> {
+            getPresenter().clearSelectedContactId();
+            getPresenter().onSendToContactClicked();
+        });
+
+        binding.buttonRequestPayment.setOnClickListener(v ->
+        {
+            if (getPresenter().getSelectedContactId() == null) {
+                showToast(getString(R.string.contact_select_first), ToastCustom.TYPE_ERROR);
+            } else if (!getPresenter().isValidAmount(binding.amountContainer.amountBtc.getText().toString())) {
+                showToast(getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
+            }else if (listener != null) {
+                listener.onTransactionNotesRequested(
+                        getPresenter().getConfirmationDetails(),
+                        PaymentRequestType.REQUEST,
+                        getPresenter().getSelectedContactId(),
+                        getPresenter().getCurrencyHelper().getLongAmount(
+                                binding.amountContainer.amountBtc.getText().toString()),
+                        getPresenter().getCorrectedAccountIndex(selectedAccountPosition));
+            }
         });
     }
 
@@ -485,16 +503,9 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
                 Contact contact = new ObjectMapper().readValue(
                         data.getStringExtra(EXTRA_SELECTED_ITEM),
                         Contact.class);
+                getPresenter().setSelectedContactId(contact.getId());
+                binding.fromContainer.fromAddressTextView.setText(contact.getName());
 
-                if (listener != null) {
-                    listener.onTransactionNotesRequested(
-                            getPresenter().getConfirmationDetails(),
-                            PaymentRequestType.REQUEST,
-                            contact.getId(),
-                            getPresenter().getCurrencyHelper().getLongAmount(
-                                    binding.amountContainer.amountBtc.getText().toString()),
-                            getPresenter().getCorrectedAccountIndex(selectedAccountPosition));
-                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
