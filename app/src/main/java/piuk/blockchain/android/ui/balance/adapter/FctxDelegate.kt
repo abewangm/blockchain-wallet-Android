@@ -24,7 +24,6 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
-import timber.log.Timber
 
 class FctxDelegate<in T>(
         val activity: Activity,
@@ -73,9 +72,6 @@ class FctxDelegate<in T>(
         viewHolder.timeSince.text = dateUtil.formatted(transaction.lastUpdated)
         viewHolder.contactName.text = contactName
 
-        Timber.d("State = ${transaction.state}")
-        Timber.d("Role = ${transaction.role}")
-
         if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
             when (transaction.role) {
                 FacilitatedTransaction.ROLE_RPR_INITIATOR -> {
@@ -83,13 +79,12 @@ class FctxDelegate<in T>(
                     viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
                     displaySending(viewHolder)
                 }
-                FacilitatedTransaction.ROLE_RPR_RECEIVER -> TODO()
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> TODO()
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> {
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> {
                     viewHolder.note.setText(R.string.contacts_transaction_accept_or_decline)
                     viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.primary_blue_accent))
                     displayReceiving(viewHolder)
                 }
+                else -> throw IllegalStateException("Some odd combination of role & state has happened")
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
             when (transaction.role) {
@@ -101,7 +96,7 @@ class FctxDelegate<in T>(
                 FacilitatedTransaction.ROLE_RPR_RECEIVER -> {
                     viewHolder.note.setText(R.string.contacts_transaction_waiting_for_payment)
                     viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_hint))
-                    displaySending(viewHolder)
+                    displayReceiving(viewHolder)
                 }
                 FacilitatedTransaction.ROLE_PR_INITIATOR -> {
                     viewHolder.note.setText(R.string.contacts_transaction_payment_requested)
@@ -121,33 +116,30 @@ class FctxDelegate<in T>(
             when (transaction.role) {
                 FacilitatedTransaction.ROLE_RPR_INITIATOR -> displaySent(viewHolder)
                 FacilitatedTransaction.ROLE_RPR_RECEIVER -> displayReceived(viewHolder)
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> displayReceived(viewHolder)
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayPaid(viewHolder)
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> displayPaid(viewHolder)
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayReceived(viewHolder)
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_DECLINED) {
             viewHolder.note.text = stringUtils.getString(R.string.contacts_receiving_declined).toUpperCase()
             viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
             when (transaction.role) {
-            // TODO:
-                FacilitatedTransaction.ROLE_RPR_INITIATOR -> Unit.toString()
-                FacilitatedTransaction.ROLE_RPR_RECEIVER -> Unit.toString()
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> Unit.toString()
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> Unit.toString()
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> displaySending(viewHolder)
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> displayReceiving(viewHolder)
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> displaySending(viewHolder)
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayReceiving(viewHolder)
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_CANCELLED) {
             viewHolder.note.text = stringUtils.getString(R.string.contacts_receiving_cancelled).toUpperCase()
             viewHolder.note.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
 
             when (transaction.role) {
-            // TODO:
-                FacilitatedTransaction.ROLE_RPR_INITIATOR -> Unit.toString()
-                FacilitatedTransaction.ROLE_RPR_RECEIVER -> Unit.toString()
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> Unit.toString()
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> Unit.toString()
+                FacilitatedTransaction.ROLE_RPR_INITIATOR -> displaySending(viewHolder)
+                FacilitatedTransaction.ROLE_RPR_RECEIVER -> displayReceiving(viewHolder)
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> displaySending(viewHolder)
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayReceiving(viewHolder)
             }
         }
-
     }
 
     fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
@@ -195,11 +187,15 @@ class FctxDelegate<in T>(
         viewHolder.result.setBackgroundResource(R.drawable.rounded_view_red)
     }
 
-    private fun getResolvedColor(viewHolder: RecyclerView.ViewHolder, @ColorRes color: Int): Int {
-        return ContextCompat.getColor(viewHolder.getContext(), color)
-    }
+    private fun getResolvedColor(viewHolder: RecyclerView.ViewHolder, @ColorRes color: Int) =
+            ContextCompat.getColor(viewHolder.getContext(), color)
 
-    private fun getDisplaySpannable(btcAmount: Double, fiatAmount: Double, fiatString: String): Spannable {
+    private fun getDisplaySpannable(
+            btcAmount: Double,
+            fiatAmount: Double,
+            fiatString: String
+    ): Spannable {
+
         val spannable: Spannable
         if (isBtc) {
             spannable = Spannable.Factory.getInstance().newSpannable(
