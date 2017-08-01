@@ -687,6 +687,11 @@
     <string name="contacts_transaction_helper_text_1">Your transactions with %1$s will appear here.</string>
     <string name="transactions">Transactions</string>
     <string name="contacts_invite_uri_used">Invitation link expired or already used.</string>
+    <string name="contacts_introducing_title">Introducing contacts</string>
+    <string name="contacts_introducing_message">You can now transact without the hassle of Bitcoin addresses. Add your first contact via the sidebar.</string>
+    <string name="contacts_introducing_subtitle">It\'s simple and secure</string>
+    <string name="contact_select">Select Contact</string>
+    <string name="contact_select_first">Please select contact first.</string>
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
@@ -748,5 +753,8 @@
     <string name="fee_options_advanced_warning">This feature is recommended for advanced users only. By choosing a custom fee, you risk overpaying or your transaction never being confirmed.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">Regular: %1$s, Priority: %2$s</string>
+
+    <string name="what_s_this">What\'s this?</string>
+    <string name="dismiss">Dismiss</string>
 
 </resources>

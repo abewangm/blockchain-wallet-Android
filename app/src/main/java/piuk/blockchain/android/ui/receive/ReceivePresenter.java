@@ -81,6 +81,8 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
     @VisibleForTesting HashBiMap<Integer, Object> accountMap;
     @VisibleForTesting SparseIntArray spinnerIndexMap;
 
+    private String selectedContactId = null;
+
     @Inject
     ReceivePresenter(
             AppUtil appUtil,
@@ -114,16 +116,23 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
     @Override
     public void onViewReady() {
         sslVerifyUtil.validateSSL();
+
+        if(prefsUtil.getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false)){
+            getView().hideContactsIntroduction();
+        } else {
+            getView().showContactsIntroduction();
+        }
+
         updateAccountList();
     }
 
-    void onSendToContactClicked(String btcAmount) {
+    void onSendToContactClicked() {
+        getView().startContactSelectionActivity();
+    }
+
+    boolean isValidAmount(String btcAmount) {
         long amountLong = currencyHelper.getLongAmount(btcAmount);
-        if (amountLong > 0) {
-            getView().startContactSelectionActivity();
-        } else {
-            getView().showToast(stringUtils.getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
-        }
+        return amountLong > 0;
     }
 
     @NonNull
@@ -346,6 +355,18 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
             getView().showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR);
             return null;
         }
+    }
+
+    void setSelectedContactId(String contactId) {
+        this.selectedContactId = contactId;
+    }
+
+    void clearSelectedContactId() {
+        this.selectedContactId = null;
+    }
+
+    String getSelectedContactId() {
+        return this.selectedContactId;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
