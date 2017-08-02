@@ -459,8 +459,6 @@
     <string name="contacts_too_much_sent">Het lijkt erop dat je meer bitcoin verzond dan was aangevraagd. Je kunt, als je wilt, wat terugvragen van je contactpersoon. We hebben de betaling niet als voltooid gemarkeerd.</string>
     <string name="contacts_too_little_sent">Het lijkt erop dat je minder bitcoin verzond dan was aangevraagd. Je contactpersoon zal de bitcoin ontvangen die je verzond, maar we hebben de betaling niet als voltooid gemarkeerd.</string>
     <string name="contacts_second_password_prompt">Om deze dienst te kunnen gebruiken, vereisen we dat je jouw tweede wachtwoord invoert. Je hoeft dit maar één keer in te voeren om de functionaliteit van Contactpersonen te gebruiken.</string>
-    <string name="contacts_pending_transaction">Transacties in behandeling</string>
-    <string name="contacts_transaction_history">Transactiegeschiedenis</string>
     <string name="contacts_request_money_receive">Verzend aanvraag naar contactpersoon</string>
     <string name="contacts_no_confirmed_contacts_found">Geen bevestigde contactpersonen gevonden!</string>
     <string name="contacts_decline_pending_transaction">Weet je zeker dat je deze transactie in behandeling wilt afwijzen?</string>

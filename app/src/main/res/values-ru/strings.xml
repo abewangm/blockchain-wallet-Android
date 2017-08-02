@@ -459,8 +459,6 @@
     <string name="contacts_too_much_sent">Судя по всему, вы отправили больше биткоинов, чем требовалось. Если хотите, вы можете попросить контакт вернуть вам какую-то сумму.  Мы не отметили платеж как исполненный.</string>
     <string name="contacts_too_little_sent">Судя по всему, вы отправили меньше биткоинов, чем требовалось. Ваш контакт все равно получит отправленные вами биткоины, но мы не пометили платеж как исполненный.</string>
     <string name="contacts_second_password_prompt">Мы требуем ввода второго пароля, чтобы пользоваться этой услугой. Для использования функционала Контактов вам нужно будет ввести эти данные только один раз.</string>
-    <string name="contacts_pending_transaction">Ожидающие транзакции</string>
-    <string name="contacts_transaction_history">История транзакций</string>
     <string name="contacts_request_money_receive">Отправить запрос контакту</string>
     <string name="contacts_no_confirmed_contacts_found">Подтвержденных контактов не найдено!</string>
     <string name="contacts_decline_pending_transaction">Вы уверены, что хотите отклонить эту ожидающую транзакцию?</string>

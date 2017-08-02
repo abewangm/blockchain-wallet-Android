@@ -156,6 +156,8 @@ public class SendPresenter extends BasePresenter<SendView> {
             metricInputFlag = getView().getFragmentBundle().getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE);
 
             if (contactId != null) {
+                getView().lockContactsFields();
+
                 getCompositeDisposable().add(
                         contactsDataManager.getContactList()
                                 .filter(ContactsPredicates.filterById(contactId))
@@ -207,7 +209,7 @@ public class SendPresenter extends BasePresenter<SendView> {
                                                     contact.getId(),
                                                     sendModel.pendingTransaction.bigIntAmount.longValue(),
                                                     payloadDataManager.getAccounts().indexOf(sendModel.pendingTransaction.sendingObject)),
-                            throwable -> showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR)));
+                                            throwable -> showToast(R.string.contacts_not_found_error, ToastCustom.TYPE_ERROR)));
                 }
             });
         } else {
@@ -616,7 +618,22 @@ public class SendPresenter extends BasePresenter<SendView> {
      */
     @Thunk
     void confirmPayment() {
-        if (getView() != null) getView().onShowPaymentDetails(getConfirmationDetails());
+        if (fctxId != null) {
+            contactsDataManager.getFacilitatedTransactions()
+                    .filter(model -> model.getFacilitatedTransaction().getId().equals(fctxId))
+                    .firstOrError()
+                    .subscribe(contactTransactionModel -> {
+                        if (getView() != null) getView().onShowPaymentDetails(
+                                getConfirmationDetails(),
+                                contactTransactionModel.getFacilitatedTransaction().getNote());
+                    }, throwable -> {
+                        Timber.e(throwable);
+                        getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                        getView().finishPage();
+                    });
+        } else {
+            if (getView() != null) getView().onShowPaymentDetails(getConfirmationDetails(), null);
+        }
     }
 
     private PaymentConfirmationDetails getConfirmationDetails() {
@@ -874,9 +891,11 @@ public class SendPresenter extends BasePresenter<SendView> {
             payloadDataManager.incrementReceiveAddress(account);
             updateInternalBalances();
         }
-
         if (getView() != null) {
-            getView().onShowTransactionSuccess(hash, sendModel.pendingTransaction.bigIntAmount.longValue());
+            getView().onShowTransactionSuccess(contactMdid,
+                    hash,
+                    fctxId,
+                    sendModel.pendingTransaction.bigIntAmount.longValue());
         }
 
         logAddressInputMetric();

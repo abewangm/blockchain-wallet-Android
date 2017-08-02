@@ -459,8 +459,6 @@
     <string name="contacts_too_much_sent">Zdá se, že jste odeslali více bitcoinů, než bylo požadováno. Můžete požádat o vrácení některých z nich od svého kontaktu, budete-li chtít. Ještě jste neoznačili platbu jako dokončenou.</string>
     <string name="contacts_too_little_sent">Zdá se, že jste odeslali méně bitcoinů, než bylo požadováno. Váš kontakt bude stále moci přijmout bitcoiny, které jste odeslali, ale platbu jsme neoznačili jako dokončenou.</string>
     <string name="contacts_second_password_prompt">Abyste mohli tuto službu použít, vyžadujeme od Vás zadání druhého hesla. Pro použití funkce Kontakty stačí zadat toto pouze jednou.</string>
-    <string name="contacts_pending_transaction">Nevyřízené transakce</string>
-    <string name="contacts_transaction_history">Historie transakcí</string>
     <string name="contacts_request_money_receive">Odeslat kontaktu požadavek</string>
     <string name="contacts_no_confirmed_contacts_found">Nebyly nalezeny žádné potvrzené kontakty!</string>
     <string name="contacts_decline_pending_transaction">Opravdu chcete odmítnout tuto nevyřízenou transakci?</string>

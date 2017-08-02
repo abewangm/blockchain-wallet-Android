@@ -165,12 +165,12 @@ class BalancePresenter @Inject constructor(
 
                             transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
                                     && transaction.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
-                                // Waiting for payment
-                                view.initiatePayment(
-                                        transaction.toBitcoinURI(),
-                                        it.id,
-                                        it.mdid,
-                                        transaction.id
+                                // Waiting for payment, pay or reject
+                                view.showPayOrDeclineDialog(
+                                        fctxId,
+                                        getBalanceString(true, transaction.intendedAmount),
+                                        it.name,
+                                        transaction.note
                                 )
 
                             transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
@@ -193,29 +193,55 @@ class BalancePresenter @Inject constructor(
                 })
     }
 
-    internal fun onPendingTransactionLongClicked(fctxId: String) {
-        contactsDataManager.getFacilitatedTransactions()
-                .filter { it.facilitatedTransaction.id == fctxId }
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
+    internal fun onPaymentRequestAccepted(fctxId: String) {
+        contactsDataManager.getContactFromFctxId(fctxId)
+                .compose(RxUtil.addSingleToCompositeDisposable(this))
                 .subscribe({
-                    val fctx = it.facilitatedTransaction
-
-                    if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
-                        when {
-                            fctx.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
-                                view.showTransactionDeclineDialog(fctxId)
-                            fctx.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
-                                view.showTransactionCancelDialog(fctxId)
-                        }
-                    } else if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
-                        when {
-                            fctx.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
-                                view.showTransactionDeclineDialog(fctxId)
-                            fctx.role == FacilitatedTransaction.ROLE_PR_INITIATOR ->
-                                view.showTransactionCancelDialog(fctxId)
-                        }
+                    val transaction = it.facilitatedTransactions[fctxId]
+                    if (transaction == null) {
+                        view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)
+                    } else {
+                        // Need to send payment to recipient
+                        view.initiatePayment(
+                                transaction.toBitcoinURI(),
+                                it.id,
+                                it.mdid,
+                                transaction.id
+                        )
                     }
-                }, { Timber.e(it) })
+                }, {
+                    Timber.e(it)
+                    view.showToast(
+                            R.string.contacts_not_found_error,
+                            ToastCustom.TYPE_ERROR
+                    )
+                })
+    }
+
+    internal fun onPendingTransactionLongClicked(fctxId: String) {
+        // TODO: I'm not sure we should allow this, and if we do, the role/state combos are wrong
+//        contactsDataManager.getFacilitatedTransactions()
+//                .filter { it.facilitatedTransaction.id == fctxId }
+//                .compose(RxUtil.addObservableToCompositeDisposable(this))
+//                .subscribe({
+//                    val fctx = it.facilitatedTransaction
+//
+//                    if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
+//                        when {
+//                            fctx.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
+//                                view.showTransactionDeclineDialog(fctxId)
+//                            fctx.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
+//                                view.showTransactionCancelDialog(fctxId)
+//                        }
+//                    } else if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
+//                        when {
+//                            fctx.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
+//                                view.showTransactionDeclineDialog(fctxId)
+//                            fctx.role == FacilitatedTransaction.ROLE_PR_INITIATOR ->
+//                                view.showTransactionCancelDialog(fctxId)
+//                        }
+//                    }
+//                }, { Timber.e(it) })
     }
 
     internal fun onAccountChosen(accountPosition: Int, fctxId: String) {
@@ -496,7 +522,8 @@ class BalancePresenter @Inject constructor(
                             && it.role == FacilitatedTransaction.ROLE_RPR_RECEIVER) {
                         value++
                     } else if (it.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                            && it.role == FacilitatedTransaction.ROLE_RPR_RECEIVER) {
+                            && (it.role == FacilitatedTransaction.ROLE_RPR_INITIATOR
+                            || it.role == FacilitatedTransaction.ROLE_PR_RECEIVER)) {
                         value++
                     }
                 }

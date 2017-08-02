@@ -54,6 +54,8 @@ interface BalanceView : View {
 
     fun initiatePayment(uri: String, recipientId: String, mdid: String, fctxId: String)
 
+    fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?)
+
     fun showWaitingForPaymentDialog()
 
     fun showWaitingForAddressDialog()

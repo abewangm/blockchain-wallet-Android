@@ -245,6 +245,30 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun showToast(message: Int, toastType: String) = context.toast(message, toastType)
 
+    override fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?) {
+        val message: String
+        if (!note.isNullOrEmpty()) {
+            message = getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note)
+        } else {
+            message = getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount)
+        }
+
+        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_balance_dialog_payment_requested)
+                .setMessage(message)
+                .setPositiveButton(
+                        R.string.contacts_balance_dialog_accept,
+                        { _, _ -> presenter.onPaymentRequestAccepted(fctxId) }
+                )
+                .setNegativeButton(
+                        R.string.contacts_balance_dialog_decline,
+                        { _, _ -> presenter.confirmDeclineTransaction(fctxId) }
+                )
+                .setNeutralButton(android.R.string.cancel, null)
+                .create()
+                .show()
+    }
+
     override fun showSendAddressDialog(
             fctxId: String,
             amount: String,
@@ -253,9 +277,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     ) {
         val message: String
         if (!note.isNullOrEmpty()) {
-            message = getString(R.string.contacts_balance_dialog_description_note, name, amount, note)
+            message = getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
         } else {
-            message = getString(R.string.contacts_balance_dialog_description_no_note, name, amount)
+            message = getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
         }
 
         AlertDialog.Builder(activity, R.style.AlertDialogStyle)
@@ -317,9 +341,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
         var message: String
         if (!note.isNullOrEmpty()) {
-            message = getString(R.string.contacts_balance_dialog_description_note, name, amount, note)
+            message = getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
         } else {
-            message = getString(R.string.contacts_balance_dialog_description_no_note, name, amount)
+            message = getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
         }
 
         message += "\n\n${getString(R.string.contacts_balance_dialog_choose_account_message)}\n"

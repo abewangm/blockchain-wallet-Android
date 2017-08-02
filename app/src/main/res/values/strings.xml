@@ -642,8 +642,8 @@
     <string name="contacts_too_much_sent">Looks like you sent more bitcoin than was requested. You can request some back from your contact if you wish. We have not marked the payment as complete.</string>
     <string name="contacts_too_little_sent">Looks like you sent less bitcoin than was requested. Your contact will still receive the bitcoin you sent, but we have not marked the payment as complete.</string>
     <string name="contacts_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to use the Contacts functionality.</string>
-    <string name="contacts_pending_transaction">Pending Transactions</string>
-    <string name="contacts_transaction_history">Transaction History</string>
+    <string name="contacts_pending_transaction">In Progress</string>
+    <string name="contacts_transaction_history">Finished</string>
     <string name="contacts_request_money_receive">Request payment</string>
     <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
     <string name="contacts_decline_pending_transaction">Are you sure you want to decline this pending transaction?</string>
@@ -688,9 +688,12 @@
     <string name="contacts_invite_uri_used">Invitation link expired or already used.</string>
     <!-- CONTACTS BALANCE SCREEN DIALOGS -->
     <string name="contacts_balance_dialog_receiving_payment">Receiving payment</string>
-    <string name="contacts_balance_dialog_description_note">%1$s would like to send you %2$s for \"%3$s\".</string>
-    <string name="contacts_balance_dialog_description_no_note">%1$s would like to send you %2$s.</string>
+    <string name="contacts_balance_dialog_payment_requested">Payment request</string>
+    <string name="contacts_balance_dialog_description_rpr_note">%1$s would like to send you %2$s for \"%3$s\".</string>
+    <string name="contacts_balance_dialog_description_rpr_no_note">%1$s would like to send you %2$s.</string>
     <string name="contacts_balance_dialog_choose_account_message">Choose where you wish to receive your funds.</string>
+    <string name="contacts_balance_dialog_description_pr_note">%1$s would like you to send %2$s for \"%3$s\".</string>
+    <string name="contacts_balance_dialog_description_pr_no_note">%1$s would like you to send %2$s.</string>
     <string name="contacts_balance_dialog_accept">Accept</string>
     <string name="contacts_balance_dialog_decline">Decline</string>
     <!-- CONTACTS SELECT ONBOARDING -->

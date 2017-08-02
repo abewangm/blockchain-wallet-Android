@@ -29,8 +29,9 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
 
     @Inject ConfirmPaymentPresenter confirmPaymentPresenter;
 
-    private static final String ARGUMENT_PAYMENT_DETAILS = "argument_payment_details";
-    private static final String ARGUMENT_SHOW_FEE_CHOICE = "argument_show_fee_choice";
+    private static final String ARGUMENT_PAYMENT_DETAILS = "ARGUMENT_PAYMENT_DETAILS";
+    private static final String ARGUMENT_CONTACT_NOTE = "ARGUMENT_CONTACT_NOTE";
+    private static final String ARGUMENT_SHOW_FEE_CHOICE = "ARGUMENT_SHOW_FEE_CHOICE";
 
     private DialogConfirmTransactionBinding binding;
     private OnConfirmDialogInteractionListener listener;
@@ -40,9 +41,11 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     }
 
     public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details,
+                                                   @Nullable String note,
                                                    boolean showFeeChoice) {
         Bundle args = new Bundle();
         args.putParcelable(ARGUMENT_PAYMENT_DETAILS, details);
+        if (note != null) args.putString(ARGUMENT_CONTACT_NOTE, note);
         args.putBoolean(ARGUMENT_SHOW_FEE_CHOICE, showFeeChoice);
         ConfirmPaymentDialog fragment = new ConfirmPaymentDialog();
         fragment.setArguments(args);
@@ -126,6 +129,13 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     }
 
     @Override
+    public void setContactNote(String contactNote) {
+        binding.textviewContactNote.setText(contactNote);
+        binding.textviewContactNote.setVisibility(View.VISIBLE);
+        binding.textviewDescriptionHeader.setVisibility(View.VISIBLE);
+    }
+
+    @Override
     public void closeDialog() {
         dismiss();
     }
@@ -133,6 +143,12 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     @Override
     public PaymentConfirmationDetails getPaymentDetails() {
         return getArguments().getParcelable(ARGUMENT_PAYMENT_DETAILS);
+    }
+
+    @Nullable
+    @Override
+    public String getContactNote() {
+        return getArguments().getString(ARGUMENT_CONTACT_NOTE);
     }
 
     @Override

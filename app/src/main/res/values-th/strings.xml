@@ -460,8 +460,6 @@
     <string name="contacts_too_much_sent">ดูเหมือนว่าคุณส่ง bitcoin มากกว่าที่ได้รับการร้องขอ คุณสามารถร้องขอบางส่วนกลับมาจากผู้ติดต่อของคุณได้หากคุณต้องการ เราได้ทำเครื่องหมายว่าการชำระเงินนี้เสร็จสิ้น</string>
     <string name="contacts_too_little_sent">ดูเหมือนว่าคุณส่ง bitcoin น้อยกว่าที่ได้รับการร้องขอ ผู้ติดต่อของคุณจะยังคงได้รับ bitcoin ที่คุณส่ง แต่เราจะไม่ทำเครื่องหมายว่าการชำระเงินนี้เสร็จสิ้น</string>
     <string name="contacts_second_password_prompt">เพื่อใช้บริการนี้ เราต้องการให้คุณกรอกรหัสผ่านที่สองของคุณ คุณควรจำเป็นต้องกรอกสิ่งนี้เพียงครั้งเดียวเพื่อใช้การใช้งานผู้ติดต่อ</string>
-    <string name="contacts_pending_transaction">ธุรกรรมที่รอดำเนินการ</string>
-    <string name="contacts_transaction_history">ประวัติธุรกรรม</string>
     <string name="contacts_request_money_receive">ส่งคำร้องไปยังผู้ติดต่อ</string>
     <string name="contacts_no_confirmed_contacts_found">ไม่พบผู้ติดต่อที่ได้รับการยืนยัน!</string>
     <string name="contacts_decline_pending_transaction">คุณแน่ใจหรือไม่ว่าคุณต้องการปฏิเสธธุรกรรมที่รอดำเนินการนี้?</string>

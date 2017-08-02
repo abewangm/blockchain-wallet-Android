@@ -459,8 +459,6 @@
     <string name="contacts_too_much_sent">Có vẻ như bạn đã gửi bitcoin nhiều hơn yêu cầu. Bạn có thể yêu cầu gửi lại một ít từ liên lạc của mình nếu muốn. Chúng tôi chưa đánh dấu hoàn tất cho thanh toán của bạn.</string>
     <string name="contacts_too_little_sent">Có vẻ như bạn đã gửi bitcoin ít hơn yêu cầu. Liên lạc của bạn sẽ vẫn nhận được số bitcoin mà bạn đã gửi, nhưng chúng tôi chưa đánh dấu hoàn tất cho thanh toán của bạn.</string>
     <string name="contacts_second_password_prompt">Để sử dụng dịch vụ này, chúng tôi yêu cầu bạn nhập mật khẩu cấp hai của mình. Bạn chỉ nên nhập mật khẩu này khi sử dụng chức năng Danh bạ.</string>
-    <string name="contacts_pending_transaction">Giao dịch đang Chờ duyệt</string>
-    <string name="contacts_transaction_history">Lịch sử Giao dịch</string>
     <string name="contacts_request_money_receive">Gửi yêu cầu liên lạc</string>
     <string name="contacts_no_confirmed_contacts_found">Không tìm thấy danh bạ đã xác nhận!</string>
     <string name="contacts_decline_pending_transaction">Bạn có chắc muốn từ chối giao dịch đang chờ duyệt này?</string>

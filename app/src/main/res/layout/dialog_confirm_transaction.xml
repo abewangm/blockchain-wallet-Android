@@ -96,6 +96,26 @@
                             app:layout_gravity="fill_horizontal"
                             tools:text="1Pbu3p5TWsrYujGWbgT4MDeBa2J9bSkGoP" />
 
+                        <!-- DESCRIPTION -->
+                        <TextView
+                            android:id="@+id/textview_description_header"
+                            style="@style/ConfirmPaymentTitle"
+                            android:text="@string/description"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
+                        <TextView
+                            android:id="@+id/textview_contact_note"
+                            style="@style/ConfirmPaymentField"
+                            android:layout_width="0dp"
+                            android:ellipsize="end"
+                            android:scrollHorizontally="true"
+                            android:singleLine="true"
+                            android:visibility="gone"
+                            app:layout_gravity="fill_horizontal"
+                            tools:text="Thanks for all the fish"
+                            tools:visibility="visible" />
+
                         <!-- To transfer -->
                         <TextView
                             style="@style/ConfirmPaymentTitle"
@@ -195,6 +215,7 @@
                         style="@style/ButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
                         android:layout_marginLeft="32dp"
                         android:layout_marginRight="32dp"
                         android:layout_marginTop="16dp"

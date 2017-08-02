@@ -22,8 +22,8 @@ dependencies:
     - if [ ! -d "/usr/local/android-sdk-linux/platforms/android-26" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-26"; fi
     # Android SDK Build-tools, revision 26.0.1
     - if [ ! -d "/usr/local/android-sdk-linux/build-tools/26.0.1" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.1"; fi
-    # Google Support Repository, revision 56 / Local Maven repository for Google Play Services
-    - if [ ! -d "/usr/local/android-sdk-linux/extras/google/m2repository/com/google/android/gms/play-services/11.0.2" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "extras;google;m2repository"; fi
+    # Google Support Repository, revision 57 / Local Maven repository for Google Play Services
+    - if [ ! -d "/usr/local/android-sdk-linux/extras/google/m2repository/com/google/android/gms/play-services/11.0.4" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "extras;google;m2repository"; fi
     - ./gradlew app:dependencies --console=plain
 
   cache_directories:

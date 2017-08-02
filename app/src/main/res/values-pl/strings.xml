@@ -459,8 +459,6 @@
     <string name="contacts_too_much_sent">Wygląda na to, że wysłałeś więcej bitcoinów niż żądano. Jeżeli chcesz, możesz poprosić swój kontakt o zwrot ich części. Nie oznaczyliśmy płatności jako ukończonej.</string>
     <string name="contacts_too_little_sent">Wygląda na to, że wysłałeś mniej bitcoinów niż żądano. Twój kontakt nadal otrzyma wysłane bitcoiny, lecz nie oznaczyliśmy płatności jako ukończonej.</string>
     <string name="contacts_second_password_prompt">Aby skorzystać z tej usługi, musisz wpisać drugie hasło. Będziesz musiał to zrobić tylko raz, by korzystać z funkcji Kontaktów.</string>
-    <string name="contacts_pending_transaction">Transakcje w toku</string>
-    <string name="contacts_transaction_history">Historia transakcji</string>
     <string name="contacts_request_money_receive">Wyślij prośbę do kontaktu</string>
     <string name="contacts_no_confirmed_contacts_found">Nie znaleziono żadnych potwierdzonych kontaktów!</string>
     <string name="contacts_decline_pending_transaction">Czy na pewno chcesz odrzucić tę transakcję w toku?</string>
