@@ -69,7 +69,6 @@ import piuk.blockchain.android.ui.buy.FrontendJavascriptManager;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment;
-import piuk.blockchain.android.ui.contacts.payments.ContactPaymentDialog;
 import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -94,7 +93,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         SendFragment.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactConfirmRequestFragment.FragmentInteractionListener,
-        ContactPaymentDialog.OnContactPaymentDialogInteractionListener,
         FrontendJavascript<String>,
         ConfirmPaymentDialog.OnConfirmDialogInteractionListener,
         ContactRequestSuccessFragment.ContactsRequestSuccessListener {
@@ -551,10 +549,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         startContactSendDialog(uri, recipientId, mdid, fctxId);
     }
 
-    @Override
-    public void onContactPaymentDialogClosed(boolean paymentToContactMade) {
-        this.paymentToContactMade = paymentToContactMade;
-    }
+    // STOPSHIP: 02/08/2017
+//    @Override
+//    public void onContactPaymentDialogClosed(boolean paymentToContactMade) {
+//        this.paymentToContactMade = paymentToContactMade;
+//    }
 
     @Override
     public void kickToLauncherPage() {
@@ -859,9 +858,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     private void startContactSendDialog(String uri, String recipientId, String mdid, String fctxId) {
-        ContactPaymentDialog paymentDialog =
-                ContactPaymentDialog.newInstance(uri, recipientId, mdid, fctxId);
-        paymentDialog.show(getSupportFragmentManager(), ContactPaymentDialog.class.getSimpleName());
+        addFragmentToBackStack(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
+        // STOPSHIP: 02/08/2017 Select correct tab somehow
     }
 
     @Override

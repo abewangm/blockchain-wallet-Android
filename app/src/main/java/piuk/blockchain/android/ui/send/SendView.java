@@ -37,13 +37,16 @@ interface SendView extends View {
 
     void updateFiatTextField(String text);
 
-    void onShowPaymentDetails(PaymentConfirmationDetails confirmationDetails);
+    void onShowPaymentDetails(PaymentConfirmationDetails confirmationDetails, @Nullable String note);
 
     void onShowReceiveToWatchOnlyWarning(String address);
 
     void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
-    void onShowTransactionSuccess(String hash, long transactionValue);
+    void onShowTransactionSuccess(@Nullable String mdid,
+                                  @Nullable String fctxId,
+                                  String hash,
+                                  long transactionValue);
 
     void onShowBIP38PassphrasePrompt(String scanData);
 
@@ -79,4 +82,5 @@ interface SendView extends View {
 
     long getCustomFeeValue();
 
+    void lockContactsFields();
 }

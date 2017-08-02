@@ -180,7 +180,7 @@ public class AccountEditActivity extends BaseMvpActivity<AccountEditView, Accoun
 
     @Override
     public void showPaymentDetails(PaymentConfirmationDetails details) {
-        ConfirmPaymentDialog.newInstance(details, false)
+        ConfirmPaymentDialog.newInstance(details, null, false)
                 .show(getSupportFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 
         if (details.isLargeTransaction) {

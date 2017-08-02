@@ -24,6 +24,11 @@ public class ConfirmPaymentPresenter extends BasePresenter<ConfirmPaymentView> {
             return;
         }
 
+        String contactNote = getView().getContactNote();
+        if (contactNote != null) {
+            getView().setContactNote(contactNote);
+        }
+
         getView().setFromLabel(paymentDetails.fromLabel);
         getView().setToLabel(paymentDetails.toLabel);
         getView().setAmount(String.format(AMOUNT_FORMAT,

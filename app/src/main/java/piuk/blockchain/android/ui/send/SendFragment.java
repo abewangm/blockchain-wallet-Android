@@ -108,6 +108,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     @Thunk FragmentSendBinding binding;
     @Thunk AlertDialog transactionSuccessDialog;
     @Thunk boolean textChangeAllowed = true;
+    private boolean contactsPayment;
     private OnSendFragmentInteractionListener listener;
     private MaterialProgressDialog progressDialog;
     private AlertDialog largeTxWarning;
@@ -146,6 +147,20 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         args.putString(ARGUMENT_SCAN_DATA, scanData);
         args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
         args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static SendFragment newInstance(String uri,
+                                           String contactId,
+                                           String contactMdid,
+                                           String fctxId) {
+        SendFragment fragment = new SendFragment();
+        Bundle args = new Bundle();
+        args.putString(ARGUMENT_SCAN_DATA, uri);
+        args.putString(ARGUMENT_CONTACT_ID, contactId);
+        args.putString(ARGUMENT_CONTACT_MDID, contactMdid);
+        args.putString(ARGUMENT_FCTX_ID, fctxId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -447,7 +462,6 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     private void setupDestinationView() {
         binding.toContainer.toAddressTextView.setHorizontallyScrolling(false);
-//        binding.toContainer.toAddressTextView.setLines(3);
 
         //Avoid OntouchListener - causes paste issues on some Samsung devices
         binding.toContainer.toAddressTextView.setOnClickListener(v -> {
@@ -525,6 +539,18 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     @Override
+    public void lockContactsFields() {
+        contactsPayment = true;
+        binding.amountContainer.amountBtc.setEnabled(false);
+        binding.amountContainer.amountFiat.setEnabled(false);
+        binding.toContainer.toArrowImage.setVisibility(View.GONE);
+        binding.toContainer.toArrowImage.setOnClickListener(null);
+        binding.toContainer.toAddressTextView.setEnabled(false);
+        binding.progressBarMaxAvailable.setVisibility(View.GONE);
+        binding.max.setVisibility(View.GONE);
+    }
+
+    @Override
     public void hideSendingAddressField() {
         binding.fromContainer.fromConstraintLayout.setVisibility(View.GONE);
         binding.divider1.setVisibility(View.GONE);
@@ -568,12 +594,14 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void setMaxAvailableVisible(boolean visible) {
-        if (visible) {
-            binding.max.setVisibility(View.VISIBLE);
-            binding.progressBarMaxAvailable.setVisibility(View.INVISIBLE);
-        } else {
-            binding.max.setVisibility(View.INVISIBLE);
-            binding.progressBarMaxAvailable.setVisibility(View.VISIBLE);
+        if (!contactsPayment) {
+            if (visible) {
+                binding.max.setVisibility(View.VISIBLE);
+                binding.progressBarMaxAvailable.setVisibility(View.INVISIBLE);
+            } else {
+                binding.max.setVisibility(View.INVISIBLE);
+                binding.progressBarMaxAvailable.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -618,7 +646,10 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     @Override
-    public void onShowTransactionSuccess(String hash, long transactionValue) {
+    public void onShowTransactionSuccess(@Nullable String mdid,
+                                         @Nullable String fctxId,
+                                         String hash,
+                                         long transactionValue) {
         playAudio();
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
@@ -635,14 +666,20 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         // If should show app rate, success dialog shows first and launches
         // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
         // happen if the user chooses to rate the app - they'll return to the main page.
-        if (appRate.shouldShowDialog()) {
+        // Won't show if contact transaction, as other dialog takes preference
+        if (appRate.shouldShowDialog() && fctxId == null) {
             AlertDialog ratingDialog = appRate.getRateDialog();
             ratingDialog.setOnDismissListener(d -> finishPage());
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
         } else {
             transactionSuccessDialog.show();
-            transactionSuccessDialog.setOnDismissListener(dialogInterface -> finishPage());
+            transactionSuccessDialog.setOnDismissListener(dialogInterface -> {
+                if (fctxId != null) {
+                    listener.onSendPaymentSuccessful(mdid, fctxId, hash, transactionValue);
+                }
+                finishPage();
+            });
         }
 
         dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
@@ -845,8 +882,8 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     };
 
     @Override
-    public void onShowPaymentDetails(PaymentConfirmationDetails details) {
-        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, true);
+    public void onShowPaymentDetails(PaymentConfirmationDetails details, @Nullable String note) {
+        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, note, true);
         confirmPaymentDialog
                 .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 
@@ -1048,5 +1085,10 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                                          String contactId,
                                          long satoshis,
                                          int accountPosition);
+
+        void onSendPaymentSuccessful(String mdid,
+                                     String transactionHash,
+                                     String fctxId,
+                                     long transactionValue);
     }
 }
