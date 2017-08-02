@@ -223,6 +223,11 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             dialog.showDialog(getFragmentManager());
         });
 
+        binding.fromContainer.fromAddressTextView.setOnClickListener(v -> {
+            getPresenter().clearSelectedContactId();
+            getPresenter().onSendToContactClicked();
+        });
+
         binding.fromContainer.fromArrowImage.setOnClickListener(v -> {
             getPresenter().clearSelectedContactId();
             getPresenter().onSendToContactClicked();
