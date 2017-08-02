@@ -259,7 +259,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                     if (label == null || label.isEmpty()) {
                         label = account.getXpub();
                     }
-                    binding.toContainer.toAddressTextView.setText(StringUtils.abbreviate(label, 32));
+                    binding.toContainer.toAddressEditTextView.setText(StringUtils.abbreviate(label, 32));
                 } else if (object instanceof LegacyAddress) {
                     LegacyAddress legacyAddress = ((LegacyAddress) object);
                     getPresenter().setContact(null);
@@ -269,7 +269,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                     if (label == null || label.isEmpty()) {
                         label = legacyAddress.getAddress();
                     }
-                    binding.toContainer.toAddressTextView.setText(StringUtils.abbreviate(label, 32));
+                    binding.toContainer.toAddressEditTextView.setText(StringUtils.abbreviate(label, 32));
                 }
 
             } catch (ClassNotFoundException | IOException e) {
@@ -441,22 +441,20 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     private void requestSendPayment() {
         getPresenter().onSendClicked(
                 binding.amountContainer.amountBtc.getText().toString(),
-                binding.toContainer.toAddressTextView.getText().toString(),
+                binding.toContainer.toAddressEditTextView.getText().toString(),
                 getFeePriority());
     }
 
     private void setupDestinationView() {
-        binding.toContainer.toAddressTextView.setHorizontallyScrolling(false);
-//        binding.toContainer.toAddressTextView.setLines(3);
 
         //Avoid OntouchListener - causes paste issues on some Samsung devices
-        binding.toContainer.toAddressTextView.setOnClickListener(v -> {
-            binding.toContainer.toAddressTextView.setText("");
+        binding.toContainer.toAddressEditTextView.setOnClickListener(v -> {
+            binding.toContainer.toAddressEditTextView.setText("");
             getPresenter().setReceivingAddress(null);
         });
         //LongClick listener required to clear receive address in memory when user long clicks to paste
-        binding.toContainer.toAddressTextView.setOnLongClickListener(v -> {
-            binding.toContainer.toAddressTextView.setText("");
+        binding.toContainer.toAddressEditTextView.setOnLongClickListener(v -> {
+            binding.toContainer.toAddressEditTextView.setText("");
             getPresenter().setReceivingAddress(null);
             v.performClick();
             return false;
@@ -464,9 +462,9 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
         //TextChanged listener required to invalidate receive address in memory when user
         //chooses to edit address populated via QR
-        RxTextView.textChanges(binding.toContainer.toAddressTextView)
+        RxTextView.textChanges(binding.toContainer.toAddressEditTextView)
                 .doOnNext(ignored -> {
-                    if (getActivity().getCurrentFocus() == binding.toContainer.toAddressTextView) {
+                    if (getActivity().getCurrentFocus() == binding.toContainer.toAddressEditTextView) {
                         getPresenter().setReceivingAddress(null);
                         getPresenter().setContact(null);
                     }
@@ -532,7 +530,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void hideReceivingAddressField() {
-        binding.toContainer.toAddressTextView.setHint(R.string.to_field_helper_no_dropdown);
+        binding.toContainer.toAddressEditTextView.setHint(R.string.to_field_helper_no_dropdown);
     }
 
     @Override
@@ -548,7 +546,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void setDestinationAddress(String btcAddress) {
-        binding.toContainer.toAddressTextView.setText(btcAddress);
+        binding.toContainer.toAddressEditTextView.setText(btcAddress);
     }
 
     @Override
@@ -563,7 +561,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     @Override
     public void setContactName(String name) {
-        binding.toContainer.toAddressTextView.setText(name);
+        binding.toContainer.toAddressEditTextView.setText(name);
     }
 
     @Override
@@ -867,14 +865,14 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         alertDialog.setCanceledOnTouchOutside(false);
 
         dialogBinding.confirmCancel.setOnClickListener(v -> {
-            binding.toContainer.toAddressTextView.setText("");
+            binding.toContainer.toAddressEditTextView.setText("");
             if (dialogBinding.confirmDontAskAgain.isChecked())
                 getPresenter().disableWatchOnlySpendWarning();
             alertDialog.dismiss();
         });
 
         dialogBinding.confirmContinue.setOnClickListener(v -> {
-            binding.toContainer.toAddressTextView.setText(address);
+            binding.toContainer.toAddressEditTextView.setText(address);
             if (dialogBinding.confirmDontAskAgain.isChecked())
                 getPresenter().disableWatchOnlySpendWarning();
             alertDialog.dismiss();
