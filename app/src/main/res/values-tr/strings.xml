@@ -459,8 +459,6 @@
     <string name="contacts_too_much_sent">Öyle görünüyor ki talep edilenden daha fazla bitcoin gönderdiniz. İsterseniz kişinizden birazını geri isteyebilirsiniz. Ödemeyi tamamlanmış olarak işaretlemedik.</string>
     <string name="contacts_too_little_sent">Öyle görünüyor ki talep edilenden daha az bitcoin gönderdiniz. Kişiniz, göndermiş olduğunuz bitcoin tutarını yine de alacak ancak ödemeyi tamamlanmış olarak işaretlemedik.</string>
     <string name="contacts_second_password_prompt">Bu hizmeti kullanmak için ikinci şifrenizi girmenizi rica ediyoruz. Kişiler işlevini kullanmak için bunu sadece bir kez girmeniz gerekecek.</string>
-    <string name="contacts_pending_transaction">Bekleyen İşlemler</string>
-    <string name="contacts_transaction_history">İşlem Geçmişi</string>
     <string name="contacts_request_money_receive">Kişiye talebi gönderin</string>
     <string name="contacts_no_confirmed_contacts_found">Onaylanmış kişi bulunamadı!</string>
     <string name="contacts_decline_pending_transaction">Bu bekleyen işlemi geri çevirmek istediğinizden emin misiniz?</string>

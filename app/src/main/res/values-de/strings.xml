@@ -459,8 +459,6 @@
     <string name="contacts_too_much_sent">Anscheinend haben Sie mehr als die erforderliche Anzahl an Bitcoin gesendet. Bei Bedarf können Sie Ihren Kontakt bitten, eine entsprechende Rückerstattung zu leisten. Wir haben die Zahlung nicht als abgeschlossen gekennzeichnet.</string>
     <string name="contacts_too_little_sent">Anscheinend haben Sie weniger als die erforderliche Anzahl an Bitcoin gesendet. Ihr Kontakt wird zwar das von Ihnen gesendete Bitcoin erhalten, doch wir haben die Zahlung nicht als abgeschlossen gekennzeichnet.</string>
     <string name="contacts_second_password_prompt">Zur Benutzung dieses Service müssen Sie uns das zweite Passwort angeben. Zur Verwendung der Kontaktfunktion ist nur eine einmalige Eingabe erforderlich.</string>
-    <string name="contacts_pending_transaction">Ausstehende Transaktionen</string>
-    <string name="contacts_transaction_history">Verlaufsdaten</string>
     <string name="contacts_request_money_receive">Kontakt eine Anfrage senden</string>
     <string name="contacts_no_confirmed_contacts_found">Es wurden keine bestätigten Kontakte gefunden!</string>
     <string name="contacts_decline_pending_transaction">Möchten Sie diese ausstehende Transaktion wirklich ablehnen?</string>

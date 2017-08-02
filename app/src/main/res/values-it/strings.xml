@@ -461,8 +461,6 @@
     <string name="contacts_too_much_sent">Sembra che tu abbia inviato più bitcoin di quanto richiesto. Se lo desideri, puoi richiedere al tuo contatto di restituirne alcuni. Non abbiamo indicato il pagamento come completo.</string>
     <string name="contacts_too_little_sent">Sembra che tu abbia inviato meno bitcoin di quanto richiesto. Il tuo contatto riceverà i bitcoin che hai inviato ma non abbiamo indicato il pagamento come completo.</string>
     <string name="contacts_second_password_prompt">Per utilizzare questo servizio, devi inserire la tua seconda password. Dovrai inserirla solo per utilizzare la funzionalità contatti.</string>
-    <string name="contacts_pending_transaction">Transazioni pendenti</string>
-    <string name="contacts_transaction_history">Storico transazioni</string>
     <string name="contacts_request_money_receive">Invia richiesta di contatto</string>
     <string name="contacts_no_confirmed_contacts_found">Nessun contatto confermato trovato!</string>
     <string name="contacts_decline_pending_transaction">Sei sicuro di voler rifiutare questa transazione pendente?</string>

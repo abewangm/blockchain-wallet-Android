@@ -61,6 +61,11 @@ class FctxDelegate<in T>(
         holder.itemView.setOnLongClickListener {
             consume { listClickListener.onFctxLongClicked(transaction.id) }
         }
+        // Format switch
+        holder.result.setOnClickListener {
+            isBtc = !isBtc
+            listClickListener.onValueClicked(isBtc)
+        }
 
         val btcBalance = transaction.intendedAmount / 1e8
         val fiatBalance = btcExchangeRate * btcBalance

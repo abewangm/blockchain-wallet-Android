@@ -459,8 +459,6 @@
     <string name="contacts_too_much_sent">Схоже, ви відправили більше bitcoin, ніж було запитано. Ви можете відправити запит на повернення від вашого контакту, якщо ви хочете. Ми не позначили платіж як завершений.</string>
     <string name="contacts_too_little_sent">Схоже, ви відправили менше bitcoin, ніж було запитано. Ваш контакт буде, як і раніше, отримувати bitcoin, які ви відправили, але ми не позначили платіж як завершений.</string>
     <string name="contacts_second_password_prompt">Щоб скористатись цією послугою, вам треба ввести свій другий пароль. Вам треба ввести його лише один раз, щоб використовувати усі функціональні можливості Контактів.</string>
-    <string name="contacts_pending_transaction">Транзакції в очікуванні</string>
-    <string name="contacts_transaction_history">Історія транзакцій</string>
     <string name="contacts_request_money_receive">Відправити запит до контакту</string>
     <string name="contacts_no_confirmed_contacts_found">Жоден підтверджений контакт не знайдено!</string>
     <string name="contacts_decline_pending_transaction">Ви впевнені, що хочете відхилити цю транзакцію в очікуванні?</string>
