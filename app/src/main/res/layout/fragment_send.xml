@@ -37,7 +37,7 @@
 
             <include
                 android:id="@+id/toContainer"
-                layout="@layout/include_to_row"
+                layout="@layout/include_to_row_editable"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
