@@ -446,9 +446,6 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     private void setupDestinationView() {
-        //Multi-line input field with 'Done' button
-        binding.toContainer.toAddressEditTextView.setHorizontallyScrolling(false);
-        binding.toContainer.toAddressEditTextView.setLines(3);
 
         //Avoid OntouchListener - causes paste issues on some Samsung devices
         binding.toContainer.toAddressEditTextView.setOnClickListener(v -> {
