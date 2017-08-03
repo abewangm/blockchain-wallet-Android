@@ -15,11 +15,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
-import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.contacts.ContactsDataManager
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.customviews.ToastCustom
-import piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID
 import kotlin.test.assertNull
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
@@ -57,9 +56,9 @@ class ContactConfirmRequestPresenterTest {
         val contactId = "CONTACT_ID"
         val satoshis = 21000000000L
         val bundle = Bundle().apply {
-            putString(ARGUMENT_CONTACT_ID, contactId)
-            putLong(ARGUMENT_SATOSHIS, satoshis)
-            putSerializable(ARGUMENT_REQUEST_TYPE, null)
+            putString(ContactConfirmRequestFragment.ARGUMENT_CONTACT_ID, contactId)
+            putLong(ContactConfirmRequestFragment.ARGUMENT_SATOSHIS, satoshis)
+            putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, null)
         }
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
         // Act
@@ -79,10 +78,10 @@ class ContactConfirmRequestPresenterTest {
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
         val bundle = Bundle().apply {
-            putString(ARGUMENT_CONTACT_ID, contactId)
-            putLong(ARGUMENT_SATOSHIS, satoshis)
-            putInt(ARGUMENT_ACCOUNT_POSITION, accountPosition)
-            putSerializable(ARGUMENT_REQUEST_TYPE, paymentRequestType)
+            putString(ContactConfirmRequestFragment.ARGUMENT_CONTACT_ID, contactId)
+            putLong(ContactConfirmRequestFragment.ARGUMENT_SATOSHIS, satoshis)
+            putInt(ContactConfirmRequestFragment.ARGUMENT_ACCOUNT_POSITION, accountPosition)
+            putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, paymentRequestType)
         }
         val contact0 = Contact()
         val contact1 = Contact().apply {
@@ -99,7 +98,8 @@ class ContactConfirmRequestPresenterTest {
         verify(mockContactsManager).getContactList()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).fragmentBundle
-        verify(mockActivity).contactLoaded(contactName, paymentRequestType)
+        verify(mockActivity).contactLoaded(contactName)
+        verify(mockActivity).updatePaymentType(paymentRequestType)
         verifyNoMoreInteractions(mockActivity)
         subject.recipient shouldEqual contact1
     }
@@ -113,10 +113,10 @@ class ContactConfirmRequestPresenterTest {
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
         val bundle = Bundle().apply {
-            putString(ARGUMENT_CONTACT_ID, contactId)
-            putLong(ARGUMENT_SATOSHIS, satoshis)
-            putInt(ARGUMENT_ACCOUNT_POSITION, accountPosition)
-            putSerializable(ARGUMENT_REQUEST_TYPE, paymentRequestType)
+            putString(ContactConfirmRequestFragment.ARGUMENT_CONTACT_ID, contactId)
+            putLong(ContactConfirmRequestFragment.ARGUMENT_SATOSHIS, satoshis)
+            putInt(ContactConfirmRequestFragment.ARGUMENT_ACCOUNT_POSITION, accountPosition)
+            putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, paymentRequestType)
         }
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
         whenever(mockContactsManager.getContactList()).thenReturn(Observable.error { Throwable() })
@@ -141,10 +141,10 @@ class ContactConfirmRequestPresenterTest {
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
         val bundle = Bundle().apply {
-            putString(ARGUMENT_CONTACT_ID, contactId)
-            putLong(ARGUMENT_SATOSHIS, satoshis)
-            putInt(ARGUMENT_ACCOUNT_POSITION, accountPosition)
-            putSerializable(ARGUMENT_REQUEST_TYPE, paymentRequestType)
+            putString(ContactConfirmRequestFragment.ARGUMENT_CONTACT_ID, contactId)
+            putLong(ContactConfirmRequestFragment.ARGUMENT_SATOSHIS, satoshis)
+            putInt(ContactConfirmRequestFragment.ARGUMENT_ACCOUNT_POSITION, accountPosition)
+            putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, paymentRequestType)
         }
         val contact0 = Contact()
         val contact1 = Contact()
@@ -183,7 +183,7 @@ class ContactConfirmRequestPresenterTest {
         val contactName = "CONTACT_NAME"
         val contactMdid = "CONTACT_MDID"
         val note = "NOTE"
-        val satoshis = 21000000000L
+        val satoshis = 21_000_000_000L
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
         val receiveAddress = "RECEIVE_ADDRESS"
@@ -211,7 +211,7 @@ class ContactConfirmRequestPresenterTest {
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).note
         verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).showSendSuccessfulDialog(contactName)
+        verify(mockActivity).onRequestSuccessful(paymentRequestType, contactName, "")
         verifyNoMoreInteractions(mockActivity)
     }
 
@@ -222,7 +222,7 @@ class ContactConfirmRequestPresenterTest {
         val contactName = "CONTACT_NAME"
         val contactMdid = "CONTACT_MDID"
         val note = "NOTE"
-        val satoshis = 21000000000L
+        val satoshis = 21_000_000_000L
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.SEND
         val recipient = Contact().apply {
@@ -247,7 +247,7 @@ class ContactConfirmRequestPresenterTest {
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).note
         verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).onRequestSuccessful()
+        verify(mockActivity).onRequestSuccessful(paymentRequestType, contactName, "")
         verifyNoMoreInteractions(mockActivity)
     }
 

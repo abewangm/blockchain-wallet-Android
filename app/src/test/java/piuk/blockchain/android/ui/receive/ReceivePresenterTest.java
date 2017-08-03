@@ -126,7 +126,7 @@ public class ReceivePresenterTest {
         String errorString = "ERROR_STRING";
         when(stringUtils.getString(anyInt())).thenReturn(errorString);
         // Act
-        subject.onSendToContactClicked("0.00");
+        subject.onSendToContactClicked();
         // Assert
         //noinspection WrongConstant
         verify(activity).showToast(errorString, ToastCustom.TYPE_ERROR);
@@ -138,7 +138,7 @@ public class ReceivePresenterTest {
         // Arrange
 
         // Act
-        subject.onSendToContactClicked("1.00");
+        subject.onSendToContactClicked();
         // Assert
         //noinspection WrongConstant
         verify(activity).startContactSelectionActivity();
