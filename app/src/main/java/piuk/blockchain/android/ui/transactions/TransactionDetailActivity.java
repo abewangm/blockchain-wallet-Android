@@ -109,6 +109,11 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
     }
 
     @Override
+    public void showTransactionAsPaid() {
+        binding.transactionType.setText(R.string.paid);
+    }
+
+    @Override
     public void onDataLoaded() {
         binding.mainLayout.setVisibility(View.VISIBLE);
         binding.loadingLayout.setVisibility(View.GONE);
@@ -122,8 +127,10 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
 
     @Override
     public void setTransactionNote(String note) {
-        binding.transactionNote.setText(note);
-        binding.transactionNoteLayout.setVisibility(View.VISIBLE);
+        if (note != null && !note.isEmpty()) {
+            binding.transactionNote.setText(note);
+            binding.transactionNoteLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

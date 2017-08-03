@@ -1,13 +1,13 @@
 package piuk.blockchain.android.ui.balance
 
 import android.support.annotation.StringRes
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.util.MonetaryUtil
-import java.util.*
 
 interface BalanceView : View {
 
@@ -42,8 +42,7 @@ interface BalanceView : View {
     fun showFctxRequiringAttention(number: Int)
 
     fun onContactsHashMapUpdated(
-            contactsTransactionMap: HashMap<String, String>,
-            notesTransactionMap: HashMap<String, String>
+            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
     )
 
     fun showAccountChoiceDialog(

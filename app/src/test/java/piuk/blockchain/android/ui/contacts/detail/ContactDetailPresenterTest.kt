@@ -217,23 +217,11 @@ class ContactDetailPresenterTest {
     @Throws(Exception::class)
     fun getContactsTransactionMap() {
         // Arrange
-        whenever(mockContactsManager.getContactsTransactionMap()).thenReturn(HashMap())
+        whenever(mockContactsManager.getTransactionDisplayMap()).thenReturn(HashMap())
         // Act
-        val result = subject.contactsTransactionMap
+        val result = subject.transactionDisplayMap
         // Assert
-        verify(mockContactsManager).getContactsTransactionMap()
-        result shouldBeInstanceOf HashMap::class
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun getNotesTransactionMap() {
-        // Arrange
-        whenever(mockContactsManager.getNotesTransactionMap()).thenReturn(HashMap())
-        // Act
-        val result = subject.notesTransactionMap
-        // Assert
-        verify(mockContactsManager).getNotesTransactionMap()
+        verify(mockContactsManager).getTransactionDisplayMap()
         result shouldBeInstanceOf HashMap::class
     }
 

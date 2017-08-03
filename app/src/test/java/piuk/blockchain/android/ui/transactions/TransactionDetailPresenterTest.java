@@ -25,8 +25,9 @@ import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
@@ -207,9 +208,14 @@ public class TransactionDetailPresenterTest extends RxTest {
         when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
-        HashMap<String, String> notesMap = new HashMap<>();
-        notesMap.put("txMoved_hash", "transaction_note");
-        when(contactsDataManager.getNotesTransactionMap()).thenReturn(notesMap);
+        HashMap<String, ContactTransactionDisplayModel> notesMap = new HashMap<>();
+        notesMap.put("txMoved_hash", new ContactTransactionDisplayModel(
+                "",
+                "",
+                "transaction_note",
+                ""
+        ));
+        when(contactsDataManager.getTransactionDisplayMap()).thenReturn(notesMap);
         // Act
         subject.onViewReady();
         // Assert
@@ -257,9 +263,14 @@ public class TransactionDetailPresenterTest extends RxTest {
         when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
-        HashMap contactsMap = new HashMap<String, String>();
-        contactsMap.put("txMoved_hash", "Adam");
-        when(contactsDataManager.getContactsTransactionMap()).thenReturn(contactsMap);
+        HashMap contactsMap = new HashMap<String, ContactTransactionDisplayModel>();
+        contactsMap.put("txMoved_hash", new ContactTransactionDisplayModel(
+                "",
+                "",
+                "",
+                "Adam"
+        ));
+        when(contactsDataManager.getTransactionDisplayMap()).thenReturn(contactsMap);
         // Act
         subject.onViewReady();
         // Assert
@@ -276,6 +287,7 @@ public class TransactionDetailPresenterTest extends RxTest {
         verify(activity).setTransactionValueFiat(anyString());
         verify(activity).onDataLoaded();
         verify(activity).setIsDoubleSpend(anyBoolean());
+        verify(activity).setTransactionNote(anyString());
         verifyNoMoreInteractions(activity);
     }
 

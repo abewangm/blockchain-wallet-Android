@@ -13,21 +13,22 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.contacts.models.ContactTransactionModel;
+import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.comparators.FctxDateComparator;
-import piuk.blockchain.android.data.contacts.ContactsDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
+import piuk.blockchain.android.data.contacts.models.ContactTransactionModel;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -76,12 +77,8 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
         return prefsUtil;
     }
 
-    HashMap<String, String> getContactsTransactionMap() {
-        return contactsDataManager.getContactsTransactionMap();
-    }
-
-    HashMap<String, String> getNotesTransactionMap() {
-        return contactsDataManager.getNotesTransactionMap();
+    Map<String, ContactTransactionDisplayModel> getTransactionDisplayMap() {
+        return contactsDataManager.getTransactionDisplayMap();
     }
 
     void onDeleteContactClicked() {

@@ -174,9 +174,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
             setUpAdapter(isBtc);
         }
 
-        balanceAdapter.onContactsMapChanged(
-                getPresenter().getContactsTransactionMap(),
-                getPresenter().getNotesTransactionMap());
+        balanceAdapter.onContactsMapChanged(getPresenter().getTransactionDisplayMap());
         balanceAdapter.setItems(transactions);
         if (!transactions.isEmpty()) {
             binding.recyclerView.setVisibility(View.VISIBLE);

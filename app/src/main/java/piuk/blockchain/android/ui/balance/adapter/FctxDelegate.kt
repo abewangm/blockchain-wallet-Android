@@ -121,8 +121,8 @@ class FctxDelegate<in T>(
             when (transaction.role) {
                 FacilitatedTransaction.ROLE_RPR_INITIATOR -> displaySent(viewHolder)
                 FacilitatedTransaction.ROLE_RPR_RECEIVER -> displayReceived(viewHolder)
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> displayPaid(viewHolder)
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayReceived(viewHolder)
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> displayReceived(viewHolder)
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayPaid(viewHolder)
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_DECLINED) {
             viewHolder.note.text = stringUtils.getString(R.string.contacts_receiving_declined).toUpperCase()

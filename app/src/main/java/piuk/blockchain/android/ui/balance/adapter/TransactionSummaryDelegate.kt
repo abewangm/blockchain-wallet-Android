@@ -13,9 +13,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import kotlinx.android.synthetic.main.item_balance.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.DateUtil
 import piuk.blockchain.android.util.MonetaryUtil
@@ -37,8 +39,7 @@ class TransactionSummaryDelegate<in T>(
     val prefsUtil = PrefsUtil(activity)
     val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     val dateUtil = DateUtil(activity)
-    var contactsTransactionMap = mutableMapOf<String, String>()
-    var notesTransactionMap = mutableMapOf<String, String>()
+    var transactionDisplayMap = mutableMapOf<String, ContactTransactionDisplayModel>()
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is TransactionSummary
@@ -70,11 +71,19 @@ class TransactionSummaryDelegate<in T>(
             else -> throw IllegalStateException("Tx direction isn't SENT, RECEIVED or TRANSFERRED")
         }
 
-        if (notesTransactionMap.containsKey(tx.hash)) {
-            viewHolder.note.text = notesTransactionMap[tx.hash]
+        viewHolder.note.gone()
+        viewHolder.contactNameLayout.gone()
+
+        transactionDisplayMap[tx.hash]?.apply {
+            viewHolder.note.text = note
+            viewHolder.contactName.text = contactName
             viewHolder.note.visible()
-        } else {
-            viewHolder.note.gone()
+            viewHolder.contactNameLayout.visible()
+
+            if (state == FacilitatedTransaction.STATE_PAYMENT_BROADCASTED
+                    && role == FacilitatedTransaction.ROLE_PR_RECEIVER) {
+                viewHolder.result.setText(R.string.paid)
+            }
         }
 
         viewHolder.result.text = getDisplaySpannable(tx.total.toDouble(), fiatBalance, fiatString)
@@ -102,11 +111,9 @@ class TransactionSummaryDelegate<in T>(
     }
 
     fun onContactsMapUpdated(
-            contactsTransactionMap: MutableMap<String, String>,
-            notesTransactionMap: MutableMap<String, String>
+            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
     ) {
-        this.contactsTransactionMap = contactsTransactionMap
-        this.notesTransactionMap = notesTransactionMap
+        this.transactionDisplayMap = transactionDisplayMap
     }
 
     private fun getResolvedColor(viewHolder: RecyclerView.ViewHolder, @ColorRes color: Int): Int {
@@ -131,13 +138,7 @@ class TransactionSummaryDelegate<in T>(
     }
 
     private fun displayReceived(viewHolder: TxViewHolder, tx: TransactionSummary) {
-        if (contactsTransactionMap.containsKey(tx.hash)) {
-            val contactName = contactsTransactionMap[tx.hash]
-            viewHolder.direction.text = stringUtils.getFormattedString(R.string.contacts_received, contactName)
-        } else {
-            viewHolder.direction.setText(R.string.RECEIVED)
-        }
-
+        viewHolder.direction.setText(R.string.RECEIVED)
         viewHolder.result.setBackgroundResource(getColorForConfirmations(
                 tx,
                 R.drawable.rounded_view_green_50,
@@ -154,13 +155,7 @@ class TransactionSummaryDelegate<in T>(
     }
 
     private fun displaySent(viewHolder: TxViewHolder, tx: TransactionSummary) {
-        if (contactsTransactionMap.containsKey(tx.hash)) {
-            val contactName = contactsTransactionMap[tx.hash]
-            viewHolder.direction.text = stringUtils.getFormattedString(R.string.contacts_sent, contactName)
-        } else {
-            viewHolder.direction.setText(R.string.SENT)
-        }
-
+        viewHolder.direction.setText(R.string.SENT)
         viewHolder.result.setBackgroundResource(getColorForConfirmations(
                 tx,
                 R.drawable.rounded_view_red_50,
@@ -227,7 +222,6 @@ class TransactionSummaryDelegate<in T>(
         internal var contactNameLayout: LinearLayout = itemView.contact_name_layout
 
         init {
-            contactName.gone()
             contactNameLayout.gone()
         }
     }
