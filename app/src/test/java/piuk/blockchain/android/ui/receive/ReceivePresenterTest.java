@@ -121,20 +121,7 @@ public class ReceivePresenterTest {
     }
 
     @Test
-    public void onSendToContactClickedInvalidAmount() throws Exception {
-        // Arrange
-        String errorString = "ERROR_STRING";
-        when(stringUtils.getString(anyInt())).thenReturn(errorString);
-        // Act
-        subject.onSendToContactClicked();
-        // Assert
-        //noinspection WrongConstant
-        verify(activity).showToast(errorString, ToastCustom.TYPE_ERROR);
-        verifyZeroInteractions(activity);
-    }
-
-    @Test
-    public void onSendToContactClickedValidAmount() throws Exception {
+    public void onSendToContactClicked() throws Exception {
         // Arrange
 
         // Act
