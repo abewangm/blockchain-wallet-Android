@@ -52,6 +52,7 @@ class AccountChooserPresenterTest {
     fun onViewReadyRequestTypeContact() {
         // Arrange
         whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.CONTACT)
+        whenever(mockActivity.isContactsEnabled).thenReturn(true)
         val contact0 = Contact()
         contact0.mdid = "mdid"
         val contact1 = Contact()
@@ -74,6 +75,7 @@ class AccountChooserPresenterTest {
     fun onViewReadyRequestTypeContactNoConfirmedContacts() {
         // Arrange
         whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.CONTACT)
+        whenever(mockActivity.isContactsEnabled).thenReturn(true)
         val contact0 = Contact()
         val contact1 = Contact()
         val contact2 = Contact()
@@ -111,9 +113,10 @@ class AccountChooserPresenterTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeSend() {
+    fun onViewReadyRequestTypeSend_contactsEnabled() {
         // Arrange
         whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
+        whenever(mockActivity.isContactsEnabled).thenReturn(true)
         val contact0 = Contact()
         contact0.mdid = "mdid"
         val contact1 = Contact()
@@ -140,6 +143,29 @@ class AccountChooserPresenterTest {
         captor.firstValue.size shouldEqual 11
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadyRequestTypeSend_contactsDisabled() {
+        // Arrange
+        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
+        whenever(mockActivity.isContactsEnabled).thenReturn(false)
+        val itemAccount0 = ItemAccount()
+        val itemAccount1 = ItemAccount()
+        val itemAccount2 = ItemAccount()
+        whenever(mockWalletAccountHelper.getHdAccounts(any()))
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(mockWalletAccountHelper.getLegacyAddresses(any()))
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        // Act
+        subject.onViewReady()
+        // Assert
+        verify(mockWalletAccountHelper).getHdAccounts(any())
+        verify(mockWalletAccountHelper).getLegacyAddresses(any())
+        val captor = argumentCaptor<List<ItemAccount>>()
+        verify(mockActivity).updateUi(captor.capture())
+        // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
+        captor.firstValue.size shouldEqual 8
+    }
 }
 
 
