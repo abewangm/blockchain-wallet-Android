@@ -145,6 +145,28 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         }
     };
 
+    private AHBottomNavigation.OnTabSelectedListener tabSelectedListener = (position, wasSelected) -> {
+        if (!wasSelected) {
+            switch (position) {
+                case 0:
+                    if (!(getCurrentFragment() instanceof SendFragment)) {
+                        // This is a bit of a hack to allow the selection of the correct button
+                        // On the bottom nav bar, but without starting the fragment again
+                        startSendFragment(null, null);
+                    }
+                    break;
+                case 1:
+                    onStartBalanceFragment(paymentToContactMade);
+                    break;
+                case 2:
+                    startReceiveFragment();
+                    break;
+            }
+        }
+
+        return true;
+    };
+
     {
         Injector.getInstance().getPresenterComponent().inject(this);
     }
@@ -216,27 +238,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         // Select transactions by default
         binding.bottomNavigation.setCurrentItem(1);
-        binding.bottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
-            if (!wasSelected) {
-                switch (position) {
-                    case 0:
-                        if (!(getCurrentFragment() instanceof SendFragment)) {
-                            // This is a bit of a hack to allow the selection of the correct button
-                            // On the bottom nav bar, but without starting the fragment again
-                            startSendFragment(null, null);
-                        }
-                        break;
-                    case 1:
-                        onStartBalanceFragment(paymentToContactMade);
-                        break;
-                    case 2:
-                        startReceiveFragment();
-                        break;
-                }
-            }
-
-            return true;
-        });
+        binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
 
         handleIncomingIntent();
         applyFontToNavDrawer();
@@ -549,12 +551,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         startContactSendDialog(uri, recipientId, mdid, fctxId);
     }
 
-    // STOPSHIP: 02/08/2017
-//    @Override
-//    public void onContactPaymentDialogClosed(boolean paymentToContactMade) {
-//        this.paymentToContactMade = paymentToContactMade;
-//    }
-
     @Override
     public void kickToLauncherPage() {
         startSingleActivity(LauncherActivity.class);
@@ -597,6 +593,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void onStartBalanceFragment(boolean paymentToContactMade) {
         if (paymentToContactMade) {
             balanceFragment = BalanceFragment.newInstance(true);
+            this.paymentToContactMade = false;
         }
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
@@ -752,10 +749,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onSendPaymentSuccessful(@Nullable String mdid,
+    public void onSendPaymentSuccessful(String mdid,
                                         String transactionHash,
-                                        @Nullable String fctxId,
+                                        String fctxId,
                                         long transactionValue) {
+        paymentToContactMade = true;
         getPresenter().broadcastPaymentSuccess(mdid, transactionHash, fctxId, transactionValue);
     }
 
@@ -775,6 +773,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void onRequestSuccessDismissed() {
         binding.bottomNavigation.setCurrentItem(1);
+        getCurrentFragment().onResume();
     }
 
     @Override
@@ -858,8 +857,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     private void startContactSendDialog(String uri, String recipientId, String mdid, String fctxId) {
-        addFragmentToBackStack(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
-        // STOPSHIP: 02/08/2017 Select correct tab somehow
+        binding.bottomNavigation.removeOnTabSelectedListener();
+        binding.bottomNavigation.setCurrentItem(0);
+        binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
+        replaceFragmentWithAnimation(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
     }
 
     @Override
