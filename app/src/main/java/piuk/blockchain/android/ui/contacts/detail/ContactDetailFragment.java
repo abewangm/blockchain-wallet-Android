@@ -113,6 +113,31 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
     }
 
     @Override
+    public void showPayOrDeclineDialog(String fctxId,String amount, String name, @Nullable String note) {
+        String message;
+        if (note != null && !note.isEmpty()) {
+            message = getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note);
+        } else {
+            message = getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount);
+        }
+
+        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                .setTitle(R.string.contacts_balance_dialog_payment_requested)
+                .setMessage(message)
+                .setPositiveButton(
+                        R.string.contacts_balance_dialog_accept, (dialogInterface, i) ->
+                                getPresenter().onPaymentRequestAccepted(fctxId)
+                )
+                .setNegativeButton(
+                        R.string.contacts_balance_dialog_decline, (dialogInterface, i) ->
+                                getPresenter().confirmDeclineTransaction(fctxId)
+                )
+                .setNeutralButton(android.R.string.cancel, null)
+                .create()
+                .show();
+    }
+
+    @Override
     public void showRenameDialog(String name) {
         AppCompatEditText editText = new AppCompatEditText(getActivity());
         editText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
