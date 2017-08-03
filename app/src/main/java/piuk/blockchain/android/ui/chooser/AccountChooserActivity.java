@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.databinding.ActivityAccountChooserBinding;
@@ -71,6 +72,11 @@ public class AccountChooserActivity extends BaseMvpActivity<AccountChooserView, 
     public void showNoContacts() {
         binding.recyclerview.setVisibility(View.GONE);
         binding.layoutNoContacts.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public boolean isContactsEnabled() {
+        return BuildConfig.CONTACTS_ENABLED;
     }
 
     @Override

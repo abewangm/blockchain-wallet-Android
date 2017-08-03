@@ -13,4 +13,6 @@ interface AccountChooserView extends View {
     void updateUi(List<ItemAccount> items);
 
     void showNoContacts();
+
+    boolean isContactsEnabled();
 }
