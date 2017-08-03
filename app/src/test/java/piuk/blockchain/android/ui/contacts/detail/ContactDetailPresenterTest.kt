@@ -16,6 +16,7 @@ import io.reactivex.subjects.PublishSubject
 import org.amshove.kluent.shouldBeInstanceOf
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,14 +24,15 @@ import org.robolectric.annotation.Config
 import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.access.AccessState
-import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.ContactsDataManager
-import piuk.blockchain.android.data.payload.PayloadDataManager
+import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity.KEY_BUNDLE_CONTACT_ID
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.PrefsUtil
 import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
@@ -46,6 +48,7 @@ class ContactDetailPresenterTest {
     private val mockRxBus: RxBus = mock()
     private val mockAccessState: AccessState = mock()
     private val mockTransactionListDataManager: TransactionListDataManager = mock()
+    private val mockExchangeRateFactory: ExchangeRateFactory = mock()
 
     @Before
     @Throws(Exception::class)
@@ -56,7 +59,8 @@ class ContactDetailPresenterTest {
                 mockPrefsUtil,
                 mockRxBus,
                 mockTransactionListDataManager,
-                mockAccessState
+                mockAccessState,
+                mockExchangeRateFactory
         )
         subject.initView(mockActivity)
     }
@@ -456,7 +460,7 @@ class ContactDetailPresenterTest {
         contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-            role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
         })
         val mockPayload: Wallet = mock()
         whenever(mockPayloadDataManager.wallet).thenReturn(mockPayload)
@@ -483,7 +487,7 @@ class ContactDetailPresenterTest {
         contact.addFacilitatedTransaction(FacilitatedTransaction().apply {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-            role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
         })
         val mockPayload: Wallet = mock()
         whenever(mockPayloadDataManager.wallet).thenReturn(mockPayload)
@@ -513,7 +517,7 @@ class ContactDetailPresenterTest {
         val facilitatedTransaction = FacilitatedTransaction().apply {
             id = fctxId
             state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
+            role = FacilitatedTransaction.ROLE_RPR_INITIATOR
             intendedAmount = 0L
             address = ""
         }
@@ -535,6 +539,37 @@ class ContactDetailPresenterTest {
 
     @Test
     @Throws(Exception::class)
+    fun onTransactionClickedShouldPromptPayOrDecline() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contact = Contact()
+        subject.contact = contact
+        val facilitatedTransaction = FacilitatedTransaction().apply {
+            id = fctxId
+            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+            role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            intendedAmount = 0L
+            address = ""
+        }
+        contact.addFacilitatedTransaction(facilitatedTransaction)
+        whenever(mockExchangeRateFactory.getLastPrice("USD")).thenReturn(2770.10)
+        whenever(mockPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
+                .thenReturn("USD")
+        // Act
+        subject.onTransactionClicked(fctxId)
+        // Assert
+        verify(mockActivity).showPayOrDeclineDialog(
+                fctxId,
+                "0.00USD",
+                contact.name,
+                facilitatedTransaction.note
+        )
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Ignore("Long click is currently disabled until we're advised what to do here")
+    @Test
+    @Throws(Exception::class)
     fun onTransactionLongClickedError() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -550,6 +585,7 @@ class ContactDetailPresenterTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
+    @Ignore("Long click is currently disabled until we're advised what to do here")
     @Test
     @Throws(Exception::class)
     fun onTransactionLongClickedWaitingForAddressPrRec() {
@@ -572,6 +608,7 @@ class ContactDetailPresenterTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
+    @Ignore("Long click is currently disabled until we're advised what to do here")
     @Test
     @Throws(Exception::class)
     fun onTransactionLongClickedWaitingForAddressRprInit() {
@@ -594,6 +631,7 @@ class ContactDetailPresenterTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
+    @Ignore("Long click is currently disabled until we're advised what to do here")
     @Test
     @Throws(Exception::class)
     fun onTransactionLongClickedWaitingForPaymentRprRec() {
@@ -616,6 +654,7 @@ class ContactDetailPresenterTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
+    @Ignore("Long click is currently disabled until we're advised what to do here")
     @Test
     @Throws(Exception::class)
     fun onTransactionLongClickedWaitingForPaymentPrInit() {
@@ -766,6 +805,47 @@ class ContactDetailPresenterTest {
         verify(mockPayloadDataManager).getPositionOfAccountInActiveList(accountPosition)
         verify(mockPayloadDataManager).getNextReceiveAddressAndReserve(eq(accountPosition), any())
         verifyNoMoreInteractions(mockPayloadDataManager)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onPaymentRequestAccepted failure`() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Single.error(Throwable()))
+        // Act
+        subject.onPaymentRequestAccepted(fctxId)
+        // Assert
+        verify(mockContactsManager).getContactFromFctxId(fctxId)
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onPaymentRequestAccepted success`() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        val contactId = "CONTACT_ID"
+        val mdid = "MDID"
+        val contact = Contact().apply {
+            id = contactId
+            this.mdid = mdid
+        }
+        val fctx = FacilitatedTransaction().apply {
+            address = "ADDRESS"
+            intendedAmount = 1000L
+        }
+        contact.facilitatedTransactions.put(fctxId, fctx)
+        whenever(mockContactsManager.getContactFromFctxId(fctxId))
+                .thenReturn(Single.just(contact))
+        // Act
+        subject.onPaymentRequestAccepted(fctxId)
+        // Assert
+        verify(mockContactsManager).getContactFromFctxId(fctxId)
+        verifyNoMoreInteractions(mockContactsManager)
+        verify(mockActivity).initiatePayment(any(), eq(contactId), eq(mdid), any())
     }
 
     @Test

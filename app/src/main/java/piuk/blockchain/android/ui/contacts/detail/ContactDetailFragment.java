@@ -332,6 +332,9 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
         if (listener != null) listener.onShowTransactionDetailCalled(txHash);
     }
 
+    // FIXME: 03/08/2017 This is currently broken because of onResume issues on MainActivity, presumably
+    // ¯\_(ツ)_/¯
+    // TODO: 03/08/2017 Fix me before an actual release
     @Override
     public void initiatePayment(String uri, String recipientId, String mdid, String fctxId) {
         if (listener != null) {

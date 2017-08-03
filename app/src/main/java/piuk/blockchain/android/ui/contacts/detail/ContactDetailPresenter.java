@@ -178,6 +178,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
                         contact.getId(),
                         contact.getMdid(),
                         transaction.getId());
+
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
                     && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
 
