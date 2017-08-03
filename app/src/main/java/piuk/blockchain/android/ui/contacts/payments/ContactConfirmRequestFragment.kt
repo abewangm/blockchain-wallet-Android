@@ -25,7 +25,7 @@ import javax.inject.Inject
 class ContactConfirmRequestFragment : BaseFragment<ContactConfirmRequestView, ContactConfirmRequestPresenter>(),
         ContactConfirmRequestView {
 
-    override val fragmentBundle: Bundle
+    override val fragmentBundle: Bundle?
         get() = arguments
     override val note: String
         get() = edittext_description.getTextString()

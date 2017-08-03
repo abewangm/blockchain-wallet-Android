@@ -9,7 +9,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom
 
 interface ContactConfirmRequestView : View {
 
-    val fragmentBundle: Bundle
+    val fragmentBundle: Bundle?
 
     val note: String
 

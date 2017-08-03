@@ -60,17 +60,21 @@ class ConfirmPaymentPresenterTest {
             this.btcTotal = btcTotal
             this.fiatTotal = fiatTotal
         }
+        val contactNote = "CONTACT_NOTE"
         whenever(mockActivity.paymentDetails).thenReturn(confirmationDetails)
+        whenever(mockActivity.contactNote).thenReturn(contactNote)
         // Act
         subject.onViewReady()
         // Assert
         verify(mockActivity).paymentDetails
+        verify(mockActivity).contactNote
         verify(mockActivity).setFromLabel(fromLabel)
         verify(mockActivity).setToLabel(toLabel)
         verify(mockActivity).setAmount("$btcAmount $btcUnit ($fiatSymbol$fiatAmount)")
         verify(mockActivity).setFee("$btcFee $btcUnit ($fiatSymbol$fiatFee)")
         verify(mockActivity).setTotalBtc("$btcTotal $btcUnit")
         verify(mockActivity).setTotalFiat("$fiatSymbol$fiatTotal")
+        verify(mockActivity).contactNote = contactNote
         verify(mockActivity).setUiState(UiState.CONTENT)
         verifyNoMoreInteractions(mockActivity)
     }

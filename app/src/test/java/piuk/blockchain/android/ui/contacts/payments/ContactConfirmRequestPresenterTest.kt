@@ -18,6 +18,7 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.payload.PayloadDataManager
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import kotlin.test.assertNull
 
@@ -37,9 +38,9 @@ class ContactConfirmRequestPresenterTest {
         subject.initView(mockActivity)
     }
 
-    @Test(expected = AssertionError::class)
+    @Test(expected = TypeCastException::class)
     @Throws(Exception::class)
-    fun onViewReadyNullBundle() {
+    fun `onViewReady empty bundle`() {
         // Arrange
         whenever(mockActivity.fragmentBundle).thenReturn(Bundle())
         // Act
@@ -49,16 +50,19 @@ class ContactConfirmRequestPresenterTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
-    @Test(expected = AssertionError::class)
+    @Test(expected = IllegalArgumentException::class)
     @Throws(Exception::class)
     fun onViewReadyNullValues() {
         // Arrange
         val contactId = "CONTACT_ID"
         val satoshis = 21000000000L
+        val accountPosition = -1
         val bundle = Bundle().apply {
             putString(ContactConfirmRequestFragment.ARGUMENT_CONTACT_ID, contactId)
             putLong(ContactConfirmRequestFragment.ARGUMENT_SATOSHIS, satoshis)
-            putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, null)
+            putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, PaymentRequestType.REQUEST)
+            putParcelable(ContactConfirmRequestFragment.ARGUMENT_CONFIRMATION_DETAILS, null)
+            putInt(ContactConfirmRequestFragment.ARGUMENT_ACCOUNT_POSITION, accountPosition)
         }
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
         // Act
@@ -77,10 +81,23 @@ class ContactConfirmRequestPresenterTest {
         val satoshis = 21000000000L
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
+        val fromLabel = "FROM_LABEL"
+        val btcAmount = "1.0"
+        val btcUnit = "BTC"
+        val fiatSymbol = "$"
+        val fiatAmount = "2739.40"
+        val paymentDetails = PaymentConfirmationDetails().apply {
+            this.fromLabel = fromLabel
+            this.btcAmount = btcAmount
+            this.btcUnit = btcUnit
+            this.fiatSymbol = fiatSymbol
+            this.fiatAmount = fiatAmount
+        }
         val bundle = Bundle().apply {
             putString(ContactConfirmRequestFragment.ARGUMENT_CONTACT_ID, contactId)
             putLong(ContactConfirmRequestFragment.ARGUMENT_SATOSHIS, satoshis)
             putInt(ContactConfirmRequestFragment.ARGUMENT_ACCOUNT_POSITION, accountPosition)
+            putParcelable(ContactConfirmRequestFragment.ARGUMENT_CONFIRMATION_DETAILS, paymentDetails)
             putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, paymentRequestType)
         }
         val contact0 = Contact()
@@ -100,6 +117,9 @@ class ContactConfirmRequestPresenterTest {
         verify(mockActivity).fragmentBundle
         verify(mockActivity).contactLoaded(contactName)
         verify(mockActivity).updatePaymentType(paymentRequestType)
+        verify(mockActivity).updateAccountName(fromLabel)
+        verify(mockActivity).updateTotalBtc("$btcAmount $btcUnit")
+        verify(mockActivity).updateTotalFiat("$fiatSymbol$fiatAmount")
         verifyNoMoreInteractions(mockActivity)
         subject.recipient shouldEqual contact1
     }
@@ -112,10 +132,23 @@ class ContactConfirmRequestPresenterTest {
         val satoshis = 21000000000L
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
+        val fromLabel = "FROM_LABEL"
+        val btcAmount = "1.0"
+        val btcUnit = "BTC"
+        val fiatSymbol = "$"
+        val fiatAmount = "2739.40"
+        val paymentDetails = PaymentConfirmationDetails().apply {
+            this.fromLabel = fromLabel
+            this.btcAmount = btcAmount
+            this.btcUnit = btcUnit
+            this.fiatSymbol = fiatSymbol
+            this.fiatAmount = fiatAmount
+        }
         val bundle = Bundle().apply {
             putString(ContactConfirmRequestFragment.ARGUMENT_CONTACT_ID, contactId)
             putLong(ContactConfirmRequestFragment.ARGUMENT_SATOSHIS, satoshis)
             putInt(ContactConfirmRequestFragment.ARGUMENT_ACCOUNT_POSITION, accountPosition)
+            putParcelable(ContactConfirmRequestFragment.ARGUMENT_CONFIRMATION_DETAILS, paymentDetails)
             putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, paymentRequestType)
         }
         whenever(mockActivity.fragmentBundle).thenReturn(bundle)
@@ -127,6 +160,10 @@ class ContactConfirmRequestPresenterTest {
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).fragmentBundle
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
+        verify(mockActivity).updatePaymentType(paymentRequestType)
+        verify(mockActivity).updateAccountName(fromLabel)
+        verify(mockActivity).updateTotalBtc("$btcAmount $btcUnit")
+        verify(mockActivity).updateTotalFiat("$fiatSymbol$fiatAmount")
         verify(mockActivity).finishPage()
         verifyNoMoreInteractions(mockActivity)
         assertNull(subject.recipient)
@@ -140,10 +177,23 @@ class ContactConfirmRequestPresenterTest {
         val satoshis = 21000000000L
         val accountPosition = 3
         val paymentRequestType = PaymentRequestType.REQUEST
+        val fromLabel = "FROM_LABEL"
+        val btcAmount = "1.0"
+        val btcUnit = "BTC"
+        val fiatSymbol = "$"
+        val fiatAmount = "2739.40"
+        val paymentDetails = PaymentConfirmationDetails().apply {
+            this.fromLabel = fromLabel
+            this.btcAmount = btcAmount
+            this.btcUnit = btcUnit
+            this.fiatSymbol = fiatSymbol
+            this.fiatAmount = fiatAmount
+        }
         val bundle = Bundle().apply {
             putString(ContactConfirmRequestFragment.ARGUMENT_CONTACT_ID, contactId)
             putLong(ContactConfirmRequestFragment.ARGUMENT_SATOSHIS, satoshis)
             putInt(ContactConfirmRequestFragment.ARGUMENT_ACCOUNT_POSITION, accountPosition)
+            putParcelable(ContactConfirmRequestFragment.ARGUMENT_CONFIRMATION_DETAILS, paymentDetails)
             putSerializable(ContactConfirmRequestFragment.ARGUMENT_REQUEST_TYPE, paymentRequestType)
         }
         val contact0 = Contact()
@@ -158,22 +208,14 @@ class ContactConfirmRequestPresenterTest {
         verify(mockContactsManager).getContactList()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).fragmentBundle
+        verify(mockActivity).updateAccountName(fromLabel)
+        verify(mockActivity).updateTotalBtc("$btcAmount $btcUnit")
+        verify(mockActivity).updateTotalFiat("$fiatSymbol$fiatAmount")
+        verify(mockActivity).updatePaymentType(paymentRequestType)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verify(mockActivity).finishPage()
         verifyNoMoreInteractions(mockActivity)
         assertNull(subject.recipient)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun sendRequestAmountInvalid() {
-        // Arrange
-        subject.satoshis = 0L
-        // Act
-        subject.sendRequest()
-        // Assert
-        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
-        verifyNoMoreInteractions(mockActivity)
     }
 
     @Test
@@ -191,11 +233,24 @@ class ContactConfirmRequestPresenterTest {
             name = contactName
             mdid = contactMdid
         }
+        val fromLabel = "FROM_LABEL"
+        val btcAmount = "1.0"
+        val btcUnit = "BTC"
+        val fiatSymbol = "$"
+        val fiatAmount = "2739.40"
+        val paymentDetails = PaymentConfirmationDetails().apply {
+            this.fromLabel = fromLabel
+            this.btcAmount = btcAmount
+            this.btcUnit = btcUnit
+            this.fiatSymbol = fiatSymbol
+            this.fiatAmount = fiatAmount
+        }
         subject.apply {
             this.recipient = recipient
             this.satoshis = satoshis
             this.accountPosition = accountPosition
             this.paymentRequestType = paymentRequestType
+            this.confirmationDetails = paymentDetails
         }
         whenever(mockPayloadDataManager.getNextReceiveAddress(accountPosition))
                 .thenReturn(Observable.just(receiveAddress))
@@ -211,7 +266,7 @@ class ContactConfirmRequestPresenterTest {
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).note
         verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).onRequestSuccessful(paymentRequestType, contactName, "")
+        verify(mockActivity).onRequestSuccessful(paymentRequestType, contactName, "1.0 BTC")
         verifyNoMoreInteractions(mockActivity)
     }
 
@@ -229,11 +284,24 @@ class ContactConfirmRequestPresenterTest {
             name = contactName
             mdid = contactMdid
         }
+        val fromLabel = "FROM_LABEL"
+        val btcAmount = "1.0"
+        val btcUnit = "BTC"
+        val fiatSymbol = "$"
+        val fiatAmount = "2739.40"
+        val paymentDetails = PaymentConfirmationDetails().apply {
+            this.fromLabel = fromLabel
+            this.btcAmount = btcAmount
+            this.btcUnit = btcUnit
+            this.fiatSymbol = fiatSymbol
+            this.fiatAmount = fiatAmount
+        }
         subject.apply {
             this.recipient = recipient
             this.satoshis = satoshis
             this.accountPosition = accountPosition
             this.paymentRequestType = paymentRequestType
+            this.confirmationDetails = paymentDetails
         }
         whenever(mockContactsManager.requestReceivePayment(eq(contactMdid), any()))
                 .thenReturn(Completable.complete())
@@ -247,7 +315,7 @@ class ContactConfirmRequestPresenterTest {
         verify(mockActivity).showProgressDialog()
         verify(mockActivity).note
         verify(mockActivity).dismissProgressDialog()
-        verify(mockActivity).onRequestSuccessful(paymentRequestType, contactName, "")
+        verify(mockActivity).onRequestSuccessful(paymentRequestType, contactName, "1.0 BTC")
         verifyNoMoreInteractions(mockActivity)
     }
 
