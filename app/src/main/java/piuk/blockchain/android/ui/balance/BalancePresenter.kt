@@ -441,20 +441,24 @@ class BalancePresenter @Inject constructor(
                     }.toObservable<Nothing>()
 
     private fun getFacilitatedTransactionsObservable(): Observable<MutableList<ContactTransactionModel>> {
-        return contactsDataManager.fetchContacts()
-                .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
-                .toList()
-                .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
-                .toList()
-                .onErrorReturnItem(emptyList())
-                .toObservable()
-                .doOnNext {
-                    handlePendingTransactions(it)
-                    view.onContactsHashMapUpdated(
-                            contactsDataManager.getContactsTransactionMap(),
-                            contactsDataManager.getNotesTransactionMap()
-                    )
-                }
+        if (view.isContactsEnabled) {
+            return contactsDataManager.fetchContacts()
+                    .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
+                    .toList()
+                    .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
+                    .toList()
+                    .onErrorReturnItem(emptyList())
+                    .toObservable()
+                    .doOnNext {
+                        handlePendingTransactions(it)
+                        view.onContactsHashMapUpdated(
+                                contactsDataManager.getContactsTransactionMap(),
+                                contactsDataManager.getNotesTransactionMap()
+                        )
+                    }
+        } else {
+            return Observable.empty()
+        }
     }
 
     private fun refreshFacilitatedTransactions() {

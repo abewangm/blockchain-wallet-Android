@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import kotlinx.android.synthetic.main.include_onboarding_complete.*
 import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
+import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -46,6 +47,9 @@ import java.util.*
 import javax.inject.Inject
 
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
+
+    override val isContactsEnabled: Boolean
+        get() = BuildConfig.CONTACTS_ENABLED
 
     @Inject lateinit var balancePresenter: BalancePresenter
     // Adapters

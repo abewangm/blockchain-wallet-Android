@@ -462,7 +462,7 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).showWaitingForAddressDialog(transaction.note)
+        verify(view).showWaitingForAddressDialog()
         verifyNoMoreInteractions(view)
     }
 
@@ -491,13 +491,21 @@ class BalancePresenterTest {
     fun `onPendingTransactionClicked waiting for address & receiver, only one account`() {
         // Arrange
         val fctxId = "FCTX_ID"
+        val amount = 1000L
+        val txNote = "NOTE"
+        val name = "NAME"
         val facilitatedTransactions = HashMap<String, FacilitatedTransaction>()
         val fctx = FacilitatedTransaction().apply {
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
             role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            intendedAmount = amount
+            note = txNote
         }
         facilitatedTransactions.put(fctxId, fctx)
-        val contact = Contact().apply { this.facilitatedTransactions = facilitatedTransactions }
+        val contact = Contact().apply {
+            this.facilitatedTransactions = facilitatedTransactions
+            this.name = name
+        }
         whenever(contactsDataManager.getContactFromFctxId(fctxId)).thenReturn(Single.just(contact))
         val account = Account().apply { label = "" }
         whenever(payloadDataManager.accounts).thenReturn(listOf(account))
@@ -506,7 +514,7 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).showSendAddressDialog(fctxId, note)
+        verify(view).showSendAddressDialog(fctxId, "", name, txNote)
         verifyNoMoreInteractions(view)
     }
 
@@ -514,13 +522,21 @@ class BalancePresenterTest {
     fun `onPendingTransactionClicked waiting for address & receiver, multiple accounts`() {
         // Arrange
         val fctxId = "FCTX_ID"
+        val amount = 1000L
+        val txNote = "NOTE"
+        val name = "NAME"
         val facilitatedTransactions = HashMap<String, FacilitatedTransaction>()
         val fctx = FacilitatedTransaction().apply {
             state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
             role = FacilitatedTransaction.ROLE_PR_RECEIVER
+            intendedAmount = amount
+            note = txNote
         }
         facilitatedTransactions.put(fctxId, fctx)
-        val contact = Contact().apply { this.facilitatedTransactions = facilitatedTransactions }
+        val contact = Contact().apply {
+            this.facilitatedTransactions = facilitatedTransactions
+            this.name = name
+        }
         whenever(contactsDataManager.getContactFromFctxId(fctxId)).thenReturn(Single.just(contact))
         val account = Account().apply { label = "" }
         whenever(payloadDataManager.accounts).thenReturn(listOf(account, account))
@@ -529,7 +545,7 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getContactFromFctxId(fctxId)
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).showAccountChoiceDialog(listOf("", ""), fctxId, note)
+        verify(view).showAccountChoiceDialog(listOf("", ""), fctxId, "", name, txNote)
         verifyNoMoreInteractions(view)
     }
 
