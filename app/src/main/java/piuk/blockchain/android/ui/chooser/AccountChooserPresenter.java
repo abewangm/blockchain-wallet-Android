@@ -97,7 +97,7 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
     @SuppressWarnings({"ConstantConditions", "Convert2streamapi"})
     private Single<List<Contact>> parseContactsList() {
 
-        if (!BuildConfig.CONTACTS_ENABLED) {
+        if (!getView().isContactsEnabled()) {
             return Single.just(new ArrayList<>());
         } else {
 
