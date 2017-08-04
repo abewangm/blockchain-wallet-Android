@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.contacts.detail;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
 import java.util.List;
@@ -43,4 +44,6 @@ interface ContactDetailView extends View {
     void showTransactionDeclineDialog(String fctxId);
 
     void showTransactionCancelDialog(String fctxId);
+
+    void showPayOrDeclineDialog(String fctxId, String balanceString, String name, @Nullable String note);
 }

@@ -92,58 +92,70 @@
             android:background="@drawable/rounded_view_green"
             android:gravity="center_horizontal|center_vertical"
             android:minWidth="120dp"
+            android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="14sp"
             tools:ignore="MissingPrefix"
             tools:text="0.123456 BTC" />
 
-        <TextView
-            android:id="@+id/note"
-            fontPath="fonts/Montserrat-Regular.ttf"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/direction"
-            android:layout_marginTop="12dp"
-            android:gravity="right"
-            android:textAppearance="?attr/textAppearanceListItemSmall"
-            android:textColor="@color/product_gray_hint"
-            android:textSize="14sp"
-            android:visibility="gone"
-            tools:ignore="MissingPrefix"
-            tools:text="Awaiting response"
-            tools:visibility="visible" />
-
         <LinearLayout
-            android:id="@+id/contact_name_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/direction"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_below="@id/result"
+            android:layout_marginTop="28dp"
             android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="@string/name"
-                android:tint="@color/product_gray_hint"
-                app:srcCompat="@drawable/vector_contact_card" />
+            <LinearLayout
+                android:id="@+id/contact_name_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:contentDescription="@string/name"
+                    android:tint="@color/product_gray_hint"
+                    app:srcCompat="@drawable/vector_contact_card" />
+
+                <TextView
+                    android:id="@+id/contact_name"
+                    fontPath="fonts/Montserrat-Regular.ttf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="8dp"
+                    android:ellipsize="end"
+                    android:gravity="left"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceListItemSmall"
+                    android:textColor="@color/product_gray_hint"
+                    tools:ignore="MissingPrefix"
+                    tools:text="Maurice has a really long name for testing" />
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/contact_name"
+                android:id="@+id/note"
                 fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="8dp"
-                android:gravity="left"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:gravity="right"
+                android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceListItemSmall"
                 android:textColor="@color/product_gray_hint"
+                android:textSize="14sp"
+                android:visibility="gone"
                 tools:ignore="MissingPrefix"
-                tools:text="Maurice" />
-
+                tools:text="Awaiting response"
+                tools:visibility="visible" />
         </LinearLayout>
 
     </RelativeLayout>

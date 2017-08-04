@@ -13,25 +13,28 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.contacts.models.ContactTransactionModel;
+import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.comparators.FctxDateComparator;
-import piuk.blockchain.android.data.contacts.ContactsDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
+import piuk.blockchain.android.data.contacts.models.ContactTransactionModel;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import timber.log.Timber;
 
@@ -49,6 +52,8 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
     private RxBus rxBus;
     private TransactionListDataManager transactionListDataManager;
     private AccessState accessState;
+    private ExchangeRateFactory exchangeRateFactory;
+    private MonetaryUtil monetaryUtil;
 
     @Inject
     ContactDetailPresenter(ContactsDataManager contactsDataManager,
@@ -56,7 +61,8 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
                            PrefsUtil prefsUtil,
                            RxBus rxBus,
                            TransactionListDataManager transactionListDataManager,
-                           AccessState accessState) {
+                           AccessState accessState,
+                           ExchangeRateFactory exchangeRateFactory) {
 
         this.contactsDataManager = contactsDataManager;
         this.payloadDataManager = payloadDataManager;
@@ -64,6 +70,9 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
         this.rxBus = rxBus;
         this.transactionListDataManager = transactionListDataManager;
         this.accessState = accessState;
+        this.exchangeRateFactory = exchangeRateFactory;
+
+        monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
 
     @Override
@@ -76,12 +85,8 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
         return prefsUtil;
     }
 
-    HashMap<String, String> getContactsTransactionMap() {
-        return contactsDataManager.getContactsTransactionMap();
-    }
-
-    HashMap<String, String> getNotesTransactionMap() {
-        return contactsDataManager.getNotesTransactionMap();
+    Map<String, ContactTransactionDisplayModel> getTransactionDisplayMap() {
+        return contactsDataManager.getTransactionDisplayMap();
     }
 
     void onDeleteContactClicked() {
@@ -146,7 +151,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
 
                 // Received payment request, need to send address to sender
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
-                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
 
                 List<String> accountNames = new ArrayList<>();
                 //noinspection Convert2streamapi
@@ -166,13 +171,21 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
 
                 // Waiting for payment
             } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
-                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
 
                 getView().initiatePayment(
                         transaction.toBitcoinURI(),
                         contact.getId(),
                         contact.getMdid(),
                         transaction.getId());
+
+            } else if (transaction.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                    && transaction.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+
+                getView().showPayOrDeclineDialog(fctxId,
+                        getBalanceString(transaction.getIntendedAmount()),
+                        contact.getName(),
+                        transaction.getNote());
             }
         }
     }
@@ -184,28 +197,30 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
         }
     }
 
+    @SuppressWarnings("unused")
     void onTransactionLongClicked(String fctxId) {
-        getCompositeDisposable().add(
-                contactsDataManager.getFacilitatedTransactions()
-                        .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
-                        .subscribe(contactTransactionModel -> {
-                            FacilitatedTransaction fctx = contactTransactionModel.getFacilitatedTransaction();
-
-                            if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                                    getView().showTransactionDeclineDialog(fctxId);
-                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-                                    getView().showTransactionCancelDialog(fctxId);
-                                }
-
-                            } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-                                    getView().showTransactionDeclineDialog(fctxId);
-                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-                                    getView().showTransactionCancelDialog(fctxId);
-                                }
-                            }
-                        }, throwable -> showErrorAndQuitPage()));
+        // TODO: 03/08/2017 Not sure if we actually want to offer this functionality
+//        getCompositeDisposable().add(
+//                contactsDataManager.getFacilitatedTransactions()
+//                        .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
+//                        .subscribe(contactTransactionModel -> {
+//                            FacilitatedTransaction fctx = contactTransactionModel.getFacilitatedTransaction();
+//
+//                            if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
+//                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+//                                    getView().showTransactionDeclineDialog(fctxId);
+//                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+//                                    getView().showTransactionCancelDialog(fctxId);
+//                                }
+//
+//                            } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
+//                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
+//                                    getView().showTransactionDeclineDialog(fctxId);
+//                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+//                                    getView().showTransactionCancelDialog(fctxId);
+//                                }
+//                            }
+//                        }, throwable -> showErrorAndQuitPage()));
     }
 
     void confirmDeclineTransaction(String fctxId) {
@@ -250,6 +265,28 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
                                 },
                                 throwable -> getView().showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR)));
 
+    }
+
+    void onPaymentRequestAccepted(String fctxId) {
+        contactsDataManager.getContactFromFctxId(fctxId)
+                .compose(RxUtil.addSingleToCompositeDisposable(this))
+                .subscribe(contact -> {
+                    FacilitatedTransaction transaction = contact.getFacilitatedTransactions().get(fctxId);
+                    if (transaction == null) {
+                        getView().showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR);
+                    } else {
+                        // Need to send payment to recipient
+                        getView().initiatePayment(transaction.toBitcoinURI(),
+                                contact.getId(),
+                                contact.getMdid(),
+                                transaction.getId());
+                    }
+                }, throwable -> {
+                    Timber.e(throwable);
+                    getView().showToast(
+                            R.string.contacts_not_found_error,
+                            ToastCustom.TYPE_ERROR);
+                });
     }
 
 
@@ -336,9 +373,20 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
                 // Do something else
                 displayList.add(new ContactTransactionModel(contact.getName(), fctx));
             }
+
         }
 
         getView().onTransactionsUpdated(displayList, accessState.isBtc());
+    }
+
+    private String getBalanceString(long btcBalance) {
+        String strFiat = getFiatCurrency();
+        double fiatBalance = exchangeRateFactory.getLastPrice(strFiat) * (btcBalance / 1e8);
+        return monetaryUtil.getFiatFormat(strFiat).format(fiatBalance) + strFiat;
+    }
+
+    private String getFiatCurrency() {
+        return prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
     }
 
     private void showErrorAndQuitPage() {

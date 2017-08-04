@@ -218,6 +218,7 @@ class BalancePresenter @Inject constructor(
                 })
     }
 
+    @Suppress("UNUSED_PARAMETER")
     internal fun onPendingTransactionLongClicked(fctxId: String) {
         // TODO: I'm not sure we should allow this, and if we do, the role/state combos are wrong
 //        contactsDataManager.getFacilitatedTransactions()
@@ -451,10 +452,7 @@ class BalancePresenter @Inject constructor(
                     .toObservable()
                     .doOnNext {
                         handlePendingTransactions(it)
-                        view.onContactsHashMapUpdated(
-                                contactsDataManager.getContactsTransactionMap(),
-                                contactsDataManager.getNotesTransactionMap()
-                        )
+                        view.onContactsHashMapUpdated(contactsDataManager.getTransactionDisplayMap())
                     }
         } else {
             return Observable.empty()

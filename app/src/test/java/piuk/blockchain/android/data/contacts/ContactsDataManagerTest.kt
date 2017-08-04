@@ -68,8 +68,11 @@ class ContactsDataManagerTest : RxTest() {
         val contact2 = Contact()
         contact2.name = "Has completed transactions"
         val facilitatedTransaction0 = FacilitatedTransaction()
-        val facilitatedTransaction1 = FacilitatedTransaction()
-        facilitatedTransaction1.txHash = "TX_HASH"
+        val facilitatedTransaction1 = FacilitatedTransaction().apply {
+            txHash = "TX_HASH"
+            role = FacilitatedTransaction.ROLE_PR_INITIATOR
+            state = FacilitatedTransaction.STATE_PAYMENT_BROADCASTED
+        }
         contact2.addFacilitatedTransaction(facilitatedTransaction0)
         contact2.addFacilitatedTransaction(facilitatedTransaction1)
         whenever(contactsService.fetchContacts()).thenReturn(Completable.complete())
@@ -82,9 +85,7 @@ class ContactsDataManagerTest : RxTest() {
         verify(contactsService).getContactList()
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        subject.getContactsTransactionMap().size shouldEqual 1
-        subject.getContactsTransactionMap()[facilitatedTransaction1.txHash]
-                as String shouldEqual contact2.name
+        subject.getTransactionDisplayMap().size shouldEqual 1
     }
 
     @Test
@@ -599,20 +600,9 @@ class ContactsDataManagerTest : RxTest() {
         // Arrange
 
         // Act
-        val result = subject.getContactsTransactionMap()
+        val result = subject.getTransactionDisplayMap()
         // Assert
-        result shouldEqual subject.getContactsTransactionMap()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun getNotesTransactionMap() {
-        // Arrange
-
-        // Act
-        val result = subject.getNotesTransactionMap()
-        // Assert
-        result shouldEqual subject.getNotesTransactionMap()
+        result shouldEqual subject.getTransactionDisplayMap()
     }
 
     @Test
@@ -625,8 +615,7 @@ class ContactsDataManagerTest : RxTest() {
         // Assert
         verify(pendingTransactionListStore).clearList()
         verify(contactsService).destroy()
-        subject.getNotesTransactionMap().size shouldEqual 0
-        subject.getContactsTransactionMap().size shouldEqual 0
+        subject.getTransactionDisplayMap().size shouldEqual 0
     }
 
 }

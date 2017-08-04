@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.balance.adapter
 
 import android.app.Activity
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
@@ -55,10 +56,9 @@ class BalanceAdapter(
      * been updated. Will rebuild the entire adapter.
      */
     fun onContactsMapChanged(
-            contactsTransactionMap: MutableMap<String, String>,
-            notesTransactionMap: MutableMap<String, String>
+            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
     ) {
-        summaryDelegate.onContactsMapUpdated(contactsTransactionMap, notesTransactionMap)
+        summaryDelegate.onContactsMapUpdated(transactionDisplayMap)
         notifyDataSetChanged()
     }
 

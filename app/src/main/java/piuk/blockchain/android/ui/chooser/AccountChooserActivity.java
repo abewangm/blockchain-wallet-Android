@@ -58,11 +58,12 @@ public class AccountChooserActivity extends BaseMvpActivity<AccountChooserView, 
             binding.toolbar.toolbarGeneral.setTitle(
                     requestCode == REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
                             || requestCode == REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND
-                            || requestCode == REQUEST_CODE_CHOOSE_CONTACT ? R.string.to : R.string.from);
+                            || requestCode != REQUEST_CODE_CHOOSE_CONTACT ? R.string.to : R.string.from);
 
             setSupportActionBar(binding.toolbar.toolbarGeneral);
-            if (getSupportActionBar() != null)
+            if (getSupportActionBar() != null) {
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
         }
 
         onViewReady();

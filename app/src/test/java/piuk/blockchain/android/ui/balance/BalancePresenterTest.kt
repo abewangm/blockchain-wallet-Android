@@ -275,8 +275,7 @@ class BalancePresenterTest {
         verify(contactsDataManager).fetchContacts()
         verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).getContactsTransactionMap()
-        verify(contactsDataManager).getNotesTransactionMap()
+        verify(contactsDataManager).getTransactionDisplayMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(accessState).isBtc
         verifyNoMoreInteractions(accessState)
@@ -292,7 +291,7 @@ class BalancePresenterTest {
         verify(view).onTotalBalanceUpdated("0.0 BTC")
         verify(view).setUiState(UiState.CONTENT)
         verify(view, times(2)).onTransactionsUpdated(listOf(transactionSummary))
-        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onContactsHashMapUpdated(any())
         verify(view).showFctxRequiringAttention(any())
         verifyNoMoreInteractions(view)
     }
@@ -324,8 +323,7 @@ class BalancePresenterTest {
                 .thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions())
                 .thenReturn(Observable.just(transactionModel))
-        whenever(contactsDataManager.getContactsTransactionMap()).thenReturn(HashMap())
-        whenever(contactsDataManager.getNotesTransactionMap()).thenReturn(HashMap())
+        whenever(contactsDataManager.getTransactionDisplayMap()).thenReturn(HashMap())
         whenever(stringUtils.getString(R.string.contacts_pending_transaction)).thenReturn("")
         whenever(stringUtils.getString(R.string.contacts_transaction_history)).thenReturn("")
         whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
@@ -349,8 +347,7 @@ class BalancePresenterTest {
         verify(contactsDataManager).fetchContacts()
         verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).getContactsTransactionMap()
-        verify(contactsDataManager).getNotesTransactionMap()
+        verify(contactsDataManager).getTransactionDisplayMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(stringUtils).getString(R.string.contacts_pending_transaction)
         verify(stringUtils).getString(R.string.contacts_transaction_history)
@@ -359,7 +356,7 @@ class BalancePresenterTest {
         verify(view).onTotalBalanceUpdated("0.0 BTC")
         verify(view, times(2)).setUiState(UiState.CONTENT)
         verify(view, times(2)).onTransactionsUpdated(any())
-        verify(view).onContactsHashMapUpdated(HashMap(), HashMap())
+        verify(view).onContactsHashMapUpdated(HashMap())
         verify(view).showFctxRequiringAttention(1)
         verifyNoMoreInteractions(view)
     }
@@ -809,8 +806,7 @@ class BalancePresenterTest {
         verify(contactsDataManager).fetchContacts()
         verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).getNotesTransactionMap()
-        verify(contactsDataManager).getContactsTransactionMap()
+        verify(contactsDataManager).getTransactionDisplayMap()
         verify(contactsDataManager).sendPaymentRequestResponse(eq(mdid), any<PaymentRequest>(), eq(fctxId))
         verifyNoMoreInteractions(contactsDataManager)
         verify(payloadDataManager).getNextReceiveAddressAndReserve(
@@ -900,8 +896,7 @@ class BalancePresenterTest {
         verify(contactsDataManager).fetchContacts()
         verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).getNotesTransactionMap()
-        verify(contactsDataManager).getContactsTransactionMap()
+        verify(contactsDataManager).getTransactionDisplayMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).isContactsEnabled
         verify(view).showToast(
@@ -909,7 +904,7 @@ class BalancePresenterTest {
                 ToastCustom.TYPE_OK
         )
         verify(view).showFctxRequiringAttention(any())
-        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onContactsHashMapUpdated(any())
         verify(view).onTransactionsUpdated(any())
         verifyNoMoreInteractions(view)
     }
@@ -934,8 +929,7 @@ class BalancePresenterTest {
         verify(contactsDataManager, times(2)).fetchContacts()
         verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).getNotesTransactionMap()
-        verify(contactsDataManager).getContactsTransactionMap()
+        verify(contactsDataManager).getTransactionDisplayMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showToast(
                 R.string.contacts_pending_transaction_decline_failure,
@@ -943,7 +937,7 @@ class BalancePresenterTest {
         )
         verify(view).isContactsEnabled
         verify(view).showFctxRequiringAttention(any())
-        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onContactsHashMapUpdated(any())
         verify(view).onTransactionsUpdated(any())
         verifyNoMoreInteractions(view)
     }
@@ -973,8 +967,7 @@ class BalancePresenterTest {
         verify(contactsDataManager).fetchContacts()
         verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).getNotesTransactionMap()
-        verify(contactsDataManager).getContactsTransactionMap()
+        verify(contactsDataManager).getTransactionDisplayMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showToast(
                 R.string.contacts_pending_transaction_cancel_success,
@@ -982,7 +975,7 @@ class BalancePresenterTest {
         )
         verify(view).isContactsEnabled
         verify(view).showFctxRequiringAttention(any())
-        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onContactsHashMapUpdated(any())
         verify(view).onTransactionsUpdated(any())
         verifyNoMoreInteractions(view)
     }
@@ -1009,8 +1002,7 @@ class BalancePresenterTest {
         verify(contactsDataManager, times(2)).fetchContacts()
         verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
         verify(contactsDataManager).refreshFacilitatedTransactions()
-        verify(contactsDataManager).getNotesTransactionMap()
-        verify(contactsDataManager).getContactsTransactionMap()
+        verify(contactsDataManager).getTransactionDisplayMap()
         verifyNoMoreInteractions(contactsDataManager)
         verify(view).showToast(
                 R.string.contacts_pending_transaction_cancel_failure,
@@ -1018,7 +1010,7 @@ class BalancePresenterTest {
         )
         verify(view).isContactsEnabled
         verify(view).showFctxRequiringAttention(any())
-        verify(view).onContactsHashMapUpdated(any(), any())
+        verify(view).onContactsHashMapUpdated(any())
         verify(view).onTransactionsUpdated(any())
         verifyNoMoreInteractions(view)
     }

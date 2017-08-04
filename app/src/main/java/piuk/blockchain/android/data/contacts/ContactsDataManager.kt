@@ -5,12 +5,12 @@ import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
 import info.blockchain.wallet.metadata.data.Message
-import info.blockchain.wallet.multiaddress.TransactionSummary
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.data.contacts.datastore.ContactsMapStore
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
@@ -85,17 +85,17 @@ class ContactsDataManager(
         return rxPinning.call { contactsService.fetchContacts() }
                 .andThen(contactsService.getContactList())
                 .doOnNext { contact ->
-                    contactsMapStore.contactsTransactionMap.putAll(
+                    contactsMapStore.displayMap.putAll(
                             contact.facilitatedTransactions.values
                                     .filter { !it.txHash.isNullOrEmpty() }
-                                    .associateBy({ it.txHash }, { contact.name })
-                    )
-                }
-                .doOnNext { contact ->
-                    contactsMapStore.notesTransactionMap.putAll(
-                            contact.facilitatedTransactions.values
-                                    .filter { !it.note.isNullOrEmpty() }
-                                    .associateBy({ it.txHash }, { it.note })
+                                    .associateBy({ it.txHash }, {
+                                        ContactTransactionDisplayModel(
+                                                it.role,
+                                                it.state,
+                                                it.note ?: "",
+                                                contact.name
+                                        )
+                                    })
                     )
                 }
                 .toList()
@@ -459,20 +459,10 @@ class ContactsDataManager(
     }
 
     /**
-     * Returns a Map of Contact names keyed to transaction hashes.
-     *
-     * @return A [HashMap] where the key is a [TransactionSummary.getHash], and the
-     * value is a [Contact.getName]
+     * Returns a [MutableMap] containing [ContactTransactionDisplayModel] objects keyed to a Tx hash
+     * for convenient display in lists
      */
-    fun getContactsTransactionMap() = contactsMapStore.contactsTransactionMap
-
-    /**
-     * Returns a Map of [FacilitatedTransaction] notes keyed to Transaction hashes.
-     *
-     * @return A [HashMap] where the key is a [TransactionSummary.getHash], and the
-     * value is a [FacilitatedTransaction.getNote]
-     */
-    fun getNotesTransactionMap() = contactsMapStore.notesTransactionMap
+    fun getTransactionDisplayMap() = contactsMapStore.displayMap
 
     /**
      * Clears all data in the [PendingTransactionListStore].
@@ -480,8 +470,7 @@ class ContactsDataManager(
     fun resetContacts() {
         contactsService.destroy()
         pendingTransactionListStore.clearList()
-        contactsMapStore.clearContactsTransactionMap()
-        contactsMapStore.clearNotesTransactionMap()
+        contactsMapStore.clearDisplayMap()
     }
 
     ///////////////////////////////////////////////////////////////////////////

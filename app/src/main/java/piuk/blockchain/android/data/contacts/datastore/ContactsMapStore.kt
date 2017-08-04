@@ -1,17 +1,17 @@
 package piuk.blockchain.android.data.contacts.datastore
 
-import java.util.*
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 
 class ContactsMapStore {
 
-    val contactsTransactionMap = HashMap<String, String>()
-    val notesTransactionMap = HashMap<String, String>()
+    /**
+     * A [MutableMap] containing a [ContactTransactionDisplayModel] keyed to a Tx hash for convenient
+     * display.
+     */
+    val displayMap = mutableMapOf<String, ContactTransactionDisplayModel>()
 
-    fun clearContactsTransactionMap() {
-        contactsTransactionMap.clear()
+    fun clearDisplayMap() {
+        displayMap.clear()
     }
 
-    fun clearNotesTransactionMap() {
-        notesTransactionMap.clear()
-    }
 }

@@ -22,6 +22,7 @@ import kotlinx.android.synthetic.main.include_onboarding_complete.*
 import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
@@ -187,10 +188,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun onContactsHashMapUpdated(
-            contactsTransactionMap: HashMap<String, String>,
-            notesTransactionMap: HashMap<String, String>
+            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
     ) {
-        balanceAdapter?.onContactsMapChanged(contactsTransactionMap, notesTransactionMap)
+        balanceAdapter?.onContactsMapChanged(transactionDisplayMap)
     }
 
     override fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean) {

@@ -40,4 +40,6 @@ interface TransactionDetailView : View {
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 
     fun onDataLoaded()
+
+    fun showTransactionAsPaid()
 }

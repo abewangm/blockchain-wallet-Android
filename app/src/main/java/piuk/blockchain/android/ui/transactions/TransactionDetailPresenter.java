@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.transactions;
 import android.content.Intent;
 import android.support.annotation.VisibleForTesting;
 
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 
@@ -23,8 +24,9 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -130,13 +132,25 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
             inputMapString = mStringUtils.getString(R.string.transaction_detail_coinbase);
         }
 
-        if (mContactsDataManager.getContactsTransactionMap().containsKey(transactionSummary.getHash())
-                && transactionSummary.getDirection().equals(Direction.RECEIVED)) {
-            inputMapString = mContactsDataManager.getContactsTransactionMap().get(transactionSummary.getHash());
+        ContactTransactionDisplayModel displayModel = null;
+
+        if (mContactsDataManager.getTransactionDisplayMap().containsKey(transactionSummary.getHash())) {
+            displayModel =
+                    mContactsDataManager.getTransactionDisplayMap().get(transactionSummary.getHash());
+
+            inputMapString = displayModel.getContactName();
         }
 
         // TODO: 14/03/2017 Change this to dropdown like outputs, as a list of addresses looks terrible
         getView().setFromAddress(inputMapString);
+
+        // Check if should be "Paid" state via contacts
+        if (displayModel != null) {
+            if (displayModel.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)
+                    && displayModel.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                getView().showTransactionAsPaid();
+            }
+        }
 
         // To Address
         HashMap<String, BigInteger> outputMap = pair.getRight();
@@ -148,10 +162,8 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
                     mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
                     getDisplayUnits());
 
-            if (mContactsDataManager.getContactsTransactionMap().containsKey(transactionSummary.getHash())
-                    && transactionSummary.getDirection().equals(Direction.SENT)) {
-                String contactName = mContactsDataManager.getContactsTransactionMap().get(transactionSummary.getHash());
-                recipientModel.setAddress(contactName);
+            if (displayModel != null && transactionSummary.getDirection().equals(Direction.SENT)) {
+                recipientModel.setAddress(displayModel.getContactName());
             }
 
             recipients.add(recipientModel);
@@ -159,9 +171,8 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
 
         getView().setToAddresses(recipients);
 
-        if (mContactsDataManager.getNotesTransactionMap().containsKey(transactionSummary.getHash())) {
-            String note = mContactsDataManager.getNotesTransactionMap().get(transactionSummary.getHash());
-            getView().setTransactionNote(note);
+        if (displayModel != null) {
+            getView().setTransactionNote(displayModel.getNote());
         }
 
         getCompositeDisposable().add(
