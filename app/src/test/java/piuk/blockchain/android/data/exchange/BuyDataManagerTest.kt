@@ -195,7 +195,7 @@ class BuyDataManagerTest : RxTest() {
         whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
         whenever(mockSettings.countryCode).thenReturn("GB")
         // Act
-        val testObserver = subject.ifSepaCountry.test()
+        val testObserver = subject.isCoinifyAllowed.test()
         // Assert
         verify(mockAuthDataManager).walletOptions
         verifyNoMoreInteractions(mockAuthDataManager)
