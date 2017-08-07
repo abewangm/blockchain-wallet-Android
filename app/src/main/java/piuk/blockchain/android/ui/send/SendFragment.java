@@ -215,7 +215,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
             ((BaseAuthActivity) getActivity()).setupToolbar(
                     ((MainActivity) getActivity()).getSupportActionBar(), R.string.send_bitcoin);
         } else {
-            finishPage();
+            finishPage(false);
         }
     }
 
@@ -667,20 +667,48 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         // Won't show if contact transaction, as other dialog takes preference
         if (appRate.shouldShowDialog() && fctxId == null) {
             AlertDialog ratingDialog = appRate.getRateDialog();
-            ratingDialog.setOnDismissListener(d -> finishPage());
+            ratingDialog.setOnDismissListener(d -> finishPage(false));
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
         } else {
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(dialogInterface -> {
                 if (fctxId != null) {
-                    listener.onSendPaymentSuccessful(mdid, fctxId, hash, transactionValue);
+                    getPresenter().broadcastPaymentSuccess(mdid, fctxId, hash, transactionValue);
+                } else {
+                    finishPage(false);
                 }
-                finishPage();
             });
         }
 
         dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
+    }
+
+    @Override
+    public void showBroadcastFailedDialog(String mdid,
+                                          String txHash,
+                                          String facilitatedTxId,
+                                          long transactionValue) {
+
+        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_payment_sent_failed_message)
+                .setPositiveButton(R.string.retry, (dialog, which) ->
+                        getPresenter().broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showBroadcastSuccessDialog() {
+        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.contacts_payment_sent_success)
+                .setPositiveButton(android.R.string.ok, null)
+                .setOnDismissListener(dialogInterface -> finishPage(true))
+                .create()
+                .show();
     }
 
     @Override
@@ -943,7 +971,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     @Override
-    public void showProgressDialog() {
+    public void showProgressDialog(int title) {
         progressDialog = new MaterialProgressDialog(getActivity());
         progressDialog.setCancelable(false);
         progressDialog.setMessage(R.string.please_wait);
@@ -959,8 +987,8 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     @Override
-    public void finishPage() {
-        if (listener != null) listener.onSendFragmentClose();
+    public void finishPage(boolean paymentToContactMade) {
+        if (listener != null) listener.onSendFragmentClose(paymentToContactMade);
     }
 
     public void onChangeFeeClicked() {
@@ -1076,17 +1104,12 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     public interface OnSendFragmentInteractionListener {
 
-        void onSendFragmentClose();
+        void onSendFragmentClose(boolean paymentToContactMade);
 
         void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
                                          PaymentRequestType paymentRequestType,
                                          String contactId,
                                          long satoshis,
                                          int accountPosition);
-
-        void onSendPaymentSuccessful(String mdid,
-                                     String transactionHash,
-                                     String fctxId,
-                                     long transactionValue);
     }
 }

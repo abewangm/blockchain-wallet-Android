@@ -48,13 +48,17 @@ interface SendView extends View {
                                   String hash,
                                   long transactionValue);
 
+    void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue);
+
+    void showBroadcastSuccessDialog();
+
     void onShowBIP38PassphrasePrompt(String scanData);
 
-    void finishPage();
+    void finishPage(boolean paymentToContactMade);
 
     void setContactName(String name);
 
-    void showProgressDialog();
+    void showProgressDialog(@StringRes int title);
 
     void dismissProgressDialog();
 

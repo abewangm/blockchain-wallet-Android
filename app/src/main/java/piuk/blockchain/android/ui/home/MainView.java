@@ -28,10 +28,6 @@ interface MainView extends View {
 
     void showMetadataNodeRegistrationFailure();
 
-    void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue);
-
-    void showBroadcastSuccessDialog();
-
     void updateCurrentPrice(String price);
 
     void setBuySellEnabled(boolean enabled);
