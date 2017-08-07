@@ -166,7 +166,6 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         switch (uiState) {
             case LOADING:
                 binding.swipeRefreshLayout.setRefreshing(true);
-                binding.swipeRefreshLayout.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutNoContacts.setVisibility(View.GONE);
                 binding.fab.setVisibility(View.GONE);
