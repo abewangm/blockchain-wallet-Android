@@ -655,8 +655,9 @@
     <string name="contacts_pending_transaction_decline_failure">Pending transaction declination failed</string>
     <string name="contacts_pending_transaction_cancel_success">Pending transaction successfully cancelled</string>
     <string name="contacts_pending_transaction_cancel_failure">Pending transaction cancellation failed</string>
+    <string name="contacts_resend_invite">Resend invite</string>
     <!-- CONTACTS REQUEST CONFIRMATION -->
-    <string name="contacts_confirm_start_transaction">Start transaction</string>
+    <string name="contacts_confirm_start_transaconfirm_titlection">Start transaction</string>
     <string name="contacts_confirm_request_payment">Request payment</string>
     <string name="contacts_confirm_shared_with">Shared with %1$s</string>
     <string name="contacts_confirm_explanation">Transactions must be accepted by your contact prior to sending</string>

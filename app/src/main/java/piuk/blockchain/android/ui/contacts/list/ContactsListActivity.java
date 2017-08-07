@@ -295,7 +295,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
 
     @Override
     public void onMoreClick(String id) {
-        CharSequence actions[] = new CharSequence[] {"Re-send Invite", "Delete Contact"};
+        CharSequence actions[] = new CharSequence[] {getString(R.string.contacts_resend_invite), getString(R.string.contacts_delete)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setItems(actions, (dialog, which) -> {
