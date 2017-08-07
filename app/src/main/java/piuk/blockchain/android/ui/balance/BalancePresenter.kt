@@ -410,7 +410,7 @@ class BalancePresenter @Inject constructor(
                         checkLatestAnnouncement(displayList)
 
                         when {
-                            it.isEmpty() -> view.setUiState(UiState.EMPTY)
+                            displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
                             else -> view.setUiState(UiState.CONTENT)
                         }
                         view.onTransactionsUpdated(displayList)
