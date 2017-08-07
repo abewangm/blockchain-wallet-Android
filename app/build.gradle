@@ -22,7 +22,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
         // Flag to hide or show the Contacts feature
-        buildConfigField "boolean", "CONTACTS_ENABLED", "false"
+        buildConfigField "boolean", "CONTACTS_ENABLED", "true"
     }
     buildTypes {
         release {
