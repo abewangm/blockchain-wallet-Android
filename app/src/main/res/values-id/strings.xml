@@ -446,7 +446,7 @@
     <string name="confirm_upgrade_header">Hei, kami telah menambahkan fitur baru untuk dompet Blockchain Anda:</string>
     <string name="verify_email2">Alamat surel Anda yang telah diverifikasi digunakan untuk mengirimkan kode login ketika ada aktivitas mencurigakan atau tidak biasa terdeteksi, untuk mengingatkan Anda tentang Identitas login dompet Anda, dan untuk mengirim peringatan pembayaran bitcoin bila Anda menerima dana.</string>
     <string name="enable_screenshots">Aktifkan Screenshot</string>
-    <string name="enable_screenshots_warning">Anda akan mengaktifkan screenshot untuk aplikasi Blockchain. Beberapa layar dalam aplikasi dapat menampilkan data sensitif. Aplikasi lain akan dapat mengakses screenshot ini.</string>
+    <string name="enable_screenshots_summary">Anda akan mengaktifkan screenshot untuk aplikasi Blockchain. Beberapa layar dalam aplikasi dapat menampilkan data sensitif. Aplikasi lain akan dapat mengakses screenshot ini.</string>
 
     <string name="information">Informasi</string>
     <string name="transaction_detail_verify">Verifikasi Blockchain.info</string>

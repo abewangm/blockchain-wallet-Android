@@ -149,7 +149,6 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
 
         // 2FA
         getView().setTwoFaPreference(settings.getAuthType() != Settings.AUTH_TYPE_OFF);
-        getView().setTwoFaSummary(getTwoFaSummary(settings.getAuthType()));
 
         // Tor
         getView().setTorBlocked(settings.isBlockTorIps());
@@ -159,25 +158,6 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
 
         // Launcher shortcuts
         getView().setLauncherShortcutVisibility(AndroidUtils.is25orHigher());
-    }
-
-    private String getTwoFaSummary(int type) {
-        String summary;
-        switch (type) {
-            case Settings.AUTH_TYPE_GOOGLE_AUTHENTICATOR:
-                summary = stringUtils.getString(R.string.google_authenticator);
-                break;
-            case Settings.AUTH_TYPE_SMS:
-                summary = stringUtils.getString(R.string.sms);
-                break;
-            case Settings.AUTH_TYPE_YUBI_KEY:
-                summary = stringUtils.getString(R.string.yubikey);
-                break;
-            default:
-                summary = "";
-                break;
-        }
-        return summary;
     }
 
     /**

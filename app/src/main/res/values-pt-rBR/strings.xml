@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">Ei, adicionamos esses recursos para sua carteira Blockchain:</string>
     <string name="verify_email2">Seu endereço de e-mail verificado recebe códigos de login, quando atividade suspeita ou incomum for detectada. Também é usado para lembrar-lhe de seu ID de Carteira e enviar-lhe alertas de pagamento Bitcoin quando você receber fundos.</string>
     <string name="enable_screenshots">Habilitar capturas de tela</string>
-    <string name="enable_screenshots_warning">Você está para habilitar a captura de tela para o aplicativo Blockchain. Algumas telas dentro do aplicativo podem exibir dados sigilosos. Outros aplicativos poderão acessar essas capturas de tela.</string>
+    <string name="enable_screenshots_summary">Você está para habilitar a captura de tela para o aplicativo Blockchain. Algumas telas dentro do aplicativo podem exibir dados sigilosos. Outros aplicativos poderão acessar essas capturas de tela.</string>
 
     <string name="information">Informações</string>
     <string name="transaction_detail_verify">Verificar no Blockchain.info</string>

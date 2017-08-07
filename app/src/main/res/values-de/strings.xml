@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">Hallo! Wir haben Ihrer Blockchain-Wallet diese neuen Funktionen hinzugefügt:</string>
     <string name="verify_email2">Ihre verifizierte E-Mail-Adresse wird bei Feststellung verdächtiger Aktivitäten zur Übersendung von Anmeldecodes, aber auch zur Erinnerung an Ihre persönliche Wallet-Anmelde-ID und zum Versand von Bitcoin-Zahlungsbenachrichtigungen bei Eintreffen von Guthaben verwendet.</string>
     <string name="enable_screenshots">Bildschirmaufnahmen aktivieren</string>
-    <string name="enable_screenshots_warning">Sie sind dabei, für Ihrer Blockchain-App Bildschirmaufnahmen zu aktivieren. Einige App-interne Bildschirmanzeigen geben möglicherweise sensitive Daten preis. Außerdem können andere Anwendungen auf diese Aufnahmen zugreifen.</string>
+    <string name="enable_screenshots_summary">Sie sind dabei, für Ihrer Blockchain-App Bildschirmaufnahmen zu aktivieren. Einige App-interne Bildschirmanzeigen geben möglicherweise sensitive Daten preis. Außerdem können andere Anwendungen auf diese Aufnahmen zugreifen.</string>
 
     <string name="information">Information</string>
     <string name="transaction_detail_verify">Auf Blockchain.info überprüfen</string>

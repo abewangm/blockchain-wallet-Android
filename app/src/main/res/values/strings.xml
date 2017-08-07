@@ -424,9 +424,9 @@
     <string name="enable_fingerprint">Fingerprint Unlock</string>
     <string name="two_fa">2-step Verification</string>
     <string name="tor_requests">Block Tor Requests</string>
-    <string name="tor_summary">Would you like to block IP addresses that are known to be part of the Tor anonymizing network from accessing your wallet? The Tor network is frequently used by hackers attempting to access Blockchain users wallets.</string>
+    <string name="tor_summary">Block IP addresses that are known to be part of the Tor anonymizing network. The Tor network is frequently used by hackers attempting to access Blockchain user\'s wallets.</string>
     <string name="enable_screenshots">Enable Screenshots</string>
-    <string name="enable_screenshots_warning">You\'re about to enable screenshots for the Blockchain app. Some screens within the application can display sensitive data. Other applications will be able to access these screenshots.</string>
+    <string name="enable_screenshots_summary">Some screens within the application can display sensitive data. Other applications will be able to access these screenshots.</string>
 
     <string name="password_hint_summary">Your Blockchain Wallet never communicates your password to our servers. This means we have no idea what your password is and we cannot reset it if you forget it. Create a memorable password hint that we can send to your verified email address in case you forget your password.</string>
     <string name="change_password">Change Password</string>
@@ -438,6 +438,7 @@
     <string name="new_password">New Password</string>
     <string name="sms_verified">Mobile number verified</string>
     <string name="preferences">Preferences</string>
+    <string name="two_fa_summary">Protect your wallet from unauthorized access by enabling 2-Step Verification.</string>
     <string name="two_fa_description">Protect your wallet from unauthorized access by enabling 2-Step Verification. You can choose to use your mobile phone number to secure your wallet. This code will be requested when you try to access your wallet via the web browser.\n\nIn order to use other authentication methods instead, please login to our web wallet at %1$s</string>
 
     <string name="rate_title">Rate Blockchain Wallet</string>
@@ -562,7 +563,7 @@
     <string name="shortcut_receive_qr_short">Show Receive QR</string>
     <string name="shortcut_receive_qr_long">View QR code for receive address</string>
     <string name="shortcut_receive_qr_error">Sorry, there was an error generating the QR code</string>
-    <string name="shortcut_settings_summary">Enable this option to reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
+    <string name="shortcut_settings_summary">Reveal a receive address when you long-press on the app icon in the launcher, making receiving bitcoin even faster.</string>
 
     <!-- CONTACTS -->
     <string name="contacts_title">Contacts</string>
@@ -705,7 +706,8 @@
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
-    <string name="swipe_receive_preference_summary">Enable this option to reveal a receive address when you swipe left on the PIN screen, making receiving bitcoin even faster. Five addresses will be loaded consecutively, after which logging in is required to show new addresses.</string>
+    <string name="swipe_receive_preference_summary">Reveal a receive address when you swipe left on the PIN screen, making receiving bitcoin even faster.</string>
+    <string name="swipe_receive_address_info">Five addresses will be loaded consecutively, after which logging in is required to show new addresses.</string>
     <string name="swipe_receive_no_addresses">No more addresses can be loaded right now. Log in to the app to load more.</string>
 
     <!-- ONBOARDING -->

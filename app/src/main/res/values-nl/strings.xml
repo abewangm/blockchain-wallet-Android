@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">Hoi, we hebben deze nieuwe functies aan je Blockchain portemonnee toegevoegd:</string>
     <string name="verify_email2">Uw geverifieerde e-mailadres wordt gebruikt om inlogcodes naar te verzenden wanneer een verdachte of ongebruikelijke activiteit wordt ontdekt, om u te herinneren aan de inlog-ID van uw portemonnee en om u aankondigingen van Bitcoin-betalingen te sturen als u tegoeden ontvangt.</string>
     <string name="enable_screenshots">Screenshots inschakelen</string>
-    <string name="enable_screenshots_warning">Je staat op het punt om screenshots in te schakelen voor de Blockchain app. Sommige schermen binnen de applicatie kunnen gevoelige data tonen. Andere applicaties zullen toegang hebben tot deze screenshots.</string>
+    <string name="enable_screenshots_summary">Je staat op het punt om screenshots in te schakelen voor de Blockchain app. Sommige schermen binnen de applicatie kunnen gevoelige data tonen. Andere applicaties zullen toegang hebben tot deze screenshots.</string>
 
     <string name="information">Informatie</string>
     <string name="transaction_detail_verify">Bij Blockchain.info verifiëren</string>

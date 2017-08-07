@@ -45,8 +45,6 @@ interface SettingsView extends View {
 
     void setTwoFaPreference(boolean enabled);
 
-    void setTwoFaSummary(String summary);
-
     void setTorBlocked(boolean blocked);
 
     void setScreenshotsEnabled(boolean enabled);

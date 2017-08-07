@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">嘿，我们为您的 Blockchain wallet 添加了新功能：</string>
     <string name="verify_email2">在检测到可疑或不寻常活动时，系统将使用您经过验证的电子邮件地址发送登录代码，为您提醒钱包登录 ID，以及在您接收资金时发送比特币支付提醒。</string>
     <string name="enable_screenshots">启用截屏</string>
-    <string name="enable_screenshots_warning">您即将为 Blockchain 应用启用截屏功能。应用内的有些屏幕可能会显示敏感信息。其它应用将能够访问这些截图。</string>
+    <string name="enable_screenshots_summary">您即将为 Blockchain 应用启用截屏功能。应用内的有些屏幕可能会显示敏感信息。其它应用将能够访问这些截图。</string>
 
     <string name="information">信息</string>
     <string name="transaction_detail_verify">在 Blockchain.info 上验证</string>

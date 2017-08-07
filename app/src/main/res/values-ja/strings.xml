@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">Blockchainウォレットに次の機能が追加されました:</string>
     <string name="verify_email2">認証されたメールアドレスは、不審もしくは通常と異なるアクティビティが検出された際、ウォレットログインIDのリマインダーとして、そして資金を受信した際にビットコイン決済通知の送信のためのログインコード送信に使用されます。</string>
     <string name="enable_screenshots">スクリーンショットを有効にする</string>
-    <string name="enable_screenshots_warning">Blockchainアプリのスクリーンショットを有効にしようとしています。アプリケーション内のいくつかの画面には機密データが含まれる可能性があります。その他のアプリケーションがこれらのスクリーンショットにアクセスできます。</string>
+    <string name="enable_screenshots_summary">Blockchainアプリのスクリーンショットを有効にしようとしています。アプリケーション内のいくつかの画面には機密データが含まれる可能性があります。その他のアプリケーションがこれらのスクリーンショットにアクセスできます。</string>
 
     <string name="information">情報</string>
     <string name="transaction_detail_verify">Blockchain.infoで認証</string>
