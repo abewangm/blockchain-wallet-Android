@@ -43,18 +43,12 @@ android {
             buildConfigField "boolean", "USE_CRASHLYTICS", "false"
         }
         dogfood {
+            initWith release
+            debuggable true
+            buildConfigField "boolean", "DOGFOOD", "true"
             signingConfig signingConfigs.debug
             applicationIdSuffix ".dogfood"
             versionNameSuffix '-DOGFOOD'
-            debuggable true
-            minifyEnabled true
-            zipAlignEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            resValue "string", "google_maps_key", "AIzaSyB_5WN2exwvF4pqQ6rW6JdkHcYWjZOim4w"
-            multiDexEnabled false
-            buildConfigField "boolean", "DOGFOOD", "true"
-            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
         }
     }
 

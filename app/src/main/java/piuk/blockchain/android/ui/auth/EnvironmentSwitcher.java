@@ -8,6 +8,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.ui.account.AccountPresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppRate;
+import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
 class EnvironmentSwitcher {
@@ -23,9 +24,11 @@ class EnvironmentSwitcher {
     void showDebugMenu() {
         new AlertDialog.Builder(context, R.style.AlertDialogStyle)
                 .setTitle("Debug settings")
-                .setMessage("Select 'Reset Timers' to reset various device timers and saved states, such as warning dialogs, onboarding etc.")
+                .setMessage("Select 'Reset Timers' to reset various device timers and saved states, such as warning dialogs, onboarding etc.\n\nSelect 'Wipe Wallet' to log out and completely reset this app.")
                 .setPositiveButton("Reset Timers", (dialogInterface, i) -> resetAllTimers())
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeButton("Reset Wallet", (dialogInterface, i) ->
+                        new AppUtil(context).clearCredentialsAndRestart())
+                .setNeutralButton(android.R.string.cancel, null)
                 .create()
                 .show();
     }
