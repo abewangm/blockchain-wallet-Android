@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">Dodaliśmy te nowe funkcje do Twojego portfela Blockchain:</string>
     <string name="verify_email2">Twój potwierdzony adres e-mail używany jest do przesyłania kodów do logowania, gdy wykryta zostanie podejrzana lub niecodzienna aktywność; do przypominania Ci Twoich danych do logowania się do portfela, a także wysyłania powiadomień, gdy otrzymasz płatność w bitcoinach.</string>
     <string name="enable_screenshots">Włącz zrzuty ekranu</string>
-    <string name="enable_screenshots_warning">Masz zamiar włączyć zrzuty ekranu dla aplikacji Blockchain. Niektóre ekrany w aplikacji mogą ukazywać wrażliwe dane. Inne aplikacje będą mogły uzyskać dostęp do tych zrzutów ekranu.</string>
+    <string name="enable_screenshots_summary">Masz zamiar włączyć zrzuty ekranu dla aplikacji Blockchain. Niektóre ekrany w aplikacji mogą ukazywać wrażliwe dane. Inne aplikacje będą mogły uzyskać dostęp do tych zrzutów ekranu.</string>
 
     <string name="information">Informacje</string>
     <string name="transaction_detail_verify">Zweryfikuj na Blockchain.info</string>

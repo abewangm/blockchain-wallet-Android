@@ -443,7 +443,7 @@
     <string name="confirm_upgrade_header">귀하 Blockchain 지갑에 다음 새 기능들을 추가했습니다:</string>
     <string name="verify_email2">확인된 사용자 이메일 주소는 의심스러운 또는 비정상 활동이 탐지 되어 로그인 코드를 보낼 때, 지갑 로그인 아이디를 다시 알려줄 때, 비트코인 입금 알림을 보낼 때 사용됩니다.</string>
     <string name="enable_screenshots">스크린샷 사용 설정</string>
-    <string name="enable_screenshots_warning">귀하는 Blockchain 앱 스크린샷 사용 설정을 하고 있습니다. 앱 내 어떤 화면은 예민한 데이터를 디스플레이 할 수 있습니다. 다른 앱이 이 스크린샷에 접근할 수 있습니다.</string>
+    <string name="enable_screenshots_summary">귀하는 Blockchain 앱 스크린샷 사용 설정을 하고 있습니다. 앱 내 어떤 화면은 예민한 데이터를 디스플레이 할 수 있습니다. 다른 앱이 이 스크린샷에 접근할 수 있습니다.</string>
 
     <string name="information">정보</string>
     <string name="transaction_detail_verify">Blockchain.info에서 확인하기</string>

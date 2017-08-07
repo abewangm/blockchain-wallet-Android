@@ -446,7 +446,7 @@
     <string name="confirm_upgrade_header">เฮ้ เราได้เพิ่มฟีเจอร์ใหม่เหล่านี้ไปยังกระเป๋าเงิน Blockchain ของคุณ:</string>
     <string name="verify_email2">จะมีการใช้ที่อยู่อีเมลของคุณที่ได้รับการยืนยันเพื่อการส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่น่าสงสัยหรือผิดปกติ หรือเพื่อแจ้งเตือนคุณเกี่ยวกับ ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน</string>
     <string name="enable_screenshots">เปิดใช้งานภาพถ่ายหน้าจอ</string>
-    <string name="enable_screenshots_warning">คุณกำลังจะเปิดใช้งานภาพถ่ายหน้าจอสำหรับแอป Blockchain บางหน้าจอภายในแอปสามารถแสดงข้อมูลที่ละเอียดอ่อน แอปอื่น ๆ จะสามารถเข้าถึงภาพถ่ายหน้าจอเหล่านี้ได้</string>
+    <string name="enable_screenshots_summary">คุณกำลังจะเปิดใช้งานภาพถ่ายหน้าจอสำหรับแอป Blockchain บางหน้าจอภายในแอปสามารถแสดงข้อมูลที่ละเอียดอ่อน แอปอื่น ๆ จะสามารถเข้าถึงภาพถ่ายหน้าจอเหล่านี้ได้</string>
 
     <string name="information">ข้อมูล</string>
     <string name="transaction_detail_verify">ยืนยันบน Blockchain.info</string>

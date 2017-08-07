@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">Selam, Blockchain cüzdana bu yeni özellikleri ekledik:</string>
     <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.</string>
     <string name="enable_screenshots">Ekran Görüntülerini Etkinleştir</string>
-    <string name="enable_screenshots_warning">Blockchain uygulaması için ekran görüntülerini etkinleştirmek üzeresiniz. Uygulama içindeki bazı ekranlar hassas veriler görüntüleyebilir. Diğer uygulamalar bu ekran görüntülerine erişim sağlayacak.</string>
+    <string name="enable_screenshots_summary">Blockchain uygulaması için ekran görüntülerini etkinleştirmek üzeresiniz. Uygulama içindeki bazı ekranlar hassas veriler görüntüleyebilir. Diğer uygulamalar bu ekran görüntülerine erişim sağlayacak.</string>
 
     <string name="information">Bilgi</string>
     <string name="transaction_detail_verify">Blockchain.info üzerinde doğrulayın</string>

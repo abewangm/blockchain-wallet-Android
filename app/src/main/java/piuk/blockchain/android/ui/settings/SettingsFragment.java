@@ -73,6 +73,7 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 import static android.app.Activity.RESULT_OK;
 import static piuk.blockchain.android.R.string.email;
+import static piuk.blockchain.android.R.string.enable;
 import static piuk.blockchain.android.R.string.success;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.REQUEST_CODE_VALIDATE_PIN;
@@ -183,24 +184,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
         torPref = (SwitchPreferenceCompat) findPreference("tor");
         torPref.setOnPreferenceClickListener(this);
+        torPref.setOnPreferenceChangeListener((preference, newValue) -> {
+            settingsPresenter.updateTor((Boolean)newValue);
+            return true;
+        });
 
         screenshotPref = (SwitchPreferenceCompat) findPreference("screenshots_enabled");
         screenshotPref.setOnPreferenceChangeListener((preference, newValue) -> {
-            if (((Boolean) newValue)) {
-                new Builder(getActivity(), R.style.AlertDialogStyle)
-                        .setTitle(R.string.enable_screenshots)
-                        .setMessage(R.string.enable_screenshots_warning)
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.dialog_continue, (dialogInterface, i) ->
-                                settingsPresenter.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, true))
-                        .setNegativeButton(android.R.string.cancel, (dialogInterface, i) ->
-                                settingsPresenter.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false))
-                        .create()
-                        .show();
-            } else {
-                settingsPresenter.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false);
-            }
-
+            settingsPresenter.updatePreferences(PrefsUtil.KEY_SCREENSHOTS_ENABLED, (Boolean) newValue);
             return true;
         });
 
@@ -221,6 +212,13 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 PrefsUtil prefsUtil = new PrefsUtil(getContext());
                 prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ACCOUNT_NAME);
                 prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ADDRESSES);
+            } else {
+                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                        .setTitle(R.string.swipe_receive_hint)
+                        .setMessage(R.string.swipe_receive_address_info)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .create()
+                        .show();
             }
             return true;
         });
@@ -357,11 +355,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     @Override
-    public void setTwoFaSummary(String summary) {
-        twoStepVerificationPref.setSummary(summary);
-    }
-
-    @Override
     public void setTorBlocked(boolean blocked) {
         torPref.setChecked(blocked);
     }
@@ -488,7 +481,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 showDialogChangePasswordWarning();
                 break;
             case "tor":
-                showDialogTorEnable();
                 break;
             case "receive_shortcuts_enabled":
                 break;
@@ -509,17 +501,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
         }
 
         return true;
-    }
-
-    private void showDialogTorEnable() {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.tor_requests)
-                .setMessage(R.string.tor_summary)
-                .setCancelable(false)
-                .setPositiveButton(R.string.block, (dialogInterface, i) -> settingsPresenter.updateTor(true))
-                .setNegativeButton(R.string.allow, (dialogInterface, i) -> settingsPresenter.updateTor(false))
-                .create()
-                .show();
     }
 
     private void showDialogEmail() {
@@ -869,6 +850,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             twoStepVerificationPref.setChecked(true);
             new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.warning)
+                    .setCancelable(false)
                     .setMessage(R.string.disable_online_only)
                     .setPositiveButton(android.R.string.ok, null)
                     .create()
@@ -884,6 +866,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setTitle(R.string.two_fa)
+                    .setCancelable(false)
                     .setMessage(spannable)
                     .setNeutralButton(android.R.string.cancel, (dialogInterface, i) ->
                             twoStepVerificationPref.setChecked(settingsPresenter.getAuthType() != Settings.AUTH_TYPE_OFF));

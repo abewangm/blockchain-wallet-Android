@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">Hemos añadido estas nuevas características a su billetera de Blockchain:</string>
     <string name="verify_email2">Su dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarle su ID de inicio de sesión en su billetera y para enviar avisos de pago de bitcoins cuando reciba fondos.</string>
     <string name="enable_screenshots">Habilitar capturas de pantalla</string>
-    <string name="enable_screenshots_warning">Está a punto de habilitar capturas de pantalla para la aplicación Blockchain. Algunas secciones dentro de la aplicación podrían mostrar información delicada. Otras aplicaciones podrían acceder a estas capturas de pantalla.</string>
+    <string name="enable_screenshots_summary">Está a punto de habilitar capturas de pantalla para la aplicación Blockchain. Algunas secciones dentro de la aplicación podrían mostrar información delicada. Otras aplicaciones podrían acceder a estas capturas de pantalla.</string>
 
     <string name="information">Información</string>
     <string name="transaction_detail_verify">Verifique en Blockchain.info</string>
