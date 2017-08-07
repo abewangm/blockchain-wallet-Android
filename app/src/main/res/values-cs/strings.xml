@@ -445,7 +445,7 @@
     <string name="confirm_upgrade_header">Do Vaší peněženky Blockchain jsme přidali tyto nové funkce:</string>
     <string name="verify_email2">Vaše ověřená e-mailová adresa se používá pro odesílání přihlašovacích kódů, pokud je zaznamenána podezřelá nebo neobvyklá aktivita, abychom Vám připomněli Vaše přihlašovací ID peněženky, a zasílání upozornění na bitcoinovou platbu v případě připsání prostředků.</string>
     <string name="enable_screenshots">Povolit snímky obrazovky</string>
-    <string name="enable_screenshots_warning">Chystáte se povolit snímky obrazovky pro aplikaci Blockchain. Některé obrazovky v aplikaci mohou zobrazovat důvěrná data. K těmto snímkům obrazovky budou mít přístup další aplikace.</string>
+    <string name="enable_screenshots_summary">Chystáte se povolit snímky obrazovky pro aplikaci Blockchain. Některé obrazovky v aplikaci mohou zobrazovat důvěrná data. K těmto snímkům obrazovky budou mít přístup další aplikace.</string>
 
     <string name="information">Informace</string>
     <string name="transaction_detail_verify">Ověřit na Blockchain.info</string>

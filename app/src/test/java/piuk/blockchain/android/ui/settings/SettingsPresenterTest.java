@@ -457,7 +457,6 @@ public class SettingsPresenterTest {
         subject.updateTwoFa(authType);
         // Assert
         verify(settingsDataManager).updateTwoFactor(authType);
-        verify(activity).setTwoFaSummary(anyString());
     }
 
     @Test

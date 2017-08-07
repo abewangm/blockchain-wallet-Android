@@ -38,26 +38,29 @@
     <piuk.blockchain.android.ui.settings.customprefs.CustomPreferenceCategory
         android:key="security"
         android:title="@string/security">
-        <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
-            android:key="fingerprint"
-            android:title="@string/enable_fingerprint" />
         <piuk.blockchain.android.ui.settings.customprefs.CustomPreference
             android:key="pin"
             android:title="@string/change_pin_code" />
-        <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
-            android:key="2fa"
-            android:title="@string/two_fa" />
         <piuk.blockchain.android.ui.settings.customprefs.CustomPreference
             android:key="change_pw"
             android:title="@string/change_password" />
         <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
-            android:key="tor"
-            android:title="@string/tor_requests" />
+            android:key="fingerprint"
+            android:title="@string/enable_fingerprint" />
+        <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
+            android:key="2fa"
+            android:summary="@string/two_fa_summary"
+            android:title="@string/two_fa" />
         <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
             android:defaultValue="false"
             android:key="screenshots_enabled"
+            android:summary="@string/enable_screenshots_summary"
             android:persistent="true"
             android:title="@string/enable_screenshots" />
+        <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
+            android:key="tor"
+            android:summary="@string/tor_summary"
+            android:title="@string/tor_requests" />
         <piuk.blockchain.android.ui.settings.customprefs.CustomSwitchPreferenceCompat
             android:defaultValue="true"
             android:key="receive_shortcuts_enabled"

@@ -447,7 +447,7 @@
     <string name="confirm_upgrade_header">Ehi, abbiamo aggiunto nuove funzioni al tuo portafogli Blockchain:</string>
     <string name="verify_email2">Il tuo indirizzo email verificato è usato per inviare i codici di accesso in caso di rilevamento di attività insolite o sospette.</string>
     <string name="enable_screenshots">Attiva gli screenshot</string>
-    <string name="enable_screenshots_warning">Stai abilitando gli screenshot per l\'app Blockchain. Alcune schermate nell\'applicazione possono contenere dati sensibili. Altra applicazioni potranno accedere a questi screenshot.</string>
+    <string name="enable_screenshots_summary">Stai abilitando gli screenshot per l\'app Blockchain. Alcune schermate nell\'applicazione possono contenere dati sensibili. Altra applicazioni potranno accedere a questi screenshot.</string>
 
     <string name="information">Informazioni</string>
     <string name="transaction_detail_verify">Verifica su Blockchain.info</string>
