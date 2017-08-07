@@ -164,7 +164,7 @@ public class SendPresenter extends BasePresenter<SendView> {
                                 .firstOrError()
                                 .subscribe(
                                         contact -> getView().setContactName(contact.getName()),
-                                        throwable -> getView().finishPage()));
+                                        throwable -> getView().finishPage(false)));
             }
 
             if (scanData != null) {
@@ -361,7 +361,7 @@ public class SendPresenter extends BasePresenter<SendView> {
                 feeDataManager.getFeeOptions()
                         .doOnError(ignored -> {
                             getView().showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR);
-                            getView().finishPage();
+                            getView().finishPage(false);
                         })
                         .doOnTerminate(() -> sendModel.feeOptions = dynamicFeeCache.getFeeOptions())
                         .subscribe(
@@ -629,7 +629,7 @@ public class SendPresenter extends BasePresenter<SendView> {
                     }, throwable -> {
                         Timber.e(throwable);
                         getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                        getView().finishPage();
+                        getView().finishPage(false);
                     });
         } else {
             if (getView() != null) getView().onShowPaymentDetails(getConfirmationDetails(), null);
@@ -853,7 +853,7 @@ public class SendPresenter extends BasePresenter<SendView> {
             return;
         }
 
-        getView().showProgressDialog();
+        getView().showProgressDialog(R.string.app_name);
 
         getCompositeDisposable().add(
                 sendDataManager.submitPayment(
@@ -924,6 +924,31 @@ public class SendPresenter extends BasePresenter<SendView> {
         tx.setPending(true);
 
         transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
+    }
+
+    void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
+        getCompositeDisposable().add(
+                // Get contacts
+                contactsDataManager.getContactList()
+                        // Find contact by MDID
+                        .filter(ContactsPredicates.filterByMdid(mdid))
+                        .singleOrError()
+                        .flatMapCompletable(transaction -> {
+                            // Broadcast payment to shared metadata service
+                            return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
+                                    // Show successfully broadcast
+                                    .doOnComplete(() -> getView().showBroadcastSuccessDialog())
+                                    // Show retry dialog if broadcast failed
+                                    .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
+                        })
+                        .doAfterTerminate(() -> getView().dismissProgressDialog())
+                        .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.contacts_broadcasting_payment))
+                        .subscribe(
+                                () -> {
+                                    // No-op
+                                }, throwable -> {
+                                    // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
+                                }));
     }
 
     private void logAddressInputMetric() {

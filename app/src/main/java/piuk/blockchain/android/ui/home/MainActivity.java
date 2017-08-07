@@ -722,44 +722,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void showBroadcastFailedDialog(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_payment_sent_failed_message)
-                .setPositiveButton(R.string.retry, (dialog, which) ->
-                        getPresenter().broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
-                .setCancelable(false)
-                .create()
-                .show();
-    }
-
-    @Override
-    public void showBroadcastSuccessDialog() {
-        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_payment_sent_success)
-                .setPositiveButton(android.R.string.ok, null)
-                .create()
-                .show();
-    }
-
-    @Override
-    public void onSendFragmentClose() {
+    public void onSendFragmentClose(boolean paymentToContactMade) {
+        this.paymentToContactMade = paymentToContactMade;
         binding.bottomNavigation.setCurrentItem(1);
     }
 
     @Override
     public void onReceiveFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
-    }
-
-    @Override
-    public void onSendPaymentSuccessful(String mdid,
-                                        String transactionHash,
-                                        String fctxId,
-                                        long transactionValue) {
-        paymentToContactMade = true;
-        getPresenter().broadcastPaymentSuccess(mdid, transactionHash, fctxId, transactionValue);
     }
 
     @Override

@@ -23,7 +23,6 @@ import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
-import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.models.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
@@ -159,33 +158,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
                 .compose(RxUtil.applySchedulersToObservable())
                 .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTicker());
-    }
-
-    void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
-        getCompositeDisposable().add(
-                // Get contacts
-                contactsDataManager.getContactList()
-                        // Find contact by MDID
-                        .filter(ContactsPredicates.filterByMdid(mdid))
-                        // Get FacilitatedTransaction from HashMap
-                        .flatMap(contact -> Observable.just(contact.getFacilitatedTransactions().get(facilitatedTxId)))
-                        // Check the payment value was appropriate
-                        .flatMapCompletable(transaction -> {
-                            // Broadcast payment to shared metadata service
-                            return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
-                                    // Show successfully broadcast
-                                    .doOnComplete(() -> getView().showBroadcastSuccessDialog())
-                                    // Show retry dialog if broadcast failed
-                                    .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
-                        })
-                        .doAfterTerminate(() -> getView().hideProgressDialog())
-                        .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.contacts_broadcasting_payment))
-                        .subscribe(
-                                () -> {
-                                    // No-op
-                                }, throwable -> {
-                                    // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
-                                }));
     }
 
     void checkForMessages() {
