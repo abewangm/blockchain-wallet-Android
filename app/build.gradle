@@ -45,7 +45,7 @@ android {
         dogfood {
             initWith release
             debuggable true
-            buildConfigField "boolean", "DOGFOOD", "false"
+            buildConfigField "boolean", "DOGFOOD", "true"
             signingConfig signingConfigs.debug
             applicationIdSuffix ".dogfood"
             versionNameSuffix '-DOGFOOD'
