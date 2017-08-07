@@ -866,13 +866,13 @@ public class SendPresenter extends BasePresenter<SendView> {
                         .doAfterTerminate(() -> getView().dismissProgressDialog())
                         .subscribe(
                                 hash -> {
-                                    clearUnspentResponseCache();
-                                    getView().dismissConfirmationDialog();
-                                    handleSuccessfulPayment(hash);
-
                                     Logging.INSTANCE.logCustom(new PaymentSentEvent()
                                             .putSuccess(true)
                                             .putAmountForRange(sendModel.pendingTransaction.bigIntAmount));
+
+                                    clearUnspentResponseCache();
+                                    getView().dismissConfirmationDialog();
+                                    handleSuccessfulPayment(hash);
                                 }, throwable -> {
                                     showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR);
 
@@ -893,12 +893,25 @@ public class SendPresenter extends BasePresenter<SendView> {
         }
         if (getView() != null) {
             getView().onShowTransactionSuccess(contactMdid,
-                    hash,
                     fctxId,
+                    hash,
                     sendModel.pendingTransaction.bigIntAmount.longValue());
+
         }
+        resetPresenterState();
 
         logAddressInputMetric();
+    }
+
+    /**
+     * This is a precautionary measure in case the presenter isn't cleared from the app's lifecycle.
+     */
+    private void resetPresenterState() {
+        sendModel = new SendModel();
+        sendModel.pendingTransaction = new PendingTransaction();
+        sendModel.unspentApiResponses = new HashMap<>();
+        fctxId = null;
+        contactMdid = null;
     }
 
     private void insertPlaceHolderTransaction(String hash, PendingTransaction pendingTransaction) {

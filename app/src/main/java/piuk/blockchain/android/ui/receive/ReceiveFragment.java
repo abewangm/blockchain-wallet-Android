@@ -138,7 +138,8 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     public void startContactSelectionActivity() {
         AccountChooserActivity.startForResult(this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_CONTACT,
-                PaymentRequestType.CONTACT);
+                PaymentRequestType.CONTACT,
+                getString(R.string.from));
     }
 
     @Override
@@ -199,12 +200,14 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         binding.toContainer.toAddressTextView.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
-                        PaymentRequestType.REQUEST));
+                        PaymentRequestType.REQUEST,
+                        getString(R.string.to)));
 
         binding.toContainer.toArrowImage.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
-                        PaymentRequestType.REQUEST));
+                        PaymentRequestType.REQUEST,
+                        getString(R.string.to)));
 
         textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -240,7 +243,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
                 showToast(getString(R.string.contact_select_first), ToastCustom.TYPE_ERROR);
             } else if (!getPresenter().isValidAmount(binding.amountContainer.amountBtc.getText().toString())) {
                 showToast(getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
-            }else if (listener != null) {
+            } else if (listener != null) {
                 listener.onTransactionNotesRequested(
                         getPresenter().getConfirmationDetails(),
                         PaymentRequestType.REQUEST,

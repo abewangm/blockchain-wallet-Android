@@ -125,7 +125,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
-    private boolean paymentToContactMade = false;
+    private boolean paymentMade = false;
     private Typeface typeface;
     private BalanceFragment balanceFragment;
     private FrontendJavascriptManager frontendJavascriptManager;
@@ -156,7 +156,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                     }
                     break;
                 case 1:
-                    onStartBalanceFragment(paymentToContactMade);
+                    onStartBalanceFragment(paymentMade);
                     break;
                 case 2:
                     startReceiveFragment();
@@ -598,7 +598,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void onStartBalanceFragment(boolean paymentToContactMade) {
         if (paymentToContactMade) {
             balanceFragment = BalanceFragment.newInstance(true);
-            this.paymentToContactMade = false;
+            this.paymentMade = false;
         }
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
@@ -722,8 +722,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onSendFragmentClose(boolean paymentToContactMade) {
-        this.paymentToContactMade = paymentToContactMade;
+    public void onSendFragmentClose(boolean paymentMade) {
+        this.paymentMade = paymentMade;
         binding.bottomNavigation.setCurrentItem(1);
     }
 

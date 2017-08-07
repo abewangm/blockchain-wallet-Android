@@ -526,14 +526,16 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     private void startFromFragment() {
         AccountChooserActivity.startForResult(this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.REQUEST);
+                PaymentRequestType.REQUEST,
+                getString(R.string.from));
     }
 
     private void setupReceiveToView() {
         binding.toContainer.toArrowImage.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
-                        PaymentRequestType.SEND));
+                        PaymentRequestType.SEND,
+                        getString(R.string.to)));
     }
 
     @Override
@@ -667,7 +669,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         // Won't show if contact transaction, as other dialog takes preference
         if (appRate.shouldShowDialog() && fctxId == null) {
             AlertDialog ratingDialog = appRate.getRateDialog();
-            ratingDialog.setOnDismissListener(d -> finishPage(false));
+            ratingDialog.setOnDismissListener(d -> finishPage(true));
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
         } else {
@@ -676,7 +678,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                 if (fctxId != null) {
                     getPresenter().broadcastPaymentSuccess(mdid, fctxId, hash, transactionValue);
                 } else {
-                    finishPage(false);
+                    finishPage(true);
                 }
             });
         }
@@ -987,8 +989,8 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     @Override
-    public void finishPage(boolean paymentToContactMade) {
-        if (listener != null) listener.onSendFragmentClose(paymentToContactMade);
+    public void finishPage(boolean paymentMade) {
+        if (listener != null) listener.onSendFragmentClose(paymentMade);
     }
 
     public void onChangeFeeClicked() {
@@ -1104,7 +1106,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
 
     public interface OnSendFragmentInteractionListener {
 
-        void onSendFragmentClose(boolean paymentToContactMade);
+        void onSendFragmentClose(boolean paymentMade);
 
         void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
                                          PaymentRequestType paymentRequestType,
