@@ -4,14 +4,11 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import org.apache.commons.lang3.NotImplementedException;
-
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.DecryptionException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
@@ -160,6 +157,7 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
     private void updateUI(List<ContactsListItem> list) {
         if (!list.isEmpty()) {
             getView().setUiState(UiState.CONTENT);
+            Collections.sort(list);
             getView().onContactsLoaded(list);
         } else {
             getView().onContactsLoaded(new ArrayList<>());
