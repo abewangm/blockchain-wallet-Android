@@ -77,7 +77,7 @@ class ContactConfirmRequestFragment : BaseFragment<ContactConfirmRequestView, Co
 
     override fun updatePaymentType(paymentRequestType: PaymentRequestType) {
         when (paymentRequestType) {
-            PaymentRequestType.SEND -> button_send.setText(R.string.contacts_confirm_start_transaction)
+            PaymentRequestType.SEND -> button_send.setText(R.string.contacts_confirm_start_transaconfirm_titlection)
             PaymentRequestType.REQUEST -> button_send.setText(R.string.contacts_confirm_request_payment)
             else -> throw IllegalArgumentException("This payment type is not supported by this Fragment")
         }

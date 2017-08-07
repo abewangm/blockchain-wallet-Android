@@ -22,6 +22,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.databinding.ActivityContactsBinding;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseMvpActivity;
@@ -31,6 +32,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.base.UiState.CONTENT;
 import static piuk.blockchain.android.ui.base.UiState.EMPTY;
@@ -46,6 +48,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
 
     private static final int REQUEST_PAIRING = 98;
     private static final int NAME_MAX_LENGTH = 17;
+    private final int CHOOSER_REQUEST = 3510;
 
     @Inject
     ContactsListPresenter contactsListPresenter;
@@ -116,6 +119,8 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_PAIRING && resultCode == RESULT_OK) {
             getPresenter().onViewReady();
+        } else if (requestCode == CHOOSER_REQUEST) {
+            AccessState.getInstance().enableAutoLogout();
         }
     }
 
@@ -161,7 +166,6 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         switch (uiState) {
             case LOADING:
                 binding.swipeRefreshLayout.setRefreshing(true);
-                binding.swipeRefreshLayout.setVisibility(View.GONE);
                 binding.layoutFailure.setVisibility(View.GONE);
                 binding.layoutNoContacts.setVisibility(View.GONE);
                 binding.fab.setVisibility(View.GONE);
@@ -268,7 +272,8 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
 
     @Override
     public void onLinkGenerated(Intent intent) {
-        startActivity(Intent.createChooser(intent, getString(R.string.contacts_share_invitation)));
+        AccessState.getInstance().disableAutoLogout();
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.contacts_share_invitation)), CHOOSER_REQUEST);
     }
 
     @Override
@@ -290,7 +295,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
 
     @Override
     public void onMoreClick(String id) {
-        CharSequence actions[] = new CharSequence[] {"Re-send Invite", "Delete Contact"};
+        CharSequence actions[] = new CharSequence[] {getString(R.string.contacts_resend_invite), getString(R.string.contacts_delete)};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setItems(actions, (dialog, which) -> {
