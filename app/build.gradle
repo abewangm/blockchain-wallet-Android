@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId "piuk.blockchain.android"
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 268
         versionName "6.7.0-rc1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
