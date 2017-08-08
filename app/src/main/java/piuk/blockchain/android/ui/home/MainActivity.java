@@ -345,9 +345,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
         } else {
             // Switch to balance fragment
-            BalanceFragment fragment = new BalanceFragment();
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            balanceFragment = BalanceFragment.newInstance(false);
+            replaceFragmentWithAnimation(balanceFragment);
         }
     }
 
@@ -598,7 +597,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void onStartBalanceFragment(boolean paymentToContactMade) {
         if (paymentToContactMade) {
             balanceFragment = BalanceFragment.newInstance(true);
-            this.paymentMade = false;
+            paymentMade = false;
         }
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
@@ -835,7 +834,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.removeOnTabSelectedListener();
         binding.bottomNavigation.setCurrentItem(0);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
-        replaceFragmentWithAnimation(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
+        addFragmentToBackStack(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
     }
 
     @Override

@@ -131,8 +131,8 @@ class FctxDelegate<in T>(
             when (transaction.role) {
                 FacilitatedTransaction.ROLE_RPR_INITIATOR -> displaySending(viewHolder)
                 FacilitatedTransaction.ROLE_RPR_RECEIVER -> displayReceiving(viewHolder)
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> displaySending(viewHolder)
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayReceiving(viewHolder)
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> displayReceiving(viewHolder)
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> displaySending(viewHolder)
             }
         } else if (transaction.state == FacilitatedTransaction.STATE_CANCELLED) {
             viewHolder.note.text = stringUtils.getString(R.string.contacts_receiving_cancelled).toUpperCase()
@@ -141,8 +141,8 @@ class FctxDelegate<in T>(
             when (transaction.role) {
                 FacilitatedTransaction.ROLE_RPR_INITIATOR -> displaySending(viewHolder)
                 FacilitatedTransaction.ROLE_RPR_RECEIVER -> displayReceiving(viewHolder)
-                FacilitatedTransaction.ROLE_PR_INITIATOR -> displaySending(viewHolder)
-                FacilitatedTransaction.ROLE_PR_RECEIVER -> displayReceiving(viewHolder)
+                FacilitatedTransaction.ROLE_PR_INITIATOR -> displayReceiving(viewHolder)
+                FacilitatedTransaction.ROLE_PR_RECEIVER -> displaySending(viewHolder)
             }
         }
     }

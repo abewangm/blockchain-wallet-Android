@@ -37,7 +37,6 @@ import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 
 import static io.reactivex.Observable.just;
@@ -70,7 +69,6 @@ public class PinEntryPresenterTest {
     @Mock private StringUtils stringUtils;
     @Mock private FingerprintHelper fingerprintHelper;
     @Mock private AccessState accessState;
-    @Mock private SSLVerifyUtil sslVerifyUtil;
 
     @Before
     public void setUp() throws Exception {
@@ -86,7 +84,6 @@ public class PinEntryPresenterTest {
                 prefsUtil,
                 payloadManager,
                 stringUtils,
-                sslVerifyUtil,
                 fingerprintHelper,
                 accessState);
         subject.initView(activity);

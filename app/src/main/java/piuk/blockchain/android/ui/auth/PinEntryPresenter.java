@@ -36,7 +36,6 @@ import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -52,7 +51,6 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
     private PrefsUtil mPrefsUtil;
     private PayloadDataManager mPayloadDataManager;
     private StringUtils mStringUtils;
-    private SSLVerifyUtil mSSLVerifyUtil;
     private FingerprintHelper mFingerprintHelper;
     private AccessState mAccessState;
 
@@ -68,7 +66,6 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                       PrefsUtil mPrefsUtil,
                       PayloadDataManager mPayloadDataManager,
                       StringUtils mStringUtils,
-                      SSLVerifyUtil mSSLVerifyUtil,
                       FingerprintHelper mFingerprintHelper,
                       AccessState mAccessState) {
 
@@ -77,14 +74,12 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
         this.mPrefsUtil = mPrefsUtil;
         this.mPayloadDataManager = mPayloadDataManager;
         this.mStringUtils = mStringUtils;
-        this.mSSLVerifyUtil = mSSLVerifyUtil;
         this.mFingerprintHelper = mFingerprintHelper;
         this.mAccessState = mAccessState;
     }
 
     @Override
     public void onViewReady() {
-        mSSLVerifyUtil.validateSSL();
         mAppUtil.applyPRNGFixes();
 
         if (getView().getPageIntent() != null) {
