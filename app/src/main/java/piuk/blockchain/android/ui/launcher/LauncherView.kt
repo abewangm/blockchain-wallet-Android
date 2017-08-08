@@ -1,8 +1,9 @@
 package piuk.blockchain.android.ui.launcher
 
 import android.content.Intent
+import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
-import piuk.blockchain.android.util.annotations.Mockable
+import piuk.blockchain.android.ui.customviews.ToastCustom
 
 interface LauncherView: View {
 
@@ -21,5 +22,7 @@ interface LauncherView: View {
     fun onReEnterPassword()
 
     fun onStartOnboarding(emailOnly: Boolean)
+
+    fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 
 }

@@ -1,49 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/entropy_meter"
-        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="16dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="30"
+        <ProgressBar
+            android:id="@+id/pass_strength_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textColor="@color/primary_gray_medium"
-            android:gravity="center_vertical"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:visibility="invisible"
-            android:text="@string/password" />
+            android:background="@color/primary_gray_light"
+            android:progressDrawable="@drawable/progress_orange" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="70"
-            android:layout_height="wrap_content"
-            android:paddingRight="16dp"
-            android:orientation="vertical">
+        <TextView
+            android:id="@+id/pass_strength_verdict"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal"
+            android:text="@string/strength_weak"
+            android:textColor="@color/white" />
 
-            <ProgressBar
-                android:id="@+id/pass_strength_bar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="3dp"
-                android:background="@color/primary_gray_light"
-                android:progressDrawable="@drawable/progress_orange" />
-
-            <TextView
-                android:id="@+id/pass_strength_verdict"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:text="@string/strength_weak"
-                android:textColor="@color/primary_gray_medium" />
-        </LinearLayout>
-
-
-    </LinearLayout>
+    </RelativeLayout>
 </layout>

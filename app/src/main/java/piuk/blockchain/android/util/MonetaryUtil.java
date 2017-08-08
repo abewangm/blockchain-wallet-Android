@@ -1,7 +1,5 @@
 package piuk.blockchain.android.util;
 
-import android.util.Log;
-
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -26,23 +24,20 @@ public class MonetaryUtil {
     private int unit;
 
     public MonetaryUtil(int unit) {
+        updateUnit(unit);
+    }
+
+    public void updateUnit(int unit) {
         this.unit = unit;
 
         Locale defaultLocale = Locale.getDefault();
 
-        //Arabic digits are not supported yet
-        if(defaultLocale.getLanguage().equals("ar")) {
-            defaultLocale = Locale.ENGLISH;
-        }
-
         fiatFormat = (DecimalFormat) NumberFormat.getInstance(defaultLocale);
         fiatFormat.setMaximumFractionDigits(2);
         fiatFormat.setMinimumFractionDigits(2);
-        fiatFormat.setGroupingUsed(false);
 
         btcFormat = (DecimalFormat) NumberFormat.getInstance(defaultLocale);
         btcFormat.setMinimumFractionDigits(1);
-        btcFormat.setGroupingUsed(false);
         switch (unit) {
             case MonetaryUtil.MICRO_BTC:
                 btcFormat.setMaximumFractionDigits(2);
@@ -54,10 +49,6 @@ public class MonetaryUtil {
                 btcFormat.setMaximumFractionDigits(8);
                 break;
         }
-    }
-
-    public void updateUnit(int unit) {
-        this.unit = unit;
     }
 
     public NumberFormat getBTCFormat() {
@@ -122,7 +113,7 @@ public class MonetaryUtil {
     }
 
     public String getDisplayAmountWithFormatting(long value) {
-        DecimalFormat df = new DecimalFormat("#");
+        DecimalFormat df = new DecimalFormat();
         df.setMinimumIntegerDigits(1);
         df.setMinimumFractionDigits(1);
         df.setMaximumFractionDigits(8);
@@ -138,7 +129,7 @@ public class MonetaryUtil {
     }
 
     public String getDisplayAmountWithFormatting(double value) {
-        DecimalFormat df = new DecimalFormat("#");
+        DecimalFormat df = new DecimalFormat();
         df.setMinimumIntegerDigits(1);
         df.setMinimumFractionDigits(1);
         df.setMaximumFractionDigits(8);

@@ -58,12 +58,12 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
 
             ItemAccount item = getItem(position);
 
-            binding.accountName.setText(item.label);
+            binding.accountName.setText(item.getLabel());
 
             if (isBtc) {
-                binding.balance.setText(item.displayBalance);
+                binding.balance.setText(item.getDisplayBalance());
             } else {
-                double btcBalance = item.absoluteBalance / 1e8;
+                double btcBalance = item.getAbsoluteBalance() / 1e8;
                 double fiatBalance = exchangeRate * btcBalance;
 
                 String balance = monetaryUtil.getFiatFormat(fiatUnits).format(Math.abs(fiatBalance)) + " " + fiatUnits;
@@ -81,13 +81,14 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
 
             ItemAccount item = getItem(position);
 
-            binding.text.setText(item.label);
+            binding.text.setText(item.getLabel());
             return binding.getRoot();
         }
     }
 
-    void notifyBtcChanged(boolean isBtc) {
+    void notifyBtcChanged(boolean isBtc, int btcFormat) {
         this.isBtc = isBtc;
+        monetaryUtil.updateUnit(btcFormat);
         notifyDataSetChanged();
     }
 

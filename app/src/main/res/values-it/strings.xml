@@ -358,7 +358,6 @@
     <string name="new_password">Nuova password</string>
     <string name="sms_verified">Numero di cellulare verificato</string>
     <string name="preferences">Preferenze</string>
-    <string name="two_fa_summary">Proteggi il tuo portafogli da accessi non autorizzati abilitando la Verifica in 2-Fasi. Puoi scegliere di usare il tuo numero di telefono cellulare per mettere al sicuro il tuo portafoglio. Questo codice ti verrà richiesto quando tenti di accedere al tuo portafoglio tramite il browser web.\n\nPer usare altri metodi di autenticazione, accedi al nostro portafoglio web.</string>
 
     <string name="rate_title">Vota il Portafoglio Blockchain</string>
     <string name="rate_message">Ti piace il Portafoglio Blockchain? Per favore, spendi un momento per lasciare una recensione su Google Play e farlo sapere agli altri.</string>
@@ -437,9 +436,6 @@
     <string name="swipe_receive_preference_summary">Abilita questa opzione per rivelare un indirizzo di ricezione, quando si fa scorrere verso sinistra la schermata del PIN: così potrai ricevere dei bitcoin ancora più velocemente. Verranno caricati cinque indirizzi consecutivi, dopodiché, sarà necessario effettuare il login per poter visualizzare i nuovi indirizzi.</string>
     <string name="swipe_receive_no_addresses">Non si possono caricare altri indirizzi al momento. Per caricarne altri è necessario accedere all\'app.</string>
 
-    <string name="survey_message">Ti dispiacerebbe completare una breve indagine per aiutarci a migliorare la tua esperienza in fatto di gestione del portafoglio?\n\nPer noi, la tua opinione è molto importante!</string>
-    <string name="survey_positive_button">Completa indagine</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Panoramica</string>
     <string name="create_a_wallet">Crea un portafogli</string>
@@ -451,7 +447,7 @@
     <string name="confirm_upgrade_header">Ehi, abbiamo aggiunto nuove funzioni al tuo portafogli Blockchain:</string>
     <string name="verify_email2">Il tuo indirizzo email verificato è usato per inviare i codici di accesso in caso di rilevamento di attività insolite o sospette.</string>
     <string name="enable_screenshots">Attiva gli screenshot</string>
-    <string name="enable_screenshots_warning">Stai abilitando gli screenshot per l\'app Blockchain. Alcune schermate nell\'applicazione possono contenere dati sensibili. Altra applicazioni potranno accedere a questi screenshot.</string>
+    <string name="enable_screenshots_summary">Stai abilitando gli screenshot per l\'app Blockchain. Alcune schermate nell\'applicazione possono contenere dati sensibili. Altra applicazioni potranno accedere a questi screenshot.</string>
 
     <string name="information">Informazioni</string>
     <string name="transaction_detail_verify">Verifica su Blockchain.info</string>
@@ -465,8 +461,6 @@
     <string name="contacts_too_much_sent">Sembra che tu abbia inviato più bitcoin di quanto richiesto. Se lo desideri, puoi richiedere al tuo contatto di restituirne alcuni. Non abbiamo indicato il pagamento come completo.</string>
     <string name="contacts_too_little_sent">Sembra che tu abbia inviato meno bitcoin di quanto richiesto. Il tuo contatto riceverà i bitcoin che hai inviato ma non abbiamo indicato il pagamento come completo.</string>
     <string name="contacts_second_password_prompt">Per utilizzare questo servizio, devi inserire la tua seconda password. Dovrai inserirla solo per utilizzare la funzionalità contatti.</string>
-    <string name="contacts_pending_transaction">Transazioni pendenti</string>
-    <string name="contacts_transaction_history">Storico transazioni</string>
     <string name="contacts_request_money_receive">Invia richiesta di contatto</string>
     <string name="contacts_no_confirmed_contacts_found">Nessun contatto confermato trovato!</string>
     <string name="contacts_decline_pending_transaction">Sei sicuro di voler rifiutare questa transazione pendente?</string>
@@ -477,12 +471,6 @@
     <string name="contacts_pending_transaction_decline_failure">Rifiuto della transazione pendente fallito</string>
     <string name="contacts_pending_transaction_cancel_success">Transazione pendente annullata con successo</string>
     <string name="contacts_pending_transaction_cancel_failure">Annullamento della transazione pendente fallito</string>
-    <string name="contacts_sending_to_contact_waiting">Invio di %1$s a %2$s\nIn attesa che %2$s accetti</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s richiesti da %2$s\nPronti all\'invio</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Richiesti %1$s da %2$s\nIn attesa di pagamento</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Ricevuti %1$s da %2$s\nIn attesa che tu accetti</string>
-    <string name="contacts_receiving_declined">Pagamento rifiutato</string>
-    <string name="contacts_receiving_cancelled">Pagamento annullato</string>
     <string name="contacts_send_complete">Inviati %1$s a %2$s</string>
     <string name="contacts_receive_complete">Ricevuti %1$s da %2$s</string>
     <string name="contacts_received">Ricevuti da %1$s</string>
@@ -529,7 +517,7 @@
     <string name="contacts_address_sent_success">Indirizzo inviato correttamente</string>
     <string name="contacts_being_invited">Accetta invito</string>
     <string name="contacts_broadcasting_payment">Stiamo informando il tuo contatto dell\'invio di bitcoin da parte tua, attendi.</string>
-    <string name="contacts_choose_account_message">Scegli dove vuoi ricevere i tuoi fondi.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Scegli dove vuoi ricevere i tuoi fondi.</string>
     <string name="contacts_choose_pairing_method">Scegli il metodo di abbinamento da utilizzare per aggiungere un contatto di fiducia:</string>
     <string name="contacts_delete">Elimina contatto</string>
     <string name="contacts_delete_contact_success">Contatto eliminato</string>

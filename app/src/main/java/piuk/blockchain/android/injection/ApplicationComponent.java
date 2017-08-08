@@ -6,14 +6,10 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import piuk.blockchain.android.BlockchainApplication;
-import piuk.blockchain.android.data.datamanagers.BuyDataManager;
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
-import piuk.blockchain.android.data.datamanagers.OnboardingDataManager;
+import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.notifications.FcmCallbackService;
 import piuk.blockchain.android.data.notifications.InstanceIdService;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
-import piuk.blockchain.android.ui.contacts.pairing.ContactPairingMethodViewModel;
-import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
@@ -26,19 +22,20 @@ import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
 @Singleton
 @Component(modules = {
         ApplicationModule.class,
-        ApiModule.class
+        ApiModule.class,
+        PersistentStoreModule.class,
+        ServiceModule.class
 })
 public interface ApplicationComponent {
 
-    DataManagerComponent plus(DataManagerModule userModule);
+    // Subcomponent with its own scope
+    PresenterComponent plus(DataManagerModule userModule);
 
     void inject(AppUtil appUtil);
 
     void inject(LoggingExceptionHandler loggingExceptionHandler);
 
     void inject(ExchangeRateFactory exchangeRateFactory);
-
-    void inject(ReceiveCurrencyHelper receiveCurrencyHelper);
 
     void inject(PrivateKeyFactory privateKeyFactory);
 
@@ -48,13 +45,7 @@ public interface ApplicationComponent {
 
     void inject(ContactsDataManager contactsDataManager);
 
-    void inject(ContactPairingMethodViewModel contactPairingMethodViewModel);
-
     void inject(FcmCallbackService fcmCallbackService);
 
     void inject(BaseAuthActivity baseAuthActivity);
-
-    void inject(OnboardingDataManager onboardingDataManager);
-
-    void inject(BuyDataManager buyDataManager);
 }

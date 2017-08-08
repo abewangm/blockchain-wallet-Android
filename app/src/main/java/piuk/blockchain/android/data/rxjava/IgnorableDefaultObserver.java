@@ -2,6 +2,7 @@ package piuk.blockchain.android.data.rxjava;
 
 import io.reactivex.CompletableObserver;
 import io.reactivex.observers.DefaultObserver;
+import timber.log.Timber;
 
 /**
  * To be used when the result of the subscription can be ignored
@@ -15,7 +16,7 @@ public class IgnorableDefaultObserver<T> extends DefaultObserver<T> implements C
 
     @Override
     public void onError(Throwable e) {
-        // No-op
+        Timber.e(e);
     }
 
     @Override

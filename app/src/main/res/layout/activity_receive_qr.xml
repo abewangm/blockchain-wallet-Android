@@ -12,7 +12,7 @@
         android:layout_marginBottom="16dp"
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
-        android:textAppearance="@android:style/TextAppearance.Material.Title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
         tools:text="My Bitcoin Wallet" />
 
     <ImageView
@@ -31,7 +31,7 @@
         android:gravity="center"
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
-        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
         tools:text="Bitcoin address" />
 
     <LinearLayout
@@ -58,7 +58,8 @@
             android:layout_height="wrap_content"
             android:text="@string/copy_address"
             android:textColor="@color/primary_blue_accent"
-            android:theme="@style/PlainTheme" />
+            android:theme="@style/PlainTheme"
+            tools:ignore="NewApi" />
 
         <Button
             android:id="@+id/action_done"
@@ -67,6 +68,7 @@
             android:layout_height="wrap_content"
             android:text="@string/done"
             android:textColor="@color/primary_blue_accent"
-            android:theme="@style/PlainTheme" />
+            android:theme="@style/PlainTheme"
+            tools:ignore="NewApi" />
     </LinearLayout>
 </RelativeLayout>

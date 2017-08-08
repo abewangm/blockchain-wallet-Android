@@ -83,17 +83,17 @@ public class AddressAdapter extends ArrayAdapter<ItemAccount> {
 
             ItemAccount item = getItem(position);
 
-            if (item.tag == null || item.tag.isEmpty()) {
+            if (item.getTag() == null || item.getTag().isEmpty()) {
                 binding.tvTag.setVisibility(View.GONE);
             } else {
-                binding.tvTag.setText(item.tag);
+                binding.tvTag.setText(item.getTag());
             }
-            binding.tvLabel.setText(item.label);
+            binding.tvLabel.setText(item.getLabel());
 
             if (isBtc) {
-                binding.tvBalance.setText(item.displayBalance);
+                binding.tvBalance.setText(item.getDisplayBalance());
             } else {
-                double btcBalance = item.absoluteBalance != null ? item.absoluteBalance / 1e8 : 0D;
+                double btcBalance = item.getAbsoluteBalance() != null ? item.getAbsoluteBalance() / 1e8 : 0D;
                 double fiatBalance = exchangeRate * btcBalance;
 
                 String balance = monetaryUtil.getFiatFormat(fiatUnits).format(Math.abs(fiatBalance)) + " " + fiatUnits;
@@ -111,7 +111,7 @@ public class AddressAdapter extends ArrayAdapter<ItemAccount> {
 
             if (showText) {
                 ItemAccount item = getItem(position);
-                binding.text.setText(item.label);
+                binding.text.setText(item.getLabel());
             }
 
             return binding.getRoot();

@@ -29,5 +29,4 @@ public class FeeDataManager {
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
-
 }

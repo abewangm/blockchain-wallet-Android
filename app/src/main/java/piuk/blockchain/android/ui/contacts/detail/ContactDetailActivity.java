@@ -82,13 +82,9 @@ public class ContactDetailActivity extends BaseAuthActivity implements
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragmentById = fragmentManager.findFragmentById(R.id.content_frame);
         if (fragmentById != null && fragmentById instanceof SendFragment) {
-            if (((SendFragment) fragmentById).isKeyboardVisible()) {
-                ((SendFragment) fragmentById).onBackPressed();
-            } else {
-                submitFragmentTransaction(
-                        ContactDetailFragment.newInstance(
-                                getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
-            }
+            submitFragmentTransaction(
+                    ContactDetailFragment.newInstance(
+                            getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
         } else {
             super.onBackPressed();
         }

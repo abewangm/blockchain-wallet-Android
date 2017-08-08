@@ -356,7 +356,6 @@
     <string name="new_password">Mật khẩu mới</string>
     <string name="sms_verified">Số điện thoại đã xác minh</string>
     <string name="preferences">Ưu tiên</string>
-    <string name="two_fa_summary">Bảo vệ ví của bạn khỏi các truy cập trái phép bằng Xác minh 2 bước. Bạn có thể lựa chọn sử dụng số điện thoại để bảo vệ ví của mình. Mã này sẽ được yêu cầu khi bạn truy cập vào ví của mình thông qua trình duyệt web.\n\nĐể sử dụng các phương pháp xác thực thay thế khác, vui lòng đăng nhập ví trên trang web của chúng tôi.</string>
 
     <string name="rate_title">Đánh giá Ví Blockchain</string>
     <string name="rate_message">Bạn có thích Ví Blockchain? Hãy để lại nhận xét trên Google Play.</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">Bật tùy chọn này để hiện địa chỉ nhận khi bạn trượt qua trái trên màn hình mã PIN, giúp việc nhận bitcoin thậm chí còn nhanh hơn. Năm địa chỉ này sẽ được tải liên tục, sau đó cần đăng nhập để hiện các địa chỉ mới.</string>
     <string name="swipe_receive_no_addresses">Không có địa chỉ có thể tải bây giờ. Đăng nhập vào ứng dụng để tải thêm.</string>
 
-    <string name="survey_message">Bạn có muốn thực hiện một bài khảo sát ngắn để giúp cải thiện trải nghiệm sử dụng ví của mình?\n\nChúng tôi đánh giá cao phản hồi của bạn!</string>
-    <string name="survey_positive_button">Thực hiện khảo sát</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Tổng quan</string>
     <string name="create_a_wallet">Tạo ví</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header">Xin chào, chúng tôi đã thêm các tính năng mới sau đây vào ví Blockchain của bạn:</string>
     <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền.</string>
     <string name="enable_screenshots">Kích hoạt Chụp màn hình</string>
-    <string name="enable_screenshots_warning">Bạn đang kích hoạt tính năng chụp ảnh màn hình cho ứng dụng Blockchain. Một vài hình ảnh trong ứng dụng có thể hiển thị dữ liệu nhạy cảm. Những ứng dụng khác sẽ có thể truy cập các ảnh chụp màn hình này.</string>
+    <string name="enable_screenshots_summary">Bạn đang kích hoạt tính năng chụp ảnh màn hình cho ứng dụng Blockchain. Một vài hình ảnh trong ứng dụng có thể hiển thị dữ liệu nhạy cảm. Những ứng dụng khác sẽ có thể truy cập các ảnh chụp màn hình này.</string>
 
     <string name="information">Thông tin</string>
     <string name="transaction_detail_verify">Xác minh trên Blockchain.info</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">Có vẻ như bạn đã gửi bitcoin nhiều hơn yêu cầu. Bạn có thể yêu cầu gửi lại một ít từ liên lạc của mình nếu muốn. Chúng tôi chưa đánh dấu hoàn tất cho thanh toán của bạn.</string>
     <string name="contacts_too_little_sent">Có vẻ như bạn đã gửi bitcoin ít hơn yêu cầu. Liên lạc của bạn sẽ vẫn nhận được số bitcoin mà bạn đã gửi, nhưng chúng tôi chưa đánh dấu hoàn tất cho thanh toán của bạn.</string>
     <string name="contacts_second_password_prompt">Để sử dụng dịch vụ này, chúng tôi yêu cầu bạn nhập mật khẩu cấp hai của mình. Bạn chỉ nên nhập mật khẩu này khi sử dụng chức năng Danh bạ.</string>
-    <string name="contacts_pending_transaction">Giao dịch đang Chờ duyệt</string>
-    <string name="contacts_transaction_history">Lịch sử Giao dịch</string>
     <string name="contacts_request_money_receive">Gửi yêu cầu liên lạc</string>
     <string name="contacts_no_confirmed_contacts_found">Không tìm thấy danh bạ đã xác nhận!</string>
     <string name="contacts_decline_pending_transaction">Bạn có chắc muốn từ chối giao dịch đang chờ duyệt này?</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">Giao dịch đang chờ duyệt đã từ chối thất bại</string>
     <string name="contacts_pending_transaction_cancel_success">Giao dịch đang chờ duyệt đã hủy thành công</string>
     <string name="contacts_pending_transaction_cancel_failure">Giao dịch đang chờ duyệt đã hủy thất bại</string>
-    <string name="contacts_sending_to_contact_waiting">Đang gửi %1$s đến %2$s\nĐang chờ %2$s chấp nhận</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s được yêu cầu bởi %2$s\nSẵn sàng để gửi</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Đã yêu cầu %1$s từ %2$s\nĐang chờ thanh toán</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Đang nhận %1$s từ %2$s\nĐang chờ bạn chấp nhận</string>
-    <string name="contacts_receiving_declined">Thanh toán bị từ chối</string>
-    <string name="contacts_receiving_cancelled">Thanh toán bị hủy</string>
     <string name="contacts_send_complete">Đã gửi %1$s đến %2$s</string>
     <string name="contacts_receive_complete">Đã nhận %1$s từ %2$s</string>
     <string name="contacts_received">Đã nhận từ %1$s</string>
@@ -527,7 +515,7 @@
     <string name="contacts_address_sent_success">Gửi địa chỉ thành công</string>
     <string name="contacts_being_invited">Chấp nhận lời mời</string>
     <string name="contacts_broadcasting_payment">Chúng tôi vừa thông báo cho liên lạc của bạn về việc bạn đã gửi cho họ một số bitcoin, vui lòng chờ.</string>
-    <string name="contacts_choose_account_message">Chọn nơi bạn muốn nhận các khoản tiền của mình.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Chọn nơi bạn muốn nhận các khoản tiền của mình.</string>
     <string name="contacts_choose_pairing_method">Chọn phương pháp kết nối bạn muốn sử dụng để thêm một liên lạc tin cậy:</string>
     <string name="contacts_delete">Xóa liên lạc</string>
     <string name="contacts_delete_contact_success">Đã xóa liên lạc</string>

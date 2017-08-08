@@ -1,5 +1,6 @@
 package piuk.blockchain.android;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.security.ProviderInstaller;
 
@@ -12,6 +13,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
@@ -28,6 +30,8 @@ import dagger.Lazy;
 import io.fabric.sdk.android.Fabric;
 import io.reactivex.plugins.RxJavaPlugins;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.AppLaunchEvent;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -39,6 +43,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 import piuk.blockchain.android.util.exceptions.LoggingExceptionHandler;
 import retrofit2.Retrofit;
+import timber.log.Timber;
 
 /**
  * Created by adambennett on 04/08/2016.
@@ -47,7 +52,6 @@ import retrofit2.Retrofit;
 public class BlockchainApplication extends Application implements FrameworkInterface {
 
     public static final String RX_ERROR_TAG = "RxJava Error";
-    @Thunk static final String TAG = BlockchainApplication.class.getSimpleName();
 
     @Inject
     @Named("api")
@@ -62,9 +66,10 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Named("coinify")
     protected Lazy<Retrofit> coinify;
 
-    @Inject protected PrefsUtil prefsUtil;
-    @Inject protected RxBus rxBus;
-    @Inject protected EnvironmentSettings environmentSettings;
+    @Inject PrefsUtil prefsUtil;
+    @Inject RxBus rxBus;
+    @Inject EnvironmentSettings environmentSettings;
+    @Inject AppUtil appUtil;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -86,7 +91,11 @@ public class BlockchainApplication extends Application implements FrameworkInter
         super.onCreate();
         if (BuildConfig.USE_CRASHLYTICS) {
             // Init crash reporting
-            Fabric.with(this, new Crashlytics());
+            Fabric.with(this, new Crashlytics(), new Answers());
+        }
+        // Init Timber
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
         }
         // Init objects first
         Injector.getInstance().init(this);
@@ -98,8 +107,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
         new LoggingExceptionHandler();
 
         RxJavaPlugins.setErrorHandler(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
-
-        AppUtil appUtil = new AppUtil(this);
 
         AccessState.getInstance().initAccessState(this, prefsUtil, rxBus);
 
@@ -125,6 +132,9 @@ public class BlockchainApplication extends Application implements FrameworkInter
                 // No-op
             }
         });
+
+        // Report Google Play Services availability
+        Logging.INSTANCE.logCustom(new AppLaunchEvent(isGooglePlayServicesAvailable(this)));
     }
 
     // Pass instances to JAR Framework, evaluate after object graph instantiated fully
@@ -188,7 +198,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
         ProviderInstaller.installIfNeededAsync(this, new ProviderInstaller.ProviderInstallListener() {
             @Override
             public void onProviderInstalled() {
-                Log.i(TAG, "Security Provider installed");
+                Timber.i("Security Provider installed");
             }
 
             @Override
@@ -211,7 +221,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Thunk
     void showError(int errorCode) {
         // TODO: 05/08/2016 Decide if we should alert users here or not
-        Log.e(TAG, "Security Provider install failed with recoverable error: " +
+        Timber.e("Security Provider install failed with recoverable error: " +
                 GoogleApiAvailability.getInstance().getErrorString(errorCode));
     }
 
@@ -222,6 +232,17 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Thunk
     void onProviderInstallerNotAvailable() {
         // TODO: 05/08/2016 Decide if we should take action here or not
-        Log.wtf(TAG, "Security Provider Installer not available");
+        Timber.wtf("Security Provider Installer not available");
     }
+
+    /**
+     * Returns true if Google Play Services are found and ready to use.
+     *
+     * @param context The current Application Context
+     */
+    private boolean isGooglePlayServicesAvailable(Context context) {
+        GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
+        return availability.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;
+    }
+
 }

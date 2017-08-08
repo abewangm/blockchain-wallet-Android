@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import piuk.blockchain.android.data.datamanagers.ContactsDataManager;
+import piuk.blockchain.android.data.contacts.ContactsDataManager;
 
 /**
  * Specifies that the method being called hits a Shared Metadata endpoint and requires an

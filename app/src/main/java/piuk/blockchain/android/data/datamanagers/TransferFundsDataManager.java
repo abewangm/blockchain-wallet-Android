@@ -17,6 +17,8 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -81,7 +83,8 @@ public class TransferFundsDataManager {
                                 "",
                                 "",
                                 null,
-                                legacyAddress);
+                                legacyAddress,
+                                legacyAddress.getAddress());
                         pendingSpend.bigIntFee = pendingSpend.unspentOutputBundle.getAbsoluteFee();
                         pendingSpend.bigIntAmount = sweepAmount;
                         pendingSpend.addressToReceiveIndex = addressToReceiveIndex;
@@ -128,7 +131,7 @@ public class TransferFundsDataManager {
                 PendingTransaction pendingTransaction = pendingTransactions.get(i);
 
                 final int finalI = i;
-                LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.accountObject);
+                LegacyAddress legacyAddress = ((LegacyAddress) pendingTransaction.sendingObject.getAccountObject());
                 String changeAddress = legacyAddress.getAddress();
                 String receivingAddress =
                         payloadDataManager.getNextReceiveAddress(pendingTransaction.addressToReceiveIndex)

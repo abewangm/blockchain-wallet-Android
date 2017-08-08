@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.auth;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -33,6 +34,12 @@ public class PinEntryActivity extends BaseAuthActivity implements
     private PinEntryFragment pinEntryFragment;
     private AppUtil appUtil;
 
+    public static void start(Context context) {
+        Intent intent = new Intent(context, PinEntryActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +51,7 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
         final FragmentPagerAdapter fragmentPagerAdapter;
         if (shouldHideSwipeToReceive()) {
-            // Don't bother instantiating the QR fragment + ViewModel if not necessary
+            // Don't bother instantiating the QR fragment + Presenter if not necessary
             fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,

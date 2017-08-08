@@ -1,88 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="32dp"
+        android:paddingLeft="72dp"
+        android:paddingRight="72dp"
+        android:paddingTop="32dp"
+        android:text="@string/backup_write_down_words"
+        android:textColor="@color/primary_gray_dark"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textview_word_counter"
+        fontPath="fonts/Montserrat-Regular.ttf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha=".5"
+        android:gravity="center"
+        android:textColor="@color/primary_gray_dark"
+        android:textSize="18sp"
+        tools:ignore="MissingPrefix"
+        tools:text="Word 0 of 12" />
 
     <LinearLayout
+        android:id="@+id/card_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:orientation="vertical">
+        android:layout_height="128dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="72dp"
+        android:layout_marginRight="72dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/primary_navy_medium"
+        android:gravity="center">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="32dp"
-            android:paddingLeft="72dp"
-            android:paddingRight="72dp"
-            android:paddingTop="32dp"
-            android:text="@string/backup_write_down_words"
-            android:textColor="@color/primary_gray_dark"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/tv_current_word"
+            android:id="@+id/textview_current_word"
             fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:alpha=".5"
             android:gravity="center"
-            android:text="Word 0 of 12"
-            android:textColor="@color/primary_gray_dark"
-            android:textSize="18sp" />
-
-        <LinearLayout
-            android:id="@+id/card_layout"
-            android:layout_width="match_parent"
-            android:layout_height="128dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="72dp"
-            android:layout_marginRight="72dp"
-            android:layout_marginTop="10dp"
-            android:background="@color/primary_navy_medium"
-            android:gravity="center">
-
-            <TextView
-                android:id="@+id/tv_press_reveal"
-                fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="16dp"
-                android:textColor="@color/white"
-                android:textSize="24sp"
-                tools:text="house" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
-
-            <Button
-                android:id="@+id/previous_word_action"
-                style="@style/ButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="left|center_vertical"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:text="@string/backup_previous_word"
-                android:theme="@style/ButtonLightBlueTheme"
-                android:visibility="invisible"
-                tools:visibility="visible" />
-
-            <Button
-                android:id="@+id/next_word_action"
-                style="@style/ButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="right|center_vertical"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:text="@string/backup_next_word"
-                android:theme="@style/ButtonLightBlueTheme" />
-        </LinearLayout>
+            android:padding="16dp"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            tools:ignore="MissingPrefix"
+            tools:text="house" />
 
     </LinearLayout>
-</layout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/button_previous"
+            style="@style/ButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="left|center_vertical"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:text="@string/backup_previous_word"
+            android:theme="@style/ButtonLightBlueTheme"
+            android:visibility="invisible"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/button_next"
+            style="@style/ButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="right|center_vertical"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:text="@string/backup_next_word"
+            android:theme="@style/ButtonLightBlueTheme" />
+    </LinearLayout>
+</LinearLayout>

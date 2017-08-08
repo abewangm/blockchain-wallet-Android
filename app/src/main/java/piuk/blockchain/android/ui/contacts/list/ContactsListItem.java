@@ -3,7 +3,7 @@ package piuk.blockchain.android.ui.contacts.list;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-class ContactsListItem {
+public class ContactsListItem implements Comparable<ContactsListItem>{
 
     private String id;
     private String contactName;
@@ -45,6 +45,14 @@ class ContactsListItem {
 
     boolean requiresResponse() {
         return requiresResponse;
+    }
+
+    @Override
+    public int compareTo(@NonNull ContactsListItem contactsListItem) {
+        if(this.contactName != null && contactsListItem.contactName != null){
+            return this.contactName.compareToIgnoreCase(contactsListItem.contactName);
+        }
+        return 0;
     }
 
     @SuppressWarnings("WeakerAccess")

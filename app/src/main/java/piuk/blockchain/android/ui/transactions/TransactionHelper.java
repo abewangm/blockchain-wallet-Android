@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 
 import static info.blockchain.wallet.multiaddress.TransactionSummary.Direction.RECEIVED;
 

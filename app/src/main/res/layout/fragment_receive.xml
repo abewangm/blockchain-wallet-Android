@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <android.support.design.widget.CoordinatorLayout
@@ -7,175 +8,182 @@
         android:layout_height="match_parent"
         tools:context=".ui.receive.ReceiveActivity">
 
-        <RelativeLayout
-            android:id="@+id/relative_layout_root"
+        <ScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="?attr/actionBarSize"
             android:background="@color/white"
             android:descendantFocusability="beforeDescendants"
             android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:orientation="vertical">
+            android:focusableInTouchMode="true">
 
-            <ScrollView
-                android:id="@+id/scrollView"
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/receiveMainContent"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="?attr/actionBarSize">
+                android:layout_height="wrap_content">
 
-                <LinearLayout
-                    android:id="@+id/receive_main_content"
+                <TextView
+                    android:id="@+id/receiveHelpText"
+                    fontPath="fonts/Montserrat-Regular.ttf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_horizontal|top"
+                    android:text="@string/share_instructions"
+                    android:textColor="@color/primary_gray_dark"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/qrImage"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/qrImage" />
+
+                <ImageView
+                    android:id="@+id/qrImage"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/receiveHelpText" />
+
+                <EditText
+                    android:id="@+id/receiving_address"
+                    fontPath="fonts/Montserrat-Regular.ttf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:background="@android:color/transparent"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:inputType="none"
+                    android:maxLines="1"
+                    android:textAlignment="gravity"
+                    android:textColor="@color/primary_gray_dark"
+                    android:textIsSelectable="true"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/qrImage"
+                    tools:text="Some bitcoin address" />
+
+                <View
+                    android:id="@+id/divider1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/primary_gray_light"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/receiving_address" />
+
+                <include
+                    android:id="@+id/amountContainer"
+                    layout="@layout/include_amount_row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider1" />
+
+                <View
+                    android:id="@+id/divider2"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/primary_gray_light"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/amountContainer" />
+
+                <include
+                    android:id="@+id/toContainer"
+                    layout="@layout/include_to_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="top"
-                        android:orientation="vertical">
+                <View
+                    android:id="@+id/divider3"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/primary_gray_light"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/toContainer" />
 
-                        <TextView
-                            fontPath="fonts/Montserrat-Regular.ttf"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_horizontal|top"
-                            android:paddingLeft="32dp"
-                            android:paddingRight="32dp"
-                            android:paddingTop="16dp"
-                            android:text="@string/share_instructions"
-                            android:textColor="@color/primary_gray_dark" />
+                <include
+                    android:id="@+id/fromContainer"
+                    layout="@layout/include_from_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
-                        <FrameLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal">
+                <TextView
+                    android:id="@+id/whatsThis"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="0dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="0dp"
+                    android:text="@string/what_s_this"
+                    android:inputType="textCapWords"
+                    android:textColor="@color/primary_blue_accent"
+                    app:layout_constraintBottom_toTopOf="@+id/divider4"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
-                            <ProgressBar
-                                android:id="@+id/progress_bar"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center" />
+                <View
+                    android:id="@+id/divider4"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/primary_gray_light"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fromContainer" />
 
-                            <ImageView
-                                android:id="@+id/qr"
-                                android:layout_width="180dp"
-                                android:layout_height="180dp"
-                                android:layout_gravity="center" />
-
-                        </FrameLayout>
-
-                        <EditText
-                            android:id="@+id/receiving_address"
-                            fontPath="fonts/Montserrat-Regular.ttf"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal|center_vertical"
-                            android:layout_marginBottom="16dp"
-                            android:background="@android:color/transparent"
-                            android:gravity="center_horizontal|center_vertical"
-                            android:inputType="none"
-                            android:maxLines="1"
-                            android:textAlignment="gravity"
-                            android:textColor="@color/primary_gray_dark"
-                            android:textIsSelectable="true"
-                            android:textSize="14sp"
-                            tools:text="Some bitcoin address" />
-
-                    </LinearLayout>
-
-                    <View
-                        android:id="@+id/divider_from_row"
-                        android:layout_width="fill_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/primary_gray_light" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:id="@+id/from_row"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:gravity="center_vertical"
-                            android:orientation="vertical"
-                            android:paddingBottom="12dp"
-                            android:paddingLeft="16dp">
-
-                            <TextView
-                                fontPath="fonts/Montserrat-Light.ttf"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center|left"
-                                android:text="@string/to"
-                                android:textColor="@color/primary_gray_dark" />
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <TextView
-                                    android:id="@+id/destination"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="0.9"
-                                    android:background="@color/white"
-                                    android:paddingBottom="14dp"
-                                    android:paddingTop="14dp"
-                                    android:textColor="@color/black"
-                                    android:textSize="16sp" />
-
-                                <ImageView
-                                    android:id="@+id/imageview_dropdown_receive"
-                                    android:layout_width="58dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:layout_marginLeft="6dp"
-                                    android:layout_marginRight="2dp"
-                                    android:layout_weight="0.1"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:divider="@null"
-                                    android:src="@drawable/ic_arrow_drop_down_grey600_24dp" />
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                        <include
-                            android:id="@+id/amount_container"
-                            layout="@layout/include_amount_row" />
-
-                        <include layout="@layout/divider_grey" />
-
-                    </LinearLayout>
-
-                    <Button
-                        android:id="@+id/button_send_to_contact"
-                        style="@style/ButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="24dp"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
-                        android:layout_marginTop="16dp"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:text="@string/contacts_request_money_receive"
-                        android:theme="@style/ButtonLightBlueTheme" />
-                </LinearLayout>
-            </ScrollView>
-            <!-- include keyboard -->
-            <piuk.blockchain.android.ui.customviews.CustomKeypad
-                android:id="@+id/keyboard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:visibility="gone" />
-
-        </RelativeLayout>
+                <Button
+                    android:id="@+id/buttonRequestPayment"
+                    style="@style/ButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:text="@string/contacts_request_money_receive"
+                    android:theme="@style/ButtonLightBlueTheme"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider4" />
+            </android.support.constraint.ConstraintLayout>
+        </ScrollView>
     </android.support.design.widget.CoordinatorLayout>
 </layout>

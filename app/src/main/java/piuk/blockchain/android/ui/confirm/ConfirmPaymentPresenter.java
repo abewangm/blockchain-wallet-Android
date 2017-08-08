@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.confirm;
 
-import piuk.blockchain.android.injection.Injector;
+import javax.inject.Inject;
+
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.base.UiState;
@@ -9,8 +10,9 @@ public class ConfirmPaymentPresenter extends BasePresenter<ConfirmPaymentView> {
 
     private static final String AMOUNT_FORMAT = "%1$s %2$s (%3$s%4$s)";
 
+    @Inject
     ConfirmPaymentPresenter() {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        // Empty Constructor
     }
 
     @Override
@@ -20,6 +22,11 @@ public class ConfirmPaymentPresenter extends BasePresenter<ConfirmPaymentView> {
         if (paymentDetails == null) {
             getView().closeDialog();
             return;
+        }
+
+        String contactNote = getView().getContactNote();
+        if (contactNote != null) {
+            getView().setContactNote(contactNote);
         }
 
         getView().setFromLabel(paymentDetails.fromLabel);

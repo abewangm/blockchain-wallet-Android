@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import info.blockchain.wallet.contacts.data.Contact;
-
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
+
 import java.util.List;
 
 import piuk.blockchain.android.R;
@@ -53,23 +53,23 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
         switch (getItemViewType(position)) {
             case VIEW_TYPE_HEADER:
                 HeaderViewHolder headerViewHolder = ((HeaderViewHolder) holder);
-                headerViewHolder.header.setText(itemAccount.label);
+                headerViewHolder.header.setText(itemAccount.getLabel());
                 holder.itemView.setOnClickListener(null);
                 break;
             case VIEW_TYPE_CONTACT:
                 ContactViewHolder contactViewHolder = (ContactViewHolder) holder;
-                contactViewHolder.name.setText(((Contact) itemAccount.accountObject).getName());
-                holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.accountObject));
+                contactViewHolder.name.setText(((Contact) itemAccount.getAccountObject()).getName());
+                holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.getAccountObject()));
                 break;
             case VIEW_TYPE_ACCOUNT:
             case VIEW_TYPE_LEGACY:
                 AccountViewHolder accountViewHolder = ((AccountViewHolder) holder);
-                accountViewHolder.label.setText(itemAccount.label);
-                accountViewHolder.balance.setText(itemAccount.displayBalance);
+                accountViewHolder.label.setText(itemAccount.getLabel());
+                accountViewHolder.balance.setText(itemAccount.getDisplayBalance());
 
-                if (itemAccount.accountObject instanceof LegacyAddress) {
-                    accountViewHolder.address.setText(((LegacyAddress) itemAccount.accountObject).getAddress());
-                    if (((LegacyAddress) itemAccount.accountObject).isWatchOnly()) {
+                if (itemAccount.getAccountObject() instanceof LegacyAddress) {
+                    accountViewHolder.address.setText(((LegacyAddress) itemAccount.getAccountObject()).getAddress());
+                    if (((LegacyAddress) itemAccount.getAccountObject()).isWatchOnly()) {
                         accountViewHolder.tag.setText(holder.itemView.getContext().getString(R.string.watch_only));
                         accountViewHolder.tag.setVisibility(View.VISIBLE);
                     } else {
@@ -81,7 +81,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
                     accountViewHolder.tag.setVisibility(View.GONE);
                     accountViewHolder.address.setVisibility(View.GONE);
                 }
-                holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.accountObject));
+                holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.getAccountObject()));
                 break;
         }
     }
@@ -95,11 +95,11 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
     public int getItemViewType(int position) {
         ItemAccount object = items.get(position);
 
-        if (object.accountObject instanceof Contact) {
+        if (object.getAccountObject() instanceof Contact) {
             return VIEW_TYPE_CONTACT;
-        } else if (object.accountObject instanceof Account) {
+        } else if (object.getAccountObject() instanceof Account) {
             return VIEW_TYPE_ACCOUNT;
-        } else if (object.accountObject instanceof LegacyAddress) {
+        } else if (object.getAccountObject() instanceof LegacyAddress) {
             return VIEW_TYPE_LEGACY;
         } else {
             return VIEW_TYPE_HEADER;
@@ -112,7 +112,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
 
         HeaderViewHolder(View itemView) {
             super(itemView);
-            header = (TextView) itemView.findViewById(R.id.header_name);
+            header = itemView.findViewById(R.id.header_name);
             itemView.findViewById(R.id.imageview_plus).setVisibility(View.GONE);
         }
     }
@@ -123,8 +123,10 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
 
         ContactViewHolder(View itemView) {
             super(itemView);
-            name = (TextView) itemView.findViewById(R.id.contact_name);
-            itemView.findViewById(R.id.contact_status).setVisibility(View.GONE);
+            name = itemView.findViewById(R.id.contactName);
+            itemView.findViewById(R.id.contactStatus).setVisibility(View.GONE);
+            itemView.findViewById(R.id.imageviewIndicator).setVisibility(View.GONE);
+            itemView.findViewById(R.id.imageViewMore).setVisibility(View.GONE);
         }
     }
 
@@ -137,10 +139,10 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
 
         AccountViewHolder(View itemView) {
             super(itemView);
-            label = (TextView) itemView.findViewById(R.id.my_account_row_label);
-            tag = (TextView) itemView.findViewById(R.id.my_account_row_tag);
-            balance = (TextView) itemView.findViewById(R.id.my_account_row_amount);
-            address = (TextView) itemView.findViewById(R.id.my_account_row_address);
+            label = itemView.findViewById(R.id.my_account_row_label);
+            tag = itemView.findViewById(R.id.my_account_row_tag);
+            balance = itemView.findViewById(R.id.my_account_row_amount);
+            address = itemView.findViewById(R.id.my_account_row_address);
         }
     }
 

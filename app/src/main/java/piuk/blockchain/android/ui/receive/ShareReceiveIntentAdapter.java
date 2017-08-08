@@ -14,11 +14,11 @@ import piuk.blockchain.android.R;
 
 class ShareReceiveIntentAdapter extends RecyclerView.Adapter<ShareReceiveIntentAdapter.ViewHolder> {
 
-    private final List<ReceiveViewModel.SendPaymentCodeData> mData;
+    private final List<ReceivePresenter.SendPaymentCodeData> mData;
     private OnItemClickedListener itemClickedListener;
     private Context mContext;
 
-    ShareReceiveIntentAdapter(List<ReceiveViewModel.SendPaymentCodeData> repoDataArrayList) {
+    ShareReceiveIntentAdapter(List<ReceivePresenter.SendPaymentCodeData> repoDataArrayList) {
         mData = repoDataArrayList;
     }
 
@@ -33,7 +33,7 @@ class ShareReceiveIntentAdapter extends RecyclerView.Adapter<ShareReceiveIntentA
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ReceiveViewModel.SendPaymentCodeData data = mData.get(position);
+        ReceivePresenter.SendPaymentCodeData data = mData.get(position);
 
         holder.mTitleTextView.setText(data.getTitle());
         holder.mImageView.setImageDrawable(data.getLogo());

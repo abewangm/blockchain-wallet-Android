@@ -356,7 +356,6 @@
     <string name="new_password">Nové heslo</string>
     <string name="sms_verified">Mobilní číslo ověřeno</string>
     <string name="preferences">Předvolby</string>
-    <string name="two_fa_summary">Chraňte svoji peněženku před neoprávněným přístupem povolením dvoufázového ověření. Svoji peněženku můžete zabezpečit pomocí čísla mobilního telefonu. Kód bude vyžadován, pokud se pokusíte otevřít peněženku přes webové rozhraní.\n\nInPokud chcete využít jiné způsoby autentikace, přihlaste se k naší webové peněžence.</string>
 
     <string name="rate_title">Ohodnoťte peněženku Blockchain</string>
     <string name="rate_message">Líbí se Vám peněženka Blockchain? Napište nám recenzi na webu Google Play a podělte se o své zkušenosti s ostatními.</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">Povolením této možnosti zjistíte přijímací adresu, pokud přejedete prstem doleva na obrazovce PINu. Díky tomu budete přijímat bitcoiny ještě rychleji. Postupně se načte pět adres, poté bude pro zobrazení nových adres vyžadováno přihlášení.</string>
     <string name="swipe_receive_no_addresses">Nyní nelze načíst další adresy. Přihlaste se do aplikace, abyste načetli další.</string>
 
-    <string name="survey_message">Chcete vyplnit krátký dotazník, abyste pomohli zlepšit svůj zážitek z peněženky?\n\nVážíme si vaší zpětné vazby!</string>
-    <string name="survey_positive_button">Vyplnit dotazník</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Přehled</string>
     <string name="create_a_wallet">Vytvořit peněženku</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header">Do Vaší peněženky Blockchain jsme přidali tyto nové funkce:</string>
     <string name="verify_email2">Vaše ověřená e-mailová adresa se používá pro odesílání přihlašovacích kódů, pokud je zaznamenána podezřelá nebo neobvyklá aktivita, abychom Vám připomněli Vaše přihlašovací ID peněženky, a zasílání upozornění na bitcoinovou platbu v případě připsání prostředků.</string>
     <string name="enable_screenshots">Povolit snímky obrazovky</string>
-    <string name="enable_screenshots_warning">Chystáte se povolit snímky obrazovky pro aplikaci Blockchain. Některé obrazovky v aplikaci mohou zobrazovat důvěrná data. K těmto snímkům obrazovky budou mít přístup další aplikace.</string>
+    <string name="enable_screenshots_summary">Chystáte se povolit snímky obrazovky pro aplikaci Blockchain. Některé obrazovky v aplikaci mohou zobrazovat důvěrná data. K těmto snímkům obrazovky budou mít přístup další aplikace.</string>
 
     <string name="information">Informace</string>
     <string name="transaction_detail_verify">Ověřit na Blockchain.info</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">Zdá se, že jste odeslali více bitcoinů, než bylo požadováno. Můžete požádat o vrácení některých z nich od svého kontaktu, budete-li chtít. Ještě jste neoznačili platbu jako dokončenou.</string>
     <string name="contacts_too_little_sent">Zdá se, že jste odeslali méně bitcoinů, než bylo požadováno. Váš kontakt bude stále moci přijmout bitcoiny, které jste odeslali, ale platbu jsme neoznačili jako dokončenou.</string>
     <string name="contacts_second_password_prompt">Abyste mohli tuto službu použít, vyžadujeme od Vás zadání druhého hesla. Pro použití funkce Kontakty stačí zadat toto pouze jednou.</string>
-    <string name="contacts_pending_transaction">Nevyřízené transakce</string>
-    <string name="contacts_transaction_history">Historie transakcí</string>
     <string name="contacts_request_money_receive">Odeslat kontaktu požadavek</string>
     <string name="contacts_no_confirmed_contacts_found">Nebyly nalezeny žádné potvrzené kontakty!</string>
     <string name="contacts_decline_pending_transaction">Opravdu chcete odmítnout tuto nevyřízenou transakci?</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">Odmítnutí nevyřízené transakce se nezdařilo</string>
     <string name="contacts_pending_transaction_cancel_success">Nevyřízená transakce byla úspěšně zrušena</string>
     <string name="contacts_pending_transaction_cancel_failure">Zrušení nevyřízené transakce se nezdařilo</string>
-    <string name="contacts_sending_to_contact_waiting">Odesílání %1$s uživateli %2$s\nČekání na přijetí od uživatele %2$s</string>
-    <string name="contacts_payment_requested_ready_to_send">Požadováno %1$s od %2$s\nPřipraveno k odeslání</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Požadováno %1$s od %2$s\nČekání na platbu</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Příjem %1$s od %2$s\nČeká se na Vaše přijetí</string>
-    <string name="contacts_receiving_declined">Platba byla odmítnuta</string>
-    <string name="contacts_receiving_cancelled">Platba byla zrušena</string>
     <string name="contacts_send_complete">Odesláno %1$s uživateli %2$s</string>
     <string name="contacts_receive_complete">Přijato %1$s od %2$s</string>
     <string name="contacts_received">Přijato od %1$s</string>
@@ -527,7 +515,7 @@
     <string name="contacts_address_sent_success">Adresa úspěšně odeslána</string>
     <string name="contacts_being_invited">Přijmout pozvánku</string>
     <string name="contacts_broadcasting_payment">Právě informujeme kontakt, kterému jste poslali nějaké bitcoiny, čekejte prosím.</string>
-    <string name="contacts_choose_account_message">Zvolte si, kam chcete přijímat své prostředky.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Zvolte si, kam chcete přijímat své prostředky.</string>
     <string name="contacts_choose_pairing_method">Zvolte si párovací metodu, kterou si přejete používat k přidání důvěryhodného kontaktu:</string>
     <string name="contacts_delete">Odstranit kontakt</string>
     <string name="contacts_delete_contact_success">Kontakt odstraněn</string>

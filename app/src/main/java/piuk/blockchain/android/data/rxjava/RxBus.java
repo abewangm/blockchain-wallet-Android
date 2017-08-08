@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.rxjava;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import timber.log.Timber;
 
 /**
  * A class that allows callers to register {@link PublishSubject} objects by passing in the class
@@ -19,8 +19,6 @@ import io.reactivex.subjects.Subject;
  */
 public class RxBus {
 
-    private static final String TAG = RxBus.class.getSimpleName();
-
     /**
      * A threadsafe map of lists of {@link PublishSubject} objects, where their type is used as the
      * key for lookups.
@@ -28,10 +26,6 @@ public class RxBus {
     @SuppressWarnings("WeakerAccess")
     @VisibleForTesting
     ConcurrentHashMap<Object, List<Subject>> subjectsMap = new ConcurrentHashMap<>();
-
-    public RxBus() {
-        // Constructor intentionally empty for injection
-    }
 
     /**
      * Registers a new {@link PublishSubject} whose type matches the class {@code type} passed to
@@ -73,7 +67,7 @@ public class RxBus {
                 subjectsMap.remove(type);
             }
         } else {
-            Log.e(TAG, "unregister of type " + type.getSimpleName() + " failed, as no PublishSubject with a matching type was found");
+            Timber.e("unregister of type " + type.getSimpleName() + " failed, as no PublishSubject with a matching type was found");
         }
     }
 
@@ -93,7 +87,7 @@ public class RxBus {
                 subject.onNext(content);
             }
         } else {
-            Log.i(TAG, "emitEvent of type " + type.getSimpleName() + " failed, as no PublishSubject was registered");
+            Timber.i("emitEvent of type " + type.getSimpleName() + " failed, as no PublishSubject was registered");
         }
     }
 }

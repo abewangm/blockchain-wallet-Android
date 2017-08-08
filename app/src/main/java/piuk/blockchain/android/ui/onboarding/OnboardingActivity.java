@@ -5,17 +5,23 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
 import piuk.blockchain.android.ui.home.MainActivity;
-import piuk.blockchain.android.util.annotations.Thunk;
 
-public class OnboardingActivity extends BaseAuthActivity implements OnboardingViewModel.DataListener,
+public class OnboardingActivity extends BaseMvpActivity<OnboardingView, OnboardingPresenter>
+        implements OnboardingView,
         FingerprintPromptFragment.OnFragmentInteractionListener,
         EmailPromptFragment.OnFragmentInteractionListener {
+
+    private static final int EMAIL_CLIENT_REQUEST = 5400;
 
     /**
      * Flag for showing only the email verification prompt. This is for use when signup was
@@ -23,22 +29,25 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
      */
     public static final String EXTRAS_EMAIL_ONLY = "email_only";
 
-    @Thunk OnboardingViewModel viewModel;
+    @Inject OnboardingPresenter onboardingPresenter;
     private boolean emailLaunched = false;
     private MaterialProgressDialog progressDialog;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboarding);
-        viewModel = new OnboardingViewModel(this);
 
         progressDialog = new MaterialProgressDialog(this);
         progressDialog.setMessage(R.string.please_wait);
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        viewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -71,14 +80,14 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
             dismissDialog();
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, EmailPromptFragment.newInstance(viewModel.getEmail()))
+                    .replace(R.id.content_frame, EmailPromptFragment.newInstance(getPresenter().getEmail()))
                     .commit();
         }
     }
 
     @Override
     public void onEnableFingerprintClicked() {
-        viewModel.onEnableFingerprintClicked();
+        getPresenter().onEnableFingerprintClicked();
     }
 
     @Override
@@ -95,14 +104,14 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
                 @Override
                 public void onAuthenticated(String data) {
                     dialog.dismissAllowingStateLoss();
-                    viewModel.setFingerprintUnlockEnabled(true);
+                    getPresenter().setFingerprintUnlockEnabled(true);
                     showEmailPrompt();
                 }
 
                 @Override
                 public void onCanceled() {
                     dialog.dismissAllowingStateLoss();
-                    viewModel.setFingerprintUnlockEnabled(true);
+                    getPresenter().setFingerprintUnlockEnabled(true);
                 }
             });
 
@@ -126,6 +135,7 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
 
     @Override
     public void onVerifyEmailClicked() {
+        AccessState.getInstance().disableAutoLogout();
         emailLaunched = true;
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_APP_EMAIL);
@@ -137,11 +147,21 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
         startMainActivity();
     }
 
+    @Override
+    protected OnboardingPresenter createPresenter() {
+        return onboardingPresenter;
+    }
+
+    @Override
+    protected OnboardingView getView() {
+        return this;
+    }
+
     private void startMainActivity() {
         dismissDialog();
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        startActivityForResult(intent, EMAIL_CLIENT_REQUEST);
     }
 
     private void dismissDialog() {
@@ -150,4 +170,9 @@ public class OnboardingActivity extends BaseAuthActivity implements OnboardingVi
         }
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == EMAIL_CLIENT_REQUEST) {
+            AccessState.getInstance().enableAutoLogout();
+        }
+    }
 }

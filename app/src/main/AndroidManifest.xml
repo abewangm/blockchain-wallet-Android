@@ -54,7 +54,7 @@
             android:name=".ui.home.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.MainActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
@@ -65,9 +65,13 @@
             android:name=".ui.auth.LandingActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.pairing.PairOrCreateWalletActivity"
+            android:name=".ui.login.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.createwallet.CreateWalletActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity android:name=".ui.directory.MapActivity" />
         <!-- TODO: Remove me once a solid decision has been made -->
         <!--<activity android:name=".ui.directory.SuggestMerchantActivity" />-->
@@ -84,7 +88,7 @@
             android:name=".ui.upgrade.UpgradeWalletActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
-            android:name=".ui.pairing.ManualPairingActivity"
+            android:name=".ui.login.ManualPairingActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".ui.auth.LogoutActivity"
@@ -110,15 +114,6 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.contacts.list.ContactsListActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".ui.contacts.pairing.ContactInviteActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".ui.contacts.pairing.ContactsInvitationBuilderActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".ui.contacts.pairing.ContactsAcceptInviteActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".ui.contacts.detail.ContactDetailActivity"

@@ -356,7 +356,6 @@
     <string name="new_password">รหัสผ่านใหม่</string>
     <string name="sms_verified">ยืนยันหมายเลขโทรศัพท์มือถือแล้ว</string>
     <string name="preferences">การตั้งค่า</string>
-    <string name="two_fa_summary">ปกป้องกระเป๋าเงินของคุณจากการเข้าถึงที่ไม่ได้รับอนุญาตโดยการเปิดใช้งานการยืนยัน 2 ขั้นตอน คุณสามารถเลือกใช้หมายเลขโทรศัพท์มือถือของคุณเพื่อทำให้กระเป๋าเงินของคุณปลอดภัย รหัสผ่านนี้จะได้รับการร้องขอเมื่อคุณพยายามที่จะเข้าถึงกระเป๋าเงินของคุณผ่านทางเว็บเบราว์เซอร์\n\nเพื่อใช้วิธีการพิสูจน์ตัวตนอื่น โปรดล็อกอินไปยังกระเป๋าเงินเว็บของเรา</string>
 
     <string name="rate_title">ให้คะแนนกระเป๋าเงิน Blockchain </string>
     <string name="rate_message">สนุกกับการใช้งานกระเป๋าเงิน Blockchain? โปรดใช้เวลาสักเล็กน้อยในการรีวิวเราใน Google Play และบอกให้ผู้อื่นรู้จักเรา</string>
@@ -436,9 +435,6 @@
     <string name="swipe_receive_preference_summary">เปิดการใช้งานตัวเลือกนี้เพื่อเปิดเผยที่อยู่สำหรับที่อยู่สำหรับการรับเมื่อคุณปัดนิ้วไปทางซ้ายบนหน้าจอ PIN ทำให้การรับ bitcoin รวดเร็วยิ่งขึ้น ห้าที่อยู่ซึ่งจะได้รับการโหลดอย่างต่อเนื่องติดต่อกัน หลังจากนั้นจะจำเป็นต้องล็อกอินเพื่อแสดงที่อยู่ใหม่</string>
     <string name="swipe_receive_no_addresses">ไม่สามารถโหลดที่อยู่มากกว่านี้ได้ในตอนนี้ ล็อกอินไปยังแอปเพื่อโหลดเพิ่ม</string>
 
-    <string name="survey_message">คุณต้องการกรอกแบบสำรวจสั้น ๆ เพื่อช่วยปรับปรุงประสบการณ์การใช้กระเป๋าเงินของเราหรือไม่?\n\nเราเห็นคุณค่าของคำแนะนำติชมของคุณ!</string>
-    <string name="survey_positive_button">ทำแบบสำรวจ</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">ภาพรวม</string>
     <string name="create_a_wallet">สร้างกระเป๋าเงิน</string>
@@ -450,7 +446,7 @@
     <string name="confirm_upgrade_header">เฮ้ เราได้เพิ่มฟีเจอร์ใหม่เหล่านี้ไปยังกระเป๋าเงิน Blockchain ของคุณ:</string>
     <string name="verify_email2">จะมีการใช้ที่อยู่อีเมลของคุณที่ได้รับการยืนยันเพื่อการส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่น่าสงสัยหรือผิดปกติ หรือเพื่อแจ้งเตือนคุณเกี่ยวกับ ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน</string>
     <string name="enable_screenshots">เปิดใช้งานภาพถ่ายหน้าจอ</string>
-    <string name="enable_screenshots_warning">คุณกำลังจะเปิดใช้งานภาพถ่ายหน้าจอสำหรับแอป Blockchain บางหน้าจอภายในแอปสามารถแสดงข้อมูลที่ละเอียดอ่อน แอปอื่น ๆ จะสามารถเข้าถึงภาพถ่ายหน้าจอเหล่านี้ได้</string>
+    <string name="enable_screenshots_summary">คุณกำลังจะเปิดใช้งานภาพถ่ายหน้าจอสำหรับแอป Blockchain บางหน้าจอภายในแอปสามารถแสดงข้อมูลที่ละเอียดอ่อน แอปอื่น ๆ จะสามารถเข้าถึงภาพถ่ายหน้าจอเหล่านี้ได้</string>
 
     <string name="information">ข้อมูล</string>
     <string name="transaction_detail_verify">ยืนยันบน Blockchain.info</string>
@@ -464,8 +460,6 @@
     <string name="contacts_too_much_sent">ดูเหมือนว่าคุณส่ง bitcoin มากกว่าที่ได้รับการร้องขอ คุณสามารถร้องขอบางส่วนกลับมาจากผู้ติดต่อของคุณได้หากคุณต้องการ เราได้ทำเครื่องหมายว่าการชำระเงินนี้เสร็จสิ้น</string>
     <string name="contacts_too_little_sent">ดูเหมือนว่าคุณส่ง bitcoin น้อยกว่าที่ได้รับการร้องขอ ผู้ติดต่อของคุณจะยังคงได้รับ bitcoin ที่คุณส่ง แต่เราจะไม่ทำเครื่องหมายว่าการชำระเงินนี้เสร็จสิ้น</string>
     <string name="contacts_second_password_prompt">เพื่อใช้บริการนี้ เราต้องการให้คุณกรอกรหัสผ่านที่สองของคุณ คุณควรจำเป็นต้องกรอกสิ่งนี้เพียงครั้งเดียวเพื่อใช้การใช้งานผู้ติดต่อ</string>
-    <string name="contacts_pending_transaction">ธุรกรรมที่รอดำเนินการ</string>
-    <string name="contacts_transaction_history">ประวัติธุรกรรม</string>
     <string name="contacts_request_money_receive">ส่งคำร้องไปยังผู้ติดต่อ</string>
     <string name="contacts_no_confirmed_contacts_found">ไม่พบผู้ติดต่อที่ได้รับการยืนยัน!</string>
     <string name="contacts_decline_pending_transaction">คุณแน่ใจหรือไม่ว่าคุณต้องการปฏิเสธธุรกรรมที่รอดำเนินการนี้?</string>
@@ -476,12 +470,6 @@
     <string name="contacts_pending_transaction_decline_failure">การปฏิเสธธุรกรรมที่รอดำเนินการล้มเหลว</string>
     <string name="contacts_pending_transaction_cancel_success">ยกเลิกธุรกรรมที่รอดำเนินการเรียบร้อยแล้ว</string>
     <string name="contacts_pending_transaction_cancel_failure">การยกเลิกธุรกรรมที่รอดำเนินการล้มเหลว</string>
-    <string name="contacts_sending_to_contact_waiting">กำลังส่ง %1$s ไปยัง %2$s\nกำลังรอให้ %2$s รับ</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s ถูกร้องขอโดย %2$s\nพร้อมส่ง</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">ร้องขอ %1$s จาก %2$s\nกำลังรอการชำระเงิน</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">กำลังรับ %1$s จาก %2$s\nกำลังรอให้คุณรับ</string>
-    <string name="contacts_receiving_declined">การชำระเงินถูกปฏิเสธ</string>
-    <string name="contacts_receiving_cancelled">การชำระเงินถูกยกเลิก</string>
     <string name="contacts_send_complete">ส่ง %1$s ไปยัง %2$s</string>
     <string name="contacts_receive_complete">รับ %1$s จาก %2$s</string>
     <string name="contacts_received">ได้รับจาก %1$s</string>
@@ -528,7 +516,7 @@
     <string name="contacts_address_sent_success">ส่งที่อยู่สำเร็จแล้ว</string>
     <string name="contacts_being_invited">รับคำเชิญ</string>
     <string name="contacts_broadcasting_payment">เราเพิ่งแจ้งให้ผู้ติดต่อของคุณทราบว่าคุณได้ส่ง bitcoin ไปเล็กน้อย โปรดรอ</string>
-    <string name="contacts_choose_account_message">เลือกว่าคุณต้องการรับเงินของคุณไปยังที่ใด</string>
+    <string name="contacts_balance_dialog_choose_account_message">เลือกว่าคุณต้องการรับเงินของคุณไปยังที่ใด</string>
     <string name="contacts_choose_pairing_method">เลือกวิธีการจับคู่ที่คุณต้องการใช้เพื่อเพิ่มผู้ติดต่อที่ไว้วางใจ:</string>
     <string name="contacts_delete">ลบผู้ติดต่อ</string>
     <string name="contacts_delete_contact_success">ลบผู้ติดต่อแล้ว</string>

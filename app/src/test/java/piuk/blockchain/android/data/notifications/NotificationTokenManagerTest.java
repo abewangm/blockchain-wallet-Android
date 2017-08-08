@@ -5,20 +5,14 @@ import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.util.PrefsUtil;
 
 import static org.mockito.Matchers.anyString;
@@ -26,8 +20,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
 public class NotificationTokenManagerTest {
 
     private NotificationTokenManager subject;

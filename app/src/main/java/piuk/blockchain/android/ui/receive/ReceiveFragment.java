@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -24,9 +23,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,7 +32,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -49,47 +46,57 @@ import org.bitcoinj.uri.BitcoinURI;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.subjects.PublishSubject;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.contacts.PaymentRequestType;
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentReceiveBinding;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
-import piuk.blockchain.android.ui.customviews.CustomKeypad;
-import piuk.blockchain.android.ui.customviews.CustomKeypadCallback;
+import piuk.blockchain.android.ui.contacts.IntroducingContactsPromptDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
+import piuk.blockchain.android.util.EditTextUtils;
 import piuk.blockchain.android.util.PermissionUtil;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
-public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataListener, CustomKeypadCallback {
+public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter> implements ReceiveView {
 
-    private static final String TAG = ReceiveFragment.class.getSimpleName();
     private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
-    @Thunk ReceiveViewModel viewModel;
+    @Inject ReceivePresenter receivePresenter;
     @Thunk FragmentReceiveBinding binding;
-    private CustomKeypad customKeypad;
     private BottomSheetDialog bottomSheetDialog;
     private OnReceiveFragmentInteractionListener listener;
 
     @Thunk boolean textChangeAllowed = true;
     private String uri;
     private long backPressed;
+    PublishSubject<Integer> textChangeSubject = PublishSubject.create();
     @Thunk int selectedAccountPosition = -1;
 
     private IntentFilter intentFilter = new IntentFilter(BalanceFragment.ACTION_INTENT);
@@ -97,16 +104,16 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(BalanceFragment.ACTION_INTENT)) {
-                if (viewModel != null) {
+                if (getPresenter() != null) {
                     // Update UI with new Address + QR
-                    viewModel.updateAccountList();
+                    getPresenter().updateAccountList();
                 }
             }
         }
     };
 
-    public ReceiveFragment() {
-        // Required empty public constructor
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     public static ReceiveFragment newInstance(int selectedAccountPosition) {
@@ -131,7 +138,8 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void startContactSelectionActivity() {
         AccountChooserActivity.startForResult(this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_CONTACT,
-                PaymentRequestType.CONTACT);
+                PaymentRequestType.CONTACT,
+                getString(R.string.from));
     }
 
     @Override
@@ -139,13 +147,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                              Bundle savedInstanceState) {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_receive, container, false);
-        viewModel = new ReceiveViewModel(this, Locale.getDefault());
-        viewModel.onViewReady();
-
+        onViewReady();
         setupLayout();
-
         selectAccount(selectedAccountPosition != -1
-                ? selectedAccountPosition : viewModel.getDefaultAccountPosition());
+                ? selectedAccountPosition : getPresenter().getDefaultAccountPosition());
 
         binding.scrollView.post(() -> binding.scrollView.scrollTo(0, 0));
 
@@ -162,51 +167,98 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     private void setupLayout() {
-        setCustomKeypad();
-
-        if (viewModel.getReceiveToList().size() == 1) {
-            binding.fromRow.setVisibility(View.GONE);
-            binding.dividerFromRow.setVisibility(View.GONE);
+        if (getPresenter().getReceiveToList().size() == 1) {
+            binding.toContainer.toConstraintLayout.setVisibility(View.GONE);
+            binding.divider2.setVisibility(View.GONE);
         }
 
         // BTC Field
         binding.amountContainer.amountBtc.setKeyListener(
-                DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
+                CommaEnabledDigitsKeyListener.getInstance(false, true));
         binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountContainer.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
 
         // Fiat Field
-        binding.amountContainer.amountFiat.setKeyListener(
-                DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
         binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
+        binding.amountContainer.amountFiat.setKeyListener(
+                CommaEnabledDigitsKeyListener.getInstance(false, true));
+        binding.amountContainer.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
 
         // Units
-        binding.amountContainer.currencyBtc.setText(viewModel.getCurrencyHelper().getBtcUnit());
-        binding.amountContainer.currencyFiat.setText(viewModel.getCurrencyHelper().getFiatUnit());
+        binding.amountContainer.currencyBtc.setText(getPresenter().getCurrencyHelper().getBtcUnit());
+        binding.amountContainer.currencyFiat.setText(getPresenter().getCurrencyHelper().getFiatUnit());
 
         // QR Code
-        binding.qr.setOnClickListener(v -> showClipboardWarning());
-        binding.qr.setOnLongClickListener(view -> {
+        binding.qrImage.setOnClickListener(v -> showClipboardWarning());
+        binding.qrImage.setOnLongClickListener(view -> {
             onShareClicked();
             return true;
         });
 
-        binding.destination.setOnClickListener(v ->
+        binding.toContainer.toAddressTextView.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
-                        PaymentRequestType.REQUEST));
+                        PaymentRequestType.REQUEST,
+                        getString(R.string.to)));
 
-        binding.imageviewDropdownReceive.setOnClickListener(v ->
+        binding.toContainer.toArrowImage.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
-                        PaymentRequestType.REQUEST));
+                        PaymentRequestType.REQUEST,
+                        getString(R.string.to)));
 
-        if (BuildConfig.CONTACTS_ENABLED) {
-            binding.buttonSendToContact.setOnClickListener(v ->
-                    viewModel.onSendToContactClicked(binding.amountContainer.amountBtc.getText().toString()));
-        } else {
-            binding.buttonSendToContact.setVisibility(View.GONE);
+        textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(this::displayQRCode)
+                .subscribe(new IgnorableDefaultObserver<>());
+
+        binding.fromContainer.fromAddressTextView.setHint(R.string.contact_select);
+
+        binding.whatsThis.setOnClickListener(v -> {
+            IntroducingContactsPromptDialog dialog = IntroducingContactsPromptDialog.newInstance();
+            dialog.setDismissButtonListener(view -> {
+                new PrefsUtil(getActivity()).setValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, true);
+                dialog.dismiss();
+                hideContactsIntroduction();
+            });
+            dialog.showDialog(getFragmentManager());
+        });
+
+        binding.fromContainer.fromAddressTextView.setOnClickListener(v -> {
+            getPresenter().clearSelectedContactId();
+            getPresenter().onSendToContactClicked();
+        });
+
+        binding.fromContainer.fromArrowImage.setOnClickListener(v -> {
+            getPresenter().clearSelectedContactId();
+            getPresenter().onSendToContactClicked();
+        });
+
+        binding.buttonRequestPayment.setOnClickListener(v ->
+        {
+            if (getPresenter().getSelectedContactId() == null) {
+                showToast(getString(R.string.contact_select_first), ToastCustom.TYPE_ERROR);
+            } else if (!getPresenter().isValidAmount(binding.amountContainer.amountBtc.getText().toString())) {
+                showToast(getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR);
+            } else if (listener != null) {
+                listener.onTransactionNotesRequested(
+                        getPresenter().getConfirmationDetails(),
+                        PaymentRequestType.REQUEST,
+                        getPresenter().getSelectedContactId(),
+                        getPresenter().getCurrencyHelper().getLongAmount(
+                                binding.amountContainer.amountBtc.getText().toString()),
+                        getPresenter().getCorrectedAccountIndex(selectedAccountPosition));
+            }
+        });
+
+        if (!BuildConfig.CONTACTS_ENABLED) {
+            binding.buttonRequestPayment.setVisibility(View.GONE);
+            binding.fromContainer.fromConstraintLayout.setVisibility(View.GONE);
+            binding.whatsThis.setVisibility(View.GONE);
+            binding.divider4.setVisibility(View.GONE);
         }
     }
 
@@ -217,21 +269,23 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             binding.amountContainer.amountBtc.removeTextChangedListener(this);
             NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
-            btcFormat.setMaximumFractionDigits(viewModel.getCurrencyHelper().getMaxBtcDecimalLength() + 1);
+            btcFormat.setMaximumFractionDigits(getPresenter().getCurrencyHelper().getMaxBtcDecimalLength() + 1);
             btcFormat.setMinimumFractionDigits(0);
 
-            s = formatEditable(s, input, viewModel.getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
+            s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
 
             binding.amountContainer.amountBtc.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateFiatTextField(s.toString());
+                // Remove any possible decimal separators and replace with the localised version
+                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
+                        .replace(",", getDefaultDecimalSeparator());
+                getPresenter().updateFiatTextField(sanitisedString);
 
-                displayQRCode(selectedAccountPosition);
+                textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
             }
-            setKeyListener(s, binding.amountContainer.amountBtc);
         }
 
         @Override
@@ -262,12 +316,14 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                viewModel.updateBtcTextField(s.toString());
+                // Remove any possible decimal separators and replace with the localised version
+                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
+                        .replace(",", getDefaultDecimalSeparator());
+                getPresenter().updateBtcTextField(sanitisedString);
 
-                displayQRCode(selectedAccountPosition);
+                textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
             }
-            setKeyListener(s, binding.amountContainer.amountFiat);
         }
 
         @Override
@@ -282,49 +338,45 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     };
 
     @Thunk
-    void setKeyListener(Editable s, EditText editText) {
-        if (s.toString().contains(getDefaultDecimalSeparator())) {
-            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
-        } else {
-            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789" + getDefaultDecimalSeparator()));
-        }
-    }
-
-    @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
         try {
-            if (input.contains(getDefaultDecimalSeparator())) {
-                String dec = input.substring(input.indexOf(getDefaultDecimalSeparator()));
-                if (!dec.isEmpty()) {
-                    dec = dec.substring(1);
-                    if (dec.length() > maxLength) {
-                        editText.setText(input.substring(0, input.length() - 1));
-                        editText.setSelection(editText.getText().length());
-                        s = editText.getEditableText();
-                    }
-                }
+            if (input.contains(".")) {
+                return getEditable(s, input, maxLength, editText, input.indexOf("."));
+            } else if (input.contains(",")) {
+                return getEditable(s, input, maxLength, editText, input.indexOf(","));
             }
         } catch (NumberFormatException e) {
-            Log.e(TAG, "afterTextChanged: ", e);
+            Timber.e(e);
         }
         return s;
     }
 
+    private Editable getEditable(Editable s, String input, int maxLength, EditText editText, int index) {
+        String dec = input.substring(index);
+        if (!dec.isEmpty()) {
+            dec = dec.substring(1);
+            if (dec.length() > maxLength) {
+                editText.setText(input.substring(0, input.length() - 1));
+                editText.setSelection(editText.getText().length());
+                s = editText.getEditableText();
+            }
+        }
+        return s;
+    }
+
+    @Thunk
+    String getDefaultDecimalSeparator() {
+        return String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator());
+    }
+
+    @Override
     public int getSelectedAccountPosition() {
         return selectedAccountPosition;
     }
 
-    private void setCustomKeypad() {
-        customKeypad = binding.keyboard;
-        customKeypad.setCallback(this);
-        customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
-
-        // Enable custom keypad and disables default keyboard from popping up
-        customKeypad.enableOnView(binding.amountContainer.amountBtc);
-        customKeypad.enableOnView(binding.amountContainer.amountFiat);
-
-        binding.amountContainer.amountBtc.setText("");
-        binding.amountContainer.amountBtc.requestFocus();
+    @Override
+    public String getBtcAmount() {
+        return binding.amountContainer.amountBtc.getText().toString();
     }
 
     private void selectAccount(int position) {
@@ -334,9 +386,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
     @Thunk
     void displayQRCode(int position) {
-        Object object = viewModel.getAccountItemForPosition(position);
+        Object object = getPresenter().getAccountItemForPosition(position);
         // Disable send to contact button if not using HD account
-        binding.buttonSendToContact.setEnabled(object instanceof Account);
+        binding.buttonRequestPayment.setEnabled(object instanceof Account);
 
         String label;
         String receiveAddress = null;
@@ -349,14 +401,14 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             }
         } else {
             Account account = (Account) object;
-            viewModel.getV3ReceiveAddress(account);
+            getPresenter().getV3ReceiveAddress(account);
             label = account.getLabel();
             if (label == null || label.isEmpty()) {
                 label = account.getXpub();
             }
         }
 
-        binding.destination.setText(StringUtils.abbreviate(label, 32));
+        binding.toContainer.toAddressTextView.setText(StringUtils.abbreviate(label, 32));
         updateReceiveAddress(receiveAddress);
     }
 
@@ -364,12 +416,12 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void updateReceiveAddress(String receiveAddress) {
         binding.receivingAddress.setText(receiveAddress);
 
-        long amountLong = viewModel.getCurrencyHelper().getLongAmount(
+        long amountLong = getPresenter().getCurrencyHelper().getLongAmount(
                 binding.amountContainer.amountBtc.getText().toString());
 
-        BigInteger amountBigInt = viewModel.getCurrencyHelper().getUndenominatedAmount(amountLong);
+        BigInteger amountBigInt = getPresenter().getCurrencyHelper().getUndenominatedAmount(amountLong);
 
-        if (viewModel.getCurrencyHelper().getIfAmountInvalid(amountBigInt)) {
+        if (getPresenter().getCurrencyHelper().getIfAmountInvalid(amountBigInt)) {
             ToastCustom.makeText(getContext(), getString(R.string.invalid_amount), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
             return;
         }
@@ -382,8 +434,25 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
             } else {
                 uri = "bitcoin:" + receiveAddress;
             }
-            viewModel.generateQrCode(uri);
+            getPresenter().generateQrCode(uri);
         }
+    }
+
+    @Override
+    public void hideContactsIntroduction() {
+        binding.fromContainer.fromArrowImage.setVisibility(View.VISIBLE);
+        binding.whatsThis.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showContactsIntroduction() {
+        binding.fromContainer.fromArrowImage.setVisibility(View.INVISIBLE);
+        binding.whatsThis.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public String getContactName() {
+        return binding.toContainer.toAddressTextView.getText().toString();
     }
 
     @Override
@@ -400,14 +469,13 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     public void onResume() {
         super.onResume();
         setupToolbar();
-        closeKeypad();
-        viewModel.updateAccountList();
+        getPresenter().updateAccountList();
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
     public void showQrLoading() {
-        binding.qr.setVisibility(View.INVISIBLE);
+        binding.qrImage.setVisibility(View.INVISIBLE);
         binding.receivingAddress.setVisibility(View.INVISIBLE);
         binding.progressBar.setVisibility(View.VISIBLE);
     }
@@ -415,9 +483,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Override
     public void showQrCode(@Nullable Bitmap bitmap) {
         binding.progressBar.setVisibility(View.INVISIBLE);
-        binding.qr.setVisibility(View.VISIBLE);
+        binding.qrImage.setVisibility(View.VISIBLE);
         binding.receivingAddress.setVisibility(View.VISIBLE);
-        binding.qr.setImageBitmap(bitmap);
+        binding.qrImage.setImageBitmap(bitmap);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -432,15 +500,15 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
                 Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
-                if (viewModel.warnWatchOnlySpend()) {
+                if (getPresenter().warnWatchOnlySpend()) {
                     promptWatchOnlySpendWarning(object);
                 }
 
-                selectAccount(viewModel.getObjectPosition(object));
+                selectAccount(getPresenter().getObjectPosition(object));
 
             } catch (ClassNotFoundException | IOException e) {
-                Log.e(TAG, "onActivityResult: ", e);
-                selectAccount(viewModel.getDefaultAccountPosition());
+                Timber.e(e);
+                selectAccount(getPresenter().getDefaultAccountPosition());
             }
             // Choose contact for request
         } else if (resultCode == Activity.RESULT_OK
@@ -451,29 +519,25 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                 Contact contact = new ObjectMapper().readValue(
                         data.getStringExtra(EXTRA_SELECTED_ITEM),
                         Contact.class);
+                getPresenter().setSelectedContactId(contact.getId());
+                binding.fromContainer.fromAddressTextView.setText(contact.getName());
 
-                if (listener != null) {
-                    listener.onTransactionNotesRequested(
-                            contact.getId(),
-                            viewModel.getCorrectedAccountIndex(selectedAccountPosition),
-                            PaymentRequestType.REQUEST,
-                            viewModel.getCurrencyHelper().getLongAmount(
-                                    binding.amountContainer.amountBtc.getText().toString()));
-                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
     private void setupBottomSheet(String uri) {
-        List<ReceiveViewModel.SendPaymentCodeData> list = viewModel.getIntentDataList(uri);
+        List<ReceivePresenter.SendPaymentCodeData> list = getPresenter().getIntentDataList(uri);
         if (list != null) {
             ShareReceiveIntentAdapter adapter = new ShareReceiveIntentAdapter(list);
             adapter.setItemClickedListener(() -> bottomSheetDialog.dismiss());
 
             View sheetView = View.inflate(getActivity(), R.layout.bottom_sheet_receive, null);
-            RecyclerView recyclerView = (RecyclerView) sheetView.findViewById(R.id.recycler_view);
+            RecyclerView recyclerView = sheetView.findViewById(R.id.recycler_view);
             recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -485,8 +549,6 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     private void onShareClicked() {
-        closeKeypad();
-
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.receive_address_to_share)
@@ -551,13 +613,13 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
                     .create();
 
             dialogBinding.confirmCancel.setOnClickListener(v -> {
-                selectAccount(viewModel.getDefaultAccountPosition());
-                viewModel.setWarnWatchOnlySpend(!dialogBinding.confirmDontAskAgain.isChecked());
+                selectAccount(getPresenter().getDefaultAccountPosition());
+                getPresenter().setWarnWatchOnlySpend(!dialogBinding.confirmDontAskAgain.isChecked());
                 alertDialog.dismiss();
             });
 
             dialogBinding.confirmContinue.setOnClickListener(v -> {
-                viewModel.setWarnWatchOnlySpend(!dialogBinding.confirmDontAskAgain.isChecked());
+                getPresenter().setWarnWatchOnlySpend(!dialogBinding.confirmDontAskAgain.isChecked());
                 alertDialog.dismiss();
             });
 
@@ -565,15 +627,9 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         }
     }
 
-    private String getDefaultDecimalSeparator() {
-        DecimalFormat format = (DecimalFormat) DecimalFormat.getInstance(Locale.getDefault());
-        DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
-        return Character.toString(symbols.getDecimalSeparator());
-    }
-
     @Override
     public Bitmap getQrBitmap() {
-        return ((BitmapDrawable) binding.qr.getDrawable()).getBitmap();
+        return ((BitmapDrawable) binding.qrImage.getDrawable()).getBitmap();
     }
 
     @Override
@@ -584,7 +640,7 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     @Override
     public void onAccountDataChanged() {
         selectAccount(selectedAccountPosition != -1
-                ? selectedAccountPosition : viewModel.getDefaultAccountPosition());
+                ? selectedAccountPosition : getPresenter().getDefaultAccountPosition());
     }
 
     @Override
@@ -606,14 +662,10 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
     }
 
     public void onBackPressed() {
-        if (customKeypad.isVisible()) {
-            closeKeypad();
-        } else {
-            handleBackPressed();
-        }
+        handleBackPressed();
     }
 
-    public void handleBackPressed() {
+    private void handleBackPressed() {
         if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
             AccessState.getInstance().logout(getContext());
             return;
@@ -634,54 +686,20 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
         super.onPause();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        viewModel.destroy();
-    }
-
-    private void closeKeypad() {
-        customKeypad.setNumpadVisibility(View.GONE);
-    }
-
-    @Override
-    public void onKeypadClose() {
-        // Show bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
-        // Resize activity back to initial state
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-
-        layoutParams.addRule(RelativeLayout.ABOVE, 0);
-        layoutParams.setMargins(
-                0, 0, 0, (int) getResources().getDimension(R.dimen.action_bar_height));
-
-        binding.scrollView.setLayoutParams(layoutParams);
-    }
-
-    @Override
-    public void onKeypadOpen() {
-        // Hide bottom nav
-        ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
-    }
-
-    @Override
-    public void onKeypadOpenCompleted() {
-        // Resize activity around keyboard view
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-
-        layoutParams.addRule(RelativeLayout.ABOVE, R.id.keyboard);
-
-        binding.scrollView.setLayoutParams(layoutParams);
-    }
-
     public void finishPage() {
         if (listener != null) {
             listener.onReceiveFragmentClose();
         }
+    }
+
+    @Override
+    protected ReceivePresenter createPresenter() {
+        return receivePresenter;
+    }
+
+    @Override
+    protected ReceiveView getMvpView() {
+        return this;
     }
 
     @Override
@@ -704,7 +722,11 @@ public class ReceiveFragment extends Fragment implements ReceiveViewModel.DataLi
 
         void onReceiveFragmentClose();
 
-        void onTransactionNotesRequested(String contactId, @Nullable Integer accountPosition, PaymentRequestType paymentRequestType, long satoshis);
+        void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
+                                         PaymentRequestType paymentRequestType,
+                                         String contactId,
+                                         long satoshis,
+                                         int accountPosition);
 
     }
 }

@@ -23,7 +23,6 @@ interface PersistentPrefs {
     String KEY_NEWLY_CREATED_WALLET = "newly_created_wallet";
     String LOGGED_OUT = "logged_out";
     String KEY_BACKEND_ENVIRONMENT = "backend_environment";
-    String KEY_FIRST_RUN = "first_run";
     String KEY_SECURITY_TIME_ELAPSED = "security_time_elapsed";
     String KEY_SECURITY_TWO_FA_NEVER = "security_two_fa_never";
     String KEY_SECURITY_BACKUP_NEVER = "security_backup_never";
@@ -35,12 +34,11 @@ interface PersistentPrefs {
     String KEY_RECEIVE_SHORTCUTS_ENABLED = "receive_shortcuts_enabled";
     String KEY_FIREBASE_TOKEN = "firebase_token";
     String KEY_SWIPE_TO_RECEIVE_ENABLED = "swipe_to_receive_enabled";
-    String KEY_SURVEY_COMPLETED = "survey_completed";
-    String KEY_SURVEY_VISITS = "survey_visits";
     String KEY_APP_VISITS = "app_visits";
     String KEY_SCREENSHOTS_ENABLED = "screenshots_enabled";
     String KEY_ONBOARDING_COMPLETE = "onboarding_complete";
     String KEY_OVERLAY_TRUSTED = "overlay_trusted";
+    String KEY_CONTACTS_INTRODUCTION_COMPLETE = "contacts_intro_complete";
 
     String KEY_LATEST_ANNOUNCEMENT_DISMISSED = "latest_announcement_dismissed";
     String KEY_LATEST_ANNOUNCEMENT_SEEN = "latest_announcement_seen";

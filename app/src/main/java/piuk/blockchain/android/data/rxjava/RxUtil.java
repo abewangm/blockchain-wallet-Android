@@ -10,10 +10,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.ui.base.BasePresenter;
+import timber.log.Timber;
 
 /**
- * Created by adambennett on 12/08/2016.
- *
  * A class for basic RxJava utilities, ie Transformer classes
  */
 
@@ -26,7 +25,7 @@ public final class RxUtil {
     public static <T> ObservableTransformer<T, T> applySchedulersToObservable() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(Throwable::printStackTrace);
+                .doOnError(Timber::e);
     }
 
     /**
@@ -36,7 +35,7 @@ public final class RxUtil {
     public static <T> SingleTransformer<T, T> applySchedulersToSingle() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(Throwable::printStackTrace);
+                .doOnError(Timber::e);
     }
 
     /**
@@ -46,7 +45,7 @@ public final class RxUtil {
     public static CompletableTransformer applySchedulersToCompletable() {
         return observable -> observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnError(Throwable::printStackTrace);
+                .doOnError(Timber::e);
     }
 
     /**
@@ -67,7 +66,7 @@ public final class RxUtil {
      * cancelled automatically by the Presenter on Android lifecycle events.
      *
      * @param presenter A class extending {@link BasePresenter}
-     * @param <T>       The upstream {@link Observable}
+     * @param <T>       The type of the upstream {@link Observable}
      */
     public static <T> ObservableTransformer<T, T> addObservableToCompositeDisposable(BasePresenter presenter) {
         return upstream -> upstream.doOnSubscribe(disposable ->
@@ -85,4 +84,18 @@ public final class RxUtil {
         return upstream -> upstream.doOnSubscribe(disposable ->
                 presenter.getCompositeDisposable().add(disposable));
     }
+
+    /**
+     * Adds the subscription to the upstream {@link Single} to the {@link CompositeDisposable}
+     * supplied by a class extending {@link BasePresenter}. This allows the subscription to be
+     * cancelled automatically by the Presenter on Android lifecycle events.
+     *
+     * @param presenter A class extending {@link BasePresenter}
+     * @param <T>       The type of the upstream {@link Single}
+     */
+    public static <T> SingleTransformer<T, T> addSingleToCompositeDisposable(BasePresenter presenter) {
+        return upstream -> upstream.doOnSubscribe(disposable ->
+                presenter.getCompositeDisposable().add(disposable));
+    }
+
 }

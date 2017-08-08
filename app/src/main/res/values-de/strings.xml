@@ -356,7 +356,6 @@
     <string name="new_password">Neues Passwort</string>
     <string name="sms_verified">Handynummer wurde verifiziert</string>
     <string name="preferences">Voreinstellungen</string>
-    <string name="two_fa_summary">Schützen Sie durch die Aktivierung der 2-Schritt-Verifizierung Ihre Wallet vor unberechtigten Zugriffen. Sie können zur Sicherung Ihrer Wallet wahlweise eine kostenlose App oder Ihre Handynummer verwenden. Wenn Sie über den Webbrowser auf Ihre Wallet zugreifen möchten, wird nach diesem Code gefragt.\n\nZur Verwendung einer anderen Authentifizierungsmethode, melden Sie sich bitte bei unserer Web-Wallet an.</string>
 
     <string name="rate_title">Blockchain Wallet bewerten</string>
     <string name="rate_message">Gefällt Ihnen die Blockchain Wallet? Bitte nehmen Sie sich einen Moment Zeit, um bei Google Play eine Bewertung zu hinterlassen und andere darüber zu informieren.</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">Durch die Aktivierung dieser Option bekommen Sie eine Empfangsadresse angezeigt, wenn Sie auf dem PIN-Bildschirm nach links wischen. So lässt sich Bitcoin noch schneller empfangen. Es werden fünf Adressen hintereinander geladen. Danach ist zur Anzeige neuer Adressen eine Anmeldung erforderlich.</string>
     <string name="swipe_receive_no_addresses">Derzeit können keine weiteren Adresse geladen werden. Zum Laden zusätzlicher Adressen melden Sie sich bei der App an.</string>
 
-    <string name="survey_message">Würden Sie bitte eine kurze Umfrage beantworten und so dazu beitragen, all das, was mit Ihrer Wallet zu tun hat, noch zu verbessern?\n\nWir wissen Ihr Feedback zu schätzen!</string>
-    <string name="survey_positive_button">Umfrage beantworten</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Überblick</string>
     <string name="create_a_wallet">Eine Wallet erstellen</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header">Hallo! Wir haben Ihrer Blockchain-Wallet diese neuen Funktionen hinzugefügt:</string>
     <string name="verify_email2">Ihre verifizierte E-Mail-Adresse wird bei Feststellung verdächtiger Aktivitäten zur Übersendung von Anmeldecodes, aber auch zur Erinnerung an Ihre persönliche Wallet-Anmelde-ID und zum Versand von Bitcoin-Zahlungsbenachrichtigungen bei Eintreffen von Guthaben verwendet.</string>
     <string name="enable_screenshots">Bildschirmaufnahmen aktivieren</string>
-    <string name="enable_screenshots_warning">Sie sind dabei, für Ihrer Blockchain-App Bildschirmaufnahmen zu aktivieren. Einige App-interne Bildschirmanzeigen geben möglicherweise sensitive Daten preis. Außerdem können andere Anwendungen auf diese Aufnahmen zugreifen.</string>
+    <string name="enable_screenshots_summary">Sie sind dabei, für Ihrer Blockchain-App Bildschirmaufnahmen zu aktivieren. Einige App-interne Bildschirmanzeigen geben möglicherweise sensitive Daten preis. Außerdem können andere Anwendungen auf diese Aufnahmen zugreifen.</string>
 
     <string name="information">Information</string>
     <string name="transaction_detail_verify">Auf Blockchain.info überprüfen</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">Anscheinend haben Sie mehr als die erforderliche Anzahl an Bitcoin gesendet. Bei Bedarf können Sie Ihren Kontakt bitten, eine entsprechende Rückerstattung zu leisten. Wir haben die Zahlung nicht als abgeschlossen gekennzeichnet.</string>
     <string name="contacts_too_little_sent">Anscheinend haben Sie weniger als die erforderliche Anzahl an Bitcoin gesendet. Ihr Kontakt wird zwar das von Ihnen gesendete Bitcoin erhalten, doch wir haben die Zahlung nicht als abgeschlossen gekennzeichnet.</string>
     <string name="contacts_second_password_prompt">Zur Benutzung dieses Service müssen Sie uns das zweite Passwort angeben. Zur Verwendung der Kontaktfunktion ist nur eine einmalige Eingabe erforderlich.</string>
-    <string name="contacts_pending_transaction">Ausstehende Transaktionen</string>
-    <string name="contacts_transaction_history">Verlaufsdaten</string>
     <string name="contacts_request_money_receive">Kontakt eine Anfrage senden</string>
     <string name="contacts_no_confirmed_contacts_found">Es wurden keine bestätigten Kontakte gefunden!</string>
     <string name="contacts_decline_pending_transaction">Möchten Sie diese ausstehende Transaktion wirklich ablehnen?</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">Die Ablehnung der ausstehenden Transaktion ist fehlgeschlagen</string>
     <string name="contacts_pending_transaction_cancel_success">Die ausstehende Transaktion wurde erfolgreich abgebrochen</string>
     <string name="contacts_pending_transaction_cancel_failure">Der Abbruch der ausstehenden Transaktion ist fehlgeschlagen</string>
-    <string name="contacts_sending_to_contact_waiting">%1$s werden zu %2$s gesendet\nEs wird auf Antwort von %2$s gewartet</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s angefordert von %2$s\nFertig zur Übersendung</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Forderte %1$s von %2$s an\nWarten auf Zahlung</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Empfang von %1$s seitens %2$s\nAuf Ihre Annahme wird gewartet</string>
-    <string name="contacts_receiving_declined">Zahlung abgelehnt</string>
-    <string name="contacts_receiving_cancelled">Zahlung abgebrochen</string>
     <string name="contacts_send_complete">Sendete %1$s an %2$s</string>
     <string name="contacts_receive_complete">Erhielt %1$s von %2$s</string>
     <string name="contacts_received">Erhalten von %1$s</string>
@@ -527,7 +515,7 @@
     <string name="contacts_address_sent_success">Adresse wurde erfolgreich versandt</string>
     <string name="contacts_being_invited">Einladung annehmen</string>
     <string name="contacts_broadcasting_payment">Wir informieren Ihren Kontakt gerade kurz darüber, dass Sie ihm Bitcoin geschickt haben. Bitte warten.</string>
-    <string name="contacts_choose_account_message">Wählen Sie aus, wo Sie Ihr Guthaben empfangen möchten.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Wählen Sie aus, wo Sie Ihr Guthaben empfangen möchten.</string>
     <string name="contacts_choose_pairing_method">Wählen Sie die Kombinationsweise, die Sie zur Hinzufügung eines vertrauenswürdigen Kontakts verwenden möchten:</string>
     <string name="contacts_delete">Kontakt löschen</string>
     <string name="contacts_delete_contact_success">Kontakt wurde gelöscht</string>

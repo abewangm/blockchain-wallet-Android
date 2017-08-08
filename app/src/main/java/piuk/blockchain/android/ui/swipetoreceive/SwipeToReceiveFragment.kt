@@ -12,19 +12,27 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_swipe_to_receive.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.websocket.WebSocketService
+import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.util.OSUtil
 import piuk.blockchain.android.util.extensions.*
+import javax.inject.Inject
 
 class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(), SwipeToReceiveView {
+
+    @Inject lateinit var swipeToReceivePresenter: SwipeToReceivePresenter
+
+    init {
+        Injector.getInstance().presenterComponent.inject(this)
+    }
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT) {
                 // Update UI with new Address + QR
-                getPresenter()?.onViewReady()
+                presenter?.onViewReady()
             }
         }
     }
@@ -39,9 +47,9 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
         return container!!.inflate(R.layout.fragment_swipe_to_receive)
     }
 
-    override fun createPresenter(): SwipeToReceivePresenter = SwipeToReceivePresenter()
+    override fun createPresenter() = swipeToReceivePresenter
 
-    override fun getMvpView(): SwipeToReceiveView = this
+    override fun getMvpView() = this
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -64,7 +72,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     }
 
     override fun displayReceiveAccount(accountName: String) {
-        edittext_account.text = accountName
+        edittext_account?.text = accountName
     }
 
     override fun setUiState(uiState: Int) {

@@ -23,6 +23,8 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
@@ -89,7 +91,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         transaction1.sendingObject = new ItemAccount("", "", null, null, null);
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setAddress("");
-        transaction1.sendingObject.accountObject = legacyAddress;
+        transaction1.sendingObject.setAccountObject(legacyAddress);
         transaction1.bigIntAmount = new BigInteger("1000000");
         transaction1.bigIntFee = new BigInteger("100");
         transaction1.unspentOutputBundle = new SpendableUnspentOutputs();
@@ -125,7 +127,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         transaction1.sendingObject = new ItemAccount("", "", null, null, null);
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setAddress("");
-        transaction1.sendingObject.accountObject = legacyAddress;
+        transaction1.sendingObject.setAccountObject(legacyAddress);
         transaction1.bigIntAmount = new BigInteger("1000000");
         transaction1.bigIntFee = new BigInteger("100");
         transaction1.unspentOutputBundle = new SpendableUnspentOutputs();

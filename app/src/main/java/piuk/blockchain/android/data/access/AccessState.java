@@ -7,6 +7,11 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
+import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.api.data.WalletOptions;
+import info.blockchain.wallet.metadata.Metadata;
+import io.reactivex.subjects.AsyncSubject;
+import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.ui.auth.LogoutActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -15,19 +20,21 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 public class AccessState {
 
-    private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
     public static final String LOGOUT_ACTION = "info.blockchain.wallet.LOGOUT";
 
+    private static final int SHOW_BTC = 1;
+    private static final int SHOW_FIAT = 2;
+    private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
+
     private static AccessState instance;
-    
+
     private PrefsUtil prefs;
     private RxBus rxBus;
-    
+
     private String pin;
     private PendingIntent logoutPendingIntent;
     private boolean isLoggedIn = false;
-    private boolean inSepaCountry = false;
-    private double buySellRolloutPercent = 0.0D;
+    private boolean canAutoLogout = true;
 
     public void initAccessState(Context context, PrefsUtil prefs, RxBus rxBus) {
         this.prefs = prefs;
@@ -57,8 +64,10 @@ public class AccessState {
      * Called from {@link BaseAuthActivity#onPause()}
      */
     public void startLogoutTimer(Context context) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + LOGOUT_TIMEOUT_MILLIS, logoutPendingIntent);
+        if (canAutoLogout) {
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + LOGOUT_TIMEOUT_MILLIS, logoutPendingIntent);
+        }
     }
 
     /**
@@ -77,27 +86,13 @@ public class AccessState {
         context.startActivity(intent);
     }
 
-    /**
-     * Returns whether or not a user is accessing their wallet from a SEPA country, ie should be
-     * able to see buy/sell prompts.
-     */
-    public boolean getInSepaCountry() {
-        return inSepaCountry;
+    public boolean isBtc() {
+        final int balanceDisplayState = prefs.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
+        return balanceDisplayState != SHOW_FIAT;
     }
 
-    public void setInSepaCountry(boolean inSepaCountry) {
-        this.inSepaCountry = inSepaCountry;
-    }
-
-    /**
-     * Returns the current Buy/Sell rollout percent for Android. If 0, Buy/Sell should be disabled.
-     */
-    public double getBuySellRolloutPercent() {
-        return buySellRolloutPercent;
-    }
-
-    public void setBuySellRolloutPercent(double buySellRolloutPercent) {
-        this.buySellRolloutPercent = buySellRolloutPercent;
+    public void setIsBtc(boolean isBtc) {
+        prefs.setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
     }
 
     public boolean isLoggedIn() {
@@ -118,4 +113,11 @@ public class AccessState {
         rxBus.emitEvent(AuthEvent.class, AuthEvent.UNPAIR);
     }
 
+    public void disableAutoLogout() {
+        canAutoLogout = false;
+    }
+
+    public void enableAutoLogout() {
+        canAutoLogout = true;
+    }
 }

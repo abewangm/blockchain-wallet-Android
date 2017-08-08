@@ -356,7 +356,6 @@
     <string name="new_password">新密码</string>
     <string name="sms_verified">手机号码已验证</string>
     <string name="preferences">首选项</string>
-    <string name="two_fa_summary">通过启用 2 步验证，保护您的钱包免遭未经授权的访问。您可以选择使用手机号码保护您的钱包。在您尝试通过网页浏览器访问您的钱包时会要求该代码。\n\n若要使用其它验证方式，请登录我们的网络钱包。</string>
 
     <string name="rate_title">给 Blockchain 钱包打分</string>
     <string name="rate_message">喜欢 Blockchain 钱包？请花一些时间在 Google Play 上留下评论，让其他人知道。</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">启用该选项以在 PIN 码屏幕上向左滑动时显示接收地址，使得比特币的接收甚至更加快速。将连续载入5个地址，而后需要登录以显示新地址。</string>
     <string name="swipe_receive_no_addresses">目前不能载入更多地址。登录应用以载入更多。</string>
 
-    <string name="survey_message">您想要填写一份简单的问卷调查以帮助改进您的钱包体验吗？\n\n我们非常重视您的反馈意见！</string>
-    <string name="survey_positive_button">接受调查</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">概览</string>
     <string name="create_a_wallet">创建钱包</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header">嘿，我们为您的 Blockchain wallet 添加了新功能：</string>
     <string name="verify_email2">在检测到可疑或不寻常活动时，系统将使用您经过验证的电子邮件地址发送登录代码，为您提醒钱包登录 ID，以及在您接收资金时发送比特币支付提醒。</string>
     <string name="enable_screenshots">启用截屏</string>
-    <string name="enable_screenshots_warning">您即将为 Blockchain 应用启用截屏功能。应用内的有些屏幕可能会显示敏感信息。其它应用将能够访问这些截图。</string>
+    <string name="enable_screenshots_summary">您即将为 Blockchain 应用启用截屏功能。应用内的有些屏幕可能会显示敏感信息。其它应用将能够访问这些截图。</string>
 
     <string name="information">信息</string>
     <string name="transaction_detail_verify">在 Blockchain.info 上验证</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">似乎您发送的比特币多于所要求的。若希望，您可以向您的联系人请求退还一些。我们尚未将付款标记为完成。</string>
     <string name="contacts_too_little_sent">似乎您发送的比特币少于所要求的。您的联系人仍然会接收您发出的比特币，但是，我们尚未将付款标记为完成。</string>
     <string name="contacts_second_password_prompt">若要使用该服务，我们需要您输入您的第二个密码。您应只需要输入这个一次便可以使用联系人功能。</string>
-    <string name="contacts_pending_transaction">待定交易</string>
-    <string name="contacts_transaction_history">交易历史</string>
     <string name="contacts_request_money_receive">向联系人发送请求</string>
     <string name="contacts_no_confirmed_contacts_found">未找到已确认联系人！</string>
     <string name="contacts_decline_pending_transaction">您确定要拒绝这项待定交易吗？</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">拒绝待定交易失败</string>
     <string name="contacts_pending_transaction_cancel_success">已成功取消待定交易</string>
     <string name="contacts_pending_transaction_cancel_failure">取消待定交易失败</string>
-    <string name="contacts_sending_to_contact_waiting">正在向 %2$s 发送 %1$s\n正在等待%2$s 接受</string>
-    <string name="contacts_payment_requested_ready_to_send">%2$s 请求的 %1$s\n 准备发送</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">向 %2$s 请求了 %1$s\n 正在等待付款</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">正在从 %2$s 接收 %1$s\n 正在等待您接受</string>
-    <string name="contacts_receiving_declined">付款被拒绝</string>
-    <string name="contacts_receiving_cancelled">付款被取消</string>
     <string name="contacts_send_complete">已向 %2$s 发送 %1$s</string>
     <string name="contacts_receive_complete">从 %2$s 接收了 %1$s</string>
     <string name="contacts_received">从 %1$s 接收了</string>
@@ -527,7 +515,7 @@
     <string name="contacts_address_sent_success">地址发送成功</string>
     <string name="contacts_being_invited">接受邀请</string>
     <string name="contacts_broadcasting_payment">我们刚刚通知了您的联系人，您向他们发送了一些比特币，请等待。</string>
-    <string name="contacts_choose_account_message">选择您希望在哪里接受您的资金。</string>
+    <string name="contacts_balance_dialog_choose_account_message">选择您希望在哪里接受您的资金。</string>
     <string name="contacts_choose_pairing_method">选择您希望用于添加一个受信任联系人的配对方式：</string>
     <string name="contacts_delete">删除联系人</string>
     <string name="contacts_delete_contact_success">已删除联系人</string>

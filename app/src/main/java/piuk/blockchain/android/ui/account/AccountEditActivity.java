@@ -23,11 +23,14 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.ImageView;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityAccountEditBinding;
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
@@ -39,45 +42,50 @@ import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
-public class AccountEditActivity extends BaseAuthActivity implements AccountEditViewModel.DataListener,
+public class AccountEditActivity extends BaseMvpActivity<AccountEditView, AccountEditPresenter>
+        implements AccountEditView,
         ConfirmPaymentDialog.OnConfirmDialogInteractionListener {
 
     private static final int ADDRESS_LABEL_MAX_LENGTH = 17;
     private static final int SCAN_PRIVX = 302;
 
-    @Thunk AccountEditViewModel viewModel;
+    @Inject AccountEditPresenter accountEditPresenter;
     @Thunk AlertDialog transactionSuccessDialog;
     private ActivityAccountEditBinding binding;
     private MaterialProgressDialog progress;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_account_edit);
-        viewModel = new AccountEditViewModel(new AccountEditModel(this), this);
-        binding.setViewModel(viewModel);
+        getPresenter().setAccountModel(new AccountEditModel(this));
+        binding.setViewModel(accountEditPresenter);
 
         setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.edit);
 
         binding.tvTransfer.setOnClickListener(v -> {
-            if (viewModel.transferFundsClickable()) {
+            if (getPresenter().transferFundsClickable()) {
                 new SecondPasswordHandler(this).validate(new SecondPasswordHandler.ResultListener() {
                     @Override
                     public void onNoSecondPassword() {
-                        viewModel.onClickTransferFunds();
+                        getPresenter().onClickTransferFunds();
                     }
 
                     @Override
                     public void onSecondPasswordValidated(String validateSecondPassword) {
-                        viewModel.setSecondPassword(validateSecondPassword);
-                        viewModel.onClickTransferFunds();
+                        getPresenter().setSecondPassword(validateSecondPassword);
+                        getPresenter().onClickTransferFunds();
                     }
                 });
             }
         });
 
-        viewModel.onViewReady();
+        onViewReady();
     }
 
     @Override
@@ -100,7 +108,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
                     if (!ConnectivityStatus.hasConnectivity(this)) {
                         onConnectivityLost();
                     } else {
-                        viewModel.updateAccountLabel(etLabel.getText().toString());
+                        getPresenter().updateAccountLabel(etLabel.getText().toString());
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, null)
@@ -135,12 +143,6 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
     }
 
     @Override
-    protected void onDestroy() {
-        viewModel.destroy();
-        super.onDestroy();
-    }
-
-    @Override
     public void startScanActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             PermissionUtil.requestCameraPermissionFromActivity(binding.mainLayout, this);
@@ -169,7 +171,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
 
                             @Override
                             public void onSecondPasswordValidated(String validateSecondPassword) {
-                                viewModel.setSecondPassword(validateSecondPassword);
+                                getPresenter().setSecondPassword(validateSecondPassword);
                                 startScanActivity();
                             }
                         }))
@@ -178,7 +180,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
 
     @Override
     public void showPaymentDetails(PaymentConfirmationDetails details) {
-        ConfirmPaymentDialog.newInstance(details, false)
+        ConfirmPaymentDialog.newInstance(details, null, false)
                 .show(getSupportFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 
         if (details.isLargeTransaction) {
@@ -193,7 +195,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
 
     @Override
     public void onSendClicked() {
-        viewModel.submitPayment();
+        getPresenter().submitPayment();
     }
 
     private void onShowLargeTransactionWarning() {
@@ -216,7 +218,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
                     if (!ConnectivityStatus.hasConnectivity(this)) {
                         onConnectivityLost();
                     } else {
-                        viewModel.archiveAccount();
+                        getPresenter().archiveAccount();
                     }
                 })
                 .setNegativeButton(R.string.no, null)
@@ -234,7 +236,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
                 .setView(ViewUtils.getAlertDialogPaddedView(this, password))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) ->
-                        viewModel.importBIP38Address(data, password.getText().toString()))
+                        getPresenter().importBIP38Address(data, password.getText().toString()))
                 .setNegativeButton(android.R.string.cancel, null).show();
     }
 
@@ -243,7 +245,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(getString(R.string.warning))
                 .setMessage(getString(R.string.private_key_successfully_imported) + "\n\n" + getString(R.string.private_key_not_matching_address))
-                .setPositiveButton(R.string.try_again, (dialog, whichButton) -> viewModel.onClickScanXpriv(null))
+                .setPositiveButton(R.string.try_again, (dialog, whichButton) -> getPresenter().onClickScanXpriv(null))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
@@ -263,7 +265,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
                 .setMessage(R.string.xpub_sharing_warning)
                 .setCancelable(false)
                 .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) ->
-                        viewModel.showAddressDetails()).setNegativeButton(android.R.string.cancel, null)
+                        getPresenter().showAddressDetails()).setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
@@ -295,7 +297,7 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
-            viewModel.handleIncomingScanIntent(data);
+            getPresenter().handleIncomingScanIntent(data);
         }
     }
 
@@ -355,13 +357,24 @@ public class AccountEditActivity extends BaseAuthActivity implements AccountEdit
 
     @Override
     public void updateAppShortcuts() {
-        if (AndroidUtils.is25orHigher() && viewModel.areLauncherShortcutsEnabled()) {
+        if (AndroidUtils.is25orHigher() && getPresenter().areLauncherShortcutsEnabled()) {
             LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(
                     this,
-                    viewModel.getPayloadDataManager(),
+                    getPresenter().getPayloadDataManager(),
                     getSystemService(ShortcutManager.class));
 
             launcherShortcutHelper.generateReceiveShortcuts();
         }
     }
+
+    @Override
+    protected AccountEditPresenter createPresenter() {
+        return accountEditPresenter;
+    }
+
+    @Override
+    protected AccountEditView getView() {
+        return this;
+    }
+
 }

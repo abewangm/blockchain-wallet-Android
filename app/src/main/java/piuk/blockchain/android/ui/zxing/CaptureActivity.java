@@ -20,10 +20,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
-import piuk.blockchain.android.ui.zxing.camera.CameraManager;
 
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -33,6 +30,8 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -50,8 +49,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
-import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.ui.base.BaseAuthActivity;
+import piuk.blockchain.android.ui.zxing.camera.CameraManager;
 
 /**
  * This activity opens the camera and does the actual scanning on a background thread. It draws a viewfinder to help the
@@ -102,7 +102,7 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_scan);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_general);
+        Toolbar toolbar = findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.scan_qr);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -146,13 +146,13 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         // off screen.
         cameraManager = new CameraManager(getApplication());
 
-        viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
+        viewfinderView = findViewById(R.id.viewfinder_view);
         viewfinderView.setCameraManager(cameraManager);
 
         handler = null;
         resetStatusView();
 
-        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
+        SurfaceView surfaceView = findViewById(R.id.preview_view);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
         if (hasSurface) {
             // The activity was paused but not stopped, so the surface still exists. Therefore
@@ -206,7 +206,7 @@ public final class CaptureActivity extends BaseAuthActivity implements SurfaceHo
         inactivityTimer.onPause();
         cameraManager.closeDriver();
         if (!hasSurface) {
-            SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
+            SurfaceView surfaceView = findViewById(R.id.preview_view);
             SurfaceHolder surfaceHolder = surfaceView.getHolder();
             surfaceHolder.removeCallback(this);
         }

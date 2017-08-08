@@ -356,7 +356,6 @@
     <string name="new_password">新規パスワード</string>
     <string name="sms_verified">携帯電話番号が認証されました。</string>
     <string name="preferences">環境設定</string>
-    <string name="two_fa_summary">2段階認証を有効にして財布を不正アクセスから保護しましょう。財布を保護するために携帯電話番号を使用することができます。このコードはウェブブラウザで財布にアクセスしようとする際に要求されます。\n\n別の認証方法を使用するには当社のウェブ財布にログインしてください。</string>
 
     <string name="rate_title">ブロックチェーンウォレットを評価</string>
     <string name="rate_message">ブロックチェーンウォレットをお楽しみいただいていますか？ブロックチェーンウォレットをもっと知ってもらうためにGoogle Playでのレビューをお願いします。</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">このオプションを有効にするとPIN画面で左にスワイプするだけで受信アドレスが表示され、ビットコインの受信がさらに高速になります。5つのアドレスが連続してロードされ、その後新規アドレスを表示するにはログインが必要となります。</string>
     <string name="swipe_receive_no_addresses">現在さらにアドレスを読み込むことはできません。アプリにログインするとさらに読み込むことができます。</string>
 
-    <string name="survey_message">ウォレットの使用法を改善するための簡単なアンケートへのご回答をお願いします。\n\n皆様のご意見は大変重要です！</string>
-    <string name="survey_positive_button">アンケートを受ける</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">概要</string>
     <string name="create_a_wallet">ウォレットを作成</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header">Blockchainウォレットに次の機能が追加されました:</string>
     <string name="verify_email2">認証されたメールアドレスは、不審もしくは通常と異なるアクティビティが検出された際、ウォレットログインIDのリマインダーとして、そして資金を受信した際にビットコイン決済通知の送信のためのログインコード送信に使用されます。</string>
     <string name="enable_screenshots">スクリーンショットを有効にする</string>
-    <string name="enable_screenshots_warning">Blockchainアプリのスクリーンショットを有効にしようとしています。アプリケーション内のいくつかの画面には機密データが含まれる可能性があります。その他のアプリケーションがこれらのスクリーンショットにアクセスできます。</string>
+    <string name="enable_screenshots_summary">Blockchainアプリのスクリーンショットを有効にしようとしています。アプリケーション内のいくつかの画面には機密データが含まれる可能性があります。その他のアプリケーションがこれらのスクリーンショットにアクセスできます。</string>
 
     <string name="information">情報</string>
     <string name="transaction_detail_verify">Blockchain.infoで認証</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">リクエストされている以上のビットコインを送信したようです。ご希望の場合は連絡先の相手に返金をリクエストできます。決済が完了とマークされていません。</string>
     <string name="contacts_too_little_sent">リクエストされている額よりも少ないビットコインを送信したようです。連絡先の相手はビットコインを受け取りますが、決済が完了とマークされません。</string>
     <string name="contacts_second_password_prompt">このサービスを使用するには2番目のパスワードが必要です。連絡先機能を使用するため、これは一回のみ入力が必要です。</string>
-    <string name="contacts_pending_transaction">保留中の取引</string>
-    <string name="contacts_transaction_history">取引履歴</string>
     <string name="contacts_request_money_receive">リクエストを連絡先に送信</string>
     <string name="contacts_no_confirmed_contacts_found">確認済みの連絡先は見つかりませんでした！</string>
     <string name="contacts_decline_pending_transaction">本当にこの保留中の取引を拒否しますか？</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">保留中の取引の拒否に失敗しました</string>
     <string name="contacts_pending_transaction_cancel_success">保留中の取引のキャンセルが完了しました</string>
     <string name="contacts_pending_transaction_cancel_failure">保留中の取引の拒否に失敗しました</string>
-    <string name="contacts_sending_to_contact_waiting">%1$sを%2$sへ送信しています\n%2$sの同意を待機しています</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$sが%2$sよりリクエストされました\n送信の準備が完了しました</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">%2$sより%1$sがリクエストされています\n決済を待機しています</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">%2$sより%1$sを受け取っています\n同意を待機しています</string>
-    <string name="contacts_receiving_declined">決済が拒否されました</string>
-    <string name="contacts_receiving_cancelled">決済がキャンセルされました</string>
     <string name="contacts_send_complete">%1$sを%2$sに送信しました</string>
     <string name="contacts_receive_complete">%1$sを%2$sより受け取りました</string>
     <string name="contacts_received">%1$sよち受け取りました</string>
@@ -527,7 +515,7 @@
     <string name="contacts_address_sent_success">アドレスの送信が完了しました</string>
     <string name="contacts_being_invited">招待を承認</string>
     <string name="contacts_broadcasting_payment">連絡先の相手にビットコインの送信について通知しています。お待ちください。</string>
-    <string name="contacts_choose_account_message">資金を受け取りたい場所を指定してください。</string>
+    <string name="contacts_balance_dialog_choose_account_message">資金を受け取りたい場所を指定してください。</string>
     <string name="contacts_choose_pairing_method">信頼できる連絡先の追加に使用するするペアリング方法を選択してください:</string>
     <string name="contacts_delete">連絡先を削除する</string>
     <string name="contacts_delete_contact_success">連絡先が削除されました</string>

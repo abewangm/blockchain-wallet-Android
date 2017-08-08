@@ -1,8 +1,9 @@
 package piuk.blockchain.android.ui.balance.adapter
 
 import android.app.Activity
+import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
-import piuk.blockchain.android.ui.adapters.ListDelegationAdapter
+import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
 import kotlin.properties.Delegates
 
@@ -12,7 +13,7 @@ class BalanceAdapter(
         btcExchangeRate: Double,
         isBtc: Boolean,
         listClickListener: BalanceListClickListener
-) : ListDelegationAdapter<List<Any>>(AdapterDelegatesManager(), emptyList()) {
+) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     val summaryDelegate = TransactionSummaryDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
     val fctxDelegate = FctxDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
@@ -22,6 +23,7 @@ class BalanceAdapter(
         delegatesManager.addAdapterDelegate(HeaderDelegate())
         delegatesManager.addAdapterDelegate(summaryDelegate)
         delegatesManager.addAdapterDelegate(fctxDelegate)
+        delegatesManager.addAdapterDelegate(AnnouncementDelegate<Any>())
     }
 
     /**
@@ -43,9 +45,9 @@ class BalanceAdapter(
      * Notifies the adapter that the View format (ie, whether or not to show BTC) has been changed.
      * Will rebuild the entire adapter.
      */
-    fun onViewFormatUpdated(isBtc: Boolean) {
-        summaryDelegate.onViewFormatUpdated(isBtc)
-        fctxDelegate.onViewFormatUpdated(isBtc)
+    fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
+        summaryDelegate.onViewFormatUpdated(isBtc, btcFormat)
+        fctxDelegate.onViewFormatUpdated(isBtc, btcFormat)
         notifyDataSetChanged()
     }
 
@@ -54,10 +56,9 @@ class BalanceAdapter(
      * been updated. Will rebuild the entire adapter.
      */
     fun onContactsMapChanged(
-            contactsTransactionMap: MutableMap<String, String>,
-            notesTransactionMap: MutableMap<String, String>
+            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
     ) {
-        summaryDelegate.onContactsMapUpdated(contactsTransactionMap, notesTransactionMap)
+        summaryDelegate.onContactsMapUpdated(transactionDisplayMap)
         notifyDataSetChanged()
     }
 

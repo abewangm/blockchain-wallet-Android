@@ -356,7 +356,6 @@
     <string name="new_password">Nueva contraseña</string>
     <string name="sms_verified">Número de teléfono celular verificado</string>
     <string name="preferences">Preferencias</string>
-    <string name="two_fa_summary">Protege tu monedero de accesos no autorizados habilitando la verificación de 2 pasos. Puedes elegir utilizar tu número de celular para asegurar tu monedero. Se te pedirá este código cuando intentes acceder a tu monedero con el navegador web.\n\nPara poder usar otros métodos de autentificación en lugar de éste, inicia sesión en nuestro monedero web.</string>
 
     <string name="rate_title">Califica al monedero Blockchain</string>
     <string name="rate_message">¿Estás disfrutando de tu monedero Blockchain? Por favor tómate un momento para dejar una reseña en Google Play para que así otros la conozcan.</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">Habilite esta opción para mostrar una dirección de recepción cuando deslice a la izquierda en la pantalla PIN, haciendo que recibir bitcoins sea aún más rápido. Se cargarán cinco direcciones de forma consecutiva, después de lo cual será necesario ingresar para mostrar las nuevas direcciones.</string>
     <string name="swipe_receive_no_addresses">No se pueden cargar más direcciones ahora mismo. Inicie sesión en la aplicación para cargar más.</string>
 
-    <string name="survey_message">¿Le gustaría completar una corta encuesta para ayudarnos a mejorar su experiencia con la billetera?\n\n¡Valoramos sus comentarios!</string>
-    <string name="survey_positive_button">Realizar encuesta</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Información general</string>
     <string name="create_a_wallet">Crear una billetera</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header">Hemos añadido estas nuevas características a su billetera de Blockchain:</string>
     <string name="verify_email2">Su dirección de correo electrónico verificada se utiliza para enviar códigos de inicio de sesión cuando se detecta actividad sospechosa o inusual, para recordarle su ID de inicio de sesión en su billetera y para enviar avisos de pago de bitcoins cuando reciba fondos.</string>
     <string name="enable_screenshots">Habilitar capturas de pantalla</string>
-    <string name="enable_screenshots_warning">Está a punto de habilitar capturas de pantalla para la aplicación Blockchain. Algunas secciones dentro de la aplicación podrían mostrar información delicada. Otras aplicaciones podrían acceder a estas capturas de pantalla.</string>
+    <string name="enable_screenshots_summary">Está a punto de habilitar capturas de pantalla para la aplicación Blockchain. Algunas secciones dentro de la aplicación podrían mostrar información delicada. Otras aplicaciones podrían acceder a estas capturas de pantalla.</string>
 
     <string name="information">Información</string>
     <string name="transaction_detail_verify">Verifique en Blockchain.info</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">Parece que ha enviado más bitcoins de lo solicitado. Puede pedirle a su contacto que le devuelva algunas, si lo desea. No hemos marcado este pago como completado.</string>
     <string name="contacts_too_little_sent">Parece que ha enviado menos bitcoins de lo solicitado. Su contacto sí recibirá las bitcoins que envió, pero no hemos marcado el pago como completado.</string>
     <string name="contacts_second_password_prompt">Para usar este servicio, le pedimos introducir su segunda contraseña. Solo tendrá que introducir esto una sola vez para usar la funcionalidad de contactos.</string>
-    <string name="contacts_pending_transaction">Transacciones pendientes</string>
-    <string name="contacts_transaction_history">Historial de transacciones</string>
     <string name="contacts_request_money_receive">Enviar solicitud a contacto</string>
     <string name="contacts_no_confirmed_contacts_found">¡No se encontraron contactos confirmados!</string>
     <string name="contacts_decline_pending_transaction">¿En verdad desea rechazar esta transacción pendiente?</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">No fue posible rechazar la transacción pendiente.</string>
     <string name="contacts_pending_transaction_cancel_success">La transacción pendiente se canceló de forma exitosa.</string>
     <string name="contacts_pending_transaction_cancel_failure">No fue posible cancelar la transacción pendiente.</string>
-    <string name="contacts_sending_to_contact_waiting">Enviando %1$s a %2$s\nEsperando que %2$s acepte</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s solicitado por %2$s\nListo para enviar</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Solicitó %1$s de %2$s\nEsperando el pago</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Recibiendo %1$s de %2$s\nEsperando que usted acepte</string>
-    <string name="contacts_receiving_declined">Pago rechazado</string>
-    <string name="contacts_receiving_cancelled">Pago cancelado</string>
     <string name="contacts_send_complete">Ha enviado %1$s a %2$s</string>
     <string name="contacts_receive_complete">Ha recibido %1$s de %2$s</string>
     <string name="contacts_received">Recibido de %1$s</string>
@@ -527,7 +515,7 @@
     <string name="contacts_address_sent_success">La dirección se envió correctamente</string>
     <string name="contacts_being_invited">Aceptar invitación</string>
     <string name="contacts_broadcasting_payment">Aguarda un momento. Le estamos informando a tu contacto que le has enviado unos bitcoins.</string>
-    <string name="contacts_choose_account_message">Elige dónde deseas recibir tus fondos.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Elige dónde deseas recibir tus fondos.</string>
     <string name="contacts_choose_pairing_method">Elige el método de emparejamiento que deseas utilizar para añadir un contacto de confianza:</string>
     <string name="contacts_delete">Eliminar contacto</string>
     <string name="contacts_delete_contact_success">Contacto eliminado</string>
@@ -679,6 +667,6 @@
     <string name="fee_options_fee_too_high">Comisión alta innecesaria.</string>
     <string name="fee_options_advanced_warning">Esta función solo se recomienda para usuarios avanzados. Al elegir una comisión personalizada, te arriesgas a pagar de más o que tu transacción nunca se confirme.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
-    <string name="fee_options_sat_byte_inline_hint">Regular: %1$s prioritaria: 2$s</string>
+    <string name="fee_options_sat_byte_inline_hint">Regular: %1$s prioritaria: %2$s</string>
 
 </resources>

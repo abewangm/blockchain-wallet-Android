@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.websocket;
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
@@ -25,7 +26,7 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -364,13 +365,19 @@ class WebSocketHandler extends WebSocketListener {
     }
 
     private void triggerNotification(String title, String marquee, String text) {
-        new NotificationsUtil(context, notificationManager).setNotification(
+        Intent notifyIntent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                notifyIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        new NotificationsUtil(context, notificationManager).triggerNotification(
                 title,
                 marquee,
                 text,
                 R.drawable.ic_notification_white,
-                R.drawable.ic_notification_white,
-                MainActivity.class,
+                pendingIntent,
                 1000);
     }
 

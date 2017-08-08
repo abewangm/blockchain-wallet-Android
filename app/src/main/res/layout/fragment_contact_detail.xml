@@ -1,70 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="piuk.blockchain.android.ui.contacts.detail.ContactDetailActivity">
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            style="@style/ContactsHeader"
-            android:text="@string/contacts_detail_title" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button_rename"
-                style="@style/ButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="8dp"
-                android:layout_weight="1"
-                android:text="@string/contacts_rename"
-                android:theme="@style/ButtonLightBlueTheme" />
-
-            <Button
-                android:id="@+id/button_delete"
-                style="@style/ButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="16dp"
-                android:layout_weight="1"
-                android:text="@string/contacts_delete"
-                android:theme="@style/ButtonRedTheme" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/textview_transaction_list_header"
-            style="@style/ContactsHeader"
-            android:text="@string/contacts_detail_transactions" />
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:listitem="@layout/item_balance" />
 
-        <RelativeLayout
-            android:id="@+id/layout_no_transactions"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <!-- EMPTY LAYOUT -->
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/layoutNoTransactions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="72dp"
+            android:layout_marginRight="72dp"
+            android:layout_marginTop="16dp"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/imageList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/vector_list" />
 
             <TextView
-                style="@style/ContactsDetail"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:text="@string/contacts_detail_transactions_empty" />
+                android:id="@+id/textNoTransactionsYet"
+                style="@style/Base.DialogWindowTitle.AppCompat"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_horizontal"
+                android:text="@string/contacts_detail_transactions_empty"
+                android:textColor="@color/primary_navy_medium"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageList" />
 
-        </RelativeLayout>
-    </LinearLayout>
+            <TextView
+                android:id="@+id/textNoTransactionsHelper"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_horizontal"
+                android:text="@string/contacts_transaction_helper_text_1"
+                android:textColor="@color/product_gray_hint"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textNoTransactionsYet" />
+
+        </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
 </layout>

@@ -9,7 +9,7 @@ import android.webkit.WebView;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import piuk.blockchain.android.BuildConfig;
-import piuk.blockchain.android.data.exchange.WebViewLoginDetails;
+import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 
 /**
  * Created by justin on 2/22/17.

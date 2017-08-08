@@ -14,8 +14,11 @@ import android.view.WindowManager;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import javax.inject.Inject;
+
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.DialogConfirmTransactionBinding;
+import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.BaseDialogFragment;
 import piuk.blockchain.android.ui.base.UiState;
@@ -24,16 +27,25 @@ import piuk.blockchain.android.util.AndroidUtils;
 public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView, ConfirmPaymentPresenter>
         implements ConfirmPaymentView {
 
-    private static final String ARGUMENT_PAYMENT_DETAILS = "argument_payment_details";
-    private static final String ARGUMENT_SHOW_FEE_CHOICE = "argument_show_fee_choice";
+    @Inject ConfirmPaymentPresenter confirmPaymentPresenter;
+
+    private static final String ARGUMENT_PAYMENT_DETAILS = "ARGUMENT_PAYMENT_DETAILS";
+    private static final String ARGUMENT_CONTACT_NOTE = "ARGUMENT_CONTACT_NOTE";
+    private static final String ARGUMENT_SHOW_FEE_CHOICE = "ARGUMENT_SHOW_FEE_CHOICE";
 
     private DialogConfirmTransactionBinding binding;
     private OnConfirmDialogInteractionListener listener;
 
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
+
     public static ConfirmPaymentDialog newInstance(PaymentConfirmationDetails details,
+                                                   @Nullable String note,
                                                    boolean showFeeChoice) {
         Bundle args = new Bundle();
         args.putParcelable(ARGUMENT_PAYMENT_DETAILS, details);
+        if (note != null) args.putString(ARGUMENT_CONTACT_NOTE, note);
         args.putBoolean(ARGUMENT_SHOW_FEE_CHOICE, showFeeChoice);
         ConfirmPaymentDialog fragment = new ConfirmPaymentDialog();
         fragment.setArguments(args);
@@ -117,6 +129,13 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     }
 
     @Override
+    public void setContactNote(String contactNote) {
+        binding.textviewContactNote.setText(contactNote);
+        binding.textviewContactNote.setVisibility(View.VISIBLE);
+        binding.textviewDescriptionHeader.setVisibility(View.VISIBLE);
+    }
+
+    @Override
     public void closeDialog() {
         dismiss();
     }
@@ -124,6 +143,12 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     @Override
     public PaymentConfirmationDetails getPaymentDetails() {
         return getArguments().getParcelable(ARGUMENT_PAYMENT_DETAILS);
+    }
+
+    @Nullable
+    @Override
+    public String getContactNote() {
+        return getArguments().getString(ARGUMENT_CONTACT_NOTE);
     }
 
     @Override
@@ -145,7 +170,7 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
 
     @Override
     protected ConfirmPaymentPresenter createPresenter() {
-        return new ConfirmPaymentPresenter();
+        return confirmPaymentPresenter;
     }
 
     @Override

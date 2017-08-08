@@ -1,12 +1,10 @@
 package piuk.blockchain.android.ui.launcher;
 
-import android.app.Application;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
 import info.blockchain.wallet.api.data.Settings;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import org.junit.Before;
@@ -15,24 +13,19 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
+import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
-import piuk.blockchain.android.data.datamanagers.SettingsDataManager;
-import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.injection.ApiModule;
-import piuk.blockchain.android.injection.ApplicationModule;
-import piuk.blockchain.android.injection.DataManagerModule;
-import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.injection.InjectorTestUtils;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -43,8 +36,7 @@ import static org.mockito.Mockito.when;
 /**
  * Created by adambennett on 09/08/2016.
  */
-@SuppressWarnings("PrivateMemberAccessBetweenOuterAndInnerClass")
-@Config(sdk = 23, constants = piuk.blockchain.android.BuildConfig.class, application = BlockchainTestApplication.class)
+@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class LauncherPresenterTest {
 
@@ -64,13 +56,7 @@ public class LauncherPresenterTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InjectorTestUtils.initApplicationComponent(
-                Injector.getInstance(),
-                new MockApplicationModule(RuntimeEnvironment.application),
-                new ApiModule(),
-                new MockDataManagerModule());
-
-        subject = new LauncherPresenter();
+        subject = new LauncherPresenter(appUtil, payloadDataManager, prefsUtil, accessState, settingsDataManager);
         subject.initView(launcherActivity);
     }
 
@@ -117,7 +103,13 @@ public class LauncherPresenterTest {
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("1234567890");
         when(prefsUtil.getValue(eq(PrefsUtil.LOGGED_OUT), anyBoolean())).thenReturn(false);
         when(appUtil.isSane()).thenReturn(true);
+        String guid = "GUID";
+        String sharedKey = "SHARED_KEY";
+        when(wallet.getGuid()).thenReturn(guid);
+        when(wallet.getSharedKey()).thenReturn(sharedKey);
         when(payloadDataManager.getWallet()).thenReturn(wallet);
+        Settings mockSettings = mock(Settings.class);
+        when(settingsDataManager.initSettings(guid, sharedKey)).thenReturn(Observable.just(mockSettings));
         when(wallet.isUpgraded()).thenReturn(true);
         when(accessState.isLoggedIn()).thenReturn(true);
         when(appUtil.isNewlyCreated()).thenReturn(true);
@@ -125,6 +117,7 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartOnboarding(false);
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
@@ -158,6 +151,7 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartOnboarding(true);
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
@@ -190,11 +184,12 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartMainActivity();
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
      * Everything is good, email not verified and getting {@link Settings} object failed. Should
-     * launch MainActivity.
+     * re-request PIN code.
      */
     @Test
     public void onViewReadyNonVerifiedEmailSettingsFailure() throws Exception {
@@ -218,7 +213,8 @@ public class LauncherPresenterTest {
         // Act
         subject.onViewReady();
         // Assert
-        verify(launcherActivity).onStartMainActivity();
+        verify(launcherActivity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+        verify(launcherActivity).onRequestPin();
     }
 
     /**
@@ -400,48 +396,13 @@ public class LauncherPresenterTest {
     }
 
     @Test
-    public void getAppUtil() throws Exception {
+    public void clearCredentialsAndRestart() throws Exception {
         // Arrange
 
         // Act
-        AppUtil util = subject.getAppUtil();
+        subject.clearCredentialsAndRestart();
         // Assert
-        assertEquals(util, appUtil);
-    }
-
-    private class MockApplicationModule extends ApplicationModule {
-
-        MockApplicationModule(Application application) {
-            super(application);
-        }
-
-        @Override
-        protected PrefsUtil providePrefsUtil() {
-            return prefsUtil;
-        }
-
-        @Override
-        protected AppUtil provideAppUtil() {
-            return appUtil;
-        }
-
-        @Override
-        protected AccessState provideAccessState() {
-            return accessState;
-        }
-    }
-
-    private class MockDataManagerModule extends DataManagerModule {
-        @Override
-        protected PayloadDataManager providePayloadDataManager(PayloadManager payloadManager,
-                                                               RxBus rxBus) {
-            return payloadDataManager;
-        }
-
-        @Override
-        protected SettingsDataManager provideSettingsDataManager(RxBus rxBus) {
-            return settingsDataManager;
-        }
+        verify(appUtil).clearCredentialsAndRestart();
     }
 
 }

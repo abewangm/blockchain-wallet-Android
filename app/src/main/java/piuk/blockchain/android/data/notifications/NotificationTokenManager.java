@@ -4,7 +4,6 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Wallet;
@@ -15,12 +14,10 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.services.NotificationService;
 import piuk.blockchain.android.util.PrefsUtil;
+import timber.log.Timber;
 
 public class NotificationTokenManager {
-
-    private static final String TAG = NotificationTokenManager.class.getSimpleName();
 
     private NotificationService notificationService;
     private AccessState accessState;
@@ -79,6 +76,7 @@ public class NotificationTokenManager {
     }
 
     // TODO: 16/01/2017 Call me on logout?
+
     /**
      * Resets Instance ID and revokes all tokens. Clears stored token if successful
      */
@@ -109,7 +107,7 @@ public class NotificationTokenManager {
         // TODO: 09/11/2016 Decide what to do if sending fails, perhaps retry?
         notificationService.sendNotificationToken(refreshedToken, guid, sharedKey)
                 .subscribeOn(Schedulers.io())
-                .subscribe(() -> Log.d(TAG, "sendFirebaseToken: success"), Throwable::printStackTrace);
+                .subscribe(() -> Timber.d("sendFirebaseToken: success"), Throwable::printStackTrace);
     }
 
     /**

@@ -1,105 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="100dp"
+        android:gravity="center_horizontal"
+        app:layout_constraintDimensionRatio="h,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/vector_icon_blue" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:orientation="vertical">
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="0dp"
+        android:layout_height="22dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="24dp"
+        android:gravity="center_horizontal"
+        android:tint="@color/primary_navy_medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView3"
+        app:srcCompat="@drawable/vector_blockchain" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="50"
-                android:gravity="center"
-                android:orientation="vertical">
+    <Button
+        android:id="@+id/create"
+        style="@style/ButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
+        android:layout_marginTop="48dp"
+        android:paddingBottom="16dp"
+        android:paddingLeft="48dp"
+        android:paddingRight="48dp"
+        android:paddingTop="16dp"
+        android:text="@string/create_a_wallet"
+        android:theme="@style/ButtonLightBlueTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
-                <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:gravity="center_horizontal"
-                    app:srcCompat="@drawable/vector_icon_blue" />
+    <Button
+        android:id="@+id/login"
+        style="@style/ButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:paddingBottom="16dp"
+        android:paddingLeft="48dp"
+        android:paddingRight="48dp"
+        android:paddingTop="16dp"
+        android:text="@string/log_in"
+        android:theme="@style/ButtonBlueTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/create" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="22dp"
-                    android:layout_marginTop="24dp"
-                    android:gravity="center_horizontal"
-                    app:srcCompat="@drawable/vector_blockchain"
-                    android:tint="@color/primary_navy_medium" />
+    <TextView
+        android:id="@+id/recoverFunds"
+        fontPath="fonts/Montserrat-Regular.ttf"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:paddingLeft="48dp"
+        android:paddingRight="48dp"
+        android:text="@string/recover_funds"
+        android:textAllCaps="true"
+        android:textColor="@color/primary_navy_medium"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/login"
+        tools:ignore="MissingPrefix" />
 
-            </LinearLayout>
+    <ImageView
+        android:id="@+id/buttonSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/action_settings"
+        android:padding="16dp"
+        android:tint="@color/primary_navy_medium"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/vector_settings"
+        tools:visibility="visible" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="50"
-                android:orientation="vertical">
-
-                <Button
-                    android:id="@+id/create"
-                    style="@style/ButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_margin="8dp"
-                    android:paddingBottom="16dp"
-                    android:paddingLeft="48dp"
-                    android:paddingRight="48dp"
-                    android:paddingTop="16dp"
-                    android:text="@string/create_a_wallet"
-                    android:theme="@style/ButtonLightBlueTheme" />
-
-                <Button
-                    android:id="@+id/login"
-                    style="@style/ButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:gravity="center"
-                    android:paddingBottom="16dp"
-                    android:paddingLeft="48dp"
-                    android:paddingRight="48dp"
-                    android:paddingTop="16dp"
-                    android:text="@string/log_in"
-                    android:theme="@style/ButtonBlueTheme" />
-
-                <TextView
-                    android:id="@+id/recover_funds"
-                    fontPath="fonts/Montserrat-Regular.ttf"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:gravity="center"
-                    android:paddingLeft="48dp"
-                    android:paddingRight="48dp"
-                    android:text="@string/recover_funds"
-                    android:textAllCaps="true"
-                    android:textColor="@color/primary_navy_medium"
-                    android:textSize="16sp" />
-
-            </LinearLayout>
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/button_settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:background="?selectableItemBackgroundBorderless"
-            android:padding="16dp"
-            android:tint="@color/primary_navy_medium"
-            android:visibility="gone"
-            app:srcCompat="@drawable/vector_settings"
-            tools:visibility="visible" />
-
-    </RelativeLayout>
-</layout>
+</android.support.constraint.ConstraintLayout>

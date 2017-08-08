@@ -356,7 +356,6 @@
     <string name="new_password">Yeni Şifre</string>
     <string name="sms_verified">Cep telefonu numarası doğrulandı</string>
     <string name="preferences">Tercihler</string>
-    <string name="two_fa_summary">2-Aşamalı Doğrulamayı etkinleştirerek cüzdanınızı yetkisiz erişime karşı koruyun.  Cüzdanınızı güvende tutmak için cep telefonu numaranızı kullanabilirsiniz. Bu kod, cüzdanınıza web tarayıcısıyla erişmeyi denediğinizde istenilecektir.\n\nBunun yerine başka kimlik doğrulama yöntemi kullanmak için, lütfen web cüzdanımıza giriş yapın.</string>
 
     <string name="rate_title">Blockchain Cüzdanına Puan Verin</string>
     <string name="rate_message">Blockchain Cüzdanını Beğeniyor Musunuz? Lütfen Google Play\'de bir inceleme yazmak için biraz zamanınızı ayırın ve diğerlerinin de bundan haberdar olmasını sağlayın.</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">Bitcoin almayı daha da hızlandırmak için PIN ekranına sola dokunduğunuzda alıcı adresi almak için bu seçeneği etkinleştirin. Yeni adresleri göstermek için oturum açmanın gerekli olacağı beş adres sıralı şekilde yüklenecektir.</string>
     <string name="swipe_receive_no_addresses">Şu an daha fazla adres yüklenemiyor. Daha fazla yüklemek için uygulamada oturum açın.</string>
 
-    <string name="survey_message">Cüzdan deneyiminizi geliştirmemize yardımcı olmak için kısa bir anket doldurmak ister misiniz?\n\nGeri bildiriminize değer veriyoruz!</string>
-    <string name="survey_positive_button">Ankete katılın</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Genel bakış</string>
     <string name="create_a_wallet">Bir cüzdan oluştur</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header">Selam, Blockchain cüzdana bu yeni özellikleri ekledik:</string>
     <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.</string>
     <string name="enable_screenshots">Ekran Görüntülerini Etkinleştir</string>
-    <string name="enable_screenshots_warning">Blockchain uygulaması için ekran görüntülerini etkinleştirmek üzeresiniz. Uygulama içindeki bazı ekranlar hassas veriler görüntüleyebilir. Diğer uygulamalar bu ekran görüntülerine erişim sağlayacak.</string>
+    <string name="enable_screenshots_summary">Blockchain uygulaması için ekran görüntülerini etkinleştirmek üzeresiniz. Uygulama içindeki bazı ekranlar hassas veriler görüntüleyebilir. Diğer uygulamalar bu ekran görüntülerine erişim sağlayacak.</string>
 
     <string name="information">Bilgi</string>
     <string name="transaction_detail_verify">Blockchain.info üzerinde doğrulayın</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">Öyle görünüyor ki talep edilenden daha fazla bitcoin gönderdiniz. İsterseniz kişinizden birazını geri isteyebilirsiniz. Ödemeyi tamamlanmış olarak işaretlemedik.</string>
     <string name="contacts_too_little_sent">Öyle görünüyor ki talep edilenden daha az bitcoin gönderdiniz. Kişiniz, göndermiş olduğunuz bitcoin tutarını yine de alacak ancak ödemeyi tamamlanmış olarak işaretlemedik.</string>
     <string name="contacts_second_password_prompt">Bu hizmeti kullanmak için ikinci şifrenizi girmenizi rica ediyoruz. Kişiler işlevini kullanmak için bunu sadece bir kez girmeniz gerekecek.</string>
-    <string name="contacts_pending_transaction">Bekleyen İşlemler</string>
-    <string name="contacts_transaction_history">İşlem Geçmişi</string>
     <string name="contacts_request_money_receive">Kişiye talebi gönderin</string>
     <string name="contacts_no_confirmed_contacts_found">Onaylanmış kişi bulunamadı!</string>
     <string name="contacts_decline_pending_transaction">Bu bekleyen işlemi geri çevirmek istediğinizden emin misiniz?</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">Bekleyen işlem geri çevrilemedi</string>
     <string name="contacts_pending_transaction_cancel_success">Bekleyen işlem başarıyla iptal edildi</string>
     <string name="contacts_pending_transaction_cancel_failure">Bekleyen işlem iptal edilemedi</string>
-    <string name="contacts_sending_to_contact_waiting">%1$s tutar %2$s için gönderiliyor\n%2$s kabul etmesi gerekiyor</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s tutar %2$s tarafından talep edildi\nGöndermek için hazır</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">%1$s tutar %2$s için talep edildi\nÖdeme yapılması gerekiyor</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">%1$s tutar %2$s tarafından alınıyor\nKabul etmenizi bekliyor</string>
-    <string name="contacts_receiving_declined">Ödeme geri çevrildi</string>
-    <string name="contacts_receiving_cancelled">Ödeme iptal edildi</string>
     <string name="contacts_send_complete">%1$s tutar %2$s için gönderildi</string>
     <string name="contacts_receive_complete">%1$s tutar %2$s tarafından alındı</string>
     <string name="contacts_received">%1$s tarafından alındı</string>
@@ -527,7 +515,7 @@
     <string name="contacts_address_sent_success">Adres başarıyla gönderildi</string>
     <string name="contacts_being_invited">Daveti kabul et</string>
     <string name="contacts_broadcasting_payment">Kişinize sizin biraz bitcoin gönderdiğiniz bilgisini veriyoruz, lütfen bekleyin.</string>
-    <string name="contacts_choose_account_message">Paranızı nereye almak istediğini seçin.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Paranızı nereye almak istediğini seçin.</string>
     <string name="contacts_choose_pairing_method">Güvenli bir kişi eklemek için kullanmak istediğiniz eşleştirme yöntemini seçin:</string>
     <string name="contacts_delete">Kişiyi sil</string>
     <string name="contacts_delete_contact_success">Kişi silindi</string>

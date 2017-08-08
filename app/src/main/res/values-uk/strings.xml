@@ -356,7 +356,6 @@
     <string name="new_password">Новий пароль</string>
     <string name="sms_verified">Номер мобільного підтверджено</string>
     <string name="preferences">Налаштування</string>
-    <string name="two_fa_summary">Захистіть свій гаманець від несанкціонованого доступу, активувавши 2-крокове підтвердження. Щоб захистити свій гаманець, можете обрати свій номер моб. телефону. У вас запитають цей код, якщо ви спробуєте зайти у свій гаманець через веб-браузер.\n\nЩоб використовувати інші методи аутентифікації замість цього, будь ласка, увійдіть в свій веб-гаманець.</string>
 
     <string name="rate_title">Оцінити гаманець Blockchain</string>
     <string name="rate_message">Подобається користуватись гаманцем Blockchain? Будь ласка, знайдіть хвилинку і залишіть відгук про наш гаманець в Google Play, нехай інші також про нього дізнаються.</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">Увімкніть цю опцію, щоб показати адресу, коли ви проведете пальцем вліво на екрані PIN, що пришвидшить отримання bitcoin. Послідовно буде завантажено п\'ять адрес, після входу в систему потрібно буде показати нові адреси.</string>
     <string name="swipe_receive_no_addresses">Неможливо завантажити більше адрес прямо зараз. Щоб завантажити більше, увійдіть в програму.</string>
 
-    <string name="survey_message">Чи не могли б ви заповнити коротеньку анкету, щоб допомогти нам поліпшити ваш досвід користування гаманцем?\n\nВаш відгук для нас є дуже важливим!</string>
-    <string name="survey_positive_button">Пройти анкетування</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Огляд</string>
     <string name="create_a_wallet">Створити гаманець</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header"> Привіт, ми додали ось ці нові функції до вашого гаманця Blockchain:</string>
     <string name="verify_email2">Ваша підтверджена адреса електронної пошти використовується нами для відправки вам кодів для входу, або для інформування вас, якщо ми виявимо підозрілу чи нехарактерну активність по вашому рахунку, для нагадування вам ідентифікатора входу в гаманець або сповіщення про рух коштів по вашому рахунку.</string>
     <string name="enable_screenshots">Активувати скріншоти</string>
-    <string name="enable_screenshots_warning">Ви збирається увімкнути скріншот для Blockchain. Деякі зображення екрану всередині програми можуть відображати конфіденційні дані. Інші програми матимуть можливість отримати доступ до цих скріншотів.</string>
+    <string name="enable_screenshots_summary">Ви збирається увімкнути скріншот для Blockchain. Деякі зображення екрану всередині програми можуть відображати конфіденційні дані. Інші програми матимуть можливість отримати доступ до цих скріншотів.</string>
 
     <string name="information">Інформація</string>
     <string name="transaction_detail_verify">Підтвердити на Blockchain.info</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">Схоже, ви відправили більше bitcoin, ніж було запитано. Ви можете відправити запит на повернення від вашого контакту, якщо ви хочете. Ми не позначили платіж як завершений.</string>
     <string name="contacts_too_little_sent">Схоже, ви відправили менше bitcoin, ніж було запитано. Ваш контакт буде, як і раніше, отримувати bitcoin, які ви відправили, але ми не позначили платіж як завершений.</string>
     <string name="contacts_second_password_prompt">Щоб скористатись цією послугою, вам треба ввести свій другий пароль. Вам треба ввести його лише один раз, щоб використовувати усі функціональні можливості Контактів.</string>
-    <string name="contacts_pending_transaction">Транзакції в очікуванні</string>
-    <string name="contacts_transaction_history">Історія транзакцій</string>
     <string name="contacts_request_money_receive">Відправити запит до контакту</string>
     <string name="contacts_no_confirmed_contacts_found">Жоден підтверджений контакт не знайдено!</string>
     <string name="contacts_decline_pending_transaction">Ви впевнені, що хочете відхилити цю транзакцію в очікуванні?</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">Збій відхилення транзакції в очікуванні</string>
     <string name="contacts_pending_transaction_cancel_success">Скасування транзакції в очікуванні успішне</string>
     <string name="contacts_pending_transaction_cancel_failure">Збій скасування транзакції в очікуванні</string>
-    <string name="contacts_sending_to_contact_waiting">Відправка %1$s для %2$s\nОчікування на %2$s для схвалення</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s запитано %2$s\nГотово для відправлення</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Запитано %1$s від %2$s\nОчікування платежу</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Отримування %1$s від %2$s\nОчікування вашого схвалення</string>
-    <string name="contacts_receiving_declined">Платіж відхилено</string>
-    <string name="contacts_receiving_cancelled">Платіж скасований</string>
     <string name="contacts_send_complete">Відправлено %1$s для %2$s</string>
     <string name="contacts_receive_complete">Отримано %1$s від %2$s</string>
     <string name="contacts_received">Отримано від %1$s</string>
@@ -526,7 +514,7 @@
     <string name="contacts_address_sent_success">Адресу успішно відправлено</string>
     <string name="contacts_being_invited">Прийняти запрошення</string>
     <string name="contacts_broadcasting_payment">Інформуємо вас, що ваш контакт відправив вам bitcoin, будь ласка, трохи зачекайте.</string>
-    <string name="contacts_choose_account_message">Виберіть, куди саме ви хочете отримати свої гроші</string>
+    <string name="contacts_balance_dialog_choose_account_message">Виберіть, куди саме ви хочете отримати свої гроші</string>
     <string name="contacts_choose_pairing_method">Щоб додати довірений контакт, виберіть метод створення пари, який хочете використати:</string>
     <string name="contacts_delete">Видалити контакт</string>
     <string name="contacts_delete_contact_success">Контакт видалено</string>

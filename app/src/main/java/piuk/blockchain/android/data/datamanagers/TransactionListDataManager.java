@@ -1,27 +1,23 @@
 package piuk.blockchain.android.data.datamanagers;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.data.Account;
-import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.util.FormatsUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.stores.TransactionListStore;
-import piuk.blockchain.android.ui.account.ConsolidatedAccount;
-import piuk.blockchain.android.ui.account.ConsolidatedAccount.Type;
+import piuk.blockchain.android.ui.account.ItemAccount;
 
 public class TransactionListDataManager {
-
-    private static final String TAG = TransactionListDataManager.class.getSimpleName();
 
     private PayloadManager payloadManager;
     private TransactionListStore transactionListStore;
@@ -35,24 +31,23 @@ public class TransactionListDataManager {
         this.rxBus = rxBus;
     }
 
-    public Observable<List<TransactionSummary>> fetchTransactions(Object object, int limit, int offset) {
+    public Observable<List<TransactionSummary>> fetchTransactions(ItemAccount itemAccount, int limit, int offset) {
         return Observable.fromCallable(() -> {
             List<TransactionSummary> result;
 
-            if (object instanceof ConsolidatedAccount) {
-                ConsolidatedAccount consolidate = (ConsolidatedAccount) object;
-                if (consolidate.getType() == Type.ALL_ACCOUNTS) {
+            switch (itemAccount.getType()) {
+                case ALL_ACCOUNTS_AND_LEGACY:
                     result = payloadManager.getAllTransactions(limit, offset);
-                } else if (consolidate.getType() == Type.ALL_IMPORTED_ADDRESSES) {
+                    break;
+                case ALL_LEGACY:
                     result = payloadManager.getImportedAddressesTransactions(limit, offset);
-                } else {
-                    throw new IllegalArgumentException("ConsolidatedAccount did not have a type set");
-                }
-            } else if (object instanceof Account) {
-                // V3
-                result = payloadManager.getAccountTransactions(((Account) object).getXpub(), limit, offset);
-            } else {
-                throw new IllegalArgumentException("Cannot fetch transactions for object type: " + object.getClass().getSimpleName());
+                    break;
+                default:
+                    if (FormatsUtil.isValidXpub(itemAccount.getAddress())) {
+                        result = payloadManager.getAccountTransactions(itemAccount.getAddress(), limit, offset);
+                    } else {
+                        result = payloadManager.getImportedAddressesTransactions(limit, offset);
+                    }
             }
 
             insertTransactionList(result);
@@ -92,35 +87,22 @@ public class TransactionListDataManager {
     }
 
     /**
-     * Get total BTC balance from an {@link Account} or {@link LegacyAddress}.
+     * Get total BTC balance from {@link ItemAccount}.
      *
-     * @param object Either a {@link Account} or a {@link LegacyAddress}
+     * @param itemAccount {@link ItemAccount}
      * @return A BTC value as a long.
      */
-    public long getBtcBalance(Object object) {
-        long result = 0;
-
-        if (object instanceof ConsolidatedAccount) {
-            ConsolidatedAccount consolidate = (ConsolidatedAccount) object;
-
-            if (consolidate.getType() == Type.ALL_ACCOUNTS) {
-                result = payloadManager.getWalletBalance().longValue();
-            } else if (consolidate.getType() == Type.ALL_IMPORTED_ADDRESSES) {
-                result = payloadManager.getImportedAddressesBalance().longValue();
-            } else {
-                Log.e(TAG, "ConsolidatedAccount did not have a type set");
-            }
-        } else if (object instanceof Account) {
-            // V3
-            result = payloadManager.getAddressBalance(((Account) object).getXpub()).longValue();
-        } else if (object instanceof LegacyAddress) {
-            // V2
-            result = payloadManager.getAddressBalance(((LegacyAddress) object).getAddress()).longValue();
-        } else {
-            Log.e(TAG, "Cannot fetch transactions for object type: " + object.getClass().getSimpleName());
+    public long getBtcBalance(ItemAccount itemAccount) {
+        switch (itemAccount.getType()) {
+            case ALL_ACCOUNTS_AND_LEGACY:
+                return payloadManager.getWalletBalance().longValue();
+            case ALL_LEGACY:
+                return payloadManager.getImportedAddressesBalance().longValue();
+            case SINGLE_ACCOUNT:
+                return payloadManager.getAddressBalance(itemAccount.getAddress()).longValue();
+            default:
+                return 0;
         }
-
-        return result;
     }
 
     /**
@@ -130,21 +112,10 @@ public class TransactionListDataManager {
      * @return An Observable object wrapping a Tx. Will call onError if not found with a
      * NullPointerException
      */
-    public Observable<TransactionSummary> getTxFromHash(String transactionHash) {
-        return Observable.create(emitter -> {
-            //noinspection Convert2streamapi
-            for (TransactionSummary tx : getTransactionList()) {
-                if (tx.getHash().equals(transactionHash)) {
-                    if (!emitter.isDisposed()) {
-                        emitter.onNext(tx);
-                        emitter.onComplete();
-                    }
-                    return;
-                }
-            }
-
-            if (!emitter.isDisposed()) emitter.onError(new NullPointerException("Tx not found"));
-        });
+    public Single<TransactionSummary> getTxFromHash(String transactionHash) {
+        return Observable.fromIterable(getTransactionList())
+                .filter(tx -> tx.getHash().equals(transactionHash))
+                .firstOrError();
     }
 
     /**

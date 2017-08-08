@@ -356,7 +356,6 @@
     <string name="new_password">Новый пароль</string>
     <string name="sms_verified">Номер мобильного телефона проверен</string>
     <string name="preferences">Предпочтения</string>
-    <string name="two_fa_summary">Защитите свой кошелек от несанкционированного доступа, активировав 2-шаговую верификацию. Для обеспечения безопасности кошелька можно использовать номер мобильного телефона. Этот код будет запрашиваться, когда вы предпримете попытку зайти в свой кошелек через веб-браузер.\n\nЕсли вы вместо этого хотите использовать другие методы аутентификации, выполняйте вход в наш веб-кошелек.</string>
 
     <string name="rate_title">Оценить кошелек Blockchain Wallet</string>
     <string name="rate_message">Вам нравится кошелек Blockchain Wallet? Пожалуйста, найдите минутку, чтобы оставить отзыв в Google Play и дайте другим знать об этом.</string>
@@ -435,9 +434,6 @@
     <string name="swipe_receive_preference_summary">Включите этот параметр, чтобы открыть адрес получения, когда проводите по экрану PIN-кода влево. Так получение биткойнов станет еще быстрее. Будут последовательно загружены пять адресов, после чего необходимо выполнить вход в систему, чтобы были показаны новые адреса.</string>
     <string name="swipe_receive_no_addresses">В данный момент нельзя загрузить больше адресов. Чтобы загрузить больше, войдите в приложение.</string>
 
-    <string name="survey_message">Не могли бы вы принять участие в небольшом опросе, чтобы помочь нам улучшить ваш опыт взаимодействия с кошельком?\n\nМы ценим ваше мнение!</string>
-    <string name="survey_positive_button">Принять участие в опросе</string>
-
     <string name="current_price_btc">1 BTC = %1$s</string>
     <string name="overview">Обзор</string>
     <string name="create_a_wallet">Создать кошелек</string>
@@ -449,7 +445,7 @@
     <string name="confirm_upgrade_header">Смотрите, мы добавили эти новые функции вашему кошельку Blockchain:</string>
     <string name="verify_email2">Ваш подтвержденный электронный адрес используется для отправки кодов входа в систему, при подозрительной или необычной активности, для напоминания ID для доступа к кошельку и отправления сообщений о поступлении средств на счет.</string>
     <string name="enable_screenshots">Разрешить скриншоты</string>
-    <string name="enable_screenshots_warning">Вы собираетесь разрешить скриншоты в приложении Blockchain. Некоторые снимки экрана в приложении могут отображать конфиденциальную информацию. Другие приложения могут получить доступ к этим скриншотам.</string>
+    <string name="enable_screenshots_summary">Вы собираетесь разрешить скриншоты в приложении Blockchain. Некоторые снимки экрана в приложении могут отображать конфиденциальную информацию. Другие приложения могут получить доступ к этим скриншотам.</string>
 
     <string name="information">Информация</string>
     <string name="transaction_detail_verify">Верифицировать на Blockchain.info</string>
@@ -463,8 +459,6 @@
     <string name="contacts_too_much_sent">Судя по всему, вы отправили больше биткоинов, чем требовалось. Если хотите, вы можете попросить контакт вернуть вам какую-то сумму.  Мы не отметили платеж как исполненный.</string>
     <string name="contacts_too_little_sent">Судя по всему, вы отправили меньше биткоинов, чем требовалось. Ваш контакт все равно получит отправленные вами биткоины, но мы не пометили платеж как исполненный.</string>
     <string name="contacts_second_password_prompt">Мы требуем ввода второго пароля, чтобы пользоваться этой услугой. Для использования функционала Контактов вам нужно будет ввести эти данные только один раз.</string>
-    <string name="contacts_pending_transaction">Ожидающие транзакции</string>
-    <string name="contacts_transaction_history">История транзакций</string>
     <string name="contacts_request_money_receive">Отправить запрос контакту</string>
     <string name="contacts_no_confirmed_contacts_found">Подтвержденных контактов не найдено!</string>
     <string name="contacts_decline_pending_transaction">Вы уверены, что хотите отклонить эту ожидающую транзакцию?</string>
@@ -475,12 +469,6 @@
     <string name="contacts_pending_transaction_decline_failure">Отклонить ожидающую транзакцию не удалось</string>
     <string name="contacts_pending_transaction_cancel_success">Ожидающая транзакция отменена</string>
     <string name="contacts_pending_transaction_cancel_failure">Отменить ожидающую транзакцию не удалось</string>
-    <string name="contacts_sending_to_contact_waiting">Отправка %1$s получателю %2$s\nожидание приема от %2$s</string>
-    <string name="contacts_payment_requested_ready_to_send">%1$s, запрошенный %2$s\nГотово к отправке</string>
-    <string name="contacts_requesting_from_contact_waiting_for_payment">Запрошенный %1$s от %2$s\nОжидает платежа</string>
-    <string name="contacts_receiving_from_contact_waiting_to_accept">Получение %1$s от %2$s\nОжидает приема от вас</string>
-    <string name="contacts_receiving_declined">Платеж отклонен</string>
-    <string name="contacts_receiving_cancelled">Платеж отменен</string>
     <string name="contacts_send_complete">Отправлено %1$s получателю %2$s</string>
     <string name="contacts_receive_complete">Получено %1$s от %2$s</string>
     <string name="contacts_received">Получено от %1$s</string>
@@ -527,7 +515,7 @@
     <string name="contacts_address_sent_success">Адрес отправлен</string>
     <string name="contacts_being_invited">Принять приглашение</string>
     <string name="contacts_broadcasting_payment">Мы сообщаем вашему контакту, что вы отправили ему биткоины. Пожалуйста, ждите.</string>
-    <string name="contacts_choose_account_message">Выберите, где вы хотите получать средства.</string>
+    <string name="contacts_balance_dialog_choose_account_message">Выберите, где вы хотите получать средства.</string>
     <string name="contacts_choose_pairing_method">Для добавления контакта выберите желаемый способ сопряжения:</string>
     <string name="contacts_delete">Удалить контакт</string>
     <string name="contacts_delete_contact_success">Контакт удален</string>

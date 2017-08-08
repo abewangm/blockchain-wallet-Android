@@ -16,7 +16,7 @@ import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.datamanagers.PayloadDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
@@ -52,7 +52,7 @@ public class WebSocketService extends Service {
     };
 
     {
-        Injector.getInstance().getDataManagerComponent().inject(this);
+        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
     @Override
