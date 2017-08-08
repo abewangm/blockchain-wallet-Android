@@ -36,10 +36,6 @@ public class AccessState {
     private boolean isLoggedIn = false;
     private boolean canAutoLogout = true;
 
-    public ReplaySubject<WalletOptions> walletOptionsSubject;
-    public ReplaySubject<Settings> walletSettingsSubject;
-    public ReplaySubject<Boolean> coinifyWhitelistedSubject;
-
     public void initAccessState(Context context, PrefsUtil prefs, RxBus rxBus) {
         this.prefs = prefs;
         this.rxBus = rxBus;
@@ -48,10 +44,6 @@ public class AccessState {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setAction(AccessState.LOGOUT_ACTION);
         logoutPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-
-        walletOptionsSubject = ReplaySubject.create(1);
-        walletSettingsSubject = ReplaySubject.create(1);
-        coinifyWhitelistedSubject = ReplaySubject.create(1);
     }
 
     public static AccessState getInstance() {
@@ -87,9 +79,6 @@ public class AccessState {
     }
 
     public void logout(Context context) {
-        walletOptionsSubject = ReplaySubject.create(1);
-        walletSettingsSubject = ReplaySubject.create(1);
-        coinifyWhitelistedSubject = ReplaySubject.create(1);
         pin = null;
         Intent intent = new Intent(context, LogoutActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

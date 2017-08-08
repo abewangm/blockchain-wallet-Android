@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.exchange;
 
+import android.util.Log;
+
 import org.bitcoinj.core.Sha256Hash;
 import org.spongycastle.util.encoders.Hex;
 
@@ -19,17 +21,17 @@ public class BuyDataManager {
     private SettingsDataManager settingsDataManager;
     private AuthDataManager authDataManager;
     private PayloadDataManager payloadDataManager;
-    private AccessState accessState;
+    private BuyConditions buyConditions;
 
     public BuyDataManager(SettingsDataManager settingsDataManager,
                           AuthDataManager authDataManager,
                           PayloadDataManager payloadDataManager,
-                          AccessState accessState,
+                          BuyConditions buyConditions,
                           ExchangeService exchangeService) {
         this.settingsDataManager = settingsDataManager;
         this.authDataManager = authDataManager;
         this.payloadDataManager = payloadDataManager;
-        this.accessState = accessState;
+        this.buyConditions = buyConditions;
         this.exchangeService = exchangeService;
     }
 
@@ -40,13 +42,14 @@ public class BuyDataManager {
      */
     private void initReplaySubjects() {
         Observable<WalletOptions> walletOptionsStream = authDataManager.getWalletOptions();
-        walletOptionsStream.subscribeWith(accessState.walletOptionsSubject);
+        System.out.println("buyConditions: "+buyConditions);
+        walletOptionsStream.subscribeWith(buyConditions.walletOptionsSubject);
 
         Observable<Settings> walletSettingsStream = settingsDataManager.getSettings();
-        walletSettingsStream.subscribeWith(accessState.walletSettingsSubject);
+        walletSettingsStream.subscribeWith(buyConditions.walletSettingsSubject);
 
         Observable<Boolean> coinifyWhitelistedStream = exchangeService.hasCoinifyAccount();
-        coinifyWhitelistedStream.subscribeWith(accessState.coinifyWhitelistedSubject);
+        coinifyWhitelistedStream.subscribeWith(buyConditions.coinifyWhitelistedSubject);
     }
 
     public synchronized Observable<Boolean> getCanBuy() {
@@ -59,7 +62,7 @@ public class BuyDataManager {
 
     public synchronized Observable<Boolean> isCoinifyAllowed() {
 
-        return Observable.combineLatest(isCoinifyRolledOut(), accessState.coinifyWhitelistedSubject,
+        return Observable.combineLatest(isCoinifyRolledOut(), buyConditions.coinifyWhitelistedSubject,
                 (coinifyRolledOut, whiteListed) -> coinifyRolledOut || whiteListed);
     }
 
@@ -70,8 +73,8 @@ public class BuyDataManager {
      */
     Observable<Boolean> isCoinifyRolledOut() {
 
-        return accessState.walletOptionsSubject
-                .flatMap(walletOptions -> accessState.walletSettingsSubject
+        return buyConditions.walletOptionsSubject
+                .flatMap(walletOptions -> buyConditions.walletSettingsSubject
                         .map(settings -> walletOptions.getPartners().getCoinify().getCountries().contains(settings.getCountryCode()))
                         .map(inCoinifyCountry -> inCoinifyCountry && isRolloutAllowed(walletOptions.getRolloutPercentage()))
                 );
@@ -99,8 +102,8 @@ public class BuyDataManager {
      */
     Observable<Boolean> isUnocoinRolledOut() {
 
-        return accessState.walletOptionsSubject
-                .flatMap(walletOptions -> accessState.walletSettingsSubject
+        return buyConditions.walletOptionsSubject
+                .flatMap(walletOptions -> buyConditions.walletSettingsSubject
                         .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode()))
                         .map(inUnocoinCountry -> inUnocoinCountry && isRolloutAllowed(walletOptions.getRolloutPercentage()))
                 );
