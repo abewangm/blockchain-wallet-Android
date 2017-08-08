@@ -44,7 +44,6 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.OnItemSelectedListener
 import piuk.blockchain.android.util.helperfunctions.OnPageChangeListener
-import java.util.*
 import javax.inject.Inject
 
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {

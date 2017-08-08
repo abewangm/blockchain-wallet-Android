@@ -54,7 +54,7 @@ interface SendView extends View {
 
     void onShowBIP38PassphrasePrompt(String scanData);
 
-    void finishPage(boolean paymentToContactMade);
+    void finishPage(boolean paymentMade);
 
     void setContactName(String name);
 

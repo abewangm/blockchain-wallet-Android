@@ -31,6 +31,7 @@ public class AccountChooserActivity extends BaseMvpActivity<AccountChooserView, 
     public static final String EXTRA_REQUEST_CODE = "request_code";
     public static final String EXTRA_SELECTED_ITEM = "selected_object";
     public static final String EXTRA_SELECTED_OBJECT_TYPE = "selected_object_type";
+    public static final String EXTRA_ACTIVITY_TITLE = "activity_title";
     public static final int REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE = 216;
     public static final int REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND = 217;
     public static final int REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND = 218;
@@ -55,10 +56,13 @@ public class AccountChooserActivity extends BaseMvpActivity<AccountChooserView, 
         } else {
             paymentRequestType = (PaymentRequestType) intent.getSerializableExtra(EXTRA_REQUEST_TYPE);
             int requestCode = getIntent().getIntExtra(EXTRA_REQUEST_CODE, -1);
-            binding.toolbar.toolbarGeneral.setTitle(
-                    requestCode == REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
-                            || requestCode == REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND
-                            || requestCode != REQUEST_CODE_CHOOSE_CONTACT ? R.string.to : R.string.from);
+
+            String title = getIntent().getStringExtra(EXTRA_ACTIVITY_TITLE);
+            if (title == null) {
+                throw new AssertionError("Title string must be passed to AccountChooserActivity");
+            } else {
+                binding.toolbar.toolbarGeneral.setTitle(title);
+            }
 
             setSupportActionBar(binding.toolbar.toolbarGeneral);
             if (getSupportActionBar() != null) {
@@ -111,10 +115,15 @@ public class AccountChooserActivity extends BaseMvpActivity<AccountChooserView, 
         binding.recyclerview.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    public static void startForResult(Fragment fragment, int requestCode, PaymentRequestType paymentRequestType) {
+    public static void startForResult(Fragment fragment,
+                                      int requestCode,
+                                      PaymentRequestType paymentRequestType,
+                                      String title) {
+
         Intent starter = new Intent(fragment.getContext(), AccountChooserActivity.class);
         starter.putExtra(EXTRA_REQUEST_TYPE, paymentRequestType);
         starter.putExtra(EXTRA_REQUEST_CODE, requestCode);
+        starter.putExtra(EXTRA_ACTIVITY_TITLE, title);
         fragment.startActivityForResult(starter, requestCode);
     }
 
