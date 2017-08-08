@@ -13,10 +13,6 @@ import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import timber.log.Timber;
 
-/**
- * Created by justin on 4/28/17.
- */
-
 public class BuyDataManager {
 
     private ExchangeService exchangeService;
@@ -112,7 +108,8 @@ public class BuyDataManager {
 
     public synchronized Observable<Boolean> isUnocoinAllowed() {
 
-        return isUnocoinRolledOut();
+        // TODO: 08/08/2017 Unocoin is still under development and not ready to release
+        return Observable.just(false);
 
         // TODO: 04/08/2017 Potentially unocoin will have whitelisted accounts
 //        return Observable.combineLatest(isUnocoinRolledOut(), accessState.unocoinWhitelistedSubject,
