@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <include
             android:id="@+id/toolbar_layout"
             layout="@layout/toolbar_general"
@@ -36,35 +35,36 @@
                 android:id="@+id/imageContactCard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/vector_contact_card" />
 
             <TextView
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:id="@+id/textNoContactsYet"
+                style="@style/Base.DialogWindowTitle.AppCompat"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
                 android:text="@string/contacts_no_contacts_yet"
-                android:textStyle="bold"
+                android:textColor="@color/primary_navy_medium"
+                android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageContactCard" />
 
             <TextView
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:id="@+id/textContactHelper"
+                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
                 android:text="@string/contacts_helper_text_1"
+                android:textColor="@color/product_gray_hint"
+                android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -72,12 +72,13 @@
 
             <Button
                 android:id="@+id/buttonInviteContact"
-                android:layout_width="wrap_content"
+                style="@style/ButtonStyle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
                 android:layout_marginTop="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/contacts_invite_contact"
                 android:theme="@style/ButtonLightBlueTheme"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -133,18 +134,21 @@
                 android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
                 android:text="@string/contacts_loading_failed"
+                android:textColor="@color/product_gray_hint"
+                android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/buttonRetry"
-                android:layout_width="wrap_content"
+                style="@style/ButtonStyle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
                 android:layout_marginTop="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/retry"
                 android:theme="@style/ButtonLightBlueTheme"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -163,7 +167,7 @@
             android:layout_marginRight="16dp"
             android:theme="@style/PlainTheme"
             android:visibility="gone"
-            app:backgroundTint="@color/primary_navy_dark"
+            app:backgroundTint="@color/primary_blue_accent"
             app:layout_anchorGravity="bottom|end"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
