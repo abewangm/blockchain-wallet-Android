@@ -1,6 +1,8 @@
 package piuk.blockchain.android.data.services;
 
 import io.reactivex.schedulers.Schedulers;
+import piuk.blockchain.android.data.answers.Logging;
+import piuk.blockchain.android.data.answers.SecondPasswordEvent;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.util.PrefsUtil;
 
@@ -27,6 +29,7 @@ public class EventService {
 
     public void log2ndPwEvent(boolean active) {
         logEventOnce(PrefsUtil.KEY_EVENT_2ND_PW, EVENT_2ND_PW + getBoolean(active));
+        Logging.INSTANCE.logCustom(new SecondPasswordEvent(active));
     }
 
     public void logLegacyEvent(boolean active) {

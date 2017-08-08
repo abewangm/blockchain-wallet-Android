@@ -6,6 +6,9 @@ import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest
 import io.reactivex.Completable
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.answers.ContactEventType
+import piuk.blockchain.android.data.answers.ContactsEvent
+import piuk.blockchain.android.data.answers.Logging
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.ContactsPredicates
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
@@ -59,6 +62,7 @@ class ContactConfirmRequestPresenter @Inject internal constructor(
             // Request that the other person receives payment, ie you send
             completable = contactsDataManager.requestReceivePayment(recipient!!.mdid, request)
                     .doAfterTerminate { view.dismissProgressDialog() }
+                    .doOnComplete { Logging.logCustom(ContactsEvent(ContactEventType.RPR)) }
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
         } else {
             val paymentRequest = PaymentRequest(satoshis, view.note)
@@ -67,6 +71,7 @@ class ContactConfirmRequestPresenter @Inject internal constructor(
                     .doOnNext { address -> paymentRequest.address = address }
                     .flatMapCompletable { contactsDataManager.requestSendPayment(recipient!!.mdid, paymentRequest) }
                     .doAfterTerminate({ view.dismissProgressDialog() })
+                    .doOnComplete { Logging.logCustom(ContactsEvent(ContactEventType.PR)) }
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
         }
 

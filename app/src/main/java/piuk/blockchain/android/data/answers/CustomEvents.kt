@@ -78,3 +78,28 @@ class AppLaunchEvent(playServicesFound: Boolean) : CustomEvent("App Launched") {
 
 }
 
+class SecondPasswordEvent(secondPasswordEnabled: Boolean) : CustomEvent("Second password event") {
+
+    init {
+        putCustomAttribute("Second password enabled", if (secondPasswordEnabled) "true" else "false")
+    }
+
+}
+
+class ContactsEvent(eventType: ContactEventType) : CustomEvent("Contacts Event") {
+
+    init {
+        putCustomAttribute("Contacts event", eventType.name)
+    }
+
+}
+
+@Suppress("UNUSED_PARAMETER")
+enum class ContactEventType(name: String) {
+    RPR("Request for payment request sent"),
+    PR("Payment request sent"),
+    PAYMENT_BROADCASTED("Payment broadcasted"),
+    INVITE_SENT("Invite sent"),
+    INVITE_ACCEPTED("Invite accepted")
+}
+

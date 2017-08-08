@@ -17,9 +17,12 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.answers.ContactEventType;
+import piuk.blockchain.android.data.answers.ContactsEvent;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -209,12 +212,13 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
                         .doAfterTerminate(() -> getView().dismissProgressDialog())
                         .subscribe(
                                 contact -> {
+                                    Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.INVITE_ACCEPTED));
                                     link = null;
                                     refreshContacts();
                                     getView().showToast(R.string.contacts_add_contact_success, ToastCustom.TYPE_OK);
                                 }, throwable -> {
 
-                                    if(throwable instanceof NoSuchElementException) {
+                                    if (throwable instanceof NoSuchElementException) {
                                         getView().showToast(R.string.contacts_invite_uri_used, ToastCustom.TYPE_ERROR);
                                     } else {
                                         getView().showToast(R.string.contacts_add_contact_failed, ToastCustom.TYPE_ERROR);
@@ -291,6 +295,7 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
                                     uri -> {
                                         this.uri = uri;
                                         generateIntent(uri);
+                                        Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.INVITE_SENT));
                                     },
                                     throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
         } else {
@@ -307,7 +312,7 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
         getView().onLinkGenerated(intent);
     }
 
-    public void resendInvite(String id) {
+    void resendInvite(String id) {
         setNameOfRecipient(contactList.get(id).getName());
         getView().showSenderNameDialog();
     }
