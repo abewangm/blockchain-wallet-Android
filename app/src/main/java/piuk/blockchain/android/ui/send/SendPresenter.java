@@ -38,6 +38,8 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.ContactEventType;
+import piuk.blockchain.android.data.answers.ContactsEvent;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.answers.PaymentSentEvent;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
@@ -938,6 +940,8 @@ public class SendPresenter extends BasePresenter<SendView> {
                             return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
                                     // Show successfully broadcast
                                     .doOnComplete(() -> getView().showBroadcastSuccessDialog())
+                                    // Log event
+                                    .doOnComplete(() -> Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.PAYMENT_BROADCASTED)))
                                     // Show retry dialog if broadcast failed
                                     .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
                         })
