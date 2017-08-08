@@ -1,18 +1,19 @@
 package piuk.blockchain.android.data.exchange;
 
+import android.util.Log;
+
 import org.bitcoinj.core.Sha256Hash;
 import org.spongycastle.util.encoders.Hex;
 
+import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.api.data.WalletOptions;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
-
-/**
- * Created by justin on 4/28/17.
- */
+import timber.log.Timber;
 
 public class BuyDataManager {
 
@@ -20,32 +21,63 @@ public class BuyDataManager {
     private SettingsDataManager settingsDataManager;
     private AuthDataManager authDataManager;
     private PayloadDataManager payloadDataManager;
-    private AccessState accessState;
+    private BuyConditions buyConditions;
 
     public BuyDataManager(SettingsDataManager settingsDataManager,
                           AuthDataManager authDataManager,
                           PayloadDataManager payloadDataManager,
-                          AccessState accessState,
+                          BuyConditions buyConditions,
                           ExchangeService exchangeService) {
         this.settingsDataManager = settingsDataManager;
         this.authDataManager = authDataManager;
         this.payloadDataManager = payloadDataManager;
-        this.accessState = accessState;
+        this.buyConditions = buyConditions;
         this.exchangeService = exchangeService;
     }
 
     /**
-     * Checks whether or not a user is accessing their wallet from a SEPA country and stores the
-     * result in {@link AccessState}. Also stores the current rollout value for Android.
+     * ReplaySubjects will re-emit items it observed.
+     * It is safe to assumed that walletOptions and
+     * the user's country code won't change during an active session.
+     */
+    private void initReplaySubjects() {
+        Observable<WalletOptions> walletOptionsStream = authDataManager.getWalletOptions();
+        System.out.println("buyConditions: "+buyConditions);
+        walletOptionsStream.subscribeWith(buyConditions.walletOptionsSubject);
+
+        Observable<Settings> walletSettingsStream = settingsDataManager.getSettings();
+        walletSettingsStream.subscribeWith(buyConditions.walletSettingsSubject);
+
+        Observable<Boolean> coinifyWhitelistedStream = exchangeService.hasCoinifyAccount();
+        coinifyWhitelistedStream.subscribeWith(buyConditions.coinifyWhitelistedSubject);
+    }
+
+    public synchronized Observable<Boolean> getCanBuy() {
+
+        initReplaySubjects();
+
+        return Observable.combineLatest(isCoinifyAllowed(), isUnocoinAllowed(),
+                (allowCoinify, allowUnocoin) -> allowCoinify || allowUnocoin);
+    }
+
+    public synchronized Observable<Boolean> isCoinifyAllowed() {
+
+        return Observable.combineLatest(isCoinifyRolledOut(), buyConditions.coinifyWhitelistedSubject,
+                (coinifyRolledOut, whiteListed) -> coinifyRolledOut || whiteListed);
+    }
+
+    /**
+     * Checks whether or not a user is accessing their wallet from a SEPA country.
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    Observable<Boolean> getIfSepaCountry() {
-        return authDataManager.getWalletOptions()
-                .flatMap(walletOptions -> settingsDataManager.getSettings()
-                        .map(settings -> walletOptions.getBuySellCountries().contains(settings.getCountryCode()))
-                        .doOnNext(sepaCountry -> accessState.setInSepaCountry(sepaCountry))
-                        .doOnNext(ignored -> accessState.setBuySellRolloutPercent(walletOptions.getRolloutPercentage())));
+    Observable<Boolean> isCoinifyRolledOut() {
+
+        return buyConditions.walletOptionsSubject
+                .flatMap(walletOptions -> buyConditions.walletSettingsSubject
+                        .map(settings -> walletOptions.getPartners().getCoinify().getCountries().contains(settings.getCountryCode()))
+                        .map(inCoinifyCountry -> inCoinifyCountry && isRolloutAllowed(walletOptions.getRolloutPercentage()))
+                );
     }
 
     /**
@@ -54,14 +86,37 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    boolean isRolloutAllowed() {
+    boolean isRolloutAllowed(double rolloutPercentage) {
         String plainGuid = payloadDataManager.getWallet().getGuid().replace("-", "");
 
         byte[] guidHashBytes = Sha256Hash.hash(Hex.encode(plainGuid.getBytes()));
         int unsignedByte = guidHashBytes[0] & 0xff;
-        double rolloutPercentage = accessState.getBuySellRolloutPercent();
 
         return ((unsignedByte + 1.0) / 256.0) <= rolloutPercentage;
+    }
+
+    /**
+     * Checks whether or not a user is accessing their wallet from India.
+     *
+     * @return An {@link Observable} wrapping a boolean value
+     */
+    Observable<Boolean> isUnocoinRolledOut() {
+
+        return buyConditions.walletOptionsSubject
+                .flatMap(walletOptions -> buyConditions.walletSettingsSubject
+                        .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode()))
+                        .map(inUnocoinCountry -> inUnocoinCountry && isRolloutAllowed(walletOptions.getRolloutPercentage()))
+                );
+    }
+
+    public synchronized Observable<Boolean> isUnocoinAllowed() {
+
+        // TODO: 08/08/2017 Unocoin is still under development and not ready to release
+        return Observable.just(false);
+
+        // TODO: 04/08/2017 Potentially unocoin will have whitelisted accounts
+//        return Observable.combineLatest(isUnocoinRolledOut(), accessState.unocoinWhitelistedSubject,
+//                (unocoinRolledOut, whiteListed) -> unocoinRolledOut || whiteListed);
     }
 
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
@@ -70,12 +125,6 @@ public class BuyDataManager {
 
     public Observable<String> watchPendingTrades() {
         return exchangeService.watchPendingTrades();
-    }
-
-    public synchronized Observable<Boolean> getCanBuy() {
-
-        return Observable.combineLatest(getIfSepaCountry(), exchangeService.hasCoinifyAccount(),
-                (isSepa, hasAccount) -> hasAccount || isSepa && isRolloutAllowed());
     }
 
     public void reloadExchangeData() {

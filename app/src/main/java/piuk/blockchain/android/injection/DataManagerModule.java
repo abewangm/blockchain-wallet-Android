@@ -10,6 +10,7 @@ import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import dagger.Module;
 import dagger.Provides;
+import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
@@ -21,6 +22,7 @@ import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.exchange.BuyConditions;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeService;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
@@ -147,12 +149,14 @@ public class DataManagerModule {
     protected BuyDataManager provideBuyDataManager(SettingsDataManager settingsDataManager,
                                                    AuthDataManager authDataManager,
                                                    PayloadDataManager payloadDataManager,
-                                                   AccessState accessState,
                                                    ExchangeService exchangeService) {
         return new BuyDataManager(settingsDataManager,
                 authDataManager,
                 payloadDataManager,
-                accessState,
+                BuyConditions.getInstance(
+                        ReplaySubject.create(1),
+                        ReplaySubject.create(1),
+                        ReplaySubject.create(1)),
                 exchangeService);
     }
 

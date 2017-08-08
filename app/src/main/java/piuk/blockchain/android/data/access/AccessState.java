@@ -7,6 +7,11 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
+import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.api.data.WalletOptions;
+import info.blockchain.wallet.metadata.Metadata;
+import io.reactivex.subjects.AsyncSubject;
+import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.ui.auth.LogoutActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -29,8 +34,6 @@ public class AccessState {
     private String pin;
     private PendingIntent logoutPendingIntent;
     private boolean isLoggedIn = false;
-    private boolean inSepaCountry = false;
-    private double buySellRolloutPercent = 0.0D;
     private boolean canAutoLogout = true;
 
     public void initAccessState(Context context, PrefsUtil prefs, RxBus rxBus) {
@@ -81,29 +84,6 @@ public class AccessState {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.setAction(LOGOUT_ACTION);
         context.startActivity(intent);
-    }
-
-    /**
-     * Returns whether or not a user is accessing their wallet from a SEPA country, ie should be
-     * able to see buy/sell prompts.
-     */
-    public boolean getInSepaCountry() {
-        return inSepaCountry;
-    }
-
-    public void setInSepaCountry(boolean inSepaCountry) {
-        this.inSepaCountry = inSepaCountry;
-    }
-
-    /**
-     * Returns the current Buy/Sell rollout percent for Android. If 0, Buy/Sell should be disabled.
-     */
-    public double getBuySellRolloutPercent() {
-        return buySellRolloutPercent;
-    }
-
-    public void setBuySellRolloutPercent(double buySellRolloutPercent) {
-        this.buySellRolloutPercent = buySellRolloutPercent;
     }
 
     public boolean isBtc() {
