@@ -42,7 +42,6 @@ public class BuyDataManager {
      */
     private void initReplaySubjects() {
         Observable<WalletOptions> walletOptionsStream = authDataManager.getWalletOptions();
-        System.out.println("buyConditions: "+buyConditions);
         walletOptionsStream.subscribeWith(buyConditions.walletOptionsSubject);
 
         Observable<Settings> walletSettingsStream = settingsDataManager.getSettings();

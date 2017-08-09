@@ -138,36 +138,6 @@ public class ApiModule {
 
     @Provides
     @Singleton
-    @Named("sfox")
-    protected Retrofit provideRetrofitSFOXInstance(OkHttpClient okHttpClient,
-                                                   JacksonConverterFactory converterFactory,
-                                                   RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                   EnvironmentSettings environmentSettings) {
-        return new Retrofit.Builder()
-                .baseUrl(environmentSettings.getCurrentSFOXUrl())
-                .client(okHttpClient)
-                .addConverterFactory(converterFactory)
-                .addCallAdapterFactory(rxJavaCallFactory)
-                .build();
-    }
-
-    @Provides
-    @Singleton
-    @Named("coinify")
-    protected Retrofit provideRetrofitCoinifyInstance(OkHttpClient okHttpClient,
-                                                      JacksonConverterFactory converterFactory,
-                                                      RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                      EnvironmentSettings environmentSettings) {
-        return new Retrofit.Builder()
-                .baseUrl(environmentSettings.getCurrentCoinifyUrl())
-                .client(okHttpClient)
-                .addConverterFactory(converterFactory)
-                .addCallAdapterFactory(rxJavaCallFactory)
-                .build();
-    }
-
-    @Provides
-    @Singleton
     protected SSLVerifyUtil provideSSlVerifyUtil(@Named("explorer") Retrofit retrofit,
                                                  RxBus rxBus) {
 
