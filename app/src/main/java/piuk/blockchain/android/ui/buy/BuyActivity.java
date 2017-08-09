@@ -190,7 +190,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
 
         new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_second_password_prompt)
+                .setMessage(R.string.buy_second_password_prompt)
                 .setView(frameLayout)
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
