@@ -676,7 +676,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(dialogInterface -> {
                 if (fctxId != null) {
-                    getPresenter().broadcastPaymentSuccess(mdid, fctxId, hash, transactionValue);
+                    getPresenter().broadcastPaymentSuccess(mdid, hash, fctxId, transactionValue);
                 } else {
                     finishPage(true);
                 }
