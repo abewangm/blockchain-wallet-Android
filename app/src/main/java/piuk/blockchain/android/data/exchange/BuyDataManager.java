@@ -1,14 +1,11 @@
 package piuk.blockchain.android.data.exchange;
 
-import android.util.Log;
-
 import org.bitcoinj.core.Sha256Hash;
 import org.spongycastle.util.encoders.Hex;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.WalletOptions;
 import io.reactivex.Observable;
-import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
@@ -42,27 +39,45 @@ public class BuyDataManager {
      */
     private void initReplaySubjects() {
         Observable<WalletOptions> walletOptionsStream = authDataManager.getWalletOptions();
-        walletOptionsStream.subscribeWith(buyConditions.walletOptionsSubject);
+        walletOptionsStream.subscribeWith(buyConditions.walletOptionsSource);
 
         Observable<Settings> walletSettingsStream = settingsDataManager.getSettings();
-        walletSettingsStream.subscribeWith(buyConditions.walletSettingsSubject);
+        walletSettingsStream.subscribeWith(buyConditions.walletSettingsSource);
 
         Observable<Boolean> coinifyWhitelistedStream = exchangeService.hasCoinifyAccount();
-        coinifyWhitelistedStream.subscribeWith(buyConditions.coinifyWhitelistedSubject);
+        coinifyWhitelistedStream.subscribeWith(buyConditions.coinifyWhitelistedSource);
     }
 
     public synchronized Observable<Boolean> getCanBuy() {
 
         initReplaySubjects();
 
-        return Observable.combineLatest(isCoinifyAllowed(), isUnocoinAllowed(),
-                (allowCoinify, allowUnocoin) -> allowCoinify || allowUnocoin);
+        return Observable.combineLatest(isBuyRolledOut(), isCoinifyAllowed(), isUnocoinAllowed(),
+                (isBuyRolledOut, allowCoinify, allowUnocoin) -> isBuyRolledOut && (allowCoinify || allowUnocoin));
     }
 
-    public synchronized Observable<Boolean> isCoinifyAllowed() {
+    /**
+     * Checks if buy is rolled out for user on android based on GUID. (All exchange partners)
+     *
+     * @return An {@link Observable} wrapping a boolean value
+     */
+    Observable<Boolean> isBuyRolledOut() {
 
-        return Observable.combineLatest(isCoinifyRolledOut(), buyConditions.coinifyWhitelistedSubject,
-                (coinifyRolledOut, whiteListed) -> coinifyRolledOut || whiteListed);
+        return buyConditions.walletOptionsSource
+                .flatMap(walletOptions -> buyConditions.walletSettingsSource
+                        .map(inCoinifyCountry -> isRolloutAllowed(walletOptions.getRolloutPercentage()))
+                );
+    }
+
+    /**
+     * Checks if user has whitelisted coinify account or in valid coinify country
+     *
+     * @return An {@link Observable} wrapping a boolean value
+     */
+    public Observable<Boolean> isCoinifyAllowed() {
+
+        return Observable.combineLatest(isInCoinifyCountry(), buyConditions.coinifyWhitelistedSource,
+                (coinifyCountry, whiteListed) -> coinifyCountry || whiteListed);
     }
 
     /**
@@ -70,12 +85,11 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    Observable<Boolean> isCoinifyRolledOut() {
+    Observable<Boolean> isInCoinifyCountry() {
 
-        return buyConditions.walletOptionsSubject
-                .flatMap(walletOptions -> buyConditions.walletSettingsSubject
+        return buyConditions.walletOptionsSource
+                .flatMap(walletOptions -> buyConditions.walletSettingsSource
                         .map(settings -> walletOptions.getPartners().getCoinify().getCountries().contains(settings.getCountryCode()))
-                        .map(inCoinifyCountry -> inCoinifyCountry && isRolloutAllowed(walletOptions.getRolloutPercentage()))
                 );
     }
 
@@ -99,23 +113,21 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    Observable<Boolean> isUnocoinRolledOut() {
-
-        return buyConditions.walletOptionsSubject
-                .flatMap(walletOptions -> buyConditions.walletSettingsSubject
+    Observable<Boolean> isInUnocoinCountry() {
+        return buyConditions.walletOptionsSource
+                .flatMap(walletOptions -> buyConditions.walletSettingsSource
                         .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode()))
-                        .map(inUnocoinCountry -> inUnocoinCountry && isRolloutAllowed(walletOptions.getRolloutPercentage()))
                 );
     }
 
-    public synchronized Observable<Boolean> isUnocoinAllowed() {
+    public Observable<Boolean> isUnocoinAllowed() {
+        return Observable.combineLatest(isInUnocoinCountry(), isUnocoinWhitelisted(),
+                (unocoinCountry, whiteListed) -> unocoinCountry || whiteListed);
+    }
 
-        // TODO: 08/08/2017 Unocoin is still under development and not ready to release
-        return Observable.just(false);
-
-        // TODO: 04/08/2017 Potentially unocoin will have whitelisted accounts
-//        return Observable.combineLatest(isUnocoinRolledOut(), accessState.unocoinWhitelistedSubject,
-//                (unocoinRolledOut, whiteListed) -> unocoinRolledOut || whiteListed);
+    Observable<Boolean> isUnocoinWhitelisted() {
+        return settingsDataManager.getSettings()
+                .map(settings -> settings.getInvited().get("unocoin"));
     }
 
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {

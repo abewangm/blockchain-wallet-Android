@@ -8,14 +8,14 @@ public class BuyConditions {
 
     private static BuyConditions instance;
 
-    public ReplaySubject<WalletOptions> walletOptionsSubject;
-    public ReplaySubject<Settings> walletSettingsSubject;
-    public ReplaySubject<Boolean> coinifyWhitelistedSubject;
+    public ReplaySubject<WalletOptions> walletOptionsSource;
+    public ReplaySubject<Settings> walletSettingsSource;
+    public ReplaySubject<Boolean> coinifyWhitelistedSource;//Only coinify whitelisted like this. Other partners whitelisted in wallet settings
 
-    private BuyConditions(ReplaySubject<WalletOptions> walletOptionsSubject, ReplaySubject<Settings> walletSettingsSubject, ReplaySubject<Boolean> coinifyWhitelistedSubject) {
-        this.walletOptionsSubject = walletOptionsSubject;
-        this.walletSettingsSubject = walletSettingsSubject;
-        this.coinifyWhitelistedSubject = coinifyWhitelistedSubject;
+    private BuyConditions(ReplaySubject<WalletOptions> walletOptionsSource, ReplaySubject<Settings> walletSettingsSource, ReplaySubject<Boolean> coinifyWhitelistedSource) {
+        this.walletOptionsSource = walletOptionsSource;
+        this.walletSettingsSource = walletSettingsSource;
+        this.coinifyWhitelistedSource = coinifyWhitelistedSource;
     }
 
     public static BuyConditions getInstance(ReplaySubject<WalletOptions> walletOptionsSubject,
