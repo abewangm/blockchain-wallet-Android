@@ -38,18 +38,6 @@ public class EnvironmentSettings {
         return BuildConfig.WEBSOCKET_URL;
     }
 
-    // TODO: 09/06/2017 Switch over to using BuildConfig once URLs finalised
-    @NonNull
-    public String getCurrentSFOXUrl() {
-        return PersistentUrls.SFOX_URL;
-    }
-
-    // TODO: 09/06/2017 Switch over to using BuildConfig once URLs finalised
-    @NonNull
-    public String getCurrentCoinifyUrl() {
-        return PersistentUrls.COINIFY_URL;
-    }
-
     @NonNull
     public AbstractBitcoinNetParams getNetworkParameters() {
         switch (getEnvironment()) {

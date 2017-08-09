@@ -59,12 +59,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Inject
     @Named("explorer")
     protected Lazy<Retrofit> retrofitExplorer;
-    @Inject
-    @Named("sfox")
-    protected Lazy<Retrofit> sfoxApi;
-    @Inject
-    @Named("coinify")
-    protected Lazy<Retrofit> coinify;
 
     @Inject PrefsUtil prefsUtil;
     @Inject RxBus rxBus;
@@ -146,16 +140,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     public Retrofit getRetrofitExplorerInstance() {
         return retrofitExplorer.get();
-    }
-
-    @Override
-    public Retrofit getRetrofitSFOXInstance() {
-        return sfoxApi.get();
-    }
-
-    @Override
-    public Retrofit getRetrofitCoinifyInstance() {
-        return coinify.get();
     }
 
     @Override
