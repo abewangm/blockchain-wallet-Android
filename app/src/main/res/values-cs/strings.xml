@@ -461,8 +461,6 @@
     <string name="contacts_second_password_prompt">Abyste mohli tuto službu použít, vyžadujeme od Vás zadání druhého hesla. Pro použití funkce Kontakty stačí zadat toto pouze jednou.</string>
     <string name="contacts_request_money_receive">Odeslat kontaktu požadavek</string>
     <string name="contacts_no_confirmed_contacts_found">Nebyly nalezeny žádné potvrzené kontakty!</string>
-    <string name="contacts_decline_pending_transaction">Opravdu chcete odmítnout tuto nevyřízenou transakci?</string>
-    <string name="contacts_cancel_pending_transaction">Opravdu chcete zrušit tuto nevyřízenou transakci?</string>
     <string name="contacts_pending_transaction_delete_success">Nevyřízená transakce byla úspěšně odstraněna</string>
     <string name="contacts_pending_transaction_delete_failure">Odstranění nevyřízené transakce se nezdařilo</string>
     <string name="contacts_pending_transaction_decline_success">Nevyřízená transakce byla úspěšně odmítnuta</string>

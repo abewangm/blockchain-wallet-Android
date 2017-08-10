@@ -463,8 +463,6 @@
     <string name="contacts_second_password_prompt">Per utilizzare questo servizio, devi inserire la tua seconda password. Dovrai inserirla solo per utilizzare la funzionalità contatti.</string>
     <string name="contacts_request_money_receive">Invia richiesta di contatto</string>
     <string name="contacts_no_confirmed_contacts_found">Nessun contatto confermato trovato!</string>
-    <string name="contacts_decline_pending_transaction">Sei sicuro di voler rifiutare questa transazione pendente?</string>
-    <string name="contacts_cancel_pending_transaction">Sei sicuro di voler annullare questa transazione pendente?</string>
     <string name="contacts_pending_transaction_delete_success">Transazione pendente cancellata con successo</string>
     <string name="contacts_pending_transaction_delete_failure">Cancellazione della transazione pendente fallita</string>
     <string name="contacts_pending_transaction_decline_success">Transazione pendente rifiutata con successo</string>

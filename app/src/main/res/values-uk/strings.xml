@@ -461,8 +461,6 @@
     <string name="contacts_second_password_prompt">Щоб скористатись цією послугою, вам треба ввести свій другий пароль. Вам треба ввести його лише один раз, щоб використовувати усі функціональні можливості Контактів.</string>
     <string name="contacts_request_money_receive">Відправити запит до контакту</string>
     <string name="contacts_no_confirmed_contacts_found">Жоден підтверджений контакт не знайдено!</string>
-    <string name="contacts_decline_pending_transaction">Ви впевнені, що хочете відхилити цю транзакцію в очікуванні?</string>
-    <string name="contacts_cancel_pending_transaction">Ви впевнені, що хочете скасувати цю транзакцію в очікуванні?</string>
     <string name="contacts_pending_transaction_delete_success">Транзакцію в очікуванні успішно видалено</string>
     <string name="contacts_pending_transaction_delete_failure">Збій видалення транзакції в очікуванні</string>
     <string name="contacts_pending_transaction_decline_success">Відхилення транзакції в очікуванні успішне</string>

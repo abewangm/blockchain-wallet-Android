@@ -12,7 +12,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import org.amshove.kluent.`should equal to`
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
@@ -617,32 +616,6 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(view)
     }
 
-    @Ignore("All long click functions are disabled for now")
-    @Test
-    fun `onPendingTransactionLongClicked waiting for address & receiver`() {
-        // Arrange
-        val fctxId = "FCTX_ID"
-        val fctx = FacilitatedTransaction().apply {
-            state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-            role = FacilitatedTransaction.ROLE_PR_RECEIVER
-            id = fctxId
-        }
-        val transactionModel = ContactTransactionModel("Contact name", fctx)
-        val facilitatedTransactions = mutableListOf<ContactTransactionModel>().apply {
-            add(transactionModel)
-        }
-        whenever(contactsDataManager.getFacilitatedTransactions())
-                .thenReturn(Observable.fromIterable(facilitatedTransactions))
-        // Act
-        subject.onPendingTransactionLongClicked(fctxId)
-        // Assert
-        verify(contactsDataManager).getFacilitatedTransactions()
-        verifyNoMoreInteractions(contactsDataManager)
-        verify(view).showTransactionDeclineDialog(fctxId)
-        verifyNoMoreInteractions(view)
-    }
-
-    @Ignore("All long click functions are disabled for now")
     @Test
     fun `onPendingTransactionLongClicked waiting for address & initiator`() {
         // Arrange
@@ -664,39 +637,10 @@ class BalancePresenterTest {
         // Assert
         verify(contactsDataManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(contactsDataManager)
-        verify(view).isContactsEnabled
         verify(view).showTransactionCancelDialog(fctxId)
         verifyNoMoreInteractions(view)
     }
 
-    @Ignore("All long click functions are disabled for now")
-    @Test
-    fun `onPendingTransactionLongClicked waiting for payment & receiver`() {
-        // Arrange
-        val fctxId = "FCTX_ID"
-        val fctx = FacilitatedTransaction().apply {
-            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
-            id = fctxId
-        }
-        val transactionModel = ContactTransactionModel("Contact name", fctx)
-        val facilitatedTransactions = mutableListOf<ContactTransactionModel>().apply {
-            add(transactionModel)
-        }
-        whenever(contactsDataManager.getFacilitatedTransactions())
-                .thenReturn(Observable.fromIterable(facilitatedTransactions))
-        whenever(view.isContactsEnabled).thenReturn(true)
-        // Act
-        subject.onPendingTransactionLongClicked(fctxId)
-        // Assert
-        verify(contactsDataManager).getFacilitatedTransactions()
-        verifyNoMoreInteractions(contactsDataManager)
-        verify(view).isContactsEnabled
-        verify(view).showTransactionDeclineDialog(fctxId)
-        verifyNoMoreInteractions(view)
-    }
-
-    @Ignore("All long click functions are disabled for now")
     @Test
     fun `onPendingTransactionLongClicked waiting for payment & initiator`() {
         // Arrange
@@ -721,26 +665,15 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(view)
     }
 
-    @Ignore("All long click functions are disabled for now")
     @Test
-    fun `onPendingTransactionLongClicked transaction not found`() {
+    fun declineTransaction() {
         // Arrange
         val fctxId = "FCTX_ID"
-        val fctx = FacilitatedTransaction().apply {
-            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-            role = FacilitatedTransaction.ROLE_PR_INITIATOR
-            id = ""
-        }
-        val transactionModel = ContactTransactionModel("Contact name", fctx)
-        val facilitatedTransactions = listOf(transactionModel)
-        whenever(contactsDataManager.getFacilitatedTransactions())
-                .thenReturn(Observable.fromIterable(facilitatedTransactions))
         // Act
-        subject.onPendingTransactionLongClicked(fctxId)
+        subject.declineTransaction(fctxId)
         // Assert
-        verify(contactsDataManager).getFacilitatedTransactions()
-        verifyNoMoreInteractions(contactsDataManager)
-        verifyZeroInteractions(view)
+        verify(view).showTransactionDeclineDialog(fctxId)
+        verifyNoMoreInteractions(view)
     }
 
     @Test
