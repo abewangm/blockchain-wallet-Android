@@ -14,7 +14,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
@@ -265,7 +264,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 )
                 .setNegativeButton(
                         R.string.contacts_balance_dialog_decline,
-                        { _, _ -> presenter.confirmDeclineTransaction(fctxId) }
+                        { _, _ -> presenter.declineTransaction(fctxId) }
                 )
                 .setNeutralButton(android.R.string.cancel, null)
                 .create()
@@ -294,7 +293,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 )
                 .setNegativeButton(
                         R.string.contacts_balance_dialog_decline,
-                        { _, _ -> presenter.confirmDeclineTransaction(fctxId) }
+                        { _, _ -> presenter.declineTransaction(fctxId) }
                 )
                 .setNeutralButton(android.R.string.cancel, null)
                 .create()
@@ -308,14 +307,14 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             showDialog(R.string.app_name, R.string.contacts_waiting_for_address_message, null, false)
 
     override fun showTransactionDeclineDialog(fctxId: String) = showDialog(
-            R.string.app_name,
+            R.string.contacts_balance_dialog_decline_title,
             R.string.contacts_decline_pending_transaction,
             DialogInterface.OnClickListener { _, _ -> presenter.confirmDeclineTransaction(fctxId) },
             true
     )
 
     override fun showTransactionCancelDialog(fctxId: String) = showDialog(
-            R.string.app_name,
+            R.string.contacts_balance_dialog_cancel_title,
             R.string.contacts_cancel_pending_transaction,
             DialogInterface.OnClickListener { _, _ -> presenter.confirmCancelTransaction(fctxId) },
             true
@@ -332,15 +331,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         spinner.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, accounts)
         val selection = intArrayOf(0)
 
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                selection[0] = position
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                // No-op
-            }
-        }
+        spinner.onItemSelectedListener = OnItemSelectedListener { selection[0] = it }
 
         var message: String
         if (!note.isNullOrEmpty()) {
@@ -361,7 +352,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 )
                 .setNegativeButton(
                         R.string.contacts_balance_dialog_decline,
-                        { _, _ -> presenter.confirmDeclineTransaction(fctxId) }
+                        { _, _ -> presenter.declineTransaction(fctxId) }
                 )
                 .setNeutralButton(android.R.string.cancel, null)
                 .create()

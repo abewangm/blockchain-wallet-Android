@@ -461,8 +461,6 @@
     <string name="contacts_second_password_prompt">Zur Benutzung dieses Service müssen Sie uns das zweite Passwort angeben. Zur Verwendung der Kontaktfunktion ist nur eine einmalige Eingabe erforderlich.</string>
     <string name="contacts_request_money_receive">Kontakt eine Anfrage senden</string>
     <string name="contacts_no_confirmed_contacts_found">Es wurden keine bestätigten Kontakte gefunden!</string>
-    <string name="contacts_decline_pending_transaction">Möchten Sie diese ausstehende Transaktion wirklich ablehnen?</string>
-    <string name="contacts_cancel_pending_transaction">Möchten Sie diese ausstehende Transaktion wirklich abbrechen?</string>
     <string name="contacts_pending_transaction_delete_success">Die ausstehende Transaktion wurde erfolgreich gelöscht</string>
     <string name="contacts_pending_transaction_delete_failure">Die Löschung der ausstehenden Transaktion ist fehlgeschlagen</string>
     <string name="contacts_pending_transaction_decline_success">Die ausstehende Transaktion wurde erfolgreich abgelehnt</string>

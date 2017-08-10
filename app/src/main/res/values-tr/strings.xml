@@ -461,8 +461,6 @@
     <string name="contacts_second_password_prompt">Bu hizmeti kullanmak için ikinci şifrenizi girmenizi rica ediyoruz. Kişiler işlevini kullanmak için bunu sadece bir kez girmeniz gerekecek.</string>
     <string name="contacts_request_money_receive">Kişiye talebi gönderin</string>
     <string name="contacts_no_confirmed_contacts_found">Onaylanmış kişi bulunamadı!</string>
-    <string name="contacts_decline_pending_transaction">Bu bekleyen işlemi geri çevirmek istediğinizden emin misiniz?</string>
-    <string name="contacts_cancel_pending_transaction">Bu bekleyen işlemi iptal etmek istediğinizden emin misiniz?</string>
     <string name="contacts_pending_transaction_delete_success">Bekleyen işlem başarıyla silindi</string>
     <string name="contacts_pending_transaction_delete_failure">Bekleyen işlem silinemedi</string>
     <string name="contacts_pending_transaction_decline_success">Bekleyen işlem başarıyla geri çevrildi</string>
