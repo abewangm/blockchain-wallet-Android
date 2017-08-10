@@ -113,7 +113,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
     }
 
     @Override
-    public void showPayOrDeclineDialog(String fctxId,String amount, String name, @Nullable String note) {
+    public void showPayOrDeclineDialog(String fctxId, String amount, String name, @Nullable String note) {
         String message;
         if (note != null && !note.isEmpty()) {
             message = getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note);
@@ -161,7 +161,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
     @Override
     public void showDeleteUserDialog() {
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(getString(R.string.contacts_delete)+"?")
+                .setTitle(getString(R.string.contacts_delete) + "?")
                 .setMessage(R.string.contacts_delete_message)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onDeleteContactConfirmed())
                 .setNegativeButton(android.R.string.cancel, null)
@@ -291,7 +291,11 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_balance_dialog_choose_account_message)
                 .setView(frameLayout)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onAccountChosen(selection[0], fctxId))
+                .setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> getPresenter().onAccountChosen(selection[0], fctxId))
+                .setNegativeButton(R.string.contacts_balance_dialog_decline,
+                        (dialogInterface, i) -> getPresenter().declineTransaction(fctxId))
+                .setNeutralButton(android.R.string.cancel, null)
                 .create()
                 .show();
     }
@@ -301,8 +305,11 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
         new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_send_address_message)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().onAccountChosen(0, fctxId))
-                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> getPresenter().onAccountChosen(0, fctxId))
+                .setNegativeButton(android.R.string.cancel,
+                        (dialogInterface, i) -> getPresenter().declineTransaction(fctxId))
+                .setNeutralButton(android.R.string.cancel, null)
                 .create()
                 .show();
     }

@@ -197,30 +197,26 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
         }
     }
 
-    @SuppressWarnings("unused")
+    void declineTransaction(String fctxId) {
+        getView().showTransactionDeclineDialog(fctxId);
+    }
+
     void onTransactionLongClicked(String fctxId) {
-        // TODO: 03/08/2017 Not sure if we actually want to offer this functionality
-//        getCompositeDisposable().add(
-//                contactsDataManager.getFacilitatedTransactions()
-//                        .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
-//                        .subscribe(contactTransactionModel -> {
-//                            FacilitatedTransaction fctx = contactTransactionModel.getFacilitatedTransaction();
-//
-//                            if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)) {
-//                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-//                                    getView().showTransactionDeclineDialog(fctxId);
-//                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
-//                                    getView().showTransactionCancelDialog(fctxId);
-//                                }
-//
-//                            } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)) {
-//                                if (fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_RECEIVER)) {
-//                                    getView().showTransactionDeclineDialog(fctxId);
-//                                } else if (fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
-//                                    getView().showTransactionCancelDialog(fctxId);
-//                                }
-//                            }
-//                        }, throwable -> showErrorAndQuitPage()));
+        getCompositeDisposable().add(
+                contactsDataManager.getFacilitatedTransactions()
+                        .filter(contactTransactionModel -> contactTransactionModel.getFacilitatedTransaction().getId().equals(fctxId))
+                        .subscribe(contactTransactionModel -> {
+                            FacilitatedTransaction fctx = contactTransactionModel.getFacilitatedTransaction();
+
+                            if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS)
+                                    && fctx.getRole().equals(FacilitatedTransaction.ROLE_RPR_INITIATOR)) {
+                                getView().showTransactionCancelDialog(fctxId);
+
+                            } else if (fctx.getState().equals(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT)
+                                    && fctx.getRole().equals(FacilitatedTransaction.ROLE_PR_INITIATOR)) {
+                                getView().showTransactionCancelDialog(fctxId);
+                            }
+                        }, Timber::e));
     }
 
     void confirmDeclineTransaction(String fctxId) {
