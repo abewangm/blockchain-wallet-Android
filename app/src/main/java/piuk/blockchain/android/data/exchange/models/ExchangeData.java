@@ -24,11 +24,18 @@ public class ExchangeData {
     @JsonProperty("sfox")
     private SfoxData sfox = null;
 
+    @JsonProperty("unocoin")
+    private UnocoinData unocoin = null;
+
     public CoinifyData getCoinify() {
         return coinify;
     }
 
     public SfoxData getSfox() {
         return sfox;
+    }
+
+    public UnocoinData getUnocoin() {
+        return unocoin;
     }
 }

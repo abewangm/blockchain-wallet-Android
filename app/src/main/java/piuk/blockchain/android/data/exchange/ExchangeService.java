@@ -114,6 +114,8 @@ public class ExchangeService {
                         trades.addAll(data.getCoinify().getTrades());
                     } else if (data.getSfox() != null) {
                         trades.addAll(data.getSfox().getTrades());
+                    } else if (data.getUnocoin() != null) {
+                        trades.addAll(data.getUnocoin().getTrades());
                     }
 
                     return trades;
