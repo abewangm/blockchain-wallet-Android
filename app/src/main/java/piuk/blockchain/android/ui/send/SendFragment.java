@@ -411,6 +411,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                         binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
                         binding.textviewFeeTime.setVisibility(View.VISIBLE);
                         binding.textInputLayout.setVisibility(View.GONE);
+                        updateTotals(getPresenter().getSendingItemAccount());
                         break;
                     case 2:
                         if (getPresenter().shouldShowAdvancedFeeWarning()) {
