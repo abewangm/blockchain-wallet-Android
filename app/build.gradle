@@ -31,7 +31,7 @@ android {
             zipAlignEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            resValue "string", "google_maps_key", "AIzaSyB_5WN2exwvF4pqQ6rW6JdkHcYWjZOim4w"
+            resValue "string", "google_maps_key", "AIzaSyDH1Yx_Z4oFrN8exg3G-xyKJfskBsN1pO4"
             multiDexEnabled false
             buildConfigField "boolean", "DOGFOOD", "false"
             buildConfigField "boolean", "USE_CRASHLYTICS", "true"
