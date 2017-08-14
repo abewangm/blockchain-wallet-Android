@@ -61,7 +61,7 @@ public class RecoverFundsActivity extends BaseMvpActivity<RecoverFundsView, Reco
 
     @Override
     public String getRecoveryPhrase() {
-        return binding.fieldPassphrase.getText().toString();
+        return binding.fieldPassphrase.getText().toString().toLowerCase().trim();
     }
 
     @Override
