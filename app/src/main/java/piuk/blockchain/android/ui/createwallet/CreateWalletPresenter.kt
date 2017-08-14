@@ -63,12 +63,18 @@ class CreateWalletPresenter @Inject constructor(
             password1.length > 255 -> view.showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR)
             password1 != password2 -> view.showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR)
             passwordStrength < 50 -> view.showWeakPasswordDialog(email, password1)
-            !recoveryPhrase.isEmpty() -> recoverWallet(email, password1)
-            else -> createWallet(email, password1)
+            else -> createOrRecoverWallet(email, password1)
         }
     }
 
-    fun createWallet(email: String, password: String) {
+    fun createOrRecoverWallet(email: String, password: String) {
+        when {
+            !recoveryPhrase.isEmpty() -> recoverWallet(email, password)
+            else -> createWallet(email, password)
+        }
+    }
+
+    private fun createWallet(email: String, password: String) {
         appUtil.applyPRNGFixes()
 
         payloadDataManager.createHdWallet(password, view.getDefaultAccountName(), email)
@@ -93,7 +99,7 @@ class CreateWalletPresenter @Inject constructor(
                 })
     }
 
-    fun recoverWallet(email: String, password: String) {
+    private fun recoverWallet(email: String, password: String) {
         payloadDataManager.restoreHdWallet(
                 recoveryPhrase,
                 view.getDefaultAccountName(),

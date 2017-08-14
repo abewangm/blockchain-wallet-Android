@@ -203,7 +203,7 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
                     wallet_pass.requestFocus()
                 })
                 .setNegativeButton(R.string.no, { _, _ ->
-                    presenter.createWallet(email, password)
+                    presenter.createOrRecoverWallet(email, password)
                 }).show()
     }
 
