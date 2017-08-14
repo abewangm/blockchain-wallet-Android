@@ -433,25 +433,27 @@ class BalancePresenter @Inject constructor(
                                 exchangeRateFactory.getLastPrice(getFiatCurrency()),
                                 accessState.isBtc
                         )
-                        checkOnboardingStatus()
-                    }.toObservable<Nothing>()
+                    }.andThen(getOnboardingStatusObservable())
 
-    private fun getFacilitatedTransactionsObservable(): Observable<MutableList<ContactTransactionModel>> {
-        if (view.isContactsEnabled) {
-            return contactsDataManager.fetchContacts()
-                    .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
-                    .toList()
-                    .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
-                    .toList()
-                    .onErrorReturnItem(emptyList())
-                    .toObservable()
-                    .doOnNext {
-                        handlePendingTransactions(it)
-                        view.onContactsHashMapUpdated(contactsDataManager.getTransactionDisplayMap())
-                    }
-        } else {
-            return Observable.empty()
-        }
+    private fun getOnboardingStatusObservable() = buyDataManager.canBuy
+            .compose(RxUtil.addObservableToCompositeDisposable(this))
+            .doOnNext { view.onLoadOnboardingPages(getOnboardingPages(it)) }
+            .doOnError { Timber.e(it) }
+
+    private fun getFacilitatedTransactionsObservable() = if (view.isContactsEnabled) {
+        contactsDataManager.fetchContacts()
+                .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
+                .toList()
+                .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
+                .toList()
+                .onErrorReturnItem(emptyList())
+                .toObservable()
+                .doOnNext {
+                    handlePendingTransactions(it)
+                    view.onContactsHashMapUpdated(contactsDataManager.getTransactionDisplayMap())
+                }
+    } else {
+        Observable.empty()
     }
 
     private fun refreshFacilitatedTransactions() {
@@ -525,14 +527,6 @@ class BalancePresenter @Inject constructor(
                     }
                 }
         return value
-    }
-
-    private fun checkOnboardingStatus() {
-        buyDataManager.canBuy
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(
-                        { view.onLoadOnboardingPages(getOnboardingPages(it)) },
-                        { Timber.e(it) })
     }
 
     private fun getOnboardingPages(isBuyAllowed: Boolean): List<OnboardingPagerContent> {

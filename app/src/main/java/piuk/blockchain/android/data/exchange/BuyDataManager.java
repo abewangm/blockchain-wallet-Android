@@ -1,16 +1,16 @@
 package piuk.blockchain.android.data.exchange;
 
+import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.api.data.WalletOptions;
+
 import org.bitcoinj.core.Sha256Hash;
 import org.spongycastle.util.encoders.Hex;
 
-import info.blockchain.wallet.api.data.Settings;
-import info.blockchain.wallet.api.data.WalletOptions;
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.auth.AuthDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
-import timber.log.Timber;
 
 public class BuyDataManager {
 
@@ -61,7 +61,7 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    Observable<Boolean> isBuyRolledOut() {
+    private Observable<Boolean> isBuyRolledOut() {
 
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
@@ -74,7 +74,7 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    public Observable<Boolean> isCoinifyAllowed() {
+    private Observable<Boolean> isCoinifyAllowed() {
 
         return Observable.combineLatest(isInCoinifyCountry(), buyConditions.coinifyWhitelistedSource,
                 (coinifyCountry, whiteListed) -> coinifyCountry || whiteListed);
@@ -85,7 +85,7 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    Observable<Boolean> isInCoinifyCountry() {
+    private Observable<Boolean> isInCoinifyCountry() {
 
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
@@ -99,7 +99,7 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    boolean isRolloutAllowed(double rolloutPercentage) {
+    private boolean isRolloutAllowed(double rolloutPercentage) {
         String plainGuid = payloadDataManager.getWallet().getGuid().replace("-", "");
 
         byte[] guidHashBytes = Sha256Hash.hash(Hex.encode(plainGuid.getBytes()));
@@ -113,19 +113,19 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    Observable<Boolean> isInUnocoinCountry() {
+    private Observable<Boolean> isInUnocoinCountry() {
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
                         .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode()))
                 );
     }
 
-    public Observable<Boolean> isUnocoinAllowed() {
+    private Observable<Boolean> isUnocoinAllowed() {
         return Observable.combineLatest(isInUnocoinCountry(), isUnocoinWhitelisted(),
                 (unocoinCountry, whiteListed) -> unocoinCountry || whiteListed);
     }
 
-    Observable<Boolean> isUnocoinWhitelisted() {
+    private Observable<Boolean> isUnocoinWhitelisted() {
         return settingsDataManager.getSettings()
                 .map(settings -> settings.getInvited().get("unocoin"));
     }

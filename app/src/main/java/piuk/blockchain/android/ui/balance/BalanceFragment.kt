@@ -95,7 +95,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         textview_balance.setOnClickListener { presenter.invertViewType() }
         button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
 
-        initOnboardingPager()
+        if (!presenter.isOnboardingComplete()) {
+            initOnboardingPager()
+        }
         setUiState(UiState.LOADING)
     }
 
@@ -464,6 +466,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private fun dismissOnboarding() {
         framelayout_onboarding.gone()
         presenter.setOnboardingComplete(true)
+        onboardingPagerAdapter = null
     }
 
     private fun onContentLoaded() {
