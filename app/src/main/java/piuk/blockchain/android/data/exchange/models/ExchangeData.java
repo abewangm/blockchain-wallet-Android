@@ -1,11 +1,17 @@
 package piuk.blockchain.android.data.exchange.models;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by justin on 5/1/17.
- */
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE,
+        creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ExchangeData {
 
     public ExchangeData() {
@@ -18,11 +24,18 @@ public class ExchangeData {
     @JsonProperty("sfox")
     private SfoxData sfox = null;
 
+    @JsonProperty("unocoin")
+    private UnocoinData unocoin = null;
+
     public CoinifyData getCoinify() {
         return coinify;
     }
 
     public SfoxData getSfox() {
         return sfox;
+    }
+
+    public UnocoinData getUnocoin() {
+        return unocoin;
     }
 }

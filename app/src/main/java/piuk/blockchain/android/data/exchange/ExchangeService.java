@@ -114,6 +114,8 @@ public class ExchangeService {
                         trades.addAll(data.getCoinify().getTrades());
                     } else if (data.getSfox() != null) {
                         trades.addAll(data.getSfox().getTrades());
+                    } else if (data.getUnocoin() != null) {
+                        trades.addAll(data.getUnocoin().getTrades());
                     }
 
                     return trades;
@@ -138,9 +140,8 @@ public class ExchangeService {
         }
     }
 
-    private Observable<Metadata> getMetadata(DeterministicKey node) {
+    private Observable<Metadata> getMetadata(DeterministicKey metadataHDNode) {
         return Observable.fromCallable(() -> {
-            DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(node);
             return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build();
         }).compose(RxUtil.applySchedulersToObservable());
     }
