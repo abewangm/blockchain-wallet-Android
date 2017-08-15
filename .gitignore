@@ -28,8 +28,8 @@ captures
 # Firebase config
 google-services.json
 
-# Environment URLs
-urls.properties
+# App secrets
+secrets.properties
 
 # Fabric API Key
 fabric.properties

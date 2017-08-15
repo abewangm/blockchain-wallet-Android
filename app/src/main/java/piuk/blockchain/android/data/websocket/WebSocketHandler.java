@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,12 +34,11 @@ import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.NotificationsUtil;
+import timber.log.Timber;
 
 
 @SuppressWarnings("WeakerAccess")
 class WebSocketHandler extends WebSocketListener {
-
-    private static final String TAG = WebSocketHandler.class.getSimpleName();
 
     private final static long RETRY_INTERVAL = 5 * 1000L;
     /**
@@ -138,7 +136,7 @@ class WebSocketHandler extends WebSocketListener {
                     subHashSet.add(message);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "send: ", e);
+                Timber.e("send: ", e);
             }
         }
     }
@@ -163,8 +161,8 @@ class WebSocketHandler extends WebSocketListener {
             compositeDisposable.add(
                     getReconnectionObservable()
                             .subscribe(
-                                    value -> Log.d(TAG, "attemptReconnection: " + value),
-                                    throwable -> Log.e(TAG, "attemptReconnection: ", throwable)));
+                                    value -> Timber.d("attemptReconnection: " + value),
+                                    throwable -> Timber.e("attemptReconnection: ", throwable)));
         }
     }
 
@@ -216,7 +214,7 @@ class WebSocketHandler extends WebSocketListener {
                 jsonObject = new JSONObject(text);
                 attemptParseMessage(text, jsonObject);
             } catch (JSONException je) {
-                Log.e(TAG, "onTextMessage: ", je);
+                Timber.e("onTextMessage: ", je);
             }
         } else {
             // Ignore content and broadcast anyway so that SwipeToReceive can update
@@ -318,11 +316,13 @@ class WebSocketHandler extends WebSocketListener {
 
             } else if (op.equals("on_change")) {
                 final String localChecksum = payloadDataManager.getPayloadChecksum();
-
                 boolean isSameChecksum = false;
-                if (jsonObject.has("checksum")) {
-                    final String remoteChecksum = (String) jsonObject.get("checksum");
-                    isSameChecksum = remoteChecksum.equals(localChecksum);
+                if (jsonObject.has("x")) {
+                    JSONObject x = jsonObject.getJSONObject("x");
+                    if (x.has("checksum")) {
+                        final String remoteChecksum = x.getString("checksum");
+                        isSameChecksum = remoteChecksum.equals(localChecksum);
+                    }
                 }
 
                 if (!onChangeHashSet.contains(message) && !isSameChecksum) {
@@ -331,17 +331,15 @@ class WebSocketHandler extends WebSocketListener {
                         // Download changed payload
                         //noinspection ThrowableResultOfMethodCallIgnored
                         downloadChangedPayload().subscribe(
-                                () -> showToast().subscribeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(new IgnorableDefaultObserver<>()),
-                                throwable -> Log.e(TAG, "attemptParseMessage: ", throwable));
-
+                                () -> showToast().subscribe(new IgnorableDefaultObserver<>()),
+                                throwable -> Timber.e("attemptParseMessage: ", throwable));
                     }
 
                     onChangeHashSet.add(message);
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "attemptParseMessage: ", e);
+            Timber.e("attemptParseMessage: ", e);
         }
     }
 
@@ -351,7 +349,8 @@ class WebSocketHandler extends WebSocketListener {
                         context,
                         context.getString(R.string.wallet_updated),
                         ToastCustom.LENGTH_SHORT,
-                        ToastCustom.TYPE_GENERAL));
+                        ToastCustom.TYPE_GENERAL))
+                .subscribeOn(AndroidSchedulers.mainThread());
     }
 
     private Completable downloadChangedPayload() {
