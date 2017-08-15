@@ -41,6 +41,7 @@ test:
   pre:
     # Decode Firebase API key
     - echo $FIREBASE_API_JSON | base64 --decode > app/google-services.json
+    - echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
   override:
     - ./gradlew assembleEnvProdMinApi21Debug testEnvProdMinApi21DebugUnitTest testEnvProdMinApi21DebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace --console=plain
   post:
