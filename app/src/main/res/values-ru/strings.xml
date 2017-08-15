@@ -461,8 +461,6 @@
     <string name="contacts_second_password_prompt">Мы требуем ввода второго пароля, чтобы пользоваться этой услугой. Для использования функционала Контактов вам нужно будет ввести эти данные только один раз.</string>
     <string name="contacts_request_money_receive">Отправить запрос контакту</string>
     <string name="contacts_no_confirmed_contacts_found">Подтвержденных контактов не найдено!</string>
-    <string name="contacts_decline_pending_transaction">Вы уверены, что хотите отклонить эту ожидающую транзакцию?</string>
-    <string name="contacts_cancel_pending_transaction">Вы уверены, что хотите отменить эту ожидающую транзакцию?</string>
     <string name="contacts_pending_transaction_delete_success">Ожидающая транзакция удалена</string>
     <string name="contacts_pending_transaction_delete_failure">Удалить ожидающую транзакцию не удалось</string>
     <string name="contacts_pending_transaction_decline_success">Ожидающая транзакция отклонена</string>

@@ -2,10 +2,6 @@ package piuk.blockchain.android.data.exchange;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.wallet.api.trade.coinify.CoinifyApi;
-import info.blockchain.wallet.api.trade.coinify.data.CoinifyTrade;
-import info.blockchain.wallet.api.trade.sfox.SFOXApi;
-import info.blockchain.wallet.api.trade.sfox.data.SFOXTransaction;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -39,18 +35,12 @@ public class ExchangeService {
     private RxBus rxBus;
 
     private ReplaySubject<Metadata> metadataSubject;
-    private CoinifyApi coinifyApi;
-    private SFOXApi sfoxApi;
     private boolean didStartLoad;
 
     public ExchangeService(PayloadManager payloadManager,
-                           RxBus rxBus,
-                           CoinifyApi coinifyApi,
-                           SFOXApi sfoxApi) {
+                           RxBus rxBus) {
         this.payloadManager = payloadManager;
         this.rxBus = rxBus;
-        this.coinifyApi = coinifyApi;
-        this.sfoxApi = sfoxApi;
 
         metadataSubject = ReplaySubject.create(1);
     }
@@ -124,6 +114,8 @@ public class ExchangeService {
                         trades.addAll(data.getCoinify().getTrades());
                     } else if (data.getSfox() != null) {
                         trades.addAll(data.getSfox().getTrades());
+                    } else if (data.getUnocoin() != null) {
+                        trades.addAll(data.getUnocoin().getTrades());
                     }
 
                     return trades;
@@ -148,21 +140,10 @@ public class ExchangeService {
         }
     }
 
-    private Observable<Metadata> getMetadata(DeterministicKey node) {
+    private Observable<Metadata> getMetadata(DeterministicKey metadataHDNode) {
         return Observable.fromCallable(() -> {
-            DeterministicKey metadataHDNode = MetadataUtil.deriveMetadataNode(node);
             return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build();
         }).compose(RxUtil.applySchedulersToObservable());
-    }
-
-    private Observable<List<CoinifyTrade>> getCoinifyTrades(String accessToken) {
-        return coinifyApi.getTrades(accessToken)
-                .compose(RxUtil.applySchedulersToObservable());
-    }
-
-    public Observable<List<SFOXTransaction>> getSfoxTransactions(String accountToken) {
-        return sfoxApi.getTransactions(accountToken)
-                .compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<Boolean> hasCoinifyAccount() {

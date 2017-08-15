@@ -411,6 +411,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                         binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
                         binding.textviewFeeTime.setVisibility(View.VISIBLE);
                         binding.textInputLayout.setVisibility(View.GONE);
+                        updateTotals(getPresenter().getSendingItemAccount());
                         break;
                     case 2:
                         if (getPresenter().shouldShowAdvancedFeeWarning()) {
@@ -676,7 +677,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
             transactionSuccessDialog.show();
             transactionSuccessDialog.setOnDismissListener(dialogInterface -> {
                 if (fctxId != null) {
-                    getPresenter().broadcastPaymentSuccess(mdid, fctxId, hash, transactionValue);
+                    getPresenter().broadcastPaymentSuccess(mdid, hash, fctxId, transactionValue);
                 } else {
                     finishPage(true);
                 }

@@ -462,8 +462,6 @@
     <string name="contacts_second_password_prompt">เพื่อใช้บริการนี้ เราต้องการให้คุณกรอกรหัสผ่านที่สองของคุณ คุณควรจำเป็นต้องกรอกสิ่งนี้เพียงครั้งเดียวเพื่อใช้การใช้งานผู้ติดต่อ</string>
     <string name="contacts_request_money_receive">ส่งคำร้องไปยังผู้ติดต่อ</string>
     <string name="contacts_no_confirmed_contacts_found">ไม่พบผู้ติดต่อที่ได้รับการยืนยัน!</string>
-    <string name="contacts_decline_pending_transaction">คุณแน่ใจหรือไม่ว่าคุณต้องการปฏิเสธธุรกรรมที่รอดำเนินการนี้?</string>
-    <string name="contacts_cancel_pending_transaction">คุณแน่ใจหรือไม่ว่าคุณต้องการยกเลิกธุรกรรมที่รอดำเนินการนี้?</string>
     <string name="contacts_pending_transaction_delete_success">ลบธุรกรรมที่รอดำเนินการเรียบร้อยแล้ว</string>
     <string name="contacts_pending_transaction_delete_failure">การลบธุรกรรมที่รอดำเนินการล้มเหลว</string>
     <string name="contacts_pending_transaction_decline_success">ปฏิเสธธุรกรรมที่รอดำเนินการเรียบร้อยแล้ว</string>

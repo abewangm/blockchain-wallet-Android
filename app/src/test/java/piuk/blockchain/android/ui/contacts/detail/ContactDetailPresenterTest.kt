@@ -16,7 +16,6 @@ import io.reactivex.subjects.PublishSubject
 import org.amshove.kluent.shouldBeInstanceOf
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -567,48 +566,6 @@ class ContactDetailPresenterTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
-    @Ignore("Long click is currently disabled until we're advised what to do here")
-    @Test
-    @Throws(Exception::class)
-    fun onTransactionLongClickedError() {
-        // Arrange
-        val fctxId = "FCTX_ID"
-        whenever(mockContactsManager.getFacilitatedTransactions())
-                .thenReturn(Observable.error { Throwable() })
-        // Act
-        subject.onTransactionLongClicked(fctxId)
-        // Assert
-        verify(mockContactsManager).getFacilitatedTransactions()
-        verifyNoMoreInteractions(mockContactsManager)
-        verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
-        verify(mockActivity).finishPage()
-        verifyNoMoreInteractions(mockActivity)
-    }
-
-    @Ignore("Long click is currently disabled until we're advised what to do here")
-    @Test
-    @Throws(Exception::class)
-    fun onTransactionLongClickedWaitingForAddressPrRec() {
-        // Arrange
-        val fctxId = "FCTX_ID"
-        val transaction = FacilitatedTransaction().apply {
-            id = fctxId
-            role = FacilitatedTransaction.ROLE_PR_RECEIVER
-            state = FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-        }
-        val contactTransaction = ContactTransactionModel("", transaction)
-        whenever(mockContactsManager.getFacilitatedTransactions())
-                .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
-        // Act
-        subject.onTransactionLongClicked(fctxId)
-        // Assert
-        verify(mockContactsManager).getFacilitatedTransactions()
-        verifyNoMoreInteractions(mockContactsManager)
-        verify(mockActivity).showTransactionDeclineDialog(fctxId)
-        verifyNoMoreInteractions(mockActivity)
-    }
-
-    @Ignore("Long click is currently disabled until we're advised what to do here")
     @Test
     @Throws(Exception::class)
     fun onTransactionLongClickedWaitingForAddressRprInit() {
@@ -631,30 +588,6 @@ class ContactDetailPresenterTest {
         verifyNoMoreInteractions(mockActivity)
     }
 
-    @Ignore("Long click is currently disabled until we're advised what to do here")
-    @Test
-    @Throws(Exception::class)
-    fun onTransactionLongClickedWaitingForPaymentRprRec() {
-        // Arrange
-        val fctxId = "FCTX_ID"
-        val transaction = FacilitatedTransaction().apply {
-            id = fctxId
-            role = FacilitatedTransaction.ROLE_RPR_RECEIVER
-            state = FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-        }
-        val contactTransaction = ContactTransactionModel("", transaction)
-        whenever(mockContactsManager.getFacilitatedTransactions())
-                .thenReturn(Observable.fromIterable(listOf(contactTransaction)))
-        // Act
-        subject.onTransactionLongClicked(fctxId)
-        // Assert
-        verify(mockContactsManager).getFacilitatedTransactions()
-        verifyNoMoreInteractions(mockContactsManager)
-        verify(mockActivity).showTransactionDeclineDialog(fctxId)
-        verifyNoMoreInteractions(mockActivity)
-    }
-
-    @Ignore("Long click is currently disabled until we're advised what to do here")
     @Test
     @Throws(Exception::class)
     fun onTransactionLongClickedWaitingForPaymentPrInit() {
@@ -674,6 +607,18 @@ class ContactDetailPresenterTest {
         verify(mockContactsManager).getFacilitatedTransactions()
         verifyNoMoreInteractions(mockContactsManager)
         verify(mockActivity).showTransactionCancelDialog(fctxId)
+        verifyNoMoreInteractions(mockActivity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun declineTransaction() {
+        // Arrange
+        val fctxId = "FCTX_ID"
+        // Act
+        subject.declineTransaction(fctxId)
+        // Assert
+        verify(mockActivity).showTransactionDeclineDialog(fctxId)
         verifyNoMoreInteractions(mockActivity)
     }
 

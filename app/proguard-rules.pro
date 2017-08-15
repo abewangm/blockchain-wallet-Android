@@ -144,3 +144,4 @@
 -keep public class info.blockchain.wallet.contacts.data.** { *; }
 -keep public class info.blockchain.wallet.metadata.data.** { *; }
 -keep public class info.blockchain.wallet.payload.data.** { *; }
+-keep public class piuk.blockchain.android.data.exchange.models.** { *; }

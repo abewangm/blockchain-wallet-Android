@@ -419,9 +419,10 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
 
     private void setAccountLabelIfNecessary() {
         if (mAppUtil.isNewlyCreated()
+                && !mPayloadDataManager.getAccounts().isEmpty()
                 && mPayloadDataManager.getAccount(0) != null
-                && mPayloadDataManager.getAccount(0).getLabel() == null
-                || mPayloadDataManager.getAccount(0).getLabel().isEmpty()) {
+                && (mPayloadDataManager.getAccount(0).getLabel() == null
+                || mPayloadDataManager.getAccount(0).getLabel().isEmpty())) {
 
             mPayloadDataManager.getAccount(0).setLabel(mStringUtils.getString(R.string.default_wallet_name));
         }

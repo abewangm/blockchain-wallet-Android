@@ -182,6 +182,8 @@ class BalancePresenter @Inject constructor(
                                         it.mdid,
                                         transaction.id
                                 )
+
+                            else -> view.showTransactionCancelDialog(fctxId)
                         }
                     }
                 }, {
@@ -218,31 +220,21 @@ class BalancePresenter @Inject constructor(
                 })
     }
 
-    @Suppress("UNUSED_PARAMETER")
     internal fun onPendingTransactionLongClicked(fctxId: String) {
-        // TODO: I'm not sure we should allow this, and if we do, the role/state combos are wrong
-//        contactsDataManager.getFacilitatedTransactions()
-//                .filter { it.facilitatedTransaction.id == fctxId }
-//                .compose(RxUtil.addObservableToCompositeDisposable(this))
-//                .subscribe({
-//                    val fctx = it.facilitatedTransaction
-//
-//                    if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS) {
-//                        when {
-//                            fctx.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
-//                                view.showTransactionDeclineDialog(fctxId)
-//                            fctx.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
-//                                view.showTransactionCancelDialog(fctxId)
-//                        }
-//                    } else if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT) {
-//                        when {
-//                            fctx.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
-//                                view.showTransactionDeclineDialog(fctxId)
-//                            fctx.role == FacilitatedTransaction.ROLE_PR_INITIATOR ->
-//                                view.showTransactionCancelDialog(fctxId)
-//                        }
-//                    }
-//                }, { Timber.e(it) })
+        contactsDataManager.getFacilitatedTransactions()
+                .filter { it.facilitatedTransaction.id == fctxId }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({
+                    val fctx = it.facilitatedTransaction
+
+                    if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
+                            && fctx.role == FacilitatedTransaction.ROLE_RPR_INITIATOR) {
+                        view.showTransactionCancelDialog(fctxId)
+                    } else if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
+                            && fctx.role == FacilitatedTransaction.ROLE_PR_INITIATOR) {
+                        view.showTransactionCancelDialog(fctxId)
+                    }
+                }, { Timber.e(it) })
     }
 
     internal fun onAccountChosen(accountPosition: Int, fctxId: String) {
@@ -278,6 +270,9 @@ class BalancePresenter @Inject constructor(
                         },
                         { view.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR) })
     }
+
+
+    internal fun declineTransaction(fctxId: String) = view.showTransactionDeclineDialog(fctxId)
 
     internal fun confirmDeclineTransaction(fctxId: String) {
         contactsDataManager.getContactFromFctxId(fctxId)
@@ -438,25 +433,27 @@ class BalancePresenter @Inject constructor(
                                 exchangeRateFactory.getLastPrice(getFiatCurrency()),
                                 accessState.isBtc
                         )
-                        checkOnboardingStatus()
-                    }.toObservable<Nothing>()
+                    }.andThen(getOnboardingStatusObservable())
 
-    private fun getFacilitatedTransactionsObservable(): Observable<MutableList<ContactTransactionModel>> {
-        if (view.isContactsEnabled) {
-            return contactsDataManager.fetchContacts()
-                    .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
-                    .toList()
-                    .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
-                    .toList()
-                    .onErrorReturnItem(emptyList())
-                    .toObservable()
-                    .doOnNext {
-                        handlePendingTransactions(it)
-                        view.onContactsHashMapUpdated(contactsDataManager.getTransactionDisplayMap())
-                    }
-        } else {
-            return Observable.empty()
-        }
+    private fun getOnboardingStatusObservable() = buyDataManager.canBuy
+            .compose(RxUtil.addObservableToCompositeDisposable(this))
+            .doOnNext { view.onLoadOnboardingPages(getOnboardingPages(it)) }
+            .doOnError { Timber.e(it) }
+
+    private fun getFacilitatedTransactionsObservable() = if (view.isContactsEnabled) {
+        contactsDataManager.fetchContacts()
+                .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
+                .toList()
+                .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
+                .toList()
+                .onErrorReturnItem(emptyList())
+                .toObservable()
+                .doOnNext {
+                    handlePendingTransactions(it)
+                    view.onContactsHashMapUpdated(contactsDataManager.getTransactionDisplayMap())
+                }
+    } else {
+        Observable.empty()
     }
 
     private fun refreshFacilitatedTransactions() {
@@ -530,14 +527,6 @@ class BalancePresenter @Inject constructor(
                     }
                 }
         return value
-    }
-
-    private fun checkOnboardingStatus() {
-        buyDataManager.canBuy
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(
-                        { view.onLoadOnboardingPages(getOnboardingPages(it)) },
-                        { Timber.e(it) })
     }
 
     private fun getOnboardingPages(isBuyAllowed: Boolean): List<OnboardingPagerContent> {

@@ -647,8 +647,8 @@
     <string name="contacts_transaction_history">Finished</string>
     <string name="contacts_request_money_receive">Request payment</string>
     <string name="contacts_no_confirmed_contacts_found">No confirmed contacts found!</string>
-    <string name="contacts_decline_pending_transaction">Are you sure you want to decline this pending transaction?</string>
-    <string name="contacts_cancel_pending_transaction">Are you sure you want to cancel this pending transaction?</string>
+    <string name="contacts_decline_pending_transaction">Are you sure you want to decline this pending transaction? Once you decline a payment, no further action can be taken.</string>
+    <string name="contacts_cancel_pending_transaction">Are you sure you want to cancel this pending transaction? Once you cancel a payment, no further action can be taken.</string>
     <string name="contacts_pending_transaction_delete_success">Pending transaction successfully deleted</string>
     <string name="contacts_pending_transaction_delete_failure">Pending transaction deletion failed</string>
     <string name="contacts_pending_transaction_decline_success">Pending transaction successfully declined</string>
@@ -657,7 +657,7 @@
     <string name="contacts_pending_transaction_cancel_failure">Pending transaction cancellation failed</string>
     <string name="contacts_resend_invite">Resend invite</string>
     <!-- CONTACTS REQUEST CONFIRMATION -->
-    <string name="contacts_confirm_start_transaconfirm_titlection">Start transaction</string>
+    <string name="contacts_confirm_start_transaction">Start transaction</string>
     <string name="contacts_confirm_request_payment">Request payment</string>
     <string name="contacts_confirm_shared_with">Shared with %1$s</string>
     <string name="contacts_confirm_explanation">Transactions must be accepted by your contact prior to sending</string>
@@ -698,6 +698,8 @@
     <string name="contacts_balance_dialog_description_pr_no_note">%1$s would like you to send %2$s.</string>
     <string name="contacts_balance_dialog_accept">Accept</string>
     <string name="contacts_balance_dialog_decline">Decline</string>
+    <string name="contacts_balance_dialog_decline_title">Decline transaction</string>
+    <string name="contacts_balance_dialog_cancel_title">Cancel transaction</string>
     <!-- CONTACTS SELECT ONBOARDING -->
     <string name="contacts_introducing_title">Introducing contacts</string>
     <string name="contacts_introducing_message">You can now transact without the hassle of Bitcoin addresses. Add your first contact via the sidebar.</string>
@@ -740,6 +742,7 @@
     <string name="onboarding_available_now">Available now</string>
     <string name="onboarding_buy_details">Buy bitcoin directly from your mobile wallet. It\'s simple, seamless, and secure.</string>
     <string name="onboarding_buy_performance_warning">The buy experience may be a little slow on your device. Thanks in advance for your patience.</string>
+    <string name="buy_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to use the Buy functionality.</string>
 
     <!-- 2FA Pairing -->
     <string name="two_factor_dialog_title">Enter 2FA code</string>

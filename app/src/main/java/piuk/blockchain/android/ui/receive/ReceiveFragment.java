@@ -555,7 +555,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes, (dialog, whichButton) -> {
                     if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        PermissionUtil.requestWriteStoragePermissionFromFragment(binding.getRoot(), this);
+                        PermissionUtil.requestWriteStoragePermissionFromFragment(getActivity().findViewById(R.id.coordinator_layout), this);
                     } else {
                         showBottomSheet();
                     }
@@ -569,6 +569,12 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         if (bottomSheetDialog != null) {
             bottomSheetDialog.show();
         }
+    }
+
+    @Override
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
+        return permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                || super.shouldShowRequestPermissionRationale(permission);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
