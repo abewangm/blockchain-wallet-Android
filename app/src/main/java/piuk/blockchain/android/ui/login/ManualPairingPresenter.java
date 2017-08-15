@@ -197,7 +197,7 @@ public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
                                     if (throwable instanceof HDWalletException) {
                                         showErrorToast(R.string.pairing_failed);
                                     } else if (throwable instanceof DecryptionException) {
-                                        showErrorToast(R.string.auth_failed);
+                                        showErrorToast(R.string.invalid_password);
                                     } else {
                                         showErrorToastAndRestartApp(R.string.auth_failed);
                                     }
