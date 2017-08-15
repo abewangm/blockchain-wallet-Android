@@ -4,9 +4,13 @@ apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-allopen'
-apply from: 'environment.gradle'
+apply plugin: 'com.novoda.build-properties'
 apply from: '../quality/jacoco.gradle'
 apply from: '../quality/releasechecks.gradle'
+
+buildProperties {
+    secrets.file rootProject.file('app/secrets.properties')
+}
 
 android {
     compileSdkVersion 26
@@ -22,7 +26,8 @@ android {
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
         // Flag to hide or show the Contacts feature
-        buildConfigField "boolean", "CONTACTS_ENABLED", "false"
+        buildConfigBoolean "CONTACTS_ENABLED", false
+        manifestPlaceholders = [ FABRIC_API_KEY : buildProperties.secrets['fabricApiKey'].string ]
     }
     buildTypes {
         release {
@@ -31,21 +36,21 @@ android {
             zipAlignEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            resValue "string", "google_maps_key", "AIzaSyDH1Yx_Z4oFrN8exg3G-xyKJfskBsN1pO4"
+            manifestPlaceholders = [ GOOGLE_MAPS_KEY : buildProperties.secrets['mapsReleaseKey'].string ]
             multiDexEnabled false
-            buildConfigField "boolean", "DOGFOOD", "false"
-            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
+            buildConfigBoolean "DOGFOOD", false
+            buildConfigBoolean "USE_CRASHLYTICS", true
         }
         debug {
-            resValue "string", "google_maps_key", "AIzaSyDOrXqr30C3vjiUM4HMeZO8HFpTIH8CVaM"
+            manifestPlaceholders = [ GOOGLE_MAPS_KEY : buildProperties.secrets['mapsDebugKey'].string ]
             multiDexEnabled true
-            buildConfigField "boolean", "DOGFOOD", "false"
-            buildConfigField "boolean", "USE_CRASHLYTICS", "false"
+            buildConfigBoolean "DOGFOOD", false
+            buildConfigBoolean "USE_CRASHLYTICS", false
         }
         dogfood {
             initWith release
             debuggable true
-            buildConfigField "boolean", "DOGFOOD", "true"
+            buildConfigBoolean "DOGFOOD", true
             signingConfig signingConfigs.debug
             applicationIdSuffix ".dogfood"
             versionNameSuffix '-DOGFOOD'
@@ -73,32 +78,32 @@ android {
          */
         envProd {
             dimension "environment"
-            buildConfigField "String", "EXPLORER_URL", prodExplorer
-            buildConfigField "String", "API_URL", prodApiServer
-            buildConfigField "String", "WEBSOCKET_URL", prodWebsocketServer
+            buildConfigProperty "EXPLORER_URL", buildProperties.secrets['prodExplorer']
+            buildConfigProperty "API_URL", buildProperties.secrets['prodApiServer']
+            buildConfigProperty "WEBSOCKET_URL", buildProperties.secrets['prodWebsocketServer']
             buildConfigField "String", "ENVIRONMENT", '"env_prod"'
         }
         envDev {
             dimension "environment"
-            buildConfigField "String", "EXPLORER_URL", devExplorer
-            buildConfigField "String", "API_URL", devApiServer
-            buildConfigField "String", "WEBSOCKET_URL", devWebsocket
+            buildConfigProperty "EXPLORER_URL", buildProperties.secrets['devExplorer']
+            buildConfigProperty "API_URL", buildProperties.secrets['devApiServer']
+            buildConfigProperty "WEBSOCKET_URL", buildProperties.secrets['devWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_dev"'
             versionNameSuffix '-dev'
         }
         envStaging {
             dimension "environment"
-            buildConfigField "String", "EXPLORER_URL", stagingExplorer
-            buildConfigField "String", "API_URL", stagingApiServer
-            buildConfigField "String", "WEBSOCKET_URL", stagingWebsocket
+            buildConfigProperty "EXPLORER_URL", buildProperties.secrets['stagingExplorer']
+            buildConfigProperty "API_URL", buildProperties.secrets['stagingApiServer']
+            buildConfigProperty "WEBSOCKET_URL", buildProperties.secrets['stagingWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_staging"'
             versionNameSuffix '-staging'
         }
         envTestnet {
             dimension "environment"
-            buildConfigField "String", "EXPLORER_URL", testnetExplorer
-            buildConfigField "String", "API_URL", testnetApiServer
-            buildConfigField "String", "WEBSOCKET_URL", testnetWebsocket
+            buildConfigProperty "EXPLORER_URL", buildProperties.secrets['testnetExplorer']
+            buildConfigProperty "API_URL", buildProperties.secrets['testnetApiServer']
+            buildConfigProperty "WEBSOCKET_URL", buildProperties.secrets['testnetWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_testnet"'
             versionNameSuffix '-testnet'
         }
@@ -243,6 +248,7 @@ buildscript {
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.6.1'
         classpath 'io.fabric.tools:gradle:1.22.1'
+        classpath 'com.novoda:gradle-build-properties-plugin:0.3'
     }
 }
 
