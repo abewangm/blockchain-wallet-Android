@@ -89,7 +89,7 @@ open class PromptManager(
     }
 
     private fun isVerifyEmailReminderAllowed(settings: Settings): Boolean {
-        return !isFirstRun() && settings.isEmailVerified && !settings.email.isEmpty()
+        return !isFirstRun() && !settings.isEmailVerified && !settings.email.isEmpty()
     }
 
     private fun is2FAReminderAllowed(settings: Settings): Boolean {
