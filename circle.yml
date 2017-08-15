@@ -16,12 +16,18 @@ general:
 
 dependencies:
   pre:
+    # Decode Firebase API key
+    - echo $FIREBASE_API_JSON | base64 --decode > app/google-services.json
+    # Decode secrets; Maps key, Fabric key, URLs etc
+    - echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
     # Install platform tools including sdkmanager
     - echo y | android -s update sdk -u -a -t "tools"
     # Android SDK Platform 26
     - if [ ! -d "/usr/local/android-sdk-linux/platforms/android-26" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-26"; fi
     # Android SDK Build-tools, revision 26.0.1
     - if [ ! -d "/usr/local/android-sdk-linux/build-tools/26.0.1" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.1"; fi
+    - ./gradlew app:dependencies --console=plain
+
   cache_directories:
     # Android SDK
     - /usr/local/android-sdk-linux/tools
@@ -36,12 +42,6 @@ dependencies:
     - /home/ubuntu/.gradle/wrapper/
 
 test:
-  pre:
-    # Decode Firebase API key
-    - echo $FIREBASE_API_JSON | base64 --decode > app/google-services.json
-    # Decode secrets; Maps key, Fabric key, URLs etc
-    - echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
-    - ./gradlew app:dependencies --console=plain
   override:
     - ./gradlew assembleEnvProdMinApi21Debug testEnvProdMinApi21DebugUnitTest testEnvProdMinApi21DebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace --console=plain
   post:
