@@ -954,7 +954,7 @@ public class SendPresenter extends BasePresenter<SendView> {
                                     // Show successfully broadcast
                                     .doOnComplete(() -> getView().showBroadcastSuccessDialog())
                                     // Log event
-                                    .doOnComplete(() -> Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.PAYMENT_BROADCASTED)))
+                                    .doOnComplete(() -> logContactsPayment())
                                     // Show retry dialog if broadcast failed
                                     .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
                         })
@@ -966,6 +966,12 @@ public class SendPresenter extends BasePresenter<SendView> {
                                 }, throwable -> {
                                     // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
                                 }));
+    }
+
+    private void logContactsPayment() {
+        Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.PAYMENT_BROADCASTED));
+        metricInputFlag = EventService.EVENT_TX_INPUT_FROM_CONTACTS;
+        logAddressInputMetric();
     }
 
     private void logAddressInputMetric() {
