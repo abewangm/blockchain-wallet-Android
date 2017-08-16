@@ -25,7 +25,7 @@ class MonetaryUtil(unit: Int) {
      *
      * @param unit The chosen BTC unit
      */
-    fun updateUnit(unit: Int) {
+    final fun updateUnit(unit: Int) {
         this.unit = unit
 
         val defaultLocale = Locale.getDefault()
