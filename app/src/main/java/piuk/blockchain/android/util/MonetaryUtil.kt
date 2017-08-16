@@ -1,5 +1,6 @@
 package piuk.blockchain.android.util
 
+import piuk.blockchain.android.util.annotations.Mockable
 import java.math.BigInteger
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -8,6 +9,7 @@ import java.util.*
 /**
  * A class for various currency related operations, mostly converting between types and formats.
  */
+@Mockable
 class MonetaryUtil(unit: Int) {
 
     private lateinit var btcFormat: DecimalFormat
