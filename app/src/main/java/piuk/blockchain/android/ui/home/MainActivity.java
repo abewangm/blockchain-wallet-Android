@@ -352,7 +352,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     public void handleBackPressed() {
         if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(this);
+            AccessState.INSTANCE.logout(this);
             return;
         } else {
             onExitConfirmToast();

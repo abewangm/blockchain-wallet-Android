@@ -673,7 +673,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
     private void handleBackPressed() {
         if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(getContext());
+            AccessState.INSTANCE.logout(getContext());
             return;
         } else {
             onExitConfirmToast();

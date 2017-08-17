@@ -72,7 +72,7 @@ class LauncherPresenter @Inject constructor(
     fun clearCredentialsAndRestart() = appUtil.clearCredentialsAndRestart()
 
     private fun promptUpgrade() {
-        accessState.setIsLoggedIn(true)
+        accessState.isLoggedIn = true
         view.onRequestUpgrade()
     }
 
@@ -84,7 +84,7 @@ class LauncherPresenter @Inject constructor(
         settingsDataManager.initSettings(
                 payloadDataManager.wallet.guid,
                 payloadDataManager.wallet.sharedKey)
-                .doOnComplete { accessState.setIsLoggedIn(true) }
+                .doOnComplete { accessState.isLoggedIn = true }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({ settings ->
                     checkOnboardingStatus(settings)

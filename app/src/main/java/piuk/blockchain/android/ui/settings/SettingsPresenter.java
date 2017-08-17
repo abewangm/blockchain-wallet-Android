@@ -197,8 +197,8 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
             // No fingerprints enrolled, prompt user to add some
             getView().showNoFingerprintsAddedDialog();
         } else {
-            if (accessState.getPIN() != null && !accessState.getPIN().isEmpty()) {
-                getView().showFingerprintDialog(accessState.getPIN());
+            if (accessState.getPin() != null && !accessState.getPin().isEmpty()) {
+                getView().showFingerprintDialog(accessState.getPin());
             } else {
                 throw new IllegalStateException("PIN code not found in AccessState");
             }
@@ -474,7 +474,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         payloadManager.setTempPassword(password);
 
         getCompositeDisposable().add(
-                authDataManager.createPin(password, accessState.getPIN())
+                authDataManager.createPin(password, accessState.getPin())
                         .andThen(payloadDataManager.syncPayloadWithServer())
                         .doAfterTerminate(() -> getView().hideProgressDialog())
                         .subscribe(

@@ -179,11 +179,11 @@ public class BaseAuthActivity extends AppCompatActivity {
      * Starts the logout timer. Override in an activity if timeout is not needed.
      */
     protected void startLogoutTimer() {
-        AccessState.getInstance().startLogoutTimer(this);
+        AccessState.INSTANCE.startLogoutTimer(this);
     }
 
     private void stopLogoutTimer() {
-        AccessState.getInstance().stopLogoutTimer(this);
+        AccessState.INSTANCE.stopLogoutTimer(this);
     }
 
     private void disallowScreenshots() {

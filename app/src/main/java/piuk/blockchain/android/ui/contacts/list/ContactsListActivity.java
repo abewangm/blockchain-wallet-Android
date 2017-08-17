@@ -120,7 +120,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         if (requestCode == REQUEST_PAIRING && resultCode == RESULT_OK) {
             getPresenter().onViewReady();
         } else if (requestCode == CHOOSER_REQUEST) {
-            AccessState.getInstance().enableAutoLogout();
+            AccessState.INSTANCE.enableAutoLogout();
         }
     }
 
@@ -272,7 +272,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
 
     @Override
     public void onLinkGenerated(Intent intent) {
-        AccessState.getInstance().disableAutoLogout();
+        AccessState.INSTANCE.disableAutoLogout();
         startActivityForResult(Intent.createChooser(intent, getString(R.string.contacts_share_invitation)), CHOOSER_REQUEST);
     }
 

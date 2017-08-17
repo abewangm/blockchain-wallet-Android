@@ -173,7 +173,7 @@ public class AuthDataManager {
     }
 
     private Observable<String> getValidatePinObservable(String passedPin) {
-        accessState.setPIN(passedPin);
+        accessState.setPin(passedPin);
         String key = prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         String encryptedPassword = prefsUtil.getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
         return authService.validateAccess(key, passedPin)
@@ -207,7 +207,7 @@ public class AuthDataManager {
             return Completable.error(new Throwable("Invalid PIN"));
         }
 
-        accessState.setPIN(passedPin);
+        accessState.setPin(passedPin);
         appUtil.applyPRNGFixes();
 
         return Completable.create(subscriber -> {
