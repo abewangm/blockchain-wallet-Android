@@ -339,7 +339,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     private void handleBackPressed() {
         if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(getContext());
+            AccessState.INSTANCE.logout(getContext());
             return;
         } else {
             onExitConfirmToast();

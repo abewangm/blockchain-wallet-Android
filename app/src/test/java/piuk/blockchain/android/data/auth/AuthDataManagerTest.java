@@ -122,7 +122,7 @@ public class AuthDataManagerTest extends RxTest {
         // Act
         TestObserver<String> observer = subject.validatePin(pin).test();
         // Assert
-        verify(accessState).setPIN(pin);
+        verify(accessState).setPin(pin);
         verifyNoMoreInteractions(accessState);
         verify(prefsUtil).getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         verify(prefsUtil).getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
@@ -157,7 +157,7 @@ public class AuthDataManagerTest extends RxTest {
         // Act
         TestObserver<String> observer = subject.validatePin(pin).test();
         // Assert
-        verify(accessState).setPIN(pin);
+        verify(accessState).setPin(pin);
         verifyNoMoreInteractions(accessState);
         verify(prefsUtil).getValue(PrefsUtil.KEY_PIN_IDENTIFIER, "");
         verify(prefsUtil).getValue(PrefsUtil.KEY_ENCRYPTED_PASSWORD, "");
@@ -200,7 +200,7 @@ public class AuthDataManagerTest extends RxTest {
         // Act
         TestObserver<Void> observer = subject.createPin(password, pin).test();
         // Assert
-        verify(accessState).setPIN(pin);
+        verify(accessState).setPin(pin);
         verifyNoMoreInteractions(accessState);
         verify(appUtil).applyPRNGFixes();
         verifyNoMoreInteractions(appUtil);
@@ -227,7 +227,7 @@ public class AuthDataManagerTest extends RxTest {
         // Act
         TestObserver<Void> observer = subject.createPin(password, pin).test();
         // Assert
-        verify(accessState).setPIN(pin);
+        verify(accessState).setPin(pin);
         verifyNoMoreInteractions(accessState);
         verify(appUtil).applyPRNGFixes();
         verifyNoMoreInteractions(appUtil);

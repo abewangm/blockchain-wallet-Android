@@ -21,6 +21,7 @@ import info.blockchain.wallet.api.Environment;
 
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 
+import piuk.blockchain.android.data.preference.CurrencyState;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -102,7 +103,8 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         RxJavaPlugins.setErrorHandler(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
 
-        AccessState.getInstance().initAccessState(this, prefsUtil, rxBus);
+        AccessState.INSTANCE.initAccessState(this, prefsUtil, rxBus);
+        CurrencyState.INSTANCE.init(prefsUtil);
 
         // Apply PRNG fixes on app start if needed
         appUtil.applyPRNGFixes();

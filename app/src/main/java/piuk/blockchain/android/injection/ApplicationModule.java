@@ -13,6 +13,7 @@ import dagger.Provides;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.preference.CurrencyState;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
@@ -51,7 +52,7 @@ public class ApplicationModule {
 
     @Provides
     protected AccessState provideAccessState() {
-        return AccessState.getInstance();
+        return AccessState.INSTANCE;
     }
 
     @Provides
@@ -98,4 +99,8 @@ public class ApplicationModule {
         return new EnvironmentSettings();
     }
 
+    @Provides
+    protected CurrencyState provideCurrencyState() {
+        return CurrencyState.INSTANCE;
+    }
 }
