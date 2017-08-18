@@ -117,7 +117,7 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartOnboarding(false);
-        verify(accessState).setLoggedIn(true);
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
@@ -151,7 +151,7 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartOnboarding(true);
-        verify(accessState).setLoggedIn(true);
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
@@ -184,7 +184,7 @@ public class LauncherPresenterTest {
         subject.onViewReady();
         // Assert
         verify(launcherActivity).onStartMainActivity();
-        verify(accessState).setLoggedIn(true);
+        verify(accessState).setIsLoggedIn(true);
     }
 
     /**
@@ -301,7 +301,7 @@ public class LauncherPresenterTest {
         // Act
         subject.onViewReady();
         // Assert
-        verify(accessState).setLoggedIn(true);
+        verify(accessState).setIsLoggedIn(true);
         verify(launcherActivity).onStartMainActivity();
     }
 

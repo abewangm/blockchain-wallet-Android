@@ -14,7 +14,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
-import piuk.blockchain.android.data.preference.CurrencyState;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
@@ -138,13 +138,13 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
 
     private Observable<List<ItemAccount>> getAccountList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getHdAccounts(currencyState.isBtc()));
+        result.addAll(walletAccountHelper.getHdAccounts(currencyState.isDisplayingCryptoCurrency()));
         return Observable.just(result);
     }
 
     private Observable<List<ItemAccount>> getImportedList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getLegacyAddresses(currencyState.isBtc()));
+        result.addAll(walletAccountHelper.getLegacyAddresses(currencyState.isDisplayingCryptoCurrency()));
         return Observable.just(result);
     }
 

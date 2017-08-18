@@ -644,7 +644,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             closeKeypad();
         } else {
             if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-                AccessState.INSTANCE.logout(getContext());
+                AccessState.getInstance().logout(getContext());
                 return;
             } else {
                 onExitConfirmToast();

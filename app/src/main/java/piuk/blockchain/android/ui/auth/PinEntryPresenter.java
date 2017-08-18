@@ -176,7 +176,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                 // If user is changing their PIN and it matches their old one, disallow it
             } else if (isChangingPin()
                     && mUserEnteredConfirmationPin == null
-                    && mAccessState.getPin().equals(mUserEnteredPin)) {
+                    && mAccessState.getPIN().equals(mUserEnteredPin)) {
                 showErrorToast(R.string.change_pin_new_matches_current);
                 clearPinViewAndReset();
             } else {
@@ -280,7 +280,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                             } else if (throwable instanceof InvalidCipherTextException) {
                                 // Password changed on web, needs re-pairing
                                 getView().showToast(R.string.password_changed_explanation, ToastCustom.TYPE_ERROR);
-                                mAccessState.setPin(null);
+                                mAccessState.setPIN(null);
                                 mAppUtil.clearCredentialsAndRestart();
 
                             } else if (throwable instanceof AccountLockedException) {
@@ -447,8 +447,8 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
 
     private boolean isChangingPin() {
         return isCreatingNewPin()
-                && mAccessState.getPin() != null
-                && !mAccessState.getPin().isEmpty();
+                && mAccessState.getPIN() != null
+                && !mAccessState.getPIN().isEmpty();
     }
 
     @UiThread

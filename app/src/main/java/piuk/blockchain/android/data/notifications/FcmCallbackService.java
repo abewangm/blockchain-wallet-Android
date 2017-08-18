@@ -50,7 +50,7 @@ public class FcmCallbackService extends FirebaseMessagingService {
 
     private void sendNotification(NotificationPayload payload) {
         if (ApplicationLifeCycle.getInstance().isForeground()
-                && AccessState.INSTANCE.isLoggedIn()) {
+                && AccessState.getInstance().isLoggedIn()) {
             sendForegroundNotification(payload);
         } else {
             sendBackgroundNotification(payload);

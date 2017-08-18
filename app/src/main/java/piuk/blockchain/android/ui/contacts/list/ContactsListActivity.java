@@ -32,7 +32,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
-import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.base.UiState.CONTENT;
 import static piuk.blockchain.android.ui.base.UiState.EMPTY;
@@ -120,7 +119,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
         if (requestCode == REQUEST_PAIRING && resultCode == RESULT_OK) {
             getPresenter().onViewReady();
         } else if (requestCode == CHOOSER_REQUEST) {
-            AccessState.INSTANCE.enableAutoLogout();
+            AccessState.getInstance().enableAutoLogout();
         }
     }
 
@@ -272,7 +271,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
 
     @Override
     public void onLinkGenerated(Intent intent) {
-        AccessState.INSTANCE.disableAutoLogout();
+        AccessState.getInstance().disableAutoLogout();
         startActivityForResult(Intent.createChooser(intent, getString(R.string.contacts_share_invitation)), CHOOSER_REQUEST);
     }
 

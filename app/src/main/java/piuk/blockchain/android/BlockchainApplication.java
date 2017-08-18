@@ -21,7 +21,8 @@ import info.blockchain.wallet.api.Environment;
 
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 
-import piuk.blockchain.android.data.preference.CurrencyState;
+import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -30,7 +31,6 @@ import javax.inject.Named;
 import dagger.Lazy;
 import io.fabric.sdk.android.Fabric;
 import io.reactivex.plugins.RxJavaPlugins;
-import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.AppLaunchEvent;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
@@ -103,8 +103,8 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         RxJavaPlugins.setErrorHandler(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
 
-        AccessState.INSTANCE.initAccessState(this, prefsUtil, rxBus);
-        CurrencyState.INSTANCE.init(prefsUtil);
+        AccessState.getInstance().initAccessState(this, prefsUtil, rxBus);
+        CurrencyState.getInstance().init(prefsUtil);
 
         // Apply PRNG fixes on app start if needed
         appUtil.applyPRNGFixes();

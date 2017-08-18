@@ -135,7 +135,7 @@ public class OnboardingActivity extends BaseMvpActivity<OnboardingView, Onboardi
 
     @Override
     public void onVerifyEmailClicked() {
-        AccessState.INSTANCE.disableAutoLogout();
+        AccessState.getInstance().disableAutoLogout();
         emailLaunched = true;
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_APP_EMAIL);
@@ -172,7 +172,7 @@ public class OnboardingActivity extends BaseMvpActivity<OnboardingView, Onboardi
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == EMAIL_CLIENT_REQUEST) {
-            AccessState.INSTANCE.enableAutoLogout();
+            AccessState.getInstance().enableAutoLogout();
         }
     }
 }

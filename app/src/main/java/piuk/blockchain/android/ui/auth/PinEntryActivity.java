@@ -110,7 +110,7 @@ public class PinEntryActivity extends BaseAuthActivity implements
             finishWithResultCanceled();
         } else if (pinEntryFragment != null && pinEntryFragment.allowExit()) {
             if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-                AccessState.INSTANCE.logout(this);
+                AccessState.getInstance().logout(this);
                 return;
             } else {
                 ToastCustom.makeText(this, getString(R.string.exit_confirm), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_GENERAL);
