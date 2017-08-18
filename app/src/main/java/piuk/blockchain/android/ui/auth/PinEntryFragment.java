@@ -212,7 +212,7 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
 
         } else if (getPresenter().allowExit()) {
             if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-                AccessState.INSTANCE.logout(getContext());
+                AccessState.getInstance().logout(getContext());
                 return;
             } else {
                 showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
@@ -228,7 +228,7 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
                 .setTitle(R.string.warning)
                 .setMessage(String.format(getString(R.string.unsupported_encryption_version), walletVersion))
                 .setCancelable(false)
-                .setPositiveButton(R.string.exit, (dialog, whichButton) -> AccessState.INSTANCE.logout(getContext()))
+                .setPositiveButton(R.string.exit, (dialog, whichButton) -> AccessState.getInstance().logout(getContext()))
                 .setNegativeButton(R.string.logout, (dialog, which) -> {
                     getPresenter().getAppUtil().clearCredentialsAndRestart();
                     getPresenter().getAppUtil().restartApp();

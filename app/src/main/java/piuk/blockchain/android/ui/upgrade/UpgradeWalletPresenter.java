@@ -72,7 +72,7 @@ public class UpgradeWalletPresenter extends BasePresenter<UpgradeWalletView> {
                 final String currentPassword = payloadDataManager.getTempPassword();
                 payloadDataManager.setTempPassword(secondPassword);
 
-                authDataManager.createPin(currentPassword, accessState.getPin())
+                authDataManager.createPin(currentPassword, accessState.getPIN())
                         .andThen(payloadDataManager.syncPayloadWithServer())
                         .doOnError(ignored -> payloadDataManager.setTempPassword(currentPassword))
                         .doOnSubscribe(ignored -> getView().showProgressDialog(R.string.please_wait))
@@ -104,7 +104,7 @@ public class UpgradeWalletPresenter extends BasePresenter<UpgradeWalletView> {
 
     void onContinueClicked() {
         prefs.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
-        accessState.setLoggedIn(true);
+        accessState.setIsLoggedIn(true);
         appUtil.restartAppWithVerifiedPin();
     }
 

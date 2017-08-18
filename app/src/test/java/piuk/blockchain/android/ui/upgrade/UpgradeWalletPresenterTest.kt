@@ -210,7 +210,7 @@ class UpgradeWalletPresenterTest {
         // Assert
         verify(mockPrefs).setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true)
         verifyNoMoreInteractions(mockPrefs)
-        verify(mockAccessState).isLoggedIn = true
+        verify(mockAccessState).setIsLoggedIn(true)
         verifyNoMoreInteractions(mockAccessState)
         verify(mockAppUtil).restartAppWithVerifiedPin()
         verifyNoMoreInteractions(mockAppUtil)

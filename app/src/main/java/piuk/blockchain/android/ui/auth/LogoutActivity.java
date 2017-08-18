@@ -20,7 +20,7 @@ public class LogoutActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getIntent() != null && getIntent().getAction() != null) {
-            if (getIntent().getAction().equals(AccessState.INSTANCE.getLOGOUT_ACTION())) {
+            if (getIntent().getAction().equals(AccessState.LOGOUT_ACTION)) {
                 Intent intent = new Intent(this, WebSocketService.class);
 
                 PrefsUtil prefsUtil = new PrefsUtil(this);
@@ -32,7 +32,7 @@ public class LogoutActivity extends AppCompatActivity {
                     stopService(intent);
                 }
 
-                AccessState.INSTANCE.setLoggedIn(false);
+                AccessState.getInstance().setIsLoggedIn(false);
                 finishAffinity();
             }
         }

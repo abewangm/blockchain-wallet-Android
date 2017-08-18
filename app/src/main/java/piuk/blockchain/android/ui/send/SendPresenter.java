@@ -52,7 +52,7 @@ import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
-import piuk.blockchain.android.data.preference.CurrencyState;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -190,7 +190,7 @@ public class SendPresenter extends BasePresenter<SendView> {
         sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
         sendModel.fiatUnit = fiatUnit;
         sendModel.btcUniti = btcUnit;
-        sendModel.isBTC = currencyState.INSTANCE.isBtc();
+        sendModel.isBTC = currencyState.isDisplayingCryptoCurrency();
         sendModel.exchangeRate = exchangeRate;
         sendModel.btcExchange = exchangeRateFactory.getLastPrice(sendModel.fiatUnit);
 

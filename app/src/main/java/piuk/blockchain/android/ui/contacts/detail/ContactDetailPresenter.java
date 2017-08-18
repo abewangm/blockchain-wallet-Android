@@ -29,7 +29,7 @@ import piuk.blockchain.android.data.contacts.models.ContactTransactionModel;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
-import piuk.blockchain.android.data.preference.CurrencyState;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -291,7 +291,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
 
 
     void onBtcFormatChanged(boolean isBtc) {
-        currencyState.currencyDisplayState(isBtc ? CurrencyState.Currency.BTC: CurrencyState.Currency.FIAT);
+        currencyState.setDisplayingCryptoCurrency(isBtc);
     }
 
     private void subscribeToNotifications() {
@@ -376,7 +376,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
 
         }
 
-        getView().onTransactionsUpdated(displayList, CurrencyState.INSTANCE.isBtc());
+        getView().onTransactionsUpdated(displayList, currencyState.isDisplayingCryptoCurrency());
     }
 
     private String getBalanceString(long btcBalance) {

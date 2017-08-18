@@ -61,7 +61,7 @@ public class AppUtil {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("verified", true);
         context.startActivity(intent);
-        AccessState.INSTANCE.logIn();
+        AccessState.getInstance().logIn();
     }
 
     public String getReceiveQRFilename() {
@@ -133,7 +133,7 @@ public class AppUtil {
                 PRNGFixes.apply();
             } catch (Exception e1) {
                 ToastCustom.makeText(context, context.getString(R.string.cannot_launch_app), ToastCustom.LENGTH_LONG, ToastCustom.TYPE_ERROR);
-                AccessState.INSTANCE.logout(context);
+                AccessState.getInstance().logout(context);
             }
         }
     }

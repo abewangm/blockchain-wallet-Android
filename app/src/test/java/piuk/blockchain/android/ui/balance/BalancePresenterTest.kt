@@ -19,6 +19,7 @@ import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
@@ -44,11 +45,13 @@ class BalancePresenterTest {
     private var stringUtils: StringUtils = mock()
     private var prefsUtil: PrefsUtil = mock()
     private var accessState: AccessState = mock()
+    private var currencyState: CurrencyState = mock()
     private var rxBus: RxBus = mock()
     private var appUtil: AppUtil = mock()
 
     @Before
     fun setUp() {
+
         subject = BalancePresenter(
                 exchangeRateFactory,
                 transactionListDataManager,
@@ -60,7 +63,8 @@ class BalancePresenterTest {
                 prefsUtil,
                 accessState,
                 rxBus,
-                appUtil
+                appUtil,
+                currencyState
         )
         subject.initView(view)
     }
@@ -93,7 +97,7 @@ class BalancePresenterTest {
         // Arrange
         val itemAccount = ItemAccount()
         subject.chosenAccount = itemAccount
-        whenever(accessState.isBtc).thenReturn(true)
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -102,7 +106,7 @@ class BalancePresenterTest {
         // Act
         subject.onResume()
         // Assert
-        verify(accessState, times(2)).isBtc
+        verify(currencyState, times(2)).isDisplayingCryptoCurrency
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -124,7 +128,7 @@ class BalancePresenterTest {
         whenever(transactionListDataManager.getBtcBalance(itemAccount)).thenReturn(0L)
         whenever(transactionListDataManager.fetchTransactions(itemAccount, 50, 0))
                 .thenReturn(Observable.just(listOf(transactionSummary)))
-        whenever(accessState.isBtc).thenReturn(true)
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -139,7 +143,7 @@ class BalancePresenterTest {
         verify(transactionListDataManager).getBtcBalance(itemAccount)
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(accessState).isBtc
+        verify(currencyState).isDisplayingCryptoCurrency
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -164,7 +168,7 @@ class BalancePresenterTest {
         whenever(transactionListDataManager.getBtcBalance(itemAccount)).thenReturn(0L)
         whenever(transactionListDataManager.fetchTransactions(itemAccount, 50, 0))
                 .thenReturn(Observable.just(emptyList()))
-        whenever(accessState.isBtc).thenReturn(true)
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -179,7 +183,7 @@ class BalancePresenterTest {
         verify(transactionListDataManager).getBtcBalance(itemAccount)
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(accessState).isBtc
+        verify(currencyState).isDisplayingCryptoCurrency
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -252,7 +256,7 @@ class BalancePresenterTest {
         whenever(transactionListDataManager.getBtcBalance(itemAccount)).thenReturn(0L)
         whenever(transactionListDataManager.fetchTransactions(itemAccount, 50, 0))
                 .thenReturn(Observable.just(listOf(transactionSummary)))
-        whenever(accessState.isBtc).thenReturn(true)
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -276,7 +280,7 @@ class BalancePresenterTest {
         verify(contactsDataManager).refreshFacilitatedTransactions()
         verify(contactsDataManager).getTransactionDisplayMap()
         verifyNoMoreInteractions(contactsDataManager)
-        verify(accessState).isBtc
+        verify(currencyState).isDisplayingCryptoCurrency
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -310,7 +314,7 @@ class BalancePresenterTest {
         whenever(transactionListDataManager.getBtcBalance(itemAccount)).thenReturn(0L)
         whenever(transactionListDataManager.fetchTransactions(itemAccount, 50, 0))
                 .thenReturn(Observable.just(listOf(transactionSummary)))
-        whenever(accessState.isBtc).thenReturn(true)
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -335,7 +339,7 @@ class BalancePresenterTest {
         verify(transactionListDataManager).getBtcBalance(itemAccount)
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(accessState).isBtc
+        verify(currencyState).isDisplayingCryptoCurrency()
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -376,7 +380,7 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(accessState).setIsBtc(true)
+        verify(currencyState).setDisplayingCryptoCurrency(true)
         verifyNoMoreInteractions(accessState)
         verify(view).onViewTypeChanged(true, 0)
         verify(view).onTotalBalanceUpdated("0.0 BTC")
@@ -385,7 +389,7 @@ class BalancePresenterTest {
     @Test
     fun invertViewType() {
         // Arrange
-        whenever(accessState.isBtc).thenReturn(true)
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -399,8 +403,8 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(accessState).isBtc
-        verify(accessState).setIsBtc(false)
+        verify(currencyState).isDisplayingCryptoCurrency
+        verify(currencyState).setDisplayingCryptoCurrency(false)
         verifyNoMoreInteractions(accessState)
         verify(view).onViewTypeChanged(false, 0)
         verify(view).onTotalBalanceUpdated("0.00 USD")
@@ -1048,7 +1052,7 @@ class BalancePresenterTest {
         whenever(payloadDataManager.walletBalance).thenReturn(BigInteger.valueOf(1_000_000L))
         whenever(payloadDataManager.importedAddressesBalance)
                 .thenReturn(BigInteger.valueOf(1_000_000L))
-        whenever(accessState.isBtc).thenReturn(true)
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
@@ -1061,7 +1065,7 @@ class BalancePresenterTest {
         verify(payloadDataManager).walletBalance
         verify(payloadDataManager).importedAddressesBalance
         verifyNoMoreInteractions(payloadDataManager)
-        verify(accessState, times(4)).isBtc
+        verify(currencyState, times(4)).isDisplayingCryptoCurrency
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil, times(4)).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(5)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
