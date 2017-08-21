@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.send;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -18,6 +19,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -33,7 +35,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 
@@ -73,6 +74,8 @@ import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
+import piuk.blockchain.android.ui.customviews.NumericKeyboard;
+import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
@@ -90,7 +93,8 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
 
-public class SendFragment extends BaseFragment<SendView, SendPresenter> implements SendView {
+public class SendFragment extends BaseFragment<SendView, SendPresenter>
+        implements SendView, NumericKeyboardCallback {
 
     public static final String ARGUMENT_SCAN_DATA = "scan_data";
     public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
@@ -113,6 +117,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     private MaterialProgressDialog progressDialog;
     private AlertDialog largeTxWarning;
     private ConfirmPaymentDialog confirmPaymentDialog;
+    private NumericKeyboard customKeypad;
 
     private int selectedAccountPosition = -1;
     private long backPressed;
@@ -178,16 +183,11 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
-        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        onViewReady();
         setupViews();
+        setCustomKeypad();
         setupFeesView();
         return binding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        onViewReady();
     }
 
     @Override
@@ -198,6 +198,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     @Override
     public void onResume() {
         super.onResume();
+        closeKeypad();
         setupToolbar();
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
@@ -334,7 +335,11 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     public void onBackPressed() {
-        handleBackPressed();
+        if (isKeyboardVisible()) {
+            closeKeypad();
+        } else {
+            handleBackPressed();
+        }
     }
 
     private void handleBackPressed() {
@@ -570,7 +575,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     @Override
     public void updateBtcAmount(String amount) {
         binding.amountContainer.amountBtc.setText(amount);
-        binding.amountContainer.amountBtc.setSelection(binding.amountContainer.amountBtc.getText().length());
+//        binding.amountContainer.amountBtc.setSelection(binding.amountContainer.amountBtc.getText().length());
     }
 
     @Override
@@ -777,6 +782,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     // BTC Field
+    @SuppressLint("NewApi")
     private void setupBtcTextField() {
         binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
         binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
@@ -784,9 +790,16 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
         binding.amountContainer.amountBtc.setKeyListener(
                 CommaEnabledDigitsKeyListener.getInstance(false, true));
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
     }
 
     // Fiat Field
+    @SuppressLint("NewApi")
     private void setupFiatTextField() {
         binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
         binding.amountContainer.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
@@ -794,6 +807,12 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
         binding.amountContainer.amountFiat.setKeyListener(
                 CommaEnabledDigitsKeyListener.getInstance(false, true));
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            binding.amountContainer.amountFiat.setShowSoftInputOnFocus(false);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
     }
 
     @Override
@@ -826,7 +845,6 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
             dec = dec.substring(1);
             if (dec.length() > maxLength) {
                 editText.setText(input.substring(0, input.length() - 1));
-                editText.setSelection(editText.getText().length());
                 s = editText.getEditableText();
             }
         }
@@ -1103,6 +1121,67 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     public void onDetach() {
         super.onDetach();
         listener = null;
+    }
+
+    private void setCustomKeypad() {
+        customKeypad = binding.keyboard;
+        customKeypad.setCallback(this);
+        customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
+
+        // Enable custom keypad and disables default keyboard from popping up
+        customKeypad.enableOnView(binding.amountContainer.amountBtc);
+        customKeypad.enableOnView(binding.amountContainer.amountFiat);
+
+        binding.amountContainer.amountBtc.setText("");
+        binding.amountContainer.amountBtc.requestFocus();
+    }
+
+    private void closeKeypad() {
+        customKeypad.setNumpadVisibility(View.GONE);
+    }
+
+    public boolean isKeyboardVisible() {
+        return customKeypad.isVisible();
+    }
+
+    @Override
+    public void onKeypadClose() {
+        // Show bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        }
+
+        // Resize activity to default
+        binding.scrollView.setPadding(0, 0, 0, 0);
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                CoordinatorLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.setMargins(0,
+                0,
+                0,
+                (int) getActivity().getResources().getDimension(R.dimen.action_bar_height));
+        binding.scrollView.setLayoutParams(layoutParams);
+    }
+
+    @Override
+    public void onKeypadOpen() {
+        // Hide bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+        }
+    }
+
+    @Override
+    public void onKeypadOpenCompleted() {
+        // Resize activity around view
+        int translationY = binding.keyboard.getHeight();
+        binding.scrollView.setPadding(0, 0, 0, translationY);
+
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                CoordinatorLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.setMargins(0, 0, 0, 0);
+        binding.scrollView.setLayoutParams(layoutParams);
     }
 
     public interface OnSendFragmentInteractionListener {

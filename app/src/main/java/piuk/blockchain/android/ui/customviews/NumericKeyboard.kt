@@ -1,9 +1,8 @@
 package piuk.blockchain.android.ui.customviews
 
-import android.annotation.TargetApi
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.KeyEvent
@@ -14,70 +13,51 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.TableLayout
-import android.widget.TextView
-
-import java.util.ArrayList
-
+import kotlinx.android.synthetic.main.view_numeric_keyboard.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.annotations.Thunk
+import piuk.blockchain.android.util.extensions.getTextString
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.visible
 
-class NumericKeyboard : LinearLayout, View.OnClickListener {
+class NumericKeyboard @JvmOverloads constructor(
+        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr), View.OnClickListener {
 
-    private var viewList: ArrayList<EditText>? = null
+    val isVisible: Boolean
+        get() = visibility == View.VISIBLE
+
+    private val viewList: MutableList<EditText> = mutableListOf()
     private var decimalSeparator = "."
-    @Thunk internal var numpad: TableLayout
-    @Thunk internal var callback: NumericKeyboardCallback? = null
+    private var callback: NumericKeyboardCallback? = null
 
-    constructor(context: Context) : super(context) {
-        init()
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init()
-    }
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        init()
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
-        init()
-    }
-
-    private fun init() {
+    init {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.BOTTOM
 
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         inflater.inflate(R.layout.view_numeric_keyboard, this, true)
 
-        numpad = findViewById(R.id.numericPad)
-        numpad.findViewById<View>(R.id.button1).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button2).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button3).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button4).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button5).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button6).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button7).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button8).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button9).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button10).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.button0).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.buttonDeleteBack).setOnClickListener(this)
-        numpad.findViewById<View>(R.id.buttonDone).setOnClickListener(this)
-
-        viewList = ArrayList()
+        button_0.setOnClickListener(this)
+        button_1.setOnClickListener(this)
+        button_2.setOnClickListener(this)
+        button_3.setOnClickListener(this)
+        button_4.setOnClickListener(this)
+        button_5.setOnClickListener(this)
+        button_6.setOnClickListener(this)
+        button_7.setOnClickListener(this)
+        button_8.setOnClickListener(this)
+        button_9.setOnClickListener(this)
+        button_separator.setOnClickListener(this)
+        button_delete.setOnClickListener(this)
+        button_done.setOnClickListener(this)
     }
 
     fun enableOnView(view: EditText) {
-
-        if (!viewList!!.contains(view)) viewList!!.add(view)
+        if (!viewList.contains(view)) viewList.add(view)
 
         view.setTextIsSelectable(true)
-        view.setOnFocusChangeListener { v, hasFocus ->
+        view.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 val view1 = (context as Activity).currentFocus
                 if (view1 != null) {
@@ -87,8 +67,8 @@ class NumericKeyboard : LinearLayout, View.OnClickListener {
                 setNumpadVisibility(View.VISIBLE)
             }
         }
-        view.setOnClickListener { v ->
-            (numpad.findViewById<View>(R.id.decimal_point) as TextView).text = decimalSeparator
+        view.setOnClickListener {
+            decimal_point.text = decimalSeparator
             setNumpadVisibility(View.VISIBLE)
         }
     }
@@ -97,11 +77,11 @@ class NumericKeyboard : LinearLayout, View.OnClickListener {
         this.callback = callback
     }
 
+    @SuppressLint("SwitchIntDef")
     fun setNumpadVisibility(@ViewUtils.Visibility visibility: Int) {
-        if (visibility == View.VISIBLE) {
-            showKeyboard()
-        } else {
-            hideKeyboard()
+        when (visibility) {
+            View.VISIBLE -> showKeyboard()
+            else -> hideKeyboard()
         }
     }
 
@@ -115,15 +95,15 @@ class NumericKeyboard : LinearLayout, View.OnClickListener {
                 }
 
                 override fun onAnimationEnd(animation: Animation) {
-                    if (callback != null) callback!!.onKeypadOpenCompleted()
+                    callback?.onKeypadOpenCompleted()
                 }
 
                 override fun onAnimationRepeat(animation: Animation) {
                     // No-op
                 }
             })
-            visibility = View.VISIBLE
-            if (callback != null) callback!!.onKeypadOpen()
+            visible()
+            callback?.onKeypadOpen()
         }
     }
 
@@ -131,21 +111,17 @@ class NumericKeyboard : LinearLayout, View.OnClickListener {
         if (isVisible) {
             val topDown = AnimationUtils.loadAnimation(context, R.anim.top_down)
             startAnimation(topDown)
-            visibility = View.GONE
-            if (callback != null) callback!!.onKeypadClose()
+            gone()
+            callback?.onKeypadClose()
         }
     }
 
     override fun onClick(v: View) {
-
         var pad: String? = ""
         when (v.id) {
-            R.id.button10 -> pad = decimalSeparator
-            R.id.buttonDeleteBack -> {
-                deleteFromFocusedView()
-                return
-            }
-            R.id.buttonDone -> setNumpadVisibility(View.GONE)
+            R.id.button_separator -> pad = decimalSeparator
+            R.id.button_delete -> deleteFromFocusedView()
+            R.id.button_done -> setNumpadVisibility(View.GONE)
             else -> pad = v.tag.toString().substring(0, 1)
         }
 
@@ -156,32 +132,27 @@ class NumericKeyboard : LinearLayout, View.OnClickListener {
     }
 
     private fun appendToFocusedView(pad: String) {
-        for (view in viewList!!) {
+        viewList.forEach { view ->
             if (view.hasFocus()) {
-
-                //Don't allow multiple decimals
+                // Don't allow multiple decimals
                 if (pad == decimalSeparator && view.text.toString().contains(decimalSeparator))
-                    continue
+                    return@forEach
 
                 val startSelection = view.selectionStart
                 val endSelection = view.selectionEnd
                 if (endSelection - startSelection > 0) {
                     val selectedText = view.text.toString().substring(startSelection, endSelection)
-                    view.setText(view.text.toString().replace(selectedText, pad))
+                    view.setText(view.getTextString().replace(selectedText, pad))
                 } else {
                     view.append(pad)
-                }
-
-                if (view.text.length > 0) {
-                    view.post { view.setSelection(view.text.toString().length) }
                 }
             }
         }
     }
 
     private fun deleteFromFocusedView() {
-        for (view in viewList!!) {
-            if (view.hasFocus() && view.text.length > 0) {
+        for (view in viewList) {
+            if (view.hasFocus() && view.text.isNotEmpty()) {
                 view.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
                 view.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL))
             }
@@ -192,6 +163,4 @@ class NumericKeyboard : LinearLayout, View.OnClickListener {
         decimalSeparator = passedDecimalSeparator
     }
 
-    val isVisible: Boolean
-        get() = visibility == View.VISIBLE
 }

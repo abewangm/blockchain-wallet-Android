@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.receive;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -71,6 +73,8 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.contacts.IntroducingContactsPromptDialog;
+import piuk.blockchain.android.ui.customviews.NumericKeyboard;
+import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
@@ -83,7 +87,8 @@ import timber.log.Timber;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
-public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter> implements ReceiveView {
+public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter> implements
+        ReceiveView, NumericKeyboardCallback {
 
     private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -91,6 +96,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     @Inject ReceivePresenter receivePresenter;
     @Thunk FragmentReceiveBinding binding;
     private BottomSheetDialog bottomSheetDialog;
+    private NumericKeyboard customKeypad;
     private OnReceiveFragmentInteractionListener listener;
 
     @Thunk boolean textChangeAllowed = true;
@@ -149,6 +155,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_receive, container, false);
         onViewReady();
         setupLayout();
+        setCustomKeypad();
         selectAccount(selectedAccountPosition != -1
                 ? selectedAccountPosition : getPresenter().getDefaultAccountPosition());
 
@@ -166,6 +173,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         }
     }
 
+    @SuppressLint("NewApi")
     private void setupLayout() {
         if (getPresenter().getReceiveToList().size() == 1) {
             binding.toContainer.toConstraintLayout.setVisibility(View.GONE);
@@ -178,6 +186,12 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
         binding.amountContainer.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
 
         // Fiat Field
         binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
@@ -185,6 +199,12 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
                 CommaEnabledDigitsKeyListener.getInstance(false, true));
         binding.amountContainer.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            binding.amountContainer.amountFiat.setShowSoftInputOnFocus(false);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
 
         // Units
         binding.amountContainer.currencyBtc.setText(getPresenter().getCurrencyHelper().getBtcUnit());
@@ -237,8 +257,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             getPresenter().onSendToContactClicked();
         });
 
-        binding.buttonRequestPayment.setOnClickListener(v ->
-        {
+        binding.buttonRequestPayment.setOnClickListener(v -> {
             if (getPresenter().getSelectedContactId() == null) {
                 showToast(getString(R.string.contact_select_first), ToastCustom.TYPE_ERROR);
             } else if (!getPresenter().isValidAmount(binding.amountContainer.amountBtc.getText().toString())) {
@@ -357,7 +376,6 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             dec = dec.substring(1);
             if (dec.length() > maxLength) {
                 editText.setText(input.substring(0, input.length() - 1));
-                editText.setSelection(editText.getText().length());
                 s = editText.getEditableText();
             }
         }
@@ -468,6 +486,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     @Override
     public void onResume() {
         super.onResume();
+        closeKeypad();
         setupToolbar();
         getPresenter().updateAccountList();
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
@@ -672,14 +691,18 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     }
 
     private void handleBackPressed() {
-        if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(getContext());
-            return;
+        if (isKeyboardVisible()) {
+            closeKeypad();
         } else {
-            onExitConfirmToast();
-        }
+            if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                AccessState.getInstance().logout(getContext());
+                return;
+            } else {
+                onExitConfirmToast();
+            }
 
-        backPressed = System.currentTimeMillis();
+            backPressed = System.currentTimeMillis();
+        }
     }
 
     public void onExitConfirmToast() {
@@ -696,6 +719,27 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         if (listener != null) {
             listener.onReceiveFragmentClose();
         }
+    }
+
+    private void setCustomKeypad() {
+        customKeypad = binding.keyboard;
+        customKeypad.setCallback(this);
+        customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
+
+        // Enable custom keypad and disables default keyboard from popping up
+        customKeypad.enableOnView(binding.amountContainer.amountBtc);
+        customKeypad.enableOnView(binding.amountContainer.amountFiat);
+
+        binding.amountContainer.amountBtc.setText("");
+        binding.amountContainer.amountBtc.requestFocus();
+    }
+
+    private void closeKeypad() {
+        customKeypad.setNumpadVisibility(View.GONE);
+    }
+
+    public boolean isKeyboardVisible() {
+        return customKeypad.isVisible();
     }
 
     @Override
@@ -722,6 +766,46 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     public void onDetach() {
         super.onDetach();
         listener = null;
+    }
+
+    @Override
+    public void onKeypadClose() {
+        // Show bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        }
+
+        // Resize activity to default
+        binding.scrollView.setPadding(0, 0, 0, 0);
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                CoordinatorLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.setMargins(0,
+                0,
+                0,
+                (int) getActivity().getResources().getDimension(R.dimen.action_bar_height));
+        binding.scrollView.setLayoutParams(layoutParams);
+    }
+
+    @Override
+    public void onKeypadOpen() {
+        // Hide bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+        }
+    }
+
+    @Override
+    public void onKeypadOpenCompleted() {
+        // Resize activity around view
+        int translationY = binding.keyboard.getHeight();
+        binding.scrollView.setPadding(0, 0, 0, translationY);
+
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                CoordinatorLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.setMargins(0, 0, 0, 0);
+        binding.scrollView.setLayoutParams(layoutParams);
     }
 
     public interface OnReceiveFragmentInteractionListener {

@@ -599,6 +599,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         }
     }
 
+    public void restoreBottomNavigation() {
+        binding.bottomNavigation.restoreBottomNavigation(true);
+    }
+
+    public void hideBottomNavigation() {
+        binding.bottomNavigation.hideBottomNavigation(true);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Override
     public boolean isBuySellPermitted() {
