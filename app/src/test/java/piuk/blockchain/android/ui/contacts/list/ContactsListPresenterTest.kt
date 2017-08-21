@@ -5,7 +5,6 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.exceptions.DecryptionException
 import info.blockchain.wallet.metadata.MetadataNodeFactory
-import info.blockchain.wallet.metadata.data.Invitation
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -431,7 +430,7 @@ class ContactsListPresenterTest {
         val recipientName = "RECIPIENT_NAME"
         val sender = Contact().apply {
             name = senderName
-            invitationSent = Invitation().apply { id = "" }
+            invitationSent = ""
         }
         val recipient = Contact().apply { name = recipientName }
         subject.apply {
