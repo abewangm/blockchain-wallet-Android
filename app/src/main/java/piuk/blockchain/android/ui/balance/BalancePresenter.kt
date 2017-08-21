@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.balance
 
+import android.annotation.SuppressLint
 import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
@@ -57,6 +58,7 @@ class BalancePresenter @Inject constructor(
     private val displayList: MutableList<Any> = mutableListOf()
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
+    @SuppressLint("VisibleForTests")
     override fun onViewReady() {
         subscribeToEvents()
         storeSwipeReceiveAddresses()
@@ -612,9 +614,9 @@ class BalancePresenter @Inject constructor(
         }
     }
 
-    fun dismissAnnouncement() {
+    private fun dismissAnnouncement() {
         prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
-        if (displayList.filter { it is AnnouncementData }.isNotEmpty()) {
+        if (displayList.any { it is AnnouncementData }) {
             displayList.removeAll { it is AnnouncementData }
             view.onTransactionsUpdated(displayList)
         }
@@ -644,7 +646,7 @@ class BalancePresenter @Inject constructor(
 
     private fun getLastPrice(fiat: String) = exchangeRateFactory.getLastPrice(fiat)
 
-    private fun getDisplayUnits() = monetaryUtil.btcUnits[getBtcUnitType()].toString()
+    private fun getDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
 
     private fun getBtcUnitType() =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
