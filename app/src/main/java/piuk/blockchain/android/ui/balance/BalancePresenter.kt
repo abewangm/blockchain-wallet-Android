@@ -307,15 +307,19 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun getBitcoinClicked() {
-        buyDataManager.canBuy
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe({
-                    if (it) {
-                        view.startBuyActivity()
-                    } else {
-                        view.startReceiveFragment()
-                    }
-                }, { Timber.e(it) })
+        if (view.shouldShowBuy) {
+            buyDataManager.canBuy
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .subscribe({
+                        if (it) {
+                            view.startBuyActivity()
+                        } else {
+                            view.startReceiveFragment()
+                        }
+                    }, { Timber.e(it) })
+        } else {
+            view.startReceiveFragment()
+        }
     }
 
     internal fun disableAnnouncement() {
@@ -576,7 +580,7 @@ class BalancePresenter @Inject constructor(
         buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({ buyAllowed ->
-                    if (buyAllowed && view.getIfShouldShowBuy() && isOnboardingComplete()) {
+                    if (buyAllowed && view.shouldShowBuy && isOnboardingComplete()) {
                         if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false)
                                 && txList.isNotEmpty()) {
                             prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true)
@@ -592,7 +596,7 @@ class BalancePresenter @Inject constructor(
 
     private fun showAnnouncement() {
         // Don't add the announcement to an empty UI state, don't add it if there already is one
-        if (displayList.isNotEmpty() && displayList.filter { it is AnnouncementData }.isEmpty()) {
+        if (displayList.isNotEmpty() && displayList.none { it is AnnouncementData }) {
             // In the future, the announcement data may be parsed from an endpoint. For now, here is fine
             val announcementData = AnnouncementData(
                     title = R.string.onboarding_available_now,
