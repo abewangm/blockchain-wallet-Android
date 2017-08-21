@@ -25,7 +25,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -49,9 +48,7 @@ import org.bitcoinj.uri.BitcoinURI;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -77,8 +74,6 @@ import piuk.blockchain.android.ui.customviews.NumericKeyboard;
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
-import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
-import piuk.blockchain.android.util.EditTextUtils;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -181,10 +176,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         }
 
         // BTC Field
-        binding.amountContainer.amountBtc.setKeyListener(
-                CommaEnabledDigitsKeyListener.getInstance(false, true));
         binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
         try {
             // This method is hidden but accessible on <API21, but here we catch exceptions just in case
@@ -195,9 +187,6 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
 
         // Fiat Field
         binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountFiat.setKeyListener(
-                CommaEnabledDigitsKeyListener.getInstance(false, true));
-        binding.amountContainer.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
         try {
             // This method is hidden but accessible on <API21, but here we catch exceptions just in case
@@ -285,23 +274,14 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         @Override
         public void afterTextChanged(Editable s) {
             String input = s.toString();
-
             binding.amountContainer.amountBtc.removeTextChangedListener(this);
-            NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
-            btcFormat.setMaximumFractionDigits(getPresenter().getCurrencyHelper().getMaxBtcDecimalLength() + 1);
-            btcFormat.setMinimumFractionDigits(0);
-
             s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
 
             binding.amountContainer.amountBtc.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                // Remove any possible decimal separators and replace with the localised version
-                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
-                        .replace(",", getDefaultDecimalSeparator());
-                getPresenter().updateFiatTextField(sanitisedString);
-
+                getPresenter().updateFiatTextField(s.toString());
                 textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
             }
@@ -322,24 +302,15 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         @Override
         public void afterTextChanged(Editable s) {
             String input = s.toString();
-
             binding.amountContainer.amountFiat.removeTextChangedListener(this);
             int maxLength = 2;
-            NumberFormat fiatFormat = NumberFormat.getInstance(Locale.getDefault());
-            fiatFormat.setMaximumFractionDigits(maxLength + 1);
-            fiatFormat.setMinimumFractionDigits(0);
-
             s = formatEditable(s, input, maxLength, binding.amountContainer.amountFiat);
 
             binding.amountContainer.amountFiat.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                // Remove any possible decimal separators and replace with the localised version
-                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
-                        .replace(",", getDefaultDecimalSeparator());
-                getPresenter().updateBtcTextField(sanitisedString);
-
+                getPresenter().updateBtcTextField(s.toString());
                 textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
             }
@@ -359,10 +330,8 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
         try {
-            if (input.contains(".")) {
-                return getEditable(s, input, maxLength, editText, input.indexOf("."));
-            } else if (input.contains(",")) {
-                return getEditable(s, input, maxLength, editText, input.indexOf(","));
+            if (input.contains(getDefaultDecimalSeparator())) {
+                return getEditable(s, input, maxLength, editText, input.indexOf(getDefaultDecimalSeparator()));
             }
         } catch (NumberFormatException e) {
             Timber.e(e);
@@ -376,6 +345,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             dec = dec.substring(1);
             if (dec.length() > maxLength) {
                 editText.setText(input.substring(0, input.length() - 1));
+                editText.setSelection(editText.getText().length());
                 s = editText.getEditableText();
             }
         }

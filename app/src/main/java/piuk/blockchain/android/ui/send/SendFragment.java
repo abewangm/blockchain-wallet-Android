@@ -26,7 +26,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -49,8 +48,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -81,8 +78,6 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
-import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
-import piuk.blockchain.android.util.EditTextUtils;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -786,10 +781,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     private void setupBtcTextField() {
         binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
         binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
-        binding.amountContainer.amountBtc.setKeyListener(
-                CommaEnabledDigitsKeyListener.getInstance(false, true));
         try {
             // This method is hidden but accessible on <API21, but here we catch exceptions just in case
             binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
@@ -802,11 +794,8 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     @SuppressLint("NewApi")
     private void setupFiatTextField() {
         binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountFiat.setSelectAllOnFocus(true);
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
-        binding.amountContainer.amountFiat.setKeyListener(
-                CommaEnabledDigitsKeyListener.getInstance(false, true));
         try {
             // This method is hidden but accessible on <API21, but here we catch exceptions just in case
             binding.amountContainer.amountFiat.setShowSoftInputOnFocus(false);
@@ -828,10 +817,8 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     @Thunk
     Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
         try {
-            if (input.contains(".")) {
-                return getEditable(s, input, maxLength, editText, input.indexOf("."));
-            } else if (input.contains(",")) {
-                return getEditable(s, input, maxLength, editText, input.indexOf(","));
+            if (input.contains(getDefaultDecimalSeparator())) {
+                return getEditable(s, input, maxLength, editText, input.indexOf(getDefaultDecimalSeparator()));
             }
         } catch (NumberFormatException e) {
             Timber.e(e);
@@ -845,6 +832,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
             dec = dec.substring(1);
             if (dec.length() > maxLength) {
                 editText.setText(input.substring(0, input.length() - 1));
+                editText.setSelection(editText.getText().length());
                 s = editText.getEditableText();
             }
         }
@@ -865,23 +853,14 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         @Override
         public void afterTextChanged(Editable s) {
             String input = s.toString();
-
             binding.amountContainer.amountBtc.removeTextChangedListener(this);
-            NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
-            btcFormat.setMaximumFractionDigits(getPresenter().getCurrencyHelper().getMaxBtcDecimalLength() + 1);
-            btcFormat.setMinimumFractionDigits(0);
-
             s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
 
             binding.amountContainer.amountBtc.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                // Remove any possible decimal separators and replace with the localised version
-                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
-                        .replace(",", getDefaultDecimalSeparator());
-                getPresenter().updateFiatTextField(sanitisedString);
-
+                getPresenter().updateFiatTextField(s.toString());
                 textChangeAllowed = true;
             }
         }
@@ -906,23 +885,15 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         @Override
         public void afterTextChanged(Editable s) {
             String input = s.toString();
-
             binding.amountContainer.amountFiat.removeTextChangedListener(this);
             int maxLength = 2;
-            NumberFormat fiatFormat = NumberFormat.getInstance(Locale.getDefault());
-            fiatFormat.setMaximumFractionDigits(maxLength + 1);
-            fiatFormat.setMinimumFractionDigits(0);
-
             s = formatEditable(s, input, maxLength, binding.amountContainer.amountFiat);
 
             binding.amountContainer.amountFiat.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                // Remove any possible decimal separators and replace with the localised version
-                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
-                        .replace(",", getDefaultDecimalSeparator());
-                getPresenter().updateBtcTextField(sanitisedString);
+                getPresenter().updateBtcTextField(s.toString());
                 textChangeAllowed = true;
             }
         }
