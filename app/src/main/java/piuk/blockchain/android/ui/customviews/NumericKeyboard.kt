@@ -155,9 +155,9 @@ class NumericKeyboard @JvmOverloads constructor(
 
                 if (view.text.isNotEmpty()) {
                     if (endSelection < view.text.length) {
-                        view.post { view.setSelection(endSelection + 1) }
+                        view.setSelection(endSelection + 1)
                     } else {
-                        view.post { view.setSelection(view.text.length) }
+                        view.setSelection(view.text.length)
                     }
                 }
             }
