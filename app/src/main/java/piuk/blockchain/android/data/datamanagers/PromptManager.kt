@@ -68,7 +68,7 @@ open class PromptManager(
         prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TIME_ELAPSED, System.currentTimeMillis())
     }
 
-    fun neverPrompt2Fa() {
+    private fun neverPrompt2Fa() {
         prefsUtil.setValue(PrefsUtil.KEY_SECURITY_TWO_FA_NEVER, true)
     }
 
