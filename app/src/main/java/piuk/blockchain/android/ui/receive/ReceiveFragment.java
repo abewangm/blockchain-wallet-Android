@@ -32,7 +32,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -74,6 +73,7 @@ import piuk.blockchain.android.ui.customviews.NumericKeyboard;
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.util.EditTextFormatUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -273,9 +273,11 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     private TextWatcher btcTextWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
-            String input = s.toString();
             binding.amountContainer.amountBtc.removeTextChangedListener(this);
-            s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
+            s = EditTextFormatUtil.formatEditable(s,
+                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
+                    binding.amountContainer.amountBtc,
+                    getDefaultDecimalSeparator());
 
             binding.amountContainer.amountBtc.addTextChangedListener(this);
 
@@ -301,10 +303,12 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     private TextWatcher fiatTextWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
-            String input = s.toString();
             binding.amountContainer.amountFiat.removeTextChangedListener(this);
             int maxLength = 2;
-            s = formatEditable(s, input, maxLength, binding.amountContainer.amountFiat);
+            s = EditTextFormatUtil.formatEditable(s,
+                    maxLength,
+                    binding.amountContainer.amountFiat,
+                    getDefaultDecimalSeparator());
 
             binding.amountContainer.amountFiat.addTextChangedListener(this);
 
@@ -326,31 +330,6 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             // No-op
         }
     };
-
-    @Thunk
-    Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
-        try {
-            if (input.contains(getDefaultDecimalSeparator())) {
-                return getEditable(s, input, maxLength, editText, input.indexOf(getDefaultDecimalSeparator()));
-            }
-        } catch (NumberFormatException e) {
-            Timber.e(e);
-        }
-        return s;
-    }
-
-    private Editable getEditable(Editable s, String input, int maxLength, EditText editText, int index) {
-        String dec = input.substring(index);
-        if (!dec.isEmpty()) {
-            dec = dec.substring(1);
-            if (dec.length() > maxLength) {
-                editText.setText(input.substring(0, input.length() - 1));
-                editText.setSelection(editText.getText().length());
-                s = editText.getEditableText();
-            }
-        }
-        return s;
-    }
 
     @Thunk
     String getDefaultDecimalSeparator() {

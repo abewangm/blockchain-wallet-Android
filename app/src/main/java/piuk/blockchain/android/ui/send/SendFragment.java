@@ -35,7 +35,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jakewharton.rxbinding2.widget.RxTextView;
@@ -78,6 +77,7 @@ import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AppRate;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.EditTextFormatUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -814,31 +814,6 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.amountContainer.amountFiat.setText(text);
     }
 
-    @Thunk
-    Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
-        try {
-            if (input.contains(getDefaultDecimalSeparator())) {
-                return getEditable(s, input, maxLength, editText, input.indexOf(getDefaultDecimalSeparator()));
-            }
-        } catch (NumberFormatException e) {
-            Timber.e(e);
-        }
-        return s;
-    }
-
-    private Editable getEditable(Editable s, String input, int maxLength, EditText editText, int index) {
-        String dec = input.substring(index);
-        if (!dec.isEmpty()) {
-            dec = dec.substring(1);
-            if (dec.length() > maxLength) {
-                editText.setText(input.substring(0, input.length() - 1));
-                editText.setSelection(editText.getText().length());
-                s = editText.getEditableText();
-            }
-        }
-        return s;
-    }
-
     private TextWatcher btcTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -852,9 +827,11 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
         @Override
         public void afterTextChanged(Editable s) {
-            String input = s.toString();
             binding.amountContainer.amountBtc.removeTextChangedListener(this);
-            s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
+            s = EditTextFormatUtil.formatEditable(s,
+                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
+                    binding.amountContainer.amountBtc,
+                    getDefaultDecimalSeparator());
 
             binding.amountContainer.amountBtc.addTextChangedListener(this);
 
@@ -884,10 +861,12 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
         @Override
         public void afterTextChanged(Editable s) {
-            String input = s.toString();
             binding.amountContainer.amountFiat.removeTextChangedListener(this);
             int maxLength = 2;
-            s = formatEditable(s, input, maxLength, binding.amountContainer.amountFiat);
+            s = EditTextFormatUtil.formatEditable(s,
+                    maxLength,
+                    binding.amountContainer.amountFiat,
+                    getDefaultDecimalSeparator());
 
             binding.amountContainer.amountFiat.addTextChangedListener(this);
 

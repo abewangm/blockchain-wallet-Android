@@ -21,7 +21,9 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.visible
 
 class NumericKeyboard @JvmOverloads constructor(
-        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), View.OnClickListener {
 
     val isVisible: Boolean
@@ -53,6 +55,19 @@ class NumericKeyboard @JvmOverloads constructor(
         button_done.setOnClickListener(this)
     }
 
+    override fun onClick(v: View) {
+        var pad: String? = null
+        when (v.id) {
+            R.id.button_separator -> pad = decimalSeparator
+            R.id.button_delete -> deleteFromFocusedView()
+            R.id.button_done -> setNumpadVisibility(View.GONE)
+            else -> pad = v.tag.toString().substring(0, 1)
+        }
+
+        // Append tapped #
+        pad?.let { appendToFocusedView(it) }
+    }
+
     fun enableOnView(view: EditText) {
         if (!viewList.contains(view)) viewList.add(view)
 
@@ -67,6 +82,7 @@ class NumericKeyboard @JvmOverloads constructor(
                 setNumpadVisibility(View.VISIBLE)
             }
         }
+
         view.setOnClickListener {
             decimal_point.text = decimalSeparator
             setNumpadVisibility(View.VISIBLE)
@@ -75,6 +91,10 @@ class NumericKeyboard @JvmOverloads constructor(
 
     fun setCallback(callback: NumericKeyboardCallback) {
         this.callback = callback
+    }
+
+    fun setDecimalSeparator(passedDecimalSeparator: String) {
+        decimalSeparator = passedDecimalSeparator
     }
 
     @SuppressLint("SwitchIntDef")
@@ -87,20 +107,20 @@ class NumericKeyboard @JvmOverloads constructor(
 
     private fun showKeyboard() {
         if (!isVisible) {
-            val bottomUp = AnimationUtils.loadAnimation(context, R.anim.bottom_up)
-            startAnimation(bottomUp)
-            bottomUp.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation) {
-                    // No-op
-                }
+            startAnimation(AnimationUtils.loadAnimation(context, R.anim.bottom_up).apply {
+                setAnimationListener(object : Animation.AnimationListener {
+                    override fun onAnimationStart(animation: Animation) {
+                        // No-op
+                    }
 
-                override fun onAnimationEnd(animation: Animation) {
-                    callback?.onKeypadOpenCompleted()
-                }
+                    override fun onAnimationEnd(animation: Animation) {
+                        callback?.onKeypadOpenCompleted()
+                    }
 
-                override fun onAnimationRepeat(animation: Animation) {
-                    // No-op
-                }
+                    override fun onAnimationRepeat(animation: Animation) {
+                        // No-op
+                    }
+                })
             })
             visible()
             callback?.onKeypadOpen()
@@ -109,34 +129,18 @@ class NumericKeyboard @JvmOverloads constructor(
 
     private fun hideKeyboard() {
         if (isVisible) {
-            val topDown = AnimationUtils.loadAnimation(context, R.anim.top_down)
-            startAnimation(topDown)
+            startAnimation(AnimationUtils.loadAnimation(context, R.anim.top_down))
             gone()
             callback?.onKeypadClose()
         }
     }
 
-    override fun onClick(v: View) {
-        var pad: String? = ""
-        when (v.id) {
-            R.id.button_separator -> pad = decimalSeparator
-            R.id.button_delete -> deleteFromFocusedView()
-            R.id.button_done -> setNumpadVisibility(View.GONE)
-            else -> pad = v.tag.toString().substring(0, 1)
-        }
-
-        // Append tapped #
-        if (pad != null) {
-            appendToFocusedView(pad)
-        }
-    }
-
     private fun appendToFocusedView(pad: String) {
-        viewList.forEach { view ->
+        for (view in viewList) {
             if (view.hasFocus()) {
                 // Don't allow multiple decimals
                 if (pad == decimalSeparator && view.text.toString().contains(decimalSeparator))
-                    return@forEach
+                    return
 
                 val startSelection = view.selectionStart
                 val endSelection = view.selectionEnd
@@ -144,7 +148,17 @@ class NumericKeyboard @JvmOverloads constructor(
                     val selectedText = view.text.toString().substring(startSelection, endSelection)
                     view.setText(view.getTextString().replace(selectedText, pad))
                 } else {
-                    view.append(pad)
+                    val currentString = view.text.toString()
+                    val newString = "${currentString.substring(0, startSelection)}$pad${currentString.substring(endSelection, currentString.length)}"
+                    view.setText(newString)
+                }
+
+                if (view.text.isNotEmpty()) {
+                    if (endSelection < view.text.length) {
+                        view.post { view.setSelection(endSelection + 1) }
+                    } else {
+                        view.post { view.setSelection(view.text.length) }
+                    }
                 }
             }
         }
@@ -157,10 +171,6 @@ class NumericKeyboard @JvmOverloads constructor(
                 view.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL))
             }
         }
-    }
-
-    fun setDecimalSeparator(passedDecimalSeparator: String) {
-        decimalSeparator = passedDecimalSeparator
     }
 
 }
