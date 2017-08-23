@@ -16,6 +16,7 @@ import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
+import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -39,6 +40,7 @@ class BalancePresenter @Inject constructor(
         private val exchangeRateFactory: ExchangeRateFactory,
         private val transactionListDataManager: TransactionListDataManager,
         private val contactsDataManager: ContactsDataManager,
+        private val ethDataManager: EthDataManager,
         private val swipeToReceiveHelper: SwipeToReceiveHelper,
         internal val payloadDataManager: PayloadDataManager,
         private val buyDataManager: BuyDataManager,
@@ -49,14 +51,19 @@ class BalancePresenter @Inject constructor(
         private val appUtil: AppUtil
 ) : BasePresenter<BalanceView>() {
 
-    @VisibleForTesting var contactsEventObservable: Observable<ContactsEvent>? = null
-    @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
-    @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
-    @VisibleForTesting var chosenAccount: ItemAccount? = null
+    @VisibleForTesting
+    var contactsEventObservable: Observable<ContactsEvent>? = null
+    @VisibleForTesting
+    var notificationObservable: Observable<NotificationPayload>? = null
+    @VisibleForTesting
+    var authEventObservable: Observable<AuthEvent>? = null
+    @VisibleForTesting
+    var chosenAccount: ItemAccount? = null
 
     @VisibleForTesting internal val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private val displayList: MutableList<Any> = mutableListOf()
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
+    private var selectedCurrency = CryptoCurrency.BTC
 
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
@@ -131,6 +138,11 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun invertViewType() = setViewType(!accessState.isBtc)
+
+    internal fun onCryptoCurrencySelected(selectedCurrency: CryptoCurrency) {
+        this.selectedCurrency = selectedCurrency
+        // TODO: Update UI
+    }
 
     internal fun areLauncherShortcutsEnabled() =
             prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
@@ -410,6 +422,18 @@ class BalancePresenter @Inject constructor(
                         displayList.addAll(it)
                         checkLatestAnnouncement(displayList)
 
+                        when {
+                            displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
+                            else -> view.setUiState(UiState.CONTENT)
+                        }
+                        view.onTransactionsUpdated(displayList)
+                    }
+
+    private fun getEthTransactionsObservable() =
+            ethDataManager.getEthTransactions()
+                    .doOnNext {
+                        displayList.clear()
+                        displayList.addAll(it)
                         when {
                             displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
                             else -> view.setUiState(UiState.CONTENT)

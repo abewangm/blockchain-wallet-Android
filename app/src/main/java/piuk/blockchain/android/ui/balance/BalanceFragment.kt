@@ -43,6 +43,7 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.OnItemSelectedListener
 import piuk.blockchain.android.util.helperfunctions.OnPageChangeListener
+import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import javax.inject.Inject
 
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
@@ -101,6 +102,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             initOnboardingPager()
         }
         setUiState(UiState.LOADING)
+
+        tabs.apply {
+            addTab(tabs.newTab().setText("BITCOIN"))
+            addTab(tabs.newTab().setText("ETHER"))
+            setOnTabSelectedListener { presenter.onCryptoCurrencySelected(CryptoCurrency.values()[it]) }
+        }
     }
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
@@ -252,11 +259,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun showToast(message: Int, toastType: String) = context.toast(message, toastType)
 
     override fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?) {
-        val message: String
-        if (!note.isNullOrEmpty()) {
-            message = getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note)
+        val message: String = if (!note.isNullOrEmpty()) {
+            getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note)
         } else {
-            message = getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount)
+            getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount)
         }
 
         AlertDialog.Builder(activity, R.style.AlertDialogStyle)
@@ -281,11 +287,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             name: String,
             note: String?
     ) {
-        val message: String
-        if (!note.isNullOrEmpty()) {
-            message = getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
+        val message: String = if (!note.isNullOrEmpty()) {
+            getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
         } else {
-            message = getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
+            getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
         }
 
         AlertDialog.Builder(activity, R.style.AlertDialogStyle)
@@ -337,11 +342,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
         spinner.onItemSelectedListener = OnItemSelectedListener { selection[0] = it }
 
-        var message: String
-        if (!note.isNullOrEmpty()) {
-            message = getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
+        var message: String = if (!note.isNullOrEmpty()) {
+            getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
         } else {
-            message = getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
+            getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
         }
 
         message += "\n\n${getString(R.string.contacts_balance_dialog_choose_account_message)}\n"
@@ -537,7 +541,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         const val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
         const val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
         const val KEY_TRANSACTION_HASH = "transaction_hash"
-        const val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
+        private const val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
 
         @JvmStatic
         fun newInstance(broadcastingPayment: Boolean): BalanceFragment {
