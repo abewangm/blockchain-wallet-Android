@@ -22,24 +22,22 @@ import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.DateUtil
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
 
 class TransactionSummaryDelegate<in T>(
-        val activity: Activity,
-        var btcExchangeRate: Double,
-        var isBtc: Boolean,
-        val listClickListener: BalanceListClickListener
+        activity: Activity,
+        private var btcExchangeRate: Double,
+        private var isBtc: Boolean,
+        private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
-    val stringUtils = StringUtils(activity)
-    val prefsUtil = PrefsUtil(activity)
-    val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
-    val dateUtil = DateUtil(activity)
-    var transactionDisplayMap = mutableMapOf<String, ContactTransactionDisplayModel>()
+    private val prefsUtil = PrefsUtil(activity)
+    private val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
+    private val dateUtil = DateUtil(activity)
+    private var transactionDisplayMap = mutableMapOf<String, ContactTransactionDisplayModel>()
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is TransactionSummary

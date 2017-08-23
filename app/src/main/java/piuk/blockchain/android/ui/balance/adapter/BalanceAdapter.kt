@@ -15,8 +15,10 @@ class BalanceAdapter(
         listClickListener: BalanceListClickListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
-    val summaryDelegate = TransactionSummaryDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
-    val fctxDelegate = FctxDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
+    private val summaryDelegate =
+            TransactionSummaryDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
+    private val fctxDelegate =
+            FctxDelegate<Any>(activity, btcExchangeRate, isBtc, listClickListener)
 
     init {
         // Add all necessary AdapterDelegate objects here
