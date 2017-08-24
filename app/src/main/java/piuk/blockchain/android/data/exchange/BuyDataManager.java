@@ -62,11 +62,9 @@ public class BuyDataManager {
      * @return An {@link Observable} wrapping a boolean value
      */
     private Observable<Boolean> isBuyRolledOut() {
-
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
-                        .map(inCoinifyCountry -> isRolloutAllowed(walletOptions.getRolloutPercentage()))
-                );
+                        .map(inCoinifyCountry -> isRolloutAllowed(walletOptions.getRolloutPercentage())));
     }
 
     /**
@@ -75,7 +73,6 @@ public class BuyDataManager {
      * @return An {@link Observable} wrapping a boolean value
      */
     private Observable<Boolean> isCoinifyAllowed() {
-
         return Observable.combineLatest(isInCoinifyCountry(), buyConditions.coinifyWhitelistedSource,
                 (coinifyCountry, whiteListed) -> coinifyCountry || whiteListed);
     }
@@ -86,11 +83,9 @@ public class BuyDataManager {
      * @return An {@link Observable} wrapping a boolean value
      */
     private Observable<Boolean> isInCoinifyCountry() {
-
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
-                        .map(settings -> walletOptions.getPartners().getCoinify().getCountries().contains(settings.getCountryCode()))
-                );
+                        .map(settings -> walletOptions.getPartners().getCoinify().getCountries().contains(settings.getCountryCode())));
     }
 
     /**
@@ -116,18 +111,23 @@ public class BuyDataManager {
     private Observable<Boolean> isInUnocoinCountry() {
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
-                        .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode()))
-                );
+                        .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode())));
     }
 
     private Observable<Boolean> isUnocoinAllowed() {
-        return Observable.combineLatest(isInUnocoinCountry(), isUnocoinWhitelisted(),
-                (unocoinCountry, whiteListed) -> unocoinCountry || whiteListed);
+        return Observable.combineLatest(isInUnocoinCountry(), isUnocoinWhitelisted(), isUnocoinEnabledOnAndroid(),
+                (unocoinCountry, whiteListed, androidEnabled) -> (unocoinCountry || whiteListed) && androidEnabled);
     }
 
     private Observable<Boolean> isUnocoinWhitelisted() {
         return settingsDataManager.getSettings()
                 .map(settings -> settings.getInvited().get("unocoin"));
+    }
+
+    private Observable<Boolean> isUnocoinEnabledOnAndroid() {
+        return buyConditions.walletOptionsSource
+                .map(options -> options.getAndroidFlags().containsKey("showUnocoin")
+                        && options.getAndroidFlags().get("showUnocoin"));
     }
 
     public Observable<WebViewLoginDetails> getWebViewLoginDetails() {
