@@ -18,6 +18,7 @@ import info.blockchain.wallet.multiaddress.TransactionSummary
 import kotlinx.android.synthetic.main.item_balance.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
+import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.DateUtil
 import piuk.blockchain.android.util.MonetaryUtil
@@ -27,7 +28,7 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
 
-class TransactionSummaryDelegate<in T>(
+class DisplayableDelegate<in T>(
         activity: Activity,
         private var btcExchangeRate: Double,
         private var isBtc: Boolean,
@@ -40,7 +41,7 @@ class TransactionSummaryDelegate<in T>(
     private var transactionDisplayMap = mutableMapOf<String, ContactTransactionDisplayModel>()
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
-            items[position] is TransactionSummary
+            items[position] is Displayable
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
             TxViewHolder(parent.inflate(R.layout.item_balance))
@@ -53,14 +54,16 @@ class TransactionSummaryDelegate<in T>(
     ) {
 
         val viewHolder = holder as TxViewHolder
-        val tx = items[position] as TransactionSummary
+        val tx = items[position] as Displayable
 
         val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        val btcBalance = tx.total.toLong() / 1e8
+        // TODO: This will need changing based on the currency
+        val btcBalance = tx.total / 1e8
+        // TODO: This will need changing based on the currency
         val fiatBalance = btcExchangeRate * btcBalance
 
         viewHolder.result.setTextColor(Color.WHITE)
-        viewHolder.timeSince.text = dateUtil.formatted(tx.time)
+        viewHolder.timeSince.text = dateUtil.formatted(tx.timeStamp)
 
         when (tx.direction) {
             TransactionSummary.Direction.TRANSFERRED -> displayTransferred(viewHolder, tx)
@@ -85,8 +88,8 @@ class TransactionSummaryDelegate<in T>(
         }
 
         viewHolder.result.text = getDisplaySpannable(tx.total.toDouble(), fiatBalance, fiatString)
-        viewHolder.watchOnly.visibility = if (tx.isWatchOnly) View.VISIBLE else View.GONE
-        viewHolder.doubleSpend.visibility = if (tx.isDoubleSpend) View.VISIBLE else View.GONE
+        viewHolder.watchOnly.visibility = if (tx.watchOnly) View.VISIBLE else View.GONE
+        viewHolder.doubleSpend.visibility = if (tx.doubleSpend) View.VISIBLE else View.GONE
 
         viewHolder.result.setOnClickListener {
             isBtc = !isBtc
@@ -118,7 +121,7 @@ class TransactionSummaryDelegate<in T>(
         return ContextCompat.getColor(viewHolder.getContext(), color)
     }
 
-    private fun displayTransferred(viewHolder: TxViewHolder, tx: TransactionSummary) {
+    private fun displayTransferred(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.MOVED)
         viewHolder.result.setBackgroundResource(getColorForConfirmations(
                 tx,
@@ -135,7 +138,7 @@ class TransactionSummaryDelegate<in T>(
         )
     }
 
-    private fun displayReceived(viewHolder: TxViewHolder, tx: TransactionSummary) {
+    private fun displayReceived(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.RECEIVED)
         viewHolder.result.setBackgroundResource(getColorForConfirmations(
                 tx,
@@ -152,7 +155,7 @@ class TransactionSummaryDelegate<in T>(
         )
     }
 
-    private fun displaySent(viewHolder: TxViewHolder, tx: TransactionSummary) {
+    private fun displaySent(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.SENT)
         viewHolder.result.setBackgroundResource(getColorForConfirmations(
                 tx,
@@ -196,7 +199,7 @@ class TransactionSummaryDelegate<in T>(
             monetaryUtil.getBtcUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)]
 
     private fun getColorForConfirmations(
-            tx: TransactionSummary,
+            tx: Displayable,
             @DrawableRes colorLight: Int,
             @DrawableRes colorDark: Int
     ) = if (tx.confirmations < 3) colorLight else colorDark

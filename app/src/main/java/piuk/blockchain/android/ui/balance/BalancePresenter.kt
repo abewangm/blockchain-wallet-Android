@@ -2,9 +2,9 @@ package piuk.blockchain.android.ui.balance
 
 import android.annotation.SuppressLint
 import android.support.annotation.VisibleForTesting
+import android.view.Display
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
-import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -22,6 +22,7 @@ import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
@@ -51,16 +52,12 @@ class BalancePresenter @Inject constructor(
         private val appUtil: AppUtil
 ) : BasePresenter<BalanceView>() {
 
-    @VisibleForTesting
-    var contactsEventObservable: Observable<ContactsEvent>? = null
-    @VisibleForTesting
-    var notificationObservable: Observable<NotificationPayload>? = null
-    @VisibleForTesting
-    var authEventObservable: Observable<AuthEvent>? = null
-    @VisibleForTesting
-    var chosenAccount: ItemAccount? = null
+    @VisibleForTesting var contactsEventObservable: Observable<ContactsEvent>? = null
+    @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
+    @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
+    @VisibleForTesting var chosenAccount: ItemAccount? = null
 
-    @VisibleForTesting internal val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
+    @VisibleForTesting val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private val displayList: MutableList<Any> = mutableListOf()
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
     private var selectedCurrency = CryptoCurrency.BTC
@@ -142,6 +139,18 @@ class BalancePresenter @Inject constructor(
     internal fun onCryptoCurrencySelected(selectedCurrency: CryptoCurrency) {
         this.selectedCurrency = selectedCurrency
         // TODO: Update UI
+        if (selectedCurrency == CryptoCurrency.ETH) {
+            chosenAccount = ItemAccount().apply {
+                type = ItemAccount.TYPE.ETHEREUM
+                label = "Ethereum"
+            }
+        }
+        // STOPSHIP: Redact me
+        ethDataManager.fetchEthAccount()
+                .doOnNext { onRefreshRequested() }
+                .subscribe({
+                    // No-op
+                }, { throwable -> Timber.e(throwable) })
     }
 
     internal fun areLauncherShortcutsEnabled() =
@@ -418,22 +427,10 @@ class BalancePresenter @Inject constructor(
             transactionListDataManager.fetchTransactions(itemAccount, 50, 0)
                     .doAfterTerminate(this::storeSwipeReceiveAddresses)
                     .doOnNext {
-                        displayList.removeAll { it is TransactionSummary }
+                        displayList.removeAll { it is Displayable }
                         displayList.addAll(it)
                         checkLatestAnnouncement(displayList)
 
-                        when {
-                            displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
-                            else -> view.setUiState(UiState.CONTENT)
-                        }
-                        view.onTransactionsUpdated(displayList)
-                    }
-
-    private fun getEthTransactionsObservable() =
-            ethDataManager.getEthTransactions()
-                    .doOnNext {
-                        displayList.clear()
-                        displayList.addAll(it)
                         when {
                             displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
                             else -> view.setUiState(UiState.CONTENT)
@@ -527,7 +524,7 @@ class BalancePresenter @Inject constructor(
     }
 
     private fun handlePendingTransactions(transactions: List<ContactTransactionModel>) {
-        displayList.removeAll { it !is TransactionSummary }
+        displayList.removeAll { it !is Display }
         view.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions))
         if (transactions.isNotEmpty()) {
             val reversed = transactions.sortedBy { it.facilitatedTransaction.lastUpdated }.reversed()

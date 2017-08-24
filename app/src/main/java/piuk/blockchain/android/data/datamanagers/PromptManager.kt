@@ -81,7 +81,7 @@ open class PromptManager(
     }
 
     private fun hasTransactions(): Boolean {
-        return !transactionListDataManager.transactionList.isEmpty()
+        return !transactionListDataManager.getTransactionList().isEmpty()
     }
 
     private fun isRooted(): Boolean {

@@ -937,8 +937,8 @@ public class SendPresenter extends BasePresenter<SendView> {
         tx.setInputsMap(inputs);
         tx.setOutputsMap(outputs);
         tx.setPending(true);
-
-        transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
+// STOPSHIP: 24/08/2017
+//        transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
@@ -954,7 +954,7 @@ public class SendPresenter extends BasePresenter<SendView> {
                                     // Show successfully broadcast
                                     .doOnComplete(() -> getView().showBroadcastSuccessDialog())
                                     // Log event
-                                    .doOnComplete(() -> logContactsPayment())
+                                    .doOnComplete(this::logContactsPayment)
                                     // Show retry dialog if broadcast failed
                                     .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
                         })
