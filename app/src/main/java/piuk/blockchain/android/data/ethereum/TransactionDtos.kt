@@ -3,9 +3,11 @@ package piuk.blockchain.android.data.ethereum
 import info.blockchain.wallet.ethereum.data.EthAccount
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.multiaddress.TransactionSummary
+import piuk.blockchain.android.ui.balance.CryptoCurrency
 
 abstract class Displayable {
 
+    abstract val cryptoCurrency: CryptoCurrency
     abstract val direction: TransactionSummary.Direction
     abstract val timeStamp: Long
     abstract val total: Long
@@ -22,6 +24,8 @@ data class EthDisplayable(
         private val ethTransaction: EthTransaction
 ) : Displayable() {
 
+    override val cryptoCurrency: CryptoCurrency
+        get() = CryptoCurrency.ETH
     override val direction: TransactionSummary.Direction
         get() = when (ethTransaction.from) {
             ethAccount.account -> TransactionSummary.Direction.SENT

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.ethereum.EthAccountApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -24,8 +25,6 @@ import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
-import piuk.blockchain.android.data.ethereum.EthService;
-import piuk.blockchain.android.data.ethereum.datastore.EthDataStore;
 import piuk.blockchain.android.data.exchange.BuyConditions;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeService;
@@ -130,10 +129,8 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected EthDataManager provideEthDataManager(EthService ethService,
-                                                   EthDataStore ethDataStore,
-                                                   RxBus rxBus) {
-        return new EthDataManager(ethService, ethDataStore, rxBus);
+    protected EthDataManager provideEthDataManager(RxBus rxBus) {
+        return new EthDataManager(new EthAccountApi(), rxBus);
     }
 
     @Provides
