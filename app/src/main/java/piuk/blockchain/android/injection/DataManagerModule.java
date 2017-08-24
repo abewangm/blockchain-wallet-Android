@@ -88,10 +88,12 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
+                                                                           EthDataManager ethDataManager,
                                                                            TransactionListStore transactionListStore,
                                                                            RxBus rxBus) {
         return new TransactionListDataManager(
                 payloadManager,
+                ethDataManager,
                 transactionListStore,
                 rxBus);
     }

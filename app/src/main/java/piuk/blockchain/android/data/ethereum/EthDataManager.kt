@@ -48,21 +48,27 @@ class EthDataManager(
     }
 
     /**
-     * Returns a list of [EthTransaction] objects associated with a user's ETH address specifically
+     * Returns the user's ETH account object if previously fetched.
+     *
+     * @return A nullable [EthAccount] object
+     */
+    fun getEthAccount() = ethAccount
+
+    /**
+     * Returns a steam of [EthTransaction] objects associated with a user's ETH address specifically
      * for displaying in the transaction list. These are cached and may be empty if the account
      * hasn't previously been fetched.
      *
-     * @return An [Observable] list of [EthTransaction] objects
+     * @return An [Observable] stream of [EthTransaction] objects
      */
-    fun getEthTransactions(): Observable<List<EthTransaction>> {
+    fun getEthTransactions(): Observable<EthTransaction> {
         ethAccount?.let {
             return Observable.just(it)
                     .flatMapIterable { it.transactions }
-                    .map { listOf(it) }
                     .compose(RxUtil.applySchedulersToObservable())
         }
 
-        return Observable.just(emptyList())
+        return Observable.empty()
     }
 
     /**

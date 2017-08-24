@@ -3,7 +3,7 @@ package piuk.blockchain.android.ui.account
 class ItemAccount {
 
     enum class TYPE {
-        ALL_ACCOUNTS_AND_LEGACY, ALL_LEGACY, SINGLE_ACCOUNT
+        ALL_ACCOUNTS_AND_LEGACY, ALL_LEGACY, SINGLE_ACCOUNT, ETHEREUM
     }
 
     var label: String? = null

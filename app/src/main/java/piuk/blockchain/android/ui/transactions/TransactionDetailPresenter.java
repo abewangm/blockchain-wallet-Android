@@ -4,20 +4,14 @@ import android.content.Intent;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
-import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -27,6 +21,7 @@ import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.transactions.Displayable;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -53,7 +48,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
 
     private String mFiatType;
 
-    @VisibleForTesting TransactionSummary mTransaction;
+    @VisibleForTesting Displayable mTransaction;
 
     @Inject
     public TransactionDetailPresenter(TransactionHelper transactionHelper,
@@ -106,26 +101,26 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
                         }, throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
     }
 
-    private void updateUiFromTransaction(TransactionSummary transactionSummary) {
+    private void updateUiFromTransaction(Displayable transactionSummary) {
         getView().setTransactionType(transactionSummary.getDirection());
         setTransactionColor(transactionSummary);
-        setTransactionAmountInBtc(transactionSummary.getTotal());
+//        setTransactionAmountInBtc(transactionSummary.getTotal());
         setConfirmationStatus(transactionSummary.getHash(), transactionSummary.getConfirmations());
         setTransactionNote(transactionSummary.getHash());
-        setDate(transactionSummary.getTime());
-        setFee(transactionSummary.getFee());
+        setDate(transactionSummary.getTimeStamp());
+//        setFee(transactionSummary.getFee());
 
-        Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> pair =
-                transactionHelper.filterNonChangeAddresses(transactionSummary);
+//        Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> pair =
+//                transactionHelper.filterNonChangeAddresses(transactionSummary);
 
         // From Address
-        HashMap<String, BigInteger> inputMap = pair.getLeft();
+//        HashMap<String, BigInteger> inputMap = pair.getLeft();
         ArrayList<String> labelList = new ArrayList<>();
-        Set<Entry<String, BigInteger>> entrySet = inputMap.entrySet();
-        for (Entry<String, BigInteger> set : entrySet) {
-            String label = mPayloadDataManager.addressToLabel(set.getKey());
-            if (!labelList.contains(label)) labelList.add(label);
-        }
+//        Set<Entry<String, BigInteger>> entrySet = inputMap.entrySet();
+//        for (Entry<String, BigInteger> set : entrySet) {
+//            String label = mPayloadDataManager.addressToLabel(set.getKey());
+//            if (!labelList.contains(label)) labelList.add(label);
+//        }
 
         String inputMapString = org.apache.commons.lang3.StringUtils.join(labelList.toArray(), "\n\n");
         if (inputMapString.isEmpty()) {
@@ -153,28 +148,28 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         }
 
         // To Address
-        HashMap<String, BigInteger> outputMap = pair.getRight();
+//        HashMap<String, BigInteger> outputMap = pair.getRight();
         ArrayList<RecipientModel> recipients = new ArrayList<>();
 
-        for (Entry<String, BigInteger> item : outputMap.entrySet()) {
-            RecipientModel recipientModel = new RecipientModel(
-                    mPayloadDataManager.addressToLabel(item.getKey()),
-                    mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
-                    getDisplayUnits());
-
-            if (displayModel != null && transactionSummary.getDirection().equals(Direction.SENT)) {
-                recipientModel.setAddress(displayModel.getContactName());
-            }
-
-            recipients.add(recipientModel);
-        }
-
-        getView().setToAddresses(recipients);
-
-        if (displayModel != null) {
-            getView().setTransactionNote(displayModel.getNote());
-        }
-
+//        for (Entry<String, BigInteger> item : outputMap.entrySet()) {
+//            RecipientModel recipientModel = new RecipientModel(
+//                    mPayloadDataManager.addressToLabel(item.getKey()),
+//                    mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
+//                    getDisplayUnits());
+//
+//            if (displayModel != null && transactionSummary.getDirection().equals(Direction.SENT)) {
+//                recipientModel.setAddress(displayModel.getContactName());
+//            }
+//
+//            recipients.add(recipientModel);
+//        }
+//
+//        getView().setToAddresses(recipients);
+//
+//        if (displayModel != null) {
+//            getView().setTransactionNote(displayModel.getNote());
+//        }
+//
         getCompositeDisposable().add(
                 getTransactionValueString(mFiatType, transactionSummary)
                         .subscribe(
@@ -182,7 +177,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
                                 throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
 
         getView().onDataLoaded();
-        getView().setIsDoubleSpend(transactionSummary.isDoubleSpend());
+        getView().setIsDoubleSpend(transactionSummary.getDoubleSpend());
     }
 
     private void setFee(BigInteger fee) {
@@ -237,7 +232,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
     }
 
     @VisibleForTesting
-    void setTransactionColor(TransactionSummary transaction) {
+    void setTransactionColor(Displayable transaction) {
         if (transaction.getDirection() == Direction.TRANSFERRED) {
             getView().setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
                     ? R.color.product_gray_transferred_50 : R.color.product_gray_transferred);
@@ -251,11 +246,11 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
     }
 
     @VisibleForTesting
-    Observable<String> getTransactionValueString(String currency, TransactionSummary transaction) {
+    Observable<String> getTransactionValueString(String currency, Displayable transaction) {
         return mExchangeRateFactory.getHistoricPrice(
-                transaction.getTotal().abs().longValue(),
+                transaction.getTotal(),
                 currency,
-                transaction.getTime() * 1000)
+                transaction.getTimeStamp() * 1000)
                 .map(aDouble -> {
                     int stringId = -1;
                     switch (transaction.getDirection()) {
