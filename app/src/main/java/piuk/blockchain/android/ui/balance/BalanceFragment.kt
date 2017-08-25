@@ -106,7 +106,15 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         tabs.apply {
             addTab(tabs.newTab().setText("BITCOIN"))
             addTab(tabs.newTab().setText("ETHER"))
-            setOnTabSelectedListener { presenter.onCryptoCurrencySelected(CryptoCurrency.values()[it]) }
+            setOnTabSelectedListener {
+                if (it == 1) {
+                    accounts_spinner.invisible()
+                    presenter.onAccountChosen(presenter.activeAccountAndAddressList.lastIndex)
+                } else {
+                    accounts_spinner.visible()
+                    presenter.onAccountChosen(0)
+                }
+            }
         }
     }
 
@@ -224,6 +232,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun onResume() {
         super.onResume()
+        tabs.getTabAt(0)?.select()
         presenter.onResume()
         onViewReady()
         if (activity is MainActivity) {

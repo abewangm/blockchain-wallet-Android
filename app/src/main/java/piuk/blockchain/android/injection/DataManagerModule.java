@@ -4,6 +4,7 @@ import android.content.Context;
 
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.ethereum.EthAccountApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -24,8 +25,6 @@ import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
-import piuk.blockchain.android.data.ethereum.EthService;
-import piuk.blockchain.android.data.ethereum.datastore.EthDataStore;
 import piuk.blockchain.android.data.exchange.BuyConditions;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeService;
@@ -89,10 +88,12 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
+                                                                           EthDataManager ethDataManager,
                                                                            TransactionListStore transactionListStore,
                                                                            RxBus rxBus) {
         return new TransactionListDataManager(
                 payloadManager,
+                ethDataManager,
                 transactionListStore,
                 rxBus);
     }
@@ -130,11 +131,9 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected EthDataManager provideEthDataManager(EthService ethService,
-                                                   EthDataStore ethDataStore,
-                                                   PayloadManager payloadManager,
+    protected EthDataManager provideEthDataManager(PayloadManager payloadManager,
                                                    RxBus rxBus) {
-        return new EthDataManager(ethService, ethDataStore, payloadManager, rxBus);
+        return new EthDataManager(payloadManager, new EthAccountApi(), rxBus);
     }
 
     @Provides

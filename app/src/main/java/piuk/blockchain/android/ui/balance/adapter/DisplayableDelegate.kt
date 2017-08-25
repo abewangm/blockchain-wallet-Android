@@ -18,7 +18,9 @@ import info.blockchain.wallet.multiaddress.TransactionSummary
 import kotlinx.android.synthetic.main.item_balance.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
+import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
+import piuk.blockchain.android.ui.balance.CryptoCurrency
 import piuk.blockchain.android.util.DateUtil
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -26,11 +28,12 @@ import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
+import java.text.DecimalFormat
 
-class TransactionSummaryDelegate<in T>(
+class DisplayableDelegate<in T>(
         activity: Activity,
         private var btcExchangeRate: Double,
-        private var isBtc: Boolean,
+        private var showCrypto: Boolean,
         private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
@@ -40,7 +43,7 @@ class TransactionSummaryDelegate<in T>(
     private var transactionDisplayMap = mutableMapOf<String, ContactTransactionDisplayModel>()
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
-            items[position] is TransactionSummary
+            items[position] is Displayable
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
             TxViewHolder(parent.inflate(R.layout.item_balance))
@@ -53,14 +56,18 @@ class TransactionSummaryDelegate<in T>(
     ) {
 
         val viewHolder = holder as TxViewHolder
-        val tx = items[position] as TransactionSummary
+        val tx = items[position] as Displayable
 
         val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        val btcBalance = tx.total.toLong() / 1e8
-        val fiatBalance = btcExchangeRate * btcBalance
+        val balance = when (tx.cryptoCurrency) {
+            CryptoCurrency.BTC -> tx.total / 1e8
+            CryptoCurrency.ETH -> tx.total / 1e18
+        }
+        // TODO: This will need changing based on the currency
+        val fiatBalance = btcExchangeRate * balance
 
         viewHolder.result.setTextColor(Color.WHITE)
-        viewHolder.timeSince.text = dateUtil.formatted(tx.time)
+        viewHolder.timeSince.text = dateUtil.formatted(tx.timeStamp)
 
         when (tx.direction) {
             TransactionSummary.Direction.TRANSFERRED -> displayTransferred(viewHolder, tx)
@@ -84,13 +91,18 @@ class TransactionSummaryDelegate<in T>(
             }
         }
 
-        viewHolder.result.text = getDisplaySpannable(tx.total.toDouble(), fiatBalance, fiatString)
-        viewHolder.watchOnly.visibility = if (tx.isWatchOnly) View.VISIBLE else View.GONE
-        viewHolder.doubleSpend.visibility = if (tx.isDoubleSpend) View.VISIBLE else View.GONE
+        viewHolder.result.text = getDisplaySpannable(
+                tx.cryptoCurrency,
+                tx.total.toDouble(),
+                fiatBalance,
+                fiatString
+        )
+        viewHolder.watchOnly.visibility = if (tx.watchOnly) View.VISIBLE else View.GONE
+        viewHolder.doubleSpend.visibility = if (tx.doubleSpend) View.VISIBLE else View.GONE
 
         viewHolder.result.setOnClickListener {
-            isBtc = !isBtc
-            listClickListener.onValueClicked(isBtc)
+            showCrypto = !showCrypto
+            listClickListener.onValueClicked(showCrypto)
         }
 
         viewHolder.itemView.setOnClickListener {
@@ -100,7 +112,7 @@ class TransactionSummaryDelegate<in T>(
     }
 
     fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
-        this.isBtc = isBtc
+        this.showCrypto = isBtc
         monetaryUtil.updateUnit(btcFormat)
     }
 
@@ -118,7 +130,7 @@ class TransactionSummaryDelegate<in T>(
         return ContextCompat.getColor(viewHolder.getContext(), color)
     }
 
-    private fun displayTransferred(viewHolder: TxViewHolder, tx: TransactionSummary) {
+    private fun displayTransferred(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.MOVED)
         viewHolder.result.setBackgroundResource(getColorForConfirmations(
                 tx,
@@ -135,7 +147,7 @@ class TransactionSummaryDelegate<in T>(
         )
     }
 
-    private fun displayReceived(viewHolder: TxViewHolder, tx: TransactionSummary) {
+    private fun displayReceived(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.RECEIVED)
         viewHolder.result.setBackgroundResource(getColorForConfirmations(
                 tx,
@@ -152,7 +164,7 @@ class TransactionSummaryDelegate<in T>(
         )
     }
 
-    private fun displaySent(viewHolder: TxViewHolder, tx: TransactionSummary) {
+    private fun displaySent(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.SENT)
         viewHolder.result.setBackgroundResource(getColorForConfirmations(
                 tx,
@@ -169,17 +181,36 @@ class TransactionSummaryDelegate<in T>(
         )
     }
 
-    private fun getDisplaySpannable(btcAmount: Double, fiatAmount: Double, fiatString: String): Spannable {
+    private fun getDisplaySpannable(
+            cryptoCurrency: CryptoCurrency,
+            cryptoAmount: Double,
+            fiatAmount: Double,
+            fiatString: String
+    ): Spannable {
         val spannable: Spannable
-        if (isBtc) {
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(btcAmount))} ${getDisplayUnits()}")
-            spannable.setSpan(
-                    RelativeSizeSpan(0.67f),
-                    spannable.length - getDisplayUnits().length,
-                    spannable.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        if (showCrypto) {
+            if (cryptoCurrency == CryptoCurrency.BTC) {
+                spannable = Spannable.Factory.getInstance().newSpannable(
+                        "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(cryptoAmount))} ${getDisplayUnits()}")
+                spannable.setSpan(
+                        RelativeSizeSpan(0.67f),
+                        spannable.length - getDisplayUnits().length,
+                        spannable.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            } else {
+                val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
+                        .run { format(cryptoAmount / 1e18) }
+
+                spannable = Spannable.Factory.getInstance().newSpannable(
+                        "$number ETH")
+                spannable.setSpan(
+                        RelativeSizeSpan(0.67f),
+                        spannable.length - "ETH".length,
+                        spannable.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
         } else {
+            // TODO: ETH Fiat value  
             spannable = Spannable.Factory.getInstance().newSpannable(
                     "${monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount))} $fiatString")
             spannable.setSpan(
@@ -196,13 +227,13 @@ class TransactionSummaryDelegate<in T>(
             monetaryUtil.getBtcUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)]
 
     private fun getColorForConfirmations(
-            tx: TransactionSummary,
+            tx: Displayable,
             @DrawableRes colorLight: Int,
             @DrawableRes colorDark: Int
     ) = if (tx.confirmations < 3) colorLight else colorDark
 
     private fun getRealTxPosition(position: Int, items: List<T>): Int {
-        val diff = items.size - items.count { it is TransactionSummary }
+        val diff = items.size - items.count { it is Displayable }
         return position - diff
     }
 
