@@ -20,6 +20,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
+import piuk.blockchain.android.ui.balance.CryptoCurrency
 import piuk.blockchain.android.util.DateUtil
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -27,11 +28,12 @@ import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
+import java.text.DecimalFormat
 
 class DisplayableDelegate<in T>(
         activity: Activity,
         private var btcExchangeRate: Double,
-        private var isBtc: Boolean,
+        private var showCrypto: Boolean,
         private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
@@ -57,10 +59,12 @@ class DisplayableDelegate<in T>(
         val tx = items[position] as Displayable
 
         val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        val balance = when (tx.cryptoCurrency) {
+            CryptoCurrency.BTC -> tx.total / 1e8
+            CryptoCurrency.ETH -> tx.total / 1e18
+        }
         // TODO: This will need changing based on the currency
-        val btcBalance = tx.total / 1e8
-        // TODO: This will need changing based on the currency
-        val fiatBalance = btcExchangeRate * btcBalance
+        val fiatBalance = btcExchangeRate * balance
 
         viewHolder.result.setTextColor(Color.WHITE)
         viewHolder.timeSince.text = dateUtil.formatted(tx.timeStamp)
@@ -87,13 +91,18 @@ class DisplayableDelegate<in T>(
             }
         }
 
-        viewHolder.result.text = getDisplaySpannable(tx.total.toDouble(), fiatBalance, fiatString)
+        viewHolder.result.text = getDisplaySpannable(
+                tx.cryptoCurrency,
+                tx.total.toDouble(),
+                fiatBalance,
+                fiatString
+        )
         viewHolder.watchOnly.visibility = if (tx.watchOnly) View.VISIBLE else View.GONE
         viewHolder.doubleSpend.visibility = if (tx.doubleSpend) View.VISIBLE else View.GONE
 
         viewHolder.result.setOnClickListener {
-            isBtc = !isBtc
-            listClickListener.onValueClicked(isBtc)
+            showCrypto = !showCrypto
+            listClickListener.onValueClicked(showCrypto)
         }
 
         viewHolder.itemView.setOnClickListener {
@@ -103,7 +112,7 @@ class DisplayableDelegate<in T>(
     }
 
     fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
-        this.isBtc = isBtc
+        this.showCrypto = isBtc
         monetaryUtil.updateUnit(btcFormat)
     }
 
@@ -172,17 +181,36 @@ class DisplayableDelegate<in T>(
         )
     }
 
-    private fun getDisplaySpannable(btcAmount: Double, fiatAmount: Double, fiatString: String): Spannable {
+    private fun getDisplaySpannable(
+            cryptoCurrency: CryptoCurrency,
+            cryptoAmount: Double,
+            fiatAmount: Double,
+            fiatString: String
+    ): Spannable {
         val spannable: Spannable
-        if (isBtc) {
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(btcAmount))} ${getDisplayUnits()}")
-            spannable.setSpan(
-                    RelativeSizeSpan(0.67f),
-                    spannable.length - getDisplayUnits().length,
-                    spannable.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        if (showCrypto) {
+            if (cryptoCurrency == CryptoCurrency.BTC) {
+                spannable = Spannable.Factory.getInstance().newSpannable(
+                        "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(cryptoAmount))} ${getDisplayUnits()}")
+                spannable.setSpan(
+                        RelativeSizeSpan(0.67f),
+                        spannable.length - getDisplayUnits().length,
+                        spannable.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            } else {
+                val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
+                        .run { format(cryptoAmount / 1e18) }
+
+                spannable = Spannable.Factory.getInstance().newSpannable(
+                        "$number ETH")
+                spannable.setSpan(
+                        RelativeSizeSpan(0.67f),
+                        spannable.length - "ETH".length,
+                        spannable.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
         } else {
+            // TODO: ETH Fiat value  
             spannable = Spannable.Factory.getInstance().newSpannable(
                     "${monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount))} $fiatString")
             spannable.setSpan(
@@ -205,7 +233,7 @@ class DisplayableDelegate<in T>(
     ) = if (tx.confirmations < 3) colorLight else colorDark
 
     private fun getRealTxPosition(position: Int, items: List<T>): Int {
-        val diff = items.size - items.count { it is TransactionSummary }
+        val diff = items.size - items.count { it is Displayable }
         return position - diff
     }
 

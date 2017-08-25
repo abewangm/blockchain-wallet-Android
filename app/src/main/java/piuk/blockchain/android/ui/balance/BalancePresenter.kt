@@ -62,7 +62,6 @@ class BalancePresenter @Inject constructor(
     @VisibleForTesting val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private val displayList: MutableList<Any> = mutableListOf()
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-    private var selectedCurrency = CryptoCurrency.BTC
 
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
@@ -72,6 +71,12 @@ class BalancePresenter @Inject constructor(
         activeAccountAndAddressList.clear()
         activeAccountAndAddressList.addAll(getAllDisplayableAccounts())
         chosenAccount = activeAccountAndAddressList[0]
+
+        // STOPSHIP: Redact me
+        ethDataManager.fetchEthAccount()
+                .subscribe({
+                    // No-op
+                }, { throwable -> Timber.e(throwable) })
 
         chosenAccount?.let {
             Observable.merge(
@@ -133,27 +138,16 @@ class BalancePresenter @Inject constructor(
     internal fun setViewType(isBtc: Boolean) {
         currencyState.setDisplayingCryptoCurrency(isBtc);
         view.onViewTypeChanged(isBtc, getBtcUnitType())
-        view.onTotalBalanceUpdated(getBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
+        if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
+            view.onTotalBalanceUpdated(
+                    getEthBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
+        } else {
+            view.onTotalBalanceUpdated(
+                    getBtcBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
+        }
     }
 
     internal fun invertViewType() = setViewType(!currencyState.isDisplayingCryptoCurrency)
-
-    internal fun onCryptoCurrencySelected(selectedCurrency: CryptoCurrency) {
-        this.selectedCurrency = selectedCurrency
-        // TODO: Update UI
-        if (selectedCurrency == CryptoCurrency.ETH) {
-            chosenAccount = ItemAccount().apply {
-                type = ItemAccount.TYPE.ETHEREUM
-                label = "Ethereum"
-            }
-        }
-        // STOPSHIP: Redact me
-        ethDataManager.fetchEthAccount()
-                .doOnNext { onRefreshRequested() }
-                .subscribe({
-                    // No-op
-                }, { throwable -> Timber.e(throwable) })
-    }
 
     internal fun areLauncherShortcutsEnabled() =
             prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
@@ -193,7 +187,7 @@ class BalancePresenter @Inject constructor(
                                 // Waiting for payment, pay or reject
                                 view.showPayOrDeclineDialog(
                                         fctxId,
-                                        getBalanceString(true, transaction.intendedAmount),
+                                        getBtcBalanceString(true, transaction.intendedAmount),
                                         it.name,
                                         transaction.note
                                 )
@@ -364,7 +358,7 @@ class BalancePresenter @Inject constructor(
                     val bigIntBalance = payloadDataManager.getAddressBalance(it.xpub)
                     ItemAccount().apply {
                         label = it.label
-                        displayBalance = getBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
+                        displayBalance = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
                         absoluteBalance = bigIntBalance.toLong()
                         address = it.xpub
                         type = ItemAccount.TYPE.SINGLE_ACCOUNT
@@ -377,7 +371,7 @@ class BalancePresenter @Inject constructor(
 
             mutableList.add(ItemAccount().apply {
                 label = stringUtils.getString(R.string.all_accounts)
-                displayBalance = getBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
+                displayBalance = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
                 absoluteBalance = bigIntBalance.toLong()
                 type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
             })
@@ -390,12 +384,20 @@ class BalancePresenter @Inject constructor(
             val bigIntBalance = payloadDataManager.importedAddressesBalance
 
             mutableList.add(ItemAccount().apply {
-                displayBalance = getBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
+                displayBalance = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
                 label = stringUtils.getString(R.string.imported_addresses)
                 absoluteBalance = bigIntBalance.toLong()
                 type = ItemAccount.TYPE.ALL_LEGACY
             })
         }
+
+        // TODO: This needs to be hidden from the dropdown
+        // Add Ethereum
+        mutableList.add(ItemAccount().apply {
+            type = ItemAccount.TYPE.ETHEREUM
+            label = "Ethereum"
+            absoluteBalance = ethDataManager.getEthAccount()?.balance?.toLong()
+        })
 
         return mutableList
     }
@@ -409,7 +411,7 @@ class BalancePresenter @Inject constructor(
             // Only one account, ask if you want to send an address
             view.showSendAddressDialog(
                     fctxId,
-                    getBalanceString(true, amount),
+                    getBtcBalanceString(true, amount),
                     name,
                     note
             )
@@ -418,7 +420,7 @@ class BalancePresenter @Inject constructor(
             view.showAccountChoiceDialog(
                     accountNames,
                     fctxId,
-                    getBalanceString(true, amount),
+                    getBtcBalanceString(true, amount),
                     name,
                     note
             )
@@ -440,29 +442,47 @@ class BalancePresenter @Inject constructor(
                         view.onTransactionsUpdated(displayList)
                     }
 
-    private fun getBalanceObservable(itemAccount: ItemAccount) =
+    private fun getBalanceObservable(itemAccount: ItemAccount): Observable<Nothing>? {
+        return if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
+            ethDataManager.getEthAccount()?.let {
+                val ethBalance = it.balance.toLong()
+                val ethString = getEthBalanceString(currencyState.isDisplayingCryptoCurrency, ethBalance)
+                view.onTotalBalanceUpdated(ethString)
+            }
+
+            Observable.empty()
+        } else {
             payloadDataManager.updateAllBalances()
                     .doOnComplete {
                         val btcBalance = transactionListDataManager.getBtcBalance(itemAccount)
-                        val balanceTotal = getBalanceString(currencyState.isDisplayingCryptoCurrency, btcBalance)
+                        val balanceTotal = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, btcBalance)
                         view.onTotalBalanceUpdated(balanceTotal)
                     }.toObservable<Nothing>()
+        }
+    }
 
-    private fun getUpdateTickerObservable() =
-            exchangeRateFactory.updateTicker()
-                    .doOnComplete {
-                        view.onAccountsUpdated(
-                                activeAccountAndAddressList,
-                                getLastPrice(getFiatCurrency()),
-                                getFiatCurrency(),
-                                monetaryUtil,
-                                currencyState.isDisplayingCryptoCurrency
-                        )
-                        view.onExchangeRateUpdated(
-                                exchangeRateFactory.getLastPrice(getFiatCurrency()),
-                                currencyState.isDisplayingCryptoCurrency
-                        )
-                    }.andThen(getOnboardingStatusObservable())
+    private fun getUpdateTickerObservable(): Observable<Boolean>? {
+        // Remove ETH from list of accounts
+        val displayableAccounts = mutableListOf<ItemAccount>().apply {
+            addAll(activeAccountAndAddressList)
+            removeAt(lastIndex)
+        }
+
+        return exchangeRateFactory.updateTicker()
+                .doOnComplete {
+                    view.onAccountsUpdated(
+                            displayableAccounts,
+                            getLastPrice(getFiatCurrency()),
+                            getFiatCurrency(),
+                            monetaryUtil,
+                            currencyState.isDisplayingCryptoCurrency
+                    )
+                    view.onExchangeRateUpdated(
+                            exchangeRateFactory.getLastPrice(getFiatCurrency()),
+                            currencyState.isDisplayingCryptoCurrency
+                    )
+                }.andThen(getOnboardingStatusObservable())
+    }
 
     private fun getOnboardingStatusObservable() = buyDataManager.canBuy
             .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -656,12 +676,25 @@ class BalancePresenter @Inject constructor(
         )
     }
 
-    private fun getBalanceString(isBTC: Boolean, btcBalance: Long): String {
+    private fun getBtcBalanceString(isBTC: Boolean, btcBalance: Long): String {
         val strFiat = getFiatCurrency()
         val fiatBalance = exchangeRateFactory.getLastPrice(strFiat) * (btcBalance / 1e8)
 
         return if (isBTC) {
-            "${monetaryUtil.getDisplayAmountWithFormatting(btcBalance)} ${getDisplayUnits()}"
+            "${monetaryUtil.getDisplayAmountWithFormatting(btcBalance)} ${getBtcDisplayUnits()}"
+        } else {
+            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
+        }
+    }
+
+    private fun getEthBalanceString(isEth: Boolean, ethBalance: Long): String {
+        val strFiat = getFiatCurrency()
+        val fiatBalance = exchangeRateFactory.getLastPrice(strFiat) * (ethBalance / 1e18)
+        val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
+                .run { format(ethBalance / 1e18) }
+
+        return if (isEth) {
+            "$number ETH"
         } else {
             "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
         }
@@ -669,7 +702,7 @@ class BalancePresenter @Inject constructor(
 
     private fun getLastPrice(fiat: String) = exchangeRateFactory.getLastPrice(fiat)
 
-    private fun getDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
+    private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
 
     //todo  to currency state
     private fun getBtcUnitType() =
