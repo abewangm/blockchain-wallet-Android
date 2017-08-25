@@ -3,13 +3,21 @@ package piuk.blockchain.android.data.ethereum
 import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.data.EthAccount
 import info.blockchain.wallet.ethereum.data.EthTransaction
+import info.blockchain.wallet.ethereum.EthereumWallet
+import info.blockchain.wallet.ethereum.data.EthAccount
+import info.blockchain.wallet.payload.PayloadManager
+import info.blockchain.wallet.util.MetadataUtil
 import io.reactivex.Observable
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import timber.log.Timber
 
 class EthDataManager(
         private val ethAccountApi: EthAccountApi,
+        private val ethService: EthService,
+        private val ethDataStore: EthDataStore,
+        private val payloadManager: PayloadManager,
         rxBus: RxBus
 ) {
 
@@ -84,4 +92,28 @@ class EthDataManager(
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
+    /**
+     * Returns EthereumWallet stored in metadata. If metadata entry doens't exists it will be inserted.
+     *
+     * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
+     * @return An [Observable] returning EthereumWallet
+     */
+    fun getEthereumWallet(defaultLabel: String) : Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
+        Observable.fromCallable{fetchOrCreateEthereumWallet(defaultLabel)}
+    }
+
+    private fun fetchOrCreateEthereumWallet(defaultLabel: String) : EthereumWallet {
+
+        val masterKey = payloadManager.payload.hdWallets[0].masterKey
+        val metadataNode = MetadataUtil.deriveMetadataNode(masterKey)
+
+        var ethWallet = EthereumWallet.load(metadataNode)
+
+        if (ethWallet == null) {
+            ethWallet =  EthereumWallet(masterKey, defaultLabel)
+            ethWallet.save()
+        }
+
+        return ethWallet
+    }
 }
