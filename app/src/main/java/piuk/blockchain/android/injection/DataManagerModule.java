@@ -131,8 +131,9 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected EthDataManager provideEthDataManager(RxBus rxBus) {
-        return new EthDataManager(new EthAccountApi(), rxBus);
+    protected EthDataManager provideEthDataManager(PayloadManager payloadManager,
+                                                   RxBus rxBus) {
+        return new EthDataManager(payloadManager, new EthAccountApi(), rxBus);
     }
 
     @Provides
