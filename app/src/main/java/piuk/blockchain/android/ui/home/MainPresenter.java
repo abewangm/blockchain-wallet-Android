@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
@@ -26,6 +27,8 @@ import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
+import piuk.blockchain.android.data.ethereum.EthDataManager;
+import piuk.blockchain.android.data.ethereum.EthWallet;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
@@ -35,6 +38,7 @@ import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
@@ -62,6 +66,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private FeeDataManager feeDataManager;
     private EnvironmentSettings environmentSettings;
     private PromptManager promptManager;
+    private EthDataManager ethDataManager;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -79,7 +84,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                   RxBus rxBus,
                   FeeDataManager feeDataManager,
                   EnvironmentSettings environmentSettings,
-                  PromptManager promptManager) {
+                  PromptManager promptManager,
+                  EthDataManager ethDataManager) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -97,6 +103,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.feeDataManager = feeDataManager;
         this.environmentSettings = environmentSettings;
         this.promptManager = promptManager;
+        this.ethDataManager = ethDataManager;
         osUtil = new OSUtil(applicationContext);
     }
 
@@ -123,6 +130,7 @@ public class MainPresenter extends BasePresenter<MainView> {
 
             getCompositeDisposable().add(registerMetadataNodesCompletable()
                     .mergeWith(feesCompletable())
+                    .andThen(ethWalletCompletable())
                     .doAfterTerminate(() -> {
                                 getView().hideProgressDialog();
 
@@ -148,6 +156,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                         //noinspection StatementWithEmptyBody
                         if (throwable instanceof InvalidCredentialsException) {
                             // Double encrypted and not previously set up, ignore error
+                            getView().showSecondPasswordDialog();
                         } else {
                             getView().showMetadataNodeRegistrationFailure();
                         }
@@ -338,6 +347,35 @@ public class MainPresenter extends BasePresenter<MainView> {
         if (prefs.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
                 && prefs.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, false)) {
             prefs.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true);
+        }
+    }
+
+    /**
+     * Creates or retrieves ethereum wallet.
+     * EthWallet is stored as EthWallet singleton object.
+     * @return
+     */
+    private Completable ethWalletCompletable() {
+
+        return ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
+                .doOnNext(ethereumWallet -> {
+                    EthWallet.INSTANCE.setEthWallet(ethereumWallet);
+                })
+                .compose(RxUtil.applySchedulersToObservable())
+                .flatMapCompletable(ethereumWallet -> Completable.complete());
+    }
+
+    void generateMetadataHDNodeAndEthereumWallet(@Nullable String secondPassword) {
+        if (!payloadDataManager.validateSecondPassword(secondPassword)) {
+            getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
+            getView().showSecondPasswordDialog();
+        } else {
+            getCompositeDisposable().add(
+                    payloadDataManager.generateNodes(secondPassword)
+                            .andThen(ethWalletCompletable())
+                            .subscribe(() -> {
+                                //no-op
+                            }, Throwable::printStackTrace));
         }
     }
 }
