@@ -97,7 +97,7 @@ class BalancePresenterTest {
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
-        whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2717.0)
         // Act
         subject.onResume()
         // Assert
@@ -106,7 +106,7 @@ class BalancePresenterTest {
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastPrice("USD")
+        verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(view).onViewTypeChanged(true, 0)
         verify(view).onExchangeRateUpdated(2717.0, true)
@@ -128,7 +128,7 @@ class BalancePresenterTest {
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
-        whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2717.0)
         whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
         // Act
         subject.onAccountChosen(0)
@@ -144,7 +144,7 @@ class BalancePresenterTest {
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil).setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastPrice("USD")
+        verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(buyDataManager).canBuy
         verifyNoMoreInteractions(buyDataManager)
@@ -168,7 +168,7 @@ class BalancePresenterTest {
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
-        whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2717.0)
         whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
         // Act
         subject.onAccountChosen(0)
@@ -184,7 +184,7 @@ class BalancePresenterTest {
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil).setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastPrice("USD")
+        verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(buyDataManager).canBuy
         verifyNoMoreInteractions(buyDataManager)
@@ -256,7 +256,7 @@ class BalancePresenterTest {
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
-        whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2717.0)
         whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
         whenever(contactsDataManager.getContactsWithUnreadPaymentRequests()).thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions()).thenReturn(Observable.empty())
@@ -281,7 +281,7 @@ class BalancePresenterTest {
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil).setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastPrice("USD")
+        verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(buyDataManager).canBuy
         verifyNoMoreInteractions(buyDataManager)
@@ -315,7 +315,7 @@ class BalancePresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)).thenReturn(true)
-        whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(2717.0)
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2717.0)
         whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
         whenever(contactsDataManager.getContactsWithUnreadPaymentRequests())
                 .thenReturn(Observable.empty())
@@ -340,7 +340,7 @@ class BalancePresenterTest {
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil).setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastPrice("USD")
+        verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(contactsDataManager).fetchContacts()
         verify(contactsDataManager).getContactsWithUnreadPaymentRequests()
@@ -366,14 +366,14 @@ class BalancePresenterTest {
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
-        whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(0.0)
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(0.0)
         // Act
         subject.setViewType(true)
         // Assert
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(3)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastPrice("USD")
+        verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(accessState).setIsBtc(true)
         verifyNoMoreInteractions(accessState)
@@ -389,14 +389,14 @@ class BalancePresenterTest {
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
-        whenever(exchangeRateFactory.getLastPrice("USD")).thenReturn(0.0)
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(0.0)
         // Act
         subject.invertViewType()
         // Assert
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastPrice("USD")
+        verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(accessState).isBtc
         verify(accessState).setIsBtc(false)

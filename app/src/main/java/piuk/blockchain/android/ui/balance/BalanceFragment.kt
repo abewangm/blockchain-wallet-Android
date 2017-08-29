@@ -210,11 +210,17 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         balanceAdapter?.onContactsMapChanged(transactionDisplayMap)
     }
 
-    override fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean) {
+    // TODO: Pass Eth exchange rate
+    override fun onExchangeRateUpdated(
+            btcExchangeRate: Double,
+            ethExchangeRate: Double,
+            isBtc: Boolean
+    ) {
         if (balanceAdapter == null) {
-            setUpRecyclerView(exchangeRate, isBtc)
+            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc)
         } else {
-            balanceAdapter?.onPriceUpdated(exchangeRate)
+            // TODO: Pass Eth exchange rate
+            balanceAdapter?.onPriceUpdated(btcExchangeRate, 0.0)
         }
     }
 
@@ -487,10 +493,11 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.gone()
     }
 
-    private fun setUpRecyclerView(exchangeRate: Double, isBtc: Boolean) {
+    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean) {
         balanceAdapter = BalanceAdapter(
                 activity,
-                exchangeRate,
+                btcExchangeRate,
+                ethExchangeRate,
                 isBtc,
                 this
         ).apply { setHasStableIds(true) }

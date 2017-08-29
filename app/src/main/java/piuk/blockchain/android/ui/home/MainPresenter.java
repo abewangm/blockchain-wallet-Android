@@ -168,7 +168,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         return feeDataManager.getFeeOptions()
                 .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
                 .compose(RxUtil.applySchedulersToObservable())
-                .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTicker());
+                .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTickers());
     }
 
     void checkForMessages() {
@@ -222,7 +222,7 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     void updateTicker() {
         getCompositeDisposable().add(
-                exchangeRateFactory.updateTicker()
+                exchangeRateFactory.updateTickers()
                         .subscribe(
                                 () -> getView().updateCurrentPrice(getFormattedPriceString()),
                                 Throwable::printStackTrace));
@@ -230,7 +230,7 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     private String getFormattedPriceString() {
         String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
-        double lastPrice = exchangeRateFactory.getLastPrice(fiat);
+        double lastPrice = exchangeRateFactory.getLastBtcPrice(fiat);
         String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
         DecimalFormat format = new DecimalFormat();
         format.setMinimumFractionDigits(2);

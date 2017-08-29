@@ -551,7 +551,7 @@ class ContactDetailPresenterTest {
             address = ""
         }
         contact.addFacilitatedTransaction(facilitatedTransaction)
-        whenever(mockExchangeRateFactory.getLastPrice("USD")).thenReturn(2770.10)
+        whenever(mockExchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2770.10)
         whenever(mockPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         // Act

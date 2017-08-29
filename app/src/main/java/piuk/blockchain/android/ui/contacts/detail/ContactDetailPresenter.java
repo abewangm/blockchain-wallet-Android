@@ -377,7 +377,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
 
     private String getBalanceString(long btcBalance) {
         String strFiat = getFiatCurrency();
-        double fiatBalance = exchangeRateFactory.getLastPrice(strFiat) * (btcBalance / 1e8);
+        double fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8);
         return monetaryUtil.getFiatFormat(strFiat).format(fiatBalance) + strFiat;
     }
 

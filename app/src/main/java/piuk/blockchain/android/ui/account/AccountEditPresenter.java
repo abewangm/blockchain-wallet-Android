@@ -303,7 +303,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
 
         String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         String btcUnit = monetaryUtil.getBtcUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-        double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
+        double exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit);
 
         details.btcAmount = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.longValue());
         details.btcFee = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntFee.longValue());

@@ -178,7 +178,7 @@ public class SendPresenter extends BasePresenter<SendView> {
     void updateUI() {
         int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
+        double exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit);
 
         monetaryUtil = new MonetaryUtil(btcUnit);
         currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory);
@@ -188,7 +188,7 @@ public class SendPresenter extends BasePresenter<SendView> {
         sendModel.btcUniti = btcUnit;
         sendModel.isBTC = accessState.isBtc();
         sendModel.exchangeRate = exchangeRate;
-        sendModel.btcExchange = exchangeRateFactory.getLastPrice(sendModel.fiatUnit);
+        sendModel.btcExchange = exchangeRateFactory.getLastBtcPrice(sendModel.fiatUnit);
 
         getView().updateBtcUnit(sendModel.btcUnit);
         getView().updateFiatUnit(sendModel.fiatUnit);
@@ -685,7 +685,7 @@ public class SendPresenter extends BasePresenter<SendView> {
      */
     boolean isLargeTransaction() {
         String valueString = monetaryUtil.getFiatFormat("USD")
-                .format(exchangeRateFactory.getLastPrice("USD") * sendModel.absoluteSuggestedFee.doubleValue() / 1e8);
+                .format(exchangeRateFactory.getLastBtcPrice("USD") * sendModel.absoluteSuggestedFee.doubleValue() / 1e8);
         double usdValue = Double.parseDouble(stripSeparator(valueString));
         int txSize = sendDataManager.estimateSize(sendModel.pendingTransaction.unspentOutputBundle.getSpendableOutputs().size(), 2);//assume change
         double relativeFee = sendModel.absoluteSuggestedFee.doubleValue() / sendModel.pendingTransaction.bigIntAmount.doubleValue() * 100.0;
