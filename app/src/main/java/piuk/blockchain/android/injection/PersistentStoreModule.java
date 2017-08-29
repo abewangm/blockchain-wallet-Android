@@ -34,7 +34,7 @@ class PersistentStoreModule {
 
     @Provides
     @Singleton
-    ContactsMapStore provideContactsMapStore(){
+    ContactsMapStore provideContactsMapStore() {
         return new ContactsMapStore();
     }
 

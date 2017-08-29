@@ -187,7 +187,7 @@ public class SendPresenter extends BasePresenter<SendView> {
         monetaryUtil = new MonetaryUtil(btcUnit);
         currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory);
 
-        sendModel.btcUnit = monetaryUtil.getBTCUnit(btcUnit);
+        sendModel.btcUnit = monetaryUtil.getBtcUnit(btcUnit);
         sendModel.fiatUnit = fiatUnit;
         sendModel.btcUniti = btcUnit;
         sendModel.isBTC = currencyState.isDisplayingCryptoCurrency();
@@ -509,7 +509,7 @@ public class SendPresenter extends BasePresenter<SendView> {
             String fiatBalanceFormatted = monetaryUtil.getFiatFormat(sendModel.fiatUnit).format(fiatBalance);
             getView().setMaxAvailable(stringUtils.getString(R.string.max_available) + " " + fiatBalanceFormatted + " " + sendModel.fiatUnit);
         } else {
-            String btcAmountFormatted = monetaryUtil.getBTCFormat().format(monetaryUtil.getDenominatedAmount(Math.max(balanceAfterFee, 0.0) / 1e8));
+            String btcAmountFormatted = monetaryUtil.getBtcFormat().format(monetaryUtil.getDenominatedAmount(Math.max(balanceAfterFee, 0.0) / 1e8));
             getView().setMaxAvailable(stringUtils.getString(R.string.max_available) + " " + btcAmountFormatted + " " + sendModel.btcUnit);
         }
 
@@ -941,8 +941,8 @@ public class SendPresenter extends BasePresenter<SendView> {
         tx.setInputsMap(inputs);
         tx.setOutputsMap(outputs);
         tx.setPending(true);
-
-        transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
+// STOPSHIP: 24/08/2017
+//        transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
     }
 
     void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
@@ -958,7 +958,7 @@ public class SendPresenter extends BasePresenter<SendView> {
                                     // Show successfully broadcast
                                     .doOnComplete(() -> getView().showBroadcastSuccessDialog())
                                     // Log event
-                                    .doOnComplete(() -> Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.PAYMENT_BROADCASTED)))
+                                    .doOnComplete(this::logContactsPayment)
                                     // Show retry dialog if broadcast failed
                                     .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
                         })
@@ -970,6 +970,12 @@ public class SendPresenter extends BasePresenter<SendView> {
                                 }, throwable -> {
                                     // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
                                 }));
+    }
+
+    private void logContactsPayment() {
+        Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.PAYMENT_BROADCASTED));
+        metricInputFlag = EventService.EVENT_TX_INPUT_FROM_CONTACTS;
+        logAddressInputMetric();
     }
 
     private void logAddressInputMetric() {

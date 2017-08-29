@@ -26,13 +26,16 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -77,7 +80,6 @@ import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
-import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.AppUtil;
@@ -393,9 +395,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             case R.id.nav_contacts:
                 startActivityForResult(new Intent(this, ContactsListActivity.class), CONTACTS_EDIT);
                 break;
-            case R.id.nav_upgrade:
-                startActivity(new Intent(this, UpgradeWalletActivity.class));
-                break;
             case R.id.nav_map:
                 startMerchantActivity();
                 break;
@@ -431,18 +430,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void resetNavigationDrawer() {
         // Called onResume from BalanceFragment
         toolbar.setTitle("");
-        MenuItem backUpMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_backup);
-        MenuItem upgradeMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_upgrade);
-
-        if (getPresenter().getPayloadManager().isNotUpgraded()) {
-            //Legacy
-            upgradeMenuItem.setVisible(true);
-            backUpMenuItem.setVisible(false);
-        } else {
-            //HD
-            upgradeMenuItem.setVisible(false);
-            backUpMenuItem.setVisible(true);
-        }
 
         binding.navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
@@ -857,5 +844,30 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     protected MainView getView() {
         return this;
+    }
+
+    @Override
+    public void showSecondPasswordDialog() {
+        AppCompatEditText editText = new AppCompatEditText(this);
+        editText.setHint(R.string.password);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        FrameLayout frameLayout = ViewUtils.getAlertDialogPaddedView(this, editText);
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.eth_now_supporting)
+                .setMessage(R.string.eth_second_password_prompt)
+                .setView(frameLayout)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    ViewUtils.hideKeyboard(this);
+                    getPresenter().generateMetadataHDNodeAndEthereumWallet(editText.getText().toString());
+                })
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+        ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 }
