@@ -52,6 +52,7 @@ import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -104,6 +105,7 @@ public class SendPresenter extends BasePresenter<SendView> {
     private EnvironmentSettings environmentSettings;
     private FeeDataManager feeDataManager;
     private AccessState accessState;
+    private CurrencyState currencyState;
 
     @Inject
     SendPresenter(PrefsUtil prefsUtil,
@@ -120,7 +122,8 @@ public class SendPresenter extends BasePresenter<SendView> {
                   TransactionListDataManager transactionListDataManager,
                   EnvironmentSettings environmentSettings,
                   FeeDataManager feeDataManager,
-                  AccessState accessState) {
+                  AccessState accessState,
+                  CurrencyState currencyState) {
 
         this.prefsUtil = prefsUtil;
         this.walletAccountHelper = walletAccountHelper;
@@ -136,6 +139,7 @@ public class SendPresenter extends BasePresenter<SendView> {
         this.environmentSettings = environmentSettings;
         this.feeDataManager = feeDataManager;
         this.accessState = accessState;
+        this.currencyState = currencyState;
         locale = Locale.getDefault();
 
         sendModel = new SendModel();
@@ -186,7 +190,7 @@ public class SendPresenter extends BasePresenter<SendView> {
         sendModel.btcUnit = monetaryUtil.getBtcUnit(btcUnit);
         sendModel.fiatUnit = fiatUnit;
         sendModel.btcUniti = btcUnit;
-        sendModel.isBTC = accessState.isBtc();
+        sendModel.isBTC = currencyState.isDisplayingCryptoCurrency();
         sendModel.exchangeRate = exchangeRate;
         sendModel.btcExchange = exchangeRateFactory.getLastBtcPrice(sendModel.fiatUnit);
 

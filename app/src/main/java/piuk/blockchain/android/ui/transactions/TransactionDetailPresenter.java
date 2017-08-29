@@ -248,7 +248,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
     @VisibleForTesting
     Observable<String> getTransactionValueString(String currency, Displayable transaction) {
         return mExchangeRateFactory.getBtcHistoricPrice(
-                transaction.getTotal(),
+                transaction.getTotal().longValue(),
                 currency,
                 transaction.getTimeStamp() * 1000)
                 .map(aDouble -> {

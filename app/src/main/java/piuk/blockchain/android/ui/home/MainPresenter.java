@@ -190,7 +190,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     void unPair() {
         getView().clearAllDynamicShortcuts();
         payloadManager.wipe();
-        prefs.logOut();
+        accessState.logout(applicationContext);
         accessState.unpairWallet();
         appUtil.restartApp();
         accessState.setPIN(null);

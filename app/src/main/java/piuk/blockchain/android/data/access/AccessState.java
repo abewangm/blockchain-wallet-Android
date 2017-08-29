@@ -7,23 +7,15 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
-import info.blockchain.wallet.api.data.Settings;
-import info.blockchain.wallet.api.data.WalletOptions;
-import info.blockchain.wallet.metadata.Metadata;
-import io.reactivex.subjects.AsyncSubject;
-import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.ui.auth.LogoutActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.util.PrefsUtil;
 
-
 public class AccessState {
 
     public static final String LOGOUT_ACTION = "info.blockchain.wallet.LOGOUT";
 
-    private static final int SHOW_BTC = 1;
-    private static final int SHOW_FIAT = 2;
     private static final long LOGOUT_TIMEOUT_MILLIS = 1000L * 30L;
 
     private static AccessState instance;
@@ -86,21 +78,16 @@ public class AccessState {
         context.startActivity(intent);
     }
 
-    public boolean isBtc() {
-        final int balanceDisplayState = prefs.getValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, SHOW_BTC);
-        return balanceDisplayState != SHOW_FIAT;
-    }
-
-    public void setIsBtc(boolean isBtc) {
-        prefs.setValue(PrefsUtil.KEY_BALANCE_DISPLAY_STATE, isBtc ? SHOW_BTC : SHOW_FIAT);
-    }
-
     public boolean isLoggedIn() {
         return isLoggedIn;
     }
 
+    public void logIn() {
+        prefs.setValue(PrefsUtil.LOGGED_OUT, false);
+    }
+
     public void setIsLoggedIn(boolean loggedIn) {
-        prefs.logIn();
+        logIn();
         isLoggedIn = loggedIn;
         if (isLoggedIn) {
             rxBus.emitEvent(AuthEvent.class, AuthEvent.LOGIN);

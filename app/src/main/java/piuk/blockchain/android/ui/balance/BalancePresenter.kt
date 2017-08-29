@@ -15,6 +15,7 @@ import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.exchange.BuyDataManager
@@ -47,9 +48,9 @@ class BalancePresenter @Inject constructor(
         private val buyDataManager: BuyDataManager,
         private val stringUtils: StringUtils,
         private val prefsUtil: PrefsUtil,
-        private val accessState: AccessState,
         private val rxBus: RxBus,
-        private val appUtil: AppUtil
+        private val appUtil: AppUtil,
+        private val currencyState: CurrencyState
 ) : BasePresenter<BalanceView>() {
 
     @VisibleForTesting var contactsEventObservable: Observable<ContactsEvent>? = null
@@ -96,8 +97,8 @@ class BalancePresenter @Inject constructor(
         val btcUnitType = getBtcUnitType()
         monetaryUtil.updateUnit(btcUnitType)
         // TODO: Get ETH exchange rate
-        view.onExchangeRateUpdated(getLastPrice(getFiatCurrency()), 0.0, accessState.isBtc)
-        view.onViewTypeChanged(accessState.isBtc, btcUnitType)
+        view.onExchangeRateUpdated(getLastPrice(getFiatCurrency()), 0.0, currencyState.isDisplayingCryptoCurrency)
+        view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
     }
 
     internal fun onAccountChosen(position: Int) {
@@ -129,7 +130,7 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun setViewType(isBtc: Boolean) {
-        accessState.setIsBtc(isBtc)
+        currencyState.isDisplayingCryptoCurrency = isBtc
         view.onViewTypeChanged(isBtc, getBtcUnitType())
         if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
             view.onTotalBalanceUpdated(
@@ -140,7 +141,7 @@ class BalancePresenter @Inject constructor(
         }
     }
 
-    internal fun invertViewType() = setViewType(!accessState.isBtc)
+    internal fun invertViewType() = setViewType(!currencyState.isDisplayingCryptoCurrency)
 
     internal fun areLauncherShortcutsEnabled() =
             prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
@@ -351,7 +352,7 @@ class BalancePresenter @Inject constructor(
                     val bigIntBalance = payloadDataManager.getAddressBalance(it.xpub)
                     ItemAccount().apply {
                         label = it.label
-                        displayBalance = getBtcBalanceString(accessState.isBtc, bigIntBalance.toLong())
+                        displayBalance = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
                         absoluteBalance = bigIntBalance.toLong()
                         address = it.xpub
                         type = ItemAccount.TYPE.SINGLE_ACCOUNT
@@ -364,7 +365,7 @@ class BalancePresenter @Inject constructor(
 
             mutableList.add(ItemAccount().apply {
                 label = stringUtils.getString(R.string.all_accounts)
-                displayBalance = getBtcBalanceString(accessState.isBtc, bigIntBalance.toLong())
+                displayBalance = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
                 absoluteBalance = bigIntBalance.toLong()
                 type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
             })
@@ -377,7 +378,7 @@ class BalancePresenter @Inject constructor(
             val bigIntBalance = payloadDataManager.importedAddressesBalance
 
             mutableList.add(ItemAccount().apply {
-                displayBalance = getBtcBalanceString(accessState.isBtc, bigIntBalance.toLong())
+                displayBalance = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, bigIntBalance.toLong())
                 label = stringUtils.getString(R.string.imported_addresses)
                 absoluteBalance = bigIntBalance.toLong()
                 type = ItemAccount.TYPE.ALL_LEGACY
@@ -440,7 +441,7 @@ class BalancePresenter @Inject constructor(
         return if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
             ethDataManager.getEthAddress()?.let {
                 val ethBalance = it.balance.toLong()
-                val ethString = getEthBalanceString(accessState.isBtc, ethBalance)
+                val ethString = getEthBalanceString(currencyState.isDisplayingCryptoCurrency, ethBalance)
                 view.onTotalBalanceUpdated(ethString)
             }
 
@@ -449,7 +450,7 @@ class BalancePresenter @Inject constructor(
             payloadDataManager.updateAllBalances()
                     .doOnComplete {
                         val btcBalance = transactionListDataManager.getBtcBalance(itemAccount)
-                        val balanceTotal = getBtcBalanceString(accessState.isBtc, btcBalance)
+                        val balanceTotal = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, btcBalance)
                         view.onTotalBalanceUpdated(balanceTotal)
                     }.toObservable<Nothing>()
         }
@@ -469,13 +470,13 @@ class BalancePresenter @Inject constructor(
                             getLastPrice(getFiatCurrency()),
                             getFiatCurrency(),
                             monetaryUtil,
-                            accessState.isBtc
+                            currencyState.isDisplayingCryptoCurrency
                     )
                     view.onExchangeRateUpdated(
                             exchangeRateFactory.getLastBtcPrice(getFiatCurrency()),
                             // STOPSHIP: This needs updating with the current price
                             0.0,
-                            accessState.isBtc
+                            currencyState.isDisplayingCryptoCurrency
                     )
                 }.andThen(getOnboardingStatusObservable())
     }
@@ -700,9 +701,11 @@ class BalancePresenter @Inject constructor(
 
     private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
 
+    //todo  to currency state
     private fun getBtcUnitType() =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
 
+    //todo  to currency state
     private fun getFiatCurrency() =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
