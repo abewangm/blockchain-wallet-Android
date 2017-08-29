@@ -61,7 +61,7 @@ public class AppUtil {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("verified", true);
         context.startActivity(intent);
-        prefs.logIn();
+        AccessState.getInstance().logIn();
     }
 
     public String getReceiveQRFilename() {

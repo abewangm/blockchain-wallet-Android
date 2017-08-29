@@ -32,7 +32,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.ViewUtils;
-import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.base.UiState.CONTENT;
 import static piuk.blockchain.android.ui.base.UiState.EMPTY;

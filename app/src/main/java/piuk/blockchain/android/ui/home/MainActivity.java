@@ -44,6 +44,7 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import org.jetbrains.annotations.NotNull;
 
+import piuk.blockchain.android.data.access.AccessState;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -54,7 +55,6 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxUtil;
