@@ -33,6 +33,7 @@ import java.text.DecimalFormat
 class DisplayableDelegate<in T>(
         activity: Activity,
         private var btcExchangeRate: Double,
+        private var ethExchangeRate: Double,
         private var showCrypto: Boolean,
         private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
@@ -63,8 +64,10 @@ class DisplayableDelegate<in T>(
             CryptoCurrency.BTC -> tx.total / 1e8
             CryptoCurrency.ETH -> tx.total / 1e18
         }
-        // TODO: This will need changing based on the currency
-        val fiatBalance = btcExchangeRate * balance
+        val fiatBalance = when (tx.cryptoCurrency) {
+            CryptoCurrency.BTC -> btcExchangeRate * balance
+            CryptoCurrency.ETH -> ethExchangeRate * balance
+        }
 
         viewHolder.result.setTextColor(Color.WHITE)
         viewHolder.timeSince.text = dateUtil.formatted(tx.timeStamp)
@@ -116,8 +119,9 @@ class DisplayableDelegate<in T>(
         monetaryUtil.updateUnit(btcFormat)
     }
 
-    fun onPriceUpdated(btcExchangeRate: Double) {
+    fun onPriceUpdated(btcExchangeRate: Double, ethExchangeRate: Double) {
         this.btcExchangeRate = btcExchangeRate
+        this.ethExchangeRate = ethExchangeRate
     }
 
     fun onContactsMapUpdated(
@@ -210,7 +214,7 @@ class DisplayableDelegate<in T>(
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         } else {
-            // TODO: ETH Fiat value  
+            // TODO: ETH Fiat value
             spannable = Spannable.Factory.getInstance().newSpannable(
                     "${monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount))} $fiatString")
             spannable.setSpan(

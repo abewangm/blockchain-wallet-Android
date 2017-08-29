@@ -246,7 +246,7 @@ public class AccountEditPresenterTest {
         when(spendableUnspentOutputs.getConsumedAmount()).thenReturn(BigInteger.TEN);
         when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
                 .thenReturn(spendableUnspentOutputs);
-        when(exchangeRateFactory.getLastPrice(anyString())).thenReturn(100.0d);
+        when(exchangeRateFactory.getLastBtcPrice(anyString())).thenReturn(100.0d);
         when(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD");
         when(sendDataManager.estimateSize(anyInt(), anyInt())).thenReturn(1337);

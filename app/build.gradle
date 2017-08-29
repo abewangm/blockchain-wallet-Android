@@ -151,7 +151,7 @@ afterEvaluate {
 
 dependencies {
     compile files('libs/MyWalletHD.jar')
-    compile files('libs/api-client-0.1.14-SNAPSHOT.jar')
+    compile files('libs/api-client-0.1.15-SNAPSHOT.jar')
     // Kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     // Support Libs

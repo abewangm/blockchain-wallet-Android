@@ -19,7 +19,7 @@ interface BalanceView : View {
 
     fun onTotalBalanceUpdated(balance: String)
 
-    fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean)
+    fun onExchangeRateUpdated(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean)
 
     fun showProgressDialog()
 
