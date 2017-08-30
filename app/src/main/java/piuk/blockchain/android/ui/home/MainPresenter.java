@@ -28,7 +28,6 @@ import piuk.blockchain.android.data.contacts.models.ContactsEvent;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
-import piuk.blockchain.android.data.ethereum.EthWallet;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
@@ -195,6 +194,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         appUtil.restartApp();
         accessState.setPIN(null);
         buyDataManager.wipe();
+        ethDataManager.clearEthAccountDetails();
     }
 
     PayloadManager getPayloadManager() {
@@ -352,15 +352,9 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     /**
      * Creates or retrieves ethereum wallet.
-     * EthWallet is stored as EthWallet singleton object.
-     * @return
      */
     private Completable ethWalletCompletable() {
-
         return ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
-                .doOnNext(ethereumWallet -> {
-                    EthWallet.INSTANCE.setEthWallet(ethereumWallet);
-                })
                 .compose(RxUtil.applySchedulersToObservable())
                 .flatMapCompletable(ethereumWallet -> Completable.complete());
     }
