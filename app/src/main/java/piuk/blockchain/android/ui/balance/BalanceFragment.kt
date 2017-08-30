@@ -149,7 +149,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun onAccountsUpdated(
             accounts: List<ItemAccount>,
-            lastPrice: Double,
+            lastBtcPrice: Double,
             fiat: String,
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean
@@ -162,7 +162,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                     isBtc,
                     monetaryUtil,
                     fiat,
-                    lastPrice
+                    lastBtcPrice
             ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
 
             accounts_spinner.adapter = accountsAdapter
@@ -210,7 +210,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         balanceAdapter?.onContactsMapChanged(transactionDisplayMap)
     }
 
-    // TODO: Pass Eth exchange rate
     override fun onExchangeRateUpdated(
             btcExchangeRate: Double,
             ethExchangeRate: Double,
@@ -219,8 +218,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         if (balanceAdapter == null) {
             setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc)
         } else {
-            // TODO: Pass Eth exchange rate
-            balanceAdapter?.onPriceUpdated(btcExchangeRate, 0.0)
+            balanceAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
         }
     }
 
@@ -443,6 +441,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
+    @Suppress("CascadeIf")
     private fun initOnboardingPager() {
         if (onboardingPagerAdapter == null) {
             onboardingPagerAdapter = OnboardingPagerAdapter(context)
