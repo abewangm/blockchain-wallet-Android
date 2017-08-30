@@ -29,7 +29,7 @@ interface BalanceView : View {
 
     fun onAccountsUpdated(
             accounts: List<ItemAccount>,
-            lastPrice: Double,
+            lastBtcPrice: Double,
             fiat: String,
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean

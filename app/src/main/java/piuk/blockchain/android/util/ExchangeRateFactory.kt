@@ -25,6 +25,7 @@ import javax.inject.Inject
  * object instead. However, we need this class open for testing, and we (for now) need to access
  * it outside of dependency injection.
  */
+@Suppress("LeakingThis") // This will be resolved in the future
 @Mockable
 class ExchangeRateFactory private constructor() {
 
