@@ -1,11 +1,11 @@
 package piuk.blockchain.android.data.ethereum
 
+import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.EthereumWallet
-import info.blockchain.wallet.ethereum.data.EthAccount
+import info.blockchain.wallet.ethereum.data.EthAddressResponse
+import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.util.MetadataUtil
-import info.blockchain.wallet.ethereum.EthAccountApi
-import info.blockchain.wallet.ethereum.data.EthTransaction
 import io.reactivex.Observable
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
@@ -19,34 +19,34 @@ class EthDataManager(
 
     private val rxPinning = RxPinning(rxBus)
     private var address: String? = null
-    private var ethAccount: EthAccount? = null
+    private var ethAccount: EthAddressResponse? = null
 
     /**
      * Stores the ETH address associated with the user's wallet for the duration of the session.
      *
      * @param address The ETH address belonging to the logged in user
      */
-    internal fun storeEthAccount(address: String) {
+    internal fun storeEthAccountAddress(address: String) {
         this.address = address
     }
 
     /**
-     * Clears the currently stored ETH address and [EthAccount] from memory.
+     * Clears the currently stored ETH address and [EthAddressResponse] from memory.
      */
-    internal fun clearEthAccount() {
+    internal fun clearEthAccountDetails() {
         address = null
         ethAccount = null
     }
 
     /**
-     * Returns an [EthAccount] object for a given ETH address as an [Observable]. An [EthAccount]
-     * contains a list of transactions associated with the account, as well as a final balance.
-     * Calling this function also caches the [EthAccount].
+     * Returns an [EthAddressResponse] object for a given ETH address as an [Observable]. An
+     * [EthAddressResponse] contains a list of transactions associated with the account, as well
+     * as a final balance. Calling this function also caches the [EthAddressResponse].
      *
-     * @return An [Observable] wrapping an [EthAccount]
+     * @return An [Observable] wrapping an [EthAddressResponse]
      */
-    fun fetchEthAccount(): Observable<EthAccount> = rxPinning.call<EthAccount> {
-        ethAccountApi.getEthAccount(address)
+    fun fetchEthAddress(): Observable<EthAddressResponse> = rxPinning.call<EthAddressResponse> {
+        ethAccountApi.getEthAddress(address)
                 .doOnNext { account -> ethAccount = account }
                 .compose(RxUtil.applySchedulersToObservable())
     }
@@ -54,9 +54,9 @@ class EthDataManager(
     /**
      * Returns the user's ETH account object if previously fetched.
      *
-     * @return A nullable [EthAccount] object
+     * @return A nullable [EthAddressResponse] object
      */
-    fun getEthAccount() = ethAccount
+    fun getEthAddress() = ethAccount
 
     /**
      * Returns a steam of [EthTransaction] objects associated with a user's ETH address specifically
@@ -94,19 +94,19 @@ class EthDataManager(
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Observable] returning EthereumWallet
      */
-    fun getEthereumWallet(defaultLabel: String) : Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
-        Observable.fromCallable{fetchOrCreateEthereumWallet(defaultLabel)}
+    fun getEthereumWallet(defaultLabel: String): Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
+        Observable.fromCallable { fetchOrCreateEthereumWallet(defaultLabel) }
+                .compose(RxUtil.applySchedulersToObservable())
     }
 
-    private fun fetchOrCreateEthereumWallet(defaultLabel: String) : EthereumWallet {
-
+    private fun fetchOrCreateEthereumWallet(defaultLabel: String): EthereumWallet {
         val masterKey = payloadManager.payload.hdWallets[0].masterKey
         val metadataNode = MetadataUtil.deriveMetadataNode(masterKey)
 
         var ethWallet = EthereumWallet.load(metadataNode)
 
         if (ethWallet == null) {
-            ethWallet =  EthereumWallet(masterKey, defaultLabel)
+            ethWallet = EthereumWallet(masterKey, defaultLabel)
             ethWallet.save()
         }
 

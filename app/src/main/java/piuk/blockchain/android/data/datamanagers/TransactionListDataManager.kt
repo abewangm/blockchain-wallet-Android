@@ -30,7 +30,7 @@ class TransactionListDataManager(private val payloadManager: PayloadManager,
                             .map { BtcDisplayable(it) }
                 ItemAccount.TYPE.ETHEREUM ->
                     ethDataManager.getEthTransactions().blockingIterable()
-                            .map { EthDisplayable(ethDataManager.getEthAccount()!!, it) }
+                            .map { EthDisplayable(ethDataManager.getEthAddress()!!, it) }
                 else ->
                     if (FormatsUtil.isValidXpub(itemAccount.address)) {
                         payloadManager.getAccountTransactions(itemAccount.address, limit, offset)

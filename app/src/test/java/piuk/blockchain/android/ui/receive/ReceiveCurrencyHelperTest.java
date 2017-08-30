@@ -60,7 +60,7 @@ public class ReceiveCurrencyHelperTest {
     @Test
     public void getLastPrice() throws Exception {
         // Arrange
-        when(mExchangeRateFactory.getLastPrice(anyString())).thenReturn(1000D);
+        when(mExchangeRateFactory.getLastBtcPrice(anyString())).thenReturn(1000D);
         when(mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn("GBP");
         // Act
         double value = mSubject.getLastPrice();

@@ -205,7 +205,7 @@ public class TransactionDetailPresenterTest extends RxTest {
         when(payloadDataManager.addressToLabel("addr1")).thenReturn("account1");
         when(payloadDataManager.addressToLabel("addr2")).thenReturn("account2");
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         HashMap<String, ContactTransactionDisplayModel> notesMap = new HashMap<>();
@@ -260,7 +260,7 @@ public class TransactionDetailPresenterTest extends RxTest {
         when(payloadDataManager.addressToLabel("addr1")).thenReturn("account1");
         when(payloadDataManager.addressToLabel("addr2")).thenReturn("account2");
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         HashMap contactsMap = new HashMap<String, ContactTransactionDisplayModel>();
@@ -296,7 +296,7 @@ public class TransactionDetailPresenterTest extends RxTest {
     public void getTransactionValueStringUsd() {
         // Arrange
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
         when(stringUtils.getString(anyInt())).thenReturn("Value when sent: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
@@ -313,7 +313,7 @@ public class TransactionDetailPresenterTest extends RxTest {
     public void getTransactionValueStringReceived() {
         // Arrange
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong()))
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong()))
                 .thenReturn(Observable.just(price));
         when(stringUtils.getString(anyInt())).thenReturn("Value when received: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
@@ -330,7 +330,7 @@ public class TransactionDetailPresenterTest extends RxTest {
     public void getTransactionValueStringTransferred() {
         // Arrange
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong()))
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong()))
                 .thenReturn(Observable.just(price));
         when(stringUtils.getString(anyInt())).thenReturn("Value when transferred: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");

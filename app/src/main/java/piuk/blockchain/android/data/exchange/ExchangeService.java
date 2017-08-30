@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.util.encoders.Hex;
@@ -141,9 +140,9 @@ public class ExchangeService {
     }
 
     private Observable<Metadata> getMetadata(DeterministicKey metadataHDNode) {
-        return Observable.fromCallable(() -> {
-            return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build();
-        }).compose(RxUtil.applySchedulersToObservable());
+        return Observable.fromCallable(() ->
+                new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build()
+        ).compose(RxUtil.applySchedulersToObservable());
     }
 
     public Observable<Boolean> hasCoinifyAccount() {
