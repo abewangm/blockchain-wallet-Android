@@ -90,20 +90,23 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
 
-public class SendFragment extends BaseFragment<SendView, SendPresenter> implements SendView {
+public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresenterLegacy> implements SendViewLegacy {
 
+    //done
     public static final String ARGUMENT_SCAN_DATA = "scan_data";
     public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String ARGUMENT_CONTACT_ID = "contact_id";
     public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
     public static final String ARGUMENT_FCTX_ID = "fctx_id";
     public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
+    //\done
 
     private static final int SCAN_URI = 2010;
     private static final int SCAN_PRIVX = 2011;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
-    @Inject SendPresenter sendPresenter;
+    @Inject
+    SendPresenterLegacy sendPresenter;
 
     @Thunk FragmentSendBinding binding;
     @Thunk AlertDialog transactionSuccessDialog;
@@ -135,14 +138,16 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         }
     };
 
+    //done
     {
-        Injector.getInstance().getPresenterComponent().inject(this);
+//        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
-    public static SendFragment newInstance(@Nullable String scanData,
-                                           String scanRoute,
-                                           int selectedAccountPosition) {
-        SendFragment fragment = new SendFragment();
+    //done
+    public static SendFragmentLegacy newInstance(@Nullable String scanData,
+                                                 String scanRoute,
+                                                 int selectedAccountPosition) {
+        SendFragmentLegacy fragment = new SendFragmentLegacy();
         Bundle args = new Bundle();
         args.putString(ARGUMENT_SCAN_DATA, scanData);
         args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
@@ -151,11 +156,12 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         return fragment;
     }
 
-    public static SendFragment newInstance(String uri,
-                                           String contactId,
-                                           String contactMdid,
-                                           String fctxId) {
-        SendFragment fragment = new SendFragment();
+    //done
+    public static SendFragmentLegacy newInstance(String uri,
+                                                 String contactId,
+                                                 String contactMdid,
+                                                 String fctxId) {
+        SendFragmentLegacy fragment = new SendFragmentLegacy();
         Bundle args = new Bundle();
         args.putString(ARGUMENT_SCAN_DATA, uri);
         args.putString(ARGUMENT_CONTACT_ID, contactId);
@@ -165,6 +171,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         return fragment;
     }
 
+    //done
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -175,6 +182,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         }
     }
 
+    //done
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
@@ -219,6 +227,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
         }
     }
 
+    //Done
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (menu != null) menu.clear();
@@ -376,9 +385,9 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     private void setupViews() {
-        setupDestinationView();
-        setupSendFromView();
-        setupReceiveToView();
+        setupDestinationView();//done
+        setupSendFromView();//done
+        setupReceiveToView();//done
 
         setupBtcTextField();
         setupFiatTextField();
@@ -531,6 +540,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
                 getString(R.string.from));
     }
 
+    // done
     private void setupReceiveToView() {
         binding.toContainer.toArrowImage.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
@@ -1075,12 +1085,12 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter> implemen
     }
 
     @Override
-    protected SendPresenter createPresenter() {
+    protected SendPresenterLegacy createPresenter() {
         return sendPresenter;
     }
 
     @Override
-    protected SendView getMvpView() {
+    protected SendViewLegacy getMvpView() {
         return this;
     }
 

@@ -4,6 +4,7 @@ import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -17,7 +18,8 @@ class WalletAccountHelper(
         private val payloadManager: PayloadManager,
         private val stringUtils: StringUtils,
         prefsUtil: PrefsUtil,
-        exchangeRateFactory: ExchangeRateFactory
+        exchangeRateFactory: ExchangeRateFactory,
+        private val currencyState: CurrencyState
 ) {
     private val btcUnitType: Int by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC) }
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(btcUnitType) }
@@ -34,11 +36,11 @@ class WalletAccountHelper(
      *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getAccountItems(isBtc: Boolean) = mutableListOf<ItemAccount>().apply {
+    fun getAccountItems() = mutableListOf<ItemAccount>().apply {
         // V3
-        addAll(getHdAccounts(isBtc))
+        addAll(getHdAccounts())
         // V2l
-        addAll(getLegacyAddresses(isBtc))
+        addAll(getLegacyAddresses())
     }.toList()
 
     /**
@@ -49,13 +51,13 @@ class WalletAccountHelper(
      *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getHdAccounts(isBtc: Boolean) = payloadManager.payload.hdWallets[0].accounts
+    fun getHdAccounts() = payloadManager.payload.hdWallets[0].accounts
             // Skip archived account
             .filterNot { it.isArchived }
             .map {
                 ItemAccount(
                         it.label,
-                        getAccountBalance(it, isBtc, btcExchangeRate, fiatUnit, btcUnit),
+                        getAccountBalance(it, btcExchangeRate, fiatUnit, btcUnit),
                         null,
                         getAccountAbsoluteBalance(it),
                         it,
@@ -71,7 +73,7 @@ class WalletAccountHelper(
      *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getLegacyAddresses(isBtc: Boolean) = payloadManager.payload.legacyAddressList
+    fun getLegacyAddresses() = payloadManager.payload.legacyAddressList
             // Skip archived address
             .filterNot { it.tag == LegacyAddress.ARCHIVED_ADDRESS }
             .map {
@@ -89,7 +91,7 @@ class WalletAccountHelper(
 
                 ItemAccount(
                         labelOrAddress,
-                        getAddressBalance(it, isBtc, btcExchangeRate, fiatUnit, btcUnit),
+                        getAddressBalance(it, btcExchangeRate, fiatUnit, btcUnit),
                         tag,
                         getAddressAbsoluteBalance(it),
                         it,
@@ -125,7 +127,6 @@ class WalletAccountHelper(
      */
     private fun getAccountBalance(
             account: Account,
-            isBTC: Boolean,
             btcExchange: Double,
             fiatUnit: String,
             btcUnit: String
@@ -133,7 +134,7 @@ class WalletAccountHelper(
 
         val btcBalance = getAccountAbsoluteBalance(account)
 
-        if (!isBTC) {
+        if (!currencyState.isDisplayingCryptoCurrency) {
             val fiatBalance = btcExchange * (btcBalance / 1e8)
             return "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
         } else {
@@ -152,7 +153,6 @@ class WalletAccountHelper(
      */
     private fun getAddressBalance(
             legacyAddress: LegacyAddress,
-            isBTC: Boolean,
             btcExchange: Double,
             fiatUnit: String,
             btcUnit: String
@@ -160,7 +160,7 @@ class WalletAccountHelper(
 
         val btcBalance = getAddressAbsoluteBalance(legacyAddress)
 
-        if (!isBTC) {
+        if (!currencyState.isDisplayingCryptoCurrency) {
             val fiatBalance = btcExchange * (btcBalance / 1e8)
             return "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
         } else {

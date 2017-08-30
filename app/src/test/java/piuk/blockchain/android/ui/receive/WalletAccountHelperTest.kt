@@ -49,7 +49,7 @@ class WalletAccountHelperTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("GBP")
         // Act
-        val result = subject.getAccountItems(false)
+        val result = subject.getAccountItems()
         // Assert
         verify(payloadManager, atLeastOnce()).payload
         verify(prefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -77,7 +77,7 @@ class WalletAccountHelperTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("GBP")
         // Act
-        val result = subject.getAccountItems(true)
+        val result = subject.getAccountItems()
         // Assert
         verify(payloadManager, atLeastOnce()).payload
         verify(prefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)

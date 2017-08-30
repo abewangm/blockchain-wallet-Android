@@ -19,6 +19,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsService;
 import piuk.blockchain.android.data.contacts.datastore.ContactsMapStore;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
@@ -81,8 +82,9 @@ public class DataManagerModule {
     protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
                                                              PrefsUtil prefsUtil,
                                                              StringUtils stringUtils,
-                                                             ExchangeRateFactory exchangeRateFactory) {
-        return new WalletAccountHelper(payloadManager, stringUtils, prefsUtil, exchangeRateFactory);
+                                                             ExchangeRateFactory exchangeRateFactory,
+                                                             CurrencyState currencyState) {
+        return new WalletAccountHelper(payloadManager, stringUtils, prefsUtil, exchangeRateFactory, currencyState);
     }
 
     @Provides

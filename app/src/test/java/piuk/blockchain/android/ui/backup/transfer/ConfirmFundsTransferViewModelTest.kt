@@ -191,7 +191,7 @@ class ConfirmFundsTransferPresenterTest {
     @Throws(Exception::class)
     fun getReceiveToList() {
         // Arrange
-        whenever(walletAccountHelper.getAccountItems(anyBoolean())).thenReturn(listOf())
+        whenever(walletAccountHelper.getAccountItems()).thenReturn(listOf())
         // Act
         val value = subject.getReceiveToList()
         // Assert

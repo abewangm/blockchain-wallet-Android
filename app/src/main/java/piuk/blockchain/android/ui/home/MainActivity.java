@@ -45,6 +45,7 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 import org.jetbrains.annotations.NotNull;
 
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.ui.send.SendFragment;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -77,7 +78,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
-import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
@@ -763,8 +763,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         addFragmentToBackStack(ContactRequestSuccessFragment.newInstance(paymentRequestType, contactName, btcAmount));
     }
 
-    private void startSendFragment(@Nullable String scanData, String scanRoute) {
-        SendFragment sendFragment = SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
+    private void startSendFragment(@Nullable String scanData, @Nullable String scanRoute) {
+        SendFragment sendFragment = SendFragment.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
         addFragmentToBackStack(sendFragment);
     }
 
@@ -821,7 +821,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.removeOnTabSelectedListener();
         binding.bottomNavigation.setCurrentItem(0);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
-        addFragmentToBackStack(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
+        addFragmentToBackStack(SendFragment.Companion.newInstance(uri, recipientId, mdid, fctxId));
     }
 
     @Override

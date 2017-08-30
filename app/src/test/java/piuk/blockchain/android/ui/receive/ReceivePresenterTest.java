@@ -135,14 +135,14 @@ public class ReceivePresenterTest {
     @Test
     public void getReceiveToList() throws Exception {
         // Arrange
-        when(walletAccountHelper.getAccountItems(anyBoolean())).thenReturn(Collections.emptyList());
+        when(walletAccountHelper.getAccountItems()).thenReturn(Collections.emptyList());
         when(walletAccountHelper.getAddressBookEntries()).thenReturn(Collections.emptyList());
         // Act
         List<ItemAccount> values = subject.getReceiveToList();
         // Assert
         assertNotNull(values);
         assertTrue(values.isEmpty());
-        verify(walletAccountHelper).getAccountItems(true);
+        verify(walletAccountHelper).getAccountItems();
         verify(walletAccountHelper).getAddressBookEntries();
     }
 

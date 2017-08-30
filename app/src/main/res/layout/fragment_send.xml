@@ -3,248 +3,271 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <ScrollView
-        android:id="@+id/scrollView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:focusable="true"
-        android:focusableInTouchMode="true">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/sendMainContent"
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="?attr/actionBarSize"
+            android:layout_below="@id/accounts_spinner"
+            android:layout_gravity="bottom"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            android:background="@color/primary_navy_medium"
+            app:tabContentStart="72dp"
+            app:tabGravity="fill"
+            app:tabIndicatorColor="@android:color/white"
+            app:tabIndicatorHeight="4dp"
+            app:tabMode="fixed" />
 
-            <include
-                android:id="@+id/fromContainer"
-                layout="@layout/include_from_row"
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/sendMainContent"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="parent" />
+                android:layout_height="wrap_content">
 
-            <View
-                android:id="@+id/divider1"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="8dp"
-                android:background="@color/primary_gray_light"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fromContainer" />
-
-            <include
-                android:id="@+id/toContainer"
-                layout="@layout/include_to_row_editable"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider1" />
-
-            <View
-                android:id="@+id/divider2"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="8dp"
-                android:background="@color/primary_gray_light"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/toContainer" />
-
-            <include
-                android:id="@+id/amountContainer"
-                layout="@layout/include_amount_row"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider2" />
-
-            <ProgressBar
-                android:id="@+id/progressBarMaxAvailable"
-                style="?android:attr/progressBarStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center_horizontal|center_vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/amountContainer"
-                tools:visibility="visible" />
-
-            <TextView
-                android:id="@+id/max"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/amountContainer"
-                tools:text="Use total minus fees: 0.00394932"
-                tools:textColor="@color/primary_blue_accent" />
-
-            <View
-                android:id="@+id/divider3"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="8dp"
-                android:background="@color/primary_gray_light"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/max" />
-
-            <!-- FEES TYPE -->
-            <LinearLayout
-                android:id="@+id/custom_fee_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider3">
-
-                <TextView
-                    fontPath="fonts/Montserrat-Light.ttf"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center|left"
-                    android:paddingLeft="16dp"
-                    android:paddingTop="4dp"
-                    android:text="@string/fee"
-                    android:textColor="@color/primary_gray_dark" />
-
-                <LinearLayout
+                <include
+                    android:id="@+id/fromContainer"
+                    layout="@layout/include_from_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingLeft="16dp">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="parent" />
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
+                <View
+                    android:id="@+id/divider1"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/primary_gray_light"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fromContainer" />
 
-                        <TextView
-                            android:id="@+id/textview_fee_type"
-                            fontPath="fonts/Montserrat-Regular.ttf"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:textColor="@color/black"
-                            android:textSize="14sp"
-                            tools:text="Priority" />
+                <include
+                    android:id="@+id/toContainer"
+                    layout="@layout/include_to_row_editable"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider1" />
 
-                        <TextView
-                            android:id="@+id/textview_fee_time"
-                            fontPath="fonts/Montserrat-Regular.ttf"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginBottom="16dp"
-                            android:textSize="14sp"
-                            tools:text="~ 60 min" />
+                <View
+                    android:id="@+id/divider2"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/primary_gray_light"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/toContainer" />
 
-                    </LinearLayout>
+                <include
+                    android:id="@+id/amountContainer"
+                    layout="@layout/include_amount_row"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider2" />
+
+                <ProgressBar
+                    android:id="@+id/progressBarMaxAvailable"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_horizontal|center_vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/amountContainer"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/max"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/amountContainer"
+                    tools:text="Use total minus fees: 0.00394932"
+                    tools:textColor="@color/primary_blue_accent" />
+
+                <View
+                    android:id="@+id/divider3"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/primary_gray_light"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/max" />
+
+                <!-- FEES TYPE -->
+                <LinearLayout
+                    android:id="@+id/custom_fee_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider3">
 
                     <TextView
-                        android:id="@+id/textview_fee_absolute"
-                        fontPath="fonts/Montserrat-Regular.ttf"
+                        fontPath="fonts/Montserrat-Light.ttf"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center|left"
+                        android:paddingLeft="16dp"
+                        android:paddingTop="4dp"
+                        android:text="@string/fee"
+                        android:textColor="@color/primary_gray_dark" />
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="16dp"
-                        android:layout_weight="0.9"
-                        android:gravity="right"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        tools:text="0.000081BTC (0.43 USD)" />
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp">
 
-                    <android.support.design.widget.TextInputLayout
-                        android:id="@+id/text_input_layout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="8dp"
-                        android:layout_weight="0.9"
-                        android:visibility="gone"
-                        app:hintAnimationEnabled="true"
-                        app:hintEnabled="true">
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center_vertical"
+                            android:orientation="vertical">
 
-                        <EditText
-                            android:id="@+id/edittext_custom_fee"
+                            <TextView
+                                android:id="@+id/textview_fee_type"
+                                fontPath="fonts/Montserrat-Regular.ttf"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                tools:text="Priority" />
+
+                            <TextView
+                                android:id="@+id/textview_fee_time"
+                                fontPath="fonts/Montserrat-Regular.ttf"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginBottom="16dp"
+                                android:textSize="14sp"
+                                tools:text="~ 60 min" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/textview_fee_absolute"
                             fontPath="fonts/Montserrat-Regular.ttf"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:digits="1234567890"
-                            android:focusable="true"
-                            android:focusableInTouchMode="true"
-                            android:imeOptions="actionDone"
-                            android:inputType="number"
-                            android:textSize="16sp" />
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginRight="16dp"
+                            android:layout_weight="0.9"
+                            android:gravity="right"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            tools:text="0.000081BTC (0.43 USD)" />
 
-                    </android.support.design.widget.TextInputLayout>
+                        <android.support.design.widget.TextInputLayout
+                            android:id="@+id/text_input_layout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="8dp"
+                            android:layout_weight="0.9"
+                            android:visibility="gone"
+                            app:hintAnimationEnabled="true"
+                            app:hintEnabled="true">
 
-                    <Spinner
-                        android:id="@+id/spinner_priority"
-                        android:layout_width="36dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginRight="4dp"
-                        android:layout_weight="0.1"
-                        android:dropDownSelector="?attr/selectableItemBackground"
-                        android:dropDownWidth="250dp" />
+                            <EditText
+                                android:id="@+id/edittext_custom_fee"
+                                fontPath="fonts/Montserrat-Regular.ttf"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:digits="1234567890"
+                                android:focusable="true"
+                                android:focusableInTouchMode="true"
+                                android:imeOptions="actionDone"
+                                android:inputType="number"
+                                android:textSize="16sp" />
+
+                        </android.support.design.widget.TextInputLayout>
+
+                        <Spinner
+                            android:id="@+id/spinner_priority"
+                            android:layout_width="36dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginRight="4dp"
+                            android:layout_weight="0.1"
+                            android:dropDownSelector="?attr/selectableItemBackground"
+                            android:dropDownWidth="250dp" />
+
+                    </LinearLayout>
+
+                    <include layout="@layout/divider_grey" />
 
                 </LinearLayout>
 
-                <include layout="@layout/divider_grey" />
+                <Button
+                    android:id="@+id/button_send"
+                    style="@style/ButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="16dp"
+                    android:paddingLeft="32dp"
+                    android:paddingRight="32dp"
+                    android:text="@string/CONTINUE"
+                    android:theme="@style/ButtonLightBlueTheme"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/custom_fee_container" />
 
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/unconfirmed_funds_warning"
+                    fontPath="fonts/Montserrat-Regular.ttf"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:gravity="center"
+                    android:textColor="@color/product_red_medium"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/button_send"
+                    tools:text="@string/insufficient_funds" />
 
-            <Button
-                android:id="@+id/button_send"
-                style="@style/ButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="16dp"
-                android:layout_marginTop="16dp"
-                android:paddingLeft="32dp"
-                android:paddingRight="32dp"
-                android:text="@string/CONTINUE"
-                android:theme="@style/ButtonLightBlueTheme"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/custom_fee_container" />
+            </android.support.constraint.ConstraintLayout>
+        </ScrollView>
 
-            <TextView
-                android:id="@+id/unconfirmed_funds_warning"
-                fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:gravity="center"
-                android:textColor="@color/product_red_medium"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button_send"
-                tools:text="@string/insufficient_funds" />
-
-        </android.support.constraint.ConstraintLayout>
-    </ScrollView>
+    </LinearLayout>
 </layout>
