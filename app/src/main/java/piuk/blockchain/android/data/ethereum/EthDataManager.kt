@@ -1,47 +1,31 @@
 package piuk.blockchain.android.data.ethereum
 
 import info.blockchain.wallet.ethereum.EthAccountApi
-import info.blockchain.wallet.ethereum.data.EthAccount
-import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.ethereum.EthereumWallet
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.util.MetadataUtil
+import io.reactivex.Completable
 import io.reactivex.Observable
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
-import timber.log.Timber
+import java.util.*
 
 class EthDataManager(
-        private val ethAccountApi: EthAccountApi,
-        private val ethService: EthService,
-        private val ethDataStore: EthDataStore,
         private val payloadManager: PayloadManager,
+        private val ethAccountApi: EthAccountApi,
+        private val ethDataStore: EthDataStore,
         rxBus: RxBus
 ) {
 
     private val rxPinning = RxPinning(rxBus)
-    private var address: String? = null
-    private var ethAccount: EthAddressResponse? = null
 
     /**
-     * Stores the ETH address associated with the user's wallet for the duration of the session.
-     *
-     * @param address The ETH address belonging to the logged in user
+     * Clears the currently stored ETH account and [EthAddressResponse] from memory.
      */
-    internal fun storeEthAccountAddress(address: String) {
-        this.address = address
-    }
-
-    /**
-     * Clears the currently stored ETH address and [EthAddressResponse] from memory.
-     */
-    internal fun clearEthAccountDetails() {
-        address = null
-        ethAccount = null
-    }
+    fun clearEthAccountDetails() = ethDataStore.clearEthData()
 
     /**
      * Returns an [EthAddressResponse] object for a given ETH address as an [Observable]. An
@@ -51,8 +35,8 @@ class EthDataManager(
      * @return An [Observable] wrapping an [EthAddressResponse]
      */
     fun fetchEthAddress(): Observable<EthAddressResponse> = rxPinning.call<EthAddressResponse> {
-        ethAccountApi.getEthAddress(address)
-                .doOnNext { account -> ethAccount = account }
+        ethAccountApi.getEthAddress(ethDataStore.ethWallet!!.account.address)
+                .doOnNext { ethDataStore.ethAddressResponse = it }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
@@ -61,7 +45,7 @@ class EthDataManager(
      *
      * @return A nullable [EthAddressResponse] object
      */
-    fun getEthAddress() = ethAccount
+    fun getEthAddress() = ethDataStore.ethAddressResponse
 
     /**
      * Returns a steam of [EthTransaction] objects associated with a user's ETH address specifically
@@ -71,7 +55,7 @@ class EthDataManager(
      * @return An [Observable] stream of [EthTransaction] objects
      */
     fun getEthTransactions(): Observable<EthTransaction> {
-        ethAccount?.let {
+        ethDataStore.ethAddressResponse?.let {
             return Observable.just(it)
                     .flatMapIterable { it.transactions }
                     .compose(RxUtil.applySchedulersToObservable())
@@ -94,13 +78,39 @@ class EthDataManager(
     }
 
     /**
-     * Returns EthereumWallet stored in metadata. If metadata entry doens't exists it will be inserted.
+     * Returns the transaction notes for a given transaction hash, or null if not found.
+     */
+    fun getTransactionNotes(hash: String) = ethDataStore.ethWallet?.txNotes?.get(hash)
+
+    /**
+     * Puts a given note in the [HashMap] of transaction notes keyed to a transaction hash. This
+     * information is then saved in the metadata service.
+     *
+     * @return A [Completable] object
+     */
+    fun updateTransactionNotes(hash: String, note: String): Completable = rxPinning.call {
+        Completable.fromCallable {
+            if (ethDataStore.ethWallet != null) {
+                ethDataStore.ethWallet?.let {
+                    it.txNotes.put(hash, note)
+                    it.save()
+                }
+                return@fromCallable Void.TYPE
+            } else {
+                throw IllegalStateException("ETH Wallet is null")
+            }
+        }
+    }.compose(RxUtil.applySchedulersToCompletable())
+
+    /**
+     * Returns EthereumWallet stored in metadata. If metadata entry doesn't exists it will be inserted.
      *
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Observable] returning EthereumWallet
      */
     fun getEthereumWallet(defaultLabel: String): Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
         Observable.fromCallable { fetchOrCreateEthereumWallet(defaultLabel) }
+                .doOnNext { ethDataStore.ethWallet = it }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 

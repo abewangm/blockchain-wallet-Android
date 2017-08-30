@@ -1,18 +1,21 @@
 package piuk.blockchain.android.data.transactions
 
-import info.blockchain.wallet.ethereum.data.EthAccount
+import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.multiaddress.TransactionSummary
-import piuk.blockchain.android.ui.balance.CryptoCurrency
+import piuk.blockchain.android.data.currency.CryptoCurrencies
+import java.math.BigInteger
 
 abstract class Displayable {
 
-    abstract val cryptoCurrency: CryptoCurrency
+    abstract val cryptoCurrency: CryptoCurrencies
     abstract val direction: TransactionSummary.Direction
     abstract val timeStamp: Long
-    abstract val total: Long
-    abstract val fee: Long
+    abstract val total: BigInteger
+    abstract val fee: BigInteger
     abstract val hash: String
+    abstract val inputsMap: HashMap<String, BigInteger>
+    abstract val outputsMap: HashMap<String, BigInteger>
     open val confirmations = 3
     open val watchOnly: Boolean = false
     open val doubleSpend: Boolean = false
@@ -21,12 +24,12 @@ abstract class Displayable {
 }
 
 data class EthDisplayable(
-        private val ethAccount: EthAccount,
+        private val ethAccount: EthAddressResponse,
         private val ethTransaction: EthTransaction
 ) : Displayable() {
 
-    override val cryptoCurrency: CryptoCurrency
-        get() = CryptoCurrency.ETH
+    override val cryptoCurrency: CryptoCurrencies
+        get() = CryptoCurrencies.ETHER
     override val direction: TransactionSummary.Direction
         get() = when (ethTransaction.from) {
             ethAccount.account -> TransactionSummary.Direction.SENT
@@ -34,12 +37,20 @@ data class EthDisplayable(
         }
     override val timeStamp: Long
         get() = ethTransaction.timeStamp
-    override val total: Long
-        get() = ethTransaction.value.toLong()
-    override val fee: Long
-        get() = ethTransaction.gas.toLong()
+    override val total: BigInteger
+        get() = ethTransaction.value
+    override val fee: BigInteger
+        get() = ethTransaction.gasUsed.multiply(ethTransaction.gasPrice)
     override val hash: String
         get() = ethTransaction.hash
+    override val inputsMap: HashMap<String, BigInteger>
+        get() = HashMap<String, BigInteger>().apply {
+            put(ethTransaction.from, ethTransaction.value)
+        }
+    override val outputsMap: HashMap<String, BigInteger>
+        get() = HashMap<String, BigInteger>().apply {
+            put(ethTransaction.to, ethTransaction.value)
+        }
 
 }
 
@@ -47,18 +58,22 @@ data class BtcDisplayable(
         private val transactionSummary: TransactionSummary
 ) : Displayable() {
 
-    override val cryptoCurrency: CryptoCurrency
-        get() = CryptoCurrency.BTC
+    override val cryptoCurrency: CryptoCurrencies
+        get() = CryptoCurrencies.BTC
     override val direction: TransactionSummary.Direction
         get() = transactionSummary.direction
     override val timeStamp: Long
         get() = transactionSummary.time
-    override val total: Long
-        get() = transactionSummary.total.toLong()
-    override val fee: Long
-        get() = transactionSummary.fee.toLong()
+    override val total: BigInteger
+        get() = transactionSummary.total
+    override val fee: BigInteger
+        get() = transactionSummary.fee
     override val hash: String
         get() = transactionSummary.hash
+    override val inputsMap: HashMap<String, BigInteger>
+        get() = transactionSummary.inputsMap
+    override val outputsMap: HashMap<String, BigInteger>
+        get() = transactionSummary.outputsMap
     override val confirmations: Int
         get() = transactionSummary.confirmations
     override val watchOnly: Boolean

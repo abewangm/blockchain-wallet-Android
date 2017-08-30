@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.transactions.Displayable;
 
 import static info.blockchain.wallet.multiaddress.TransactionSummary.Direction.RECEIVED;
 
@@ -31,7 +32,7 @@ public class TransactionHelper {
      * @return A Pair of Maps representing the input and output of the transaction
      */
     @NonNull
-    Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> filterNonChangeAddresses(TransactionSummary transactionSummary) {
+    Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> filterNonChangeAddresses(Displayable transactionSummary) {
 
         HashMap<String, BigInteger> inputMap = new HashMap<>();
         HashMap<String, BigInteger> outputMap = new HashMap<>();
