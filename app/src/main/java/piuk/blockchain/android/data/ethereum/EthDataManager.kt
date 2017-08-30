@@ -101,6 +101,7 @@ class EthDataManager(
      */
     fun getEthereumWallet(defaultLabel: String): Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
         Observable.fromCallable { fetchOrCreateEthereumWallet(defaultLabel) }
+                .compose(RxUtil.applySchedulersToObservable())
     }
 
     private fun fetchOrCreateEthereumWallet(defaultLabel: String): EthereumWallet {

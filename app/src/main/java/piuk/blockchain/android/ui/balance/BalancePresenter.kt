@@ -5,6 +5,7 @@ import android.support.annotation.VisibleForTesting
 import android.view.Display
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
+import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -67,36 +68,22 @@ class BalancePresenter @Inject constructor(
         subscribeToEvents()
         storeSwipeReceiveAddresses()
 
-        ethDataManager.fetchEthAddress()
-                .subscribe({
-                    activeAccountAndAddressList.add(ItemAccount().apply {
-                        type = ItemAccount.TYPE.ETHEREUM
-                        label = stringUtils.getString(R.string.eth_default_account_label)
-                        absoluteBalance = ethDataManager.getEthAddress()?.balance?.toLong() ?: 0L
-                        displayBalance = getEthBalanceString(
-                                currencyState.isDisplayingCryptoCurrency,
-                                absoluteBalance ?: 0L
-                        )
-                    })
-
-                }, { throwable -> Timber.e(throwable) })
-
-        activeAccountAndAddressList.clear()
-        activeAccountAndAddressList.addAll(getAllDisplayableAccounts())
-        chosenAccount = activeAccountAndAddressList[0]
-
-        chosenAccount?.let {
-            Observable.merge(
-                    getBalanceObservable(it),
-                    getTransactionsListObservable(it),
-                    getUpdateTickerObservable(),
-                    getFacilitatedTransactionsObservable()
-            ).compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnError { Timber.e(it) }
-                    .subscribe(
-                            { /* No-op */ },
-                            { view.setUiState(UiState.FAILURE) })
-        }
+        // Set up Ethereum wallet if necessary
+        ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
+                .doOnNext { ethDataManager.storeEthAccountAddress(it.account.address) }
+                .flatMap { ethDataManager.fetchEthAddress() }
+                .doOnError { Timber.e(it) }
+                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnNext {
+                    activeAccountAndAddressList.clear()
+                    activeAccountAndAddressList.addAll(getAllDisplayableAccounts())
+                    chosenAccount = activeAccountAndAddressList[0]
+                }
+                .subscribe(
+                        { setupTransactions() },
+                        { Timber.e(it) }
+                )
     }
 
     override fun onViewDestroyed() {
@@ -274,9 +261,10 @@ class BalancePresenter @Inject constructor(
                 .flatMapCompletable { contact ->
                     val transaction = contact.facilitatedTransactions[fctxId]
 
-                    val paymentRequest = PaymentRequest()
-                    paymentRequest.intendedAmount = transaction?.intendedAmount ?: 0L
-                    paymentRequest.id = fctxId
+                    val paymentRequest = PaymentRequest().apply {
+                        intendedAmount = transaction?.intendedAmount ?: 0L
+                        id = fctxId
+                    }
 
                     payloadDataManager.getNextReceiveAddressAndReserve(
                             payloadDataManager.getPositionOfAccountInActiveList(accountPosition),
@@ -412,17 +400,15 @@ class BalancePresenter @Inject constructor(
         }
 
         // Add Ethereum
-        ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
-
-//        mutableList.add(ItemAccount().apply {
-//            type = ItemAccount.TYPE.ETHEREUM
-//            label = stringUtils.getString(R.string.eth_default_account_label)
-//            absoluteBalance = ethDataManager.getEthAddress()?.balance?.toLong() ?: 0L
-//            displayBalance = getEthBalanceString(
-//                    currencyState.isDisplayingCryptoCurrency,
-//                    absoluteBalance ?: 0L
-//            )
-//        })
+        mutableList.add(ItemAccount().apply {
+            type = ItemAccount.TYPE.ETHEREUM
+            label = stringUtils.getString(R.string.eth_default_account_label)
+            absoluteBalance = ethDataManager.getEthAddress()?.balance?.toLong() ?: 0L
+            displayBalance = getEthBalanceString(
+                    currencyState.isDisplayingCryptoCurrency,
+                    absoluteBalance ?: 0L
+            )
+        })
 
         return mutableList
     }
@@ -452,13 +438,28 @@ class BalancePresenter @Inject constructor(
         }
     }
 
+    private fun setupTransactions() {
+        chosenAccount?.let {
+            Observable.merge(
+                    getBalanceObservable(it),
+                    getTransactionsListObservable(it),
+                    getUpdateTickerObservable(),
+                    getFacilitatedTransactionsObservable()
+            ).compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .doOnError { Timber.e(it) }
+                    .subscribe(
+                            { /* No-op */ },
+                            { view.setUiState(UiState.FAILURE) })
+        }
+    }
+
     private fun getTransactionsListObservable(itemAccount: ItemAccount) =
             transactionListDataManager.fetchTransactions(itemAccount, 50, 0)
                     .doAfterTerminate(this::storeSwipeReceiveAddresses)
                     .doOnNext {
                         displayList.removeAll { it is Displayable }
                         displayList.addAll(it)
-                        checkLatestAnnouncement(displayList)
+//                        checkLatestAnnouncement(displayList)
 
                         when {
                             displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
@@ -467,15 +468,14 @@ class BalancePresenter @Inject constructor(
                         view.onTransactionsUpdated(displayList)
                     }
 
-    private fun getBalanceObservable(itemAccount: ItemAccount): Observable<Nothing>? {
+    private fun getBalanceObservable(itemAccount: ItemAccount): Observable<Nothing> {
         return if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
-            ethDataManager.getEthAddress()?.let {
-                val ethBalance = it.balance.toLong()
-                val ethString = getEthBalanceString(currencyState.isDisplayingCryptoCurrency, ethBalance)
-                view.onTotalBalanceUpdated(ethString)
-            }
-
-            Observable.empty()
+            ethDataManager.fetchEthAddress()
+                    .doOnNext {
+                        val ethBalance = it.balance.toLong()
+                        val ethString = getEthBalanceString(currencyState.isDisplayingCryptoCurrency, ethBalance)
+                        view.onTotalBalanceUpdated(ethString)
+                    }.flatMap { Observable.empty<Nothing>() }
         } else {
             payloadDataManager.updateAllBalances()
                     .doOnComplete {
@@ -508,7 +508,8 @@ class BalancePresenter @Inject constructor(
                             exchangeRateFactory.getLastEthPrice(getFiatCurrency()),
                             currencyState.isDisplayingCryptoCurrency
                     )
-                }.andThen(getOnboardingStatusObservable())
+                }.toObservable()
+//                .andThen(getOnboardingStatusObservable())
     }
 
     private fun getOnboardingStatusObservable() = buyDataManager.canBuy
@@ -553,23 +554,26 @@ class BalancePresenter @Inject constructor(
     }
 
     private fun subscribeToEvents() {
-        contactsEventObservable = rxBus.register(ContactsEvent::class.java)
-        contactsEventObservable?.subscribe({ refreshFacilitatedTransactions() })
+        contactsEventObservable = rxBus.register(ContactsEvent::class.java).apply {
+            subscribe({ refreshFacilitatedTransactions() })
+        }
 
-        authEventObservable = rxBus.register(AuthEvent::class.java)
-        authEventObservable?.subscribe({
-            displayList.clear()
-            transactionListDataManager.clearTransactionList()
-            contactsDataManager.resetContacts()
-        })
+        authEventObservable = rxBus.register(AuthEvent::class.java).apply {
+            subscribe({
+                displayList.clear()
+                transactionListDataManager.clearTransactionList()
+                contactsDataManager.resetContacts()
+            })
+        }
 
-        notificationObservable = rxBus.register(NotificationPayload::class.java)
-        notificationObservable?.subscribe({ notificationPayload ->
-            if (notificationPayload.type != null
-                    && notificationPayload.type == NotificationPayload.NotificationType.PAYMENT) {
-                refreshFacilitatedTransactions()
-            }
-        })
+        notificationObservable = rxBus.register(NotificationPayload::class.java).apply {
+            subscribe({ notificationPayload ->
+                if (notificationPayload.type != null
+                        && notificationPayload.type == NotificationPayload.NotificationType.PAYMENT) {
+                    refreshFacilitatedTransactions()
+                }
+            })
+        }
     }
 
     private fun handlePendingTransactions(transactions: List<ContactTransactionModel>) {
@@ -733,11 +737,9 @@ class BalancePresenter @Inject constructor(
 
     private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
 
-    //todo  to currency state
     private fun getBtcUnitType() =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
 
-    //todo  to currency state
     private fun getFiatCurrency() =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
