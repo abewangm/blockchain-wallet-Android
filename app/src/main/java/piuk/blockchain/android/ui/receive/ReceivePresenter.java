@@ -429,7 +429,7 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
 
         int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
+        double exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit);
 
         BigInteger satoshis = getSatoshisFromText(getView().getBtcAmount());
 

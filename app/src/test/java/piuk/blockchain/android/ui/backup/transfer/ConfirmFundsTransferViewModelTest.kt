@@ -106,7 +106,7 @@ class ConfirmFundsTransferPresenterTest {
                 .thenReturn(MonetaryUtil.UNIT_BTC)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
-        whenever(exchangeRateFactory.getLastPrice(anyString())).thenReturn(100.0)
+        whenever(exchangeRateFactory.getLastBtcPrice(anyString())).thenReturn(100.0)
         whenever(exchangeRateFactory.getSymbol(anyString())).thenReturn("$")
         subject.pendingTransactions = mutableListOf()
         // Act

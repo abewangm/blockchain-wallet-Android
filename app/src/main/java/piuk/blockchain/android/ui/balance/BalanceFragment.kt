@@ -148,7 +148,7 @@ class BalanceFragment    : BaseFragment<BalanceView, BalancePresenter>(), Balanc
 
     override fun onAccountsUpdated(
             accounts: List<ItemAccount>,
-            lastPrice: Double,
+            lastBtcPrice: Double,
             fiat: String,
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean
@@ -161,7 +161,7 @@ class BalanceFragment    : BaseFragment<BalanceView, BalancePresenter>(), Balanc
                     isBtc,
                     monetaryUtil,
                     fiat,
-                    lastPrice
+                    lastBtcPrice
             ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
 
             accounts_spinner.adapter = accountsAdapter
@@ -209,11 +209,15 @@ class BalanceFragment    : BaseFragment<BalanceView, BalancePresenter>(), Balanc
         balanceAdapter?.onContactsMapChanged(transactionDisplayMap)
     }
 
-    override fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean) {
+    override fun onExchangeRateUpdated(
+            btcExchangeRate: Double,
+            ethExchangeRate: Double,
+            isBtc: Boolean
+    ) {
         if (balanceAdapter == null) {
-            setUpRecyclerView(exchangeRate, isBtc)
+            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc)
         } else {
-            balanceAdapter?.onPriceUpdated(exchangeRate)
+            balanceAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
         }
     }
 
@@ -436,6 +440,7 @@ class BalanceFragment    : BaseFragment<BalanceView, BalancePresenter>(), Balanc
         }
     }
 
+    @Suppress("CascadeIf")
     private fun initOnboardingPager() {
         if (onboardingPagerAdapter == null) {
             onboardingPagerAdapter = OnboardingPagerAdapter(context)
@@ -486,10 +491,11 @@ class BalanceFragment    : BaseFragment<BalanceView, BalancePresenter>(), Balanc
         no_transaction_include.gone()
     }
 
-    private fun setUpRecyclerView(exchangeRate: Double, isBtc: Boolean) {
+    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean) {
         balanceAdapter = BalanceAdapter(
                 activity,
-                exchangeRate,
+                btcExchangeRate,
+                ethExchangeRate,
                 isBtc,
                 this
         ).apply { setHasStableIds(true) }

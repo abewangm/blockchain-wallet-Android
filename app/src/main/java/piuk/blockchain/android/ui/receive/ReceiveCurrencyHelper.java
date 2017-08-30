@@ -50,7 +50,7 @@ public class ReceiveCurrencyHelper {
      * @return A double exchange rate
      */
     public double getLastPrice() {
-        return exchangeRateFactory.getLastPrice(getFiatUnit());
+        return exchangeRateFactory.getLastBtcPrice(getFiatUnit());
     }
 
     /**

@@ -18,9 +18,9 @@ import info.blockchain.wallet.multiaddress.TransactionSummary
 import kotlinx.android.synthetic.main.item_balance.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
-import piuk.blockchain.android.ui.balance.CryptoCurrency
 import piuk.blockchain.android.util.DateUtil
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -28,11 +28,13 @@ import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
+import java.math.BigDecimal
 import java.text.DecimalFormat
 
 class DisplayableDelegate<in T>(
         activity: Activity,
         private var btcExchangeRate: Double,
+        private var ethExchangeRate: Double,
         private var showCrypto: Boolean,
         private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
@@ -60,11 +62,14 @@ class DisplayableDelegate<in T>(
 
         val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         val balance = when (tx.cryptoCurrency) {
-            CryptoCurrency.BTC -> tx.total / 1e8
-            CryptoCurrency.ETH -> tx.total / 1e18
+            CryptoCurrencies.BTC -> BigDecimal(tx.total).divide(BigDecimal.valueOf(1e8))
+            CryptoCurrencies.ETHER -> BigDecimal(tx.total).divide(BigDecimal.valueOf(1e18))
         }
-        // TODO: This will need changing based on the currency
-        val fiatBalance = btcExchangeRate * balance
+
+        val fiatBalance = when (tx.cryptoCurrency) {
+            CryptoCurrencies.BTC -> balance.multiply(BigDecimal(btcExchangeRate))
+            CryptoCurrencies.ETHER -> balance.multiply(BigDecimal(ethExchangeRate))
+        }
 
         viewHolder.result.setTextColor(Color.WHITE)
         viewHolder.timeSince.text = dateUtil.formatted(tx.timeStamp)
@@ -94,7 +99,7 @@ class DisplayableDelegate<in T>(
         viewHolder.result.text = getDisplaySpannable(
                 tx.cryptoCurrency,
                 tx.total.toDouble(),
-                fiatBalance,
+                fiatBalance.toDouble(),
                 fiatString
         )
         viewHolder.watchOnly.visibility = if (tx.watchOnly) View.VISIBLE else View.GONE
@@ -116,8 +121,9 @@ class DisplayableDelegate<in T>(
         monetaryUtil.updateUnit(btcFormat)
     }
 
-    fun onPriceUpdated(btcExchangeRate: Double) {
+    fun onPriceUpdated(btcExchangeRate: Double, ethExchangeRate: Double) {
         this.btcExchangeRate = btcExchangeRate
+        this.ethExchangeRate = ethExchangeRate
     }
 
     fun onContactsMapUpdated(
@@ -182,14 +188,14 @@ class DisplayableDelegate<in T>(
     }
 
     private fun getDisplaySpannable(
-            cryptoCurrency: CryptoCurrency,
+            cryptoCurrency: CryptoCurrencies,
             cryptoAmount: Double,
             fiatAmount: Double,
             fiatString: String
     ): Spannable {
         val spannable: Spannable
         if (showCrypto) {
-            if (cryptoCurrency == CryptoCurrency.BTC) {
+            if (cryptoCurrency == CryptoCurrencies.BTC) {
                 spannable = Spannable.Factory.getInstance().newSpannable(
                         "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(cryptoAmount))} ${getDisplayUnits()}")
                 spannable.setSpan(
@@ -210,7 +216,7 @@ class DisplayableDelegate<in T>(
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         } else {
-            // TODO: ETH Fiat value  
+            // TODO: ETH Fiat value
             spannable = Spannable.Factory.getInstance().newSpannable(
                     "${monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount))} $fiatString")
             spannable.setSpan(

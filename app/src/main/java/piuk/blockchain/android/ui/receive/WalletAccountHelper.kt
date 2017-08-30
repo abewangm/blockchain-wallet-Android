@@ -25,7 +25,7 @@ class WalletAccountHelper(
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(btcUnitType) }
     private val btcUnit: String by unsafeLazy { monetaryUtil.getBtcUnit(btcUnitType) }
     private val fiatUnit: String by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY) }
-    private val btcExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastPrice(fiatUnit) }
+    private val btcExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastBtcPrice(fiatUnit) }
 
     /**
      * Returns a list of [ItemAccount] objects containing both HD accounts and [LegacyAddress]
