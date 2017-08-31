@@ -11,17 +11,16 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
-import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.transactions.Displayable
@@ -49,7 +48,6 @@ class BalancePresenter @Inject constructor(
         private val buyDataManager: BuyDataManager,
         private val stringUtils: StringUtils,
         private val prefsUtil: PrefsUtil,
-        private val accessState: AccessState,
         private val rxBus: RxBus,
         private val appUtil: AppUtil,
         private val currencyState: CurrencyState
@@ -501,7 +499,6 @@ class BalancePresenter @Inject constructor(
                             currencyState.isDisplayingCryptoCurrency
                     )
                     view.onExchangeRateUpdated(
-                            // STOPSHIP: This needs updating with the current price
                             exchangeRateFactory.getLastBtcPrice(getFiatCurrency()),
                             exchangeRateFactory.getLastEthPrice(getFiatCurrency()),
                             currencyState.isDisplayingCryptoCurrency
