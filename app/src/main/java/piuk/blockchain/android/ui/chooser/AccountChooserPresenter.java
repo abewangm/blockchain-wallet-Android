@@ -138,13 +138,13 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
 
     private Observable<List<ItemAccount>> getAccountList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getHdAccounts(currencyState.isDisplayingCryptoCurrency()));
+        result.addAll(walletAccountHelper.getHdAccounts());
         return Observable.just(result);
     }
 
     private Observable<List<ItemAccount>> getImportedList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getLegacyAddresses(currencyState.isDisplayingCryptoCurrency()));
+        result.addAll(walletAccountHelper.getLegacyAddresses());
         return Observable.just(result);
     }
 

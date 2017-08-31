@@ -71,7 +71,7 @@ class ConfirmFundsTransferPresenter @Inject constructor(
      *
      * @return A [List] of [ItemAccount] objects
      */
-    internal fun getReceiveToList() = walletAccountHelper.getHdAccounts(true)
+    internal fun getReceiveToList() = walletAccountHelper.getHdAccounts()
 
     /**
      * Get corrected default account position

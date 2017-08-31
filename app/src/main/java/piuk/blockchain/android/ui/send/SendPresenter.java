@@ -262,7 +262,7 @@ public class SendPresenter extends BasePresenter<SendView> {
      */
     List<ItemAccount> getAddressList(int feePriority) {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getAccountItems(sendModel.isBTC));
+        result.addAll(walletAccountHelper.getAccountItems());
 
         if (result.size() == 1) {
             //Only a single account/address available in wallet

@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.currency;
 
+import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 
 public class CurrencyState {
@@ -54,5 +55,9 @@ public class CurrencyState {
 
     public void setDisplayingCryptoCurrency(boolean displayingCryptoCurrency) {
         isDisplayingCryptoCurrency = displayingCryptoCurrency;
+    }
+
+    public String getFiatUnit() {
+        return prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
     }
 }

@@ -34,7 +34,6 @@ import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerAdapter
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.ui.receive.ReceiveFragment
-import piuk.blockchain.android.ui.send.SendFragment
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
@@ -46,7 +45,7 @@ import piuk.blockchain.android.util.helperfunctions.OnPageChangeListener
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import javax.inject.Inject
 
-class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
+class BalanceFragment    : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 
     override val isContactsEnabled: Boolean
         get() = BuildConfig.CONTACTS_ENABLED

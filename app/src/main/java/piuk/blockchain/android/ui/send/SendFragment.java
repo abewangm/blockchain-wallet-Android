@@ -60,7 +60,6 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
-import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
@@ -91,18 +90,24 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 public class SendFragment extends BaseFragment<SendView, SendPresenter>
         implements SendView, NumericKeyboardCallback {
 
+    //done
     public static final String ARGUMENT_SCAN_DATA = "scan_data";
     public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     public static final String ARGUMENT_CONTACT_ID = "contact_id";
     public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
     public static final String ARGUMENT_FCTX_ID = "fctx_id";
     public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
+    //\done
 
+    //done
     private static final int SCAN_URI = 2010;
     private static final int SCAN_PRIVX = 2011;
+    //\done
+
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
-    @Inject SendPresenter sendPresenter;
+    @Inject
+    SendPresenter sendPresenter;
 
     @Thunk FragmentSendBinding binding;
     @Thunk AlertDialog transactionSuccessDialog;
@@ -135,10 +140,12 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     };
 
+    //done
     {
-        Injector.getInstance().getPresenterComponent().inject(this);
+//        Injector.getInstance().getPresenterComponent().inject(this);
     }
 
+    //done
     public static SendFragment newInstance(@Nullable String scanData,
                                            String scanRoute,
                                            int selectedAccountPosition) {
@@ -151,6 +158,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         return fragment;
     }
 
+    //done
     public static SendFragment newInstance(String uri,
                                            String contactId,
                                            String contactMdid,
@@ -165,6 +173,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         return fragment;
     }
 
+    //done
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -175,6 +184,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //done
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
@@ -185,6 +195,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         return binding.getRoot();
     }
 
+    //done
     @Override
     public Bundle getFragmentBundle() {
         return getArguments();
@@ -206,6 +217,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         super.onPause();
     }
 
+    //done
     private void setupToolbar() {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((BaseAuthActivity) getActivity()).setupToolbar(
@@ -215,6 +227,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (menu != null) menu.clear();
@@ -222,6 +235,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    //done
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -352,6 +366,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
     }
 
+    //Done
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -366,6 +381,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     private void startScanActivity(int code) {
         if (!new AppUtil(getActivity()).isCameraOpen()) {
             Intent intent = new Intent(getActivity(), CaptureActivity.class);
@@ -376,9 +392,9 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     }
 
     private void setupViews() {
-        setupDestinationView();
-        setupSendFromView();
-        setupReceiveToView();
+        setupDestinationView();//done
+        setupSendFromView();//done
+        setupReceiveToView();//done
 
         setupBtcTextField();
         setupFiatTextField();
@@ -524,6 +540,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     private void startFromFragment() {
         AccountChooserActivity.startForResult(this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
@@ -531,8 +548,9 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 getString(R.string.from));
     }
 
+    // done
     private void setupReceiveToView() {
-        binding.toContainer.toArrowImage.setOnClickListener(v ->
+        binding.toContainer.toArrow.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                         PaymentRequestType.SEND,
@@ -544,8 +562,8 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         contactsPayment = true;
         binding.amountContainer.amountBtc.setEnabled(false);
         binding.amountContainer.amountFiat.setEnabled(false);
-        binding.toContainer.toArrowImage.setVisibility(View.GONE);
-        binding.toContainer.toArrowImage.setOnClickListener(null);
+        binding.toContainer.toArrow.setVisibility(View.GONE);
+        binding.toContainer.toArrow.setOnClickListener(null);
         binding.toContainer.toAddressEditTextView.setEnabled(false);
         binding.progressBarMaxAvailable.setVisibility(View.GONE);
         binding.max.setVisibility(View.GONE);
@@ -626,6 +644,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.amountContainer.amountBtc.setText(textFromSatoshis);
     }
 
+    //done
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);

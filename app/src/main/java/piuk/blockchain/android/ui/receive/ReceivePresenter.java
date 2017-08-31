@@ -138,7 +138,7 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
     @NonNull
     List<ItemAccount> getReceiveToList() {
         ArrayList<ItemAccount> itemAccounts = new ArrayList<>();
-        itemAccounts.addAll(walletAccountHelper.getAccountItems(true));
+        itemAccounts.addAll(walletAccountHelper.getAccountItems());
         itemAccounts.addAll(walletAccountHelper.getAddressBookEntries());
         return itemAccounts;
     }

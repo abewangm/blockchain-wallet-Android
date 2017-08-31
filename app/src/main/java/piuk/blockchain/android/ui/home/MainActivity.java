@@ -45,6 +45,7 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 import org.jetbrains.annotations.NotNull;
 
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.ui.send.SendFragmentNew;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -77,7 +78,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
-import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
@@ -92,7 +92,7 @@ import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTR
 public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> implements
         BalanceFragment.OnFragmentInteractionListener,
         MainView,
-        SendFragment.OnSendFragmentInteractionListener,
+        SendFragmentNew.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactConfirmRequestFragment.FragmentInteractionListener,
         FrontendJavascript<String>,
@@ -151,7 +151,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         if (!wasSelected) {
             switch (position) {
                 case 0:
-                    if (!(getCurrentFragment() instanceof SendFragment)) {
+                    if (!(getCurrentFragment() instanceof SendFragmentNew)) {
                         // This is a bit of a hack to allow the selection of the correct button
                         // On the bottom nav bar, but without starting the fragment again
                         startSendFragment(null, null);
@@ -337,8 +337,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             binding.drawerLayout.closeDrawers();
         } else if (getCurrentFragment() instanceof BalanceFragment) {
             handleBackPressed();
-        } else if (getCurrentFragment() instanceof SendFragment) {
-            ((SendFragment) getCurrentFragment()).onBackPressed();
+        } else if (getCurrentFragment() instanceof SendFragmentNew) {
+            ((SendFragmentNew) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             ((ReceiveFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ContactConfirmRequestFragment) {
@@ -440,7 +440,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         // Set selected appropriately.
         if (getCurrentFragment() instanceof BalanceFragment) {
             binding.bottomNavigation.setCurrentItem(1);
-        } else if (getCurrentFragment() instanceof SendFragment) {
+        } else if (getCurrentFragment() instanceof SendFragmentNew) {
             binding.bottomNavigation.setCurrentItem(0);
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             binding.bottomNavigation.setCurrentItem(2);
@@ -747,15 +747,15 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public void onChangeFeeClicked() {
-        SendFragment fragment = (SendFragment) getSupportFragmentManager()
-                .findFragmentByTag(SendFragment.class.getSimpleName());
+        SendFragmentNew fragment = (SendFragmentNew) getSupportFragmentManager()
+                .findFragmentByTag(SendFragmentNew.class.getSimpleName());
         fragment.onChangeFeeClicked();
     }
 
     @Override
     public void onSendClicked() {
-        SendFragment fragment = (SendFragment) getSupportFragmentManager()
-                .findFragmentByTag(SendFragment.class.getSimpleName());
+        SendFragmentNew fragment = (SendFragmentNew) getSupportFragmentManager()
+                .findFragmentByTag(SendFragmentNew.class.getSimpleName());
         fragment.onSendClicked();
     }
 
@@ -771,8 +771,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         addFragmentToBackStack(ContactRequestSuccessFragment.newInstance(paymentRequestType, contactName, btcAmount));
     }
 
-    private void startSendFragment(@Nullable String scanData, String scanRoute) {
-        SendFragment sendFragment = SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
+    private void startSendFragment(@Nullable String scanData, @Nullable String scanRoute) {
+        SendFragmentNew sendFragment = SendFragmentNew.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
         addFragmentToBackStack(sendFragment);
     }
 
@@ -829,7 +829,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.removeOnTabSelectedListener();
         binding.bottomNavigation.setCurrentItem(0);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
-        addFragmentToBackStack(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
+        addFragmentToBackStack(SendFragmentNew.Companion.newInstance(uri, recipientId, mdid, fctxId));
     }
 
     @Override
