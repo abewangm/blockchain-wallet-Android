@@ -385,8 +385,8 @@
     <string name="transaction_surge">The Bitcoin mining network is currently experiencing a high volume of activity, resulting in recommended fees that are higher than usual.</string>
     <string name="unsupported_encryption_version">Wallet version %1$s not supported.</string>
     <string name="logout">Logout</string>
-    <string name="to_field_helper">Enter Bitcoin address or select</string>
-    <string name="to_field_helper_no_dropdown">Enter Bitcoin address</string>
+    <string name="to_field_helper">Enter bitcoin address or select</string>
+    <string name="to_field_helper_no_dropdown">Enter bitcoin address</string>
 
     <!-- SETTINGS -->
     <string name="update">Update</string>
@@ -779,5 +779,7 @@
     <string name="eth_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to set up your Ether wallet.</string>
     <string name="ether">ETHER</string>
     <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Enter ether address or select</string>
+    <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
 
 </resources>

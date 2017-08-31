@@ -1,6 +1,12 @@
 package piuk.blockchain.android.ui.send
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.annotation.StringRes
+import android.support.v4.content.ContextCompat
+import android.support.v7.app.AppCompatActivity
 import android.view.*
 import com.jakewharton.rxbinding2.widget.RxTextView
 import kotlinx.android.synthetic.main.fragment_send.*
@@ -12,15 +18,23 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
+import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
+import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.zxing.CaptureActivity
+import piuk.blockchain.android.util.AppUtil
+import piuk.blockchain.android.util.PermissionUtil
+import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import javax.inject.Inject
 
-class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
+class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew {
 
-    @Inject lateinit var sendPresenter: SendPresenter
+    @Inject lateinit var sendPresenterNew: SendPresenterNew
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -35,14 +49,14 @@ class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        button_send.setOnClickListener { onSendClicked() }
-
         activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
+        setTabs()
+        setupInitialAccount()
         setupSendingView()
         setupReceivingView()
-
-        setTabs()
+        setupFeesView()
+        button_send.setOnClickListener { onSendClicked() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +70,12 @@ class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun createPresenter() = sendPresenter
+    override fun onResume() {
+        super.onResume()
+        setupToolbar()
+    }
+
+    override fun createPresenter() = sendPresenterNew
 
     override fun getMvpView() = this
 
@@ -65,12 +84,64 @@ class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
             addTab(tabs.newTab().setText(R.string.bitcoin))
             addTab(tabs.newTab().setText(R.string.ether))
             setOnTabSelectedListener {
-                if (it == 1) {
+                if (it == 0) {
                     presenter.onBitcoinChosen()
                 } else {
                     presenter.onEtherChosen()
                 }
             }
+        }
+    }
+
+    private fun setupToolbar() {
+        if ((activity as AppCompatActivity).supportActionBar != null) {
+            (activity as BaseAuthActivity).setupToolbar(
+                    (activity as MainActivity).supportActionBar, R.string.send_bitcoin)
+        } else {
+            finishPage(false)
+        }
+    }
+
+    override fun finishPage(paymentMade: Boolean) {
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item!!.getItemId()) {
+            R.id.action_qr -> {
+                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    PermissionUtil.requestCameraPermissionFromFragment(view!!.rootView, this)
+                } else {
+                    startScanActivity(SCAN_URI)
+                }
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun startScanActivity(code: Int) {
+        if (!AppUtil(activity).isCameraOpen) {
+            val intent = Intent(activity, CaptureActivity::class.java)
+            startActivityForResult(intent, code)
+        } else {
+            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
+            if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startScanActivity(SCAN_URI)
+            } else {
+                // Permission request was denied.
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 
@@ -99,7 +170,7 @@ class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
                 }
                 .subscribe(IgnorableDefaultObserver())
 
-        toContainer.toArrowImage.setOnClickListener({ v ->
+        toContainer.toArrow.setOnClickListener({ v ->
             AccountChooserActivity.startForResult(this,
                     AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                     PaymentRequestType.SEND,
@@ -107,20 +178,26 @@ class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
         })
     }
 
-    private fun setupSendingView() {
+    private fun setupInitialAccount() {
 
         if (arguments != null) {
-            presenter.selectSendingAccount(arguments.getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, -1))
+            presenter.selectSendingBtcAccount(arguments.getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, -1))
         } else {
             presenter.selectDefaultSendingAccount()
         }
+    }
 
+    private fun setupSendingView() {
         fromContainer.fromAddressTextView.setOnClickListener({ v -> startFromFragment() })
         fromContainer.fromArrowImage.setOnClickListener({ v -> startFromFragment() })
     }
 
     override fun setSendingAddress(accountItem: ItemAccount) {
         fromContainer.fromAddressTextView.setText(accountItem.label)
+    }
+
+    override fun setReceivingHint(hint: Int) {
+        toContainer.toAddressEditTextView.setHint(hint)
     }
 
     private fun startFromFragment() {
@@ -139,6 +216,29 @@ class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
     }
 
     fun onBackPressed() {
+    }
+
+    override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
+        ToastCustom.makeText(activity, getString(message), ToastCustom.LENGTH_SHORT, toastType)
+    }
+
+    override fun showSendingFieldDropdown() {
+        fromContainer.fromArrowImage.visible()
+    }
+
+    override fun hideSendingFieldDropdown() {
+        fromContainer.fromArrowImage.gone()
+    }
+
+    override fun showReceivingDropdown() {
+        toContainer.toArrow.visible()
+    }
+
+    override fun hideReceivingDropdown() {
+        toContainer.toArrow.gone()
+    }
+
+    private fun setupFeesView() {
     }
 
     interface OnSendFragmentInteractionListener {
@@ -161,10 +261,13 @@ class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
         val ARGUMENT_FCTX_ID = "fctx_id"
         val ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route"
 
+        val SCAN_URI = 2010
+        val SCAN_PRIVX = 2011
+
         fun newInstance(scanData: String?,
                         scanRoute: String?,
-                        selectedAccountPosition: Int): SendFragment {
-            val fragment = SendFragment()
+                        selectedAccountPosition: Int): SendFragmentNew {
+            val fragment = SendFragmentNew()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, scanData)
             args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute)
@@ -176,8 +279,8 @@ class SendFragment    : BaseFragment<SendView, SendPresenter>(), SendView {
         fun newInstance(uri: String,
                         contactId: String,
                         contactMdid: String,
-                        fctxId: String): SendFragment {
-            val fragment = SendFragment()
+                        fctxId: String): SendFragmentNew {
+            val fragment = SendFragmentNew()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, uri)
             args.putString(ARGUMENT_CONTACT_ID, contactId)

@@ -4,7 +4,10 @@ import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
+import piuk.blockchain.android.data.ethereum.EthDataManager
+import piuk.blockchain.android.data.ethereum.EthWallet
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -12,6 +15,7 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import timber.log.Timber
 
 @Mockable
 class WalletAccountHelper(
@@ -19,7 +23,8 @@ class WalletAccountHelper(
         private val stringUtils: StringUtils,
         prefsUtil: PrefsUtil,
         exchangeRateFactory: ExchangeRateFactory,
-        private val currencyState: CurrencyState
+        private val currencyState: CurrencyState,
+        private val ethDataManager: EthDataManager
 ) {
     private val btcUnitType: Int by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC) }
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(btcUnitType) }
@@ -36,12 +41,21 @@ class WalletAccountHelper(
      *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getAccountItems() = mutableListOf<ItemAccount>().apply {
-        // V3
-        addAll(getHdAccounts())
-        // V2l
-        addAll(getLegacyAddresses())
-    }.toList()
+    fun getAccountItems(): List<ItemAccount> {
+
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> return mutableListOf<ItemAccount>().apply {
+                // V3
+                addAll(getHdAccounts())
+                // V2l
+                addAll(getLegacyAddresses())
+            }.toList()
+
+            else -> return mutableListOf<ItemAccount>().apply {
+                addAll(getEthAccount())
+            }.toList()
+        }
+    }
 
     /**
      * Returns a list of [ItemAccount] objects containing only HD accounts.
@@ -168,4 +182,40 @@ class WalletAccountHelper(
         }
     }
 
+    fun getDefaultAccount(): ItemAccount {
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> return getDefaultBtcAccount()
+            else -> return getDefaultEthAccount()
+        }
+    }
+
+    internal fun getDefaultBtcAccount(): ItemAccount {
+        val account = payloadManager.payload.hdWallets[0].accounts[payloadManager.payload.hdWallets[0].defaultAccountIdx]
+        return ItemAccount(
+                account.label,
+                getAccountBalance(account, btcExchangeRate, fiatUnit, btcUnit),
+                null,
+                getAccountAbsoluteBalance(account),
+                account,
+                account.xpub
+        )
+    }
+
+    internal fun getDefaultEthAccount(): ItemAccount {
+        val ethAccount = EthWallet.ethWallet?.account
+        return ItemAccount(
+                ethAccount?.label,
+                "0 ETH",
+                null,
+                0,
+                ethAccount,
+                ethAccount?.address)
+    }
+
+    fun getEthAccount(): Collection<ItemAccount> {
+
+        return mutableListOf<ItemAccount>().apply {
+            add(getDefaultEthAccount())
+        }
+    }
 }

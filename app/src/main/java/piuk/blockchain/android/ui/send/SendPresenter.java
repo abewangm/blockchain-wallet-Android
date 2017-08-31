@@ -69,14 +69,14 @@ import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 import timber.log.Timber;
 
-import static piuk.blockchain.android.ui.send.SendFragmentLegacy.ARGUMENT_CONTACT_ID;
-import static piuk.blockchain.android.ui.send.SendFragmentLegacy.ARGUMENT_CONTACT_MDID;
-import static piuk.blockchain.android.ui.send.SendFragmentLegacy.ARGUMENT_FCTX_ID;
-import static piuk.blockchain.android.ui.send.SendFragmentLegacy.ARGUMENT_SCAN_DATA;
-import static piuk.blockchain.android.ui.send.SendFragmentLegacy.ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_ID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_CONTACT_MDID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_FCTX_ID;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA;
+import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE;
 
 @SuppressWarnings("WeakerAccess")
-public class SendPresenterLegacy extends BasePresenter<SendViewLegacy> {
+public class SendPresenter extends BasePresenter<SendView> {
 
     private static final String PREF_WARN_ADVANCED_FEE = "pref_warn_advanced_fee";
     private static final String PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend";
@@ -108,22 +108,22 @@ public class SendPresenterLegacy extends BasePresenter<SendViewLegacy> {
     private CurrencyState currencyState;
 
     @Inject
-    SendPresenterLegacy(PrefsUtil prefsUtil,
-                        WalletAccountHelper walletAccountHelper,
-                        ExchangeRateFactory exchangeRateFactory,
-                        SSLVerifyUtil sslVerifyUtil,
-                        PrivateKeyFactory privateKeyFactory,
-                        PayloadManager payloadManager,
-                        StringUtils stringUtils,
-                        ContactsDataManager contactsDataManager,
-                        SendDataManager sendDataManager,
-                        PayloadDataManager payloadDataManager,
-                        DynamicFeeCache dynamicFeeCache,
-                        TransactionListDataManager transactionListDataManager,
-                        EnvironmentSettings environmentSettings,
-                        FeeDataManager feeDataManager,
-                        AccessState accessState,
-                        CurrencyState currencyState) {
+    SendPresenter(PrefsUtil prefsUtil,
+                  WalletAccountHelper walletAccountHelper,
+                  ExchangeRateFactory exchangeRateFactory,
+                  SSLVerifyUtil sslVerifyUtil,
+                  PrivateKeyFactory privateKeyFactory,
+                  PayloadManager payloadManager,
+                  StringUtils stringUtils,
+                  ContactsDataManager contactsDataManager,
+                  SendDataManager sendDataManager,
+                  PayloadDataManager payloadDataManager,
+                  DynamicFeeCache dynamicFeeCache,
+                  TransactionListDataManager transactionListDataManager,
+                  EnvironmentSettings environmentSettings,
+                  FeeDataManager feeDataManager,
+                  AccessState accessState,
+                  CurrencyState currencyState) {
 
         this.prefsUtil = prefsUtil;
         this.walletAccountHelper = walletAccountHelper;

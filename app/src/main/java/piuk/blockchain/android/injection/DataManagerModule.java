@@ -83,8 +83,9 @@ public class DataManagerModule {
                                                              PrefsUtil prefsUtil,
                                                              StringUtils stringUtils,
                                                              ExchangeRateFactory exchangeRateFactory,
-                                                             CurrencyState currencyState) {
-        return new WalletAccountHelper(payloadManager, stringUtils, prefsUtil, exchangeRateFactory, currencyState);
+                                                             CurrencyState currencyState,
+                                                             EthDataManager ethDataManager) {
+        return new WalletAccountHelper(payloadManager, stringUtils, prefsUtil, exchangeRateFactory, currencyState, ethDataManager);
     }
 
     @Provides

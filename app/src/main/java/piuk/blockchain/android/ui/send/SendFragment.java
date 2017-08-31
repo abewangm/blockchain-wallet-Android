@@ -63,7 +63,6 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.databinding.AlertWatchOnlySpendBinding;
 import piuk.blockchain.android.databinding.FragmentSendBinding;
-import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.account.SecondPasswordHandler;
@@ -90,7 +89,7 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
 
-public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresenterLegacy> implements SendViewLegacy {
+public class SendFragment extends BaseFragment<SendView, SendPresenter> implements SendView {
 
     //done
     public static final String ARGUMENT_SCAN_DATA = "scan_data";
@@ -101,12 +100,15 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
     public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
     //\done
 
+    //done
     private static final int SCAN_URI = 2010;
     private static final int SCAN_PRIVX = 2011;
+    //\done
+
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
     @Inject
-    SendPresenterLegacy sendPresenter;
+    SendPresenter sendPresenter;
 
     @Thunk FragmentSendBinding binding;
     @Thunk AlertDialog transactionSuccessDialog;
@@ -144,10 +146,10 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
     }
 
     //done
-    public static SendFragmentLegacy newInstance(@Nullable String scanData,
-                                                 String scanRoute,
-                                                 int selectedAccountPosition) {
-        SendFragmentLegacy fragment = new SendFragmentLegacy();
+    public static SendFragment newInstance(@Nullable String scanData,
+                                           String scanRoute,
+                                           int selectedAccountPosition) {
+        SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
         args.putString(ARGUMENT_SCAN_DATA, scanData);
         args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
@@ -157,11 +159,11 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
     }
 
     //done
-    public static SendFragmentLegacy newInstance(String uri,
-                                                 String contactId,
-                                                 String contactMdid,
-                                                 String fctxId) {
-        SendFragmentLegacy fragment = new SendFragmentLegacy();
+    public static SendFragment newInstance(String uri,
+                                           String contactId,
+                                           String contactMdid,
+                                           String fctxId) {
+        SendFragment fragment = new SendFragment();
         Bundle args = new Bundle();
         args.putString(ARGUMENT_SCAN_DATA, uri);
         args.putString(ARGUMENT_CONTACT_ID, contactId);
@@ -192,6 +194,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
         return binding.getRoot();
     }
 
+    //done
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -206,7 +209,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
     @Override
     public void onResume() {
         super.onResume();
-        setupToolbar();
+        setupToolbar();//done
         IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
         getPresenter().updateUI();
@@ -218,6 +221,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
         super.onPause();
     }
 
+    //done
     private void setupToolbar() {
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
             ((BaseAuthActivity) getActivity()).setupToolbar(
@@ -235,6 +239,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    //done
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -361,6 +366,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
         showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
     }
 
+    //Done
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -375,6 +381,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
         }
     }
 
+    //Done
     private void startScanActivity(int code) {
         if (!new AppUtil(getActivity()).isCameraOpen()) {
             Intent intent = new Intent(getActivity(), CaptureActivity.class);
@@ -533,6 +540,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
         }
     }
 
+    //Done
     private void startFromFragment() {
         AccountChooserActivity.startForResult(this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
@@ -542,7 +550,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
 
     // done
     private void setupReceiveToView() {
-        binding.toContainer.toArrowImage.setOnClickListener(v ->
+        binding.toContainer.toArrow.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                         PaymentRequestType.SEND,
@@ -554,8 +562,8 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
         contactsPayment = true;
         binding.amountContainer.amountBtc.setEnabled(false);
         binding.amountContainer.amountFiat.setEnabled(false);
-        binding.toContainer.toArrowImage.setVisibility(View.GONE);
-        binding.toContainer.toArrowImage.setOnClickListener(null);
+        binding.toContainer.toArrow.setVisibility(View.GONE);
+        binding.toContainer.toArrow.setOnClickListener(null);
         binding.toContainer.toAddressEditTextView.setEnabled(false);
         binding.progressBarMaxAvailable.setVisibility(View.GONE);
         binding.max.setVisibility(View.GONE);
@@ -636,6 +644,7 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
         binding.amountContainer.amountBtc.setText(textFromSatoshis);
     }
 
+    //done
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
@@ -1085,12 +1094,12 @@ public class SendFragmentLegacy extends BaseFragment<SendViewLegacy, SendPresent
     }
 
     @Override
-    protected SendPresenterLegacy createPresenter() {
+    protected SendPresenter createPresenter() {
         return sendPresenter;
     }
 
     @Override
-    protected SendViewLegacy getMvpView() {
+    protected SendView getMvpView() {
         return this;
     }
 

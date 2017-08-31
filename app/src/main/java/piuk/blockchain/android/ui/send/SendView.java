@@ -10,7 +10,7 @@ import piuk.blockchain.android.ui.account.PaymentConfirmationDetails;
 import piuk.blockchain.android.ui.base.View;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
-interface SendViewLegacy extends View {
+interface SendView extends View {
 
     Bundle getFragmentBundle();
 
