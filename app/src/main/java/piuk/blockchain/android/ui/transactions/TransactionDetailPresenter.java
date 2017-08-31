@@ -1,26 +1,40 @@
 package piuk.blockchain.android.ui.transactions;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.transactions.Displayable;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -37,37 +51,40 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
 
     private static final int REQUIRED_CONFIRMATIONS = 3;
 
-    private MonetaryUtil mMonetaryUtil;
+    private MonetaryUtil monetaryUtil;
     private TransactionHelper transactionHelper;
-    private PrefsUtil mPrefsUtil;
-    private PayloadDataManager mPayloadDataManager;
-    private StringUtils mStringUtils;
-    private TransactionListDataManager mTransactionListDataManager;
-    private ExchangeRateFactory mExchangeRateFactory;
-    private ContactsDataManager mContactsDataManager;
+    private PrefsUtil prefsUtil;
+    private PayloadDataManager payloadDataManager;
+    private StringUtils stringUtils;
+    private TransactionListDataManager transactionListDataManager;
+    private ExchangeRateFactory exchangeRateFactory;
+    private ContactsDataManager contactsDataManager;
+    private EthDataManager ethDataManager;
 
-    private String mFiatType;
+    private String fiatType;
 
-    @VisibleForTesting Displayable mTransaction;
+    @VisibleForTesting Displayable displayable;
 
     @Inject
     public TransactionDetailPresenter(TransactionHelper transactionHelper,
-                                      PrefsUtil mPrefsUtil,
-                                      PayloadDataManager mPayloadDataManager,
-                                      StringUtils mStringUtils,
-                                      TransactionListDataManager mTransactionListDataManager,
-                                      ExchangeRateFactory mExchangeRateFactory,
-                                      ContactsDataManager mContactsDataManager) {
+                                      PrefsUtil prefsUtil,
+                                      PayloadDataManager payloadDataManager,
+                                      StringUtils stringUtils,
+                                      TransactionListDataManager transactionListDataManager,
+                                      ExchangeRateFactory exchangeRateFactory,
+                                      ContactsDataManager contactsDataManager,
+                                      EthDataManager ethDataManager) {
 
         this.transactionHelper = transactionHelper;
-        mMonetaryUtil = new MonetaryUtil(mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-        mFiatType = mPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        this.mPrefsUtil = mPrefsUtil;
-        this.mPayloadDataManager = mPayloadDataManager;
-        this.mStringUtils = mStringUtils;
-        this.mTransactionListDataManager = mTransactionListDataManager;
-        this.mExchangeRateFactory = mExchangeRateFactory;
-        this.mContactsDataManager = mContactsDataManager;
+        monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+        fiatType = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
+        this.prefsUtil = prefsUtil;
+        this.payloadDataManager = payloadDataManager;
+        this.stringUtils = stringUtils;
+        this.transactionListDataManager = transactionListDataManager;
+        this.exchangeRateFactory = exchangeRateFactory;
+        this.contactsDataManager = contactsDataManager;
+        this.ethDataManager = ethDataManager;
     }
 
     @Override
@@ -76,14 +93,14 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)) {
             int transactionPosition = pageIntent.getIntExtra(KEY_TRANSACTION_LIST_POSITION, -1);
             if (transactionPosition != -1) {
-                mTransaction = mTransactionListDataManager.getTransactionList().get(transactionPosition);
-                updateUiFromTransaction(mTransaction);
+                displayable = transactionListDataManager.getTransactionList().get(transactionPosition);
+                updateUiFromTransaction(displayable);
             } else {
                 getView().pageFinish();
             }
         } else if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_HASH)) {
             getCompositeDisposable().add(
-                    mTransactionListDataManager.getTxFromHash(pageIntent.getStringExtra(KEY_TRANSACTION_HASH))
+                    transactionListDataManager.getTxFromHash(pageIntent.getStringExtra(KEY_TRANSACTION_HASH))
                             .subscribe(
                                     this::updateUiFromTransaction,
                                     throwable -> getView().pageFinish()));
@@ -92,46 +109,86 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         }
     }
 
-    public void updateTransactionNote(String description) {
-        getCompositeDisposable().add(
-                mPayloadDataManager.updateTransactionNotes(mTransaction.getHash(), description)
-                        .subscribe(() -> {
-                            getView().showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
-                            getView().setDescription(description);
-                        }, throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+    void updateTransactionNote(String description) {
+        Completable completable;
+        if (displayable.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            completable = payloadDataManager.updateTransactionNotes(displayable.getHash(), description);
+        } else {
+            completable = ethDataManager.updateTransactionNotes(displayable.getHash(), description);
+        }
+
+        completable.compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(() -> {
+                    getView().showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+                    getView().setDescription(description);
+                }, throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR));
     }
 
-    private void updateUiFromTransaction(Displayable transactionSummary) {
-        getView().setTransactionType(transactionSummary.getDirection());
-        setTransactionColor(transactionSummary);
-//        setTransactionAmountInBtc(transactionSummary.getTotal());
-        setConfirmationStatus(transactionSummary.getHash(), transactionSummary.getConfirmations());
-        setTransactionNote(transactionSummary.getHash());
-        setDate(transactionSummary.getTimeStamp());
-//        setFee(transactionSummary.getFee());
+    private void updateUiFromTransaction(Displayable displayable) {
+        getView().setTransactionType(displayable.getDirection());
+        setTransactionColor(displayable);
+        setTransactionAmountInBtcOrEth(displayable.getCryptoCurrency(), displayable.getTotal());
+        setConfirmationStatus(displayable.getCryptoCurrency(), displayable.getHash(), displayable.getConfirmations());
+        setTransactionNote(displayable.getHash());
+        setDate(displayable.getTimeStamp());
+        setFee(displayable.getCryptoCurrency(), displayable.getFee());
 
-//        Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> pair =
-//                transactionHelper.filterNonChangeAddresses(transactionSummary);
+        if (displayable.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            handleBtcToAndFrom(displayable);
+        } else {
+            handleEthToAndFrom(displayable);
+        }
+
+        getCompositeDisposable().add(
+                getTransactionValueString(fiatType, displayable)
+                        .subscribe(
+                                value -> getView().setTransactionValueFiat(value),
+                                throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+
+        getView().onDataLoaded();
+        getView().setIsDoubleSpend(displayable.getDoubleSpend());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private void handleEthToAndFrom(Displayable displayable) {
+        String fromAddress = displayable.getInputsMap().keySet().iterator().next();
+        String toAddress = displayable.getOutputsMap().keySet().iterator().next();
+        String ethAddress = ethDataManager.getEthAddress().getAccount();
+        if (fromAddress.equals(ethAddress)) {
+            fromAddress = stringUtils.getString(R.string.eth_default_account_label);
+        }
+        if (toAddress.equals(ethAddress)) {
+            toAddress = stringUtils.getString(R.string.eth_default_account_label);
+        }
+
+        getView().setFromAddress(fromAddress);
+        getView().setToAddresses(Collections.singletonList(new RecipientModel(
+                toAddress, "", "")));
+    }
+
+    private void handleBtcToAndFrom(Displayable displayable) {
+        Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> pair =
+                transactionHelper.filterNonChangeAddresses(displayable);
 
         // From Address
-//        HashMap<String, BigInteger> inputMap = pair.getLeft();
+        HashMap<String, BigInteger> inputMap = pair.getLeft();
         ArrayList<String> labelList = new ArrayList<>();
-//        Set<Entry<String, BigInteger>> entrySet = inputMap.entrySet();
-//        for (Entry<String, BigInteger> set : entrySet) {
-//            String label = mPayloadDataManager.addressToLabel(set.getKey());
-//            if (!labelList.contains(label)) labelList.add(label);
-//        }
+        Set<Map.Entry<String, BigInteger>> entrySet = inputMap.entrySet();
+        for (Map.Entry<String, BigInteger> set : entrySet) {
+            String label = payloadDataManager.addressToLabel(set.getKey());
+            if (!labelList.contains(label)) labelList.add(label);
+        }
 
         String inputMapString = org.apache.commons.lang3.StringUtils.join(labelList.toArray(), "\n\n");
         if (inputMapString.isEmpty()) {
-            inputMapString = mStringUtils.getString(R.string.transaction_detail_coinbase);
+            inputMapString = stringUtils.getString(R.string.transaction_detail_coinbase);
         }
 
         ContactTransactionDisplayModel displayModel = null;
 
-        if (mContactsDataManager.getTransactionDisplayMap().containsKey(transactionSummary.getHash())) {
+        if (contactsDataManager.getTransactionDisplayMap().containsKey(displayable.getHash())) {
             displayModel =
-                    mContactsDataManager.getTransactionDisplayMap().get(transactionSummary.getHash());
+                    contactsDataManager.getTransactionDisplayMap().get(displayable.getHash());
 
             inputMapString = displayModel.getContactName();
         }
@@ -148,74 +205,94 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         }
 
         // To Address
-//        HashMap<String, BigInteger> outputMap = pair.getRight();
+        HashMap<String, BigInteger> outputMap = pair.getRight();
         ArrayList<RecipientModel> recipients = new ArrayList<>();
 
-//        for (Entry<String, BigInteger> item : outputMap.entrySet()) {
-//            RecipientModel recipientModel = new RecipientModel(
-//                    mPayloadDataManager.addressToLabel(item.getKey()),
-//                    mMonetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
-//                    getDisplayUnits());
-//
-//            if (displayModel != null && transactionSummary.getDirection().equals(Direction.SENT)) {
-//                recipientModel.setAddress(displayModel.getContactName());
-//            }
-//
-//            recipients.add(recipientModel);
-//        }
-//
-//        getView().setToAddresses(recipients);
-//
-//        if (displayModel != null) {
-//            getView().setTransactionNote(displayModel.getNote());
-//        }
-//
-        getCompositeDisposable().add(
-                getTransactionValueString(mFiatType, transactionSummary)
-                        .subscribe(
-                                value -> getView().setTransactionValueFiat(value),
-                                throwable -> getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)));
+        for (Map.Entry<String, BigInteger> item : outputMap.entrySet()) {
+            RecipientModel recipientModel = new RecipientModel(
+                    payloadDataManager.addressToLabel(item.getKey()),
+                    monetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
+                    getDisplayUnits());
 
-        getView().onDataLoaded();
-        getView().setIsDoubleSpend(transactionSummary.getDoubleSpend());
+            if (displayModel != null && displayable.getDirection().equals(Direction.SENT)) {
+                recipientModel.setAddress(displayModel.getContactName());
+            }
+
+            recipients.add(recipientModel);
+        }
+
+        getView().setToAddresses(recipients);
+        if (displayModel != null) {
+            getView().setTransactionNote(displayModel.getNote());
+        }
     }
 
-    private void setFee(BigInteger fee) {
-        String formattedFee = (mMonetaryUtil.getDisplayAmountWithFormatting(fee.longValue()) + " " + getDisplayUnits());
-        getView().setFee(formattedFee);
+    private void setFee(CryptoCurrencies currency, BigInteger fee) {
+        if (currency == CryptoCurrencies.BTC) {
+            String formattedFee = (monetaryUtil.getDisplayAmountWithFormatting(fee.longValue()) + " " + getDisplayUnits());
+            getView().setFee(formattedFee);
+        } else {
+            BigDecimal value = new BigDecimal(fee)
+                    .divide(BigDecimal.valueOf(1e18), 8, RoundingMode.HALF_UP);
+            NumberFormat format = NumberFormat.getInstance();
+            format.setMaximumFractionDigits(8);
+            getView().setFee(format.format(value.doubleValue()) + " ETH");
+        }
     }
 
-    private void setTransactionAmountInBtc(BigInteger total) {
-        String amountBtc = (
-                mMonetaryUtil.getDisplayAmountWithFormatting(
-                        total.abs().longValue())
-                        + " "
-                        + getDisplayUnits());
+    private void setTransactionAmountInBtcOrEth(CryptoCurrencies currency, BigInteger total) {
+        if (currency == CryptoCurrencies.ETHER) {
+            BigDecimal value = new BigDecimal(total)
+                    .divide(BigDecimal.valueOf(1e18), 8, RoundingMode.HALF_UP);
+            NumberFormat format = NumberFormat.getInstance();
+            format.setMaximumFractionDigits(8);
+            String amountEth = (format.format(value.doubleValue()) + " ETH");
+            getView().setTransactionValueBtc(amountEth);
+        } else {
+            String amountBtc = (
+                    monetaryUtil.getDisplayAmountWithFormatting(
+                            total.abs().longValue())
+                            + " "
+                            + getDisplayUnits());
 
-        getView().setTransactionValueBtc(amountBtc);
+            getView().setTransactionValueBtc(amountBtc);
+        }
     }
 
     private void setTransactionNote(String txHash) {
-        String notes = mPayloadDataManager.getTransactionNotes(txHash);
+        String notes;
+        if (displayable.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            notes = payloadDataManager.getTransactionNotes(txHash);
+        } else {
+            notes = ethDataManager.getTransactionNotes(displayable.getHash());
+        }
         getView().setDescription(notes);
     }
 
     public String getTransactionNote() {
-        return mPayloadDataManager.getTransactionNotes(mTransaction.getHash());
+        if (displayable.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return payloadDataManager.getTransactionNotes(displayable.getHash());
+        } else {
+            return ethDataManager.getTransactionNotes(displayable.getHash());
+        }
     }
 
     public String getTransactionHash() {
-        return mTransaction.getHash();
+        return displayable.getHash();
+    }
+
+    public CryptoCurrencies getTxType() {
+        return displayable.getCryptoCurrency();
     }
 
     @VisibleForTesting
-    void setConfirmationStatus(String txHash, long confirmations) {
+    void setConfirmationStatus(CryptoCurrencies cryptoCurrency, String txHash, long confirmations) {
         if (confirmations >= REQUIRED_CONFIRMATIONS) {
-            getView().setStatus(mStringUtils.getString(R.string.transaction_detail_confirmed), txHash);
+            getView().setStatus(cryptoCurrency, stringUtils.getString(R.string.transaction_detail_confirmed), txHash);
         } else {
-            String pending = mStringUtils.getString(R.string.transaction_detail_pending);
+            String pending = stringUtils.getString(R.string.transaction_detail_pending);
             pending = String.format(Locale.getDefault(), pending, confirmations, REQUIRED_CONFIRMATIONS);
-            getView().setStatus(pending, txHash);
+            getView().setStatus(cryptoCurrency, pending, txHash);
         }
     }
 
@@ -247,31 +324,42 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
 
     @VisibleForTesting
     Observable<String> getTransactionValueString(String currency, Displayable transaction) {
-        return mExchangeRateFactory.getBtcHistoricPrice(
-                transaction.getTotal().longValue(),
-                currency,
-                transaction.getTimeStamp() * 1000)
-                .map(aDouble -> {
-                    int stringId = -1;
-                    switch (transaction.getDirection()) {
-                        case TRANSFERRED:
-                            stringId = R.string.transaction_detail_value_at_time_transferred;
-                            break;
-                        case SENT:
-                            stringId = R.string.transaction_detail_value_at_time_sent;
-                            break;
-                        case RECEIVED:
-                            stringId = R.string.transaction_detail_value_at_time_received;
-                            break;
-                    }
-                    return mStringUtils.getString(stringId)
-                            + mExchangeRateFactory.getSymbol(mFiatType)
-                            + mMonetaryUtil.getFiatFormat(mFiatType).format(aDouble);
-                });
+        if (transaction.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return exchangeRateFactory.getBtcHistoricPrice(
+                    transaction.getTotal().longValue(),
+                    currency,
+                    transaction.getTimeStamp() * 1000)
+                    .map(aDouble -> getTransactionString(transaction, aDouble));
+        } else {
+            return exchangeRateFactory.getEthHistoricPrice(
+                    transaction.getTotal(),
+                    currency,
+                    transaction.getTimeStamp() * 1000)
+                    .map(aDouble -> getTransactionString(transaction, aDouble));
+        }
+    }
+
+    @NonNull
+    private String getTransactionString(Displayable transaction, Double aDouble) {
+        int stringId = -1;
+        switch (transaction.getDirection()) {
+            case TRANSFERRED:
+                stringId = R.string.transaction_detail_value_at_time_transferred;
+                break;
+            case SENT:
+                stringId = R.string.transaction_detail_value_at_time_sent;
+                break;
+            case RECEIVED:
+                stringId = R.string.transaction_detail_value_at_time_received;
+                break;
+        }
+        return stringUtils.getString(stringId)
+                + exchangeRateFactory.getSymbol(fiatType)
+                + monetaryUtil.getFiatFormat(fiatType).format(aDouble);
     }
 
     private String getDisplayUnits() {
-        return mMonetaryUtil.getBtcUnits()[mPrefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
+        return monetaryUtil.getBtcUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)];
     }
 
 }

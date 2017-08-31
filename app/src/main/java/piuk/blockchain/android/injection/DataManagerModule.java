@@ -26,6 +26,7 @@ import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
+import piuk.blockchain.android.data.ethereum.EthDataStore;
 import piuk.blockchain.android.data.exchange.BuyConditions;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeService;
@@ -135,8 +136,9 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected EthDataManager provideEthDataManager(PayloadManager payloadManager,
+                                                   EthDataStore ethDataStore,
                                                    RxBus rxBus) {
-        return new EthDataManager(payloadManager, new EthAccountApi(), rxBus);
+        return new EthDataManager(payloadManager, new EthAccountApi(), ethDataStore, rxBus);
     }
 
     @Provides
