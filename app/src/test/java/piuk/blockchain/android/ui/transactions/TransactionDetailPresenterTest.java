@@ -347,7 +347,7 @@ public class TransactionDetailPresenterTest extends RxTest {
         // Arrange
         when(payloadDataManager.updateTransactionNotes(anyString(), anyString()))
                 .thenReturn(Completable.complete());
-        subject.mTransaction = txMoved;
+        subject.displayable = txMoved;
         // Act
         subject.updateTransactionNote("note");
         // Assert
@@ -362,7 +362,7 @@ public class TransactionDetailPresenterTest extends RxTest {
         // Arrange
         when(payloadDataManager.updateTransactionNotes(anyString(), anyString()))
                 .thenReturn(Completable.error(new Throwable()));
-        subject.mTransaction = txMoved;
+        subject.displayable = txMoved;
         // Act
         subject.updateTransactionNote("note");
         // Assert
@@ -375,7 +375,7 @@ public class TransactionDetailPresenterTest extends RxTest {
     public void getTransactionNote() throws Exception {
         // Arrange
         when(payloadDataManager.getTransactionNotes(txSent.getHash())).thenReturn("note");
-        subject.mTransaction = txSent;
+        subject.displayable = txSent;
         // Act
         String value = subject.getTransactionNote();
         // Assert
@@ -385,7 +385,7 @@ public class TransactionDetailPresenterTest extends RxTest {
     @Test
     public void getTransactionHash() throws Exception {
         // Arrange
-        subject.mTransaction = txSent;
+        subject.displayable = txSent;
         // Act
         String value = subject.getTransactionHash();
         // Assert

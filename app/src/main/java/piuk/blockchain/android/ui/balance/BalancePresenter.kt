@@ -67,10 +67,7 @@ class BalancePresenter @Inject constructor(
         subscribeToEvents()
         storeSwipeReceiveAddresses()
 
-        // Set up Ethereum wallet if necessary
-        ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
-                .doOnNext { ethDataManager.storeEthAccountAddress(it.account.address) }
-                .flatMap { ethDataManager.fetchEthAddress() }
+        ethDataManager.fetchEthAddress()
                 .doOnError { Timber.e(it) }
                 .onExceptionResumeNext { Observable.empty<EthAddressResponse>() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))

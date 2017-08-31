@@ -216,7 +216,6 @@ class DisplayableDelegate<in T>(
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         } else {
-            // TODO: ETH Fiat value
             spannable = Spannable.Factory.getInstance().newSpannable(
                     "${monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount))} $fiatString")
             spannable.setSpan(
