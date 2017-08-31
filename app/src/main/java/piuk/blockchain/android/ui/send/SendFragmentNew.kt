@@ -80,17 +80,17 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     override fun getMvpView() = this
 
     private fun setTabs() {
-        tabs.apply {
-            addTab(tabs.newTab().setText(R.string.bitcoin))
-            addTab(tabs.newTab().setText(R.string.ether))
-            setOnTabSelectedListener {
-                if (it == 0) {
-                    presenter.onBitcoinChosen()
-                } else {
-                    presenter.onEtherChosen()
-                }
-            }
-        }
+//        tabs.apply {
+//            addTab(tabs.newTab().setText(R.string.bitcoin))
+//            addTab(tabs.newTab().setText(R.string.ether))
+//            setOnTabSelectedListener {
+//                if (it == 0) {
+//                    presenter.onBitcoinChosen()
+//                } else {
+//                    presenter.onEtherChosen()
+//                }
+//            }
+//        }
     }
 
     private fun setupToolbar() {

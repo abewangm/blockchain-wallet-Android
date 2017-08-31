@@ -7,7 +7,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.ethereum.EthDataManager
-import piuk.blockchain.android.data.ethereum.EthWallet
+import piuk.blockchain.android.data.ethereum.EthDataStore
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -24,7 +24,8 @@ class WalletAccountHelper(
         prefsUtil: PrefsUtil,
         exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState,
-        private val ethDataManager: EthDataManager
+        private val ethDataManager: EthDataManager,
+        private val ethDataStore: EthDataStore
 ) {
     private val btcUnitType: Int by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC) }
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(btcUnitType) }
@@ -202,7 +203,7 @@ class WalletAccountHelper(
     }
 
     internal fun getDefaultEthAccount(): ItemAccount {
-        val ethAccount = EthWallet.ethWallet?.account
+        val ethAccount = ethDataStore.ethWallet?.account
         return ItemAccount(
                 ethAccount?.label,
                 "0 ETH",
