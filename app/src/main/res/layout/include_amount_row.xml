@@ -42,8 +42,8 @@
                     android:maxLength="17"
                     android:paddingRight="8dp"
                     android:selectAllOnFocus="true"
-                    android:textColor="@color/black"
-                    android:textCursorDrawable="@null">
+                    android:textAppearance="?android:attr/textAppearanceMediumInverse"
+                    android:textColor="@color/black">
 
                     <requestFocus />
                 </EditText>
@@ -79,8 +79,8 @@
                     android:maxLength="17"
                     android:paddingRight="8dp"
                     android:selectAllOnFocus="true"
-                    android:textColor="@color/black"
-                    android:textCursorDrawable="@null" />
+                    android:textAppearance="?android:attr/textAppearanceMediumInverse"
+                    android:textColor="@color/black" />
 
             </LinearLayout>
         </LinearLayout>

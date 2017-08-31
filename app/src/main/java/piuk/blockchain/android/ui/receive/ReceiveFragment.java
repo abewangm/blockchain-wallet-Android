@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.receive;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -23,7 +25,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,7 +32,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -47,9 +47,7 @@ import org.bitcoinj.uri.BitcoinURI;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -71,10 +69,11 @@ import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.contacts.IntroducingContactsPromptDialog;
+import piuk.blockchain.android.ui.customviews.NumericKeyboard;
+import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
-import piuk.blockchain.android.util.CommaEnabledDigitsKeyListener;
-import piuk.blockchain.android.util.EditTextUtils;
+import piuk.blockchain.android.util.EditTextFormatUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -83,7 +82,8 @@ import timber.log.Timber;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM;
 import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE;
 
-public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter> implements ReceiveView {
+public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter> implements
+        ReceiveView, NumericKeyboardCallback {
 
     private static final String ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position";
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
@@ -91,6 +91,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     @Inject ReceivePresenter receivePresenter;
     @Thunk FragmentReceiveBinding binding;
     private BottomSheetDialog bottomSheetDialog;
+    private NumericKeyboard customKeypad;
     private OnReceiveFragmentInteractionListener listener;
 
     @Thunk boolean textChangeAllowed = true;
@@ -149,6 +150,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_receive, container, false);
         onViewReady();
         setupLayout();
+        setCustomKeypad();
         selectAccount(selectedAccountPosition != -1
                 ? selectedAccountPosition : getPresenter().getDefaultAccountPosition());
 
@@ -166,6 +168,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         }
     }
 
+    @SuppressLint("NewApi")
     private void setupLayout() {
         if (getPresenter().getReceiveToList().size() == 1) {
             binding.toContainer.toConstraintLayout.setVisibility(View.GONE);
@@ -173,18 +176,24 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         }
 
         // BTC Field
-        binding.amountContainer.amountBtc.setKeyListener(
-                CommaEnabledDigitsKeyListener.getInstance(false, true));
         binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountBtc.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
 
         // Fiat Field
         binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountFiat.setKeyListener(
-                CommaEnabledDigitsKeyListener.getInstance(false, true));
-        binding.amountContainer.amountFiat.setFilters(new InputFilter[]{EditTextUtils.getDecimalInputFilter()});
         binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            binding.amountContainer.amountFiat.setShowSoftInputOnFocus(false);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
 
         // Units
         binding.amountContainer.currencyBtc.setText(getPresenter().getCurrencyHelper().getBtcUnit());
@@ -237,8 +246,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             getPresenter().onSendToContactClicked();
         });
 
-        binding.buttonRequestPayment.setOnClickListener(v ->
-        {
+        binding.buttonRequestPayment.setOnClickListener(v -> {
             if (getPresenter().getSelectedContactId() == null) {
                 showToast(getString(R.string.contact_select_first), ToastCustom.TYPE_ERROR);
             } else if (!getPresenter().isValidAmount(binding.amountContainer.amountBtc.getText().toString())) {
@@ -265,24 +273,17 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     private TextWatcher btcTextWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
-            String input = s.toString();
-
             binding.amountContainer.amountBtc.removeTextChangedListener(this);
-            NumberFormat btcFormat = NumberFormat.getInstance(Locale.getDefault());
-            btcFormat.setMaximumFractionDigits(getPresenter().getCurrencyHelper().getMaxBtcDecimalLength() + 1);
-            btcFormat.setMinimumFractionDigits(0);
-
-            s = formatEditable(s, input, getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(), binding.amountContainer.amountBtc);
+            s = EditTextFormatUtil.formatEditable(s,
+                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
+                    binding.amountContainer.amountBtc,
+                    getDefaultDecimalSeparator());
 
             binding.amountContainer.amountBtc.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                // Remove any possible decimal separators and replace with the localised version
-                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
-                        .replace(",", getDefaultDecimalSeparator());
-                getPresenter().updateFiatTextField(sanitisedString);
-
+                getPresenter().updateFiatTextField(s.toString());
                 textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
             }
@@ -302,25 +303,18 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     private TextWatcher fiatTextWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
-            String input = s.toString();
-
             binding.amountContainer.amountFiat.removeTextChangedListener(this);
             int maxLength = 2;
-            NumberFormat fiatFormat = NumberFormat.getInstance(Locale.getDefault());
-            fiatFormat.setMaximumFractionDigits(maxLength + 1);
-            fiatFormat.setMinimumFractionDigits(0);
-
-            s = formatEditable(s, input, maxLength, binding.amountContainer.amountFiat);
+            s = EditTextFormatUtil.formatEditable(s,
+                    maxLength,
+                    binding.amountContainer.amountFiat,
+                    getDefaultDecimalSeparator());
 
             binding.amountContainer.amountFiat.addTextChangedListener(this);
 
             if (textChangeAllowed) {
                 textChangeAllowed = false;
-                // Remove any possible decimal separators and replace with the localised version
-                String sanitisedString = s.toString().replace(".", getDefaultDecimalSeparator())
-                        .replace(",", getDefaultDecimalSeparator());
-                getPresenter().updateBtcTextField(sanitisedString);
-
+                getPresenter().updateBtcTextField(s.toString());
                 textChangeSubject.onNext(selectedAccountPosition);
                 textChangeAllowed = true;
             }
@@ -336,33 +330,6 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
             // No-op
         }
     };
-
-    @Thunk
-    Editable formatEditable(Editable s, String input, int maxLength, EditText editText) {
-        try {
-            if (input.contains(".")) {
-                return getEditable(s, input, maxLength, editText, input.indexOf("."));
-            } else if (input.contains(",")) {
-                return getEditable(s, input, maxLength, editText, input.indexOf(","));
-            }
-        } catch (NumberFormatException e) {
-            Timber.e(e);
-        }
-        return s;
-    }
-
-    private Editable getEditable(Editable s, String input, int maxLength, EditText editText, int index) {
-        String dec = input.substring(index);
-        if (!dec.isEmpty()) {
-            dec = dec.substring(1);
-            if (dec.length() > maxLength) {
-                editText.setText(input.substring(0, input.length() - 1));
-                editText.setSelection(editText.getText().length());
-                s = editText.getEditableText();
-            }
-        }
-        return s;
-    }
 
     @Thunk
     String getDefaultDecimalSeparator() {
@@ -468,6 +435,7 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     @Override
     public void onResume() {
         super.onResume();
+        closeKeypad();
         setupToolbar();
         getPresenter().updateAccountList();
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, intentFilter);
@@ -672,14 +640,18 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     }
 
     private void handleBackPressed() {
-        if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(getContext());
-            return;
+        if (isKeyboardVisible()) {
+            closeKeypad();
         } else {
-            onExitConfirmToast();
-        }
+            if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                AccessState.getInstance().logout(getContext());
+                return;
+            } else {
+                onExitConfirmToast();
+            }
 
-        backPressed = System.currentTimeMillis();
+            backPressed = System.currentTimeMillis();
+        }
     }
 
     public void onExitConfirmToast() {
@@ -696,6 +668,27 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
         if (listener != null) {
             listener.onReceiveFragmentClose();
         }
+    }
+
+    private void setCustomKeypad() {
+        customKeypad = binding.keyboard;
+        customKeypad.setCallback(this);
+        customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
+
+        // Enable custom keypad and disables default keyboard from popping up
+        customKeypad.enableOnView(binding.amountContainer.amountBtc);
+        customKeypad.enableOnView(binding.amountContainer.amountFiat);
+
+        binding.amountContainer.amountBtc.setText("");
+        binding.amountContainer.amountBtc.requestFocus();
+    }
+
+    private void closeKeypad() {
+        customKeypad.setNumpadVisibility(View.GONE);
+    }
+
+    public boolean isKeyboardVisible() {
+        return customKeypad.isVisible();
     }
 
     @Override
@@ -722,6 +715,46 @@ public class ReceiveFragment extends BaseFragment<ReceiveView, ReceivePresenter>
     public void onDetach() {
         super.onDetach();
         listener = null;
+    }
+
+    @Override
+    public void onKeypadClose() {
+        // Show bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+        }
+
+        // Resize activity to default
+        binding.scrollView.setPadding(0, 0, 0, 0);
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                CoordinatorLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.setMargins(0,
+                0,
+                0,
+                (int) getActivity().getResources().getDimension(R.dimen.action_bar_height));
+        binding.scrollView.setLayoutParams(layoutParams);
+    }
+
+    @Override
+    public void onKeypadOpen() {
+        // Hide bottom nav if applicable
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+        }
+    }
+
+    @Override
+    public void onKeypadOpenCompleted() {
+        // Resize activity around view
+        int translationY = binding.keyboard.getHeight();
+        binding.scrollView.setPadding(0, 0, 0, translationY);
+
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                CoordinatorLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.setMargins(0, 0, 0, 0);
+        binding.scrollView.setLayoutParams(layoutParams);
     }
 
     public interface OnReceiveFragmentInteractionListener {

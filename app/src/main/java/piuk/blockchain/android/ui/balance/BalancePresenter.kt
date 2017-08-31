@@ -130,7 +130,7 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun setViewType(isBtc: Boolean) {
-        currencyState.isDisplayingCryptoCurrency = isBtc
+        currencyState.setDisplayingCryptoCurrency(isBtc);
         view.onViewTypeChanged(isBtc, getBtcUnitType())
         if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
             view.onTotalBalanceUpdated(

@@ -1,10 +1,11 @@
 package piuk.blockchain.android.ui.backup.transfer
 
+import android.annotation.SuppressLint
 import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.payload.data.LegacyAddress
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -41,6 +42,7 @@ class ConfirmFundsTransferPresenter @Inject constructor(
      *
      * @param secondPassword The user's double encryption password if necessary
      */
+    @SuppressLint("VisibleForTests")
     internal fun sendPayment(secondPassword: String?) {
         val archiveAll = view.getIfArchiveChecked()
 
@@ -50,7 +52,7 @@ class ConfirmFundsTransferPresenter @Inject constructor(
                     view.showProgressDialog()
                 }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doAfterTerminate { view.hideProgressDialog() }
+                .doOnTerminate { view.hideProgressDialog() }
                 .subscribe({
                     view.showToast(R.string.transfer_confirmed, ToastCustom.TYPE_OK)
                     if (archiveAll) {
@@ -116,7 +118,7 @@ class ConfirmFundsTransferPresenter @Inject constructor(
         payloadDataManager.syncPayloadWithServer()
                 .doOnSubscribe { view.showProgressDialog() }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doAfterTerminate {
+                .doOnTerminate {
                     view.hideProgressDialog()
                     view.dismissDialog()
                 }
@@ -125,6 +127,7 @@ class ConfirmFundsTransferPresenter @Inject constructor(
                         { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
     }
 
+    @SuppressLint("VisibleForTests")
     private fun updateToAddress(indexOfReceiveAccount: Int) {
         fundsDataManager.getTransferableFundTransactionList(indexOfReceiveAccount)
                 .doOnSubscribe { view.setPaymentButtonEnabled(false) }

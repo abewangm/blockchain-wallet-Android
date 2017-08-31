@@ -107,11 +107,14 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void initPrompts(Context context) {
-        getCompositeDisposable().add(
-                settingsDataManager.getSettings()
-                        .flatMap(settings -> promptManager.getCustomPrompts(context, settings))
-                        .flatMap(Observable::fromIterable)
-                        .forEach(getView()::showCustomPrompt));
+        settingsDataManager.getSettings()
+                .flatMap(settings -> promptManager.getCustomPrompts(context, settings))
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .flatMap(Observable::fromIterable)
+                .firstOrError()
+                .subscribe(
+                        getView()::showCustomPrompt,
+                        Timber::e);
     }
 
     @Override
