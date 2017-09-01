@@ -45,6 +45,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.answers.Logging;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
@@ -93,7 +94,8 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
             SSLVerifyUtil sslVerifyUtil,
             Context applicationContext,
             PayloadDataManager payloadDataManager,
-            ExchangeRateFactory exchangeRateFactory) {
+            ExchangeRateFactory exchangeRateFactory,
+            CurrencyState currencyState) {
 
         this.appUtil = appUtil;
         this.prefsUtil = prefsUtil;
@@ -107,7 +109,7 @@ public class ReceivePresenter extends BasePresenter<ReceiveView> {
 
         int btcUnitType = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         monetaryUtil = new MonetaryUtil(btcUnitType);
-        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory);
+        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory, currencyState);
 
         accountMap = HashBiMap.create();
         spinnerIndexMap = new SparseIntArray();

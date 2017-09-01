@@ -19,8 +19,9 @@
                 android:layout_weight="5"
                 android:orientation="vertical">
 
+                <!-- todo  change BTC to crypto-->
                 <TextView
-                    android:id="@+id/currency_btc"
+                    android:id="@+id/currencyBtc"
                     fontPath="fonts/Montserrat-Light.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -29,7 +30,7 @@
                     android:textColor="@color/primary_gray_dark" />
 
                 <EditText
-                    android:id="@+id/amount_btc"
+                    android:id="@+id/amountBtc"
                     fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -57,7 +58,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/currency_fiat"
+                    android:id="@+id/currencyFiat"
                     fontPath="fonts/Montserrat-Light.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -66,7 +67,7 @@
                     android:textColor="@color/primary_gray_dark" />
 
                 <EditText
-                    android:id="@+id/amount_fiat"
+                    android:id="@+id/amountFiat"
                     fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -185,7 +185,7 @@ public class SendPresenter extends BasePresenter<SendView> {
         double exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit);
 
         monetaryUtil = new MonetaryUtil(btcUnit);
-        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory);
+        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory, null);
 
         sendModel.btcUnit = monetaryUtil.getBtcUnit(btcUnit);
         sendModel.fiatUnit = fiatUnit;

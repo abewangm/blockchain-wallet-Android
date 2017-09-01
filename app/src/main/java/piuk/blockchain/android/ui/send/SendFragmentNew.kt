@@ -1,15 +1,20 @@
 package piuk.blockchain.android.ui.send
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
 import com.jakewharton.rxbinding2.widget.RxTextView
 import kotlinx.android.synthetic.main.fragment_send.*
+import kotlinx.android.synthetic.main.include_amount_row.*
+import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
 import piuk.blockchain.android.R
@@ -30,6 +35,8 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
+import timber.log.Timber
+import java.text.DecimalFormatSymbols
 import javax.inject.Inject
 
 class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew {
@@ -55,6 +62,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         setupInitialAccount()
         setupSendingView()
         setupReceivingView()
+        setupBtcTextField()
+        setupFiatTextField()
         setupFeesView()
         button_send.setOnClickListener { onSendClicked() }
     }
@@ -80,17 +89,17 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     override fun getMvpView() = this
 
     private fun setTabs() {
-//        tabs.apply {
-//            addTab(tabs.newTab().setText(R.string.bitcoin))
-//            addTab(tabs.newTab().setText(R.string.ether))
-//            setOnTabSelectedListener {
-//                if (it == 0) {
-//                    presenter.onBitcoinChosen()
-//                } else {
-//                    presenter.onEtherChosen()
-//                }
-//            }
-//        }
+        tabs.apply {
+            addTab(tabs.newTab().setText(R.string.bitcoin))
+            addTab(tabs.newTab().setText(R.string.ether))
+            setOnTabSelectedListener {
+                if (it == 0) {
+                    presenter.onBitcoinChosen()
+                } else {
+                    presenter.onEtherChosen()
+                }
+            }
+        }
     }
 
     private fun setupToolbar() {
@@ -178,6 +187,93 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         })
     }
 
+    override fun setCryptoCurrency(currency: String) {
+        amountContainer.currencyBtc.setText(currency)
+    }
+
+    override fun disableCryptoTextChangeListener() {
+        amountContainer.amountBtc.removeTextChangedListener(cryptoTextWatcher)
+    }
+
+    @SuppressLint("NewApi")
+    override fun enableCryptoTextChangeListener() {
+        amountContainer.amountBtc.addTextChangedListener(cryptoTextWatcher)
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            amountContainer.amountBtc.setShowSoftInputOnFocus(false)
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+    }
+
+    override fun updateCryptoTextField(amountString: String?) {
+        amountContainer.amountBtc.setText(amountString)
+    }
+
+    override fun disableFiatTextChangeListener() {
+        amountContainer.amountFiat.removeTextChangedListener(fiatTextWatcher)
+    }
+
+    @SuppressLint("NewApi")
+    override fun enableFiatTextChangeListener() {
+        amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher)
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            amountContainer.amountFiat.setShowSoftInputOnFocus(false)
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+    }
+
+    override fun updateFiatTextField(amountString: String?) {
+        amountContainer.amountFiat.setText(amountString)
+    }
+
+    // BTC Field
+    @SuppressLint("NewApi")
+    private fun setupBtcTextField() {
+        amountContainer.amountBtc.setHint("0" + presenter.getDefaultDecimalSeparator() + "00")
+        amountContainer.amountBtc.setSelectAllOnFocus(true)
+        enableCryptoTextChangeListener()
+    }
+
+    // Fiat Field
+    @SuppressLint("NewApi")
+    private fun setupFiatTextField() {
+        amountContainer.amountFiat.setHint("0" + presenter.getDefaultDecimalSeparator() + "00")
+        amountContainer.amountFiat.setSelectAllOnFocus(true)
+        enableFiatTextChangeListener()
+
+    }
+
+    private val cryptoTextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+            // No-op
+        }
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            // No-op
+        }
+
+        override fun afterTextChanged(editable: Editable) {
+            presenter.updateFiatTextField(editable, amountContainer.amountBtc)
+        }
+    }
+
+    private val fiatTextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+            // No-op
+        }
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            // No-op
+        }
+
+        override fun afterTextChanged(editable: Editable) {
+            presenter.updateCryptoTextField(editable, amountContainer.amountFiat)
+        }
+    }
+
     private fun setupInitialAccount() {
 
         if (arguments != null) {
@@ -198,6 +294,11 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     override fun setReceivingHint(hint: Int) {
         toContainer.toAddressEditTextView.setHint(hint)
+    }
+
+    override fun resetAmounts() {
+        val crypto = amountBtc.text
+        amountBtc.setText(crypto)
     }
 
     private fun startFromFragment() {

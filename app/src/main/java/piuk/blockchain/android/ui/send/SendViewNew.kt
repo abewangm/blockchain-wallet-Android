@@ -22,4 +22,20 @@ interface SendViewNew : View {
     fun hideSendingFieldDropdown()
 
     fun showSendingFieldDropdown()
+
+    fun disableCryptoTextChangeListener()
+
+    fun enableCryptoTextChangeListener()
+
+    fun updateCryptoTextField(amountString: String?)
+
+    fun disableFiatTextChangeListener()
+
+    fun enableFiatTextChangeListener()
+
+    fun updateFiatTextField(amountString: String?)
+
+    fun setCryptoCurrency(currency: String)
+
+    fun resetAmounts()
 }

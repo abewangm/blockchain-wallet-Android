@@ -5,6 +5,8 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -15,15 +17,18 @@ public class ReceiveCurrencyHelper {
     private Locale locale;
     private final PrefsUtil prefsUtil;
     private final ExchangeRateFactory exchangeRateFactory;
+    private CurrencyState currencyState;
 
     public ReceiveCurrencyHelper(MonetaryUtil monetaryUtil,
                                  Locale locale,
                                  PrefsUtil prefsUtil,
-                                 ExchangeRateFactory exchangeRateFactory) {
+                                 ExchangeRateFactory exchangeRateFactory,
+                                 CurrencyState currencyState) {
         this.monetaryUtil = monetaryUtil;
         this.locale = locale;
         this.prefsUtil = prefsUtil;
         this.exchangeRateFactory = exchangeRateFactory;
+        this.currencyState = currencyState;
     }
 
     /**
@@ -50,7 +55,11 @@ public class ReceiveCurrencyHelper {
      * @return A double exchange rate
      */
     public double getLastPrice() {
-        return exchangeRateFactory.getLastBtcPrice(getFiatUnit());
+        if(currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return exchangeRateFactory.getLastBtcPrice(getFiatUnit());
+        } else {
+            return exchangeRateFactory.getLastEthPrice(getFiatUnit());
+        }
     }
 
     /**
@@ -90,7 +99,12 @@ public class ReceiveCurrencyHelper {
      * @return The amount of BTC/mBits/bits as a double
      */
     public double getUndenominatedAmount(double amount) {
-        return monetaryUtil.getUndenominatedAmount(amount);
+        if(currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return monetaryUtil.getUndenominatedAmount(amount);
+        } else {
+            // TODO: 01/09/2017 Currently ontly handling Ether
+            return amount;
+        }
     }
 
     /**
@@ -101,6 +115,18 @@ public class ReceiveCurrencyHelper {
      */
     public Double getDenominatedBtcAmount(double amount) {
         return monetaryUtil.getDenominatedAmount(amount);
+    }
+
+    public String getFormattedCryptoStringFromFiat(double fiatAmount) {
+        double cryptoAmount = fiatAmount / getLastPrice();
+        return getFormattedBtcString(cryptoAmount);
+    }
+
+    public String getFormattedFiatStringFromCrypto(double cryptoAmount) {
+
+        double uAmount = getUndenominatedAmount(cryptoAmount);
+        double fiatAmount = getLastPrice() * uAmount;
+        return getFormattedFiatString(fiatAmount);
     }
 
     /**
@@ -123,6 +149,21 @@ public class ReceiveCurrencyHelper {
                 break;
         }
         return maxLength;
+    }
+
+    /**
+     * Get the maximum number of decimal points for the current Crypto unit
+     *
+     * @return The max number of allowed decimal points
+     */
+    public int getMaxCryptoDecimalLength() {
+
+        if(currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return getMaxBtcDecimalLength();
+        } else {
+            // TODO: 31/08/2017 Ether max?
+            return 30;
+        }
     }
 
     /**

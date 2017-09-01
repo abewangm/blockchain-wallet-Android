@@ -15,7 +15,6 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
-import timber.log.Timber
 
 @Mockable
 class WalletAccountHelper(
