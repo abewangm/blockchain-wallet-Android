@@ -5,20 +5,26 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
+import android.widget.AdapterView
 import com.jakewharton.rxbinding2.widget.RxTextView
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.fragment_send.*
 import kotlinx.android.synthetic.main.include_amount_row.*
 import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.connectivity.ConnectivityStatus
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
+import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -33,10 +39,11 @@ import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
-import java.text.DecimalFormatSymbols
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew {
@@ -58,6 +65,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
+        CurrencyState.getInstance().cryptoCurrency = CryptoCurrencies.BTC
         setTabs()
         setupInitialAccount()
         setupSendingView()
@@ -65,7 +73,15 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         setupBtcTextField()
         setupFiatTextField()
         setupFeesView()
-        button_send.setOnClickListener { onSendClicked() }
+
+        buttonSend.setOnClickListener {
+            if (ConnectivityStatus.hasConnectivity(activity)) {
+                onSendClicked()
+            } else {
+                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+            }
+        }
+        max.setOnClickListener({ presenter.onSpendAllClicked(getFeePriority()) })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,7 +172,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     private fun setupReceivingView() {
         //Avoid OntouchListener - causes paste issues on some Samsung devices
-        toContainer.toAddressEditTextView.setOnClickListener({ v ->
+        toContainer.toAddressEditTextView.setOnClickListener({
             toContainer.toAddressEditTextView.setText("")
             presenter.clearReceivingAddress()
         })
@@ -171,7 +187,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         //TextChanged listener required to invalidate receive address in memory when user
         //chooses to edit address populated via QR
         RxTextView.textChanges(toContainer.toAddressEditTextView)
-                .doOnNext { ignored ->
+                .doOnNext {
                     if (activity.currentFocus === toContainer.toAddressEditTextView) {
                         presenter.clearReceivingAddress()
                         presenter.clearContact()
@@ -179,7 +195,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                 }
                 .subscribe(IgnorableDefaultObserver())
 
-        toContainer.toArrow.setOnClickListener({ v ->
+        toContainer.toArrow.setOnClickListener({
             AccountChooserActivity.startForResult(this,
                     AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                     PaymentRequestType.SEND,
@@ -284,8 +300,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     private fun setupSendingView() {
-        fromContainer.fromAddressTextView.setOnClickListener({ v -> startFromFragment() })
-        fromContainer.fromArrowImage.setOnClickListener({ v -> startFromFragment() })
+        fromContainer.fromAddressTextView.setOnClickListener({ startFromFragment() })
+        fromContainer.fromArrowImage.setOnClickListener({ startFromFragment() })
     }
 
     override fun setSendingAddress(accountItem: ItemAccount) {
@@ -312,7 +328,6 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     fun onSendClicked() {
-        //maybe
         presenter.onContinue()
     }
 
@@ -340,6 +355,118 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     private fun setupFeesView() {
+        val adapter = FeePriorityAdapter(activity, presenter.getFeeOptionsForDropDown())
+
+        spinnerPriority.setAdapter(adapter)
+
+        spinnerPriority.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                when (position) {
+                    0, 1 -> {
+                        buttonSend.setEnabled(true)
+                        textviewFeeAbsolute.setVisibility(View.VISIBLE)
+                        textviewFeeTime.setVisibility(View.VISIBLE)
+                        textInputLayout.setVisibility(View.GONE)
+                        updateTotals()
+                    }
+//                    2 -> if (presenter.shouldShowAdvancedFeeWarning()) {
+//                        alertCustomSpend()
+//                    } else {
+//                        displayCustomFeeField()
+//                    }
+                }
+
+                val options = presenter.getFeeOptionsForDropDown().get(position)
+                textviewFeeType.setText(options.getTitle())
+                textviewFeeTime.setText(if (position != 2) options.getDescription() else null)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // No-op
+            }
+        })
+
+        textviewFeeAbsolute.setOnClickListener({ spinnerPriority.performClick() })
+        textviewFeeType.setText(R.string.fee_options_regular)
+        textviewFeeTime.setText(R.string.fee_options_regular_time)
+
+        //TODO this calls updateTotals multiple times on startup
+        RxTextView.textChanges(amountContainer.amountBtc)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ updateTotals() },{ it.printStackTrace() })
+
+        RxTextView.textChanges(amountContainer.amountFiat)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ updateTotals() },{ it.printStackTrace() })
+    }
+
+    internal fun updateTotals() {
+        presenter.calculateTransactionAmounts(
+                spendAll = false,
+                amountToSendText = amountContainer.amountBtc.getText().toString(),
+                feePriority = getFeePriority())
+    }
+
+    @FeeType.FeePriorityDef
+    private fun getFeePriority(): Int {
+        val position = spinnerPriority.getSelectedItemPosition()
+        when (position) {
+            1 -> return FeeType.FEE_OPTION_PRIORITY
+            2 -> return FeeType.FEE_OPTION_CUSTOM
+            else -> return FeeType.FEE_OPTION_REGULAR
+        }
+    }
+
+    override fun getCustomFeeValue(): Long {
+        val amount = edittextCustomFee.getText().toString()
+        return if (!amount.isEmpty()) java.lang.Long.valueOf(amount) else 0
+    }
+
+    override fun showMaxAvailable() {
+        max.visible()
+        progressBarMaxAvailable.invisible()
+    }
+
+    override fun hideMaxAvailable() {
+        max.invisible()
+        progressBarMaxAvailable.visible()
+    }
+
+    override fun setUnconfirmedFunds(text: String) {
+        unconfirmedFundsWarning.setText(text)
+
+    }
+
+    override fun updateFeeField(fee: String) {
+        textviewFeeAbsolute.setText(fee)
+    }
+
+    override fun setMaxAvailable(amount: String) {
+        max.setText(amount)
+    }
+
+    override fun setMaxAvailableColor(@ColorRes color: Int) {
+        max.setTextColor(ContextCompat.getColor(context, color))
+    }
+
+    override fun setSpendAllAmount(textFromSatoshis: String) {
+        amountContainer.amountBtc.setText(textFromSatoshis)
+    }
+
+    override fun showFeePriority() {
+        textviewFeeType.visible()
+        textviewFeeTime.visible()
+        spaceTextView.visible()
+    }
+
+    override fun hideFeePriority() {
+        textviewFeeType.gone()
+        textviewFeeTime.gone()
+        spaceTextView.gone()
     }
 
     interface OnSendFragmentInteractionListener {

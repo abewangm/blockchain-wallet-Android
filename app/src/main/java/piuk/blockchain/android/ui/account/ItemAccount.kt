@@ -1,5 +1,9 @@
 package piuk.blockchain.android.ui.account
 
+import info.blockchain.wallet.ethereum.EthereumAccount
+import info.blockchain.wallet.payload.data.Account
+import info.blockchain.wallet.payload.data.LegacyAddress
+
 class ItemAccount {
 
     enum class TYPE {
@@ -20,6 +24,21 @@ class ItemAccount {
 
     constructor() {
         // Empty constructor for serialization
+    }
+
+    //TODO This is disgusting
+    fun getAddressString(): String {
+
+        if (accountObject is Account) {
+            //xpub
+            return (accountObject as Account).xpub
+        } else if (accountObject is LegacyAddress){
+            //legacy address
+            return (accountObject as LegacyAddress).address
+        } else {
+            //legacy address
+            return (accountObject as EthereumAccount).address
+        }
     }
 
     @JvmOverloads

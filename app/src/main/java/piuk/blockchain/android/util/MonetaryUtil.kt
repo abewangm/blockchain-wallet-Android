@@ -80,6 +80,15 @@ class MonetaryUtil(unit: Int) {
     fun getBtcUnit(unit: Int) = BTC_UNITS[unit]
 
     /**
+     * Returns a specific ETHER Unit [String] for a given ETH unit type
+     *
+     * @param unit The chosen ETH unit
+     * @return A ETH format string
+     * @see [ETH_UNITS]
+     */
+    fun getEthUnit(unit: Int) = ETH_UNITS[unit]
+
+    /**
      * Accepts a [Long] value in Satoshis and returns the display amount as a [String] based on the
      * chosen [unit] type. Compared to [getDisplayAmountWithFormatting], this method does not return
      * Strings formatted to a particular region, and therefore don't feature delimiters (ie returns
@@ -201,6 +210,12 @@ class MonetaryUtil(unit: Int) {
         private val MICRO_LONG = 1000000L
         private val BTC_DEC = 1e8
         private val BTC_UNITS = arrayOf("BTC", "mBTC", "bits")
+
+        /**
+         * ETH Unit type constants
+         */
+        const val UNIT_ETH = 0
+        private val ETH_UNITS = arrayOf("ETH")
     }
 
 }

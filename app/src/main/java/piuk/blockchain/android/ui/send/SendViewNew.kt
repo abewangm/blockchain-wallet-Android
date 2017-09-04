@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.send
 
+import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.View
@@ -38,4 +39,24 @@ interface SendViewNew : View {
     fun setCryptoCurrency(currency: String)
 
     fun resetAmounts()
+
+    fun getCustomFeeValue(): Long
+
+    fun showMaxAvailable()
+
+    fun hideMaxAvailable()
+
+    fun setUnconfirmedFunds(text: String)
+
+    fun updateFeeField(fee: String)
+
+    fun setMaxAvailable(max: String)
+
+    fun setMaxAvailableColor(@ColorRes color: Int)
+
+    fun setSpendAllAmount(textFromSatoshis: String)
+
+    fun showFeePriority()
+
+    fun hideFeePriority()
 }

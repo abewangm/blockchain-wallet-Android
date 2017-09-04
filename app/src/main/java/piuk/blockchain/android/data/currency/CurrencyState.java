@@ -1,6 +1,5 @@
 package piuk.blockchain.android.data.currency;
 
-import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
 
 public class CurrencyState {

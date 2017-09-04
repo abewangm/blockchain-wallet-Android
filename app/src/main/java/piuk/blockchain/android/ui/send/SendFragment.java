@@ -391,31 +391,33 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //done
     private void setupViews() {
         setupDestinationView();//done
         setupSendFromView();//done
         setupReceiveToView();//done
 
-        setupBtcTextField();
-        setupFiatTextField();
+        setupBtcTextField();//done
+        setupFiatTextField();//done
 
         binding.max.setOnClickListener(view ->
-                getPresenter().spendAllClicked(getPresenter().getSendingItemAccount(), getFeePriority()));
+                getPresenter().spendAllClicked(getPresenter().getSendingItemAccount(), getFeePriority()));//done
 
         binding.buttonSend.setOnClickListener(v -> {
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
                 requestSendPayment();
             } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);//done
             }
         });
     }
 
+    //done
     private void setupFeesView() {
         FeePriorityAdapter adapter = new FeePriorityAdapter(getActivity(),
-                getPresenter().getFeeOptionsForDropDown());
+                getPresenter().getFeeOptionsForDropDown());//done
 
-        binding.spinnerPriority.setAdapter(adapter);
+        binding.spinnerPriority.setAdapter(adapter);//done
 
         binding.spinnerPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -447,11 +449,11 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
             public void onNothingSelected(AdapterView<?> parent) {
                 // No-op
             }
-        });
+        });//done
 
-        binding.textviewFeeAbsolute.setOnClickListener(v -> binding.spinnerPriority.performClick());
-        binding.textviewFeeType.setText(R.string.fee_options_regular);
-        binding.textviewFeeTime.setText(R.string.fee_options_regular_time);
+        binding.textviewFeeAbsolute.setOnClickListener(v -> binding.spinnerPriority.performClick());//done
+        binding.textviewFeeType.setText(R.string.fee_options_regular);//done
+        binding.textviewFeeTime.setText(R.string.fee_options_regular_time);//done
 
         RxTextView.textChanges(binding.amountContainer.amountBtc)
                 .debounce(400, TimeUnit.MILLISECONDS)
@@ -459,7 +461,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         value -> updateTotals(getPresenter().getSendingItemAccount()),
-                        Throwable::printStackTrace);
+                        Throwable::printStackTrace);//done
 
         RxTextView.textChanges(binding.amountContainer.amountFiat)
                 .debounce(400, TimeUnit.MILLISECONDS)
@@ -467,7 +469,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         value -> updateTotals(getPresenter().getSendingItemAccount()),
-                        Throwable::printStackTrace);
+                        Throwable::printStackTrace);//done
     }
 
     private void requestSendPayment() {
@@ -477,6 +479,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 getFeePriority());
     }
 
+    //Done
     private void setupDestinationView() {
         //Avoid OntouchListener - causes paste issues on some Samsung devices
         binding.toContainer.toAddressEditTextView.setOnClickListener(v -> {
@@ -503,6 +506,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .subscribe(new IgnorableDefaultObserver<>());
     }
 
+    //Done
     private void setupSendFromView() {
         ItemAccount itemAccount;
         if (selectedAccountPosition != -1) {
@@ -518,6 +522,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.fromContainer.fromArrowImage.setOnClickListener(v -> startFromFragment());
     }
 
+    //Done
     @Thunk
     void updateTotals(ItemAccount itemAccount) {
         getPresenter().calculateTransactionAmounts(itemAccount,
@@ -526,6 +531,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 null);
     }
 
+    //Done
     @FeeType.FeePriorityDef
     private int getFeePriority() {
         int position = binding.spinnerPriority.getSelectedItemPosition();

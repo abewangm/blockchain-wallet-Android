@@ -103,8 +103,8 @@ class BalanceFragment    : BaseFragment<BalanceView, BalancePresenter>(), Balanc
         setUiState(UiState.LOADING)
 
         tabs.apply {
-            addTab(tabs.newTab().setText("BITCOIN"))
-            addTab(tabs.newTab().setText("ETHER"))
+            addTab(tabs.newTab().setText(R.string.bitcoin))
+            addTab(tabs.newTab().setText(R.string.ether))
             setOnTabSelectedListener {
                 if (it == 1) {
                     accounts_spinner.invisible()

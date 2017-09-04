@@ -40,6 +40,18 @@ public class ReceiveCurrencyHelper {
         return monetaryUtil.getBtcUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
 
+    public String getEthUnit() {
+        return monetaryUtil.getEthUnit(MonetaryUtil.UNIT_ETH);
+    }
+
+    public String getCryptoUnit() {
+        if(currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return getBtcUnit();
+        } else {
+            return getEthUnit();
+        }
+    }
+
     /**
      * Get save Fiat currency unit
      *
@@ -204,4 +216,14 @@ public class ReceiveCurrencyHelper {
         return amount.compareTo(BigInteger.valueOf(2100000000000000L)) == 1;
     }
 
+    /**
+     * Returns btc amount from satoshis.
+     *
+     * @return btc, mbtc or bits relative to what is set in monetaryUtil
+     */
+    public String getTextFromSatoshis(long satoshis, String decimalSeparator) {
+        String displayAmount = monetaryUtil.getDisplayAmount(satoshis);
+        displayAmount = displayAmount.replace(".", decimalSeparator);
+        return displayAmount;
+    }
 }

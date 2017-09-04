@@ -114,6 +114,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:textSize="14sp"
+                        android:visibility="invisible"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/amountContainer"
@@ -131,120 +132,141 @@
                         app:layout_constraintTop_toBottomOf="@+id/max" />
 
                     <!-- FEES TYPE -->
-                    <LinearLayout
-                        android:id="@+id/custom_fee_container"
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/customFeeContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="vertical"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/divider3">
 
                         <TextView
+                            android:id="@+id/feeTextView"
                             fontPath="fonts/Montserrat-Light.ttf"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center|left"
-                            android:paddingLeft="16dp"
-                            android:paddingTop="4dp"
-                            android:text="@string/fee"
-                            android:textColor="@color/primary_gray_dark" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingLeft="16dp">
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginRight="8dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:gravity="center|left"
+                            android:text="@string/fee"
+                            android:textColor="@color/primary_gray_dark"
+                            app:layout_constraintEnd_toStartOf="@+id/spaceTextView"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginTop="8dp"
-                                android:gravity="center_vertical"
-                                android:orientation="vertical">
+                        <TextView
+                            android:id="@+id/spaceTextView"
+                            fontPath="fonts/Montserrat-Light.ttf"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="8dp"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center|left"
+                            android:textColor="@color/primary_gray_dark"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                                <TextView
-                                    android:id="@+id/textview_fee_type"
-                                    fontPath="fonts/Montserrat-Regular.ttf"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:textColor="@color/black"
-                                    android:textSize="14sp"
-                                    tools:text="Priority" />
+                        <TextView
+                            android:id="@+id/textviewFeeType"
+                            fontPath="fonts/Montserrat-Regular.ttf"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="16dp"
+                            android:textColor="@color/black"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/feeTextView"
+                            tools:text="Priority" />
 
-                                <TextView
-                                    android:id="@+id/textview_fee_time"
-                                    fontPath="fonts/Montserrat-Regular.ttf"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:layout_marginBottom="16dp"
-                                    android:textSize="14sp"
-                                    tools:text="~ 60 min" />
+                        <TextView
+                            android:id="@+id/textviewFeeTime"
+                            fontPath="fonts/Montserrat-Regular.ttf"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="16dp"
+                            android:layout_marginTop="0dp"
+                            android:layout_marginBottom="8dp"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/textviewFeeType"
+                            tools:text="~ 60 min" />
 
-                            </LinearLayout>
+                        <android.support.design.widget.TextInputLayout
+                            android:id="@+id/textInputLayout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:hintAnimationEnabled="true"
+                            app:hintEnabled="true"
+                            android:visibility="gone"
+                            app:layout_constraintBottom_toBottomOf="@+id/feeTextView"
+                            app:layout_constraintEnd_toEndOf="@+id/spinnerPriority"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/feeTextView">
 
-                            <TextView
-                                android:id="@+id/textview_fee_absolute"
+                            <EditText
+                                android:id="@+id/edittextCustomFee"
                                 fontPath="fonts/Montserrat-Regular.ttf"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginLeft="8dp"
-                                android:layout_marginRight="16dp"
-                                android:layout_weight="0.9"
-                                android:gravity="right"
-                                android:textColor="@color/black"
-                                android:textSize="16sp"
-                                tools:text="0.000081BTC (0.43 USD)" />
-
-                            <android.support.design.widget.TextInputLayout
-                                android:id="@+id/text_input_layout"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginLeft="8dp"
-                                android:layout_weight="0.9"
-                                android:visibility="gone"
-                                app:hintAnimationEnabled="true"
-                                app:hintEnabled="true">
+                                android:digits="1234567890"
+                                android:focusable="true"
+                                android:text="12345"
+                                android:focusableInTouchMode="true"
+                                android:imeOptions="actionDone"
+                                android:inputType="number"
+                                android:textSize="16sp" />
 
-                                <EditText
-                                    android:id="@+id/edittext_custom_fee"
-                                    fontPath="fonts/Montserrat-Regular.ttf"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:digits="1234567890"
-                                    android:focusable="true"
-                                    android:focusableInTouchMode="true"
-                                    android:imeOptions="actionDone"
-                                    android:inputType="number"
-                                    android:textSize="16sp" />
+                        </android.support.design.widget.TextInputLayout>
 
-                            </android.support.design.widget.TextInputLayout>
+                        <TextView
+                            android:id="@+id/textviewFeeAbsolute"
+                            fontPath="fonts/Montserrat-Regular.ttf"
+                            android:layout_width="265dp"
+                            android:layout_height="40dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:gravity="right|center_vertical"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="0.000081BTC (0.43 USD)" />
 
-                            <Spinner
-                                android:id="@+id/spinner_priority"
-                                android:layout_width="36dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="4dp"
-                                android:layout_weight="0.1"
-                                android:dropDownSelector="?attr/selectableItemBackground"
-                                android:dropDownWidth="250dp" />
+                        <Spinner
+                            android:id="@+id/spinnerPriority"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:dropDownSelector="?attr/selectableItemBackground"
+                            android:dropDownWidth="250dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="1.0"
+                            app:layout_constraintStart_toEndOf="@+id/textviewFeeAbsolute"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                        </LinearLayout>
+                    </android.support.constraint.ConstraintLayout>
 
-                        <include layout="@layout/divider_grey" />
-
-                    </LinearLayout>
+                    <View xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:id="@+id/divider4"
+                        android:layout_width="fill_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginStart="0dp"
+                        android:background="@color/primary_gray_light"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/customFeeContainer" />
 
                     <Button
-                        android:id="@+id/button_send"
+                        android:id="@+id/buttonSend"
                         style="@style/ButtonStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -257,10 +279,10 @@
                         android:theme="@style/ButtonLightBlueTheme"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/custom_fee_container" />
+                        app:layout_constraintTop_toBottomOf="@+id/divider4" />
 
                     <TextView
-                        android:id="@+id/unconfirmed_funds_warning"
+                        android:id="@+id/unconfirmedFundsWarning"
                         fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
@@ -284,7 +306,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:visibility="gone"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>
