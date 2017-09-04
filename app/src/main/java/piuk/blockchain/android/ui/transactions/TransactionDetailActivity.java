@@ -204,7 +204,7 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_share:
-                String url = getPresenter().getTxType() == CryptoCurrencies.BTC ? BTC_URL : ETH_URL;
+                String url = getPresenter().getTransactionType() == CryptoCurrencies.BTC ? BTC_URL : ETH_URL;
                 Intent shareIntent = new Intent();
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_TEXT, url + getPresenter().getTransactionHash());

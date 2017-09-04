@@ -460,7 +460,9 @@
 
     <!-- SHARE RECEIVE ADDRESS -->
     <string name="email_request_subject">Bitcoin payment request</string>
+    <string name="email_request_subject_eth">Ethereum payment request</string>
     <string name="email_request_body">Please send%1$s BTC to the Bitcoin address %2$s.</string>
+    <string name="email_request_body_eth">Please send ETH to the Ethereum address %1$s.</string>
     <string name="email_request_body_fallback">attached</string>
     <string name="share_instructions">Tap to copy this address. Share it with the sender via email or text.</string>
 
