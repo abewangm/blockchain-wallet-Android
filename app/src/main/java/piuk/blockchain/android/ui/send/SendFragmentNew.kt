@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
@@ -49,6 +50,9 @@ import javax.inject.Inject
 class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew {
 
     @Inject lateinit var sendPresenterNew: SendPresenterNew
+
+    private var backPressed: Long = 0
+    private val COOL_DOWN_MILLIS = 2 * 1000
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -332,6 +336,18 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     fun onBackPressed() {
+        handleBackPressed()
+    }
+
+    private fun handleBackPressed() {
+        if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+            AccessState.getInstance().logout(context)
+            return
+        } else {
+            showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL)
+        }
+
+        backPressed = System.currentTimeMillis()
     }
 
     override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {

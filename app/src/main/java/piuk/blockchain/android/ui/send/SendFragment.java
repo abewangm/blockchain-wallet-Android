@@ -351,6 +351,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     private void handleBackPressed() {
         if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
             AccessState.getInstance().logout(getContext());
@@ -362,6 +363,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         backPressed = System.currentTimeMillis();
     }
 
+    //Done
     public void onExitConfirmToast() {
         showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
     }
