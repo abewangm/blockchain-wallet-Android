@@ -158,7 +158,6 @@
     <string name="enable_geo">Включите GPS или любую другую службу определения местоположения для поиска текущего местоположения. Чтобы сделать это, нажмите ОК, чтобы перейти к настройкам службы определения местоположения.</string>
 
     <string name="my_addresses">Адреса</string>
-    <string name="addresses">Адреса</string>
     <string name="create_new">Создать новый</string>
     <string name="import_address">Импортировать адреса</string>
     <string name="save_name">Сохранить имя</string>
@@ -169,7 +168,6 @@
 
     <string name="ssl_pinning_invalid">SSL-сертификат закрепить не удалось. Это может указывать на злонамеренную активность. Прежде чем продолжить, проверьте сетевое подключение и устройство.</string>
 
-    <string name="merchant_map">Карта расположения торговцев</string>
     <string name="merchant_suggest">Предложить торговца</string>
     <string name="name">Имя</string>
     <string name="location">Местоположение</string>
