@@ -2,17 +2,20 @@ package piuk.blockchain.android.ui.send
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
+import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
 import android.widget.AdapterView
+import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.fragment_send.*
@@ -33,6 +36,8 @@ import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
+import piuk.blockchain.android.ui.customviews.NumericKeyboard
+import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.zxing.CaptureActivity
@@ -47,7 +52,7 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew {
+class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew, NumericKeyboardCallback {
 
     @Inject lateinit var sendPresenterNew: SendPresenterNew
 
@@ -68,6 +73,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         super.onViewCreated(view, savedInstanceState)
 
         activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+
+        setCustomKeypad()
 
         CurrencyState.getInstance().cryptoCurrency = CryptoCurrencies.BTC
         setTabs()
@@ -107,6 +114,63 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     override fun createPresenter() = sendPresenterNew
 
     override fun getMvpView() = this
+
+    private fun setCustomKeypad() {
+        keyboard.setCallback(this)
+        keyboard.setDecimalSeparator(presenter.getDefaultDecimalSeparator())
+
+        // Enable custom keypad and disables default keyboard from popping up
+        keyboard.enableOnView(amountContainer.amountBtc)
+        keyboard.enableOnView(amountContainer.amountFiat)
+
+        amountContainer.amountBtc.setText("")
+        amountContainer.amountBtc.requestFocus()
+    }
+
+    private fun closeKeypad() {
+        keyboard.setNumpadVisibility(View.GONE)
+    }
+
+    fun isKeyboardVisible(): Boolean {
+        return keyboard.isVisible
+    }
+
+    override fun onKeypadClose() {
+        // Show bottom nav if applicable
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+        }
+
+        // Resize activity to default
+        scrollView.setPadding(0, 0, 0, 0)
+        val layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT)
+        layoutParams.setMargins(0,
+                0,
+                0,
+                activity.resources.getDimension(R.dimen.action_bar_height).toInt())
+        scrollView.setLayoutParams(layoutParams)
+    }
+
+    override fun onKeypadOpen() {
+        // Hide bottom nav if applicable
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomNavigationView.hideBottomNavigation()
+        }
+    }
+
+    override fun onKeypadOpenCompleted() {
+        // Resize activity around view
+        val translationY = keyboard.getHeight()
+        scrollView.setPadding(0, 0, 0, translationY)
+
+        val layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT)
+        layoutParams.setMargins(0, 0, 0, 0)
+        scrollView.setLayoutParams(layoutParams)
+    }
 
     private fun setTabs() {
         tabs.apply {
@@ -332,11 +396,19 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     fun onSendClicked() {
-        presenter.onContinue()
+        if (ConnectivityStatus.hasConnectivity(activity)) {
+            presenter.onContinue()
+        } else {
+            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+        }
     }
 
     fun onBackPressed() {
-        handleBackPressed()
+        if (isKeyboardVisible()) {
+            closeKeypad()
+        } else {
+            handleBackPressed()
+        }
     }
 
     private fun handleBackPressed() {

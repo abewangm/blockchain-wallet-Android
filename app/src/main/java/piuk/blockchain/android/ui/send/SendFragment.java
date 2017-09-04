@@ -343,6 +343,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     public void onBackPressed() {
         if (isKeyboardVisible()) {
             closeKeypad();
@@ -577,12 +578,14 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.max.setVisibility(View.GONE);
     }
 
+    //Done
     @Override
     public void hideSendingAddressField() {
         binding.fromContainer.fromConstraintLayout.setVisibility(View.GONE);
         binding.divider1.setVisibility(View.GONE);
     }
 
+    //Done
     @Override
     public void hideReceivingAddressField() {
         binding.toContainer.toAddressEditTextView.setHint(R.string.to_field_helper_no_dropdown);
@@ -1050,17 +1053,20 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                         Throwable::printStackTrace);
     }
 
+    //done
     @Override
     public long getCustomFeeValue() {
         String amount = binding.edittextCustomFee.getText().toString();
         return !amount.isEmpty() ? Long.valueOf(amount) : 0;
     }
 
+    //done
     @Override
     public void updateFeeField(String fee) {
         binding.textviewFeeAbsolute.setText(fee);
     }
 
+    //done
     public void onSendClicked() {
         if (ConnectivityStatus.hasConnectivity(getActivity())) {
             getPresenter().submitPayment();
@@ -1069,11 +1075,13 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //done
     @Override
     protected SendPresenter createPresenter() {
         return sendPresenter;
     }
 
+    //done
     @Override
     protected SendView getMvpView() {
         return this;
@@ -1100,6 +1108,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         listener = null;
     }
 
+    //done
     private void setCustomKeypad() {
         customKeypad = binding.keyboard;
         customKeypad.setCallback(this);
@@ -1113,14 +1122,17 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.amountContainer.amountBtc.requestFocus();
     }
 
+    //Done
     private void closeKeypad() {
         customKeypad.setNumpadVisibility(View.GONE);
     }
 
+    //Done
     public boolean isKeyboardVisible() {
         return customKeypad.isVisible();
     }
 
+    //Done
     @Override
     public void onKeypadClose() {
         // Show bottom nav if applicable
@@ -1140,6 +1152,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.scrollView.setLayoutParams(layoutParams);
     }
 
+    //Done
     @Override
     public void onKeypadOpen() {
         // Hide bottom nav if applicable
@@ -1148,6 +1161,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     @Override
     public void onKeypadOpenCompleted() {
         // Resize activity around view
@@ -1161,6 +1175,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.scrollView.setLayoutParams(layoutParams);
     }
 
+    //Done
     public interface OnSendFragmentInteractionListener {
 
         void onSendFragmentClose(boolean paymentMade);
