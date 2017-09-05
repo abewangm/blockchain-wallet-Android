@@ -13,6 +13,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatEditText
 import android.text.Editable
+import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
 import android.view.*
@@ -402,8 +403,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     override fun resetAmounts() {
-        val crypto = amountCrypto.text
-        amountCrypto.setText(crypto)
+        amountCrypto.setText("")
     }
 
     private fun startFromFragment() {
@@ -566,8 +566,14 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         max.setTextColor(ContextCompat.getColor(context, color))
     }
 
-    override fun setSpendAllAmount(textFromSatoshis: String) {
-        amountContainer.amountCrypto.setText(textFromSatoshis)
+    override fun setSpendAllAmount(scryptoAmount: String) {
+        amountContainer.amountCrypto.setText(scryptoAmount)
+    }
+
+    override fun setCryptoMaxLength(length: Int) {
+        val filterArray = arrayOfNulls<InputFilter>(1)
+        filterArray[0] = InputFilter.LengthFilter(length)
+        amountContainer.amountCrypto.setFilters(filterArray)
     }
 
     override fun showFeePriority() {

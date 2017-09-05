@@ -97,7 +97,6 @@ class SendPresenterNew @Inject constructor(
     }
 
     fun onBitcoinChosen() {
-        Timber.d("onBitcoinChosen")
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         view.selectTab(0)
         absoluteSuggestedFee = BigInteger.ZERO
@@ -106,13 +105,13 @@ class SendPresenterNew @Inject constructor(
         view.hideMaxAvailable()
         view.resetAmounts()
         view.setReceivingAddress("")
+        view.setCryptoMaxLength(17)
         setCryptoCurrency()
         calculateTransactionAmounts(spendAll = false, amountToSendText = "0", feePriority = FeeType.FEE_OPTION_REGULAR)
         view.showFeePriority()
     }
 
     fun onEtherChosen() {
-        Timber.d("onEtherChosen")
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.selectTab(1)
         absoluteSuggestedFee = BigInteger.ZERO
@@ -121,6 +120,7 @@ class SendPresenterNew @Inject constructor(
         view.hideMaxAvailable()
         view.resetAmounts()
         view.setReceivingAddress("")
+        view.setCryptoMaxLength(30)
         setCryptoCurrency()
         calculateTransactionAmounts(spendAll = false, amountToSendText = "0", feePriority = FeeType.FEE_OPTION_REGULAR)
         view.hideFeePriority()
@@ -422,7 +422,7 @@ class SendPresenterNew @Inject constructor(
                 calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
             }
             else -> {
-                calculateUnspentEth()
+                calculateUnspentEth(spendAll)
             }
         }
     }
@@ -468,9 +468,7 @@ class SendPresenterNew @Inject constructor(
 
         if (spendAll) {
             amountToSend = sweepableAmount
-            if (view != null) {
-                view.setSpendAllAmount(currencyHelper.getTextFromSatoshis(sweepableAmount.toLong(), getDefaultDecimalSeparator()))
-            }
+            view?.setSpendAllAmount(currencyHelper.getTextFromSatoshis(sweepableAmount.toLong(), getDefaultDecimalSeparator()))
         }
 
         val unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
@@ -482,7 +480,7 @@ class SendPresenterNew @Inject constructor(
         pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee()
     }
 
-    fun calculateUnspentEth() {
+    fun calculateUnspentEth(spendAll: Boolean) {
 
         view.showMaxAvailable()
 
@@ -494,6 +492,10 @@ class SendPresenterNew @Inject constructor(
         maxAvailable = ethR!!.balance.minus(wei.toBigInteger())
 
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
+        Timber.d("vos "+availableEth)
+        if (spendAll) {
+            view?.setSpendAllAmount(availableEth.toString())
+        }
 
         //Format for display
         if (!currencyState.isDisplayingCryptoCurrency) {

@@ -65,4 +65,6 @@ interface SendViewNew : View {
     fun selectTab(tabIndex: Int)
 
     fun onShowBIP38PassphrasePrompt(scanData: String)
+
+    fun setCryptoMaxLength(length: Int)
 }
