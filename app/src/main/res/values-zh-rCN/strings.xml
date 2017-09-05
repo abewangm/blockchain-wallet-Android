@@ -158,7 +158,6 @@
     <string name="enable_geo">启用 GPS 或任何其他位置服务以查找当前位置。单击“确定”前往位置服务设置以进行查找。</string>
 
     <string name="my_addresses">地址</string>
-    <string name="addresses">地址</string>
     <string name="create_new">新建</string>
     <string name="import_address">导入地址</string>
     <string name="save_name">保存名称</string>
@@ -169,7 +168,6 @@
 
     <string name="ssl_pinning_invalid">SSL 证书锁定已失败。这可能属于恶意行为。请在继续之前检查您的网络连接和设备。</string>
 
-    <string name="merchant_map">商家地图</string>
     <string name="merchant_suggest">推荐商家</string>
     <string name="name">名称</string>
     <string name="location">位置</string>

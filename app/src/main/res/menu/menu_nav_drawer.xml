@@ -22,6 +22,11 @@
         android:title="@string/contacts_title" />
 
     <item
+        android:id="@+id/login_web_wallet"
+        android:icon="@drawable/vector_desktop"
+        android:title="@string/pairing_code_log_in" />
+
+    <item
         android:id="@+id/nav_map"
         android:icon="@drawable/vector_merchant"
         android:title="@string/merchant_map" />

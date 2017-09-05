@@ -158,7 +158,6 @@
     <string name="enable_geo">현 위치를 찾기 위해 GPS 또는 다른 위치 서비스를 사용하세요 그렇게 하기 위해 위치 서비스 설정으로 가려면 \'좋아요\'를 클릭</string>
 
     <string name="my_addresses">주소들</string>
-    <string name="addresses">주소들</string>
     <string name="create_new">새 것 만들기</string>
     <string name="import_address">주소 가져오기</string>
     <string name="save_name">이름 저장</string>
@@ -169,7 +168,6 @@
 
     <string name="ssl_pinning_invalid">SSL 증명 피닝(pinning) 실패 악성 활동일 가능성이 있습니다. 네트워크 연결과 장치를 점검한 후 계속하세요</string>
 
-    <string name="merchant_map">상인 지도</string>
     <string name="merchant_suggest">상인 제안</string>
     <string name="name">이름</string>
     <string name="location">위치</string>
