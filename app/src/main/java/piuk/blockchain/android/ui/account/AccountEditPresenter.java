@@ -148,7 +148,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                 long balanceAfterFee = payloadDataManager.getAddressBalance(
                         legacyAddress.getAddress()).longValue() -
                         sendDataManager.estimatedFee(1, 1,
-                                BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000))
+                                BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000))
                                 .longValue();
 
                 if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
@@ -719,7 +719,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         return sendDataManager.getUnspentOutputs(legacyAddress.getAddress())
                 .flatMap(unspentOutputs -> {
                     BigInteger suggestedFeePerKb =
-                            BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000);
+                            BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000);
 
                     Pair<BigInteger, BigInteger> sweepableCoins =
                             sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);

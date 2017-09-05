@@ -25,10 +25,11 @@
         <EditText
             android:id="@+id/toAddressEditTextView"
             fontPath="fonts/Montserrat-Regular.ttf"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:scrollHorizontally="true"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginRight="32dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
             style="@style/bitcoinAddressEditText"

@@ -9,6 +9,7 @@ import org.bitcoinj.core.Coin
 import org.bitcoinj.uri.BitcoinURI
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
 import piuk.blockchain.android.data.ethereum.EthDataStore
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -37,7 +38,8 @@ class ReceivePresenter @Inject internal constructor(
         private val payloadDataManager: PayloadDataManager,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val ethDataStore: EthDataStore,
-        private val environmentSettings: EnvironmentSettings
+        private val environmentSettings: EnvironmentSettings,
+        private val currencyState: CurrencyState
 ) : BasePresenter<ReceiveView>() {
 
     private val monetaryUtil by unsafeLazy {
@@ -47,7 +49,7 @@ class ReceivePresenter @Inject internal constructor(
     @VisibleForTesting internal var selectedContactId: String? = null
     @VisibleForTesting internal var selectedAccount: Account? = null
     internal val currencyHelper by unsafeLazy {
-        ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory)
+        ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory, currencyState)
     }
 
     override fun onViewReady() {

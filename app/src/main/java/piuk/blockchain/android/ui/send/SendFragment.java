@@ -343,6 +343,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     public void onBackPressed() {
         if (isKeyboardVisible()) {
             closeKeypad();
@@ -351,6 +352,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     private void handleBackPressed() {
         if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
             AccessState.getInstance().logout(getContext());
@@ -362,6 +364,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         backPressed = System.currentTimeMillis();
     }
 
+    //Done
     public void onExitConfirmToast() {
         showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
     }
@@ -391,31 +394,33 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //done
     private void setupViews() {
         setupDestinationView();//done
         setupSendFromView();//done
         setupReceiveToView();//done
 
-        setupBtcTextField();
-        setupFiatTextField();
+        setupBtcTextField();//done
+        setupFiatTextField();//done
 
         binding.max.setOnClickListener(view ->
-                getPresenter().spendAllClicked(getPresenter().getSendingItemAccount(), getFeePriority()));
+                getPresenter().spendAllClicked(getPresenter().getSendingItemAccount(), getFeePriority()));//done
 
         binding.buttonSend.setOnClickListener(v -> {
             if (ConnectivityStatus.hasConnectivity(getActivity())) {
                 requestSendPayment();
             } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);//done
             }
         });
     }
 
+    //done
     private void setupFeesView() {
         FeePriorityAdapter adapter = new FeePriorityAdapter(getActivity(),
-                getPresenter().getFeeOptionsForDropDown());
+                getPresenter().getFeeOptionsForDropDown());//done
 
-        binding.spinnerPriority.setAdapter(adapter);
+        binding.spinnerPriority.setAdapter(adapter);//done
 
         binding.spinnerPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -447,19 +452,19 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
             public void onNothingSelected(AdapterView<?> parent) {
                 // No-op
             }
-        });
+        });//done
 
-        binding.textviewFeeAbsolute.setOnClickListener(v -> binding.spinnerPriority.performClick());
-        binding.textviewFeeType.setText(R.string.fee_options_regular);
-        binding.textviewFeeTime.setText(R.string.fee_options_regular_time);
+        binding.textviewFeeAbsolute.setOnClickListener(v -> binding.spinnerPriority.performClick());//done
+        binding.textviewFeeType.setText(R.string.fee_options_regular);//done
+        binding.textviewFeeTime.setText(R.string.fee_options_regular_time);//done
 
-        RxTextView.textChanges(binding.amountContainer.amountBtc)
-                .debounce(400, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        value -> updateTotals(getPresenter().getSendingItemAccount()),
-                        Throwable::printStackTrace);
+//        RxTextView.textChanges(binding.amountContainer.amountBtc)
+//                .debounce(400, TimeUnit.MILLISECONDS)
+//                .subscribeOn(AndroidSchedulers.mainThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(
+//                        value -> updateTotals(getPresenter().getSendingItemAccount()),
+//                        Throwable::printStackTrace);//done
 
         RxTextView.textChanges(binding.amountContainer.amountFiat)
                 .debounce(400, TimeUnit.MILLISECONDS)
@@ -467,16 +472,17 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         value -> updateTotals(getPresenter().getSendingItemAccount()),
-                        Throwable::printStackTrace);
+                        Throwable::printStackTrace);//done
     }
 
     private void requestSendPayment() {
-        getPresenter().onSendClicked(
-                binding.amountContainer.amountBtc.getText().toString(),
-                binding.toContainer.toAddressEditTextView.getText().toString(),
-                getFeePriority());
+//        getPresenter().onSendClicked(
+//                binding.amountContainer.amountBtc.getText().toString(),
+//                binding.toContainer.toAddressEditTextView.getText().toString(),
+//                getFeePriority());
     }
 
+    //Done
     private void setupDestinationView() {
         //Avoid OntouchListener - causes paste issues on some Samsung devices
         binding.toContainer.toAddressEditTextView.setOnClickListener(v -> {
@@ -503,6 +509,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .subscribe(new IgnorableDefaultObserver<>());
     }
 
+    //Done
     private void setupSendFromView() {
         ItemAccount itemAccount;
         if (selectedAccountPosition != -1) {
@@ -518,14 +525,16 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.fromContainer.fromArrowImage.setOnClickListener(v -> startFromFragment());
     }
 
+    //Done
     @Thunk
     void updateTotals(ItemAccount itemAccount) {
-        getPresenter().calculateTransactionAmounts(itemAccount,
-                binding.amountContainer.amountBtc.getText().toString(),
-                getFeePriority(),
-                null);
+//        getPresenter().calculateTransactionAmounts(itemAccount,
+//                binding.amountContainer.amountBtc.getText().toString(),
+//                getFeePriority(),
+//                null);
     }
 
+    //Done
     @FeeType.FeePriorityDef
     private int getFeePriority() {
         int position = binding.spinnerPriority.getSelectedItemPosition();
@@ -560,7 +569,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     @Override
     public void lockContactsFields() {
         contactsPayment = true;
-        binding.amountContainer.amountBtc.setEnabled(false);
+//        binding.amountContainer.amountBtc.setEnabled(false);
         binding.amountContainer.amountFiat.setEnabled(false);
         binding.toContainer.toArrow.setVisibility(View.GONE);
         binding.toContainer.toArrow.setOnClickListener(null);
@@ -569,12 +578,14 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.max.setVisibility(View.GONE);
     }
 
+    //Done
     @Override
     public void hideSendingAddressField() {
         binding.fromContainer.fromConstraintLayout.setVisibility(View.GONE);
         binding.divider1.setVisibility(View.GONE);
     }
 
+    //Done
     @Override
     public void hideReceivingAddressField() {
         binding.toContainer.toAddressEditTextView.setHint(R.string.to_field_helper_no_dropdown);
@@ -587,7 +598,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     @Override
     public void updateBtcAmount(String amount) {
-        binding.amountContainer.amountBtc.setText(amount);
+//        binding.amountContainer.amountBtc.setText(amount);
 //        binding.amountContainer.amountBtc.setSelection(binding.amountContainer.amountBtc.getText().length());
     }
 
@@ -631,7 +642,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     @Override
     public void updateBtcUnit(String unit) {
-        binding.amountContainer.currencyBtc.setText(unit);
+//        binding.amountContainer.currencyBtc.setText(unit);
     }
 
     @Override
@@ -641,7 +652,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     @Override
     public void onSetSpendAllAmount(String textFromSatoshis) {
-        binding.amountContainer.amountBtc.setText(textFromSatoshis);
+//        binding.amountContainer.amountBtc.setText(textFromSatoshis);
     }
 
     //done
@@ -798,15 +809,15 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     // BTC Field
     @SuppressLint("NewApi")
     private void setupBtcTextField() {
-        binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
-        binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
-        try {
-            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
-            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
-        } catch (Exception e) {
-            Timber.e(e);
-        }
+//        binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
+//        binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
+//        binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
+//        try {
+//            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+//            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
+//        } catch (Exception e) {
+//            Timber.e(e);
+//        }
     }
 
     // Fiat Field
@@ -825,7 +836,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     @Override
     public void updateBtcTextField(String text) {
-        binding.amountContainer.amountBtc.setText(text);
+//        binding.amountContainer.amountBtc.setText(text);
     }
 
     @Override
@@ -846,19 +857,19 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
         @Override
         public void afterTextChanged(Editable s) {
-            binding.amountContainer.amountBtc.removeTextChangedListener(this);
-            s = EditTextFormatUtil.formatEditable(s,
-                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
-                    binding.amountContainer.amountBtc,
-                    getDefaultDecimalSeparator());
-
-            binding.amountContainer.amountBtc.addTextChangedListener(this);
-
-            if (textChangeAllowed) {
-                textChangeAllowed = false;
-                getPresenter().updateFiatTextField(s.toString());
-                textChangeAllowed = true;
-            }
+//            binding.amountContainer.amountBtc.removeTextChangedListener(this);
+//            s = EditTextFormatUtil.formatEditable(s,
+//                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
+//                    binding.amountContainer.amountBtc,
+//                    getDefaultDecimalSeparator());
+//
+//            binding.amountContainer.amountBtc.addTextChangedListener(this);
+//
+//            if (textChangeAllowed) {
+//                textChangeAllowed = false;
+//                getPresenter().updateFiatTextField(s.toString());
+//                textChangeAllowed = true;
+//            }
         }
     };
 
@@ -1042,17 +1053,20 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                         Throwable::printStackTrace);
     }
 
+    //done
     @Override
     public long getCustomFeeValue() {
         String amount = binding.edittextCustomFee.getText().toString();
         return !amount.isEmpty() ? Long.valueOf(amount) : 0;
     }
 
+    //done
     @Override
     public void updateFeeField(String fee) {
         binding.textviewFeeAbsolute.setText(fee);
     }
 
+    //done
     public void onSendClicked() {
         if (ConnectivityStatus.hasConnectivity(getActivity())) {
             getPresenter().submitPayment();
@@ -1061,11 +1075,13 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //done
     @Override
     protected SendPresenter createPresenter() {
         return sendPresenter;
     }
 
+    //done
     @Override
     protected SendView getMvpView() {
         return this;
@@ -1092,27 +1108,31 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         listener = null;
     }
 
+    //done
     private void setCustomKeypad() {
         customKeypad = binding.keyboard;
         customKeypad.setCallback(this);
         customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
 
         // Enable custom keypad and disables default keyboard from popping up
-        customKeypad.enableOnView(binding.amountContainer.amountBtc);
-        customKeypad.enableOnView(binding.amountContainer.amountFiat);
+//        customKeypad.enableOnView(binding.amountContainer.amountBtc);
+//        customKeypad.enableOnView(binding.amountContainer.amountFiat);
 
-        binding.amountContainer.amountBtc.setText("");
-        binding.amountContainer.amountBtc.requestFocus();
+//        binding.amountContainer.amountBtc.setText("");
+//        binding.amountContainer.amountBtc.requestFocus();
     }
 
+    //Done
     private void closeKeypad() {
         customKeypad.setNumpadVisibility(View.GONE);
     }
 
+    //Done
     public boolean isKeyboardVisible() {
         return customKeypad.isVisible();
     }
 
+    //Done
     @Override
     public void onKeypadClose() {
         // Show bottom nav if applicable
@@ -1132,6 +1152,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.scrollView.setLayoutParams(layoutParams);
     }
 
+    //Done
     @Override
     public void onKeypadOpen() {
         // Hide bottom nav if applicable
@@ -1140,6 +1161,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     @Override
     public void onKeypadOpenCompleted() {
         // Resize activity around view
@@ -1153,6 +1175,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.scrollView.setLayoutParams(layoutParams);
     }
 
+    //Done
     public interface OnSendFragmentInteractionListener {
 
         void onSendFragmentClose(boolean paymentMade);

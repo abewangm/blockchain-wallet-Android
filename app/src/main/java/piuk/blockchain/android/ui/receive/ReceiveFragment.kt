@@ -144,22 +144,22 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
 
         // BTC Field
-        amount_btc.apply {
+        amountCrypto.apply {
             hint = "0${defaultDecimalSeparator}00"
             addTextChangedListener(btcTextWatcher)
             disableSoftKeyboard()
         }
 
         // Fiat Field
-        amount_fiat.apply {
+        amountFiat.apply {
             hint = "0${defaultDecimalSeparator}00"
             addTextChangedListener(fiatTextWatcher)
             disableSoftKeyboard()
         }
 
         // Units
-        currency_btc.text = presenter.currencyHelper.btcUnit
-        currency_fiat.text = presenter.currencyHelper.fiatUnit
+        currencyCrypto.text = presenter.currencyHelper.btcUnit
+        currencyFiat.text = presenter.currencyHelper.fiatUnit
 
         // QR Code
         image_qr.apply {
@@ -225,7 +225,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                         PaymentRequestType.REQUEST,
                         presenter.selectedContactId!!,
                         presenter.currencyHelper.getLongAmount(
-                                amount_btc.text.toString()),
+                                amountCrypto.text.toString()),
                         presenter.getSelectedAccountPosition()
                 )
             }
@@ -252,15 +252,15 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         override fun afterTextChanged(s: Editable?) {
             Timber.d("afterTextChanged")
             var editable = s
-            amount_btc.removeTextChangedListener(this)
+            amountCrypto.removeTextChangedListener(this)
             editable = EditTextFormatUtil.formatEditable(
                     editable,
                     presenter.currencyHelper.maxBtcDecimalLength,
-                    amount_btc,
+                    amountCrypto,
                     defaultDecimalSeparator
             )
 
-            amount_btc.addTextChangedListener(this)
+            amountCrypto.addTextChangedListener(this)
 
             if (textChangeAllowed) {
                 textChangeAllowed = false
@@ -283,16 +283,16 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         override fun afterTextChanged(s: Editable) {
             Timber.d("afterTextChanged")
             var editable = s
-            amount_fiat.removeTextChangedListener(this)
+            amountFiat.removeTextChangedListener(this)
             val maxLength = 2
             editable = EditTextFormatUtil.formatEditable(
                     editable,
                     maxLength,
-                    amount_fiat,
+                    amountFiat,
                     defaultDecimalSeparator
             )
 
-            amount_fiat.addTextChangedListener(this)
+            amountFiat.addTextChangedListener(this)
 
             if (textChangeAllowed) {
                 textChangeAllowed = false
@@ -311,7 +311,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
     }
 
-    override fun getBtcAmount() = amount_btc.getTextString()
+    override fun getBtcAmount() = amountCrypto.getTextString()
 
     override fun updateReceiveAddress(address: String) {
         edittext_receiving_address.setText(address)
@@ -330,11 +330,11 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override fun getContactName() = toAddressTextView.text.toString()
 
     override fun updateFiatTextField(text: String) {
-        amount_fiat.setText(text)
+        amountFiat.setText(text)
     }
 
     override fun updateBtcTextField(text: String) {
-        amount_btc.setText(text)
+        amountCrypto.setText(text)
     }
 
     override fun onResume() {
@@ -588,11 +588,11 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             setCallback(mvpView)
             setDecimalSeparator(defaultDecimalSeparator)
             // Enable custom keypad and disables default keyboard from popping up
-            enableOnView(amount_container.amount_btc)
-            enableOnView(amount_container.amount_fiat)
+            enableOnView(amount_container.amountCrypto)
+            enableOnView(amount_container.amountFiat)
         }
 
-        amount_container.amount_btc.apply {
+        amount_container.amountCrypto.apply {
             setText("")
             requestFocus()
         }

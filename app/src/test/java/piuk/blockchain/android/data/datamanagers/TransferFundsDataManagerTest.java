@@ -56,7 +56,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         legacyAddress1.setAddress("address");
         legacyAddress1.setPrivateKey("");
         List<LegacyAddress> legacyAddresses = Arrays.asList(legacyAddress1, legacyAddress1, legacyAddress1);
-        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(1L);
+        when(dynamicFeeCache.getBtcFeeOptions().getRegularFee()).thenReturn(1L);
         when(payloadDataManager.getWallet().getLegacyAddressList()).thenReturn(legacyAddresses);
         when(payloadDataManager.getAddressBalance(anyString())).thenReturn(BigInteger.TEN);
         UnspentOutputs unspentOutputs = mock(UnspentOutputs.class);

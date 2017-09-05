@@ -166,8 +166,10 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private Completable feesCompletable() {
-        return feeDataManager.getFeeOptions()
-                .doOnNext(feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions))
+        return feeDataManager.getBtcFeeOptions()
+                .doOnNext(btcFeeOptions -> dynamicFeeCache.setBtcFeeOptions(btcFeeOptions))
+                .flatMap(ignored -> feeDataManager.getEthFeeOptions())
+                .doOnNext(ethFeeOptions -> dynamicFeeCache.setEthFeeOptions(ethFeeOptions))
                 .compose(RxUtil.applySchedulersToObservable())
                 .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTickers());
     }

@@ -185,7 +185,7 @@ public class SendPresenter extends BasePresenter<SendView> {
         double exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit);
 
         monetaryUtil = new MonetaryUtil(btcUnit);
-        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory);
+        currencyHelper = new ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory, null);
 
         sendModel.btcUnit = monetaryUtil.getBtcUnit(btcUnit);
         sendModel.fiatUnit = fiatUnit;
@@ -360,18 +360,18 @@ public class SendPresenter extends BasePresenter<SendView> {
      * Get cached dynamic fee from new Fee options endpoint
      */
     private void getSuggestedFee() {
-        sendModel.feeOptions = dynamicFeeCache.getFeeOptions();
+        sendModel.feeOptions = dynamicFeeCache.getBtcFeeOptions();
 
         // Refresh fee cache
         getCompositeDisposable().add(
-                feeDataManager.getFeeOptions()
+                feeDataManager.getBtcFeeOptions()
                         .doOnError(ignored -> {
                             getView().showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR);
                             getView().finishPage(false);
                         })
-                        .doOnTerminate(() -> sendModel.feeOptions = dynamicFeeCache.getFeeOptions())
+                        .doOnTerminate(() -> sendModel.feeOptions = dynamicFeeCache.getBtcFeeOptions())
                         .subscribe(
-                                feeOptions -> dynamicFeeCache.setFeeOptions(feeOptions),
+                                feeOptions -> dynamicFeeCache.setBtcFeeOptions(feeOptions),
                                 Throwable::printStackTrace));
     }
 
@@ -1072,7 +1072,7 @@ public class SendPresenter extends BasePresenter<SendView> {
     }
 
     FeeOptions getFeeOptions() {
-        return dynamicFeeCache.getFeeOptions();
+        return dynamicFeeCache.getBtcFeeOptions();
     }
 
     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {

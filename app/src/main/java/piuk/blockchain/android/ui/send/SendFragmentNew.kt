@@ -1,26 +1,42 @@
 package piuk.blockchain.android.ui.send
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
+import android.widget.AdapterView
+import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.RxTextView
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.fragment_send.*
+import kotlinx.android.synthetic.main.include_amount_row.*
+import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.access.AccessState
+import piuk.blockchain.android.data.connectivity.ConnectivityStatus
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
+import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
+import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
+import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.zxing.CaptureActivity
@@ -28,13 +44,19 @@ import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
+import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew {
+class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew, NumericKeyboardCallback {
 
     @Inject lateinit var sendPresenterNew: SendPresenterNew
+
+    private var backPressed: Long = 0
+    private val COOL_DOWN_MILLIS = 2 * 1000
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -51,12 +73,25 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
+        setCustomKeypad()
+
+        CurrencyState.getInstance().cryptoCurrency = CryptoCurrencies.BTC
         setTabs()
         setupInitialAccount()
         setupSendingView()
         setupReceivingView()
+        setupBtcTextField()
+        setupFiatTextField()
         setupFeesView()
-        button_send.setOnClickListener { onSendClicked() }
+
+        buttonSend.setOnClickListener {
+            if (ConnectivityStatus.hasConnectivity(activity)) {
+                onSendClicked()
+            } else {
+                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+            }
+        }
+        max.setOnClickListener({ presenter.onSpendAllClicked(getFeePriority()) })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,18 +114,79 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     override fun getMvpView() = this
 
+    private fun setCustomKeypad() {
+        keyboard.setCallback(this)
+        keyboard.setDecimalSeparator(presenter.getDefaultDecimalSeparator())
+
+        // Enable custom keypad and disables default keyboard from popping up
+        keyboard.enableOnView(amountContainer.amountCrypto)
+        keyboard.enableOnView(amountContainer.amountFiat)
+
+        amountContainer.amountCrypto.setText("")
+        amountContainer.amountCrypto.requestFocus()
+    }
+
+    private fun closeKeypad() {
+        keyboard.setNumpadVisibility(View.GONE)
+    }
+
+    fun isKeyboardVisible(): Boolean {
+        return keyboard.isVisible
+    }
+
+    override fun onKeypadClose() {
+        // Show bottom nav if applicable
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+        }
+
+        // Resize activity to default
+        scrollView.setPadding(0, 0, 0, 0)
+        val layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT)
+        layoutParams.setMargins(0,
+                0,
+                0,
+                activity.resources.getDimension(R.dimen.action_bar_height).toInt())
+        scrollView.setLayoutParams(layoutParams)
+    }
+
+    override fun onKeypadOpen() {
+        // Hide bottom nav if applicable
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomNavigationView.hideBottomNavigation()
+        }
+    }
+
+    override fun onKeypadOpenCompleted() {
+        // Resize activity around view
+        val translationY = keyboard.getHeight()
+        scrollView.setPadding(0, 0, 0, translationY)
+
+        val layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT)
+        layoutParams.setMargins(0, 0, 0, 0)
+        scrollView.setLayoutParams(layoutParams)
+    }
+
     private fun setTabs() {
-//        tabs.apply {
-//            addTab(tabs.newTab().setText(R.string.bitcoin))
-//            addTab(tabs.newTab().setText(R.string.ether))
-//            setOnTabSelectedListener {
-//                if (it == 0) {
-//                    presenter.onBitcoinChosen()
-//                } else {
-//                    presenter.onEtherChosen()
-//                }
-//            }
-//        }
+        tabs.apply {
+            addTab(tabs.newTab().setText(R.string.bitcoin))
+            addTab(tabs.newTab().setText(R.string.ether))
+            setOnTabSelectedListener {
+                if (it == 0) {
+                    presenter.onBitcoinChosen()
+                } else {
+                    presenter.onEtherChosen()
+                }
+            }
+        }
+    }
+
+    override fun selectTab(tabIndex: Int) {
+        tabs.getTabAt(tabIndex)?.select()
     }
 
     private fun setupToolbar() {
@@ -130,7 +226,17 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+
+        val scanData = data?.getStringExtra(CaptureActivity.SCAN_RESULT)
+        if(scanData == null || resultCode != Activity.RESULT_OK)return
+
+        when (requestCode) {
+            SCAN_URI -> presenter.handleURIScan(scanData, EventService.EVENT_TX_INPUT_FROM_QR)
+            SCAN_PRIVX -> presenter.handlePrivxScan(scanData)
+            AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> Timber.d("")
+            AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> Timber.d("")
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -147,7 +253,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     private fun setupReceivingView() {
         //Avoid OntouchListener - causes paste issues on some Samsung devices
-        toContainer.toAddressEditTextView.setOnClickListener({ v ->
+        toContainer.toAddressEditTextView.setOnClickListener({
             toContainer.toAddressEditTextView.setText("")
             presenter.clearReceivingAddress()
         })
@@ -162,7 +268,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         //TextChanged listener required to invalidate receive address in memory when user
         //chooses to edit address populated via QR
         RxTextView.textChanges(toContainer.toAddressEditTextView)
-                .doOnNext { ignored ->
+                .doOnNext {
                     if (activity.currentFocus === toContainer.toAddressEditTextView) {
                         presenter.clearReceivingAddress()
                         presenter.clearContact()
@@ -170,12 +276,99 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                 }
                 .subscribe(IgnorableDefaultObserver())
 
-        toContainer.toArrow.setOnClickListener({ v ->
+        toContainer.toArrow.setOnClickListener({
             AccountChooserActivity.startForResult(this,
                     AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                     PaymentRequestType.SEND,
                     getString(R.string.to))
         })
+    }
+
+    override fun setCryptoCurrency(currency: String) {
+        amountContainer.currencyCrypto.setText(currency)
+    }
+
+    override fun disableCryptoTextChangeListener() {
+        amountContainer.amountCrypto.removeTextChangedListener(cryptoTextWatcher)
+    }
+
+    @SuppressLint("NewApi")
+    override fun enableCryptoTextChangeListener() {
+        amountContainer.amountCrypto.addTextChangedListener(cryptoTextWatcher)
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            amountContainer.amountCrypto.setShowSoftInputOnFocus(false)
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+    }
+
+    override fun updateCryptoTextField(amountString: String?) {
+        amountContainer.amountCrypto.setText(amountString)
+    }
+
+    override fun disableFiatTextChangeListener() {
+        amountContainer.amountFiat.removeTextChangedListener(fiatTextWatcher)
+    }
+
+    @SuppressLint("NewApi")
+    override fun enableFiatTextChangeListener() {
+        amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher)
+        try {
+            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            amountContainer.amountFiat.setShowSoftInputOnFocus(false)
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+    }
+
+    override fun updateFiatTextField(amountString: String?) {
+        amountContainer.amountFiat.setText(amountString)
+    }
+
+    // BTC Field
+    @SuppressLint("NewApi")
+    private fun setupBtcTextField() {
+        amountContainer.amountCrypto.setHint("0" + presenter.getDefaultDecimalSeparator() + "00")
+        amountContainer.amountCrypto.setSelectAllOnFocus(true)
+        enableCryptoTextChangeListener()
+    }
+
+    // Fiat Field
+    @SuppressLint("NewApi")
+    private fun setupFiatTextField() {
+        amountContainer.amountFiat.setHint("0" + presenter.getDefaultDecimalSeparator() + "00")
+        amountContainer.amountFiat.setSelectAllOnFocus(true)
+        enableFiatTextChangeListener()
+
+    }
+
+    private val cryptoTextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+            // No-op
+        }
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            // No-op
+        }
+
+        override fun afterTextChanged(editable: Editable) {
+            presenter.updateFiatTextField(editable, amountContainer.amountCrypto)
+        }
+    }
+
+    private val fiatTextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+            // No-op
+        }
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            // No-op
+        }
+
+        override fun afterTextChanged(editable: Editable) {
+            presenter.updateCryptoTextField(editable, amountContainer.amountFiat)
+        }
     }
 
     private fun setupInitialAccount() {
@@ -188,8 +381,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     private fun setupSendingView() {
-        fromContainer.fromAddressTextView.setOnClickListener({ v -> startFromFragment() })
-        fromContainer.fromArrowImage.setOnClickListener({ v -> startFromFragment() })
+        fromContainer.fromAddressTextView.setOnClickListener({ startFromFragment() })
+        fromContainer.fromArrowImage.setOnClickListener({ startFromFragment() })
     }
 
     override fun setSendingAddress(accountItem: ItemAccount) {
@@ -198,6 +391,11 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     override fun setReceivingHint(hint: Int) {
         toContainer.toAddressEditTextView.setHint(hint)
+    }
+
+    override fun resetAmounts() {
+        val crypto = amountCrypto.text
+        amountCrypto.setText(crypto)
     }
 
     private fun startFromFragment() {
@@ -211,11 +409,30 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     fun onSendClicked() {
-        //maybe
-        presenter.onContinue()
+        if (ConnectivityStatus.hasConnectivity(activity)) {
+            presenter.onContinue()
+        } else {
+            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+        }
     }
 
     fun onBackPressed() {
+        if (isKeyboardVisible()) {
+            closeKeypad()
+        } else {
+            handleBackPressed()
+        }
+    }
+
+    private fun handleBackPressed() {
+        if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+            AccessState.getInstance().logout(context)
+            return
+        } else {
+            showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL)
+        }
+
+        backPressed = System.currentTimeMillis()
     }
 
     override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
@@ -238,7 +455,125 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         toContainer.toArrow.gone()
     }
 
+    override fun setReceivingAddress(address: String) {
+        toContainer.toAddressEditTextView.setText(address)
+    }
+
     private fun setupFeesView() {
+        val adapter = FeePriorityAdapter(activity, presenter.getFeeOptionsForDropDown())
+
+        spinnerPriority.setAdapter(adapter)
+
+        spinnerPriority.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                when (position) {
+                    0, 1 -> {
+                        buttonSend.setEnabled(true)
+                        textviewFeeAbsolute.setVisibility(View.VISIBLE)
+                        textviewFeeTime.setVisibility(View.VISIBLE)
+                        textInputLayout.setVisibility(View.GONE)
+                        updateTotals()
+                    }
+//                    2 -> if (presenter.shouldShowAdvancedFeeWarning()) {
+//                        alertCustomSpend()
+//                    } else {
+//                        displayCustomFeeField()
+//                    }
+                }
+
+                val options = presenter.getFeeOptionsForDropDown().get(position)
+                textviewFeeType.setText(options.getTitle())
+                textviewFeeTime.setText(if (position != 2) options.getDescription() else null)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // No-op
+            }
+        })
+
+        textviewFeeAbsolute.setOnClickListener({ spinnerPriority.performClick() })
+        textviewFeeType.setText(R.string.fee_options_regular)
+        textviewFeeTime.setText(R.string.fee_options_regular_time)
+
+        //TODO this calls updateTotals multiple times on startup
+        RxTextView.textChanges(amountContainer.amountCrypto)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ updateTotals() },{ it.printStackTrace() })
+
+        RxTextView.textChanges(amountContainer.amountFiat)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ updateTotals() },{ it.printStackTrace() })
+    }
+
+    internal fun updateTotals() {
+        presenter.calculateTransactionAmounts(
+                spendAll = false,
+                amountToSendText = amountContainer.amountCrypto.getText().toString(),
+                feePriority = getFeePriority())
+    }
+
+    @FeeType.FeePriorityDef
+    private fun getFeePriority(): Int {
+        val position = spinnerPriority.getSelectedItemPosition()
+        when (position) {
+            1 -> return FeeType.FEE_OPTION_PRIORITY
+            2 -> return FeeType.FEE_OPTION_CUSTOM
+            else -> return FeeType.FEE_OPTION_REGULAR
+        }
+    }
+
+    override fun getCustomFeeValue(): Long {
+        val amount = edittextCustomFee.getText().toString()
+        return if (!amount.isEmpty()) java.lang.Long.valueOf(amount) else 0
+    }
+
+    override fun showMaxAvailable() {
+        max.visible()
+        progressBarMaxAvailable.invisible()
+    }
+
+    override fun hideMaxAvailable() {
+        max.invisible()
+        progressBarMaxAvailable.visible()
+    }
+
+    override fun setUnconfirmedFunds(text: String) {
+        unconfirmedFundsWarning.setText(text)
+
+    }
+
+    override fun updateFeeField(fee: String) {
+        textviewFeeAbsolute.setText(fee)
+    }
+
+    override fun setMaxAvailable(amount: String) {
+        max.setText(amount)
+    }
+
+    override fun setMaxAvailableColor(@ColorRes color: Int) {
+        max.setTextColor(ContextCompat.getColor(context, color))
+    }
+
+    override fun setSpendAllAmount(textFromSatoshis: String) {
+        amountContainer.amountCrypto.setText(textFromSatoshis)
+    }
+
+    override fun showFeePriority() {
+        textviewFeeType.visible()
+        textviewFeeTime.visible()
+        spaceTextView.visible()
+        spinnerPriority.visible()
+    }
+
+    override fun hideFeePriority() {
+        textviewFeeType.gone()
+        textviewFeeTime.gone()
+        spaceTextView.gone()
+        spinnerPriority.invisible()
     }
 
     interface OnSendFragmentInteractionListener {
