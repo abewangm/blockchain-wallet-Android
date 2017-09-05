@@ -458,13 +458,13 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.textviewFeeType.setText(R.string.fee_options_regular);//done
         binding.textviewFeeTime.setText(R.string.fee_options_regular_time);//done
 
-        RxTextView.textChanges(binding.amountContainer.amountBtc)
-                .debounce(400, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        value -> updateTotals(getPresenter().getSendingItemAccount()),
-                        Throwable::printStackTrace);//done
+//        RxTextView.textChanges(binding.amountContainer.amountBtc)
+//                .debounce(400, TimeUnit.MILLISECONDS)
+//                .subscribeOn(AndroidSchedulers.mainThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(
+//                        value -> updateTotals(getPresenter().getSendingItemAccount()),
+//                        Throwable::printStackTrace);//done
 
         RxTextView.textChanges(binding.amountContainer.amountFiat)
                 .debounce(400, TimeUnit.MILLISECONDS)
@@ -476,10 +476,10 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     }
 
     private void requestSendPayment() {
-        getPresenter().onSendClicked(
-                binding.amountContainer.amountBtc.getText().toString(),
-                binding.toContainer.toAddressEditTextView.getText().toString(),
-                getFeePriority());
+//        getPresenter().onSendClicked(
+//                binding.amountContainer.amountBtc.getText().toString(),
+//                binding.toContainer.toAddressEditTextView.getText().toString(),
+//                getFeePriority());
     }
 
     //Done
@@ -528,10 +528,10 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     //Done
     @Thunk
     void updateTotals(ItemAccount itemAccount) {
-        getPresenter().calculateTransactionAmounts(itemAccount,
-                binding.amountContainer.amountBtc.getText().toString(),
-                getFeePriority(),
-                null);
+//        getPresenter().calculateTransactionAmounts(itemAccount,
+//                binding.amountContainer.amountBtc.getText().toString(),
+//                getFeePriority(),
+//                null);
     }
 
     //Done
@@ -569,7 +569,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     @Override
     public void lockContactsFields() {
         contactsPayment = true;
-        binding.amountContainer.amountBtc.setEnabled(false);
+//        binding.amountContainer.amountBtc.setEnabled(false);
         binding.amountContainer.amountFiat.setEnabled(false);
         binding.toContainer.toArrow.setVisibility(View.GONE);
         binding.toContainer.toArrow.setOnClickListener(null);
@@ -598,7 +598,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     @Override
     public void updateBtcAmount(String amount) {
-        binding.amountContainer.amountBtc.setText(amount);
+//        binding.amountContainer.amountBtc.setText(amount);
 //        binding.amountContainer.amountBtc.setSelection(binding.amountContainer.amountBtc.getText().length());
     }
 
@@ -642,7 +642,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     @Override
     public void updateBtcUnit(String unit) {
-        binding.amountContainer.currencyBtc.setText(unit);
+//        binding.amountContainer.currencyBtc.setText(unit);
     }
 
     @Override
@@ -652,7 +652,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     @Override
     public void onSetSpendAllAmount(String textFromSatoshis) {
-        binding.amountContainer.amountBtc.setText(textFromSatoshis);
+//        binding.amountContainer.amountBtc.setText(textFromSatoshis);
     }
 
     //done
@@ -809,15 +809,15 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
     // BTC Field
     @SuppressLint("NewApi")
     private void setupBtcTextField() {
-        binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
-        binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
-        try {
-            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
-            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
-        } catch (Exception e) {
-            Timber.e(e);
-        }
+//        binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
+//        binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
+//        binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
+//        try {
+//            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+//            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
+//        } catch (Exception e) {
+//            Timber.e(e);
+//        }
     }
 
     // Fiat Field
@@ -836,7 +836,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
     @Override
     public void updateBtcTextField(String text) {
-        binding.amountContainer.amountBtc.setText(text);
+//        binding.amountContainer.amountBtc.setText(text);
     }
 
     @Override
@@ -857,19 +857,19 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
         @Override
         public void afterTextChanged(Editable s) {
-            binding.amountContainer.amountBtc.removeTextChangedListener(this);
-            s = EditTextFormatUtil.formatEditable(s,
-                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
-                    binding.amountContainer.amountBtc,
-                    getDefaultDecimalSeparator());
-
-            binding.amountContainer.amountBtc.addTextChangedListener(this);
-
-            if (textChangeAllowed) {
-                textChangeAllowed = false;
-                getPresenter().updateFiatTextField(s.toString());
-                textChangeAllowed = true;
-            }
+//            binding.amountContainer.amountBtc.removeTextChangedListener(this);
+//            s = EditTextFormatUtil.formatEditable(s,
+//                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
+//                    binding.amountContainer.amountBtc,
+//                    getDefaultDecimalSeparator());
+//
+//            binding.amountContainer.amountBtc.addTextChangedListener(this);
+//
+//            if (textChangeAllowed) {
+//                textChangeAllowed = false;
+//                getPresenter().updateFiatTextField(s.toString());
+//                textChangeAllowed = true;
+//            }
         }
     };
 
@@ -1115,11 +1115,11 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
 
         // Enable custom keypad and disables default keyboard from popping up
-        customKeypad.enableOnView(binding.amountContainer.amountBtc);
-        customKeypad.enableOnView(binding.amountContainer.amountFiat);
+//        customKeypad.enableOnView(binding.amountContainer.amountBtc);
+//        customKeypad.enableOnView(binding.amountContainer.amountFiat);
 
-        binding.amountContainer.amountBtc.setText("");
-        binding.amountContainer.amountBtc.requestFocus();
+//        binding.amountContainer.amountBtc.setText("");
+//        binding.amountContainer.amountBtc.requestFocus();
     }
 
     //Done

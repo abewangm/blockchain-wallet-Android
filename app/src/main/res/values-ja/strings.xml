@@ -158,7 +158,6 @@
     <string name="enable_geo">現在の位置を見つけるにはGPSかその他の位置特定サービを有効にしてください。OKをクリックしてサービス設定を表示</string>
 
     <string name="my_addresses">アドレス</string>
-    <string name="addresses">アドレス</string>
     <string name="create_new">新規作成</string>
     <string name="import_address">アドレスのインポート</string>
     <string name="save_name">名前を保存</string>
@@ -169,7 +168,6 @@
 
     <string name="ssl_pinning_invalid">SSL証明書のピニングに失敗しました。悪意のあるアクティビティが行われている可能性があります。続行する前にネットワーク接続とデバイスを確認してください。</string>
 
-    <string name="merchant_map">商人マップ</string>
     <string name="merchant_suggest">商人を提案</string>
     <string name="name">名称</string>
     <string name="location">場所</string>

@@ -36,7 +36,6 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -44,8 +43,6 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import org.jetbrains.annotations.NotNull;
 
-import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.ui.send.SendFragmentNew;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -56,6 +53,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -77,7 +75,9 @@ import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
+import piuk.blockchain.android.ui.pairing_code.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
+import piuk.blockchain.android.ui.send.SendFragmentNew;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
@@ -395,6 +395,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             case R.id.nav_contacts:
                 startActivityForResult(new Intent(this, ContactsListActivity.class), CONTACTS_EDIT);
                 break;
+            case R.id.login_web_wallet:
+                PairingCodeActivity.start(this);
+                break;
             case R.id.nav_map:
                 startMerchantActivity();
                 break;
@@ -450,14 +453,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             MenuItem contactsMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_contacts);
             contactsMenuItem.setVisible(false);
         }
-    }
-
-    @Override
-    public void updateCurrentPrice(String price) {
-        View headerView = binding.navigationView.getHeaderView(0);
-        TextView currentPrice = headerView.findViewById(R.id.textview_current_price);
-
-        runOnUiThread(() -> currentPrice.setText(price));
     }
 
     private void startMerchantActivity() {

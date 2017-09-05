@@ -185,8 +185,7 @@
     <string name="navigate">Navigate</string>
     <string name="enable_geo">Enable either GPS or any other location service to find current location. Click OK to go to location services settings to let you do so.</string>
 
-    <string name="my_addresses">Addresses</string>
-    <string name="addresses">Addresses</string>
+    <string name="addresses">Bitcoin Addresses</string>
     <string name="create_new">Create New</string>
     <string name="import_address">Import Address</string>
     <string name="wallets">Wallets</string>
@@ -198,7 +197,7 @@
 
     <string name="ssl_pinning_invalid">Secure connection to the host has failed. This might indicate malicious activity. Please verify your network connection and device before continuing.</string>
 
-    <string name="merchant_map">Merchant Map</string>
+    <string name="merchant_map">Bitcoin Merchant Map</string>
     <string name="merchant_suggest">Suggest Merchant</string>
     <string name="name">Name</string>
     <string name="location">Location</string>
@@ -460,7 +459,9 @@
 
     <!-- SHARE RECEIVE ADDRESS -->
     <string name="email_request_subject">Bitcoin payment request</string>
+    <string name="email_request_subject_eth">Ethereum payment request</string>
     <string name="email_request_body">Please send%1$s BTC to the Bitcoin address %2$s.</string>
+    <string name="email_request_body_eth">Please send ETH to the Ethereum address %1$s.</string>
     <string name="email_request_body_fallback">attached</string>
     <string name="share_instructions">Tap to copy this address. Share it with the sender via email or text.</string>
 

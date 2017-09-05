@@ -119,11 +119,11 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         keyboard.setDecimalSeparator(presenter.getDefaultDecimalSeparator())
 
         // Enable custom keypad and disables default keyboard from popping up
-        keyboard.enableOnView(amountContainer.amountBtc)
+        keyboard.enableOnView(amountContainer.amountCrypto)
         keyboard.enableOnView(amountContainer.amountFiat)
 
-        amountContainer.amountBtc.setText("")
-        amountContainer.amountBtc.requestFocus()
+        amountContainer.amountCrypto.setText("")
+        amountContainer.amountCrypto.requestFocus()
     }
 
     private fun closeKeypad() {
@@ -285,26 +285,26 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     override fun setCryptoCurrency(currency: String) {
-        amountContainer.currencyBtc.setText(currency)
+        amountContainer.currencyCrypto.setText(currency)
     }
 
     override fun disableCryptoTextChangeListener() {
-        amountContainer.amountBtc.removeTextChangedListener(cryptoTextWatcher)
+        amountContainer.amountCrypto.removeTextChangedListener(cryptoTextWatcher)
     }
 
     @SuppressLint("NewApi")
     override fun enableCryptoTextChangeListener() {
-        amountContainer.amountBtc.addTextChangedListener(cryptoTextWatcher)
+        amountContainer.amountCrypto.addTextChangedListener(cryptoTextWatcher)
         try {
             // This method is hidden but accessible on <API21, but here we catch exceptions just in case
-            amountContainer.amountBtc.setShowSoftInputOnFocus(false)
+            amountContainer.amountCrypto.setShowSoftInputOnFocus(false)
         } catch (e: Exception) {
             Timber.e(e)
         }
     }
 
     override fun updateCryptoTextField(amountString: String?) {
-        amountContainer.amountBtc.setText(amountString)
+        amountContainer.amountCrypto.setText(amountString)
     }
 
     override fun disableFiatTextChangeListener() {
@@ -329,8 +329,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     // BTC Field
     @SuppressLint("NewApi")
     private fun setupBtcTextField() {
-        amountContainer.amountBtc.setHint("0" + presenter.getDefaultDecimalSeparator() + "00")
-        amountContainer.amountBtc.setSelectAllOnFocus(true)
+        amountContainer.amountCrypto.setHint("0" + presenter.getDefaultDecimalSeparator() + "00")
+        amountContainer.amountCrypto.setSelectAllOnFocus(true)
         enableCryptoTextChangeListener()
     }
 
@@ -353,7 +353,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
 
         override fun afterTextChanged(editable: Editable) {
-            presenter.updateFiatTextField(editable, amountContainer.amountBtc)
+            presenter.updateFiatTextField(editable, amountContainer.amountCrypto)
         }
     }
 
@@ -394,8 +394,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     override fun resetAmounts() {
-        val crypto = amountBtc.text
-        amountBtc.setText(crypto)
+        val crypto = amountCrypto.text
+        amountCrypto.setText(crypto)
     }
 
     private fun startFromFragment() {
@@ -496,7 +496,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         textviewFeeTime.setText(R.string.fee_options_regular_time)
 
         //TODO this calls updateTotals multiple times on startup
-        RxTextView.textChanges(amountContainer.amountBtc)
+        RxTextView.textChanges(amountContainer.amountCrypto)
                 .debounce(400, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -512,7 +512,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     internal fun updateTotals() {
         presenter.calculateTransactionAmounts(
                 spendAll = false,
-                amountToSendText = amountContainer.amountBtc.getText().toString(),
+                amountToSendText = amountContainer.amountCrypto.getText().toString(),
                 feePriority = getFeePriority())
     }
 
@@ -559,7 +559,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     override fun setSpendAllAmount(textFromSatoshis: String) {
-        amountContainer.amountBtc.setText(textFromSatoshis)
+        amountContainer.amountCrypto.setText(textFromSatoshis)
     }
 
     override fun showFeePriority() {

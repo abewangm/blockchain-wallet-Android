@@ -158,7 +158,6 @@
     <string name="enable_geo">Activa el GPS o cualquier otro servicio de localización para encontrar tu ubicación actual. Haz clic en Aceptar para ir a la configuración de servicios de localización para poder activarlos.</string>
 
     <string name="my_addresses">Direcciones</string>
-    <string name="addresses">Direcciones</string>
     <string name="create_new">Crear Nuevo</string>
     <string name="import_address">Importar la dirección</string>
     <string name="save_name">Guardar nombre</string>
@@ -169,7 +168,6 @@
 
     <string name="ssl_pinning_invalid">Se ha producido un error en la fijación del certificado SSL. Esto podría ser señal de actividad maliciosa. Por favor verifica tu conexión de red y el dispositivo antes de continuar.</string>
 
-    <string name="merchant_map">Mapa del comerciante</string>
     <string name="merchant_suggest">Sugerir comerciante</string>
     <string name="name">Nombre</string>
     <string name="location">Ubicación</string>

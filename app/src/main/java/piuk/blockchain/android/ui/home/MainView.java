@@ -29,8 +29,6 @@ interface MainView extends View {
 
     void showMetadataNodeRegistrationFailure();
 
-    void updateCurrentPrice(String price);
-
     void setBuySellEnabled(boolean enabled);
 
     void onTradeCompleted(String txHash);

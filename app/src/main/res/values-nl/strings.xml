@@ -158,7 +158,6 @@
     <string name="enable_geo">Schakel ofwel GPS of een andere locatiedienst in om de huidige locatie te vinden. Klik op OK om naar de locatiedienstinstellingen te gaan en dit te doen.</string>
 
     <string name="my_addresses">Adressen</string>
-    <string name="addresses">Adressen</string>
     <string name="create_new">Een nieuwe aanmaken</string>
     <string name="import_address">Adres importeren</string>
     <string name="save_name">Naam opslaan</string>
@@ -169,7 +168,6 @@
 
     <string name="ssl_pinning_invalid">SSL-certificaatpinning is mislukt. Dit kan op schadelijke activiteiten duiden. Controleer uw netwerkverbinding en het apparaat voordat u verder gaat.</string>
 
-    <string name="merchant_map">Kaart met handelaren</string>
     <string name="merchant_suggest">Handelaar voorstellen</string>
     <string name="name">Naam</string>
     <string name="location">Locatie</string>

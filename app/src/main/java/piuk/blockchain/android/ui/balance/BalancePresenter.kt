@@ -10,6 +10,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.contacts.ContactsDataManager
@@ -130,7 +131,7 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun setViewType(isBtc: Boolean) {
-        currencyState.setDisplayingCryptoCurrency(isBtc);
+        currencyState.isDisplayingCryptoCurrency = isBtc
         view.onViewTypeChanged(isBtc, getBtcUnitType())
         if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
             view.onTotalBalanceUpdated(
@@ -713,11 +714,12 @@ class BalancePresenter @Inject constructor(
         }
     }
 
+    // STOPSHIP: This should be a BigDecimal
     private fun getEthBalanceString(isEth: Boolean, ethBalance: Long): String {
         val strFiat = getFiatCurrency()
         val fiatBalance = exchangeRateFactory.getLastEthPrice(strFiat) * (ethBalance / 1e18)
         val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
-                .run { format(ethBalance / 1e18) }
+                .run { format(Convert.fromWei(ethBalance.toString(), Convert.Unit.ETHER)) }
 
         return if (isEth) {
             "$number ETH"

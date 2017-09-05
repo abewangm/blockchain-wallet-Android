@@ -9,7 +9,6 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.payload.PayloadManager;
 
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -229,19 +228,10 @@ public class MainPresenter extends BasePresenter<MainView> {
         getCompositeDisposable().add(
                 exchangeRateFactory.updateTickers()
                         .subscribe(
-                                () -> getView().updateCurrentPrice(getFormattedPriceString()),
+                                () -> {
+                                    // No-op
+                                },
                                 Throwable::printStackTrace));
-    }
-
-    private String getFormattedPriceString() {
-        String fiat = prefs.getValue(PrefsUtil.KEY_SELECTED_FIAT, "");
-        double lastPrice = exchangeRateFactory.getLastBtcPrice(fiat);
-        String fiatSymbol = exchangeRateFactory.getSymbol(fiat);
-        DecimalFormat format = new DecimalFormat();
-        format.setMinimumFractionDigits(2);
-        return stringUtils.getFormattedString(
-                R.string.current_price_btc,
-                fiatSymbol + format.format(lastPrice));
     }
 
     private void startWebSocketService() {

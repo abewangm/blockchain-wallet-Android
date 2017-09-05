@@ -281,7 +281,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         return displayable.getHash();
     }
 
-    public CryptoCurrencies getTxType() {
+    public CryptoCurrencies getTransactionType() {
         return displayable.getCryptoCurrency();
     }
 
