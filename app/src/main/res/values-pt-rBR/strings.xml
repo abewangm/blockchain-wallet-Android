@@ -157,7 +157,6 @@
     <string name="navigate">Dirigir</string>
     <string name="enable_geo">Ativar GPS ou outro serviço de localização para encontrar a localização atual. Clique em OK para ir às configurações do serviço de localização.</string>
 
-    <string name="my_addresses">Endereços</string>
     <string name="create_new">Criar Novo</string>
     <string name="import_address">Importar Endereço</string>
     <string name="save_name">Salvar nome</string>

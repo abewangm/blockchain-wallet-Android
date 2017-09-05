@@ -157,7 +157,6 @@
     <string name="navigate">Điều hướng</string>
     <string name="enable_geo">Kích hoạt GPS hoặc bất kỳ dịch vụ định vị nào khác để tìm vị trí hiện tại. Nhấn OK để đến cài đặt định vị và kích hoạt.</string>
 
-    <string name="my_addresses">Địa chỉ</string>
     <string name="create_new">Tạo mới</string>
     <string name="import_address">Nhập địa chỉ</string>
     <string name="save_name">Lưu tên</string>
