@@ -8,7 +8,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom
 
 interface SendViewNew : View {
 
-    fun setSendingAddress(get: ItemAccount)
+    fun setSendingAddress(label: String)
 
     fun finishPage(paymentMade: Boolean)
 
@@ -63,4 +63,6 @@ interface SendViewNew : View {
     fun setReceivingAddress(address: String)
 
     fun selectTab(tabIndex: Int)
+
+    fun onShowBIP38PassphrasePrompt(scanData: String)
 }

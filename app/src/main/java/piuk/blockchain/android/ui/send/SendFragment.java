@@ -251,6 +251,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
+    //Done
     @SuppressWarnings({"ConstantConditions", "unchecked"})
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -744,6 +745,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .show();
     }
 
+    //Done
     @Override
     public void onShowBIP38PassphrasePrompt(String scanData) {
         final AppCompatEditText password = new AppCompatEditText(getActivity());

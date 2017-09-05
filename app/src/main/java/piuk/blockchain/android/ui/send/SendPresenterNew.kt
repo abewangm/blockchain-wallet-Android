@@ -1,15 +1,24 @@
 package piuk.blockchain.android.ui.send
 
+import android.content.Intent
 import android.text.Editable
 import android.widget.EditText
+import com.fasterxml.jackson.databind.ObjectMapper
 import info.blockchain.api.data.UnspentOutputs
 import info.blockchain.wallet.api.data.FeeOptions
+import info.blockchain.wallet.payload.data.Account
+import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.payment.Payment
 import info.blockchain.wallet.util.FormatsUtil
+import info.blockchain.wallet.util.PrivateKeyFactory
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import kotlinx.android.synthetic.main.fragment_send.*
+import kotlinx.android.synthetic.main.include_to_row_editable.view.*
+import org.bitcoinj.core.ECKey
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.cache.DynamicFeeCache
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
@@ -20,12 +29,14 @@ import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.ui.chooser.AccountChooserActivity
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.util.*
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -44,7 +55,9 @@ class SendPresenterNew @Inject constructor(
         private val stringUtils: StringUtils,
         private val sendDataManager: SendDataManager,
         private val dynamicFeeCache: DynamicFeeCache,
-        private val feeDataManager: FeeDataManager
+        private val feeDataManager: FeeDataManager,
+        private val privateKeyFactory: PrivateKeyFactory,
+        private val environmentSettings: EnvironmentSettings
 ) : BasePresenter<SendViewNew>() {
 
     val locale by unsafeLazy { Locale.getDefault() }
@@ -92,6 +105,7 @@ class SendPresenterNew @Inject constructor(
         resetAccountList()
         view.hideMaxAvailable()
         view.resetAmounts()
+        view.setReceivingAddress("")
         setCryptoCurrency()
         calculateTransactionAmounts(spendAll = false, amountToSendText = "0", feePriority = FeeType.FEE_OPTION_REGULAR)
         view.showFeePriority()
@@ -106,6 +120,7 @@ class SendPresenterNew @Inject constructor(
         resetAccountList()
         view.hideMaxAvailable()
         view.resetAmounts()
+        view.setReceivingAddress("")
         setCryptoCurrency()
         calculateTransactionAmounts(spendAll = false, amountToSendText = "0", feePriority = FeeType.FEE_OPTION_REGULAR)
         view.hideFeePriority()
@@ -147,14 +162,18 @@ class SendPresenterNew @Inject constructor(
 
     fun selectDefaultSendingAccount() {
         val accountItem = walletAccountHelper.getDefaultAccount()
-        view.setSendingAddress(accountItem)
+        view.setSendingAddress(accountItem.label!!)
         pendingTransaction.sendingObject = accountItem
     }
 
     fun selectSendingBtcAccount(accountPosition: Int) {
 
         if (accountPosition >= 0) {
-            view.setSendingAddress(getAddressList().get(accountPosition))
+            var label = getAddressList().get(accountPosition).label
+            if (label == null || label.isEmpty()) {
+                label = getAddressList().get(accountPosition).address
+            }
+            view.setSendingAddress(label!!)
         } else {
             selectDefaultSendingAccount()
         }
@@ -498,7 +517,10 @@ class SendPresenterNew @Inject constructor(
 
     }
 
-    fun handleURIScan(untrimmedscanData: String, scanRoute: String) {
+    fun handleURIScan(untrimmedscanData: String?, scanRoute: String) {
+
+        if(untrimmedscanData == null) return
+
         metricInputFlag = scanRoute
 
         var scanData = untrimmedscanData.trim { it <= ' ' }
@@ -542,7 +564,157 @@ class SendPresenterNew @Inject constructor(
         }
     }
 
-    fun handlePrivxScan(scanData: String) {
+    fun handlePrivxScan(scanData: String?) {
 
+        if(scanData == null) return
+
+        val format = privateKeyFactory.getFormat(scanData)
+
+        if(format == null) {
+            view?.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR)
+        }
+
+        when (format) {
+            PrivateKeyFactory.BIP38 -> spendFromWatchOnlyNonBIP38(format, scanData)
+            else -> view?.onShowBIP38PassphrasePrompt(scanData)//BIP38 needs passphrase
+        }
+    }
+
+    private fun spendFromWatchOnlyNonBIP38(format: String, scanData: String) {
+        try {
+            val key = privateKeyFactory.getKey(format, scanData)
+            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+            setTempLegacyAddressPrivateKey(legacyAddress, key)
+
+        } catch (e: Exception) {
+            view?.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR)
+            Timber.e(e)
+        }
+
+    }
+
+    internal fun spendFromWatchOnlyBIP38(pw: String, scanData: String) {
+        compositeDisposable.add(
+                sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.getNetworkParameters())
+                        .subscribe({ ecKey ->
+                            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+                            setTempLegacyAddressPrivateKey(legacyAddress, ecKey)
+                        }) { throwable -> view?.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR) })
+    }
+
+    private fun setTempLegacyAddressPrivateKey(legacyAddress: LegacyAddress, key: ECKey?) {
+        if (key != null && key.hasPrivKey() && legacyAddress.address == key.toAddress(
+                environmentSettings.getNetworkParameters()).toString()) {
+
+            //Create copy, otherwise pass by ref will override private key in wallet payload
+            val tempLegacyAddress = LegacyAddress()
+            tempLegacyAddress.setPrivateKeyFromBytes(key.privKeyBytes)
+            tempLegacyAddress.address = key.toAddress(environmentSettings.getNetworkParameters()).toString()
+            tempLegacyAddress.label = legacyAddress.label
+            pendingTransaction.sendingObject.accountObject = tempLegacyAddress
+
+            //TODO
+//            confirmPayment()
+        } else {
+            view?.showToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR)
+        }
+    }
+
+    internal fun onSendingLegacyAddressSelected(legacyAddress: LegacyAddress) {
+
+        pendingTransaction.receivingObject = ItemAccount(legacyAddress.label, null, null, null, legacyAddress, legacyAddress.address)
+
+        var label = legacyAddress.label
+        if (label == null || label.isEmpty()) {
+            label = legacyAddress.address
+        }
+        view.setSendingAddress(label)
+    }
+
+    internal fun onSendingAccountSelected(account: Account) {
+
+        pendingTransaction.receivingObject = ItemAccount(account.label, null, null, null, account, null)
+
+        var label = account.label
+        if (label == null || label.isEmpty()) {
+            label = account.xpub
+        }
+
+        view.setSendingAddress(label)
+    }
+
+    internal fun onReceivingLegacyAddressSelected(legacyAddress: LegacyAddress) {
+
+        pendingTransaction.receivingObject = ItemAccount(legacyAddress.label, null, null, null, legacyAddress, legacyAddress.address)
+        pendingTransaction.receivingAddress = legacyAddress.address
+
+        var label = legacyAddress.label
+        if (label == null || label.isEmpty()) {
+            label = legacyAddress.address
+        }
+        view.setReceivingAddress(label)
+
+        //TODO
+//        if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
+//            view.showWatchOnlyWarning()
+//        }
+    }
+
+    internal fun onReceivingAccountSelected(account: Account) {
+
+        pendingTransaction.receivingObject = ItemAccount(account.label, null, null, null, account, null)
+
+        payloadDataManager.getNextReceiveAddress(account)
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnNext { pendingTransaction.receivingAddress = it }
+                .doOnNext { view.setReceivingAddress(it) }
+                .subscribe({ /* No-op */ },{ view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
+
+        var label = account.label
+        if (label == null || label.isEmpty()) {
+            label = account.xpub
+        }
+
+        view.setReceivingAddress(label)
+    }
+
+    fun selectSendingAccount(data: Intent?) {
+
+        try {
+            val type: Class<*> = Class.forName(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
+            val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
+
+            when (any) {
+                is LegacyAddress -> onSendingLegacyAddressSelected(any)
+                is Account -> onSendingAccountSelected(any)
+                else -> throw IllegalArgumentException("No method for handling $type available")
+            }
+
+        } catch (e: ClassNotFoundException) {
+            Timber.e(e)
+            selectDefaultSendingAccount()
+        } catch (e: IOException) {
+            Timber.e(e)
+            selectDefaultSendingAccount()
+        }
+    }
+
+    fun selectReceivingAccount(data: Intent?) {
+
+        try {
+            val type: Class<*> = Class.forName(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
+            val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
+
+            when (any) {
+                is LegacyAddress -> onReceivingLegacyAddressSelected(any)
+                is Account -> onReceivingAccountSelected(any)
+                else -> throw IllegalArgumentException("No method for handling $type available")
+            }
+
+        } catch (e: ClassNotFoundException) {
+            Timber.e(e)
+        } catch (e: IOException) {
+            Timber.e(e)
+        }
     }
 }

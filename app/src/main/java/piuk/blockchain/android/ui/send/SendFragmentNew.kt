@@ -9,19 +9,26 @@ import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.AppCompatEditText
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
 import android.view.*
 import android.widget.AdapterView
 import android.widget.LinearLayout
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.jakewharton.rxbinding2.widget.RxTextView
+import info.blockchain.wallet.payload.data.Account
+import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.fragment_send.*
 import kotlinx.android.synthetic.main.include_amount_row.*
 import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
+import org.apache.commons.lang3.StringUtils
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus
@@ -42,12 +49,14 @@ import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.zxing.CaptureActivity
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
+import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -227,14 +236,13 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-        val scanData = data?.getStringExtra(CaptureActivity.SCAN_RESULT)
-        if(scanData == null || resultCode != Activity.RESULT_OK)return
+        if(resultCode != Activity.RESULT_OK)return
 
         when (requestCode) {
-            SCAN_URI -> presenter.handleURIScan(scanData, EventService.EVENT_TX_INPUT_FROM_QR)
-            SCAN_PRIVX -> presenter.handlePrivxScan(scanData)
-            AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> Timber.d("")
-            AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> Timber.d("")
+            SCAN_URI -> presenter.handleURIScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT), EventService.EVENT_TX_INPUT_FROM_QR)
+            SCAN_PRIVX -> presenter.handlePrivxScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT))
+            AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> presenter.selectReceivingAccount(data)
+            AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> presenter.selectSendingAccount(data)
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
@@ -385,8 +393,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         fromContainer.fromArrowImage.setOnClickListener({ startFromFragment() })
     }
 
-    override fun setSendingAddress(accountItem: ItemAccount) {
-        fromContainer.fromAddressTextView.setText(accountItem.label)
+    override fun setSendingAddress(label: String) {
+        fromContainer.fromAddressTextView.setText(label)
     }
 
     override fun setReceivingHint(hint: Int) {
@@ -574,6 +582,20 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         textviewFeeTime.gone()
         spaceTextView.gone()
         spinnerPriority.invisible()
+    }
+
+    override fun onShowBIP38PassphrasePrompt(scanData: String) {
+        val password = AppCompatEditText(activity)
+        password.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        password.setHint(R.string.password)
+
+        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.bip38_password_entry)
+                .setView(ViewUtils.getAlertDialogPaddedView(context, password))
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok) { dialog, whichButton -> presenter.spendFromWatchOnlyBIP38(password.text.toString(), scanData) }
+                .setNegativeButton(android.R.string.cancel, null).show()
     }
 
     interface OnSendFragmentInteractionListener {
