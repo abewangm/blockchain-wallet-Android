@@ -2,13 +2,12 @@ package piuk.blockchain.android.ui.send
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
-import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
@@ -30,13 +29,13 @@ import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
+import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
-import piuk.blockchain.android.ui.customviews.NumericKeyboard
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.home.MainActivity
@@ -186,6 +185,10 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
     }
 
+    override fun selectTab(tabIndex: Int) {
+        tabs.getTabAt(tabIndex)?.select()
+    }
+
     private fun setupToolbar() {
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
@@ -223,7 +226,17 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+
+        val scanData = data?.getStringExtra(CaptureActivity.SCAN_RESULT)
+        if(scanData == null || resultCode != Activity.RESULT_OK)return
+
+        when (requestCode) {
+            SCAN_URI -> presenter.handleURIScan(scanData, EventService.EVENT_TX_INPUT_FROM_QR)
+            SCAN_PRIVX -> presenter.handlePrivxScan(scanData)
+            AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> Timber.d("")
+            AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> Timber.d("")
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -442,6 +455,10 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         toContainer.toArrow.gone()
     }
 
+    override fun setReceivingAddress(address: String) {
+        toContainer.toAddressEditTextView.setText(address)
+    }
+
     private fun setupFeesView() {
         val adapter = FeePriorityAdapter(activity, presenter.getFeeOptionsForDropDown())
 
@@ -549,12 +566,14 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         textviewFeeType.visible()
         textviewFeeTime.visible()
         spaceTextView.visible()
+        spinnerPriority.visible()
     }
 
     override fun hideFeePriority() {
         textviewFeeType.gone()
         textviewFeeTime.gone()
         spaceTextView.gone()
+        spinnerPriority.invisible()
     }
 
     interface OnSendFragmentInteractionListener {

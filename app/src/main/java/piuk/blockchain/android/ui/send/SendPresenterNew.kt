@@ -5,6 +5,7 @@ import android.widget.EditText
 import info.blockchain.api.data.UnspentOutputs
 import info.blockchain.wallet.api.data.FeeOptions
 import info.blockchain.wallet.payment.Payment
+import info.blockchain.wallet.util.FormatsUtil
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import org.web3j.utils.Convert
@@ -57,6 +58,8 @@ class SendPresenterNew @Inject constructor(
     var absoluteSuggestedFee = BigInteger.ZERO
     var maxAvailable = BigInteger.ZERO
 
+    private var metricInputFlag: String? = null
+
     private fun getBtcUnitType() = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
 
     override fun onViewReady() {
@@ -81,7 +84,9 @@ class SendPresenterNew @Inject constructor(
     }
 
     fun onBitcoinChosen() {
+        Timber.d("onBitcoinChosen")
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
+        view.selectTab(0)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeField("")
         resetAccountList()
@@ -93,7 +98,9 @@ class SendPresenterNew @Inject constructor(
     }
 
     fun onEtherChosen() {
+        Timber.d("onEtherChosen")
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
+        view.selectTab(1)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeField("")
         resetAccountList()
@@ -167,8 +174,9 @@ class SendPresenterNew @Inject constructor(
 
     fun updateCryptoTextField(editable: Editable, editText: EditText) {
 
+        val maxLength = 2
         var fiat = EditTextFormatUtil.formatEditable(editable,
-                currencyHelper.maxCryptoDecimalLength,
+                maxLength,
                 editText,
                 getDefaultDecimalSeparator()).toString()
         var amountString = ""
@@ -185,9 +193,8 @@ class SendPresenterNew @Inject constructor(
 
     fun updateFiatTextField(editable: Editable, editText: EditText) {
 
-        val maxLength = 2
         var crypto = EditTextFormatUtil.formatEditable(editable,
-                maxLength,
+                currencyHelper.maxCryptoDecimalLength,
                 editText,
                 getDefaultDecimalSeparator()).toString()
 
@@ -488,6 +495,54 @@ class SendPresenterNew @Inject constructor(
         } else {
             view.setMaxAvailableColor(R.color.primary_blue_accent)
         }
+
+    }
+
+    fun handleURIScan(untrimmedscanData: String, scanRoute: String) {
+        metricInputFlag = scanRoute
+
+        var scanData = untrimmedscanData.trim { it <= ' ' }
+        var address = ""
+        var amount: String? = null
+
+        scanData = FormatsUtil.getURIFromPoorlyFormedBIP21(scanData)
+
+        if (FormatsUtil.isValidBitcoinAddress(scanData)) {
+            onBitcoinChosen()
+            address = scanData
+        } else if (FormatsUtil.isBitcoinUri(scanData)) {
+            onBitcoinChosen()
+            address = FormatsUtil.getBitcoinAddress(scanData)
+            amount = FormatsUtil.getBitcoinAmount(scanData)
+
+            // QR scan comes in as BTC - set current btc unit
+            prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+
+            //Convert to correct units
+            try {
+                amount = monetaryUtil.getDisplayAmount(java.lang.Long.parseLong(amount))
+                view?.updateCryptoTextField(amount)
+            } catch (e: Exception) {
+                //ignore
+            }
+
+        } else if(FormatsUtil.isValidEthereumAddress(scanData)){
+            onEtherChosen()
+            address = scanData
+            view?.updateCryptoTextField("")
+        } else {
+            view.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR)
+            return
+        }
+
+        if (address != "") {
+            pendingTransaction.receivingObject = null
+            pendingTransaction.receivingAddress = address
+            view.setReceivingAddress(address)
+        }
+    }
+
+    fun handlePrivxScan(scanData: String) {
 
     }
 }

@@ -59,4 +59,8 @@ interface SendViewNew : View {
     fun showFeePriority()
 
     fun hideFeePriority()
+
+    fun setReceivingAddress(address: String)
+
+    fun selectTab(tabIndex: Int)
 }
