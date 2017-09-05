@@ -2,10 +2,12 @@
 
 package piuk.blockchain.android.util.extensions
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import timber.log.Timber
 
 /**
  * Sets the visibility of a [View] to [View.VISIBLE]
@@ -45,4 +47,19 @@ fun ViewGroup.inflate(layoutId: Int, attachToRoot: Boolean = false): View {
  */
 fun EditText.getTextString(): String {
     return this.text.toString()
+}
+
+/**
+ * This disables the soft keyboard as an input for a given [EditText]. The method
+ * [EditText.setShowSoftInputOnFocus] is officially only available on >API21, but is actually hidden
+ * from >API16. Here, we attempt to set that field to false, and catch any exception that might be
+ * thrown if the Android implementation doesn't include it for some reason.
+ */
+@SuppressLint("NewApi")
+fun EditText.disableSoftKeyboard() {
+    try {
+        showSoftInputOnFocus = false
+    } catch (e : Exception) {
+        Timber.e(e)
+    }
 }
