@@ -10,6 +10,8 @@ import org.amshove.kluent.`should equal`
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import piuk.blockchain.android.data.currency.CurrencyState
+import piuk.blockchain.android.data.ethereum.EthDataStore
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -22,10 +24,19 @@ class WalletAccountHelperTest {
     private val stringUtils: StringUtils = mock()
     private val prefsUtil: PrefsUtil = mock()
     private val exchangeRateFactory: ExchangeRateFactory = mock()
+    private val currencyState: CurrencyState = mock()
+    private val ethDataStore: EthDataStore = mock()
 
     @Before
     fun setUp() {
-        subject = WalletAccountHelper(payloadManager, stringUtils, prefsUtil, exchangeRateFactory)
+        subject = WalletAccountHelper(
+                payloadManager,
+                stringUtils,
+                prefsUtil,
+                exchangeRateFactory,
+                currencyState,
+                ethDataStore
+        )
     }
 
     @Test
@@ -103,7 +114,7 @@ class WalletAccountHelperTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("GBP")
         // Act
-        val result = subject.getLegacyAddresses(true)
+        val result = subject.getLegacyAddresses()
         // Assert
         verify(payloadManager, atLeastOnce()).payload
         verify(prefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)

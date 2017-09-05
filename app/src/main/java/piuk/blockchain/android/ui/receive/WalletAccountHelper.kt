@@ -6,7 +6,6 @@ import info.blockchain.wallet.payload.data.LegacyAddress
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
-import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.ethereum.EthDataStore
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.util.ExchangeRateFactory
@@ -20,10 +19,9 @@ import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 class WalletAccountHelper(
         private val payloadManager: PayloadManager,
         private val stringUtils: StringUtils,
-        prefsUtil: PrefsUtil,
-        exchangeRateFactory: ExchangeRateFactory,
+        private val prefsUtil: PrefsUtil,
+        private val exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState,
-        private val ethDataManager: EthDataManager,
         private val ethDataStore: EthDataStore
 ) {
     private val btcUnitType: Int by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC) }
@@ -36,32 +34,23 @@ class WalletAccountHelper(
      * Returns a list of [ItemAccount] objects containing both HD accounts and [LegacyAddress]
      * objects, eg from importing accounts.
      *
-     * @param isBtc Whether or not you wish to have the [ItemAccount] objects returned with
-     * [ItemAccount.displayBalance] showing BTC or fiat
-     *
      * @return Returns a list of [ItemAccount] objects
      */
     fun getAccountItems(): List<ItemAccount> {
-
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> return mutableListOf<ItemAccount>().apply {
+        return when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> mutableListOf<ItemAccount>().apply {
                 // V3
                 addAll(getHdAccounts())
                 // V2l
                 addAll(getLegacyAddresses())
             }.toList()
 
-            else -> return mutableListOf<ItemAccount>().apply {
-                addAll(getEthAccount())
-            }.toList()
+            else -> getEthAccount().toList()
         }
     }
 
     /**
      * Returns a list of [ItemAccount] objects containing only HD accounts.
-     *
-     * @param isBtc Whether or not you wish to have the [ItemAccount] objects returned with
-     * [ItemAccount.displayBalance] showing BTC or fiat
      *
      * @return Returns a list of [ItemAccount] objects
      */
@@ -148,11 +137,11 @@ class WalletAccountHelper(
 
         val btcBalance = getAccountAbsoluteBalance(account)
 
-        if (!currencyState.isDisplayingCryptoCurrency) {
+        return if (!currencyState.isDisplayingCryptoCurrency) {
             val fiatBalance = btcExchange * (btcBalance / 1e8)
-            return "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
+            "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
         } else {
-            return "(${monetaryUtil.getDisplayAmount(btcBalance)} $btcUnit)"
+            "(${monetaryUtil.getDisplayAmount(btcBalance)} $btcUnit)"
         }
     }
 
@@ -174,18 +163,18 @@ class WalletAccountHelper(
 
         val btcBalance = getAddressAbsoluteBalance(legacyAddress)
 
-        if (!currencyState.isDisplayingCryptoCurrency) {
+        return if (!currencyState.isDisplayingCryptoCurrency) {
             val fiatBalance = btcExchange * (btcBalance / 1e8)
-            return "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
+            "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
         } else {
-            return "(${monetaryUtil.getDisplayAmount(btcBalance)} $btcUnit)"
+            "(${monetaryUtil.getDisplayAmount(btcBalance)} $btcUnit)"
         }
     }
 
     fun getDefaultAccount(): ItemAccount {
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> return getDefaultBtcAccount()
-            else -> return getDefaultEthAccount()
+        return when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> getDefaultBtcAccount()
+            else -> getDefaultEthAccount()
         }
     }
 
@@ -213,7 +202,6 @@ class WalletAccountHelper(
     }
 
     fun getEthAccount(): Collection<ItemAccount> {
-
         return mutableListOf<ItemAccount>().apply {
             add(getDefaultEthAccount())
         }

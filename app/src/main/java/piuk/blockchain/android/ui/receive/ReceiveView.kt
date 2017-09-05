@@ -1,7 +1,7 @@
 package piuk.blockchain.android.ui.receive
 
 import android.graphics.Bitmap
-import piuk.blockchain.android.data.currency.CryptoCurrencies
+import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
@@ -17,7 +17,7 @@ interface ReceiveView : View {
 
     fun showQrCode(bitmap: Bitmap?)
 
-    fun showToast(message: String, @ToastCustom.ToastType toastType: String)
+    fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 
     fun updateFiatTextField(text: String)
 
@@ -37,7 +37,7 @@ interface ReceiveView : View {
 
     fun hideBitcoinLayout()
 
-    fun updateToAddress(label: String)
+    fun updateReceiveLabel(label: String)
 
     fun showBottomSheet(uri: String)
 

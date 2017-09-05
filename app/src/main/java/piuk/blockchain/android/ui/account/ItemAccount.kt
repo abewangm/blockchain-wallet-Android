@@ -3,7 +3,9 @@ package piuk.blockchain.android.ui.account
 import info.blockchain.wallet.ethereum.EthereumAccount
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
+import piuk.blockchain.android.util.annotations.Mockable
 
+@Mockable
 class ItemAccount {
 
     enum class TYPE {

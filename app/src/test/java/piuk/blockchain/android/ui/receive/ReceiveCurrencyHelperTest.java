@@ -10,6 +10,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -28,12 +29,17 @@ public class ReceiveCurrencyHelperTest {
     @Mock private PrefsUtil mPrefsUtil;
     @Mock private ExchangeRateFactory mExchangeRateFactory;
     @Mock private MonetaryUtil mMonetaryUtil;
+    @Mock private CurrencyState currencyState;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mSubject = new ReceiveCurrencyHelper(mMonetaryUtil, Locale.UK, mPrefsUtil, mExchangeRateFactory);
+        mSubject = new ReceiveCurrencyHelper(mMonetaryUtil,
+                Locale.UK,
+                mPrefsUtil,
+                mExchangeRateFactory,
+                currencyState);
     }
 
     @Test
