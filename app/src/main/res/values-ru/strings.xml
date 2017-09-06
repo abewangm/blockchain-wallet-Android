@@ -157,7 +157,6 @@
     <string name="navigate">Навигация</string>
     <string name="enable_geo">Включите GPS или любую другую службу определения местоположения для поиска текущего местоположения. Чтобы сделать это, нажмите ОК, чтобы перейти к настройкам службы определения местоположения.</string>
 
-    <string name="my_addresses">Адреса</string>
     <string name="create_new">Создать новый</string>
     <string name="import_address">Импортировать адреса</string>
     <string name="save_name">Сохранить имя</string>

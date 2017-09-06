@@ -45,7 +45,7 @@ public class ReceiveCurrencyHelper {
     }
 
     public String getCryptoUnit() {
-        if(currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
             return getBtcUnit();
         } else {
             return getEthUnit();
@@ -67,7 +67,7 @@ public class ReceiveCurrencyHelper {
      * @return A double exchange rate
      */
     public double getLastPrice() {
-        if(currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
             return exchangeRateFactory.getLastBtcPrice(getFiatUnit());
         } else {
             return exchangeRateFactory.getLastEthPrice(getFiatUnit());
@@ -111,7 +111,7 @@ public class ReceiveCurrencyHelper {
      * @return The amount of BTC/mBits/bits as a double
      */
     public double getUndenominatedAmount(double amount) {
-        if(currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
             return monetaryUtil.getUndenominatedAmount(amount);
         } else {
             // TODO: 01/09/2017 Currently ontly handling Ether
@@ -129,13 +129,12 @@ public class ReceiveCurrencyHelper {
         return monetaryUtil.getDenominatedAmount(amount);
     }
 
+    // TODO: 05/09/2017 This seems to be hardcoded for BTC?
     public String getFormattedCryptoStringFromFiat(double fiatAmount) {
         double cryptoAmount = fiatAmount / getLastPrice();
         return getFormattedBtcString(cryptoAmount);
     }
-
     public String getFormattedFiatStringFromCrypto(double cryptoAmount) {
-
         double uAmount = getUndenominatedAmount(cryptoAmount);
         double fiatAmount = getLastPrice() * uAmount;
         return getFormattedFiatString(fiatAmount);
@@ -169,8 +168,7 @@ public class ReceiveCurrencyHelper {
      * @return The max number of allowed decimal points
      */
     public int getMaxCryptoDecimalLength() {
-
-        if(currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
             return getMaxBtcDecimalLength();
         } else {
             // TODO: 31/08/2017 Ether max?

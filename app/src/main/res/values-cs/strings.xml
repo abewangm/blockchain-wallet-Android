@@ -157,7 +157,6 @@
     <string name="navigate">Navigovat</string>
     <string name="enable_geo">Pro vyhledání aktuální polohy povolte prosím GPS nebo jinou lokalizační službu. Kliknutím na OK přejdete na nastavení lokalizační služby, kde můžete akci provést.</string>
 
-    <string name="my_addresses">Adresy</string>
     <string name="create_new">Vytvořit novou</string>
     <string name="import_address">Importovat adresu</string>
     <string name="save_name">Uložit název</string>

@@ -157,7 +157,6 @@
     <string name="navigate">Prowadź</string>
     <string name="enable_geo">Pozwól urządzeniom GPS i innym urządzeniom lokalizacyjnym na znajdowanie obecnej lokalizacji. Kliknij OK, by przejść do ustawień usług lokalizacji, abyś mógł to zrobić.</string>
 
-    <string name="my_addresses">Adresy</string>
     <string name="create_new">Stwórz nowy</string>
     <string name="import_address">Importuj adres</string>
     <string name="save_name">Nazwa zapisu</string>

@@ -5,7 +5,6 @@ import info.blockchain.wallet.util.FormatsUtil
 import io.reactivex.Observable
 import io.reactivex.Single
 import piuk.blockchain.android.data.ethereum.EthDataManager
-import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.stores.TransactionListStore
 import piuk.blockchain.android.data.transactions.BtcDisplayable
@@ -16,8 +15,7 @@ import java.util.*
 
 class TransactionListDataManager(private val payloadManager: PayloadManager,
                                  private val ethDataManager: EthDataManager,
-                                 private val transactionListStore: TransactionListStore,
-                                 private val rxBus: RxBus) {
+                                 private val transactionListStore: TransactionListStore) {
 
     fun fetchTransactions(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> {
         return Observable.fromCallable {
@@ -112,8 +110,6 @@ class TransactionListDataManager(private val payloadManager: PayloadManager,
         clearTransactionList()
         txList.addAll(pendingTxs)
         transactionListStore.insertTransactions(txList)
-        // TODO: Check if necessary and fix
-//        rxBus.emitEvent(List<*>::class.java, transactionListStore.list)
     }
 
     /**

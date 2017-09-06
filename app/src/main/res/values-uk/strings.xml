@@ -157,7 +157,6 @@
     <string name="navigate">Навігація</string>
     <string name="enable_geo">Щоб знайти це місце розташування, активуйте GPS або інші види геолокації. Натисніть OK, щоб перейти до налаштувань послуг геолокації, щоб дозволити вам це зробити.</string>
 
-    <string name="my_addresses">Адреси</string>
     <string name="create_new">Створити нову</string>
     <string name="import_address">Імпортування адрес</string>
     <string name="save_name">Зберегти назву</string>

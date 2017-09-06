@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.support.annotation.StringRes
 import android.support.design.widget.BottomSheetDialog
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
@@ -138,7 +139,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     private fun setupLayout() {
-        if (presenter.getReceiveToList().size == 1) {
+        if (!presenter.shouldShowDropdown()) {
             constraint_layout_to_row.gone()
             divider_to.gone()
         }
@@ -216,9 +217,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
         button_request.setOnClickListener {
             if (presenter.selectedContactId == null) {
-                showToast(getString(R.string.contact_select_first), ToastCustom.TYPE_ERROR)
+                showToast(R.string.contact_select_first, ToastCustom.TYPE_ERROR)
             } else if (!presenter.isValidAmount(getBtcAmount())) {
-                showToast(getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR)
+                showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
             } else {
                 listener?.onTransactionNotesRequested(
                         presenter.getConfirmationDetails(),
@@ -392,7 +393,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
     }
 
-    override fun updateToAddress(label: String) {
+    override fun updateReceiveLabel(label: String) {
         toAddressTextView.text = label
     }
 
@@ -519,7 +520,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun getQrBitmap(): Bitmap = (image_qr.drawable as BitmapDrawable).bitmap
 
-    override fun showToast(message: String, @ToastCustom.ToastType toastType: String) {
+    override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
         activity.toast(message, toastType)
     }
 

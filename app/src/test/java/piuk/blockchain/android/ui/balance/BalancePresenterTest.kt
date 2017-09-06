@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.balance
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction
-import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
@@ -20,10 +19,12 @@ import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
+import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -47,6 +48,7 @@ class BalancePresenterTest {
     private var currencyState: CurrencyState = mock()
     private var rxBus: RxBus = mock()
     private var appUtil: AppUtil = mock()
+    private var ethDataManager: EthDataManager = mock()
 
     @Before
     fun setUp() {
@@ -55,12 +57,12 @@ class BalancePresenterTest {
                 exchangeRateFactory,
                 transactionListDataManager,
                 contactsDataManager,
+                ethDataManager,
                 swipeToReceiveHelper,
                 payloadDataManager,
                 buyDataManager,
                 stringUtils,
                 prefsUtil,
-                accessState,
                 rxBus,
                 appUtil,
                 currencyState
@@ -113,7 +115,7 @@ class BalancePresenterTest {
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(view).onViewTypeChanged(true, 0)
-        verify(view).onExchangeRateUpdated(2717.0, true)
+        verify(view).onExchangeRateUpdated(2717.0, 0.0, true)
         verifyNoMoreInteractions(view)
     }
 
@@ -121,7 +123,7 @@ class BalancePresenterTest {
     fun `onAccountChosen success update ui with content state`() {
         // Arrange
         val itemAccount = ItemAccount()
-        val transactionSummary = TransactionSummary()
+        val transactionSummary: Displayable = mock()
         subject.activeAccountAndAddressList.add(itemAccount)
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
         whenever(transactionListDataManager.getBtcBalance(itemAccount)).thenReturn(0L)
@@ -221,7 +223,7 @@ class BalancePresenterTest {
     @Test
     fun `onRefreshRequested failure`() {
         val itemAccount = ItemAccount()
-        val transactionSummary = TransactionSummary()
+        val transactionSummary: Displayable = mock()
         subject.chosenAccount = itemAccount
         whenever(payloadDataManager.updateAllBalances())
                 .thenReturn(Completable.error { Throwable() })
@@ -249,7 +251,7 @@ class BalancePresenterTest {
     @Test
     fun `onRefreshRequested contacts not enabled`() {
         val itemAccount = ItemAccount()
-        val transactionSummary = TransactionSummary()
+        val transactionSummary: Displayable = mock()
         subject.chosenAccount = itemAccount
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
         whenever(transactionListDataManager.getBtcBalance(itemAccount)).thenReturn(0L)
@@ -301,7 +303,7 @@ class BalancePresenterTest {
     @Test
     fun `onRefreshRequested contacts enabled`() {
         val itemAccount = ItemAccount()
-        val transactionSummary = TransactionSummary()
+        val transactionSummary: Displayable = mock()
         subject.chosenAccount = itemAccount
         val contactName = "CONTACT_NAME"
         val fctx = FacilitatedTransaction().apply {
@@ -338,7 +340,7 @@ class BalancePresenterTest {
         verify(transactionListDataManager).getBtcBalance(itemAccount)
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(currencyState).isDisplayingCryptoCurrency()
+        verify(currencyState).isDisplayingCryptoCurrency
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -379,7 +381,7 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(currencyState).setDisplayingCryptoCurrency(true)
+        verify(currencyState).isDisplayingCryptoCurrency = true
         verifyNoMoreInteractions(accessState)
         verify(view).onViewTypeChanged(true, 0)
         verify(view).onTotalBalanceUpdated("0.0 BTC")
@@ -403,7 +405,7 @@ class BalancePresenterTest {
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(currencyState).isDisplayingCryptoCurrency
-        verify(currencyState).setDisplayingCryptoCurrency(false)
+        verify(currencyState).isDisplayingCryptoCurrency = false
         verifyNoMoreInteractions(accessState)
         verify(view).onViewTypeChanged(false, 0)
         verify(view).onTotalBalanceUpdated("0.00 USD")

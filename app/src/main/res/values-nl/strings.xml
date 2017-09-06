@@ -157,7 +157,6 @@
     <string name="navigate">Navigeren</string>
     <string name="enable_geo">Schakel ofwel GPS of een andere locatiedienst in om de huidige locatie te vinden. Klik op OK om naar de locatiedienstinstellingen te gaan en dit te doen.</string>
 
-    <string name="my_addresses">Adressen</string>
     <string name="create_new">Een nieuwe aanmaken</string>
     <string name="import_address">Adres importeren</string>
     <string name="save_name">Naam opslaan</string>
