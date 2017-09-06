@@ -19,27 +19,23 @@ import android.text.TextWatcher
 import android.view.*
 import android.widget.AdapterView
 import android.widget.LinearLayout
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.jakewharton.rxbinding2.widget.RxTextView
-import info.blockchain.wallet.payload.data.Account
-import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.fragment_send.*
 import kotlinx.android.synthetic.main.include_amount_row.*
 import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
-import org.apache.commons.lang3.StringUtils
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus
+import piuk.blockchain.android.data.contacts.ContactsPredicates
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
@@ -57,7 +53,6 @@ import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -87,7 +82,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         CurrencyState.getInstance().cryptoCurrency = CryptoCurrencies.BTC
         setTabs()
-        setupInitialAccount()
+        handleIncomingArguments()
         setupSendingView()
         setupReceivingView()
         setupBtcTextField()
@@ -380,10 +375,18 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
     }
 
-    private fun setupInitialAccount() {
+    private fun handleIncomingArguments() {
 
         if (arguments != null) {
             presenter.selectSendingBtcAccount(arguments.getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, -1))
+
+                val scanData = arguments.getString(ARGUMENT_SCAN_DATA)
+                val metricInputFlag = arguments.getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE)
+
+                if (scanData != null) {
+                    presenter.handleURIScan(scanData, metricInputFlag)
+                }
+
         } else {
             presenter.selectDefaultSendingAccount()
         }
