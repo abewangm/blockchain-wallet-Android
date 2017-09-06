@@ -784,4 +784,13 @@
     <string name="eth_to_field_helper">Enter ether address or select</string>
     <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
 
+    <!-- DASHBOARD -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_time_span_week">Week</string>
+    <string name="dashboard_time_span_month">Month</string>
+    <string name="dashboard_time_span_year">Year</string>
+    <string name="dashboard_bitcoin_price">Bitcoin price</string>
+    <string name="dashboard_ether_price">Ether price</string>
+    <string name="dashboard_charts_error">Error loading chart data</string>
+
 </resources>

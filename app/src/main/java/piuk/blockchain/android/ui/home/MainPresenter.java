@@ -135,8 +135,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                     .doAfterTerminate(() -> {
                                 getView().hideProgressDialog();
 
-                                getView().onStartBalanceFragment(false);
-
                                 initPrompts(getView().getActivityContext());
 
                                 if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
