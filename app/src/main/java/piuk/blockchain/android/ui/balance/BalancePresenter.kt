@@ -703,11 +703,11 @@ class BalancePresenter @Inject constructor(
         )
     }
 
-    private fun getBtcBalanceString(isBTC: Boolean, btcBalance: Long): String {
+    private fun getBtcBalanceString(isBtc: Boolean, btcBalance: Long): String {
         val strFiat = getFiatCurrency()
         val fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8)
 
-        return if (isBTC) {
+        return if (isBtc) {
             "${monetaryUtil.getDisplayAmountWithFormatting(btcBalance)} ${getBtcDisplayUnits()}"
         } else {
             "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"

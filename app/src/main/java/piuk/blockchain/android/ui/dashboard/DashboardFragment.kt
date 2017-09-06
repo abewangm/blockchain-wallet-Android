@@ -89,15 +89,15 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     }
 
     override fun updateEthBalance(balance: String) {
-        TODO("not implemented")
+        textview_eth.text = balance
     }
 
     override fun updateBtcBalance(balance: String) {
-        TODO("not implemented")
+        textview_btc.text = balance
     }
 
     override fun updateTotalBalance(balance: String) {
-        TODO("not implemented")
+        textview_total.text = balance
     }
 
     override fun updateCryptoCurrencyPrice(price: String) {
