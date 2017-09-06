@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.transactions.BtcDisplayable;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,7 +44,7 @@ public class TransactionHelperTest {
         transaction.setInputsMap(inputs);
         // Act
         Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> value =
-                subject.filterNonChangeAddresses(transaction);
+                subject.filterNonChangeAddresses(new BtcDisplayable(transaction));
         // Assert
         assertEquals(1, value.getLeft().size());
         assertEquals(0, value.getRight().size());
@@ -60,7 +61,7 @@ public class TransactionHelperTest {
         transaction.setInputsMap(inputs);
         // Act
         Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> value =
-                subject.filterNonChangeAddresses(transaction);
+                subject.filterNonChangeAddresses(new BtcDisplayable(transaction));
         // Assert
         assertEquals(1, value.getLeft().size());
         assertEquals(0, value.getRight().size());
@@ -80,7 +81,7 @@ public class TransactionHelperTest {
         when(payloadDataManager.getXpubFromAddress("key1")).thenReturn("xpub");
         // Act
         Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> value =
-                subject.filterNonChangeAddresses(transaction);
+                subject.filterNonChangeAddresses(new BtcDisplayable(transaction));
         // Assert
         assertEquals(2, value.getLeft().size());
         assertEquals(0, value.getRight().size());
@@ -101,7 +102,7 @@ public class TransactionHelperTest {
         when(payloadDataManager.getWallet()).thenReturn(payload);
         // Act
         Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> value =
-                subject.filterNonChangeAddresses(transaction);
+                subject.filterNonChangeAddresses(new BtcDisplayable(transaction));
         // Assert
         assertEquals(1, value.getLeft().size());
         assertEquals(1, value.getRight().size());
@@ -134,7 +135,7 @@ public class TransactionHelperTest {
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         // Act
         Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> value =
-                subject.filterNonChangeAddresses(transaction);
+                subject.filterNonChangeAddresses(new BtcDisplayable(transaction));
         // Assert
         assertEquals(1, value.getLeft().size());
         assertEquals(1, value.getRight().size());
@@ -162,7 +163,7 @@ public class TransactionHelperTest {
         when(payloadDataManager.isOwnHDAddress(anyString())).thenReturn(true);
         // Act
         Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> value =
-                subject.filterNonChangeAddresses(transaction);
+                subject.filterNonChangeAddresses(new BtcDisplayable(transaction));
         // Assert
         assertEquals(1, value.getLeft().size());
         assertEquals(1, value.getRight().size());

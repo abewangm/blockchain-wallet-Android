@@ -14,14 +14,12 @@ import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
 import piuk.blockchain.android.data.ethereum.EthDataStore
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -32,7 +30,6 @@ import javax.inject.Inject
 @Suppress("MemberVisibilityCanPrivate")
 class ReceivePresenter @Inject internal constructor(
         private val prefsUtil: PrefsUtil,
-        private val stringUtils: StringUtils,
         private val qrCodeDataManager: QrCodeDataManager,
         private val walletAccountHelper: WalletAccountHelper,
         private val payloadDataManager: PayloadDataManager,
@@ -64,13 +61,11 @@ class ReceivePresenter @Inject internal constructor(
         view.startContactSelectionActivity()
     }
 
-    internal fun isValidAmount(btcAmount: String): Boolean =
-            currencyHelper.getLongAmount(btcAmount) > 0
+    internal fun isValidAmount(btcAmount: String) = currencyHelper.getLongAmount(btcAmount) > 0
 
-    internal fun getReceiveToList() = ArrayList<ItemAccount>().apply {
-        addAll(walletAccountHelper.getAccountItems())
-        addAll(walletAccountHelper.getAddressBookEntries())
-    }
+    internal fun shouldShowDropdown() =
+            walletAccountHelper.getAccountItems().size +
+                    walletAccountHelper.getAddressBookEntries().size > 1
 
     internal fun onLegacyAddressSelected(legacyAddress: LegacyAddress) {
         if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
@@ -78,7 +73,7 @@ class ReceivePresenter @Inject internal constructor(
         }
 
         selectedAccount = null
-        view.updateToAddress(
+        view.updateReceiveLabel(
                 if (!legacyAddress.label.isNullOrEmpty())
                     legacyAddress.label
                 else
@@ -93,15 +88,17 @@ class ReceivePresenter @Inject internal constructor(
 
     internal fun onAccountSelected(account: Account) {
         selectedAccount = account
-        view.updateToAddress(account.label)
+        view.updateReceiveLabel(account.label)
         payloadDataManager.getNextReceiveAddress(account)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnNext { selectedAddress = it }
-                .doOnNext { view.updateReceiveAddress(it) }
-                .doOnNext { generateQrCode(getBitcoinUri(it, view.getBtcAmount())) }
+                .doOnNext {
+                    selectedAddress = it
+                    view.updateReceiveAddress(it)
+                    generateQrCode(getBitcoinUri(it, view.getBtcAmount()))
+                }
                 .subscribe(
                         { /* No-op */ },
-                        { view.showToast(stringUtils.getString(R.string.unexpected_error), ToastCustom.TYPE_ERROR) })
+                        { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
     }
 
     internal fun onEthSelected() {
@@ -128,7 +125,7 @@ class ReceivePresenter @Inject internal constructor(
         val amountBigInt = getBtcFromString(amount)
 
         if (currencyHelper.getIfAmountInvalid(amountBigInt)) {
-            view.showToast(stringUtils.getString(R.string.invalid_amount), ToastCustom.TYPE_ERROR)
+            view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
         }
 
         generateQrCode(getBitcoinUri(selectedAddress!!, amount))
@@ -168,14 +165,33 @@ class ReceivePresenter @Inject internal constructor(
         }
     }
 
-    fun onShowBottomSheetSelected() {
+    internal fun onShowBottomSheetSelected() {
         selectedAddress?.let {
-            if (FormatsUtil.isValidBitcoinAddress(it)) {
-                view.showBottomSheet(getBitcoinUri(it, view.getBtcAmount()))
-            } else if (FormatsUtil.isValidEthereumAddress(it)) {
-                view.showBottomSheet(it)
-            } else throw IllegalStateException("Unknown address format $selectedAddress")
+            when {
+                FormatsUtil.isValidBitcoinAddress(it) ->
+                    view.showBottomSheet(getBitcoinUri(it, view.getBtcAmount()))
+                FormatsUtil.isValidEthereumAddress(it) ->
+                    view.showBottomSheet(it)
+                else ->
+                    throw IllegalStateException("Unknown address format $selectedAddress")
+            }
         }
+    }
+
+    internal fun updateFiatTextField(bitcoin: String) {
+        var amount = bitcoin
+        if (amount.isEmpty()) amount = "0"
+        val btcAmount = currencyHelper.getUndenominatedAmount(currencyHelper.getDoubleAmount(amount))
+        val fiatAmount = currencyHelper.lastPrice * btcAmount
+        view.updateFiatTextField(currencyHelper.getFormattedFiatString(fiatAmount))
+    }
+
+    internal fun updateBtcTextField(fiat: String) {
+        var amount = fiat
+        if (amount.isEmpty()) amount = "0"
+        val fiatAmount = currencyHelper.getDoubleAmount(amount)
+        val btcAmount = fiatAmount / currencyHelper.lastPrice
+        view.updateBtcTextField(currencyHelper.getFormattedBtcString(btcAmount))
     }
 
     // TODO: Test me against valid Segwit address, although we don't currently generate these
@@ -211,22 +227,6 @@ class ReceivePresenter @Inject internal constructor(
                 .subscribe(
                         { view.showQrCode(it) },
                         { view.showQrCode(null) })
-    }
-
-    internal fun updateFiatTextField(bitcoin: String) {
-        var amount = bitcoin
-        if (amount.isEmpty()) amount = "0"
-        val btcAmount = currencyHelper.getUndenominatedAmount(currencyHelper.getDoubleAmount(amount))
-        val fiatAmount = currencyHelper.lastPrice * btcAmount
-        view.updateFiatTextField(currencyHelper.getFormattedFiatString(fiatAmount))
-    }
-
-    internal fun updateBtcTextField(fiat: String) {
-        var amount = fiat
-        if (amount.isEmpty()) amount = "0"
-        val fiatAmount = currencyHelper.getDoubleAmount(amount)
-        val btcAmount = fiatAmount / currencyHelper.lastPrice
-        view.updateBtcTextField(currencyHelper.getFormattedBtcString(btcAmount))
     }
 
     /**

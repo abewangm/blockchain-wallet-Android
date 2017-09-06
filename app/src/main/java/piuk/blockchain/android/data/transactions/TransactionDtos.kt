@@ -4,6 +4,7 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.util.annotations.Mockable
 import java.math.BigInteger
 
 abstract class Displayable {
@@ -23,6 +24,7 @@ abstract class Displayable {
 
 }
 
+@Mockable
 data class EthDisplayable(
         private val ethAccount: EthAddressResponse,
         private val ethTransaction: EthTransaction
@@ -54,6 +56,7 @@ data class EthDisplayable(
 
 }
 
+@Mockable
 data class BtcDisplayable(
         private val transactionSummary: TransactionSummary
 ) : Displayable() {

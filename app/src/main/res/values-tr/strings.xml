@@ -157,7 +157,6 @@
     <string name="navigate">Gezin</string>
     <string name="enable_geo">Mevcut konumu bulmak için GPS veya başka bir konum bulma hizmetini etkinleştirin. Bunu yapabilmeniz için konum hizmetleri ayarlarına gitmek için TAMAM\'a tıklayın.</string>
 
-    <string name="my_addresses">Adresler</string>
     <string name="create_new">Yeni Oluştur</string>
     <string name="import_address">Adres Al</string>
     <string name="save_name">Ad kaydedildi</string>
