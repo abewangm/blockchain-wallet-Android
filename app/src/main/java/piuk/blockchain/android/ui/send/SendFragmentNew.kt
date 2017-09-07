@@ -3,12 +3,15 @@ package piuk.blockchain.android.ui.send
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatEditText
@@ -21,6 +24,7 @@ import android.widget.AdapterView
 import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.android.synthetic.main.alert_watch_only_spend.view.*
 import kotlinx.android.synthetic.main.fragment_send.*
 import kotlinx.android.synthetic.main.include_amount_row.*
 import kotlinx.android.synthetic.main.include_amount_row.view.*
@@ -29,17 +33,17 @@ import kotlinx.android.synthetic.main.include_to_row_editable.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus
-import piuk.blockchain.android.data.contacts.ContactsPredicates
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
+import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.home.MainActivity
@@ -63,8 +67,18 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     private var backPressed: Long = 0
     private val COOL_DOWN_MILLIS = 2 * 1000
 
+    private var progressDialog: MaterialProgressDialog? = null
+
     init {
         Injector.getInstance().presenterComponent.inject(this)
+    }
+
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == BalanceFragment.ACTION_INTENT) {
+                presenter.onBroadcastReceived()
+            }
+        }
     }
 
     override fun onCreateView(
@@ -97,6 +111,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             }
         }
         max.setOnClickListener({ presenter.onSpendAllClicked(getFeePriority()) })
+
+        onViewReady()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,6 +129,15 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     override fun onResume() {
         super.onResume()
         setupToolbar()
+        closeKeypad()
+
+        val filter = IntentFilter(BalanceFragment.ACTION_INTENT)
+        LocalBroadcastManager.getInstance(activity).registerReceiver(receiver, filter)
+    }
+
+    override fun onPause() {
+        LocalBroadcastManager.getInstance(activity).unregisterReceiver(receiver)
+        super.onPause()
     }
 
     override fun createPresenter() = sendPresenterNew
@@ -190,7 +215,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
     }
 
-    override fun selectTab(tabIndex: Int) {
+    override fun setTabSelection(tabIndex: Int) {
         tabs.getTabAt(tabIndex)?.select()
     }
 
@@ -275,7 +300,6 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                 .doOnNext {
                     if (activity.currentFocus === toContainer.toAddressEditTextView) {
                         presenter.clearReceivingAddress()
-                        presenter.clearContact()
                     }
                 }
                 .subscribe(IgnorableDefaultObserver())
@@ -288,7 +312,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         })
     }
 
-    override fun setCryptoCurrency(currency: String) {
+    override fun updateCryptoCurrency(currency: String) {
         amountContainer.currencyCrypto.setText(currency)
     }
 
@@ -307,7 +331,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
     }
 
-    override fun updateCryptoTextField(amountString: String?) {
+    override fun updateCryptoAmount(amountString: String?) {
         amountContainer.amountCrypto.setText(amountString)
     }
 
@@ -326,7 +350,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
     }
 
-    override fun updateFiatTextField(amountString: String?) {
+    override fun updateFiatAmount(amountString: String?) {
         amountContainer.amountFiat.setText(amountString)
     }
 
@@ -397,16 +421,12 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         fromContainer.fromArrowImage.setOnClickListener({ startFromFragment() })
     }
 
-    override fun setSendingAddress(label: String) {
+    override fun updateSendingAddress(label: String) {
         fromContainer.fromAddressTextView.setText(label)
     }
 
-    override fun setReceivingHint(hint: Int) {
+    override fun updateReceivingHint(hint: Int) {
         toContainer.toAddressEditTextView.setHint(hint)
-    }
-
-    override fun resetAmounts() {
-        amountCrypto.setText("")
     }
 
     private fun startFromFragment() {
@@ -421,11 +441,13 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     fun onSendClicked() {
         if (ConnectivityStatus.hasConnectivity(activity)) {
-            presenter.onContinue()
+            presenter.onContinueClicked()
         } else {
             showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
         }
     }
+
+    override fun getReceivingAddress() = amountContainer.toAddressEditTextView?.getText().toString()
 
     fun onBackPressed() {
         if (isKeyboardVisible()) {
@@ -466,7 +488,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         toContainer.toArrow.gone()
     }
 
-    override fun setReceivingAddress(address: String) {
+    override fun updateReceivingAddress(address: String) {
         toContainer.toAddressEditTextView.setText(address)
     }
 
@@ -552,25 +574,26 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         progressBarMaxAvailable.visible()
     }
 
-    override fun setUnconfirmedFunds(text: String) {
-        unconfirmedFundsWarning.setText(text)
-
+    override fun updateWarning(message: String) {
+        arbitraryWarning.visible()
+        arbitraryWarning.setText(message)
     }
 
-    override fun updateFeeField(fee: String) {
+    override fun clearWarning() {
+        arbitraryWarning.gone()
+        arbitraryWarning.setText("")
+    }
+
+    override fun updateFeeAmount(fee: String) {
         textviewFeeAbsolute.setText(fee)
     }
 
-    override fun setMaxAvailable(amount: String) {
+    override fun updateMaxAvailable(amount: String) {
         max.setText(amount)
     }
 
-    override fun setMaxAvailableColor(@ColorRes color: Int) {
+    override fun updateMaxAvailableColor(@ColorRes color: Int) {
         max.setTextColor(ContextCompat.getColor(context, color))
-    }
-
-    override fun setSpendAllAmount(scryptoAmount: String) {
-        amountContainer.amountCrypto.setText(scryptoAmount)
     }
 
     override fun setCryptoMaxLength(length: Int) {
@@ -607,15 +630,62 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                 .setNegativeButton(android.R.string.cancel, null).show()
     }
 
-    interface OnSendFragmentInteractionListener {
+    override fun showWatchOnlyWarning(address: String) {
+        val dialogView = layoutInflater.inflate(R.layout.alert_watch_only_spend, null)
+        val alertDialog = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setView(dialogView.rootView)
+                .setCancelable(false)
+                .create()
 
-        fun onSendFragmentClose(paymentMade: Boolean)
+        dialogView.confirm_cancel.setOnClickListener {
+            toContainer.toAddressEditTextView.setText("")
+            presenter.setWarnWatchOnlySpend(!dialogView.confirm_dont_ask_again.isChecked)
+            alertDialog.dismiss()
+        }
 
-        fun onTransactionNotesRequested(paymentConfirmationDetails: PaymentConfirmationDetails,
-                                        paymentRequestType: PaymentRequestType,
-                                        contactId: String,
-                                        satoshis: Long,
-                                        accountPosition: Int)
+        dialogView.confirm_continue.setOnClickListener {
+            presenter.setWarnWatchOnlySpend(!dialogView.confirm_dont_ask_again.isChecked)
+            alertDialog.dismiss()
+        }
+
+        alertDialog.show()
+    }
+
+    override fun getClipboardContents(): String? {
+        val clipMan = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = clipMan.primaryClip
+        return if (clip != null && clip.itemCount > 0) {
+            clip.getItemAt(0).coerceToText(activity).toString()
+        } else null
+    }
+
+    private fun playAudio() {
+        val audioManager = activity.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        if (audioManager != null && audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+            val mp: MediaPlayer
+            mp = MediaPlayer.create(activity.applicationContext, R.raw.beep)
+            mp.setOnCompletionListener { mp1 ->
+                mp1.reset()
+                mp1.release()
+            }
+            mp.start()
+        }
+    }
+
+    override fun showProgressDialog(title: Int) {
+        progressDialog = MaterialProgressDialog(activity)
+        progressDialog?.apply {
+            setCancelable(false)
+            setMessage(R.string.please_wait)
+            show()
+        }
+    }
+
+    override fun dismissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog?.apply { dismiss() }
+            progressDialog = null
+        }
     }
 
     companion object {

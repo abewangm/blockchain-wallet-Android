@@ -92,7 +92,6 @@ import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTR
 public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> implements
         BalanceFragment.OnFragmentInteractionListener,
         MainView,
-        SendFragmentNew.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactConfirmRequestFragment.FragmentInteractionListener,
         FrontendJavascript<String>,
@@ -708,12 +707,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         if (AndroidUtils.is25orHigher()) {
             getSystemService(ShortcutManager.class).removeAllDynamicShortcuts();
         }
-    }
-
-    @Override
-    public void onSendFragmentClose(boolean paymentMade) {
-        this.paymentMade = paymentMade;
-        binding.bottomNavigation.setCurrentItem(1);
     }
 
     @Override

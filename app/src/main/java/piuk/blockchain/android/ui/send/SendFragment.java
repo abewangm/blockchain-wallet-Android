@@ -90,37 +90,38 @@ import static piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SE
 public class SendFragment extends BaseFragment<SendView, SendPresenter>
         implements SendView, NumericKeyboardCallback {
 
-    //done
-    public static final String ARGUMENT_SCAN_DATA = "scan_data";
-    public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
-    public static final String ARGUMENT_CONTACT_ID = "contact_id";
-    public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
-    public static final String ARGUMENT_FCTX_ID = "fctx_id";
-    public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
-    //\done
+                //done
+                public static final String ARGUMENT_SCAN_DATA = "scan_data";
+                public static final String ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position";
+                public static final String ARGUMENT_CONTACT_ID = "contact_id";
+                public static final String ARGUMENT_CONTACT_MDID = "contact_mdid";
+                public static final String ARGUMENT_FCTX_ID = "fctx_id";
+                public static final String ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route";
+                //\done
 
-    //done
-    private static final int SCAN_URI = 2010;
-    private static final int SCAN_PRIVX = 2011;
-    //\done
+                //done
+                private static final int SCAN_URI = 2010;
+                private static final int SCAN_PRIVX = 2011;
+                //\done
 
-    private static final int COOL_DOWN_MILLIS = 2 * 1000;
+                //Done
+                private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
-    @Inject
-    SendPresenter sendPresenter;
+                @Inject
+                SendPresenter sendPresenter;
 
-    @Thunk FragmentSendBinding binding;
+                @Thunk FragmentSendBinding binding;
     @Thunk AlertDialog transactionSuccessDialog;
     @Thunk boolean textChangeAllowed = true;
-    private boolean contactsPayment;
-    private OnSendFragmentInteractionListener listener;
+                private boolean contactsPayment;//skip
+                private OnSendFragmentInteractionListener listener;//skip
     private MaterialProgressDialog progressDialog;
     private AlertDialog largeTxWarning;
     private ConfirmPaymentDialog confirmPaymentDialog;
-    private NumericKeyboard customKeypad;
+                private NumericKeyboard customKeypad;
 
-    private int selectedAccountPosition = -1;
-    private long backPressed;
+                private int selectedAccountPosition = -1;
+                private long backPressed;
     private final Handler dialogHandler = new Handler();
     private final Runnable dialogRunnable = new Runnable() {
         @Override
@@ -131,293 +132,296 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     };
 
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(final Context context, final Intent intent) {
-            if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
-                getPresenter().updateUI();
-            }
-        }
-    };
+                //done
+                private final BroadcastReceiver receiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(final Context context, final Intent intent) {
+                        if (intent.getAction().equals(BalanceFragment.ACTION_INTENT) && binding != null) {
+                            getPresenter().updateUI();
+                        }
+                    }
+                };
 
-    //done
-    {
-//        Injector.getInstance().getPresenterComponent().inject(this);
-    }
+                //done
+                {
+            //        Injector.getInstance().getPresenterComponent().inject(this);
+                }
 
-    //done
-    public static SendFragment newInstance(@Nullable String scanData,
-                                           String scanRoute,
-                                           int selectedAccountPosition) {
-        SendFragment fragment = new SendFragment();
-        Bundle args = new Bundle();
-        args.putString(ARGUMENT_SCAN_DATA, scanData);
-        args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
-        args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
-        fragment.setArguments(args);
-        return fragment;
-    }
+                //done
+                public static SendFragment newInstance(@Nullable String scanData,
+                                                       String scanRoute,
+                                                       int selectedAccountPosition) {
+                    SendFragment fragment = new SendFragment();
+                    Bundle args = new Bundle();
+                    args.putString(ARGUMENT_SCAN_DATA, scanData);
+                    args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute);
+                    args.putInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, selectedAccountPosition);
+                    fragment.setArguments(args);
+                    return fragment;
+                }
 
-    //done
-    public static SendFragment newInstance(String uri,
-                                           String contactId,
-                                           String contactMdid,
-                                           String fctxId) {
-        SendFragment fragment = new SendFragment();
-        Bundle args = new Bundle();
-        args.putString(ARGUMENT_SCAN_DATA, uri);
-        args.putString(ARGUMENT_CONTACT_ID, contactId);
-        args.putString(ARGUMENT_CONTACT_MDID, contactMdid);
-        args.putString(ARGUMENT_FCTX_ID, fctxId);
-        fragment.setArguments(args);
-        return fragment;
-    }
+                //done
+                public static SendFragment newInstance(String uri,
+                                                       String contactId,
+                                                       String contactMdid,
+                                                       String fctxId) {
+                    SendFragment fragment = new SendFragment();
+                    Bundle args = new Bundle();
+                    args.putString(ARGUMENT_SCAN_DATA, uri);
+                    args.putString(ARGUMENT_CONTACT_ID, contactId);
+                    args.putString(ARGUMENT_CONTACT_MDID, contactMdid);
+                    args.putString(ARGUMENT_FCTX_ID, fctxId);
+                    fragment.setArguments(args);
+                    return fragment;
+                }
 
-    //done
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+                //done
+                @Override
+                public void onCreate(@Nullable Bundle savedInstanceState) {
+                    super.onCreate(savedInstanceState);
+                    setHasOptionsMenu(true);
 
-        if (getArguments() != null) {
-            selectedAccountPosition = getArguments().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
-        }
-    }
+                    if (getArguments() != null) {
+                        selectedAccountPosition = getArguments().getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION);
+                    }
+                }
 
-    //done
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
-        onViewReady();
-        setupViews();
-        setCustomKeypad();
-        setupFeesView();
-        return binding.getRoot();
-    }
+                //done
+                @Override
+                public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+                    binding = DataBindingUtil.inflate(inflater, R.layout.fragment_send, container, false);
+                    onViewReady();
+                    setupViews();
+                    setCustomKeypad();
+                    setupFeesView();
+                    return binding.getRoot();
+                }
 
-    //done
-    @Override
-    public Bundle getFragmentBundle() {
+                //done
+                @Override
+                public Bundle getFragmentBundle() {
         return getArguments();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        closeKeypad();
-        setupToolbar();
-        IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
-        getPresenter().updateUI();
-    }
-
-    @Override
-    public void onPause() {
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(receiver);
-        super.onPause();
-    }
-
-    //done
-    private void setupToolbar() {
-        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((BaseAuthActivity) getActivity()).setupToolbar(
-                    ((MainActivity) getActivity()).getSupportActionBar(), R.string.send_bitcoin);
-        } else {
-            finishPage(false);
-        }
-    }
-
-    //Done
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if (menu != null) menu.clear();
-        inflater.inflate(R.menu.menu_send, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    //done
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_qr:
-                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    PermissionUtil.requestCameraPermissionFromFragment(binding.getRoot(), this);
-                } else {
-                    startScanActivity(SCAN_URI);
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    //Done
-    @SuppressWarnings({"ConstantConditions", "unchecked"})
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK && requestCode == SCAN_URI
-                && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
-
-            getPresenter().handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
-                    EventService.EVENT_TX_INPUT_FROM_QR);
-
-        } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
-            final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
-            getPresenter().handleScannedDataForWatchOnlySpend(scanData);
-
-            // Set Receiving account
-        } else if (resultCode == Activity.RESULT_OK
-                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND
-                && data != null) {
-
-            try {
-                Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
-                Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
-
-                if (object instanceof Contact) {
-                    getPresenter().setContact(((Contact) object));
-                } else if (object instanceof Account) {
-                    Account account = ((Account) object);
-                    getPresenter().setContact(null);
-                    getPresenter().setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account, null));
-
-                    String label = account.getLabel();
-                    if (label == null || label.isEmpty()) {
-                        label = account.getXpub();
-                    }
-                    binding.toContainer.toAddressEditTextView.setText(StringUtils.abbreviate(label, 32));
-                } else if (object instanceof LegacyAddress) {
-                    LegacyAddress legacyAddress = ((LegacyAddress) object);
-                    getPresenter().setContact(null);
-                    getPresenter().setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress()));
-
-                    String label = legacyAddress.getLabel();
-                    if (label == null || label.isEmpty()) {
-                        label = legacyAddress.getAddress();
-                    }
-                    binding.toContainer.toAddressEditTextView.setText(StringUtils.abbreviate(label, 32));
+                //done
+                @Override
+                public void onResume() {
+                    super.onResume();
+                    closeKeypad();
+                    setupToolbar();
+                    IntentFilter filter = new IntentFilter(BalanceFragment.ACTION_INTENT);
+                    LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
+                    getPresenter().updateUI();
                 }
 
-            } catch (ClassNotFoundException | IOException e) {
-                throw new RuntimeException(e);
-            }
-            // Set Sending account
-        } else if (resultCode == Activity.RESULT_OK
-                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND
-                && data != null) {
-
-            try {
-                Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
-                Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
-
-                ItemAccount chosenItem = null;
-                if (object instanceof Account) {
-                    Account account = ((Account) object);
-                    chosenItem = new ItemAccount(account.getLabel(), null, null, null, account, null);
-
-                    String label = chosenItem.getLabel();
-                    if (label == null || label.isEmpty()) {
-                        label = account.getXpub();
-                    }
-                    binding.fromContainer.fromAddressTextView.setText(StringUtils.abbreviate(label, 32));
-
-                } else if (object instanceof LegacyAddress) {
-                    LegacyAddress legacyAddress = ((LegacyAddress) object);
-                    chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress());
-
-                    String label = chosenItem.getLabel();
-                    if (label == null || label.isEmpty()) {
-                        label = legacyAddress.getAddress();
-                    }
-                    binding.fromContainer.fromAddressTextView.setText(StringUtils.abbreviate(label, 32));
+                //Done
+                @Override
+                public void onPause() {
+                    LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(receiver);
+                    super.onPause();
                 }
 
-                getPresenter().setSendingAddress(chosenItem);
+                //done
+                private void setupToolbar() {
+                    if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+                        ((BaseAuthActivity) getActivity()).setupToolbar(
+                                ((MainActivity) getActivity()).getSupportActionBar(), R.string.send_bitcoin);
+                    } else {
+                        finishPage(false);
+                    }
+                }
 
-                updateTotals(chosenItem);
+                //Done
+                @Override
+                public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+                    if (menu != null) menu.clear();
+                    inflater.inflate(R.menu.menu_send, menu);
+                    super.onCreateOptionsMenu(menu, inflater);
+                }
 
-            } catch (ClassNotFoundException | IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
+                //done
+                @Override
+                public boolean onOptionsItemSelected(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.action_qr:
+                            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                PermissionUtil.requestCameraPermissionFromFragment(binding.getRoot(), this);
+                            } else {
+                                startScanActivity(SCAN_URI);
+                            }
+                            return true;
+                        default:
+                            return super.onOptionsItemSelected(item);
+                    }
+                }
 
-    //Done
-    public void onBackPressed() {
-        if (isKeyboardVisible()) {
-            closeKeypad();
-        } else {
-            handleBackPressed();
-        }
-    }
+                //Done
+                @SuppressWarnings({"ConstantConditions", "unchecked"})
+                @Override
+                public void onActivityResult(int requestCode, int resultCode, Intent data) {
+                    if (resultCode == Activity.RESULT_OK && requestCode == SCAN_URI
+                            && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
 
-    //Done
-    private void handleBackPressed() {
-        if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(getContext());
-            return;
-        } else {
-            onExitConfirmToast();
-        }
+                        getPresenter().handleIncomingQRScan(data.getStringExtra(CaptureActivity.SCAN_RESULT),
+                                EventService.EVENT_TX_INPUT_FROM_QR);
 
-        backPressed = System.currentTimeMillis();
-    }
+                    } else if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
+                        final String scanData = data.getStringExtra(CaptureActivity.SCAN_RESULT);
+                        getPresenter().handleScannedDataForWatchOnlySpend(scanData);
 
-    //Done
-    public void onExitConfirmToast() {
-        showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
-    }
+                        // Set Receiving account
+                    } else if (resultCode == Activity.RESULT_OK
+                            && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND
+                            && data != null) {
 
-    //Done
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startScanActivity(SCAN_URI);
-            } else {
-                // Permission request was denied.
-            }
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
+                        try {
+                            Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
+                            Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
-    //Done
-    private void startScanActivity(int code) {
-        if (!new AppUtil(getActivity()).isCameraOpen()) {
-            Intent intent = new Intent(getActivity(), CaptureActivity.class);
-            startActivityForResult(intent, code);
-        } else {
-            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
-        }
-    }
+                            if (object instanceof Contact) {
+                                getPresenter().setContact(((Contact) object));
+                            } else if (object instanceof Account) {
+                                Account account = ((Account) object);
+                                getPresenter().setContact(null);
+                                getPresenter().setReceivingAddress(new ItemAccount(account.getLabel(), null, null, null, account, null));
 
-    //done
-    private void setupViews() {
-        setupDestinationView();//done
-        setupSendFromView();//done
-        setupReceiveToView();//done
+                                String label = account.getLabel();
+                                if (label == null || label.isEmpty()) {
+                                    label = account.getXpub();
+                                }
+                                binding.toContainer.toAddressEditTextView.setText(StringUtils.abbreviate(label, 32));
+                            } else if (object instanceof LegacyAddress) {
+                                LegacyAddress legacyAddress = ((LegacyAddress) object);
+                                getPresenter().setContact(null);
+                                getPresenter().setReceivingAddress(new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress()));
 
-        setupBtcTextField();//done
-        setupFiatTextField();//done
+                                String label = legacyAddress.getLabel();
+                                if (label == null || label.isEmpty()) {
+                                    label = legacyAddress.getAddress();
+                                }
+                                binding.toContainer.toAddressEditTextView.setText(StringUtils.abbreviate(label, 32));
+                            }
 
-        binding.max.setOnClickListener(view ->
-                getPresenter().spendAllClicked(getPresenter().getSendingItemAccount(), getFeePriority()));//done
+                        } catch (ClassNotFoundException | IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        // Set Sending account
+                    } else if (resultCode == Activity.RESULT_OK
+                            && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND
+                            && data != null) {
 
-        binding.buttonSend.setOnClickListener(v -> {
-            if (ConnectivityStatus.hasConnectivity(getActivity())) {
-                requestSendPayment();
-            } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);//done
-            }
-        });
-    }
+                        try {
+                            Class type = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE));
+                            Object object = new ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type);
 
-    //done
-    private void setupFeesView() {
+                            ItemAccount chosenItem = null;
+                            if (object instanceof Account) {
+                                Account account = ((Account) object);
+                                chosenItem = new ItemAccount(account.getLabel(), null, null, null, account, null);
+
+                                String label = chosenItem.getLabel();
+                                if (label == null || label.isEmpty()) {
+                                    label = account.getXpub();
+                                }
+                                binding.fromContainer.fromAddressTextView.setText(StringUtils.abbreviate(label, 32));
+
+                            } else if (object instanceof LegacyAddress) {
+                                LegacyAddress legacyAddress = ((LegacyAddress) object);
+                                chosenItem = new ItemAccount(legacyAddress.getLabel(), null, null, null, legacyAddress, legacyAddress.getAddress());
+
+                                String label = chosenItem.getLabel();
+                                if (label == null || label.isEmpty()) {
+                                    label = legacyAddress.getAddress();
+                                }
+                                binding.fromContainer.fromAddressTextView.setText(StringUtils.abbreviate(label, 32));
+                            }
+
+                            getPresenter().setSendingAddress(chosenItem);
+
+                            updateTotals(chosenItem);
+
+                        } catch (ClassNotFoundException | IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        super.onActivityResult(requestCode, resultCode, data);
+                    }
+                }
+
+                //Done
+                public void onBackPressed() {
+                    if (isKeyboardVisible()) {
+                        closeKeypad();
+                    } else {
+                        handleBackPressed();
+                    }
+                }
+
+                //Done
+                private void handleBackPressed() {
+                    if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                        AccessState.getInstance().logout(getContext());
+                        return;
+                    } else {
+                        onExitConfirmToast();
+                    }
+
+                    backPressed = System.currentTimeMillis();
+                }
+
+                //Done
+                public void onExitConfirmToast() {
+                    showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
+                }
+
+                //Done
+                @SuppressWarnings("StatementWithEmptyBody")
+                @Override
+                public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+                    if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
+                        if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                            startScanActivity(SCAN_URI);
+                        } else {
+                            // Permission request was denied.
+                        }
+                    } else {
+                        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                    }
+                }
+
+                //Done
+                private void startScanActivity(int code) {
+                    if (!new AppUtil(getActivity()).isCameraOpen()) {
+                        Intent intent = new Intent(getActivity(), CaptureActivity.class);
+                        startActivityForResult(intent, code);
+                    } else {
+                        showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR);
+                    }
+                }
+
+                //done
+                private void setupViews() {
+                    setupDestinationView();//done
+                    setupSendFromView();//done
+                    setupReceiveToView();//done
+
+                    setupBtcTextField();//done
+                    setupFiatTextField();//done
+
+                    binding.max.setOnClickListener(view ->
+                            getPresenter().spendAllClicked(getPresenter().getSendingItemAccount(), getFeePriority()));//done
+
+                    binding.buttonSend.setOnClickListener(v -> {
+                        if (ConnectivityStatus.hasConnectivity(getActivity())) {
+                            requestSendPayment();
+                        } else {
+                            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);//done
+                        }
+                    });
+                }
+
+                //done
+                private void setupFeesView() {
         FeePriorityAdapter adapter = new FeePriorityAdapter(getActivity(),
                 getPresenter().getFeeOptionsForDropDown());//done
 
@@ -476,90 +480,90 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                         Throwable::printStackTrace);//done
     }
 
-    private void requestSendPayment() {
-//        getPresenter().onSendClicked(
-//                binding.amountContainer.amountBtc.getText().toString(),
-//                binding.toContainer.toAddressEditTextView.getText().toString(),
-//                getFeePriority());
-    }
-
-    //Done
-    private void setupDestinationView() {
-        //Avoid OntouchListener - causes paste issues on some Samsung devices
-        binding.toContainer.toAddressEditTextView.setOnClickListener(v -> {
-            binding.toContainer.toAddressEditTextView.setText("");
-            getPresenter().setReceivingAddress(null);
-        });
-        //LongClick listener required to clear receive address in memory when user long clicks to paste
-        binding.toContainer.toAddressEditTextView.setOnLongClickListener(v -> {
-            binding.toContainer.toAddressEditTextView.setText("");
-            getPresenter().setReceivingAddress(null);
-            v.performClick();
-            return false;
-        });
-
-        //TextChanged listener required to invalidate receive address in memory when user
-        //chooses to edit address populated via QR
-        RxTextView.textChanges(binding.toContainer.toAddressEditTextView)
-                .doOnNext(ignored -> {
-                    if (getActivity().getCurrentFocus() == binding.toContainer.toAddressEditTextView) {
-                        getPresenter().setReceivingAddress(null);
-                        getPresenter().setContact(null);
+                    private void requestSendPayment() {
+                //        getPresenter().onSendClicked(
+                //                binding.amountContainer.amountBtc.getText().toString(),
+                //                binding.toContainer.toAddressEditTextView.getText().toString(),
+                //                getFeePriority());
                     }
-                })
-                .subscribe(new IgnorableDefaultObserver<>());
-    }
 
-    //Done
-    private void setupSendFromView() {
-        ItemAccount itemAccount;
-        if (selectedAccountPosition != -1) {
-            itemAccount = getPresenter().getAddressList(getFeePriority()).get(selectedAccountPosition);
-        } else {
-            itemAccount = getPresenter().getAddressList(getFeePriority()).get(getPresenter().getDefaultAccount());
-        }
+                //Done
+                private void setupDestinationView() {
+                    //Avoid OntouchListener - causes paste issues on some Samsung devices
+                    binding.toContainer.toAddressEditTextView.setOnClickListener(v -> {
+                        binding.toContainer.toAddressEditTextView.setText("");
+                        getPresenter().setReceivingAddress(null);
+                    });
+                    //LongClick listener required to clear receive address in memory when user long clicks to paste
+                    binding.toContainer.toAddressEditTextView.setOnLongClickListener(v -> {
+                        binding.toContainer.toAddressEditTextView.setText("");
+                        getPresenter().setReceivingAddress(null);
+                        v.performClick();
+                        return false;
+                    });
 
-        getPresenter().setSendingAddress(itemAccount);
-        binding.fromContainer.fromAddressTextView.setText(itemAccount.getLabel());
+                    //TextChanged listener required to invalidate receive address in memory when user
+                    //chooses to edit address populated via QR
+                    RxTextView.textChanges(binding.toContainer.toAddressEditTextView)
+                            .doOnNext(ignored -> {
+                                if (getActivity().getCurrentFocus() == binding.toContainer.toAddressEditTextView) {
+                                    getPresenter().setReceivingAddress(null);
+                                    getPresenter().setContact(null);
+                                }
+                            })
+                            .subscribe(new IgnorableDefaultObserver<>());
+                }
 
-        binding.fromContainer.fromAddressTextView.setOnClickListener(v -> startFromFragment());
-        binding.fromContainer.fromArrowImage.setOnClickListener(v -> startFromFragment());
-    }
+                //Done
+                private void setupSendFromView() {
+                    ItemAccount itemAccount;
+                    if (selectedAccountPosition != -1) {
+                        itemAccount = getPresenter().getAddressList(getFeePriority()).get(selectedAccountPosition);
+                    } else {
+                        itemAccount = getPresenter().getAddressList(getFeePriority()).get(getPresenter().getDefaultAccount());
+                    }
 
-    //Done
-    @Thunk
-    void updateTotals(ItemAccount itemAccount) {
-//        getPresenter().calculateTransactionAmounts(itemAccount,
-//                binding.amountContainer.amountBtc.getText().toString(),
-//                getFeePriority(),
-//                null);
-    }
+                    getPresenter().setSendingAddress(itemAccount);
+                    binding.fromContainer.fromAddressTextView.setText(itemAccount.getLabel());
 
-    //Done
-    @FeeType.FeePriorityDef
-    private int getFeePriority() {
-        int position = binding.spinnerPriority.getSelectedItemPosition();
-        switch (position) {
-            case 1:
-                return FeeType.FEE_OPTION_PRIORITY;
-            case 2:
-                return FeeType.FEE_OPTION_CUSTOM;
-            case 0:
-            default:
-                return FeeType.FEE_OPTION_REGULAR;
-        }
-    }
+                    binding.fromContainer.fromAddressTextView.setOnClickListener(v -> startFromFragment());
+                    binding.fromContainer.fromArrowImage.setOnClickListener(v -> startFromFragment());
+                }
 
-    //Done
-    private void startFromFragment() {
-        AccountChooserActivity.startForResult(this,
-                AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.REQUEST,
-                getString(R.string.from));
-    }
+                //Done
+                @Thunk
+                void updateTotals(ItemAccount itemAccount) {
+            //        getPresenter().calculateTransactionAmounts(itemAccount,
+            //                binding.amountContainer.amountBtc.getText().toString(),
+            //                getFeePriority(),
+            //                null);
+                }
 
-    // done
-    private void setupReceiveToView() {
+                //Done
+                @FeeType.FeePriorityDef
+                private int getFeePriority() {
+                    int position = binding.spinnerPriority.getSelectedItemPosition();
+                    switch (position) {
+                        case 1:
+                            return FeeType.FEE_OPTION_PRIORITY;
+                        case 2:
+                            return FeeType.FEE_OPTION_CUSTOM;
+                        case 0:
+                        default:
+                            return FeeType.FEE_OPTION_REGULAR;
+                    }
+                }
+
+                //Done
+                private void startFromFragment() {
+                    AccountChooserActivity.startForResult(this,
+                            AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
+                            PaymentRequestType.REQUEST,
+                            getString(R.string.from));
+                }
+
+                // done
+                private void setupReceiveToView() {
         binding.toContainer.toArrow.setOnClickListener(v ->
                 AccountChooserActivity.startForResult(this,
                         AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
@@ -567,98 +571,103 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                         getString(R.string.to)));
     }
 
-    @Override
-    public void lockContactsFields() {
-        contactsPayment = true;
-//        binding.amountContainer.amountBtc.setEnabled(false);
-        binding.amountContainer.amountFiat.setEnabled(false);
-        binding.toContainer.toArrow.setVisibility(View.GONE);
-        binding.toContainer.toArrow.setOnClickListener(null);
-        binding.toContainer.toAddressEditTextView.setEnabled(false);
-        binding.progressBarMaxAvailable.setVisibility(View.GONE);
-        binding.max.setVisibility(View.GONE);
-    }
+                //Skip
+                @Override
+                public void lockContactsFields() {
+                    contactsPayment = true;
+                    //        binding.amountContainer.amountBtc.setEnabled(false);
+                    binding.amountContainer.amountFiat.setEnabled(false);
+                    binding.toContainer.toArrow.setVisibility(View.GONE);
+                    binding.toContainer.toArrow.setOnClickListener(null);
+                    binding.toContainer.toAddressEditTextView.setEnabled(false);
+                    binding.progressBarMaxAvailable.setVisibility(View.GONE);
+                    binding.max.setVisibility(View.GONE);
+                }
 
-    //Done
-    @Override
-    public void hideSendingAddressField() {
-        binding.fromContainer.fromConstraintLayout.setVisibility(View.GONE);
-        binding.divider1.setVisibility(View.GONE);
-    }
+                //Done
+                @Override
+                public void hideSendingAddressField() {
+                    binding.fromContainer.fromConstraintLayout.setVisibility(View.GONE);
+                    binding.divider1.setVisibility(View.GONE);
+                }
 
-    //Done
-    @Override
-    public void hideReceivingAddressField() {
+                //Done
+                @Override
+                public void hideReceivingAddressField() {
         binding.toContainer.toAddressEditTextView.setHint(R.string.to_field_helper_no_dropdown);
     }
 
-    @Override
-    public void showInvalidAmount() {
+                @Override
+                public void showInvalidAmount() {
         showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR);
     }
 
-    @Override
-    public void updateBtcAmount(String amount) {
-//        binding.amountContainer.amountBtc.setText(amount);
-//        binding.amountContainer.amountBtc.setSelection(binding.amountContainer.amountBtc.getText().length());
-    }
+                @Override
+                public void updateBtcAmount(String amount) {
+                    //        binding.amountContainer.amountBtc.setText(amount);
+                    //        binding.amountContainer.amountBtc.setSelection(binding.amountContainer.amountBtc.getText().length());
+                }
 
-    @Override
-    public void setDestinationAddress(String btcAddress) {
-        binding.toContainer.toAddressEditTextView.setText(btcAddress);
-    }
+                @Override
+                public void setDestinationAddress(String btcAddress) {
+                    binding.toContainer.toAddressEditTextView.setText(btcAddress);
+                }
 
-    @Override
-    public void setMaxAvailable(String max) {
-        binding.max.setText(max);
-    }
+                //Done
+                @Override
+                public void setMaxAvailable(String max) {
+                    binding.max.setText(max);
+                }
 
-    @Override
-    public void setUnconfirmedFunds(String warning) {
-        binding.unconfirmedFundsWarning.setText(warning);
-    }
+                @Override
+                public void setUnconfirmedFunds(String warning) {
+                 //        binding.unconfirmedFundsWarning.setText(warning);
+                }
 
-    @Override
-    public void setContactName(String name) {
+                //Skip
+                @Override
+                public void setContactName(String name) {
         binding.toContainer.toAddressEditTextView.setText(name);
     }
 
-    @Override
-    public void setMaxAvailableVisible(boolean visible) {
-        if (!contactsPayment) {
-            if (visible) {
-                binding.max.setVisibility(View.VISIBLE);
-                binding.progressBarMaxAvailable.setVisibility(View.INVISIBLE);
-            } else {
-                binding.max.setVisibility(View.INVISIBLE);
-                binding.progressBarMaxAvailable.setVisibility(View.VISIBLE);
-            }
-        }
-    }
+                //Done
+                @Override
+                public void setMaxAvailableVisible(boolean visible) {
+                    if (!contactsPayment) {
+                        if (visible) {
+                            binding.max.setVisibility(View.VISIBLE);
+                            binding.progressBarMaxAvailable.setVisibility(View.INVISIBLE);
+                        } else {
+                            binding.max.setVisibility(View.INVISIBLE);
+                            binding.progressBarMaxAvailable.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
 
-    @Override
-    public void setMaxAvailableColor(@ColorRes int color) {
-        binding.max.setTextColor(ContextCompat.getColor(getContext(), color));
-    }
+                //Done
+                @Override
+                public void setMaxAvailableColor(@ColorRes int color) {
+                    binding.max.setTextColor(ContextCompat.getColor(getContext(), color));
+                }
 
-    @Override
-    public void updateBtcUnit(String unit) {
-//        binding.amountContainer.currencyBtc.setText(unit);
-    }
+                @Override
+                public void updateBtcUnit(String unit) {
+            //        binding.amountContainer.currencyBtc.setText(unit);
+                }
 
     @Override
     public void updateFiatUnit(String unit) {
         binding.amountContainer.currencyFiat.setText(unit);
     }
 
-    @Override
-    public void onSetSpendAllAmount(String textFromSatoshis) {
-//        binding.amountContainer.amountBtc.setText(textFromSatoshis);
-    }
+                @Override
+                public void onSetSpendAllAmount(String textFromSatoshis) {
+                //        binding.amountContainer.amountBtc.setText(textFromSatoshis);
+                }
 
-    //done
-    @Override
-    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+                //done
+                @Override
+                public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
@@ -745,9 +754,9 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .show();
     }
 
-    //Done
-    @Override
-    public void onShowBIP38PassphrasePrompt(String scanData) {
+                //Done
+                @Override
+                public void onShowBIP38PassphrasePrompt(String scanData) {
         final AppCompatEditText password = new AppCompatEditText(getActivity());
         password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         password.setHint(R.string.password);
@@ -793,60 +802,61 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .setNegativeButton(android.R.string.cancel, null).show();
     }
 
-    @Override
-    public void navigateToAddNote(PaymentConfirmationDetails paymentConfirmationDetails,
-                                  PaymentRequestType paymentRequestType,
-                                  String contactId,
-                                  long satoshis,
-                                  int accountPosition) {
-        if (listener != null) {
-            listener.onTransactionNotesRequested(paymentConfirmationDetails,
-                    paymentRequestType,
-                    contactId,
-                    satoshis,
-                    accountPosition);
-        }
-    }
+                //skip
+                @Override
+                public void navigateToAddNote(PaymentConfirmationDetails paymentConfirmationDetails,
+                                              PaymentRequestType paymentRequestType,
+                                              String contactId,
+                                              long satoshis,
+                                              int accountPosition) {
+                    if (listener != null) {
+                        listener.onTransactionNotesRequested(paymentConfirmationDetails,
+                                paymentRequestType,
+                                contactId,
+                                satoshis,
+                                accountPosition);
+                    }
+                }
 
-    // BTC Field
-    @SuppressLint("NewApi")
-    private void setupBtcTextField() {
-//        binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
-//        binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
-//        binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
-//        try {
-//            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
-//            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
-//        } catch (Exception e) {
-//            Timber.e(e);
-//        }
-    }
+                // BTC Field
+                @SuppressLint("NewApi")
+                private void setupBtcTextField() {
+            //        binding.amountContainer.amountBtc.setSelectAllOnFocus(true);
+            //        binding.amountContainer.amountBtc.setHint("0" + getDefaultDecimalSeparator() + "00");
+            //        binding.amountContainer.amountBtc.addTextChangedListener(btcTextWatcher);
+            //        try {
+            //            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+            //            binding.amountContainer.amountBtc.setShowSoftInputOnFocus(false);
+            //        } catch (Exception e) {
+            //            Timber.e(e);
+            //        }
+                }
 
-    // Fiat Field
-    @SuppressLint("NewApi")
-    private void setupFiatTextField() {
-        binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
-        binding.amountContainer.amountFiat.setSelectAllOnFocus(true);
-        binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
-        try {
-            // This method is hidden but accessible on <API21, but here we catch exceptions just in case
-            binding.amountContainer.amountFiat.setShowSoftInputOnFocus(false);
-        } catch (Exception e) {
-            Timber.e(e);
-        }
-    }
+                // Fiat Field
+                @SuppressLint("NewApi")
+                private void setupFiatTextField() {
+                    binding.amountContainer.amountFiat.setHint("0" + getDefaultDecimalSeparator() + "00");
+                    binding.amountContainer.amountFiat.setSelectAllOnFocus(true);
+                    binding.amountContainer.amountFiat.addTextChangedListener(fiatTextWatcher);
+                    try {
+                        // This method is hidden but accessible on <API21, but here we catch exceptions just in case
+                        binding.amountContainer.amountFiat.setShowSoftInputOnFocus(false);
+                    } catch (Exception e) {
+                        Timber.e(e);
+                    }
+                }
 
-    @Override
-    public void updateBtcTextField(String text) {
-//        binding.amountContainer.amountBtc.setText(text);
-    }
+                @Override
+                public void updateBtcTextField(String text) {
+            //        binding.amountContainer.amountBtc.setText(text);
+                }
 
-    @Override
-    public void updateFiatTextField(String text) {
-        binding.amountContainer.amountFiat.setText(text);
-    }
+                @Override
+                public void updateFiatTextField(String text) {
+                    binding.amountContainer.amountFiat.setText(text);
+                }
 
-    private TextWatcher btcTextWatcher = new TextWatcher() {
+                private TextWatcher btcTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             // No-op
@@ -869,18 +879,18 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 //
 //            if (textChangeAllowed) {
 //                textChangeAllowed = false;
-//                getPresenter().updateFiatTextField(s.toString());
+//                getPresenter().updateFiatAmount(s.toString());
 //                textChangeAllowed = true;
 //            }
         }
     };
 
-    @Thunk
-    String getDefaultDecimalSeparator() {
-        return String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator());
-    }
+                @Thunk
+                String getDefaultDecimalSeparator() {
+                    return String.valueOf(DecimalFormatSymbols.getInstance().getDecimalSeparator());
+                }
 
-    private TextWatcher fiatTextWatcher = new TextWatcher() {
+                private TextWatcher fiatTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             // No-op
@@ -921,78 +931,82 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     }
 
-    @Override
-    public void onShowReceiveToWatchOnlyWarning(String address) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle);
-        AlertWatchOnlySpendBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
-                R.layout.alert_watch_only_spend, null, false);
-        dialogBuilder.setView(dialogBinding.getRoot());
-        dialogBuilder.setCancelable(false);
+                //Done
+                @Override
+                public void onShowReceiveToWatchOnlyWarning(String address) {
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle);
+                    AlertWatchOnlySpendBinding dialogBinding = inflate(LayoutInflater.from(getActivity()),
+                            R.layout.alert_watch_only_spend, null, false);
+                    dialogBuilder.setView(dialogBinding.getRoot());
+                    dialogBuilder.setCancelable(false);
 
-        final AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.setCanceledOnTouchOutside(false);
+                    final AlertDialog alertDialog = dialogBuilder.create();
+                    alertDialog.setCanceledOnTouchOutside(false);
 
-        dialogBinding.confirmCancel.setOnClickListener(v -> {
-            binding.toContainer.toAddressEditTextView.setText("");
-            if (dialogBinding.confirmDontAskAgain.isChecked())
-                getPresenter().disableWatchOnlySpendWarning();
-            alertDialog.dismiss();
-        });
+                    dialogBinding.confirmCancel.setOnClickListener(v -> {
+                        binding.toContainer.toAddressEditTextView.setText("");
+                        if (dialogBinding.confirmDontAskAgain.isChecked())
+                            getPresenter().disableWatchOnlySpendWarning();
+                        alertDialog.dismiss();
+                    });
 
-        dialogBinding.confirmContinue.setOnClickListener(v -> {
-            binding.toContainer.toAddressEditTextView.setText(address);
-            if (dialogBinding.confirmDontAskAgain.isChecked())
-                getPresenter().disableWatchOnlySpendWarning();
-            alertDialog.dismiss();
-        });
+                    dialogBinding.confirmContinue.setOnClickListener(v -> {
+                        binding.toContainer.toAddressEditTextView.setText(address);
+                        if (dialogBinding.confirmDontAskAgain.isChecked())
+                            getPresenter().disableWatchOnlySpendWarning();
+                        alertDialog.dismiss();
+                    });
 
-        alertDialog.show();
-    }
+                    alertDialog.show();
+                }
 
-    private void playAudio() {
-        AudioManager audioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-            MediaPlayer mp;
-            mp = MediaPlayer.create(getActivity().getApplicationContext(), R.raw.beep);
-            mp.setOnCompletionListener(mp1 -> {
-                mp1.reset();
-                mp1.release();
-            });
-            mp.start();
-        }
-    }
+                //Done
+                private void playAudio() {
+                    AudioManager audioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+                    if (audioManager != null && audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+                        MediaPlayer mp;
+                        mp = MediaPlayer.create(getActivity().getApplicationContext(), R.raw.beep);
+                        mp.setOnCompletionListener(mp1 -> {
+                            mp1.reset();
+                            mp1.release();
+                        });
+                        mp.start();
+                    }
+                }
 
-    @Nullable
-    @Override
-    public String getClipboardContents() {
-        ClipboardManager clipMan = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = clipMan.getPrimaryClip();
-        if (clip != null && clip.getItemCount() > 0) {
-            return clip.getItemAt(0).coerceToText(getActivity()).toString();
-        }
-        return null;
-    }
+                //Done
+                @Nullable
+                @Override
+                public String getClipboardContents() {
+                    ClipboardManager clipMan = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = clipMan.getPrimaryClip();
+                    if (clip != null && clip.getItemCount() > 0) {
+                        return clip.getItemAt(0).coerceToText(getActivity()).toString();
+                    }
+                    return null;
+                }
 
-    @Override
-    public void showProgressDialog(int title) {
-        progressDialog = new MaterialProgressDialog(getActivity());
-        progressDialog.setCancelable(false);
-        progressDialog.setMessage(R.string.please_wait);
-        progressDialog.show();
-    }
+                @Override
+                public void showProgressDialog(int title) {
+                    progressDialog = new MaterialProgressDialog(getActivity());
+                    progressDialog.setCancelable(false);
+                    progressDialog.setMessage(R.string.please_wait);
+                    progressDialog.show();
+                }
 
-    @Override
-    public void dismissProgressDialog() {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-            progressDialog = null;
-        }
-    }
+                @Override
+                public void dismissProgressDialog() {
+                    if (progressDialog != null) {
+                        progressDialog.dismiss();
+                        progressDialog = null;
+                    }
+                }
 
-    @Override
-    public void finishPage(boolean paymentMade) {
-        if (listener != null) listener.onSendFragmentClose(paymentMade);
-    }
+                //Done
+                @Override
+                public void finishPage(boolean paymentMade) {
+                    if (listener != null) listener.onSendFragmentClose(paymentMade);
+                }
 
     public void onChangeFeeClicked() {
         confirmPaymentDialog.dismiss();
@@ -1055,37 +1069,37 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                         Throwable::printStackTrace);
     }
 
-    //done
-    @Override
-    public long getCustomFeeValue() {
-        String amount = binding.edittextCustomFee.getText().toString();
-        return !amount.isEmpty() ? Long.valueOf(amount) : 0;
-    }
+                //done
+                @Override
+                public long getCustomFeeValue() {
+                    String amount = binding.edittextCustomFee.getText().toString();
+                    return !amount.isEmpty() ? Long.valueOf(amount) : 0;
+                }
 
-    //done
-    @Override
-    public void updateFeeField(String fee) {
-        binding.textviewFeeAbsolute.setText(fee);
-    }
+                //done
+                @Override
+                public void updateFeeField(String fee) {
+                    binding.textviewFeeAbsolute.setText(fee);
+                }
 
-    //done
-    public void onSendClicked() {
-        if (ConnectivityStatus.hasConnectivity(getActivity())) {
-            getPresenter().submitPayment();
-        } else {
-            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
-        }
-    }
+                //done
+                public void onSendClicked() {
+                    if (ConnectivityStatus.hasConnectivity(getActivity())) {
+                        getPresenter().submitPayment();
+                    } else {
+                        showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
+                    }
+                }
 
-    //done
-    @Override
-    protected SendPresenter createPresenter() {
-        return sendPresenter;
-    }
+                //done
+                @Override
+                protected SendPresenter createPresenter() {
+                    return sendPresenter;
+                }
 
-    //done
-    @Override
-    protected SendView getMvpView() {
+                //done
+                @Override
+                protected SendView getMvpView() {
         return this;
     }
 
@@ -1094,98 +1108,100 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         confirmPaymentDialog.dismiss();
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnSendFragmentInteractionListener) {
-            listener = (OnSendFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context + " must implement OnSendFragmentInteractionListener");
-        }
-    }
+                //skip
+                @Override
+                public void onAttach(Context context) {
+                    super.onAttach(context);
+                    if (context instanceof OnSendFragmentInteractionListener) {
+                        listener = (OnSendFragmentInteractionListener) context;
+                    } else {
+                        throw new RuntimeException(context + " must implement OnSendFragmentInteractionListener");
+                    }
+                }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        listener = null;
-    }
+                //skip
+                @Override
+                public void onDetach() {
+                    super.onDetach();
+                    listener = null;
+                }
 
-    //done
-    private void setCustomKeypad() {
-        customKeypad = binding.keyboard;
-        customKeypad.setCallback(this);
-        customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
+                //done
+                private void setCustomKeypad() {
+                    customKeypad = binding.keyboard;
+                    customKeypad.setCallback(this);
+                    customKeypad.setDecimalSeparator(getDefaultDecimalSeparator());
 
-        // Enable custom keypad and disables default keyboard from popping up
-//        customKeypad.enableOnView(binding.amountContainer.amountBtc);
-//        customKeypad.enableOnView(binding.amountContainer.amountFiat);
+                    // Enable custom keypad and disables default keyboard from popping up
+            //        customKeypad.enableOnView(binding.amountContainer.amountBtc);
+            //        customKeypad.enableOnView(binding.amountContainer.amountFiat);
 
-//        binding.amountContainer.amountBtc.setText("");
-//        binding.amountContainer.amountBtc.requestFocus();
-    }
+            //        binding.amountContainer.amountBtc.setText("");
+            //        binding.amountContainer.amountBtc.requestFocus();
+                }
 
-    //Done
-    private void closeKeypad() {
-        customKeypad.setNumpadVisibility(View.GONE);
-    }
+                //Done
+                private void closeKeypad() {
+                    customKeypad.setNumpadVisibility(View.GONE);
+                }
 
-    //Done
-    public boolean isKeyboardVisible() {
-        return customKeypad.isVisible();
-    }
+                //Done
+                public boolean isKeyboardVisible() {
+                    return customKeypad.isVisible();
+                }
 
-    //Done
-    @Override
-    public void onKeypadClose() {
-        // Show bottom nav if applicable
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
-        }
+                //Done
+                @Override
+                public void onKeypadClose() {
+                    // Show bottom nav if applicable
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).getBottomNavigationView().restoreBottomNavigation();
+                    }
 
-        // Resize activity to default
-        binding.scrollView.setPadding(0, 0, 0, 0);
-        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
-                CoordinatorLayout.LayoutParams.MATCH_PARENT,
-                CoordinatorLayout.LayoutParams.MATCH_PARENT);
-        layoutParams.setMargins(0,
-                0,
-                0,
-                (int) getActivity().getResources().getDimension(R.dimen.action_bar_height));
-        binding.scrollView.setLayoutParams(layoutParams);
-    }
+                    // Resize activity to default
+                    binding.scrollView.setPadding(0, 0, 0, 0);
+                    CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                            CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                            CoordinatorLayout.LayoutParams.MATCH_PARENT);
+                    layoutParams.setMargins(0,
+                            0,
+                            0,
+                            (int) getActivity().getResources().getDimension(R.dimen.action_bar_height));
+                    binding.scrollView.setLayoutParams(layoutParams);
+                }
 
-    //Done
-    @Override
-    public void onKeypadOpen() {
-        // Hide bottom nav if applicable
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
-        }
-    }
+                //Done
+                @Override
+                public void onKeypadOpen() {
+                    // Hide bottom nav if applicable
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).getBottomNavigationView().hideBottomNavigation();
+                    }
+                }
 
-    //Done
-    @Override
-    public void onKeypadOpenCompleted() {
-        // Resize activity around view
-        int translationY = binding.keyboard.getHeight();
-        binding.scrollView.setPadding(0, 0, 0, translationY);
+                //Done
+                @Override
+                public void onKeypadOpenCompleted() {
+                    // Resize activity around view
+                    int translationY = binding.keyboard.getHeight();
+                    binding.scrollView.setPadding(0, 0, 0, translationY);
 
-        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
-                CoordinatorLayout.LayoutParams.MATCH_PARENT,
-                CoordinatorLayout.LayoutParams.MATCH_PARENT);
-        layoutParams.setMargins(0, 0, 0, 0);
-        binding.scrollView.setLayoutParams(layoutParams);
-    }
+                    CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                            CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                            CoordinatorLayout.LayoutParams.MATCH_PARENT);
+                    layoutParams.setMargins(0, 0, 0, 0);
+                    binding.scrollView.setLayoutParams(layoutParams);
+                }
 
-    //Done
-    public interface OnSendFragmentInteractionListener {
+                //Skip
+                public interface OnSendFragmentInteractionListener {
 
-        void onSendFragmentClose(boolean paymentMade);
+                    void onSendFragmentClose(boolean paymentMade);
 
-        void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
-                                         PaymentRequestType paymentRequestType,
-                                         String contactId,
-                                         long satoshis,
-                                         int accountPosition);
-    }
+                    void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
+                                                     PaymentRequestType paymentRequestType,
+                                                     String contactId,
+                                                     long satoshis,
+                                                     int accountPosition);
+                }
 }

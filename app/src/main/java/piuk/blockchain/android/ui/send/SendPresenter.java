@@ -699,10 +699,10 @@ public class SendPresenter extends BasePresenter<SendView> {
                 && relativeFee > SendModel.LARGE_TX_PERCENTAGE;
     }
 
-    /**
-     * Various checks on validity of transaction details
-     */
-    private boolean isValidSpend(PendingTransaction pendingTransaction, boolean checkAmountsOnly) {
+                /**
+                 * Various checks on validity of transaction details
+                 */
+                private boolean isValidSpend(PendingTransaction pendingTransaction, boolean checkAmountsOnly) {
         // Validate amount
         if (!isValidAmount(pendingTransaction.bigIntAmount)) {
             if (getView() != null) getView().showInvalidAmount();

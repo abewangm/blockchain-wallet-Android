@@ -24,4 +24,18 @@ public class PendingTransaction {
     public boolean isHD() {
         return (sendingObject.getAccountObject() instanceof Account);
     }
+
+    @Override
+    public String toString() {
+        return "PendingTransaction{" +
+                "unspentOutputBundle=" + unspentOutputBundle +
+                ", sendingObject=" + sendingObject +
+                ", receivingObject=" + receivingObject +
+                ", note='" + note + '\'' +
+                ", receivingAddress='" + receivingAddress + '\'' +
+                ", bigIntFee=" + bigIntFee +
+                ", bigIntAmount=" + bigIntAmount +
+                ", addressToReceiveIndex=" + addressToReceiveIndex +
+                '}';
+    }
 }
