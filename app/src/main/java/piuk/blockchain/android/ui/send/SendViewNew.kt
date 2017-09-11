@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.send
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.account.ItemAccount
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
@@ -70,14 +71,21 @@ interface SendViewNew : View {
     fun getReceivingAddress(): String?
 
     // Prompts
-    //TODO consider not using a toast and rather using the warning field?
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 
-    fun onShowBIP38PassphrasePrompt(scanData: String)
+    fun showBIP38PassphrasePrompt(scanData: String)
 
     fun showWatchOnlyWarning(address: String)
 
     fun showProgressDialog(@StringRes title: Int)
+
+    fun showSpendFromWatchOnlyWarning(address: String)
+
+    fun showSecondPasswordDialog()
+
+    fun showPaymentDetails(confirmationDetails: PaymentConfirmationDetails, note: String?)
+
+    fun showLargeTransactionWarning()
 
     fun dismissProgressDialog()
 

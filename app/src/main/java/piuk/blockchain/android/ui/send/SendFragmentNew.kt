@@ -39,10 +39,13 @@ import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.injection.Injector
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
+import piuk.blockchain.android.ui.account.SecondPasswordHandler
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
+import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -68,6 +71,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     private val COOL_DOWN_MILLIS = 2 * 1000
 
     private var progressDialog: MaterialProgressDialog? = null
+    private var confirmPaymentDialog: ConfirmPaymentDialog? = null
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -616,7 +620,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         spinnerPriority.invisible()
     }
 
-    override fun onShowBIP38PassphrasePrompt(scanData: String) {
+    override fun showBIP38PassphrasePrompt(scanData: String) {
         val password = AppCompatEditText(activity)
         password.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         password.setHint(R.string.password)
@@ -686,6 +690,52 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             progressDialog?.apply { dismiss() }
             progressDialog = null
         }
+    }
+
+    override fun showSpendFromWatchOnlyWarning(address: String) {
+
+        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(R.string.privx_required)
+                .setMessage(String.format(getString(R.string.watch_only_spend_instructionss), address))
+                .setCancelable(false)
+                .setPositiveButton(R.string.dialog_continue) { dialog, whichButton ->
+                    if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        PermissionUtil.requestCameraPermissionFromActivity(coordinator_layout, activity)
+                    } else {
+                        startScanActivity(SCAN_PRIVX)
+                    }
+                }
+                .setNegativeButton(android.R.string.cancel, null).show()
+    }
+
+    override fun showSecondPasswordDialog() {
+        SecondPasswordHandler(context).validate(object : SecondPasswordHandler.ResultListener {
+            override fun onNoSecondPassword() {
+                presenter.onNoSecondPassword()
+            }
+
+            override fun onSecondPasswordValidated(validateSecondPassword: String) {
+                presenter.onSecondPasswordValidated(validateSecondPassword)
+            }
+        })
+    }
+
+    override fun showPaymentDetails(details: PaymentConfirmationDetails, note: String?) {
+        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, note, true)
+        confirmPaymentDialog?.apply {
+            show(fragmentManager, ConfirmPaymentDialog::class.java.simpleName)
+        }
+    }
+
+    override fun showLargeTransactionWarning() {
+        coordinator_layout.postDelayed(Runnable {
+            AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                    .setCancelable(false)
+                    .setTitle(R.string.warning)
+                    .setMessage(R.string.large_tx_warning)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+        }, 500L)
     }
 
     companion object {

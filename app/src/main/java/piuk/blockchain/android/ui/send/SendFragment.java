@@ -112,11 +112,11 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
                 @Thunk FragmentSendBinding binding;
     @Thunk AlertDialog transactionSuccessDialog;
-    @Thunk boolean textChangeAllowed = true;
+                @Thunk boolean textChangeAllowed = true;//skip
                 private boolean contactsPayment;//skip
                 private OnSendFragmentInteractionListener listener;//skip
     private MaterialProgressDialog progressDialog;
-    private AlertDialog largeTxWarning;
+                private AlertDialog largeTxWarning;//skip
     private ConfirmPaymentDialog confirmPaymentDialog;
                 private NumericKeyboard customKeypad;
 
@@ -671,20 +671,21 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         ToastCustom.makeText(getActivity(), getString(message), ToastCustom.LENGTH_SHORT, toastType);
     }
 
-    @Override
-    public void showSecondPasswordDialog() {
-        new SecondPasswordHandler(getContext()).validate(new SecondPasswordHandler.ResultListener() {
-            @Override
-            public void onNoSecondPassword() {
-                getPresenter().onNoSecondPassword();
-            }
+                //Done
+                @Override
+                public void showSecondPasswordDialog() {
+                    new SecondPasswordHandler(getContext()).validate(new SecondPasswordHandler.ResultListener() {
+                        @Override
+                        public void onNoSecondPassword() {
+                            getPresenter().onNoSecondPassword();
+                        }
 
-            @Override
-            public void onSecondPasswordValidated(String validateSecondPassword) {
-                getPresenter().onSecondPasswordValidated(validateSecondPassword);
-            }
-        });
-    }
+                        @Override
+                        public void onSecondPasswordValidated(String validateSecondPassword) {
+                            getPresenter().onSecondPasswordValidated(validateSecondPassword);
+                        }
+                    });
+                }
 
     @Override
     public void onShowTransactionSuccess(@Nullable String mdid,
@@ -771,36 +772,38 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 .setNegativeButton(android.R.string.cancel, null).show();
     }
 
-    private void onShowLargeTransactionWarning() {
-        if (largeTxWarning != null && largeTxWarning.isShowing()) {
-            largeTxWarning.dismiss();
-        }
-
-        largeTxWarning = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setCancelable(false)
-                .setTitle(R.string.warning)
-                .setMessage(R.string.large_tx_warning)
-                .setPositiveButton(android.R.string.ok, null)
-                .create();
-
-        largeTxWarning.show();
-    }
-
-    @Override
-    public void onShowSpendFromWatchOnly(String address) {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.privx_required)
-                .setMessage(String.format(getString(R.string.watch_only_spend_instructionss), address))
-                .setCancelable(false)
-                .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> {
-                    if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), getActivity());
-                    } else {
-                        startScanActivity(SCAN_PRIVX);
+                //Done
+                private void onShowLargeTransactionWarning() {
+                    if (largeTxWarning != null && largeTxWarning.isShowing()) {
+                        largeTxWarning.dismiss();
                     }
-                })
-                .setNegativeButton(android.R.string.cancel, null).show();
-    }
+
+                    largeTxWarning = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                            .setCancelable(false)
+                            .setTitle(R.string.warning)
+                            .setMessage(R.string.large_tx_warning)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .create();
+
+                    largeTxWarning.show();
+                }
+
+                //done
+                @Override
+                public void onShowSpendFromWatchOnly(String address) {
+                    new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                            .setTitle(R.string.privx_required)
+                            .setMessage(String.format(getString(R.string.watch_only_spend_instructionss), address))
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.dialog_continue, (dialog, whichButton) -> {
+                                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                    PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), getActivity());
+                                } else {
+                                    startScanActivity(SCAN_PRIVX);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.cancel, null).show();
+                }
 
                 //skip
                 @Override
@@ -857,33 +860,33 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 }
 
                 private TextWatcher btcTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            // No-op
-        }
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                            // No-op
+                        }
 
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            // No-op
-        }
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            // No-op
+                        }
 
-        @Override
-        public void afterTextChanged(Editable s) {
-//            binding.amountContainer.amountBtc.removeTextChangedListener(this);
-//            s = EditTextFormatUtil.formatEditable(s,
-//                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
-//                    binding.amountContainer.amountBtc,
-//                    getDefaultDecimalSeparator());
-//
-//            binding.amountContainer.amountBtc.addTextChangedListener(this);
-//
-//            if (textChangeAllowed) {
-//                textChangeAllowed = false;
-//                getPresenter().updateFiatAmount(s.toString());
-//                textChangeAllowed = true;
-//            }
-        }
-    };
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                //            binding.amountContainer.amountBtc.removeTextChangedListener(this);
+                //            s = EditTextFormatUtil.formatEditable(s,
+                //                    getPresenter().getCurrencyHelper().getMaxBtcDecimalLength(),
+                //                    binding.amountContainer.amountBtc,
+                //                    getDefaultDecimalSeparator());
+                //
+                //            binding.amountContainer.amountBtc.addTextChangedListener(this);
+                //
+                //            if (textChangeAllowed) {
+                //                textChangeAllowed = false;
+                //                getPresenter().updateFiatAmount(s.toString());
+                //                textChangeAllowed = true;
+                //            }
+                        }
+                    };
 
                 @Thunk
                 String getDefaultDecimalSeparator() {
@@ -920,16 +923,17 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         }
     };
 
-    @Override
-    public void onShowPaymentDetails(PaymentConfirmationDetails details, @Nullable String note) {
-        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, note, true);
-        confirmPaymentDialog
-                .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
+                //Done
+                @Override
+                public void onShowPaymentDetails(PaymentConfirmationDetails details, @Nullable String note) {
+                    confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, note, true);
+                    confirmPaymentDialog
+                            .show(getFragmentManager(), ConfirmPaymentDialog.class.getSimpleName());
 
-        if (getPresenter().isLargeTransaction()) {
-            binding.getRoot().postDelayed(this::onShowLargeTransactionWarning, 500);
-        }
-    }
+                    if (getPresenter().isLargeTransaction()) {
+                        binding.getRoot().postDelayed(this::onShowLargeTransactionWarning, 500);
+                    }
+                }
 
                 //Done
                 @Override
