@@ -615,16 +615,19 @@ class SendPresenterNew @Inject constructor(
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
         updateFee(wei.toBigInteger())
 
-        val ethR = ethDataManager.getEthAddress()
-
         //Fail safe - This shouldn't happen
-        if(ethR == null || ethR.balance == null) {
+        if(ethDataManager.getEthAddress() == null) {
             view.setTabSelection(0)
             view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR)
             return
         }
 
-        maxAvailable = ethR?.balance?.minus(wei.toBigInteger())
+        val ethR = ethDataManager.getEthAddress()!!.getAddressResponse("")
+
+//        maxAvailable = ethR?.balance?.minus(wei.toBigInteger())
+        // STOPSHIP: Here we need to get the non-legacy address and then get the balance of the standalone object, not the combined balance
+        // #getTotalBalance is wrong; it's just a placeholder for compiling's sake.
+//        maxAvailable = ethR!!.getTotalBalance().minus(wei.toBigInteger())
 
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
         if (spendAll) {
