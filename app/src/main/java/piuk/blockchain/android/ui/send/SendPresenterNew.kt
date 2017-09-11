@@ -472,7 +472,9 @@ class SendPresenterNew @Inject constructor(
         updateFee(wei.toBigInteger())
 
         val ethR = ethDataManager.getEthAddress()
-        maxAvailable = ethR!!.balance.minus(wei.toBigInteger())
+        // STOPSHIP: Here we need to get the non-legacy address and then get the balance of the standalone object, not the combined balance
+        // #getTotalBalance is wrong; it's just a placeholder for compiling's sake.
+        maxAvailable = ethR!!.getTotalBalance().minus(wei.toBigInteger())
 
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
 

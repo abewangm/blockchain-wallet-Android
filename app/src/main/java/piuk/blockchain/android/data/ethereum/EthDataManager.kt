@@ -8,6 +8,7 @@ import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.util.MetadataUtil
 import io.reactivex.Completable
 import io.reactivex.Observable
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -29,13 +30,15 @@ class EthDataManager(
 
     /**
      * Returns an [EthAddressResponse] object for a given ETH address as an [Observable]. An
-     * [EthAddressResponse] contains a list of transactions associated with the account, as well
-     * as a final balance. Calling this function also caches the [EthAddressResponse].
+     * [CombinedEthModel] contains a list of transactions associated with the account, as well
+     * as a final balance. Calling this function also caches the [CombinedEthModel].
      *
-     * @return An [Observable] wrapping an [EthAddressResponse]
+     * @return An [Observable] wrapping an [CombinedEthModel]
      */
-    fun fetchEthAddress(): Observable<EthAddressResponse> = rxPinning.call<EthAddressResponse> {
-        ethAccountApi.getEthAddress(ethDataStore.ethWallet!!.account.address)
+    // TODO: Fetch both the legacy and non-legacy addresses
+    fun fetchEthAddress(): Observable<CombinedEthModel> = rxPinning.call<CombinedEthModel> {
+        ethAccountApi.getEthAddress(listOf(ethDataStore.ethWallet!!.account.address))
+                .map(::CombinedEthModel)
                 .doOnNext { ethDataStore.ethAddressResponse = it }
                 .compose(RxUtil.applySchedulersToObservable())
     }
@@ -57,7 +60,7 @@ class EthDataManager(
     fun getEthTransactions(): Observable<EthTransaction> {
         ethDataStore.ethAddressResponse?.let {
             return Observable.just(it)
-                    .flatMapIterable { it.transactions }
+                    .flatMapIterable { it.getTransactions() }
                     .compose(RxUtil.applySchedulersToObservable())
         }
 
