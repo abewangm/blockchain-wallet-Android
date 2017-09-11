@@ -1,9 +1,9 @@
 package piuk.blockchain.android.data.transactions
 
-import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.util.annotations.Mockable
 import java.math.BigInteger
 
@@ -26,15 +26,15 @@ abstract class Displayable {
 
 @Mockable
 data class EthDisplayable(
-        private val ethAccount: EthAddressResponse,
+        private val combinedEthModel: CombinedEthModel,
         private val ethTransaction: EthTransaction
 ) : Displayable() {
 
     override val cryptoCurrency: CryptoCurrencies
         get() = CryptoCurrencies.ETHER
     override val direction: TransactionSummary.Direction
-        get() = when (ethTransaction.from) {
-            ethAccount.account -> TransactionSummary.Direction.SENT
+        get() = when {
+            combinedEthModel.getAccounts().contains(ethTransaction.from) -> TransactionSummary.Direction.SENT
             else -> TransactionSummary.Direction.RECEIVED
         }
     override val timeStamp: Long
