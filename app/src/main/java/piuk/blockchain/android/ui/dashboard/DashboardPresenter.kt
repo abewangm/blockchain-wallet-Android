@@ -41,10 +41,10 @@ class DashboardPresenter @Inject constructor(
         updateAllBalances()
     }
 
-    internal fun updateChartsData(timeSpan: TimeSpan) {
+    private fun updateChartsData(timeSpan: TimeSpan) {
         compositeDisposable.clear()
 
-        view.updateChartState(ChartsState.SelectedTime(timeSpan))
+        view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
 
         when (timeSpan) {
             TimeSpan.YEAR -> chartsDataManager.getYearPrice()
@@ -53,16 +53,26 @@ class DashboardPresenter @Inject constructor(
             else -> throw IllegalArgumentException("Day isn't currently supported")
         }.compose(RxUtil.addObservableToCompositeDisposable(this))
                 .toList()
-                .doOnSubscribe { view.updateChartState(ChartsState.Loading()) }
-                .doOnSuccess { view.updateChartState(ChartsState.Data(it)) }
-                .doOnError { view.updateChartState(ChartsState.Error()) }
+                .doOnSubscribe { view.updateChartState(ChartsState.Loading) }
+                .doOnSuccess { view.updateChartState(getChartsData(it)) }
+                .doOnError { view.updateChartState(ChartsState.Error) }
                 .subscribe(
                         { /* No-op */ },
                         { Timber.e(it) }
                 )
     }
 
-    internal fun getCurrencySymbol() = exchangeRateFactory.getSymbol(getFiatCurrency())
+    private fun getChartsData(list: List<Point>): ChartsState.Data {
+        return ChartsState.Data(
+                data = list,
+                fiatSymbol = getCurrencySymbol(),
+                getChartYear = { updateChartsData(TimeSpan.YEAR) },
+                getChartMonth = { updateChartsData(TimeSpan.MONTH) },
+                getChartWeek = { updateChartsData(TimeSpan.WEEK) }
+        )
+    }
+
+    private fun getCurrencySymbol() = exchangeRateFactory.getSymbol(getFiatCurrency())
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         this.cryptoCurrency = cryptoCurrency
@@ -120,7 +130,6 @@ class DashboardPresenter @Inject constructor(
                 .run { format(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER)) }
 
         return "$number ETH"
-
     }
 
     private fun getBtcString(): String {
@@ -145,9 +154,18 @@ class DashboardPresenter @Inject constructor(
 
 sealed class ChartsState {
 
-    data class Data(val data: List<Point>) : ChartsState()
-    class Error : ChartsState()
-    class Loading : ChartsState()
-    data class SelectedTime(val timeSpan: TimeSpan) : ChartsState()
+    data class Data(
+            val data: List<Point>,
+            val fiatSymbol: String,
+            val getChartYear : () -> Unit,
+            val getChartMonth : () -> Unit,
+            val getChartWeek : () -> Unit
+    ) : ChartsState()
+
+    object Error : ChartsState()
+    object Loading : ChartsState()
+    class TimeSpanUpdated(val timeSpan: TimeSpan) : ChartsState()
 
 }
+
+class ChartDisplayable

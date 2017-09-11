@@ -268,7 +268,7 @@ class BalanceFragment    : BaseFragment<BalanceView, BalancePresenter>(), Balanc
         }
     }
 
-    override fun showToast(message: Int, toastType: String) = context.toast(message, toastType)
+    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
     override fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?) {
         val message: String = if (!note.isNullOrEmpty()) {
