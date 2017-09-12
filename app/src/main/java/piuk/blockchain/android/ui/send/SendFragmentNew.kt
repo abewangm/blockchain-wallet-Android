@@ -546,6 +546,16 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                 .subscribe({ updateTotals() },{ it.printStackTrace() })
     }
 
+    override fun enableFeeDropdown() {
+        spinnerPriority.isEnabled = true
+        textviewFeeAbsolute.isEnabled = true
+    }
+
+    override fun disableFeeDropdown() {
+        spinnerPriority.isEnabled = false
+        textviewFeeAbsolute.isEnabled = false
+    }
+
     internal fun updateTotals() {
         presenter.calculateTransactionAmounts(
                 spendAll = false,

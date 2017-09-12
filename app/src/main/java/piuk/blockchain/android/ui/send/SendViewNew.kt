@@ -63,6 +63,10 @@ interface SendViewNew : View {
 
     fun enableFiatTextChangeListener()
 
+    fun enableFeeDropdown()
+
+    fun disableFeeDropdown()
+
     // Fetch value
     fun getCustomFeeValue(): Long
 

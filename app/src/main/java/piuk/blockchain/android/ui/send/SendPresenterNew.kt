@@ -13,6 +13,7 @@ import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PrivateKeyFactory
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
 import org.bitcoinj.core.ECKey
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -22,6 +23,7 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.FeeDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -219,6 +221,7 @@ class SendPresenterNew @Inject constructor(
         view.setTabSelection(0)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
+        view.enableFeeDropdown()
         resetAccountList()
         selectDefaultSendingAccount()
         view.hideMaxAvailable()
@@ -236,6 +239,7 @@ class SendPresenterNew @Inject constructor(
         view.setTabSelection(1)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
+        view.disableFeeDropdown()
         resetAccountList()
         selectDefaultSendingAccount()
         view.hideMaxAvailable()
@@ -545,7 +549,7 @@ class SendPresenterNew @Inject constructor(
                 calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
             }
             CryptoCurrencies.ETHER -> {
-                calculateUnspentEth(spendAll)
+                getEthAccountResponse(spendAll)
             }
         }
     }
@@ -607,27 +611,33 @@ class SendPresenterNew @Inject constructor(
         pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee()
     }
 
-    internal fun calculateUnspentEth(spendAll: Boolean) {
+    internal fun getEthAccountResponse(spendAll: Boolean) {
 
         view.showMaxAvailable()
+
+        if(ethDataManager.getEthAddress() == null) {
+            ethDataManager.fetchEthAddress()
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .doOnError { view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR) }
+                    .subscribe(Consumer {
+                        calculateUnspentEth(it, spendAll)
+                    })
+        } else {
+            val combinedEthModel = ethDataManager.getEthAddress()
+            combinedEthModel?.let {
+                calculateUnspentEth(combinedEthModel, spendAll)
+            }
+        }
+    }
+
+    internal fun calculateUnspentEth(combinedEthModel: CombinedEthModel, spendAll: Boolean) {
 
         val gwei = BigDecimal.valueOf(feeOptions.gasLimit * feeOptions.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
         updateFee(wei.toBigInteger())
 
-        //Fail safe - This shouldn't happen
-        if(ethDataManager.getEthAddress() == null) {
-            view.setTabSelection(0)
-            view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR)
-            return
-        }
-
-        val ethR = ethDataManager.getEthAddress()!!.getAddressResponse("")
-
-//        maxAvailable = ethR?.balance?.minus(wei.toBigInteger())
-        // STOPSHIP: Here we need to get the non-legacy address and then get the balance of the standalone object, not the combined balance
-        // #getTotalBalance is wrong; it's just a placeholder for compiling's sake.
-//        maxAvailable = ethR!!.getTotalBalance().minus(wei.toBigInteger())
+        val addressResponse = combinedEthModel.getAddressResponse()
+        maxAvailable = addressResponse!!.balance.minus(wei.toBigInteger())
 
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
         if (spendAll) {
@@ -653,7 +663,6 @@ class SendPresenterNew @Inject constructor(
         } else {
             view.updateMaxAvailableColor(R.color.primary_blue_accent)
         }
-
     }
 
     internal fun handleURIScan(untrimmedscanData: String?, scanRoute: String) {
