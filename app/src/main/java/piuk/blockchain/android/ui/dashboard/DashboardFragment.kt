@@ -12,6 +12,7 @@ import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
 import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import javax.inject.Inject
@@ -40,20 +41,18 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
             addTab(tabs_dashboard.newTab().setText(R.string.ether))
             setOnTabSelectedListener {
                 if (it == 0) {
-//                    textview_currency.setText(R.string.dashboard_bitcoin_price)
                     presenter.updateSelectedCurrency(CryptoCurrencies.BTC)
+                    dashboardAdapter.updateSelectedCurrency(CryptoCurrencies.BTC)
                 } else {
-//                    textview_currency.setText(R.string.dashboard_ether_price)
                     presenter.updateSelectedCurrency(CryptoCurrencies.ETHER)
+                    dashboardAdapter.updateSelectedCurrency(CryptoCurrencies.ETHER)
                 }
             }
         }
 
         recycler_view?.apply {
             layoutManager = LinearLayoutManager(activity)
-            this.adapter = dashboardAdapter.apply {
-                items = listOf(ChartDisplayable())
-            }
+            this.adapter = dashboardAdapter
         }
 
         onViewReady()
@@ -62,6 +61,10 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun onResume() {
         super.onResume()
         presenter.updatePrices()
+    }
+
+    override fun updateAdapterItems(displayItems: MutableList<Any>) {
+        dashboardAdapter.items = displayItems
     }
 
     override fun updateChartState(chartsState: ChartsState) {
@@ -81,7 +84,11 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     }
 
     override fun updateCryptoCurrencyPrice(price: String) {
-//        textview_price.text = price
+        dashboardAdapter.updateCurrencyPrice(price)
+    }
+
+    override fun showToast(message: Int, toastType: String) {
+        toast(message, toastType)
     }
 
     override fun createPresenter() = dashboardPresenter

@@ -12,6 +12,7 @@ import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -35,10 +36,36 @@ class DashboardPresenter @Inject constructor(
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
     private var cryptoCurrency = CryptoCurrencies.BTC
+    private val displayItems = mutableListOf<Any>(ChartDisplayable())
 
     override fun onViewReady() {
         updateChartsData(TimeSpan.YEAR)
         updateAllBalances()
+        view.updateAdapterItems(displayItems)
+    }
+
+    internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        this.cryptoCurrency = cryptoCurrency
+        updatePrices()
+        // TODO: Update graph data once ETH supported  
+    }
+
+    internal fun updatePrices() {
+        exchangeRateFactory.updateTickers()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        {
+                            if (cryptoCurrency == CryptoCurrencies.BTC) {
+                                view.updateCryptoCurrencyPrice(getBtcString())
+                            } else {
+                                view.updateCryptoCurrencyPrice(getEthString())
+                            }
+                        },
+                        {
+                            Timber.e(it)
+                            view.showToast(R.string.dashboard_charts_price_error, ToastCustom.TYPE_ERROR)
+                        }
+                )
     }
 
     private fun updateChartsData(timeSpan: TimeSpan) {
@@ -74,26 +101,6 @@ class DashboardPresenter @Inject constructor(
 
     private fun getCurrencySymbol() = exchangeRateFactory.getSymbol(getFiatCurrency())
 
-    internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        this.cryptoCurrency = cryptoCurrency
-        updatePrices()
-    }
-
-    // TODO: This can be slow and can fail  
-    internal fun updatePrices() {
-        exchangeRateFactory.updateTickers()
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .subscribe(
-                        {
-                            if (cryptoCurrency == CryptoCurrencies.BTC) {
-                                view.updateCryptoCurrencyPrice(getBtcString())
-                            } else {
-                                view.updateCryptoCurrencyPrice(getEthString())
-                            }
-                        },
-                        { Timber.e(it) })
-    }
-
     private fun updateAllBalances() {
         ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
                 .flatMap { ethDataManager.fetchEthAddress() }
@@ -117,7 +124,10 @@ class DashboardPresenter @Inject constructor(
                             }
                 }.subscribe(
                 { /* No-op*/ },
-                { Timber.e(it) }
+                {
+                    Timber.e(it)
+                    view.showToast(R.string.dashboard_charts_price_error, ToastCustom.TYPE_ERROR)
+                }
         )
     }
 
@@ -157,9 +167,9 @@ sealed class ChartsState {
     data class Data(
             val data: List<Point>,
             val fiatSymbol: String,
-            val getChartYear : () -> Unit,
-            val getChartMonth : () -> Unit,
-            val getChartWeek : () -> Unit
+            val getChartYear: () -> Unit,
+            val getChartMonth: () -> Unit,
+            val getChartWeek: () -> Unit
     ) : ChartsState()
 
     object Error : ChartsState()

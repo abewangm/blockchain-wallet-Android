@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.android.synthetic.main.item_chart.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.TimeSpan
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.dashboard.ChartDisplayable
@@ -34,8 +35,18 @@ class ChartDelegate<in T>(
 
     private var viewHolder: ChartViewHolder? = null
 
-    private val typefaceRegular by unsafeLazy { TypefaceUtils.load(activity.assets, "fonts/Montserrat-Regular.ttf") }
-    private val typefaceLight by unsafeLazy { TypefaceUtils.load(activity.assets, "fonts/Montserrat-Light.ttf") }
+    private val typefaceRegular by unsafeLazy {
+        TypefaceUtils.load(
+                activity.assets,
+                "fonts/Montserrat-Regular.ttf"
+        )
+    }
+    private val typefaceLight by unsafeLazy {
+        TypefaceUtils.load(
+                activity.assets,
+                "fonts/Montserrat-Light.ttf"
+        )
+    }
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is ChartDisplayable
@@ -53,13 +64,25 @@ class ChartDelegate<in T>(
         setTextViewSelected(holder.year, listOf(holder.week, holder.month))
     }
 
-    fun updateChartState(chartsState: ChartsState) {
+    internal fun updateChartState(chartsState: ChartsState) {
         return when (chartsState) {
             is ChartsState.Data -> showData(chartsState)
             is ChartsState.Loading -> showLoading()
             is ChartsState.Error -> showError()
             is ChartsState.TimeSpanUpdated -> showTimeSpanSelected(chartsState.timeSpan)
         }
+    }
+
+    internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        if (cryptoCurrency == CryptoCurrencies.BTC) {
+            viewHolder?.currency?.setText(R.string.dashboard_bitcoin_price)
+        } else {
+            viewHolder?.currency?.setText(R.string.dashboard_ether_price)
+        }
+    }
+
+    internal fun updateCurrencyPrice(price: String) {
+        viewHolder?.let { it.price.text = price }
     }
 
     private fun showData(data: ChartsState.Data) {

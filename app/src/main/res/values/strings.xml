@@ -792,5 +792,6 @@
     <string name="dashboard_bitcoin_price">Bitcoin price</string>
     <string name="dashboard_ether_price">Ether price</string>
     <string name="dashboard_charts_error">Error loading chart data</string>
+    <string name="dashboard_charts_price_error">Error fetching price data</string>
 
 </resources>
