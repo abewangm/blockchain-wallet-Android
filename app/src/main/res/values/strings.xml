@@ -794,4 +794,9 @@
     <string name="dashboard_charts_error">Error loading chart data</string>
     <string name="dashboard_charts_price_error">Error fetching price data</string>
 
+    <!-- ETHEREUM ONBOARDING -->
+    <string name="onboarding_ether_title">Now Supporting Ether</string>
+    <string name="onboarding_ether_description">You asked, we listened. We\'re excited to announce that your Blockchain wallet will now allow you to seamlessly send and receive ether!</string>
+    <string name="onboarding_ether_cta">Get Started with Ether</string>
+
 </resources>

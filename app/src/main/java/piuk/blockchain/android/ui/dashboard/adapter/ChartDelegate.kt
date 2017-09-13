@@ -74,11 +74,12 @@ class ChartDelegate<in T>(
     }
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        if (cryptoCurrency == CryptoCurrencies.BTC) {
-            viewHolder?.currency?.setText(R.string.dashboard_bitcoin_price)
-        } else {
-            viewHolder?.currency?.setText(R.string.dashboard_ether_price)
-        }
+        viewHolder?.currency?.setText(
+                if (cryptoCurrency == CryptoCurrencies.BTC)
+                    R.string.dashboard_bitcoin_price
+                else
+                    R.string.dashboard_ether_price
+        )
     }
 
     internal fun updateCurrencyPrice(price: String) {

@@ -141,7 +141,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
                 requestScan();
             } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
-                binding.bottomNavigation.setCurrentItem(2);
+                binding.bottomNavigation.setCurrentItem(3);
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 BuyActivity.start(MainActivity.this);
             }

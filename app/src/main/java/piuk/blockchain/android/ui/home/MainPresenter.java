@@ -37,6 +37,7 @@ import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.home.models.MetadataEvent;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
@@ -136,6 +137,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                                 getView().hideProgressDialog();
 
                                 initPrompts(getView().getActivityContext());
+
+                                rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
 
                                 if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
                                     String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");

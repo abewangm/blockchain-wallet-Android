@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.balance.adapter
+package piuk.blockchain.android.ui.dashboard.adapter
 
 import android.annotation.SuppressLint
 import android.support.v4.content.ContextCompat

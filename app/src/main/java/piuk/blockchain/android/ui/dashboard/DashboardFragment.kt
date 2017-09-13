@@ -1,6 +1,8 @@
 package piuk.blockchain.android.ui.dashboard
 
+import android.content.Intent
 import android.os.Bundle
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +13,8 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
+import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
@@ -20,8 +24,11 @@ import javax.inject.Inject
 
 class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), DashboardView {
 
-    @Inject lateinit var dashboardPresenter: DashboardPresenter
+    override val shouldShowBuy: Boolean
+        get() = AndroidUtils.is19orHigher()
+
     private val dashboardAdapter by unsafeLazy { DashboardDelegateAdapter(activity) }
+    @Inject lateinit var dashboardPresenter: DashboardPresenter
 
     init {
         Injector.INSTANCE.presenterComponent.inject(this)
@@ -63,8 +70,16 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         presenter.updatePrices()
     }
 
-    override fun updateAdapterItems(displayItems: MutableList<Any>) {
+    override fun notifyItemAdded(displayItems: MutableList<Any>, position: Int) {
         dashboardAdapter.items = displayItems
+        dashboardAdapter.notifyItemInserted(position)
+        recycler_view.smoothScrollToPosition(0)
+    }
+
+    override fun notifyItemRemoved(displayItems: MutableList<Any>, position: Int) {
+        dashboardAdapter.items = displayItems
+        dashboardAdapter.notifyItemRemoved(position)
+        recycler_view.smoothScrollToPosition(0)
     }
 
     override fun updateChartState(chartsState: ChartsState) {
@@ -89,6 +104,16 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun showToast(message: Int, toastType: String) {
         toast(message, toastType)
+    }
+
+    override fun startBuyActivity() {
+        LocalBroadcastManager.getInstance(activity)
+                .sendBroadcast(Intent(MainActivity.ACTION_BUY))
+    }
+
+    override fun startReceiveFragment() {
+        LocalBroadcastManager.getInstance(activity)
+                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
     }
 
     override fun createPresenter() = dashboardPresenter
