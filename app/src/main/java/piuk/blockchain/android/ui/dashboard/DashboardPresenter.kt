@@ -129,11 +129,11 @@ class DashboardPresenter @Inject constructor(
                                     type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
                                 })
                                 view.updateBtcBalance(getBtcBalanceString(btcBalance))
-                                view.updateEthBalance(getEthBalanceString(ethAddressResponse.balance))
+                                view.updateEthBalance(getEthBalanceString(ethAddressResponse.getTotalBalance()))
 
                                 val btcFiat = exchangeRateFactory.getLastBtcPrice(getFiatCurrency()) * (btcBalance / 1e8)
                                 val ethFiat = BigDecimal(exchangeRateFactory.getLastEthPrice(getFiatCurrency()))
-                                        .multiply(Convert.fromWei(BigDecimal(ethAddressResponse.balance), Convert.Unit.ETHER))
+                                        .multiply(Convert.fromWei(BigDecimal(ethAddressResponse.getTotalBalance()), Convert.Unit.ETHER))
 
                                 val totalDouble = btcFiat.plus(ethFiat.toDouble())
 

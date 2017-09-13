@@ -12,7 +12,6 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
-import timber.log.Timber
 import java.util.*
 
 class EthDataManager(
@@ -36,7 +35,6 @@ class EthDataManager(
      *
      * @return An [Observable] wrapping an [CombinedEthModel]
      */
-    // TODO: Fetch both the legacy and non-legacy addresses
     fun fetchEthAddress(): Observable<CombinedEthModel> = rxPinning.call<CombinedEthModel> {
         ethAccountApi.getEthAddress(listOf(ethDataStore.ethWallet!!.account.address))
                 .map(::CombinedEthModel)

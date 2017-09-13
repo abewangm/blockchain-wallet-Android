@@ -13,17 +13,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
+        android:layout_marginTop="@dimen/action_bar_height"
         android:background="@color/primary_gray_lightest"
-        android:gravity="center"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="56dp"
-            android:layout_marginTop="24dp"
             android:orientation="vertical"
             android:paddingLeft="72dp"
             android:paddingRight="72dp">
