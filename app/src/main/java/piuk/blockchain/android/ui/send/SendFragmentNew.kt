@@ -126,7 +126,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
             }
         }
-        max.setOnClickListener({ presenter.onSpendAllClicked(getFeePriority()) })
+        max.setOnClickListener({ presenter.onSpendMaxClicked() })
 
         onViewReady()
     }
@@ -398,6 +398,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         override fun afterTextChanged(editable: Editable) {
             presenter.updateFiatTextField(editable, amountContainer.amountCrypto)
+            updateTotals()
         }
     }
 
@@ -412,6 +413,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         override fun afterTextChanged(editable: Editable) {
             presenter.updateCryptoTextField(editable, amountContainer.amountFiat)
+            updateTotals()
         }
     }
 
@@ -531,11 +533,11 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                         textInputLayout.setVisibility(View.GONE)
                         updateTotals()
                     }
-//                    2 -> if (presenter.shouldShowAdvancedFeeWarning()) {
-//                        alertCustomSpend()
-//                    } else {
-//                        displayCustomFeeField()
-//                    }
+                    2 -> if (presenter.shouldShowAdvancedFeeWarning()) {
+                        alertCustomSpend()
+                    } else {
+                        displayCustomFeeField()
+                    }
                 }
 
                 val options = presenter.getFeeOptionsForDropDown().get(position)
@@ -551,19 +553,6 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         textviewFeeAbsolute.setOnClickListener({ spinnerPriority.performClick() })
         textviewFeeType.setText(R.string.fee_options_regular)
         textviewFeeTime.setText(R.string.fee_options_regular_time)
-
-        //TODO this calls updateTotals multiple times on startup
-        RxTextView.textChanges(amountContainer.amountCrypto)
-                .debounce(400, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ updateTotals() },{ it.printStackTrace() })
-
-        RxTextView.textChanges(amountContainer.amountFiat)
-                .debounce(400, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ updateTotals() },{ it.printStackTrace() })
     }
 
     override fun enableFeeDropdown() {
@@ -577,14 +566,11 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     internal fun updateTotals() {
-        presenter.calculateTransactionAmounts(
-                spendAll = false,
-                amountToSendText = amountContainer.amountCrypto.getText().toString(),
-                feePriority = getFeePriority())
+        presenter.onCryptoTextchange(amountContainer.amountCrypto.getText().toString())
     }
 
     @FeeType.FeePriorityDef
-    private fun getFeePriority(): Int {
+    override fun getFeePriority(): Int {
         val position = spinnerPriority.getSelectedItemPosition()
         when (position) {
             1 -> return FeeType.FEE_OPTION_PRIORITY
@@ -770,22 +756,64 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         confirmPaymentDialog?.dismiss()
     }
 
-    interface OnSendFragmentInteractionListener {
-        fun onSendFragmentClose()
+    internal fun alertCustomSpend() {
+        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(R.string.transaction_fee)
+                .setMessage(R.string.fee_options_advanced_warning)
+                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    presenter.disableAdvancedFeeWarning()
+                    displayCustomFeeField()
+                }
+                .setNegativeButton(android.R.string.cancel) { dialog, which -> spinnerPriority.setSelection(0) }
+                .show()
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        if (context is OnSendFragmentInteractionListener) {
-            listener = context
-        } else {
-            throw RuntimeException(context!!.toString() + " must implement OnSendFragmentInteractionListener")
-        }
+    override fun setFeePrioritySelection(index: Int) {
+        spinnerPriority.setSelection(index)
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        listener = null
+    internal fun displayCustomFeeField() {
+        textviewFeeAbsolute.setVisibility(View.GONE)
+        textviewFeeTime.setVisibility(View.INVISIBLE)
+        textInputLayout.setVisibility(View.VISIBLE)
+        buttonContinue.setEnabled(false)
+        textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint))
+
+        edittextCustomFee.setOnFocusChangeListener({ v, hasFocus ->
+            if (hasFocus || !edittextCustomFee.getText().toString().isEmpty()) {
+                textInputLayout.setHint(getString(R.string.fee_options_sat_byte_inline_hint,
+                        presenter.getFeeOptions()?.getRegularFee().toString(),
+                        presenter.getFeeOptions()?.getPriorityFee().toString()))
+            } else if (edittextCustomFee.getText().toString().isEmpty()) {
+                textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint))
+            } else {
+                textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint))
+            }
+        })
+
+        RxTextView.textChanges(edittextCustomFee)
+                .skip(1)
+                .map<String>({ it.toString() })
+                .doOnNext { value -> buttonContinue.setEnabled(!value.isEmpty() && value != "0") }
+                .filter { value -> !value.isEmpty() }
+                .map<Long>({ java.lang.Long.valueOf(it) })
+                .onErrorReturnItem(0L)
+                .doOnNext { value ->
+
+                    if (presenter.getFeeOptions() != null && value < presenter.getFeeOptions()!!.getLimits().getMin()) {
+                        textInputLayout.setError(getString(R.string.fee_options_fee_too_low))
+                    } else if (presenter.getFeeOptions() != null && value > presenter.getFeeOptions()!!.getLimits().getMax()) {
+                        textInputLayout.setError(getString(R.string.fee_options_fee_too_high))
+                    } else {
+                        textInputLayout.setError(null)
+                    }
+                }
+                .debounce(300, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { value -> updateTotals() },
+                        { it.printStackTrace() })
     }
 
     override fun showTransactionSuccess(hash: String,
@@ -818,6 +846,24 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
 
         dialogHandler.postDelayed(dialogRunnable, (5 * 1000).toLong())
+    }
+
+    interface OnSendFragmentInteractionListener {
+        fun onSendFragmentClose()
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context is OnSendFragmentInteractionListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context!!.toString() + " must implement OnSendFragmentInteractionListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 
     companion object {

@@ -35,6 +35,8 @@ interface SendViewNew : View {
 
     fun setTabSelection(tabIndex: Int)
 
+    fun setFeePrioritySelection(index: Int)
+
     fun clearWarning()
 
     //Hide / Show
@@ -73,6 +75,8 @@ interface SendViewNew : View {
     fun getClipboardContents(): String?
 
     fun getReceivingAddress(): String?
+
+    fun getFeePriority(): Int
 
     // Prompts
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)

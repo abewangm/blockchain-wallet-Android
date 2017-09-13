@@ -78,34 +78,34 @@ import static piuk.blockchain.android.ui.send.SendFragment.ARGUMENT_SCAN_DATA_AD
 @SuppressWarnings("WeakerAccess")
 public class SendPresenter extends BasePresenter<SendView> {
 
-    private static final String PREF_WARN_ADVANCED_FEE = "pref_warn_advanced_fee";
-    private static final String PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend";
+                    private static final String PREF_WARN_ADVANCED_FEE = "pref_warn_advanced_fee";
+                    private static final String PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend";
 
-    private MonetaryUtil monetaryUtil;
-    private ReceiveCurrencyHelper currencyHelper;
-    private SendModel sendModel;
-    @Nullable private String contactMdid;
-    @Nullable private String fctxId;
-    private String metricInputFlag;
-    private Locale locale;
+                    private MonetaryUtil monetaryUtil;
+                    private ReceiveCurrencyHelper currencyHelper;
+                    private SendModel sendModel;
+                    @Nullable private String contactMdid;
+                    @Nullable private String fctxId;
+                    private String metricInputFlag;
+                    private Locale locale;
 
-    private Disposable unspentApiDisposable;
+                    private Disposable unspentApiDisposable;
 
-    private PrefsUtil prefsUtil;
-    private WalletAccountHelper walletAccountHelper;
-    private ExchangeRateFactory exchangeRateFactory;
-    private PrivateKeyFactory privateKeyFactory;
-    private PayloadManager payloadManager;
-    private StringUtils stringUtils;
-    private ContactsDataManager contactsDataManager;
-    private SendDataManager sendDataManager;
-    private PayloadDataManager payloadDataManager;
-    private DynamicFeeCache dynamicFeeCache;
-    private TransactionListDataManager transactionListDataManager;
-    private EnvironmentSettings environmentSettings;
-    private FeeDataManager feeDataManager;
-    private AccessState accessState;
-    private CurrencyState currencyState;
+                    private PrefsUtil prefsUtil;
+                    private WalletAccountHelper walletAccountHelper;
+                    private ExchangeRateFactory exchangeRateFactory;
+                    private PrivateKeyFactory privateKeyFactory;
+                    private PayloadManager payloadManager;
+                    private StringUtils stringUtils;
+                    private ContactsDataManager contactsDataManager;
+                    private SendDataManager sendDataManager;
+                    private PayloadDataManager payloadDataManager;
+                    private DynamicFeeCache dynamicFeeCache;
+                    private TransactionListDataManager transactionListDataManager;
+                    private EnvironmentSettings environmentSettings;
+                    private FeeDataManager feeDataManager;
+                    private AccessState accessState;
+                    private CurrencyState currencyState;
 
                     @Inject
                     SendPresenter(PrefsUtil prefsUtil,
@@ -973,7 +973,8 @@ public class SendPresenter extends BasePresenter<SendView> {
                                             }));
                 }
 
-    private void logContactsPayment() {
+                //Skip
+                private void logContactsPayment() {
         Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.PAYMENT_BROADCASTED));
         metricInputFlag = EventService.EVENT_TX_INPUT_FROM_CONTACTS;
         logAddressInputMetric();
@@ -1073,8 +1074,8 @@ public class SendPresenter extends BasePresenter<SendView> {
                     }
 
                     FeeOptions getFeeOptions() {
-        return dynamicFeeCache.getBtcFeeOptions();
-    }
+                        return dynamicFeeCache.getBtcFeeOptions();
+                    }
 
                     private void setTempLegacyAddressPrivateKey(LegacyAddress legacyAddress, ECKey key) {
                         if (key != null && key.hasPrivKey() && legacyAddress.getAddress().equals(key.toAddress(
@@ -1107,13 +1108,13 @@ public class SendPresenter extends BasePresenter<SendView> {
                     prefsUtil.setValue(PREF_WARN_WATCH_ONLY_SPEND, false);
                 }
 
-    boolean shouldShowAdvancedFeeWarning() {
-        return prefsUtil.getValue(PREF_WARN_ADVANCED_FEE, true);
-    }
+                boolean shouldShowAdvancedFeeWarning() {
+                    return prefsUtil.getValue(PREF_WARN_ADVANCED_FEE, true);
+                }
 
-    void disableAdvancedFeeWarning() {
-        prefsUtil.setValue(PREF_WARN_ADVANCED_FEE, false);
-    }
+                    void disableAdvancedFeeWarning() {
+                        prefsUtil.setValue(PREF_WARN_ADVANCED_FEE, false);
+                    }
 
                     BigInteger getFeePerKbFromPriority(@FeeType.FeePriorityDef int feePriorityTemp) {
                         if (sendModel.feeOptions == null) {
