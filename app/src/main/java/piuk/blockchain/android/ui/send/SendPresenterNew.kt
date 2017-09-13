@@ -5,7 +5,9 @@ import android.text.Editable
 import android.widget.EditText
 import com.fasterxml.jackson.databind.ObjectMapper
 import info.blockchain.api.data.UnspentOutputs
+import info.blockchain.wallet.api.WalletApi
 import info.blockchain.wallet.api.data.FeeOptions
+import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.payment.Payment
@@ -17,11 +19,15 @@ import io.reactivex.functions.Consumer
 import org.bitcoinj.core.ECKey
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.answers.Logging
+import piuk.blockchain.android.data.answers.PaymentSentEvent
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.auth.AuthService
 import piuk.blockchain.android.data.cache.DynamicFeeCache
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.FeeDataManager
+import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -60,7 +66,8 @@ class SendPresenterNew @Inject constructor(
         private val feeDataManager: FeeDataManager,
         private val privateKeyFactory: PrivateKeyFactory,
         private val environmentSettings: EnvironmentSettings,
-        private val sslVerifyUtil: SSLVerifyUtil
+        private val sslVerifyUtil: SSLVerifyUtil,
+        private val transactionListDataManager: TransactionListDataManager
 ) : BasePresenter<SendViewNew>() {
 
     val locale by unsafeLazy { Locale.getDefault() }
@@ -95,127 +102,8 @@ class SendPresenterNew @Inject constructor(
         setCryptoCurrency()
     }
 
-    internal fun onContinueClicked() {
-
-        view?.showProgressDialog(R.string.app_name)
-
-        checkManualAddressInput()
-
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-
-                if (isValidBitcoinTransaction()) {
-                    view.showToast(R.string.ok_cap, ToastCustom.TYPE_OK)
-
-                    if(pendingTransaction.isWatchOnly()) {
-                        //returns to spendFromWatchOnly*BIP38 -> showPaymentReview()
-                        view.showSpendFromWatchOnlyWarning((pendingTransaction.sendingObject.accountObject as LegacyAddress).address)
-                    } else if(pendingTransaction.isWatchOnly() && verifiedSecondPassword != null) {
-                        //Second password already verified
-                        showPaymentReview()
-                    } else {
-                        //Checks if second pw needed then -> onNoSecondPassword()
-                        view.showSecondPasswordDialog()
-                    }
-                }
-            }
-            CryptoCurrencies.ETHER -> {
-
-                if (iValidEtherTransaction()) {
-                    view.showToast(R.string.ok_cap, ToastCustom.TYPE_OK)
-                }
-            }
-        }
-        Timber.d("vos pendingTransaction: " + pendingTransaction.toString())
-
-        view?.dismissProgressDialog()
-    }
-
-    internal fun onNoSecondPassword() {
-        showPaymentReview()
-    }
-
-    internal fun onSecondPasswordValidated(secondPassword: String) {
-        verifiedSecondPassword = secondPassword
-        showPaymentReview()
-    }
-
-    internal fun showPaymentReview() {
-
-        val paymentDetais = getConfirmationDetails()
-
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-                if(paymentDetais.isLargeTransaction) {
-                    view.showLargeTransactionWarning()
-                }
-            }
-            CryptoCurrencies.ETHER -> {
-                //no-op
-            }
-        }
-
-        view.showPaymentDetails(getConfirmationDetails(), null)
-    }
-
-    internal fun checkManualAddressInput() {
-        val address = view.getReceivingAddress()
-
-        address?.let {
-            //Input analytics
-            checkClipboardPaste(address)
-
-            if (FormatsUtil.isValidBitcoinAddress(address)) {
-                pendingTransaction.receivingAddress = address
-            }
-        }
-    }
-
-    private fun getConfirmationDetails(): PaymentConfirmationDetails {
-        val pendingTransaction = pendingTransaction
-
-        val details = PaymentConfirmationDetails()
-
-        details.fromLabel = pendingTransaction.sendingObject.label
-        details.toLabel = pendingTransaction.getDisplayableReceivingLabel()
-        details.btcAmount = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntAmount.toLong(), getDefaultDecimalSeparator())
-        details.btcFee = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntFee.toLong(), getDefaultDecimalSeparator())
-        details.btcSuggestedFee = currencyHelper.getTextFromSatoshis(absoluteSuggestedFee.toLong(), getDefaultDecimalSeparator())
-        details.btcUnit = currencyHelper.btcUnit
-        details.fiatUnit = currencyHelper.fiatUnit
-        details.btcTotal = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee).toLong(), getDefaultDecimalSeparator())
-        details.fiatFee = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
-                .format(currencyHelper.lastPrice * (pendingTransaction.bigIntFee.toDouble() / 1e8))
-        details.fiatAmount = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
-                .format(currencyHelper.lastPrice * (pendingTransaction.bigIntAmount.toDouble() / 1e8))
-
-        val totalFiat = pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee)
-        details.fiatTotal = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
-                .format(currencyHelper.lastPrice * (totalFiat.toDouble() / 1e8))
-
-        details.fiatSymbol = exchangeRateFactory.getSymbol(currencyHelper.fiatUnit)
-        details.isLargeTransaction = isLargeTransaction()
-
-        //TODO unused BTC specific
-//        details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.consumedAmount.compareTo(BigInteger.ZERO) == 1
-
-        return details
-    }
-
-    internal fun resetAccountList() {
-        val list = getAddressList()
-        if (list.size == 1) {
-            view.hideReceivingDropdown()
-            view.hideSendingFieldDropdown()
-            setReceiveHint(list.size)
-        } else {
-            view.showSendingFieldDropdown()
-            view.showReceivingDropdown()
-            setReceiveHint(list.size)
-        }
-    }
-
     fun onBitcoinChosen() {
+        compositeDisposable.clear()
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         updateTicker()
         view.setTabSelection(0)
@@ -234,6 +122,7 @@ class SendPresenterNew @Inject constructor(
     }
 
     fun onEtherChosen() {
+        compositeDisposable.clear()
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         updateTicker()
         view.setTabSelection(1)
@@ -251,8 +140,302 @@ class SendPresenterNew @Inject constructor(
         view.hideFeePriority()
     }
 
+    internal fun onContinueClicked() {
+
+        view?.showProgressDialog(R.string.app_name)
+
+        checkManualAddressInput()
+
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> {
+
+                if (isValidBitcoinTransaction()) {
+
+                    if(pendingTransaction.isWatchOnly()) {
+                        //returns to spendFromWatchOnly*BIP38 -> showPaymentReview()
+                        view.showSpendFromWatchOnlyWarning((pendingTransaction.sendingObject.accountObject as LegacyAddress).address)
+                    } else if(pendingTransaction.isWatchOnly() && verifiedSecondPassword != null) {
+                        //Second password already verified
+                        showPaymentReview()
+                    } else {
+                        //Checks if second pw needed then -> onNoSecondPassword()
+                        view.showSecondPasswordDialog()
+                    }
+                }
+            }
+            CryptoCurrencies.ETHER -> {
+
+                if (iValidEtherTransaction()) {
+                    showPaymentReview()
+                }
+            }
+        }
+
+        view?.dismissProgressDialog()
+    }
+
+    /**
+     * Executes transaction
+     */
+    internal fun submitPayment() {
+        when(currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> submitBitcoinTransaction()
+            CryptoCurrencies.ETHER -> submitEthTransaction()
+        }
+    }
+
+    private fun submitBitcoinTransaction() {
+
+        view.showProgressDialog(R.string.app_name)
+
+        val changeAddress: String
+        val keys = ArrayList<ECKey>()
+        try {
+            if (pendingTransaction.isHD()) {
+                val account = pendingTransaction.sendingObject.accountObject as Account
+                changeAddress = payloadDataManager.getNextChangeAddress(account).blockingFirst()
+
+                if (payloadDataManager.isDoubleEncrypted) {
+                    payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+                }
+                keys.addAll(payloadDataManager.getHDKeysForSigning(account, pendingTransaction.unspentOutputBundle))
+
+            } else {
+                val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+                changeAddress = legacyAddress.address
+                keys.add(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)!!)
+            }
+
+        } catch (e: Exception) {
+            Timber.e(e)
+            view.dismissProgressDialog()
+            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
+            return
+        }
+
+        compositeDisposable.add(
+                sendDataManager.submitPayment(
+                        pendingTransaction.unspentOutputBundle,
+                        keys,
+                        pendingTransaction.receivingAddress,
+                        changeAddress,
+                        pendingTransaction.bigIntFee,
+                        pendingTransaction.bigIntAmount)
+                        .doAfterTerminate { view.dismissProgressDialog() }
+                        .subscribe(
+                                { hash ->
+                                    Logging.logCustom(PaymentSentEvent()
+                                            .putSuccess(true)
+                                            .putAmountForRange(pendingTransaction.bigIntAmount))
+
+                                    clearBtcUnspentResponseCache()
+                                    view.dismissConfirmationDialog()
+                                    handleSuccessfulBtcPayment(hash)
+                                }) { throwable ->
+                            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
+
+                            Logging.logCustom(PaymentSentEvent()
+                                    .putSuccess(false)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount))
+                        })
+    }
+
+    private fun submitEthTransaction() {
+
+    }
+
+    private fun clearBtcUnspentResponseCache() {
+        if (pendingTransaction.isHD()) {
+            val account = pendingTransaction.sendingObject.accountObject as Account
+            unspentApiResponses.remove(account.xpub)
+        } else {
+            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+            unspentApiResponses.remove(legacyAddress.address)
+        }
+    }
+
+    private fun handleSuccessfulBtcPayment(hash: String) {
+        insertPlaceHolderTransaction(hash, pendingTransaction)
+
+        if (pendingTransaction.isHD()) {
+            val account = pendingTransaction.sendingObject.accountObject as Account
+            payloadDataManager.incrementChangeAddress(account)
+            payloadDataManager.incrementReceiveAddress(account)
+            updateInternalBalances()
+        }
+        if (view != null) {
+            view.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
+        }
+        pendingTransaction.clear()
+        unspentApiResponses.clear()
+
+        logAddressInputMetric()
+    }
+
+    private fun logAddressInputMetric() {
+        val handler = EventService(prefsUtil, AuthService(WalletApi()))
+        if (metricInputFlag != null) handler.logAddressInputEvent(metricInputFlag)
+    }
+
+    /**
+     * Update balance immediately after spend - until refresh from server
+     */
+    private fun updateInternalBalances() {
+        try {
+            val totalSent = pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee)
+            if (pendingTransaction.isHD()) {
+                val account = pendingTransaction.sendingObject.accountObject as Account
+                payloadDataManager.subtractAmountFromAddressBalance(account.xpub, totalSent.toLong())
+            } else {
+                val address = pendingTransaction.sendingObject.accountObject as LegacyAddress
+                payloadDataManager.subtractAmountFromAddressBalance(address.address, totalSent.toLong())
+            }
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+
+    }
+
+    /**
+     * After sending btc we create a "placeholder" tx until websocket handler refreshes list
+     */
+    private fun insertPlaceHolderTransaction(hash: String, pendingTransaction: PendingTransaction) {
+        val inputs = HashMap<String, BigInteger>()
+        pendingTransaction.sendingObject.label?.let {
+            inputs.put(pendingTransaction.sendingObject.label!!, pendingTransaction.bigIntAmount)
+        }
+
+        val outputs = HashMap<String, BigInteger>()
+        outputs.put(pendingTransaction.displayableReceivingLabel, pendingTransaction.bigIntAmount)
+
+        val tx = TransactionSummary()
+        tx.direction = TransactionSummary.Direction.SENT
+        tx.time = System.currentTimeMillis() / 1000
+        tx.total = pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee)
+        tx.hash = hash
+        tx.fee = pendingTransaction.bigIntFee
+        tx.inputsMap = inputs
+        tx.outputsMap = outputs
+        tx.isPending = true
+        // STOPSHIP: 24/08/2017
+//      transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
+    }
+
+    internal fun onNoSecondPassword() {
+        showPaymentReview()
+    }
+
+    internal fun onSecondPasswordValidated(secondPassword: String) {
+        verifiedSecondPassword = secondPassword
+        showPaymentReview()
+    }
+
+    internal fun showPaymentReview() {
+
+        val paymentDetais = getConfirmationDetails()
+        var allowFeeChange = true
+
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> {
+                if(paymentDetais.isLargeTransaction) {
+                    view.showLargeTransactionWarning()
+                }
+            }
+            CryptoCurrencies.ETHER -> {
+                allowFeeChange = false
+            }
+        }
+
+        view.showPaymentDetails(getConfirmationDetails(), null, allowFeeChange)
+    }
+
+    internal fun checkManualAddressInput() {
+        val address = view.getReceivingAddress()
+        address?.let {
+            //Input analytics
+            checkClipboardPaste(address)
+
+            //Only if valid address so we don't override with a label
+            when(currencyState.cryptoCurrency) {
+                CryptoCurrencies.BTC -> if (FormatsUtil.isValidBitcoinAddress(address)) pendingTransaction.receivingAddress = address
+                CryptoCurrencies.ETHER -> if (FormatsUtil.isValidEthereumAddress(address)) {
+                    pendingTransaction.receivingAddress = address
+                }
+            }
+        }
+    }
+
+    private fun getConfirmationDetails(): PaymentConfirmationDetails {
+        val pendingTransaction = pendingTransaction
+
+        val details = PaymentConfirmationDetails()
+
+        details.fromLabel = pendingTransaction.sendingObject.label
+        details.toLabel = pendingTransaction.getDisplayableReceivingLabel()
+
+        details.cryptoUnit = currencyHelper.cryptoUnit
+        details.fiatUnit = currencyHelper.fiatUnit
+        details.fiatSymbol = exchangeRateFactory.getSymbol(currencyHelper.fiatUnit)
+
+        when(currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> {
+                details.isLargeTransaction = isLargeTransaction()
+                details.btcSuggestedFee = currencyHelper.getTextFromSatoshis(absoluteSuggestedFee.toLong(), getDefaultDecimalSeparator())
+//                details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.consumedAmount.compareTo(BigInteger.ZERO) == 1 //Unused
+
+                details.cryptoTotal = currencyHelper.getTextFromSatoshis(pendingTransaction.total.toLong(), getDefaultDecimalSeparator())
+                details.cryptoAmount = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntAmount.toLong(), getDefaultDecimalSeparator())
+                details.cryptoFee = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntFee.toLong(), getDefaultDecimalSeparator())
+
+                details.fiatFee = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
+                        .format(currencyHelper.lastPrice * (pendingTransaction.bigIntFee.toDouble() / 1e8))
+                details.fiatAmount = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
+                        .format(currencyHelper.lastPrice * (pendingTransaction.bigIntAmount.toDouble() / 1e8))
+                details.fiatTotal = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
+                        .format(currencyHelper.lastPrice * (pendingTransaction.total.toDouble() / 1e8))
+            }
+            CryptoCurrencies.ETHER -> {
+
+                val ethAmount = Convert.fromWei(pendingTransaction.bigIntAmount.toString(), Convert.Unit.ETHER)
+                val ethFee = Convert.fromWei(pendingTransaction.bigIntFee.toString(), Convert.Unit.ETHER)
+                val ethTotal = ethAmount.add(ethFee)
+
+                details.cryptoAmount = ethAmount.toString()
+                details.cryptoFee = ethFee.toString()
+                details.cryptoTotal = ethTotal.toString()
+
+                details.fiatFee = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
+                        .format(currencyHelper.lastPrice * (ethFee.toDouble()))
+                details.fiatAmount = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
+                        .format(currencyHelper.lastPrice * (ethAmount.toDouble()))
+                details.fiatTotal = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
+                        .format(currencyHelper.lastPrice * (ethTotal.toDouble()))
+            }
+        }
+
+        return details
+    }
+
+    internal fun resetAccountList() {
+        val list = getAddressList()
+        if (list.size == 1) {
+            view.hideReceivingDropdown()
+            view.hideSendingFieldDropdown()
+            setReceiveHint(list.size)
+        } else {
+            view.showSendingFieldDropdown()
+            view.showReceivingDropdown()
+            setReceiveHint(list.size)
+        }
+    }
+
     internal fun clearReceivingAddress() {
         view.updateReceivingAddress("")
+    }
+
+    internal fun clearReceivingObject() {
+        pendingTransaction.receivingObject = null
+        metricInputFlag = null
     }
 
     internal fun clearCryptoAmount() {
@@ -440,35 +623,6 @@ class SendPresenterNew @Inject constructor(
         }
     }
 
-    private fun stripSeparator(text: String): String {
-        return text.trim { it <= ' ' }
-                .replace(" ", "")
-                .replace(getDefaultDecimalSeparator(), ".")
-    }
-
-    /**
-     * Returns amount of satoshis from btc amount. This could be btc, mbtc or bits.
-     *
-     * @return satoshis
-     */
-    private fun getSatoshisFromText(text: String?): BigInteger {
-        if (text == null || text.isEmpty()) return BigInteger.ZERO
-
-        val amountToSend = stripSeparator(text)
-
-        var amount: Double
-        try {
-            amount = java.lang.Double.parseDouble(amountToSend)
-        } catch (nfe: NumberFormatException) {
-            amount = 0.0
-        }
-
-        val amountL = BigDecimal.valueOf(monetaryUtil.getUndenominatedAmount(amount))
-                .multiply(BigDecimal.valueOf(100000000))
-                .toLong()
-        return BigInteger.valueOf(amountL)
-    }
-
     @Throws(UnsupportedEncodingException::class)
     private fun getSuggestedAbsoluteFee(coins: UnspentOutputs, amountToSend: BigInteger, feePerKb: BigInteger): BigInteger {
         val spendableCoins = sendDataManager.getSpendableCoins(coins, amountToSend, feePerKb)
@@ -549,7 +703,7 @@ class SendPresenterNew @Inject constructor(
                 calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
             }
             CryptoCurrencies.ETHER -> {
-                getEthAccountResponse(spendAll)
+                getEthAccountResponse(spendAll, amountToSendText)
             }
         }
     }
@@ -563,7 +717,7 @@ class SendPresenterNew @Inject constructor(
                 .compose(RxUtil.applySchedulersToObservable<UnspentOutputs>())
                 .subscribe(
                         { coins ->
-                            val amountToSend = getSatoshisFromText(amountToSendText)
+                            val amountToSend = currencyHelper.getSatoshisFromText(amountToSendText, getDefaultDecimalSeparator())
 
                             // Future use. There might be some unconfirmed funds. Not displaying a warning currently (to line up with iOS and Web wallet)
                             if (coins.getNotice() != null)
@@ -611,7 +765,7 @@ class SendPresenterNew @Inject constructor(
         pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee()
     }
 
-    internal fun getEthAccountResponse(spendAll: Boolean) {
+    internal fun getEthAccountResponse(spendAll: Boolean, amountToSendText: String?) {
 
         view.showMaxAvailable()
 
@@ -620,21 +774,23 @@ class SendPresenterNew @Inject constructor(
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnError { view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR) }
                     .subscribe(Consumer {
-                        calculateUnspentEth(it, spendAll)
+                        calculateUnspentEth(it, spendAll, amountToSendText)
                     })
         } else {
             val combinedEthModel = ethDataManager.getEthAddress()
             combinedEthModel?.let {
-                calculateUnspentEth(combinedEthModel, spendAll)
+                calculateUnspentEth(combinedEthModel, spendAll, amountToSendText)
             }
         }
     }
 
-    internal fun calculateUnspentEth(combinedEthModel: CombinedEthModel, spendAll: Boolean) {
+    internal fun calculateUnspentEth(combinedEthModel: CombinedEthModel, spendAll: Boolean, amountToSendText: String?) {
 
         val gwei = BigDecimal.valueOf(feeOptions.gasLimit * feeOptions.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
+
         updateFee(wei.toBigInteger())
+        pendingTransaction.bigIntFee = wei.toBigInteger()
 
         val addressResponse = combinedEthModel.getAddressResponse()
         maxAvailable = addressResponse!!.balance.minus(wei.toBigInteger())
@@ -642,6 +798,9 @@ class SendPresenterNew @Inject constructor(
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
         if (spendAll) {
             view?.updateCryptoAmount(availableEth.toString())
+            pendingTransaction.bigIntAmount = availableEth.toBigInteger()
+        } else {
+            pendingTransaction.bigIntAmount = currencyHelper.getWeiFromText(amountToSendText, getDefaultDecimalSeparator())
         }
 
         //Format for display
@@ -983,7 +1142,7 @@ class SendPresenterNew @Inject constructor(
     private fun isLargeTransaction(): Boolean {
         val valueString = monetaryUtil.getFiatFormat("USD")
                 .format(exchangeRateFactory.getLastBtcPrice("USD") * absoluteSuggestedFee.toDouble() / 1e8)
-        val usdValue = java.lang.Double.parseDouble(stripSeparator(valueString))
+        val usdValue = java.lang.Double.parseDouble(currencyHelper.stripSeparator(valueString, getDefaultDecimalSeparator()))
         val txSize = sendDataManager.estimateSize(pendingTransaction.unspentOutputBundle.getSpendableOutputs().size, 2)//assume change
         val relativeFee = absoluteSuggestedFee.toDouble() / pendingTransaction.bigIntAmount.toDouble() * 100.0
 

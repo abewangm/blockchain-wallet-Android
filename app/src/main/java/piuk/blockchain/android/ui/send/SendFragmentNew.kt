@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
@@ -26,7 +27,6 @@ import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.alert_watch_only_spend.view.*
 import kotlinx.android.synthetic.main.fragment_send.*
-import kotlinx.android.synthetic.main.include_amount_row.*
 import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
@@ -51,6 +51,7 @@ import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.zxing.CaptureActivity
+import piuk.blockchain.android.util.AppRate
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.ViewUtils
@@ -72,6 +73,17 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     private var progressDialog: MaterialProgressDialog? = null
     private var confirmPaymentDialog: ConfirmPaymentDialog? = null
+    private var transactionSuccessDialog: AlertDialog? = null
+    private var listener: OnSendFragmentInteractionListener? = null
+
+    private val dialogHandler = Handler()
+    private val dialogRunnable = Runnable {
+        transactionSuccessDialog?.apply {
+            if(isShowing) {
+                dismiss()
+            }
+        }
+    }
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -107,9 +119,9 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         setupFiatTextField()
         setupFeesView()
 
-        buttonSend.setOnClickListener {
+        buttonContinue.setOnClickListener {
             if (ConnectivityStatus.hasConnectivity(activity)) {
-                onSendClicked()
+                presenter.onContinueClicked()
             } else {
                 showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
             }
@@ -288,12 +300,12 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         //Avoid OntouchListener - causes paste issues on some Samsung devices
         toContainer.toAddressEditTextView.setOnClickListener({
             toContainer.toAddressEditTextView.setText("")
-            presenter.clearReceivingAddress()
+            presenter.clearReceivingObject()
         })
         //LongClick listener required to clear receive address in memory when user long clicks to paste
         toContainer.toAddressEditTextView.setOnLongClickListener({ v ->
             toContainer.toAddressEditTextView.setText("")
-            presenter.clearReceivingAddress()
+            presenter.clearReceivingObject()
             v.performClick()
             false
         })
@@ -303,7 +315,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         RxTextView.textChanges(toContainer.toAddressEditTextView)
                 .doOnNext {
                     if (activity.currentFocus === toContainer.toAddressEditTextView) {
-                        presenter.clearReceivingAddress()
+                        presenter.clearReceivingObject()
                     }
                 }
                 .subscribe(IgnorableDefaultObserver())
@@ -443,7 +455,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     fun onChangeFeeClicked() {
     }
 
-    fun onSendClicked() {
+    fun onContinueClicked() {
         if (ConnectivityStatus.hasConnectivity(activity)) {
             presenter.onContinueClicked()
         } else {
@@ -451,7 +463,11 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
     }
 
-    override fun getReceivingAddress() = amountContainer.toAddressEditTextView?.getText().toString()
+    fun onSendClicked() {
+        presenter.submitPayment()
+    }
+
+    override fun getReceivingAddress() = toContainer.toAddressEditTextView.editableText.toString()
 
     fun onBackPressed() {
         if (isKeyboardVisible()) {
@@ -478,18 +494,22 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     override fun showSendingFieldDropdown() {
         fromContainer.fromArrowImage.visible()
+        fromContainer.fromAddressTextView.isClickable = true
     }
 
     override fun hideSendingFieldDropdown() {
         fromContainer.fromArrowImage.gone()
+        fromContainer.fromAddressTextView.isClickable = false
     }
 
     override fun showReceivingDropdown() {
         toContainer.toArrow.visible()
+        toContainer.toAddressEditTextView.isClickable = true
     }
 
     override fun hideReceivingDropdown() {
         toContainer.toArrow.gone()
+        toContainer.toAddressEditTextView.isClickable = false
     }
 
     override fun updateReceivingAddress(address: String) {
@@ -505,7 +525,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 when (position) {
                     0, 1 -> {
-                        buttonSend.setEnabled(true)
+                        buttonContinue.setEnabled(true)
                         textviewFeeAbsolute.setVisibility(View.VISIBLE)
                         textviewFeeTime.setVisibility(View.VISIBLE)
                         textInputLayout.setVisibility(View.GONE)
@@ -730,11 +750,9 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         })
     }
 
-    override fun showPaymentDetails(details: PaymentConfirmationDetails, note: String?) {
-        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, note, true)
-        confirmPaymentDialog?.apply {
-            show(fragmentManager, ConfirmPaymentDialog::class.java.simpleName)
-        }
+    override fun showPaymentDetails(details: PaymentConfirmationDetails, note: String?, allowFeeChange: Boolean) {
+        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(details, note, allowFeeChange)
+        confirmPaymentDialog?.show(fragmentManager, ConfirmPaymentDialog::class.java.simpleName)
     }
 
     override fun showLargeTransactionWarning() {
@@ -746,6 +764,60 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
         }, 500L)
+    }
+
+    override fun dismissConfirmationDialog() {
+        confirmPaymentDialog?.dismiss()
+    }
+
+    interface OnSendFragmentInteractionListener {
+        fun onSendFragmentClose()
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context is OnSendFragmentInteractionListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context!!.toString() + " must implement OnSendFragmentInteractionListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
+
+    override fun showTransactionSuccess(hash: String,
+                                          transactionValue: Long) {
+        playAudio()
+
+        val appRate = AppRate(activity)
+                .setMinTransactionsUntilPrompt(3)
+                .incrementTransactionCount()
+
+        val dialogBuilder = AlertDialog.Builder(activity)
+        val dialogView = View.inflate(activity, R.layout.modal_transaction_success, null)
+        transactionSuccessDialog = dialogBuilder.setView(dialogView)
+                .setPositiveButton(getString(R.string.done), null)
+                .create()
+
+        transactionSuccessDialog?.apply {
+            setTitle(R.string.transaction_submitted)
+
+            // If should show app rate, success dialog shows first and launches
+            // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
+            // happen if the user chooses to rate the app - they'll return to the main page.
+            // Won't show if contact transaction, as other dialog takes preference
+            if (appRate.shouldShowDialog()) {
+                val ratingDialog = appRate.rateDialog
+                ratingDialog.setOnDismissListener { d -> finishPage(true) }
+                show()
+                setOnDismissListener({ d -> ratingDialog.show() })
+            }
+        }
+
+        dialogHandler.postDelayed(dialogRunnable, (5 * 1000).toLong())
     }
 
     companion object {

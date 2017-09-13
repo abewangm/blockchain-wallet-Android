@@ -22,10 +22,14 @@ public class PendingTransaction {
     public int addressToReceiveIndex;
 
     @JsonIgnore
+    public BigInteger getTotal() {
+        return bigIntAmount.add(bigIntFee);
+    }
+
+    @JsonIgnore
     public boolean isHD() {
         return (sendingObject.getAccountObject() instanceof Account);
     }
-
 
     @JsonIgnore
     public boolean isWatchOnly() {
@@ -49,6 +53,17 @@ public class PendingTransaction {
         } else {
             return receivingAddress;
         }
+    }
+
+    @JsonIgnore
+    public void clear() {
+        unspentOutputBundle = null;
+        sendingObject = null;
+        receivingAddress = null;
+        note = null;
+        receivingAddress = null;
+        bigIntFee = null;
+        bigIntAmount = null;
     }
 
     @Override

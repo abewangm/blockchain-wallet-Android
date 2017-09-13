@@ -305,12 +305,12 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         String btcUnit = monetaryUtil.getBtcUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
         double exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit);
 
-        details.btcAmount = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.longValue());
-        details.btcFee = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntFee.longValue());
+        details.cryptoAmount = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.longValue());
+        details.cryptoFee = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntFee.longValue());
         details.btcSuggestedFee = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntFee.longValue());
-        details.btcUnit = btcUnit;
+        details.cryptoUnit = btcUnit;
         details.fiatUnit = fiatUnit;
-        details.btcTotal = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee).longValue());
+        details.cryptoTotal = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee).longValue());
 
         details.fiatFee = monetaryUtil.getFiatFormat(fiatUnit)
                 .format(exchangeRate * (pendingTransaction.bigIntFee.doubleValue() / 1e8));

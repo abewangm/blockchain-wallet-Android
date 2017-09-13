@@ -656,12 +656,12 @@ public class SendPresenter extends BasePresenter<SendView> {
                         } else {
                             details.toLabel = pendingTransaction.receivingAddress;
                         }
-                        details.btcAmount = getTextFromSatoshis(pendingTransaction.bigIntAmount.longValue());
-                        details.btcFee = getTextFromSatoshis(pendingTransaction.bigIntFee.longValue());
+                        details.cryptoAmount = getTextFromSatoshis(pendingTransaction.bigIntAmount.longValue());
+                        details.cryptoFee = getTextFromSatoshis(pendingTransaction.bigIntFee.longValue());
                         details.btcSuggestedFee = getTextFromSatoshis(sendModel.absoluteSuggestedFee.longValue());
-                        details.btcUnit = sendModel.btcUnit;
+                        details.cryptoUnit = sendModel.btcUnit;
                         details.fiatUnit = sendModel.fiatUnit;
-                        details.btcTotal = getTextFromSatoshis(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee).longValue());
+                        details.cryptoTotal = getTextFromSatoshis(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee).longValue());
 
                         details.fiatFee = (monetaryUtil.getFiatFormat(sendModel.fiatUnit)
                                 .format(sendModel.exchangeRate * (pendingTransaction.bigIntFee.doubleValue() / 1e8)));
@@ -909,68 +909,69 @@ public class SendPresenter extends BasePresenter<SendView> {
         logAddressInputMetric();
     }
 
-    /**
-     * This is a precautionary measure in case the presenter isn't cleared from the app's lifecycle.
-     */
-    private void resetPresenterState() {
-        sendModel = new SendModel();
-        sendModel.pendingTransaction = new PendingTransaction();
-        sendModel.unspentApiResponses = new HashMap<>();
-        fctxId = null;
-        contactMdid = null;
-    }
+                /**
+                 * This is a precautionary measure in case the presenter isn't cleared from the app's lifecycle.
+                 */
+                private void resetPresenterState() {
+                    sendModel = new SendModel();
+                    sendModel.pendingTransaction = new PendingTransaction();
+                    sendModel.unspentApiResponses = new HashMap<>();
+                    fctxId = null;
+                    contactMdid = null;
+                }
 
-    private void insertPlaceHolderTransaction(String hash, PendingTransaction pendingTransaction) {
-        // After sending btc we create a "placeholder" tx until websocket handler refreshes list
-        HashMap<String, BigInteger> inputs = new HashMap<>();
-        inputs.put(pendingTransaction.sendingObject.getLabel(), pendingTransaction.bigIntAmount);
-        HashMap<String, BigInteger> outputs = new HashMap<>();
+                private void insertPlaceHolderTransaction(String hash, PendingTransaction pendingTransaction) {
+                    // After sending btc we create a "placeholder" tx until websocket handler refreshes list
+                    HashMap<String, BigInteger> inputs = new HashMap<>();
+                    inputs.put(pendingTransaction.sendingObject.getLabel(), pendingTransaction.bigIntAmount);
+                    HashMap<String, BigInteger> outputs = new HashMap<>();
 
-        String outLabel = pendingTransaction.receivingAddress;
-        if (pendingTransaction.receivingObject != null && pendingTransaction.receivingObject.getLabel() != null) {
-            outLabel = pendingTransaction.receivingObject.getLabel();
-        }
-        outputs.put(outLabel, pendingTransaction.bigIntAmount);
+                    String outLabel = pendingTransaction.receivingAddress;
+                    if (pendingTransaction.receivingObject != null && pendingTransaction.receivingObject.getLabel() != null) {
+                        outLabel = pendingTransaction.receivingObject.getLabel();
+                    }
+                    outputs.put(outLabel, pendingTransaction.bigIntAmount);
 
-        TransactionSummary tx = new TransactionSummary();
-        tx.setDirection(Direction.SENT);
-        tx.setTime(System.currentTimeMillis() / 1000);
-        tx.setTotal(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee));
-        tx.setHash(hash);
-        tx.setFee(pendingTransaction.bigIntFee);
-        tx.setInputsMap(inputs);
-        tx.setOutputsMap(outputs);
-        tx.setPending(true);
-// STOPSHIP: 24/08/2017
-//        transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
-    }
+                    TransactionSummary tx = new TransactionSummary();
+                    tx.setDirection(Direction.SENT);
+                    tx.setTime(System.currentTimeMillis() / 1000);
+                    tx.setTotal(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee));
+                    tx.setHash(hash);
+                    tx.setFee(pendingTransaction.bigIntFee);
+                    tx.setInputsMap(inputs);
+                    tx.setOutputsMap(outputs);
+                    tx.setPending(true);
+            // STOPSHIP: 24/08/2017
+            //        transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
+                }
 
-    void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
-        getCompositeDisposable().add(
-                // Get contacts
-                contactsDataManager.getContactList()
-                        // Find contact by MDID
-                        .filter(ContactsPredicates.filterByMdid(mdid))
-                        .singleOrError()
-                        .flatMapCompletable(transaction -> {
-                            // Broadcast payment to shared metadata service
-                            return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
-                                    // Show successfully broadcast
-                                    .doOnComplete(() -> getView().showBroadcastSuccessDialog())
-                                    // Log event
-                                    .doOnComplete(this::logContactsPayment)
-                                    // Show retry dialog if broadcast failed
-                                    .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
-                        })
-                        .doAfterTerminate(() -> getView().dismissProgressDialog())
-                        .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.contacts_broadcasting_payment))
-                        .subscribe(
-                                () -> {
-                                    // No-op
-                                }, throwable -> {
-                                    // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
-                                }));
-    }
+                //Skip
+                void broadcastPaymentSuccess(String mdid, String txHash, String facilitatedTxId, long transactionValue) {
+                    getCompositeDisposable().add(
+                            // Get contacts
+                            contactsDataManager.getContactList()
+                                    // Find contact by MDID
+                                    .filter(ContactsPredicates.filterByMdid(mdid))
+                                    .singleOrError()
+                                    .flatMapCompletable(transaction -> {
+                                        // Broadcast payment to shared metadata service
+                                        return contactsDataManager.sendPaymentBroadcasted(mdid, txHash, facilitatedTxId)
+                                                // Show successfully broadcast
+                                                .doOnComplete(() -> getView().showBroadcastSuccessDialog())
+                                                // Log event
+                                                .doOnComplete(this::logContactsPayment)
+                                                // Show retry dialog if broadcast failed
+                                                .doOnError(throwable -> getView().showBroadcastFailedDialog(mdid, txHash, facilitatedTxId, transactionValue));
+                                    })
+                                    .doAfterTerminate(() -> getView().dismissProgressDialog())
+                                    .doOnSubscribe(disposable -> getView().showProgressDialog(R.string.contacts_broadcasting_payment))
+                                    .subscribe(
+                                            () -> {
+                                                // No-op
+                                            }, throwable -> {
+                                                // Not sure if it's worth notifying people at this point? Dialogs are advisory anyway.
+                                            }));
+                }
 
     private void logContactsPayment() {
         Logging.INSTANCE.logCustom(new ContactsEvent(ContactEventType.PAYMENT_BROADCASTED));
@@ -978,10 +979,10 @@ public class SendPresenter extends BasePresenter<SendView> {
         logAddressInputMetric();
     }
 
-    private void logAddressInputMetric() {
-        EventService handler = new EventService(prefsUtil, new AuthService(new WalletApi()));
-        if (metricInputFlag != null) handler.logAddressInputEvent(metricInputFlag);
-    }
+                private void logAddressInputMetric() {
+                    EventService handler = new EventService(prefsUtil, new AuthService(new WalletApi()));
+                    if (metricInputFlag != null) handler.logAddressInputEvent(metricInputFlag);
+                }
 
                 private void checkClipboardPaste(String address) {
                     String contents = getView().getClipboardContents();
@@ -990,33 +991,33 @@ public class SendPresenter extends BasePresenter<SendView> {
                     }
                 }
 
-    private void clearUnspentResponseCache() {
-        if (sendModel.pendingTransaction.isHD()) {
-            Account account = ((Account) sendModel.pendingTransaction.sendingObject.getAccountObject());
-            sendModel.unspentApiResponses.remove(account.getXpub());
-        } else {
-            LegacyAddress legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject());
-            sendModel.unspentApiResponses.remove(legacyAddress.getAddress());
-        }
-    }
+                private void clearUnspentResponseCache() {
+                    if (sendModel.pendingTransaction.isHD()) {
+                        Account account = ((Account) sendModel.pendingTransaction.sendingObject.getAccountObject());
+                        sendModel.unspentApiResponses.remove(account.getXpub());
+                    } else {
+                        LegacyAddress legacyAddress = ((LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject());
+                        sendModel.unspentApiResponses.remove(legacyAddress.getAddress());
+                    }
+                }
 
-    /**
-     * Update balance immediately after spend - until refresh from server
-     */
-    private void updateInternalBalances() {
-        try {
-            BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
-            if (sendModel.pendingTransaction.isHD()) {
-                Account account = (Account) sendModel.pendingTransaction.sendingObject.getAccountObject();
-                payloadManager.subtractAmountFromAddressBalance(account.getXpub(), totalSent);
-            } else {
-                LegacyAddress address = (LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject();
-                payloadManager.subtractAmountFromAddressBalance(address.getAddress(), totalSent);
-            }
-        } catch (Exception e) {
-            Timber.e(e);
-        }
-    }
+                /**
+                 * Update balance immediately after spend - until refresh from server
+                 */
+                private void updateInternalBalances() {
+                    try {
+                        BigInteger totalSent = sendModel.pendingTransaction.bigIntAmount.add(sendModel.pendingTransaction.bigIntFee);
+                        if (sendModel.pendingTransaction.isHD()) {
+                            Account account = (Account) sendModel.pendingTransaction.sendingObject.getAccountObject();
+                            payloadManager.subtractAmountFromAddressBalance(account.getXpub(), totalSent);
+                        } else {
+                            LegacyAddress address = (LegacyAddress) sendModel.pendingTransaction.sendingObject.getAccountObject();
+                            payloadManager.subtractAmountFromAddressBalance(address.getAddress(), totalSent);
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e);
+                    }
+                }
 
                     void handleScannedDataForWatchOnlySpend(String scanData) {
                         try {

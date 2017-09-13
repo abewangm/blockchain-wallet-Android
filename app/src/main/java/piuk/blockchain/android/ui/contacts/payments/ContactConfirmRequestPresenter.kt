@@ -81,7 +81,7 @@ class ContactConfirmRequestPresenter @Inject internal constructor(
                     view.onRequestSuccessful(
                             paymentRequestType ?: throw IllegalStateException("Request type is null"),
                             recipient!!.name,
-                            "${confirmationDetails!!.btcAmount} ${confirmationDetails!!.btcUnit}"
+                            "${confirmationDetails!!.cryptoAmount} ${confirmationDetails!!.cryptoUnit}"
                     )
                 },
                 {
@@ -97,7 +97,7 @@ class ContactConfirmRequestPresenter @Inject internal constructor(
             paymentRequestType: PaymentRequestType
     ) {
         view.updateAccountName(confirmationDetails.fromLabel)
-        view.updateTotalBtc("${confirmationDetails.btcAmount} ${confirmationDetails.btcUnit}")
+        view.updateTotalBtc("${confirmationDetails.cryptoAmount} ${confirmationDetails.cryptoUnit}")
         view.updateTotalFiat("${confirmationDetails.fiatSymbol}${confirmationDetails.fiatAmount}")
         view.updatePaymentType(paymentRequestType)
     }

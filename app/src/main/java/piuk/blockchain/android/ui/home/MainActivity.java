@@ -92,6 +92,7 @@ import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTR
 public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> implements
         BalanceFragment.OnFragmentInteractionListener,
         MainView,
+        SendFragmentNew.OnSendFragmentInteractionListener,
         ReceiveFragment.OnReceiveFragmentInteractionListener,
         ContactConfirmRequestFragment.FragmentInteractionListener,
         FrontendJavascript<String>,
@@ -865,5 +866,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void onSendFragmentClose() {
+        binding.bottomNavigation.setCurrentItem(1);
     }
 }

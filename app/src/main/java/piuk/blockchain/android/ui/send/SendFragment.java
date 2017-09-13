@@ -117,20 +117,20 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 private OnSendFragmentInteractionListener listener;//skip
     private MaterialProgressDialog progressDialog;
                 private AlertDialog largeTxWarning;//skip
-    private ConfirmPaymentDialog confirmPaymentDialog;
+                private ConfirmPaymentDialog confirmPaymentDialog;
                 private NumericKeyboard customKeypad;
 
                 private int selectedAccountPosition = -1;
                 private long backPressed;
-    private final Handler dialogHandler = new Handler();
-    private final Runnable dialogRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (transactionSuccessDialog != null && transactionSuccessDialog.isShowing()) {
-                transactionSuccessDialog.dismiss();
-            }
-        }
-    };
+                private final Handler dialogHandler = new Handler();
+                private final Runnable dialogRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (transactionSuccessDialog != null && transactionSuccessDialog.isShowing()) {
+                            transactionSuccessDialog.dismiss();
+                        }
+                    }
+                };
 
                 //done
                 private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -411,7 +411,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                     binding.max.setOnClickListener(view ->
                             getPresenter().spendAllClicked(getPresenter().getSendingItemAccount(), getFeePriority()));//done
 
-                    binding.buttonSend.setOnClickListener(v -> {
+                    binding.buttonContinue.setOnClickListener(v -> {
                         if (ConnectivityStatus.hasConnectivity(getActivity())) {
                             requestSendPayment();
                         } else {
@@ -433,7 +433,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 switch (position) {
                     case 0:
                     case 1:
-                        binding.buttonSend.setEnabled(true);
+                        binding.buttonContinue.setEnabled(true);
                         binding.textviewFeeAbsolute.setVisibility(View.VISIBLE);
                         binding.textviewFeeTime.setVisibility(View.VISIBLE);
                         binding.textInputLayout.setVisibility(View.GONE);
@@ -687,62 +687,63 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                     });
                 }
 
-    @Override
-    public void onShowTransactionSuccess(@Nullable String mdid,
-                                         @Nullable String fctxId,
-                                         String hash,
-                                         long transactionValue) {
-        playAudio();
+                @Override
+                public void onShowTransactionSuccess(@Nullable String mdid,
+                                                     @Nullable String fctxId,
+                                                     String hash,
+                                                     long transactionValue) {
+                    playAudio();
 
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        View dialogView = View.inflate(getActivity(), R.layout.modal_transaction_success, null);
-        transactionSuccessDialog = dialogBuilder.setView(dialogView)
-                .setPositiveButton(getString(R.string.done), null)
-                .create();
-        transactionSuccessDialog.setTitle(R.string.transaction_submitted);
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+                    View dialogView = View.inflate(getActivity(), R.layout.modal_transaction_success, null);
+                    transactionSuccessDialog = dialogBuilder.setView(dialogView)
+                            .setPositiveButton(getString(R.string.done), null)
+                            .create();
+                    transactionSuccessDialog.setTitle(R.string.transaction_submitted);
 
-        AppRate appRate = new AppRate(getActivity())
-                .setMinTransactionsUntilPrompt(3)
-                .incrementTransactionCount();
+                    AppRate appRate = new AppRate(getActivity())
+                            .setMinTransactionsUntilPrompt(3)
+                            .incrementTransactionCount();
 
-        // If should show app rate, success dialog shows first and launches
-        // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
-        // happen if the user chooses to rate the app - they'll return to the main page.
-        // Won't show if contact transaction, as other dialog takes preference
-        if (appRate.shouldShowDialog() && fctxId == null) {
-            AlertDialog ratingDialog = appRate.getRateDialog();
-            ratingDialog.setOnDismissListener(d -> finishPage(true));
-            transactionSuccessDialog.show();
-            transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
-        } else {
-            transactionSuccessDialog.show();
-            transactionSuccessDialog.setOnDismissListener(dialogInterface -> {
-                if (fctxId != null) {
-                    getPresenter().broadcastPaymentSuccess(mdid, hash, fctxId, transactionValue);
-                } else {
-                    finishPage(true);
+                    // If should show app rate, success dialog shows first and launches
+                    // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
+                    // happen if the user chooses to rate the app - they'll return to the main page.
+                    // Won't show if contact transaction, as other dialog takes preference
+                    if (appRate.shouldShowDialog() && fctxId == null) {
+                        AlertDialog ratingDialog = appRate.getRateDialog();
+                        ratingDialog.setOnDismissListener(d -> finishPage(true));
+                        transactionSuccessDialog.show();
+                        transactionSuccessDialog.setOnDismissListener(d -> ratingDialog.show());
+                    } else {
+                        transactionSuccessDialog.show();
+                        transactionSuccessDialog.setOnDismissListener(dialogInterface -> {
+                            if (fctxId != null) {
+                                getPresenter().broadcastPaymentSuccess(mdid, hash, fctxId, transactionValue);
+                            } else {
+                                finishPage(true);
+                            }
+                        });
+                    }
+
+                    dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
                 }
-            });
-        }
 
-        dialogHandler.postDelayed(dialogRunnable, 5 * 1000);
-    }
+                //skip
+                @Override
+                public void showBroadcastFailedDialog(String mdid,
+                                                      String txHash,
+                                                      String facilitatedTxId,
+                                                      long transactionValue) {
 
-    @Override
-    public void showBroadcastFailedDialog(String mdid,
-                                          String txHash,
-                                          String facilitatedTxId,
-                                          long transactionValue) {
-
-        new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.contacts_payment_sent_failed_message)
-                .setPositiveButton(R.string.retry, (dialog, which) ->
-                        getPresenter().broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
-                .setCancelable(false)
-                .create()
-                .show();
-    }
+                    new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                            .setTitle(R.string.app_name)
+                            .setMessage(R.string.contacts_payment_sent_failed_message)
+                            .setPositiveButton(R.string.retry, (dialog, which) ->
+                                    getPresenter().broadcastPaymentSuccess(mdid, txHash, facilitatedTxId, transactionValue))
+                            .setCancelable(false)
+                            .create()
+                            .show();
+                }
 
     @Override
     public void showBroadcastSuccessDialog() {
@@ -1012,9 +1013,10 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                     if (listener != null) listener.onSendFragmentClose(paymentMade);
                 }
 
-    public void onChangeFeeClicked() {
-        confirmPaymentDialog.dismiss();
-    }
+                //skip - unused?
+                public void onChangeFeeClicked() {
+                    confirmPaymentDialog.dismiss();
+                }
 
     @Thunk
     void alertCustomSpend() {
@@ -1035,7 +1037,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         binding.textviewFeeAbsolute.setVisibility(View.GONE);
         binding.textviewFeeTime.setVisibility(View.GONE);
         binding.textInputLayout.setVisibility(View.VISIBLE);
-        binding.buttonSend.setEnabled(false);
+        binding.buttonContinue.setEnabled(false);
         binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
 
         binding.edittextCustomFee.setOnFocusChangeListener((v, hasFocus) -> {
@@ -1052,7 +1054,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
 
         RxTextView.textChanges(binding.edittextCustomFee)
                 .map(CharSequence::toString)
-                .doOnNext(value -> binding.buttonSend.setEnabled(!value.isEmpty() && !value.equals("0")))
+                .doOnNext(value -> binding.buttonContinue.setEnabled(!value.isEmpty() && !value.equals("0")))
                 .filter(value -> !value.isEmpty())
                 .map(Long::valueOf)
                 .onErrorReturnItem(0L)
@@ -1107,12 +1109,13 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
         return this;
     }
 
-    @Override
-    public void dismissConfirmationDialog() {
-        confirmPaymentDialog.dismiss();
-    }
+                //done
+                @Override
+                public void dismissConfirmationDialog() {
+                    confirmPaymentDialog.dismiss();
+                }
 
-                //skip
+                //Done
                 @Override
                 public void onAttach(Context context) {
                     super.onAttach(context);
@@ -1123,7 +1126,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                     }
                 }
 
-                //skip
+                //Done
                 @Override
                 public void onDetach() {
                     super.onDetach();
@@ -1197,7 +1200,7 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                     binding.scrollView.setLayoutParams(layoutParams);
                 }
 
-                //Skip
+                //Done
                 public interface OnSendFragmentInteractionListener {
 
                     void onSendFragmentClose(boolean paymentMade);

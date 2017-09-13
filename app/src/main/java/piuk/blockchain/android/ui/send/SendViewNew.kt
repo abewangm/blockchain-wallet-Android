@@ -87,11 +87,15 @@ interface SendViewNew : View {
 
     fun showSecondPasswordDialog()
 
-    fun showPaymentDetails(confirmationDetails: PaymentConfirmationDetails, note: String?)
+    fun showPaymentDetails(confirmationDetails: PaymentConfirmationDetails, note: String?, allowFeeChange: Boolean)
 
     fun showLargeTransactionWarning()
 
+    fun showTransactionSuccess(hash: String, transactionValue: Long)
+
     fun dismissProgressDialog()
+
+    fun dismissConfirmationDialog()
 
     fun finishPage(paymentMade: Boolean)
 }
