@@ -36,11 +36,9 @@ public class PendingTransaction {
 
         boolean watchOnly = false;
 
-        if(!isHD()) {
-            if(sendingObject.getAccountObject() instanceof LegacyAddress) {
-                LegacyAddress legacyAddress = (LegacyAddress)sendingObject.getAccountObject();
-                watchOnly = legacyAddress.isWatchOnly() && (legacyAddress.getPrivateKey() == null ||  legacyAddress.getPrivateKey().isEmpty());
-            }
+        if(sendingObject.getAccountObject() instanceof LegacyAddress) {
+            LegacyAddress legacyAddress = (LegacyAddress)sendingObject.getAccountObject();
+            watchOnly = legacyAddress.isWatchOnly() && (legacyAddress.getPrivateKey() == null ||  legacyAddress.getPrivateKey().isEmpty());
         }
 
         return watchOnly;

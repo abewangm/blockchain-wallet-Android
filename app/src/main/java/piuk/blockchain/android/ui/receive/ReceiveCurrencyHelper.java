@@ -246,11 +246,9 @@ public class ReceiveCurrencyHelper {
             amount = 0.0;
         }
 
-        long amountL = BigDecimal.valueOf(monetaryUtil.getUndenominatedAmount(amount))
-                    .multiply(BigDecimal.valueOf(100000000))
-                    .longValue();
-
-        return BigInteger.valueOf(amountL);
+        return BigDecimal.valueOf(monetaryUtil.getUndenominatedAmount(amount))
+                .multiply(BigDecimal.valueOf(100000000))
+                .toBigInteger();
     }
 
     /**
@@ -270,9 +268,7 @@ public class ReceiveCurrencyHelper {
             amount = 0.0;
         }
 
-        long amountL = Convert.toWei(amount.toString(), Convert.Unit.ETHER).longValue();
-
-        return BigInteger.valueOf(amountL);
+        return Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger();
     }
 
     public String stripSeparator(String text, String decimalSeparator) {
