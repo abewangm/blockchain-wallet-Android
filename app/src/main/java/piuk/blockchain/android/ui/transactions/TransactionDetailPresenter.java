@@ -153,13 +153,14 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
     private void handleEthToAndFrom(Displayable displayable) {
         String fromAddress = displayable.getInputsMap().keySet().iterator().next();
         String toAddress = displayable.getOutputsMap().keySet().iterator().next();
-        String ethAddress = ethDataManager.getEthAddress().getAccount();
-        if (fromAddress.equals(ethAddress)) {
-            fromAddress = stringUtils.getString(R.string.eth_default_account_label);
-        }
-        if (toAddress.equals(ethAddress)) {
-            toAddress = stringUtils.getString(R.string.eth_default_account_label);
-        }
+        // STOPSHIP: 11/09/2017 Fix me
+//        String ethAddress = ethDataManager.getEthAddress().getAccount();
+//        if (fromAddress.equals(ethAddress)) {
+//            fromAddress = stringUtils.getString(R.string.eth_default_account_label);
+//        }
+//        if (toAddress.equals(ethAddress)) {
+//            toAddress = stringUtils.getString(R.string.eth_default_account_label);
+//        }
 
         getView().setFromAddress(fromAddress);
         getView().setToAddresses(Collections.singletonList(new RecipientModel(

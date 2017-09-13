@@ -1,7 +1,7 @@
 package piuk.blockchain.android.data.ethereum
 
 import info.blockchain.wallet.ethereum.EthereumWallet
-import info.blockchain.wallet.ethereum.data.EthAddressResponse
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.util.annotations.Mockable
 
 /**
@@ -11,7 +11,7 @@ import piuk.blockchain.android.util.annotations.Mockable
 class EthDataStore {
 
     var ethWallet: EthereumWallet? = null
-    var ethAddressResponse: EthAddressResponse? = null
+    var ethAddressResponse: CombinedEthModel? = null
 
     fun clearEthData() {
         ethWallet = null

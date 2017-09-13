@@ -3,7 +3,6 @@ package piuk.blockchain.android.data.cache;
 import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.api.data.FeeOptions;
-import timber.log.Timber;
 
 public class DynamicFeeCache {
 
@@ -30,10 +29,5 @@ public class DynamicFeeCache {
 
     public void setEthFeeOptions(FeeOptions ethFeeOptions) {
         this.ethFeeOptions = ethFeeOptions;
-    }
-
-    public void destroy() {
-        btcFeeOptions = null;
-        ethFeeOptions = null;
     }
 }

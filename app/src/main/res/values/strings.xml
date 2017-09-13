@@ -783,6 +783,7 @@
     <string name="bitcoin">BITCOIN</string>
     <string name="eth_to_field_helper">Enter ether address or select</string>
     <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
+    <string name="invalid_ether_address">Invalid Ether address</string>
 
     <!-- DASHBOARD -->
     <string name="dashboard_title">Dashboard</string>

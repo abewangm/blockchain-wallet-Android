@@ -104,11 +104,12 @@ class ReceivePresenter @Inject internal constructor(
     internal fun onEthSelected() {
         view.hideBitcoinLayout()
         selectedAccount = null
-        ethDataStore.ethAddressResponse!!.account.let {
-            selectedAddress = it
-            view.updateReceiveAddress(it)
-            generateQrCode(it)
-        }
+        // STOPSHIP: Fix me by selecting the correct account
+//        ethDataStore.ethAddressResponse!!.account.let {
+//            selectedAddress = it
+//            view.updateReceiveAddress(it)
+//            generateQrCode(it)
+//        }
     }
 
     internal fun onSelectDefault(defaultAccountPosition: Int) {
@@ -154,8 +155,8 @@ class ReceivePresenter @Inject internal constructor(
 
             val satoshis = getSatoshisFromText(view.getBtcAmount())
 
-            btcAmount = getTextFromSatoshis(satoshis.toLong())
-            this.btcUnit = monetaryUtil.getBtcUnit(btcUnit)
+            cryptoAmount = getTextFromSatoshis(satoshis.toLong())
+            this.cryptoUnit = monetaryUtil.getBtcUnit(btcUnit)
             this.fiatUnit = fiatUnit
 
             fiatAmount = monetaryUtil.getFiatFormat(fiatUnit)

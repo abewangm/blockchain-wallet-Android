@@ -409,8 +409,8 @@ class ReceivePresenterTest {
         verifyNoMoreInteractions(exchangeRateFactory)
         result.fromLabel `should equal to` label
         result.toLabel `should equal to` contactName
-        result.btcAmount `should equal to` "1.0"
-        result.btcUnit `should equal to` "BTC"
+        result.cryptoAmount `should equal to` "1.0"
+        result.cryptoUnit `should equal to` "BTC"
         result.fiatUnit `should equal to` "GBP"
         result.fiatAmount `should equal to` "3,426.00"
         result.fiatSymbol `should equal to` "£"

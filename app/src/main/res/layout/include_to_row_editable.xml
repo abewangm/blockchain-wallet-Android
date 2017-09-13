@@ -24,18 +24,17 @@
 
         <EditText
             android:id="@+id/toAddressEditTextView"
-            fontPath="fonts/Montserrat-Regular.ttf"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollHorizontally="true"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="32dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
             style="@style/bitcoinAddressEditText"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_height="23dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="8dp"
             android:hint="@string/to_field_helper"
+            android:scrollHorizontally="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/toArrowImage"
+            app:layout_constraintEnd_toStartOf="@+id/toArrow"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toTextView" />
 

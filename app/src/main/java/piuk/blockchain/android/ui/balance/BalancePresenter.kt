@@ -387,7 +387,7 @@ class BalancePresenter @Inject constructor(
         mutableList.add(ItemAccount().apply {
             type = ItemAccount.TYPE.ETHEREUM
             label = stringUtils.getString(R.string.eth_default_account_label)
-            absoluteBalance = ethDataManager.getEthAddress()?.balance?.toLong() ?: 0L
+            absoluteBalance = ethDataManager.getEthAddress()?.getTotalBalance()?.toLong() ?: 0L
             displayBalance = getEthBalanceString(
                     currencyState.isDisplayingCryptoCurrency,
                     absoluteBalance ?: 0L
@@ -455,7 +455,7 @@ class BalancePresenter @Inject constructor(
         return if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
             ethDataManager.fetchEthAddress()
                     .doOnNext {
-                        val ethBalance = it.balance.toLong()
+                        val ethBalance = it.getTotalBalance().toLong()
                         val ethString = getEthBalanceString(currencyState.isDisplayingCryptoCurrency, ethBalance)
                         view.onTotalBalanceUpdated(ethString)
                     }.flatMap { Observable.empty<Nothing>() }
