@@ -14,6 +14,7 @@ import info.blockchain.wallet.payment.Payment
 import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PrivateKeyFactory
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
 import org.bitcoinj.core.ECKey
@@ -77,7 +78,7 @@ class SendPresenterNew @Inject constructor(
     lateinit var feeOptions: FeeOptions
     val pendingTransaction: PendingTransaction by unsafeLazy { PendingTransaction() }
     val unspentApiResponses: HashMap<String, UnspentOutputs> by unsafeLazy { HashMap<String, UnspentOutputs>() }
-    var unspentApiDisposable: Disposable = compositeDisposable
+    var unspentApiDisposable: Disposable = CompositeDisposable()
     var absoluteSuggestedFee = BigInteger.ZERO
     var maxAvailable = BigInteger.ZERO
     var verifiedSecondPassword: String? = null
@@ -103,6 +104,7 @@ class SendPresenterNew @Inject constructor(
     }
 
     fun onBitcoinChosen() {
+        Timber.d("vos onBitcoinChosen compositeDisposable.clear")
         compositeDisposable.clear()
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         updateTicker()
@@ -122,6 +124,7 @@ class SendPresenterNew @Inject constructor(
     }
 
     fun onEtherChosen() {
+        Timber.d("vos onEtherChosen compositeDisposable.clear")
         compositeDisposable.clear()
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         updateTicker()
@@ -977,18 +980,20 @@ class SendPresenterNew @Inject constructor(
 
         pendingTransaction.receivingObject = ItemAccount(account.label, null, null, null, account, null)
 
-        payloadDataManager.getNextReceiveAddress(account)
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnNext { pendingTransaction.receivingAddress = it }
-                .doOnNext { view.updateReceivingAddress(it) }
-                .subscribe({ /* No-op */ },{ view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
-
         var label = account.label
         if (label == null || label.isEmpty()) {
             label = account.xpub
         }
-
         view.updateReceivingAddress(label)
+
+        payloadDataManager.getNextReceiveAddress(account)
+                .doOnNext {
+                    pendingTransaction.receivingAddress = it
+                }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({
+                    /* No-op */
+                }, { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
     }
 
     internal fun selectSendingAccount(data: Intent?) {
@@ -1032,9 +1037,9 @@ class SendPresenterNew @Inject constructor(
     }
 
     internal fun updateTicker() {
-        //TODO this is not working
         exchangeRateFactory.updateTickers()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .compose(RxUtil.applySchedulersToCompletable())
                 .subscribe({
                     //no-op
                 }, { it.printStackTrace() })
