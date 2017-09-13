@@ -346,6 +346,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             ((SendFragmentNew) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             ((ReceiveFragment) getCurrentFragment()).onBackPressed();
+        } else //noinspection StatementWithEmptyBody
+            if (getCurrentFragment() instanceof DashboardFragment) {
+            // Ignore
         } else if (getCurrentFragment() instanceof ContactConfirmRequestFragment) {
             // Remove Notes fragment from stack
             FragmentManager fragmentManager = getSupportFragmentManager();

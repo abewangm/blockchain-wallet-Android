@@ -73,7 +73,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun notifyItemAdded(displayItems: MutableList<Any>, position: Int) {
         dashboardAdapter.items = displayItems
         dashboardAdapter.notifyItemInserted(position)
-        recycler_view.smoothScrollToPosition(0)
+        recycler_view.scrollToPosition(0)
     }
 
     override fun notifyItemRemoved(displayItems: MutableList<Any>, position: Int) {

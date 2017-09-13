@@ -42,8 +42,8 @@ class AnnouncementDelegate<in T> : AdapterDelegate<T> {
         )
         holder.link.setText(announcement.link)
 
-        holder.close.setOnClickListener { announcement.closeFunction.invoke() }
-        holder.link.setOnClickListener { announcement.linkFunction.invoke() }
+        holder.close.setOnClickListener { announcement.closeFunction() }
+        holder.link.setOnClickListener { announcement.linkFunction() }
     }
 
     private class AnnouncementViewHolder internal constructor(

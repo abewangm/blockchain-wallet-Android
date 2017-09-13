@@ -63,38 +63,58 @@
                     tools:ignore="MissingPrefix"
                     tools:text="$1235.82" />
 
-                <TextView
-                    android:id="@+id/textview_btc"
-                    fontPath="fonts/Montserrat-Light.ttf"
+                <FrameLayout
+                    android:id="@+id/wrapper_btc"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="0.0 BTC"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="@+id/textview_eth"
-                    app:layout_constraintEnd_toStartOf="@+id/textview_eth"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textview_total"
-                    tools:ignore="MissingPrefix"
-                    tools:text="0.21728567 BTC" />
+                    app:layout_constraintBottom_toBottomOf="@+id/wrapper_eth"
+                    app:layout_constraintEnd_toStartOf="@+id/wrapper_eth"
+                    app:layout_constraintHorizontal_chainStyle="spread"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textview_total">
 
-                <TextView
-                    android:id="@+id/textview_eth"
-                    fontPath="fonts/Montserrat-Light.ttf"
+                    <TextView
+                        android:id="@+id/textview_btc"
+                        fontPath="fonts/Montserrat-Light.ttf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableLeft="@drawable/vector_buy"
+                        android:drawablePadding="4dp"
+                        android:gravity="center"
+                        android:text="0.0 BTC"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        tools:ignore="MissingPrefix"
+                        tools:text="0.21728567 BTC" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/wrapper_eth"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="0.0 ETH"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/textview_btc"
-                    app:layout_constraintTop_toBottomOf="@+id/textview_total"
-                    tools:ignore="MissingPrefix"
-                    tools:text="2.36545678 ETH" />
+                    app:layout_constraintHorizontal_chainStyle="spread"
+                    app:layout_constraintStart_toEndOf="@+id/wrapper_btc"
+                    app:layout_constraintTop_toBottomOf="@+id/textview_total">
 
+                    <TextView
+                        android:id="@+id/textview_eth"
+                        fontPath="fonts/Montserrat-Light.ttf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableLeft="@drawable/vector_eth"
+                        android:drawablePadding="4dp"
+                        android:gravity="center"
+                        android:text="0.0 ETH"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        tools:ignore="MissingPrefix"
+                        tools:text="2.36545678 ETH" />
+
+                </FrameLayout>
             </android.support.constraint.ConstraintLayout>
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>

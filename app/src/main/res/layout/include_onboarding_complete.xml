@@ -20,7 +20,7 @@
         android:padding="16dp"
         android:src="@drawable/ic_clear_white_24dp"
         android:theme="@style/PlainTheme"
-        android:tint="@color/primary_gray_light" />
+        android:tint="@color/primary_gray" />
 
     <ImageView
         android:id="@+id/onboarding_complete_check"
