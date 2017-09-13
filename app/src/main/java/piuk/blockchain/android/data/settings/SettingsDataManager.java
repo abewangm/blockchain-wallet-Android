@@ -210,9 +210,9 @@ public class SettingsDataManager {
     }
 
     /**
-     * Update the user's btcUnit unit preference and fetches an updated {@link Settings} object.
+     * Update the user's cryptoUnit unit preference and fetches an updated {@link Settings} object.
      *
-     * @param btcUnit The user's preference for btcUnit unit
+     * @param btcUnit The user's preference for cryptoUnit unit
      * @return {@link Observable<Settings>} wrapping the Settings object
      */
     public Observable<Settings> updateBtcUnit(String btcUnit) {

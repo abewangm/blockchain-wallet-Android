@@ -32,16 +32,16 @@ public class ConfirmPaymentPresenter extends BasePresenter<ConfirmPaymentView> {
         getView().setFromLabel(paymentDetails.fromLabel);
         getView().setToLabel(paymentDetails.toLabel);
         getView().setAmount(String.format(AMOUNT_FORMAT,
-                paymentDetails.btcAmount,
-                paymentDetails.btcUnit,
+                paymentDetails.cryptoAmount,
+                paymentDetails.cryptoUnit,
                 paymentDetails.fiatSymbol,
                 paymentDetails.fiatAmount));
         getView().setFee(String.format(AMOUNT_FORMAT,
-                paymentDetails.btcFee,
-                paymentDetails.btcUnit,
+                paymentDetails.cryptoFee,
+                paymentDetails.cryptoUnit,
                 paymentDetails.fiatSymbol,
                 paymentDetails.fiatFee));
-        getView().setTotalBtc(paymentDetails.btcTotal + " " + paymentDetails.btcUnit);
+        getView().setTotalBtc(paymentDetails.cryptoTotal + " " + paymentDetails.cryptoUnit);
         getView().setTotalFiat(paymentDetails.fiatSymbol + paymentDetails.fiatTotal);
         getView().setUiState(UiState.CONTENT);
     }

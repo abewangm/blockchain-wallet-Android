@@ -88,8 +88,8 @@ class ContactConfirmRequestPresenterTest {
         val fiatAmount = "2739.40"
         val paymentDetails = PaymentConfirmationDetails().apply {
             this.fromLabel = fromLabel
-            this.btcAmount = btcAmount
-            this.btcUnit = btcUnit
+            this.cryptoAmount = btcAmount
+            this.cryptoUnit = btcUnit
             this.fiatSymbol = fiatSymbol
             this.fiatAmount = fiatAmount
         }
@@ -139,8 +139,8 @@ class ContactConfirmRequestPresenterTest {
         val fiatAmount = "2739.40"
         val paymentDetails = PaymentConfirmationDetails().apply {
             this.fromLabel = fromLabel
-            this.btcAmount = btcAmount
-            this.btcUnit = btcUnit
+            this.cryptoAmount = btcAmount
+            this.cryptoUnit = btcUnit
             this.fiatSymbol = fiatSymbol
             this.fiatAmount = fiatAmount
         }
@@ -184,8 +184,8 @@ class ContactConfirmRequestPresenterTest {
         val fiatAmount = "2739.40"
         val paymentDetails = PaymentConfirmationDetails().apply {
             this.fromLabel = fromLabel
-            this.btcAmount = btcAmount
-            this.btcUnit = btcUnit
+            this.cryptoAmount = btcAmount
+            this.cryptoUnit = btcUnit
             this.fiatSymbol = fiatSymbol
             this.fiatAmount = fiatAmount
         }
@@ -240,8 +240,8 @@ class ContactConfirmRequestPresenterTest {
         val fiatAmount = "2739.40"
         val paymentDetails = PaymentConfirmationDetails().apply {
             this.fromLabel = fromLabel
-            this.btcAmount = btcAmount
-            this.btcUnit = btcUnit
+            this.cryptoAmount = btcAmount
+            this.cryptoUnit = btcUnit
             this.fiatSymbol = fiatSymbol
             this.fiatAmount = fiatAmount
         }
@@ -291,8 +291,8 @@ class ContactConfirmRequestPresenterTest {
         val fiatAmount = "2739.40"
         val paymentDetails = PaymentConfirmationDetails().apply {
             this.fromLabel = fromLabel
-            this.btcAmount = btcAmount
-            this.btcUnit = btcUnit
+            this.cryptoAmount = btcAmount
+            this.cryptoUnit = btcUnit
             this.fiatSymbol = fiatSymbol
             this.fiatAmount = fiatAmount
         }

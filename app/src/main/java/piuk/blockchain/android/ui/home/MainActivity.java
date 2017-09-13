@@ -711,12 +711,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onSendFragmentClose(boolean paymentMade) {
-        this.paymentMade = paymentMade;
-        binding.bottomNavigation.setCurrentItem(1);
-    }
-
-    @Override
     public void onReceiveFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
     }
@@ -872,5 +866,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void onSendFragmentClose() {
+        binding.bottomNavigation.setCurrentItem(1);
     }
 }

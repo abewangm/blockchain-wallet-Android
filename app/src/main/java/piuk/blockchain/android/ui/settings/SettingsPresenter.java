@@ -490,7 +490,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
     }
 
     /**
-     * Updates the user's btcUnit unit preference
+     * Updates the user's cryptoUnit unit preference
      */
     void updateBtcUnit(int btcUnitIndex) {
 

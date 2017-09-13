@@ -155,8 +155,8 @@ class ReceivePresenter @Inject internal constructor(
 
             val satoshis = getSatoshisFromText(view.getBtcAmount())
 
-            btcAmount = getTextFromSatoshis(satoshis.toLong())
-            this.btcUnit = monetaryUtil.getBtcUnit(btcUnit)
+            cryptoAmount = getTextFromSatoshis(satoshis.toLong())
+            this.cryptoUnit = monetaryUtil.getBtcUnit(btcUnit)
             this.fiatUnit = fiatUnit
 
             fiatAmount = monetaryUtil.getFiatFormat(fiatUnit)

@@ -43,6 +43,10 @@ class ItemAccount {
         }
     }
 
+    override fun toString(): String {
+        return "ItemAccount(label=$label, displayBalance=$displayBalance, tag=$tag, absoluteBalance=$absoluteBalance, accountObject=$accountObject, address=$address, type=$type)"
+    }
+
     @JvmOverloads
     constructor(label: String?,
                 displayBalance: String?,
@@ -59,4 +63,6 @@ class ItemAccount {
         this.accountObject = accountObject
         this.type = type
     }
+
+
 }

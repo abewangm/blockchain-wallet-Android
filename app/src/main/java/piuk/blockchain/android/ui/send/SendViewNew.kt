@@ -3,19 +3,41 @@ package piuk.blockchain.android.ui.send
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.account.ItemAccount
+import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
 interface SendViewNew : View {
 
-    fun setSendingAddress(get: ItemAccount)
+    //Update field
+    fun updateSendingAddress(label: String)
 
-    fun finishPage(paymentMade: Boolean)
+    fun updateReceivingHint(hint: Int)
 
-    fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
+    fun updateCryptoCurrency(currency: String)
 
-    fun setReceivingHint(hint: Int)
+    fun updateCryptoAmount(amountString: String?)
 
+    fun updateFiatAmount(amountString: String?)
+
+    fun updateWarning(message: String)
+
+    fun updateMaxAvailable(max: String)
+
+    fun updateMaxAvailableColor(@ColorRes color: Int)
+
+    fun updateReceivingAddress(address: String)
+
+    fun updateFeeAmount(fee: String)
+
+    //Set property
+    fun setCryptoMaxLength(length: Int)
+
+    fun setTabSelection(tabIndex: Int)
+
+    fun clearWarning()
+
+    //Hide / Show
     fun hideReceivingDropdown()
 
     fun showReceivingDropdown()
@@ -24,43 +46,56 @@ interface SendViewNew : View {
 
     fun showSendingFieldDropdown()
 
-    fun disableCryptoTextChangeListener()
-
-    fun enableCryptoTextChangeListener()
-
-    fun updateCryptoTextField(amountString: String?)
-
-    fun disableFiatTextChangeListener()
-
-    fun enableFiatTextChangeListener()
-
-    fun updateFiatTextField(amountString: String?)
-
-    fun setCryptoCurrency(currency: String)
-
-    fun resetAmounts()
-
-    fun getCustomFeeValue(): Long
-
     fun showMaxAvailable()
 
     fun hideMaxAvailable()
-
-    fun setUnconfirmedFunds(text: String)
-
-    fun updateFeeField(fee: String)
-
-    fun setMaxAvailable(max: String)
-
-    fun setMaxAvailableColor(@ColorRes color: Int)
-
-    fun setSpendAllAmount(textFromSatoshis: String)
 
     fun showFeePriority()
 
     fun hideFeePriority()
 
-    fun setReceivingAddress(address: String)
+    //Enable / Disable
+    fun disableCryptoTextChangeListener()
 
-    fun selectTab(tabIndex: Int)
+    fun enableCryptoTextChangeListener()
+
+    fun disableFiatTextChangeListener()
+
+    fun enableFiatTextChangeListener()
+
+    fun enableFeeDropdown()
+
+    fun disableFeeDropdown()
+
+    // Fetch value
+    fun getCustomFeeValue(): Long
+
+    fun getClipboardContents(): String?
+
+    fun getReceivingAddress(): String?
+
+    // Prompts
+    fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
+
+    fun showBIP38PassphrasePrompt(scanData: String)
+
+    fun showWatchOnlyWarning(address: String)
+
+    fun showProgressDialog(@StringRes title: Int)
+
+    fun showSpendFromWatchOnlyWarning(address: String)
+
+    fun showSecondPasswordDialog()
+
+    fun showPaymentDetails(confirmationDetails: PaymentConfirmationDetails, note: String?, allowFeeChange: Boolean)
+
+    fun showLargeTransactionWarning()
+
+    fun showTransactionSuccess(hash: String, transactionValue: Long)
+
+    fun dismissProgressDialog()
+
+    fun dismissConfirmationDialog()
+
+    fun finishPage(paymentMade: Boolean)
 }

@@ -12,6 +12,7 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import timber.log.Timber
 import java.util.*
 
 class EthDataManager(

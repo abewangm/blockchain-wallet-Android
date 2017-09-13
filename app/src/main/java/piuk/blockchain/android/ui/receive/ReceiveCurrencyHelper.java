@@ -1,5 +1,8 @@
 package piuk.blockchain.android.ui.receive;
 
+import org.web3j.utils.Convert;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -10,6 +13,7 @@ import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import timber.log.Timber;
 
 public class ReceiveCurrencyHelper {
 
@@ -223,5 +227,51 @@ public class ReceiveCurrencyHelper {
         String displayAmount = monetaryUtil.getDisplayAmount(satoshis);
         displayAmount = displayAmount.replace(".", decimalSeparator);
         return displayAmount;
+    }
+
+    /**
+     * Returns amount of satoshis from btc amount. This could be btc, mbtc or bits.
+     *
+     * @return satoshis
+     */
+    public BigInteger getSatoshisFromText(String text, String decimalSeparator) {
+        if (text == null || text.isEmpty()) return BigInteger.ZERO;
+
+        String amountToSend = stripSeparator(text, decimalSeparator);
+
+        Double amount;
+        try {
+            amount = java.lang.Double.parseDouble(amountToSend);
+        } catch (NumberFormatException e) {
+            amount = 0.0;
+        }
+
+        return BigDecimal.valueOf(monetaryUtil.getUndenominatedAmount(amount))
+                .multiply(BigDecimal.valueOf(100000000))
+                .toBigInteger();
+    }
+
+    /**
+     * Returns amount of wei from ether amount.
+     *
+     * @return satoshis
+     */
+    public BigInteger getWeiFromText(String text, String decimalSeparator) {
+        if (text == null || text.isEmpty()) return BigInteger.ZERO;
+
+        String amountToSend = stripSeparator(text, decimalSeparator);
+
+        Double amount;
+        try {
+            amount = java.lang.Double.parseDouble(amountToSend);
+        } catch (NumberFormatException e) {
+            amount = 0.0;
+        }
+
+        return Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger();
+    }
+
+    public String stripSeparator(String text, String decimalSeparator) {
+        return text.trim().replace(" ","").replace(decimalSeparator, ".");
     }
 }

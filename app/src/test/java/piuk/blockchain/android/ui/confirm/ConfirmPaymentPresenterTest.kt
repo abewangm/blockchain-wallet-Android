@@ -51,13 +51,13 @@ class ConfirmPaymentPresenterTest {
         val confirmationDetails = PaymentConfirmationDetails().apply {
             this.fromLabel = fromLabel
             this.toLabel = toLabel
-            this.btcAmount = btcAmount
-            this.btcUnit = btcUnit
+            this.cryptoAmount = btcAmount
+            this.cryptoUnit = btcUnit
             this.fiatAmount = fiatAmount
             this.fiatSymbol = fiatSymbol
-            this.btcFee = btcFee
+            this.cryptoFee = btcFee
             this.fiatFee = fiatFee
-            this.btcTotal = btcTotal
+            this.cryptoTotal = btcTotal
             this.fiatTotal = fiatTotal
         }
         val contactNote = "CONTACT_NOTE"
