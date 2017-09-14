@@ -3,6 +3,7 @@ package piuk.blockchain.android.data.ethereum
 import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.EthereumWallet
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
+import info.blockchain.wallet.ethereum.data.EthLatestBlock
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.util.MetadataUtil
@@ -64,6 +65,17 @@ class EthDataManager(
         }
 
         return Observable.empty()
+    }
+
+    /**
+     * Returns a [EthLatestBlock] object which contains information about the most recently
+     * mined block.
+     *
+     * @return An [Observable] wrapping an [EthLatestBlock]
+     */
+    fun getLatestBlock(): Observable<EthLatestBlock> = rxPinning.call<EthLatestBlock> {
+        ethAccountApi.latestBlock
+                .compose(RxUtil.applySchedulersToObservable())
     }
 
     /**

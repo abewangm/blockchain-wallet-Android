@@ -49,10 +49,10 @@ class DashboardPresenter @Inject constructor(
 
     override fun onViewReady() {
         updateChartsData(TimeSpan.YEAR)
-        updateAllBalances()
         view.notifyItemAdded(displayList, 0)
 
         metadataObservable.flatMap { getOnboardingStatusObservable() }
+                .doOnNext { updateAllBalances() }
                 .doOnNext { checkLatestAnnouncement() }
                 .subscribe(
                         { /* No-op */ },
@@ -120,8 +120,7 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun updateAllBalances() {
-        ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
-                .flatMap { ethDataManager.fetchEthAddress() }
+        ethDataManager.fetchEthAddress()
                 .flatMapCompletable { ethAddressResponse ->
                     payloadDataManager.updateAllBalances()
                             .doOnComplete {
