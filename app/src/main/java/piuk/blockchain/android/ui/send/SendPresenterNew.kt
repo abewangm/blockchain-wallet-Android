@@ -14,8 +14,9 @@ import info.blockchain.wallet.payment.Payment
 import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PrivateKeyFactory
 import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
+import io.reactivex.subjects.PublishSubject
 import org.bitcoinj.core.ECKey
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -32,6 +33,7 @@ import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -51,6 +53,7 @@ import java.math.BigInteger
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class SendPresenterNew @Inject constructor(
@@ -77,7 +80,7 @@ class SendPresenterNew @Inject constructor(
     lateinit var feeOptions: FeeOptions
     val pendingTransaction: PendingTransaction by unsafeLazy { PendingTransaction() }
     val unspentApiResponses: HashMap<String, UnspentOutputs> by unsafeLazy { HashMap<String, UnspentOutputs>() }
-    var unspentApiDisposable: Disposable = compositeDisposable
+    var textChangeSubject = PublishSubject.create<String>()
     var absoluteSuggestedFee = BigInteger.ZERO
     var maxAvailable = BigInteger.ZERO
     var verifiedSecondPassword: String? = null
@@ -98,6 +101,7 @@ class SendPresenterNew @Inject constructor(
     override fun onViewReady() {
         sslVerifyUtil.validateSSL()
 
+        setupTextChangeSubject()
         updateTicker()
         setCryptoCurrency()
     }
@@ -117,13 +121,14 @@ class SendPresenterNew @Inject constructor(
         clearReceivingAddress()
         view.setCryptoMaxLength(17)
         setCryptoCurrency()
-        calculateTransactionAmounts(spendAll = false, amountToSendText = "0", feePriority = FeeType.FEE_OPTION_REGULAR)
+        calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
         view.showFeePriority()
     }
 
     fun onEtherChosen() {
         compositeDisposable.clear()
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
+        view.setFeePrioritySelection(0)
         updateTicker()
         view.setTabSelection(1)
         absoluteSuggestedFee = BigInteger.ZERO
@@ -136,7 +141,7 @@ class SendPresenterNew @Inject constructor(
         clearReceivingAddress()
         view.setCryptoMaxLength(30)
         setCryptoCurrency()
-        calculateTransactionAmounts(spendAll = false, amountToSendText = "0", feePriority = FeeType.FEE_OPTION_REGULAR)
+        calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
         view.hideFeePriority()
     }
 
@@ -539,12 +544,6 @@ class SendPresenterNew @Inject constructor(
         view.enableFiatTextChangeListener()
     }
 
-    internal fun onSpendAllClicked(feePriority: Int) {
-        calculateTransactionAmounts(spendAll = true,
-                amountToSendText = null,
-                feePriority = feePriority)
-    }
-
     /**
      * Get cached dynamic fee from new Fee options endpoint
      */
@@ -577,6 +576,10 @@ class SendPresenterNew @Inject constructor(
 
             }
         }
+    }
+
+    internal fun getFeeOptions(): FeeOptions? {
+        return dynamicFeeCache.btcFeeOptions
     }
 
     internal fun getFeeOptionsForDropDown(): List<DisplayFeeOptions> {
@@ -685,18 +688,33 @@ class SendPresenterNew @Inject constructor(
         }
     }
 
-    /**
-     *
-     * Fetches unspent data Gets spendable coins Mixed checks and updates
-     */
-    internal fun calculateTransactionAmounts(spendAll: Boolean,
-                                    amountToSendText: String?,
-                                    @FeeType.FeePriorityDef feePriority: Int) {
+    fun onCryptoTextchange(cryptoText: String) {
+        textChangeSubject.onNext(cryptoText)
+    }
 
+    /**
+     * Calculate amounts on crypto text change
+     */
+    internal fun setupTextChangeSubject() {
+
+        textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext {
+                    calculateSpendableAmounts(spendAll = false, amountToSendText = it)
+                }
+                .subscribe(IgnorableDefaultObserver())
+    }
+
+    internal fun onSpendMaxClicked() {
+        calculateSpendableAmounts(spendAll = true, amountToSendText = null)
+    }
+
+    internal fun calculateSpendableAmounts(spendAll: Boolean, amountToSendText: String?) {
         view.hideMaxAvailable()
         view.clearWarning()
 
-        val feePerKb = getFeePerKbFromPriority(feePriority)
+        val feePerKb = getFeePerKbFromPriority(view.getFeePriority())
 
         when(currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
@@ -708,12 +726,14 @@ class SendPresenterNew @Inject constructor(
         }
     }
 
-    internal fun calculateUnspentBtc(spendAll: Boolean, amountToSendText: String?, feePerKb: BigInteger) {
+    internal fun calculateUnspentBtc(spendAll: Boolean,
+                             amountToSendText: String?,
+                             feePerKb: BigInteger) {
 
         val address = pendingTransaction.sendingObject.getAddressString()
 
-        if (unspentApiDisposable != null) unspentApiDisposable.dispose()
-        unspentApiDisposable = getUnspentApiResponse(address)
+        getUnspentApiResponse(address)
+                .debounce(200, TimeUnit.MILLISECONDS)
                 .compose(RxUtil.applySchedulersToObservable<UnspentOutputs>())
                 .subscribe(
                         { coins ->
@@ -977,18 +997,20 @@ class SendPresenterNew @Inject constructor(
 
         pendingTransaction.receivingObject = ItemAccount(account.label, null, null, null, account, null)
 
-        payloadDataManager.getNextReceiveAddress(account)
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnNext { pendingTransaction.receivingAddress = it }
-                .doOnNext { view.updateReceivingAddress(it) }
-                .subscribe({ /* No-op */ },{ view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
-
         var label = account.label
         if (label == null || label.isEmpty()) {
             label = account.xpub
         }
-
         view.updateReceivingAddress(label)
+
+        payloadDataManager.getNextReceiveAddress(account)
+                .doOnNext {
+                    pendingTransaction.receivingAddress = it
+                }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({
+                    /* No-op */
+                }, { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
     }
 
     internal fun selectSendingAccount(data: Intent?) {
@@ -1032,9 +1054,9 @@ class SendPresenterNew @Inject constructor(
     }
 
     internal fun updateTicker() {
-        //TODO this is not working
         exchangeRateFactory.updateTickers()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .compose(RxUtil.applySchedulersToCompletable())
                 .subscribe({
                     //no-op
                 }, { it.printStackTrace() })
@@ -1149,6 +1171,14 @@ class SendPresenterNew @Inject constructor(
         return usdValue > SendModel.LARGE_TX_FEE
                 && txSize > SendModel.LARGE_TX_SIZE
                 && relativeFee > SendModel.LARGE_TX_PERCENTAGE
+    }
+
+    internal fun disableAdvancedFeeWarning() {
+        prefsUtil.setValue(PrefsUtil.KEY_WARN_ADVANCED_FEE, false)
+    }
+
+    internal fun shouldShowAdvancedFeeWarning(): Boolean {
+        return prefsUtil.getValue(PrefsUtil.KEY_WARN_ADVANCED_FEE, true)
     }
 
     companion object {

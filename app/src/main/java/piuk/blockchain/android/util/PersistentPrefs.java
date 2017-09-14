@@ -43,6 +43,8 @@ interface PersistentPrefs {
     String KEY_LATEST_ANNOUNCEMENT_DISMISSED = "latest_announcement_dismissed";
     String KEY_LATEST_ANNOUNCEMENT_SEEN = "latest_announcement_seen";
 
+    String KEY_WARN_ADVANCED_FEE = "pref_warn_advanced_fee";
+
     String getValue(String name, String value);
 
     void setValue(String name, String value);

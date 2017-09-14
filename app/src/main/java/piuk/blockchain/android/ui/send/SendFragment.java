@@ -111,11 +111,11 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                 SendPresenter sendPresenter;
 
                 @Thunk FragmentSendBinding binding;
-    @Thunk AlertDialog transactionSuccessDialog;
+                @Thunk AlertDialog transactionSuccessDialog;
                 @Thunk boolean textChangeAllowed = true;//skip
                 private boolean contactsPayment;//skip
                 private OnSendFragmentInteractionListener listener;//skip
-    private MaterialProgressDialog progressDialog;
+                private MaterialProgressDialog progressDialog;
                 private AlertDialog largeTxWarning;//skip
                 private ConfirmPaymentDialog confirmPaymentDialog;
                 private NumericKeyboard customKeypad;
@@ -1018,62 +1018,63 @@ public class SendFragment extends BaseFragment<SendView, SendPresenter>
                     confirmPaymentDialog.dismiss();
                 }
 
-    @Thunk
-    void alertCustomSpend() {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.transaction_fee)
-                .setMessage(R.string.fee_options_advanced_warning)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    getPresenter().disableAdvancedFeeWarning();
-                    displayCustomFeeField();
-                })
-                .setNegativeButton(android.R.string.cancel, (dialog, which) ->
-                        binding.spinnerPriority.setSelection(0))
-                .show();
-    }
+                @Thunk
+                void alertCustomSpend() {
+                    new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
+                            .setTitle(R.string.transaction_fee)
+                            .setMessage(R.string.fee_options_advanced_warning)
+                            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                                getPresenter().disableAdvancedFeeWarning();
+                                displayCustomFeeField();
+                            })
+                            .setNegativeButton(android.R.string.cancel, (dialog, which) ->
+                                    binding.spinnerPriority.setSelection(0))
+                            .show();
+                }
 
-    @Thunk
-    void displayCustomFeeField() {
-        binding.textviewFeeAbsolute.setVisibility(View.GONE);
-        binding.textviewFeeTime.setVisibility(View.GONE);
-        binding.textInputLayout.setVisibility(View.VISIBLE);
-        binding.buttonContinue.setEnabled(false);
-        binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
+                //Done
+                @Thunk
+                void displayCustomFeeField() {
+                    binding.textviewFeeAbsolute.setVisibility(View.GONE);
+                    binding.textviewFeeTime.setVisibility(View.GONE);
+                    binding.textInputLayout.setVisibility(View.VISIBLE);
+                    binding.buttonContinue.setEnabled(false);
+                    binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
 
-        binding.edittextCustomFee.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus || !binding.edittextCustomFee.getText().toString().isEmpty()) {
-                binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_inline_hint,
-                        String.valueOf(getPresenter().getFeeOptions().getRegularFee()),
-                        String.valueOf(getPresenter().getFeeOptions().getPriorityFee())));
-            } else if (binding.edittextCustomFee.getText().toString().isEmpty()) {
-                binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
-            } else {
-                binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
-            }
-        });
+                    binding.edittextCustomFee.setOnFocusChangeListener((v, hasFocus) -> {
+                        if (hasFocus || !binding.edittextCustomFee.getText().toString().isEmpty()) {
+                            binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_inline_hint,
+                                    String.valueOf(getPresenter().getFeeOptions().getRegularFee()),
+                                    String.valueOf(getPresenter().getFeeOptions().getPriorityFee())));
+                        } else if (binding.edittextCustomFee.getText().toString().isEmpty()) {
+                            binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
+                        } else {
+                            binding.textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint));
+                        }
+                    });
 
-        RxTextView.textChanges(binding.edittextCustomFee)
-                .map(CharSequence::toString)
-                .doOnNext(value -> binding.buttonContinue.setEnabled(!value.isEmpty() && !value.equals("0")))
-                .filter(value -> !value.isEmpty())
-                .map(Long::valueOf)
-                .onErrorReturnItem(0L)
-                .doOnNext(value -> {
-                    if (value < getPresenter().getFeeOptions().getLimits().getMin()) {
-                        binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
-                    } else if (value > getPresenter().getFeeOptions().getLimits().getMax()) {
-                        binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_high));
-                    } else {
-                        binding.textInputLayout.setError(null);
-                    }
-                })
-                .debounce(300, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        value -> updateTotals(getPresenter().getSendingItemAccount()),
-                        Throwable::printStackTrace);
-    }
+                    RxTextView.textChanges(binding.edittextCustomFee)
+                            .map(CharSequence::toString)
+                            .doOnNext(value -> binding.buttonContinue.setEnabled(!value.isEmpty() && !value.equals("0")))
+                            .filter(value -> !value.isEmpty())
+                            .map(Long::valueOf)
+                            .onErrorReturnItem(0L)
+                            .doOnNext(value -> {
+                                if (value < getPresenter().getFeeOptions().getLimits().getMin()) {
+                                    binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_low));
+                                } else if (value > getPresenter().getFeeOptions().getLimits().getMax()) {
+                                    binding.textInputLayout.setError(getString(R.string.fee_options_fee_too_high));
+                                } else {
+                                    binding.textInputLayout.setError(null);
+                                }
+                            })
+                            .debounce(300, TimeUnit.MILLISECONDS)
+                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(
+                                    value -> updateTotals(getPresenter().getSendingItemAccount()),
+                                    Throwable::printStackTrace);
+                }
 
                 //done
                 @Override
