@@ -25,6 +25,7 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
 import piuk.blockchain.android.data.ethereum.EthDataStore
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.ExchangeRateFactory
@@ -234,9 +235,11 @@ class ReceivePresenterTest {
     fun onEthSelected() {
         // Arrange
         val ethAccount = "0x879dBFdE84B0239feB355f55F81fb29f898C778C"
+        val combinedEthModel: CombinedEthModel = mock()
         val ethResponse: EthAddressResponse = mock()
+        whenever(ethDataStore.ethAddressResponse).thenReturn(combinedEthModel)
+        whenever(combinedEthModel.getAddressResponse()).thenReturn(ethResponse)
         whenever(ethResponse.account).thenReturn(ethAccount)
-        whenever(ethDataStore.ethAddressResponse).thenReturn(ethResponse)
         whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
                 .thenReturn(Observable.empty())
         // Act

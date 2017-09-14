@@ -3,19 +3,20 @@ package piuk.blockchain.android.data.ethereum.models
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap
 import info.blockchain.wallet.ethereum.data.EthTransaction
-import timber.log.Timber
+import piuk.blockchain.android.util.annotations.Mockable
 import java.math.BigInteger
 
 /**
  * A model that merges the transactions and balances of multiple ETH responses into a single object.
  */
+@Mockable
 class CombinedEthModel(private val ethAddressResponseMap: EthAddressResponseMap) {
 
     fun getTotalBalance(): BigInteger {
         val values = ethAddressResponseMap.ethAddressResponseMap.values
-        val total = BigInteger.ZERO
+        var total = BigInteger.ZERO
         for (it in values) {
-            total.add(it.balance)
+            total += total.add(it.balance)
         }
         return total
     }
