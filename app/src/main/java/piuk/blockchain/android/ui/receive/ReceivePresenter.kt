@@ -104,12 +104,11 @@ class ReceivePresenter @Inject internal constructor(
     internal fun onEthSelected() {
         view.hideBitcoinLayout()
         selectedAccount = null
-        // STOPSHIP: Fix me by selecting the correct account
-//        ethDataStore.ethAddressResponse!!.account.let {
-//            selectedAddress = it
-//            view.updateReceiveAddress(it)
-//            generateQrCode(it)
-//        }
+        ethDataStore.ethAddressResponse!!.getAddressResponse()!!.account.let {
+            selectedAddress = it
+            view.updateReceiveAddress(it)
+            generateQrCode(it)
+        }
     }
 
     internal fun onSelectDefault(defaultAccountPosition: Int) {
