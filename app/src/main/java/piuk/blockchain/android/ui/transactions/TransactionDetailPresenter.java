@@ -49,7 +49,8 @@ import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION
 @SuppressWarnings("WeakerAccess")
 public class TransactionDetailPresenter extends BasePresenter<TransactionDetailView> {
 
-    private static final int REQUIRED_CONFIRMATIONS = 3;
+    private static final int CONFIRMATIONS_BTC = 3;
+    private static final int CONFIRMATIONS_ETH = 12;
 
     private MonetaryUtil monetaryUtil;
     private TransactionHelper transactionHelper;
@@ -153,14 +154,14 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
     private void handleEthToAndFrom(Displayable displayable) {
         String fromAddress = displayable.getInputsMap().keySet().iterator().next();
         String toAddress = displayable.getOutputsMap().keySet().iterator().next();
-        // STOPSHIP: 11/09/2017 Fix me
-//        String ethAddress = ethDataManager.getEthAddress().getAccount();
-//        if (fromAddress.equals(ethAddress)) {
-//            fromAddress = stringUtils.getString(R.string.eth_default_account_label);
-//        }
-//        if (toAddress.equals(ethAddress)) {
-//            toAddress = stringUtils.getString(R.string.eth_default_account_label);
-//        }
+
+        String ethAddress = ethDataManager.getEthAddress().getAddressResponse().getAccount();
+        if (fromAddress.equals(ethAddress)) {
+            fromAddress = stringUtils.getString(R.string.eth_default_account_label);
+        }
+        if (toAddress.equals(ethAddress)) {
+            toAddress = stringUtils.getString(R.string.eth_default_account_label);
+        }
 
         getView().setFromAddress(fromAddress);
         getView().setToAddresses(Collections.singletonList(new RecipientModel(
@@ -288,13 +289,17 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
 
     @VisibleForTesting
     void setConfirmationStatus(CryptoCurrencies cryptoCurrency, String txHash, long confirmations) {
-        if (confirmations >= REQUIRED_CONFIRMATIONS) {
+        if (confirmations >= getRequiredConfirmations(cryptoCurrency)) {
             getView().setStatus(cryptoCurrency, stringUtils.getString(R.string.transaction_detail_confirmed), txHash);
         } else {
             String pending = stringUtils.getString(R.string.transaction_detail_pending);
-            pending = String.format(Locale.getDefault(), pending, confirmations, REQUIRED_CONFIRMATIONS);
+            pending = String.format(Locale.getDefault(), pending, confirmations, getRequiredConfirmations(cryptoCurrency));
             getView().setStatus(cryptoCurrency, pending, txHash);
         }
+    }
+
+    private int getRequiredConfirmations(CryptoCurrencies cryptoCurrency) {
+        return cryptoCurrency == CryptoCurrencies.BTC ? CONFIRMATIONS_BTC : CONFIRMATIONS_ETH;
     }
 
     private void setDate(long time) {
@@ -312,13 +317,13 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
     @VisibleForTesting
     void setTransactionColor(Displayable transaction) {
         if (transaction.getDirection() == Direction.TRANSFERRED) {
-            getView().setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
+            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(displayable.getCryptoCurrency())
                     ? R.color.product_gray_transferred_50 : R.color.product_gray_transferred);
         } else if (transaction.getDirection() == Direction.SENT) {
-            getView().setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
+            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(displayable.getCryptoCurrency())
                     ? R.color.product_red_sent_50 : R.color.product_red_sent);
         } else {
-            getView().setTransactionColour(transaction.getConfirmations() < REQUIRED_CONFIRMATIONS
+            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(displayable.getCryptoCurrency())
                     ? R.color.product_green_received_50 : R.color.product_green_received);
         }
     }
