@@ -20,7 +20,7 @@ class TransactionListDataManager(
 ) {
 
     fun fetchTransactions(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> {
-        val observable: Observable<Displayable> = when (itemAccount.type) {
+        val observable: Observable<List<Displayable>> = when (itemAccount.type) {
             ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> getAllTransactionsObservable(limit, offset)
             ItemAccount.TYPE.ALL_LEGACY -> getLegacyObservable(limit, offset)
             ItemAccount.TYPE.ETHEREUM -> getEthereumObservable()
@@ -31,10 +31,8 @@ class TransactionListDataManager(
             }
         }
 
-        return observable.toList()
-                .doOnSuccess { insertTransactionList(it.toMutableList()) }
+        return observable.doOnNext { insertTransactionList(it.toMutableList()) }
                 .map { transactionListStore.list }
-                .toObservable()
                 .doOnError { emptyList<Displayable>() }
                 .compose(RxUtil.applySchedulersToObservable())
     }
@@ -131,33 +129,35 @@ class TransactionListDataManager(
                 .forEach { pendingMap.remove(it.hash) }
     }
 
-    private fun getAllTransactionsObservable(limit: Int, offset: Int): Observable<Displayable> {
-        return Observable.fromIterable(payloadManager.getAllTransactions(limit, offset))
-                .map { BtcDisplayable(it) }
-    }
+    private fun getAllTransactionsObservable(limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                payloadManager.getAllTransactions(limit, offset)
+                        .map { BtcDisplayable(it) }
+            }
 
-    private fun getLegacyObservable(limit: Int, offset: Int): Observable<Displayable> {
-        return Observable.fromIterable(payloadManager.getImportedAddressesTransactions(limit, offset))
-                .map { BtcDisplayable(it) }
-    }
+    private fun getLegacyObservable(limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                payloadManager.getImportedAddressesTransactions(limit, offset)
+                        .map { BtcDisplayable(it) }
+            }
 
-    private fun getAccountObservable(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<Displayable> {
-        return Observable.fromIterable(payloadManager.getAccountTransactions(itemAccount.address, limit, offset))
-                .map { BtcDisplayable(it) }
-    }
+    private fun getAccountObservable(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                payloadManager.getAccountTransactions(itemAccount.address, limit, offset)
+                        .map { BtcDisplayable(it) }
+            }
 
-    private fun getEthereumObservable(): Observable<Displayable> {
-        return ethDataManager.getLatestBlock()
-                .flatMap { latestBlock ->
-                    ethDataManager.getEthTransactions()
-                            .map {
-                                EthDisplayable(
-                                        ethDataManager.getEthAddress()!!,
-                                        it,
-                                        latestBlock.blockHeight
-                                )
-                            }
-                }
-    }
+    private fun getEthereumObservable(): Observable<List<Displayable>> = ethDataManager.getLatestBlock()
+            .flatMap { latestBlock ->
+                ethDataManager.getEthTransactions()
+                        .map {
+                            EthDisplayable(
+                                    ethDataManager.getEthAddress()!!,
+                                    it,
+                                    latestBlock.blockHeight
+                            )
+                        }.toList()
+                        .toObservable()
+            }
 
 }
