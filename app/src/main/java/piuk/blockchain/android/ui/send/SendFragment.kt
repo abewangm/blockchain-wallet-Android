@@ -65,9 +65,9 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew, NumericKeyboardCallback {
+class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericKeyboardCallback {
 
-    @Inject lateinit var sendPresenterNew: SendPresenterNew
+    @Inject lateinit var sendPresenter: SendPresenter
 
     private var backPressed: Long = 0
     private val COOL_DOWN_MILLIS = 2 * 1000
@@ -157,7 +157,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         super.onPause()
     }
 
-    override fun createPresenter() = sendPresenterNew
+    override fun createPresenter() = sendPresenter
 
     override fun getMvpView() = this
 
@@ -331,6 +331,10 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     override fun updateCryptoCurrency(currency: String) {
         amountContainer.currencyCrypto.setText(currency)
+    }
+
+    override fun updateFiatCurrency(currency: String) {
+        amountContainer.currencyFiat.setText(currency)
     }
 
     override fun disableCryptoTextChangeListener() {
@@ -900,8 +904,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         fun newInstance(scanData: String?,
                         scanRoute: String?,
-                        selectedAccountPosition: Int): SendFragmentNew {
-            val fragment = SendFragmentNew()
+                        selectedAccountPosition: Int): SendFragment {
+            val fragment = SendFragment()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, scanData)
             args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute)
@@ -913,8 +917,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         fun newInstance(uri: String,
                         contactId: String,
                         contactMdid: String,
-                        fctxId: String): SendFragmentNew {
-            val fragment = SendFragmentNew()
+                        fctxId: String): SendFragment {
+            val fragment = SendFragment()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, uri)
             args.putString(ARGUMENT_CONTACT_ID, contactId)

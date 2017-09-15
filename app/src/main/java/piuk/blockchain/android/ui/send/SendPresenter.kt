@@ -19,7 +19,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.subjects.PublishSubject
 import org.apache.commons.lang3.tuple.Pair
-import org.apache.commons.lang3.tuple.Triple
 import org.bitcoinj.core.ECKey
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -58,7 +57,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class SendPresenterNew @Inject constructor(
+class SendPresenter @Inject constructor(
         private val walletAccountHelper: WalletAccountHelper,
         private val payloadDataManager: PayloadDataManager,
         private val currencyState: CurrencyState,
@@ -73,7 +72,7 @@ class SendPresenterNew @Inject constructor(
         private val environmentSettings: EnvironmentSettings,
         private val sslVerifyUtil: SSLVerifyUtil,
         private val transactionListDataManager: TransactionListDataManager
-) : BasePresenter<SendViewNew>() {
+) : BasePresenter<SendView>() {
 
     val locale by unsafeLazy { Locale.getDefault() }
     val currencyHelper by unsafeLazy { ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory, currencyState) }
@@ -105,7 +104,7 @@ class SendPresenterNew @Inject constructor(
 
         setupTextChangeSubject()
         updateTicker()
-        setCryptoCurrency()
+        updateCurrencyUnits()
     }
 
     fun onBitcoinChosen() {
@@ -122,7 +121,7 @@ class SendPresenterNew @Inject constructor(
         clearCryptoAmount()
         clearReceivingAddress()
         view.setCryptoMaxLength(17)
-        setCryptoCurrency()
+        updateCurrencyUnits()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
         view.showFeePriority()
     }
@@ -142,7 +141,7 @@ class SendPresenterNew @Inject constructor(
         clearCryptoAmount()
         clearReceivingAddress()
         view.setCryptoMaxLength(30)
-        setCryptoCurrency()
+        updateCurrencyUnits()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
         view.hideFeePriority()
     }
@@ -483,7 +482,10 @@ class SendPresenterNew @Inject constructor(
         view.updateReceivingHint(hint)
     }
 
-    internal fun setCryptoCurrency() {
+    internal fun updateCurrencyUnits() {
+
+        view.updateFiatCurrency(currencyHelper.fiatUnit)
+
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> view.updateCryptoCurrency(currencyHelper.btcUnit)
             CryptoCurrencies.ETHER -> view.updateCryptoCurrency(currencyHelper.ethUnit)

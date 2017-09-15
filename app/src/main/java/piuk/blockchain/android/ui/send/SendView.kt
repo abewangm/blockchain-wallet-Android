@@ -5,7 +5,7 @@ import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.View
 
-interface SendViewNew : View {
+interface SendView : View {
 
     //Update field
     fun updateSendingAddress(label: String)
@@ -13,6 +13,8 @@ interface SendViewNew : View {
     fun updateReceivingHint(hint: Int)
 
     fun updateCryptoCurrency(currency: String)
+
+    fun updateFiatCurrency(unit: String)
 
     fun updateCryptoAmount(amountString: String?)
 
