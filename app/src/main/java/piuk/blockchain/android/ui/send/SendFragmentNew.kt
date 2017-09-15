@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
@@ -123,7 +124,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             if (ConnectivityStatus.hasConnectivity(activity)) {
                 presenter.onContinueClicked()
             } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+                showSnackbar(R.string.check_connectivity_exit, Snackbar.LENGTH_LONG)
             }
         }
         max.setOnClickListener({ presenter.onSpendMaxClicked() })
@@ -267,7 +268,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             val intent = Intent(activity, CaptureActivity::class.java)
             startActivityForResult(intent, code)
         } else {
-            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR)
+            showSnackbar(R.string.camera_unavailable, Snackbar.LENGTH_LONG)
         }
     }
 
@@ -461,7 +462,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         if (ConnectivityStatus.hasConnectivity(activity)) {
             presenter.onContinueClicked()
         } else {
-            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+            showSnackbar(R.string.check_connectivity_exit, Snackbar.LENGTH_LONG)
         }
     }
 
@@ -490,8 +491,27 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         backPressed = System.currentTimeMillis()
     }
 
-    override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
+    fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
         ToastCustom.makeText(activity, getString(message), ToastCustom.LENGTH_SHORT, toastType)
+    }
+
+    override fun showSnackbar(@StringRes message: Int, duration: Int) {
+        val snackbar = Snackbar.make(activity.findViewById(R.id.coordinator_layout), message,
+                duration)
+                .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
+
+        if (duration == Snackbar.LENGTH_INDEFINITE) {
+            snackbar.setAction(R.string.ok_cap, {})
+        }
+
+        snackbar.show()
+    }
+
+    override fun showEthContractSnackbar() {
+        Snackbar.make(activity.findViewById(R.id.coordinator_layout), R.string.eth_support_contract_not_allowed,
+                Snackbar.LENGTH_INDEFINITE)
+                .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
+                .setAction(R.string.learn_more, {showSnackbar(R.string.eth_support_only_eth, Snackbar.LENGTH_INDEFINITE)}).show()
     }
 
     override fun showSendingFieldDropdown() {

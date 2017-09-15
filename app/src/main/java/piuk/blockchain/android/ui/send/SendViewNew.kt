@@ -2,10 +2,8 @@ package piuk.blockchain.android.ui.send
 
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
-import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.View
-import piuk.blockchain.android.ui.customviews.ToastCustom
 
 interface SendViewNew : View {
 
@@ -79,7 +77,9 @@ interface SendViewNew : View {
     fun getFeePriority(): Int
 
     // Prompts
-    fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
+    fun showSnackbar(@StringRes message: Int, duration: Int)
+
+    fun showEthContractSnackbar()
 
     fun showBIP38PassphrasePrompt(scanData: String)
 

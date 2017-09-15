@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.send
 
 import android.content.Intent
+import android.support.design.widget.Snackbar
 import android.text.Editable
 import android.widget.EditText
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -17,6 +18,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.subjects.PublishSubject
+import org.apache.commons.lang3.tuple.Pair
+import org.apache.commons.lang3.tuple.Triple
 import org.bitcoinj.core.ECKey
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -40,7 +43,6 @@ import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
-import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.util.*
@@ -154,29 +156,42 @@ class SendPresenterNew @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
 
-                if (isValidBitcoinTransaction()) {
-
-                    if(pendingTransaction.isWatchOnly()) {
-                        //returns to spendFromWatchOnly*BIP38 -> showPaymentReview()
-                        view.showSpendFromWatchOnlyWarning((pendingTransaction.sendingObject.accountObject as LegacyAddress).address)
-                    } else if(pendingTransaction.isWatchOnly() && verifiedSecondPassword != null) {
-                        //Second password already verified
-                        showPaymentReview()
-                    } else {
-                        //Checks if second pw needed then -> onNoSecondPassword()
-                        view.showSecondPasswordDialog()
-                    }
-                }
+                Observable.just(validateBitcoinTransaction())
+                        .doAfterTerminate { view?.dismissProgressDialog() }
+                        .compose(RxUtil.addObservableToCompositeDisposable(this))
+                        .subscribe({
+                            if (it.left) {
+                                if (pendingTransaction.isWatchOnly()) {
+                                    //returns to spendFromWatchOnly*BIP38 -> showPaymentReview()
+                                    view.showSpendFromWatchOnlyWarning((pendingTransaction.sendingObject.accountObject as LegacyAddress).address)
+                                } else if (pendingTransaction.isWatchOnly() && verifiedSecondPassword != null) {
+                                    //Second password already verified
+                                    showPaymentReview()
+                                } else {
+                                    //Checks if second pw needed then -> onNoSecondPassword()
+                                    view.showSecondPasswordDialog()
+                                }
+                            } else {
+                                view.showSnackbar(it.right, Snackbar.LENGTH_LONG)
+                            }
+                        }, { Timber.e(it) })
             }
             CryptoCurrencies.ETHER -> {
 
-                if (iValidEtherTransaction()) {
-                    showPaymentReview()
-                }
+                validateEtherTransaction()
+                        .doAfterTerminate { view?.dismissProgressDialog() }
+                        .compose(RxUtil.addObservableToCompositeDisposable(this))
+                        .subscribe({
+                            if (it.left) {
+                                showPaymentReview()
+                            } else if(it.right == R.string.eth_support_contract_not_allowed) {
+                                view.showEthContractSnackbar()
+                            } else {
+                                view.showSnackbar(it.right, Snackbar.LENGTH_LONG)
+                            }
+                        }, { Timber.e(it) })
             }
         }
-
-        view?.dismissProgressDialog()
     }
 
     /**
@@ -214,7 +229,7 @@ class SendPresenterNew @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e)
             view.dismissProgressDialog()
-            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
+            view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
             return
         }
 
@@ -237,7 +252,7 @@ class SendPresenterNew @Inject constructor(
                                     view.dismissConfirmationDialog()
                                     handleSuccessfulBtcPayment(hash)
                                 }) { throwable ->
-                            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
+                            view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
 
                             Logging.logCustom(PaymentSentEvent()
                                     .putSuccess(false)
@@ -556,7 +571,7 @@ class SendPresenterNew @Inject constructor(
                 compositeDisposable.add(
                         feeDataManager.btcFeeOptions
                                 .doOnError({ ignored ->
-                                    view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR)
+                                    view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
                                     view.finishPage(false)
                                 })
                                 .doOnTerminate({ feeOptions = dynamicFeeCache.getBtcFeeOptions()!! })
@@ -568,7 +583,7 @@ class SendPresenterNew @Inject constructor(
                 compositeDisposable.add(
                         feeDataManager.ethFeeOptions
                                 .doOnError({ ignored ->
-                                    view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR)
+                                    view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
                                     view.finishPage(false)
                                 })
                                 .doOnTerminate({ feeOptions = dynamicFeeCache.ethFeeOptions!! })
@@ -792,7 +807,7 @@ class SendPresenterNew @Inject constructor(
         if(ethDataManager.getEthAddress() == null) {
             ethDataManager.fetchEthAddress()
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnError { view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR) }
+                    .doOnError { view.showSnackbar(R.string.api_fail, Snackbar.LENGTH_INDEFINITE) }
                     .subscribe(Consumer {
                         calculateUnspentEth(it, spendAll, amountToSendText)
                     })
@@ -880,7 +895,7 @@ class SendPresenterNew @Inject constructor(
             address = scanData
             view?.updateCryptoAmount("")
         } else {
-            view.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR)
+            view.showSnackbar(R.string.invalid_bitcoin_address, Snackbar.LENGTH_LONG)
             return
         }
 
@@ -898,7 +913,7 @@ class SendPresenterNew @Inject constructor(
         val format = privateKeyFactory.getFormat(scanData)
 
         if(format == null) {
-            view?.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR)
+            view?.showSnackbar(R.string.privkey_error, Snackbar.LENGTH_LONG)
         }
 
         when (format) {
@@ -914,7 +929,7 @@ class SendPresenterNew @Inject constructor(
             setTempLegacyAddressPrivateKey(legacyAddress, key)
 
         } catch (e: Exception) {
-            view?.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR)
+            view?.showSnackbar(R.string.no_private_key, Snackbar.LENGTH_LONG)
             Timber.e(e)
         }
 
@@ -926,7 +941,7 @@ class SendPresenterNew @Inject constructor(
                         .subscribe({ ecKey ->
                             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
                             setTempLegacyAddressPrivateKey(legacyAddress, ecKey)
-                        }) { throwable -> view?.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR) })
+                        }) { throwable -> view?.showSnackbar(R.string.bip38_error, Snackbar.LENGTH_LONG) })
     }
 
     private fun setTempLegacyAddressPrivateKey(legacyAddress: LegacyAddress, key: ECKey?) {
@@ -942,7 +957,7 @@ class SendPresenterNew @Inject constructor(
 
             showPaymentReview()
         } else {
-            view?.showToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR)
+            view?.showSnackbar(R.string.invalid_private_key, Snackbar.LENGTH_LONG)
         }
     }
 
@@ -1010,7 +1025,7 @@ class SendPresenterNew @Inject constructor(
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
                     /* No-op */
-                }, { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
+                }, { view.showSnackbar(R.string.unexpected_error, Snackbar.LENGTH_LONG) })
     }
 
     internal fun selectSendingAccount(data: Intent?) {
@@ -1089,69 +1104,84 @@ class SendPresenterNew @Inject constructor(
         return bAmount.compareTo(BigInteger.ZERO) >= 0
     }
 
-    private fun isValidBitcoinTransaction(): Boolean {
-
+    private fun validateBitcoinTransaction(): Pair<Boolean, Int> {
         var validated = true
+        var errorMessage = R.string.unexpected_error
 
         //Validate address
         if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
-            view?.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR)
+            errorMessage = R.string.invalid_bitcoin_address
             validated = false
         }
 
         //Validate amount
         if (!isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
-            view?.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
-            return false
+            errorMessage = R.string.invalid_amount
+            validated = false
         }
 
         // Validate sufficient funds
         if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.spendableOutputs == null) {
-            view?.showToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR)
-            return false
+            errorMessage = R.string.no_confirmed_funds
+            validated = false
         }
 
         if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
-            view?.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR)
-            return false
+            errorMessage = R.string.insufficient_funds
+            validated = false
         }
 
         if (pendingTransaction.unspentOutputBundle.spendableOutputs.isEmpty()) {
-            view?.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR)
-            return false
+            errorMessage = R.string.insufficient_funds
+            validated = false
         }
 
-        return validated
+        return Pair.of(validated, errorMessage)
     }
 
     private fun isValidEtherAmount(bAmount: BigInteger?): Boolean {
         return (bAmount != null && bAmount.compareTo(BigInteger.ZERO) >= 0)
     }
 
-    private fun iValidEtherTransaction(): Boolean {
+    private fun validateEtherTransaction(): Observable<Pair<Boolean, Int>>{
 
-        var validated = true
+        if(pendingTransaction.receivingAddress == null) {
+            return Observable.just(Pair.of(false, R.string.eth_invalid_address))
+        } else {
+            return ethDataManager.getIfContract(pendingTransaction.receivingAddress)
+                    .map { isContract ->
 
-        //Validate address
-        if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidEthereumAddress(pendingTransaction.receivingAddress)) {
-            view?.showToast(R.string.invalid_ether_address, ToastCustom.TYPE_ERROR)
-            validated = false
+                        var validated = true
+                        var errorMessage = R.string.unexpected_error
+
+                        //Validate not contract
+                        if (isContract) {
+                            errorMessage = R.string.eth_support_contract_not_allowed
+                            validated = false
+                        }
+
+                        //Validate address
+                        if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidEthereumAddress(pendingTransaction.receivingAddress)) {
+                            errorMessage = R.string.eth_invalid_address
+                            validated = false
+                        }
+
+                        //Validate amount
+                        if (!isValidEtherAmount(pendingTransaction.bigIntAmount) || pendingTransaction.bigIntAmount.compareTo(BigInteger.ZERO) <= 0) {
+                            errorMessage = R.string.invalid_amount
+                            validated = false
+                        }
+
+                        // Validate sufficient funds
+                        if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
+                            errorMessage = R.string.insufficient_funds
+                            validated = false
+                        }
+
+
+                        Pair.of(validated, errorMessage)
+                    }
         }
-
-        //Validate amount
-        if (!isValidEtherAmount(pendingTransaction.bigIntAmount)) {
-            view?.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
-            return false
-        }
-
-        // Validate sufficient funds
-        if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
-            view?.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR)
-            return false
-        }
-
-        return validated
-
     }
 
     /**
