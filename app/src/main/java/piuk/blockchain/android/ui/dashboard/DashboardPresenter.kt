@@ -1,6 +1,6 @@
 package piuk.blockchain.android.ui.dashboard
 
-import info.blockchain.api.data.Point
+import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Observable
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -70,7 +70,7 @@ class DashboardPresenter @Inject constructor(
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         this.cryptoCurrency = cryptoCurrency
         updatePrices()
-        // TODO: Update graph data once ETH supported  
+        updateChartsData(TimeSpan.YEAR)
     }
 
     internal fun onResume() {
@@ -88,7 +88,9 @@ class DashboardPresenter @Inject constructor(
                                         getBtcString() else getEthString()
                             )
                         },
-                        { Timber.e(it) }
+                        {
+                            Timber.e(it)
+                        }
                 )
     }
 
@@ -98,10 +100,10 @@ class DashboardPresenter @Inject constructor(
         view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
 
         when (timeSpan) {
-            TimeSpan.YEAR -> chartsDataManager.getYearPrice()
-            TimeSpan.MONTH -> chartsDataManager.getMonthPrice()
-            TimeSpan.WEEK -> chartsDataManager.getWeekPrice()
-            else -> throw IllegalArgumentException("Day isn't currently supported")
+            TimeSpan.YEAR -> chartsDataManager.getYearPrice(cryptoCurrency, getFiatCurrency())
+            TimeSpan.MONTH -> chartsDataManager.getMonthPrice(cryptoCurrency, getFiatCurrency())
+            TimeSpan.WEEK -> chartsDataManager.getWeekPrice(cryptoCurrency, getFiatCurrency())
+            TimeSpan.DAY -> chartsDataManager.getDayPrice(cryptoCurrency, getFiatCurrency())
         }.compose(RxUtil.addObservableToCompositeDisposable(this))
                 .toList()
                 .doOnSubscribe { view.updateChartState(ChartsState.Loading) }
@@ -113,13 +115,14 @@ class DashboardPresenter @Inject constructor(
                 )
     }
 
-    private fun getChartsData(list: List<Point>): ChartsState.Data {
+    private fun getChartsData(list: List<PriceDatum>): ChartsState.Data {
         return ChartsState.Data(
                 data = list,
-                fiatSymbol = "$", // Dollar only supported currency right now
+                fiatSymbol = getCurrencySymbol(),
                 getChartYear = { updateChartsData(TimeSpan.YEAR) },
                 getChartMonth = { updateChartsData(TimeSpan.MONTH) },
-                getChartWeek = { updateChartsData(TimeSpan.WEEK) }
+                getChartWeek = { updateChartsData(TimeSpan.WEEK) },
+                getChartDay = { updateChartsData(TimeSpan.DAY) }
         )
     }
 
@@ -278,14 +281,14 @@ class DashboardPresenter @Inject constructor(
 
     // USD only supported currency for now
     private fun getBtcString(): String {
-        val lastBtcPrice = getLastBtcPrice("USD")
-        return "$${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastBtcPrice)}"
+        val lastBtcPrice = getLastBtcPrice(getFiatCurrency())
+        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastBtcPrice)}"
     }
 
     // USD only supported currency for now
     private fun getEthString(): String {
-        val lastEthPrice = getLastEthPrice("USD")
-        return "$${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastEthPrice)}"
+        val lastEthPrice = getLastEthPrice(getFiatCurrency())
+        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastEthPrice)}"
     }
 
     private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
@@ -313,11 +316,12 @@ class DashboardPresenter @Inject constructor(
 sealed class ChartsState {
 
     data class Data(
-            val data: List<Point>,
+            val data: List<PriceDatum>,
             val fiatSymbol: String,
             val getChartYear: () -> Unit,
             val getChartMonth: () -> Unit,
-            val getChartWeek: () -> Unit
+            val getChartWeek: () -> Unit,
+            val getChartDay: () -> Unit
     ) : ChartsState()
 
     object Error : ChartsState()

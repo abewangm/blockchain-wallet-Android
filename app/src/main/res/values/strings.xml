@@ -787,6 +787,7 @@
 
     <!-- DASHBOARD -->
     <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_time_span_day">Day</string>
     <string name="dashboard_time_span_week">Week</string>
     <string name="dashboard_time_span_month">Month</string>
     <string name="dashboard_time_span_year">Year</string>

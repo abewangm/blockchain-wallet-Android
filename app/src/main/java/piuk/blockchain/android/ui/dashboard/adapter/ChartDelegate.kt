@@ -61,7 +61,7 @@ class ChartDelegate<in T>(
             payloads: List<*>
     ) {
         viewHolder = holder as ChartViewHolder
-        setTextViewSelected(holder.year, listOf(holder.week, holder.month))
+        showTimeSpanSelected(TimeSpan.YEAR)
     }
 
     internal fun updateChartState(chartsState: ChartsState) {
@@ -90,6 +90,7 @@ class ChartDelegate<in T>(
         configureChart(data.fiatSymbol)
 
         viewHolder?.let {
+            it.day.setOnClickListener { data.getChartDay() }
             it.week.setOnClickListener { data.getChartWeek() }
             it.month.setOnClickListener { data.getChartMonth() }
             it.year.setOnClickListener { data.getChartYear() }
@@ -98,7 +99,7 @@ class ChartDelegate<in T>(
             it.chart.apply {
                 visible()
 
-                val entries = data.data.map { Entry(it.x, it.y) }
+                val entries = data.data.map { Entry(it.timestamp.toFloat(), it.price.toFloat()) }
                 this.data = LineData(LineDataSet(entries, null).apply {
                     color = ContextCompat.getColor(activity, R.color.primary_navy_medium)
                     lineWidth = 3f
@@ -137,15 +138,37 @@ class ChartDelegate<in T>(
 
     private fun showTimeSpanSelected(timeSpan: TimeSpan) {
         selectButton(timeSpan, viewHolder)
+        setDateFormatter(timeSpan)
     }
 
     private fun selectButton(timeSpan: TimeSpan, viewHolder: ChartViewHolder?) {
         viewHolder?.let {
             when (timeSpan) {
-                TimeSpan.WEEK -> setTextViewSelected(viewHolder.week, listOf(viewHolder.month, viewHolder.year))
-                TimeSpan.MONTH -> setTextViewSelected(viewHolder.month, listOf(viewHolder.week, viewHolder.year))
-                TimeSpan.YEAR -> setTextViewSelected(viewHolder.year, listOf(viewHolder.week, viewHolder.month))
-                else -> throw IllegalArgumentException("Day isn't currently supported")
+                TimeSpan.WEEK -> setTextViewSelected(viewHolder.week, listOf(viewHolder.day, viewHolder.month, viewHolder.year))
+                TimeSpan.MONTH -> setTextViewSelected(viewHolder.month, listOf(viewHolder.day, viewHolder.week, viewHolder.year))
+                TimeSpan.YEAR -> setTextViewSelected(viewHolder.year, listOf(viewHolder.day, viewHolder.week, viewHolder.month))
+                TimeSpan.DAY -> setTextViewSelected(viewHolder.day, listOf(viewHolder.week, viewHolder.month, viewHolder.year))
+            }
+        }
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun setDateFormatter(timeSpan: TimeSpan) {
+        when (timeSpan) {
+            TimeSpan.DAY -> {
+                viewHolder?.let {
+                    it.chart.xAxis.setValueFormatter { fl, _ ->
+                        SimpleDateFormat("H:00").format(Date(fl.toLong() * 1000))
+                    }
+                    it.chart.xAxis.granularity
+                }
+            }
+            else -> {
+                viewHolder?.let {
+                   it.chart.xAxis.setValueFormatter { fl, _ ->
+                        SimpleDateFormat("MMM dd").format(Date(fl.toLong() * 1000))
+                    }
+                }
             }
         }
     }
@@ -185,9 +208,7 @@ class ChartDelegate<in T>(
             xAxis.typeface = typefaceLight
             xAxis.textColor = ContextCompat.getColor(context, R.color.primary_gray_medium)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
-            xAxis.setValueFormatter { fl, _ ->
-                SimpleDateFormat("MMM dd").format(Date(fl.toLong() * 1000))
-            }
+            xAxis.isGranularityEnabled = true
         }
     }
 
@@ -197,6 +218,7 @@ class ChartDelegate<in T>(
     ) : RecyclerView.ViewHolder(itemView) {
 
         internal var chart: LineChart = itemView.chart
+        internal var day: TextView = itemView.textview_day
         internal var week: TextView = itemView.textview_week
         internal var month: TextView = itemView.textview_month
         internal var year: TextView = itemView.textview_year
