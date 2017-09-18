@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.ui.base.UiState;
 
@@ -54,7 +55,7 @@ public class SwipeToReceivePresenterTest {
         List<String> addresses = Arrays.asList("adrr0", "addr1", "addr2", "addr3", "addr4");
         when(swipeToReceiveHelper.getBitcoinReceiveAddresses()).thenReturn(addresses);
         when(swipeToReceiveHelper.getBitcoinAccountName()).thenReturn("Account");
-        when(swipeToReceiveHelper.getNextAvailableAddressSingle()).thenReturn(Observable.just(""));
+        when(swipeToReceiveHelper.getNextAvailableAddressSingle()).thenReturn(Single.just(""));
         // Act
         subject.onViewReady();
         // Assert
@@ -69,7 +70,7 @@ public class SwipeToReceivePresenterTest {
         List<String> addresses = Arrays.asList("adrr0", "addr1", "addr2", "addr3", "addr4");
         when(swipeToReceiveHelper.getBitcoinReceiveAddresses()).thenReturn(addresses);
         when(swipeToReceiveHelper.getBitcoinAccountName()).thenReturn("Account");
-        when(swipeToReceiveHelper.getNextAvailableAddressSingle()).thenReturn(Observable.just("addr0"));
+        when(swipeToReceiveHelper.getNextAvailableAddressSingle()).thenReturn(Single.just("addr0"));
         when(qrCodeDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.just(mock(Bitmap.class)));
         // Act
         subject.onViewReady();

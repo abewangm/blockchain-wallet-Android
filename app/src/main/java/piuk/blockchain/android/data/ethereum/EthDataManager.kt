@@ -13,8 +13,10 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.util.annotations.Mockable
 import java.util.*
 
+@Mockable
 class EthDataManager(
         private val payloadManager: PayloadManager,
         private val ethAccountApi: EthAccountApi,
