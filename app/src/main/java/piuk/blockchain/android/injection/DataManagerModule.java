@@ -150,8 +150,10 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
-                                                               PrefsUtil prefsUtil) {
-        return new SwipeToReceiveHelper(payloadDataManager, prefsUtil);
+                                                               PrefsUtil prefsUtil,
+                                                               EthDataManager ethDataManager,
+                                                               StringUtils stringUtils) {
+        return new SwipeToReceiveHelper(payloadDataManager, prefsUtil, ethDataManager, stringUtils);
     }
 
     @Provides

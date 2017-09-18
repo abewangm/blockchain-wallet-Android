@@ -53,7 +53,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         when(mockAccount.getLabel()).thenReturn("Account");
         when(payloadDataManager.getReceiveAddressAtPosition(eq(mockAccount), anyInt())).thenReturn("address");
         // Act
-        subject.updateAndStoreAddresses();
+        subject.updateAndStoreBitcoinAddresses();
         // Assert
         verify(prefsUtil).getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true);
         verify(payloadDataManager, times(5)).getReceiveAddressAtPosition(eq(mockAccount), anyInt());
@@ -83,7 +83,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         when(payloadDataManager.getBalanceOfAddresses(anyList())).thenReturn(Observable.just(map));
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "")).thenReturn("addr0, addr1, addr2, addr3, addr4");
         // Act
-        TestObserver<String> testObserver = subject.getNextAvailableAddress().test();
+        TestObserver<String> testObserver = subject.getNextAvailableAddressSingle().test();
         // Assert
         testObserver.assertComplete();
         testObserver.assertNoErrors();
@@ -112,7 +112,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         when(payloadDataManager.getBalanceOfAddresses(anyList())).thenReturn(Observable.just(map));
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "")).thenReturn("addr0, addr1, addr2, addr3, addr4");
         // Act
-        TestObserver<String> testObserver = subject.getNextAvailableAddress().test();
+        TestObserver<String> testObserver = subject.getNextAvailableAddressSingle().test();
         // Assert
         testObserver.assertComplete();
         testObserver.assertNoErrors();
@@ -124,7 +124,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         // Arrange
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "")).thenReturn("addr0, addr1, addr2, addr3, addr4");
         // Act
-        List<String> result = subject.getReceiveAddresses();
+        List<String> result = subject.getBitcoinReceiveAddresses();
         // Assert
         assertEquals(5, result.size());
     }
@@ -134,7 +134,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         // Arrange
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, "")).thenReturn("");
         // Act
-        List<String> result = subject.getReceiveAddresses();
+        List<String> result = subject.getBitcoinReceiveAddresses();
         // Assert
         assertEquals(Collections.emptyList(), result);
     }
@@ -144,7 +144,7 @@ public class SwipeToReceiveHelperTest extends RxTest {
         // Arrange
         when(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ACCOUNT_NAME, "")).thenReturn("Account");
         // Act
-        String result = subject.getAccountName();
+        String result = subject.getBitcoinAccountName();
         // Assert
         assertEquals("Account", result);
     }

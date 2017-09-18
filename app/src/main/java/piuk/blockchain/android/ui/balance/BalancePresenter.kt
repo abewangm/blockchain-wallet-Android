@@ -29,10 +29,11 @@ import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.ToastCustom
-import piuk.blockchain.android.ui.home.MainActivity
-import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.text.DecimalFormat
@@ -388,7 +389,7 @@ class BalancePresenter @Inject constructor(
         mutableList.add(ItemAccount().apply {
             type = ItemAccount.TYPE.ETHEREUM
             label = stringUtils.getString(R.string.eth_default_account_label)
-            absoluteBalance = ethDataManager.getEthAddress()?.getTotalBalance()?.toLong() ?: 0L
+            absoluteBalance = ethDataManager.getEthResponseModel()?.getTotalBalance()?.toLong() ?: 0L
             displayBalance = getEthBalanceString(
                     currencyState.isDisplayingCryptoCurrency,
                     absoluteBalance ?: 0L
@@ -521,7 +522,7 @@ class BalancePresenter @Inject constructor(
     private fun storeSwipeReceiveAddresses() {
         // Defer to background thread as deriving addresses is quite processor intensive
         Completable.fromCallable {
-            swipeToReceiveHelper.updateAndStoreAddresses()
+            swipeToReceiveHelper.updateAndStoreBitcoinAddresses()
             Void.TYPE
         }.subscribeOn(Schedulers.computation())
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))

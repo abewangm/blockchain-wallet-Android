@@ -46,9 +46,16 @@ class EthDataManager(
     /**
      * Returns the user's ETH account object if previously fetched.
      *
-     * @return A nullable [EthAddressResponse] object
+     * @return A nullable [CombinedEthModel] object
      */
-    fun getEthAddress() = ethDataStore.ethAddressResponse
+    fun getEthResponseModel() = ethDataStore.ethAddressResponse
+
+    /**
+     * Returns the user's [EthereumWallet] object if previously fetched.
+     *
+     * @return A nullable [EthereumWallet] object
+     */
+    fun getEthWallet() = ethDataStore.ethWallet
 
     /**
      * Returns a steam of [EthTransaction] objects associated with a user's ETH address specifically

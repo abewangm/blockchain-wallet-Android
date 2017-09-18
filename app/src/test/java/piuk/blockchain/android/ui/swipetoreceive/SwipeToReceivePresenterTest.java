@@ -40,7 +40,7 @@ public class SwipeToReceivePresenterTest {
     @Test
     public void onViewReadyNoAddresses() throws Exception {
         // Arrange
-        when(swipeToReceiveHelper.getReceiveAddresses()).thenReturn(Collections.emptyList());
+        when(swipeToReceiveHelper.getBitcoinReceiveAddresses()).thenReturn(Collections.emptyList());
         // Act
         subject.onViewReady();
         // Assert
@@ -52,9 +52,9 @@ public class SwipeToReceivePresenterTest {
     public void onViewReadyAddressReturnedIsEmpty() throws Exception {
         // Arrange
         List<String> addresses = Arrays.asList("adrr0", "addr1", "addr2", "addr3", "addr4");
-        when(swipeToReceiveHelper.getReceiveAddresses()).thenReturn(addresses);
-        when(swipeToReceiveHelper.getAccountName()).thenReturn("Account");
-        when(swipeToReceiveHelper.getNextAvailableAddress()).thenReturn(Observable.just(""));
+        when(swipeToReceiveHelper.getBitcoinReceiveAddresses()).thenReturn(addresses);
+        when(swipeToReceiveHelper.getBitcoinAccountName()).thenReturn("Account");
+        when(swipeToReceiveHelper.getNextAvailableAddressSingle()).thenReturn(Observable.just(""));
         // Act
         subject.onViewReady();
         // Assert
@@ -67,9 +67,9 @@ public class SwipeToReceivePresenterTest {
     public void onViewReadyAddressReturned() throws Exception {
         // Arrange
         List<String> addresses = Arrays.asList("adrr0", "addr1", "addr2", "addr3", "addr4");
-        when(swipeToReceiveHelper.getReceiveAddresses()).thenReturn(addresses);
-        when(swipeToReceiveHelper.getAccountName()).thenReturn("Account");
-        when(swipeToReceiveHelper.getNextAvailableAddress()).thenReturn(Observable.just("addr0"));
+        when(swipeToReceiveHelper.getBitcoinReceiveAddresses()).thenReturn(addresses);
+        when(swipeToReceiveHelper.getBitcoinAccountName()).thenReturn("Account");
+        when(swipeToReceiveHelper.getNextAvailableAddressSingle()).thenReturn(Observable.just("addr0"));
         when(qrCodeDataManager.generateQrCode(anyString(), anyInt())).thenReturn(Observable.just(mock(Bitmap.class)));
         // Act
         subject.onViewReady();

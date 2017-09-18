@@ -15,21 +15,22 @@ import android.view.Window;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.databinding.ActivityPinEntryBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.annotations.Thunk;
 
 public class PinEntryActivity extends BaseAuthActivity implements
         PinEntryFragment.OnPinEntryFragmentInteractionListener,
         ViewPager.OnPageChangeListener {
 
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
-    private ActivityPinEntryBinding binding;
+    @Thunk ActivityPinEntryBinding binding;
     private long backPressed;
-
     // Fragments
     private PinEntryFragment pinEntryFragment;
     private AppUtil appUtil;
@@ -52,23 +53,32 @@ public class PinEntryActivity extends BaseAuthActivity implements
         final FragmentPagerAdapter fragmentPagerAdapter;
         if (shouldHideSwipeToReceive()) {
             // Don't bother instantiating the QR fragment + Presenter if not necessary
+            Fragment fragment = new Fragment();
             fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,
-                    new Fragment());
+                    fragment,
+                    fragment);
 
             lockViewpager();
         } else {
-            final SwipeToReceiveFragment swipeToReceiveFragment = new SwipeToReceiveFragment();
+            SwipeToReceiveFragment bitcoinFragment =
+                    SwipeToReceiveFragment.newInstance(CryptoCurrencies.BTC);
+
+            SwipeToReceiveFragment ethFragment =
+                    SwipeToReceiveFragment.newInstance(CryptoCurrencies.ETHER);
 
             fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,
-                    swipeToReceiveFragment);
+                    bitcoinFragment,
+                    ethFragment);
         }
 
+        binding.viewpager.setOffscreenPageLimit(3);
         binding.viewpager.setAdapter(fragmentPagerAdapter);
         binding.viewpager.addOnPageChangeListener(this);
+        binding.indicator.setViewPager(binding.viewpager);
 
         EnvironmentSettings environmentSettings = new EnvironmentSettings();
 
@@ -104,7 +114,7 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
     @Override
     public void onBackPressed() {
-        if (binding.viewpager.getCurrentItem() == 1) {
+        if (binding.viewpager.getCurrentItem() != 0) {
             binding.viewpager.setCurrentItem(0);
         } else if (pinEntryFragment != null && pinEntryFragment.isValidatingPinForResult()) {
             finishWithResultCanceled();
@@ -138,7 +148,12 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        // No-op
+        if (position > 0) {
+            binding.indicator.setAlpha(1f);
+            binding.indicator.setVisibility(View.VISIBLE);
+        } else {
+            binding.indicator.setAlpha(positionOffset);
+        }
     }
 
     @Override
@@ -153,16 +168,19 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
     private static class SwipeToReceiveFragmentPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int NUM_ITEMS = 2;
-        private final Fragment pinEntryFragment;
-        private final Fragment swipeToReceiveFragment;
+        private static final int NUM_ITEMS = 3;
+        private final PinEntryFragment pinEntryFragment;
+        private final Fragment bitcoinFragment;
+        private final Fragment ethFragment;
 
         SwipeToReceiveFragmentPagerAdapter(FragmentManager fm,
-                                           Fragment pinEntryFragment,
-                                           Fragment swipeToReceiveFragment) {
+                                           PinEntryFragment pinEntryFragment,
+                                           Fragment bitcoinFragment,
+                                           Fragment ethFragment) {
             super(fm);
             this.pinEntryFragment = pinEntryFragment;
-            this.swipeToReceiveFragment = swipeToReceiveFragment;
+            this.bitcoinFragment = bitcoinFragment;
+            this.ethFragment = ethFragment;
         }
 
         @Override
@@ -171,7 +189,9 @@ public class PinEntryActivity extends BaseAuthActivity implements
                 case 0:
                     return pinEntryFragment;
                 case 1:
-                    return swipeToReceiveFragment;
+                    return bitcoinFragment;
+                case 2:
+                    return ethFragment;
                 default:
                     return null;
             }
@@ -182,4 +202,5 @@ public class PinEntryActivity extends BaseAuthActivity implements
             return NUM_ITEMS;
         }
     }
+
 }

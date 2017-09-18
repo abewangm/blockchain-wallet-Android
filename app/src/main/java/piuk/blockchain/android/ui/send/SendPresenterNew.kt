@@ -769,7 +769,7 @@ class SendPresenterNew @Inject constructor(
 
         view.showMaxAvailable()
 
-        if(ethDataManager.getEthAddress() == null) {
+        if(ethDataManager.getEthResponseModel() == null) {
             ethDataManager.fetchEthAddress()
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnError { view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR) }
@@ -777,7 +777,7 @@ class SendPresenterNew @Inject constructor(
                         calculateUnspentEth(it, spendAll, amountToSendText)
                     })
         } else {
-            val combinedEthModel = ethDataManager.getEthAddress()
+            val combinedEthModel = ethDataManager.getEthResponseModel()
             combinedEthModel?.let {
                 calculateUnspentEth(combinedEthModel, spendAll, amountToSendText)
             }

@@ -38,6 +38,7 @@ import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
@@ -352,7 +353,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private Completable ethWalletCompletable() {
         return ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
                 .compose(RxUtil.applySchedulersToObservable())
-                .flatMapCompletable(ethereumWallet -> Completable.complete());
+                .flatMapCompletable(ignored -> Completable.complete());
     }
 
     void generateMetadataHDNodeAndEthereumWallet(@Nullable String secondPassword) {
