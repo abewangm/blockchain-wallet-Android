@@ -16,7 +16,6 @@ import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.AnnouncementData
 import piuk.blockchain.android.ui.base.BasePresenter
-import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.dashboard.models.OnboardingModel
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.home.models.MetadataEvent
@@ -71,7 +70,12 @@ class DashboardPresenter @Inject constructor(
         // TODO: Update graph data once ETH supported  
     }
 
-    internal fun updatePrices() {
+    internal fun onResume() {
+        updateAllBalances()
+        updatePrices()
+    }
+
+    private fun updatePrices() {
         exchangeRateFactory.updateTickers()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
@@ -81,10 +85,7 @@ class DashboardPresenter @Inject constructor(
                                         getBtcString() else getEthString()
                             )
                         },
-                        {
-                            Timber.e(it)
-                            view.showToast(R.string.dashboard_charts_price_error, ToastCustom.TYPE_ERROR)
-                        }
+                        { Timber.e(it) }
                 )
     }
 
@@ -141,10 +142,7 @@ class DashboardPresenter @Inject constructor(
                             }
                 }.subscribe(
                 { /* No-op*/ },
-                {
-                    Timber.e(it)
-                    view.showToast(R.string.dashboard_charts_price_error, ToastCustom.TYPE_ERROR)
-                }
+                { Timber.e(it) }
         )
     }
 

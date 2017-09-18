@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.dashboard
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import kotlinx.android.synthetic.main.fragment_dashboard.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
+import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
 import piuk.blockchain.android.ui.home.MainActivity
@@ -67,7 +69,8 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun onResume() {
         super.onResume()
-        presenter.updatePrices()
+        setupToolbar()
+        presenter.onResume()
     }
 
     override fun notifyItemAdded(displayItems: MutableList<Any>, position: Int) {
@@ -119,6 +122,13 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun createPresenter() = dashboardPresenter
 
     override fun getMvpView() = this
+
+    private fun setupToolbar() {
+        if ((activity as AppCompatActivity).supportActionBar != null) {
+            (activity as BaseAuthActivity).setupToolbar(
+                    (activity as MainActivity).supportActionBar, null)
+        }
+    }
 
     companion object {
 

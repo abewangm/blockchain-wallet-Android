@@ -102,6 +102,7 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun onAccountChosen(position: Int) {
+        view.setUiState(UiState.LOADING)
         chosenAccount = activeAccountAndAddressList[position]
         chosenAccount?.let {
             Observable.merge(
