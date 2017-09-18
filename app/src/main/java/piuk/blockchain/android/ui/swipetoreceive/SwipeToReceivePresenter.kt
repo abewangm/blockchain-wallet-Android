@@ -16,7 +16,7 @@ class SwipeToReceivePresenter @Inject constructor(
 
     private val DIMENSION_QR_CODE = 600
     private val bitcoinAddress: Single<String>
-        get() = swipeToReceiveHelper.getNextAvailableAddressSingle()
+        get() = swipeToReceiveHelper.getNextAvailableBitcoinAddressSingle()
     private val ethereumAddress: Single<String>
         get() = swipeToReceiveHelper.getEthReceiveAddressSingle()
 

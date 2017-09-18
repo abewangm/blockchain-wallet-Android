@@ -69,7 +69,7 @@ class SwipeToReceiveHelper(
      * Returns the next unused address from the list of 5 stored for swipe to receive. Can return an
      * empty String if no unused addresses are found.
      */
-    fun getNextAvailableAddressSingle(): Single<String> {
+    fun getNextAvailableBitcoinAddressSingle(): Single<String> {
         return getBalanceOfAddresses(getBitcoinReceiveAddresses())
                 .map { map ->
                     for ((address, value) in map) {

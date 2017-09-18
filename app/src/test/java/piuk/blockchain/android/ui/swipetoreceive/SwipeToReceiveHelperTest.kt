@@ -14,10 +14,8 @@ import org.mockito.ArgumentMatchers.anyList
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.atLeastOnce
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import piuk.blockchain.android.R
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.ethereum.EthDataManager
@@ -42,7 +40,6 @@ class SwipeToReceiveHelperTest : RxTest() {
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
-        MockitoAnnotations.initMocks(this)
 
         subject = SwipeToReceiveHelper(payloadDataManager, prefsUtil, ethDataManager, stringUtils)
     }
@@ -53,7 +50,7 @@ class SwipeToReceiveHelperTest : RxTest() {
         // Arrange
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true))
                 .thenReturn(true)
-        val mockAccount = mock(Account::class.java)
+        val mockAccount: Account = mock()
         whenever(payloadDataManager.defaultAccount).thenReturn(mockAccount)
         whenever(mockAccount.label).thenReturn("Account")
         whenever(payloadDataManager.getReceiveAddressAtPosition(eq(mockAccount), anyInt()))
@@ -102,7 +99,7 @@ class SwipeToReceiveHelperTest : RxTest() {
         whenever(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, ""))
                 .thenReturn("addr0, addr1, addr2, addr3, addr4")
         // Act
-        val testObserver = subject.getNextAvailableAddressSingle().test()
+        val testObserver = subject.getNextAvailableBitcoinAddressSingle().test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
@@ -129,7 +126,7 @@ class SwipeToReceiveHelperTest : RxTest() {
         whenever(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, ""))
                 .thenReturn("addr0, addr1, addr2, addr3, addr4")
         // Act
-        val testObserver = subject.getNextAvailableAddressSingle().test()
+        val testObserver = subject.getNextAvailableBitcoinAddressSingle().test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
