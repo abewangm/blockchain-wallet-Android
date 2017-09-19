@@ -8,8 +8,10 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.util.annotations.Mockable
 import java.util.*
 
+@Mockable
 class ChartsDataManager(private val historicPriceApi: PriceApi, rxBus: RxBus) {
 
     private val rxPinning = RxPinning(rxBus)

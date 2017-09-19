@@ -232,7 +232,7 @@ dependencies {
     testImplementation 'org.json:json:20140107'
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
-    testImplementation('org.robolectric:robolectric:3.3.2') {
+    testImplementation('org.robolectric:robolectric:3.4.2') {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }

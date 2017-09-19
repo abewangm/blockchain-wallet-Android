@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.dashboard
 
+import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Observable
 import org.web3j.utils.Convert
@@ -46,11 +47,12 @@ class DashboardPresenter @Inject constructor(
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
     private var cryptoCurrency = CryptoCurrencies.BTC
     private val displayList = mutableListOf<Any>(ChartDisplayable())
-    private val metadataObservable = rxBus.register(MetadataEvent::class.java)
+    private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
 
     override fun onViewReady() {
         view.notifyItemAdded(displayList, 0)
 
+        // Triggers various updates to the page once all metadata is loaded
         metadataObservable.flatMap { getOnboardingStatusObservable() }
                 .doOnNext { swipeToReceiveHelper.storeEthAddress() }
                 .doOnNext { updateAllBalances() }
@@ -134,12 +136,13 @@ class DashboardPresenter @Inject constructor(
                                 val btcBalance = transactionListDataManager.getBtcBalance(ItemAccount().apply {
                                     type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
                                 })
+                                val ethBalance = ethAddressResponse.getTotalBalance()
                                 view.updateBtcBalance(getBtcBalanceString(btcBalance))
-                                view.updateEthBalance(getEthBalanceString(ethAddressResponse.getTotalBalance()))
+                                view.updateEthBalance(getEthBalanceString(ethBalance))
 
                                 val btcFiat = exchangeRateFactory.getLastBtcPrice(getFiatCurrency()) * (btcBalance / 1e8)
                                 val ethFiat = BigDecimal(exchangeRateFactory.getLastEthPrice(getFiatCurrency()))
-                                        .multiply(Convert.fromWei(BigDecimal(ethAddressResponse.getTotalBalance()), Convert.Unit.ETHER))
+                                        .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
 
                                 val totalDouble = btcFiat.plus(ethFiat.toDouble())
 
@@ -172,7 +175,7 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun dismissAnnouncement() {
-        prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
+        prefsUtil.setValue(ETH_ANNOUNCEMENT_DISMISSED, true)
         if (displayList.any { it is AnnouncementData }) {
             displayList.removeAll { it is AnnouncementData }
             view.notifyItemRemoved(displayList, 0)
@@ -193,8 +196,8 @@ class DashboardPresenter @Inject constructor(
     private fun checkLatestAnnouncement() {
         // If user hasn't completed onboarding, ignore announcements
         if (isOnboardingComplete()) {
-            if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false)) {
-                prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true)
+            if (!prefsUtil.getValue(ETH_ANNOUNCEMENT_DISMISSED, false)) {
+                prefsUtil.setValue(ETH_ANNOUNCEMENT_DISMISSED, true)
                 showAnnouncement()
             }
         }
@@ -243,6 +246,7 @@ class DashboardPresenter @Inject constructor(
 
         return OnboardingModel(
                 pages,
+                // TODO: These are neat and clever, but make things pretty hard to test. Replace with callbacks.
                 dismissOnboarding = {
                     displayList.removeAll { it is OnboardingModel }
                     view.notifyItemRemoved(displayList, 0)
@@ -250,6 +254,14 @@ class DashboardPresenter @Inject constructor(
                 onboardingComplete = { setOnboardingComplete(true) },
                 onboardingNotComplete = { setOnboardingComplete(false) }
         )
+    }
+
+    private fun isOnboardingComplete() =
+            // If wallet isn't newly created, don't show onboarding
+            prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) || !appUtil.isNewlyCreated
+
+    private fun setOnboardingComplete(completed: Boolean) {
+        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, completed)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -279,13 +291,11 @@ class DashboardPresenter @Inject constructor(
 
     private fun getCurrencySymbol() = exchangeRateFactory.getSymbol(getFiatCurrency())
 
-    // USD only supported currency for now
     private fun getBtcString(): String {
         val lastBtcPrice = getLastBtcPrice(getFiatCurrency())
         return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastBtcPrice)}"
     }
 
-    // USD only supported currency for now
     private fun getEthString(): String {
         val lastEthPrice = getLastEthPrice(getFiatCurrency())
         return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastEthPrice)}"
@@ -303,12 +313,10 @@ class DashboardPresenter @Inject constructor(
 
     private fun getLastEthPrice(fiat: String) = exchangeRateFactory.getLastEthPrice(fiat)
 
-    private fun isOnboardingComplete() =
-            // If wallet isn't newly created, don't show onboarding
-            prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) || !appUtil.isNewlyCreated
+    companion object {
 
-    private fun setOnboardingComplete(completed: Boolean) {
-        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, completed)
+        @VisibleForTesting const val ETH_ANNOUNCEMENT_DISMISSED = "ETH_ANNOUNCEMENT_DISMISSED"
+
     }
 
 }
