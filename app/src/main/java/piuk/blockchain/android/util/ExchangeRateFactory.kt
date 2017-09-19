@@ -3,8 +3,8 @@ package piuk.blockchain.android.util
 import info.blockchain.api.data.TickerItem
 import info.blockchain.api.exchangerates.ExchangeRates
 import info.blockchain.wallet.BlockchainFramework
-import info.blockchain.wallet.api.WalletApi
 import info.blockchain.wallet.exceptions.ApiException
+import info.blockchain.wallet.prices.PriceApi
 import io.reactivex.Completable
 import io.reactivex.Observable
 import piuk.blockchain.android.data.currency.CryptoCurrencies
@@ -14,8 +14,8 @@ import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import java.math.BigDecimal
 import java.math.BigInteger
-import java.text.NumberFormat
 import java.util.*
 import javax.inject.Inject
 
@@ -28,11 +28,14 @@ import javax.inject.Inject
 @Mockable
 class ExchangeRateFactory private constructor() {
 
+    private final val SATOSHIS_PER_BITCOIN = BigDecimal.valueOf(100_000_000L)
+    private final val WEI_PER_ETHER = BigDecimal.valueOf(1e18)
+
     private object Holder {
         val INSTANCE = ExchangeRateFactory()
     }
 
-    private final val walletApi by unsafeLazy { WalletApi() }
+    private final val priceApi by unsafeLazy { PriceApi() }
     private final val api: ExchangeRates
     private final val rxPinning: RxPinning
     // Ticker data
@@ -54,7 +57,9 @@ class ExchangeRateFactory private constructor() {
         rxPinning = RxPinning(rxBus)
     }
 
-    fun updateTickers(): Completable = rxPinning.call { getBtcTicker().mergeWith(getEthTicker()) }
+    fun updateTickers(): Completable = rxPinning.call {
+        getBtcTicker().mergeWith(getEthTicker())
+    }.compose(RxUtil.applySchedulersToCompletable())
 
     fun getLastBtcPrice(currencyName: String) = getLastPrice(currencyName, CryptoCurrencies.BTC)
 
@@ -76,16 +81,21 @@ class ExchangeRateFactory private constructor() {
      *
      * @param satoshis     The amount of Satoshi to be converted
      * @param currency     The currency to be converted to as a 3 letter acronym, eg USD, GBP
-     * @param timeInMillis The time at which to get the price, in milliseconds since epoch
-     * @return A double value
+     * @param timeInSeconds The time at which to get the price, in seconds since epoch
+     * @return A double value, which <b>is not</b> rounded to any significant figures
      */
     fun getBtcHistoricPrice(
             satoshis: Long,
             currency: String,
-            timeInMillis: Long
+            timeInSeconds: Long
     ): Observable<Double> = rxPinning.call<Double> {
-        walletApi.getBtcHistoricPrice(satoshis, currency, timeInMillis)
-                .flatMap { parseStringValue(it.string()) }
+        priceApi.getHistoricPrice("btc", currency, timeInSeconds)
+                .map {
+                    val exchangeRate = BigDecimal.valueOf(it)
+                    val satoshiDecimal = BigDecimal.valueOf(satoshis)
+                    return@map exchangeRate.multiply(satoshiDecimal.divide(SATOSHIS_PER_BITCOIN))
+                            .toDouble()
+                }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
@@ -94,27 +104,22 @@ class ExchangeRateFactory private constructor() {
      *
      * @param wei          The amount of Ether to be converted in Wei, ie ETH * 1e18
      * @param currency     The currency to be converted to as a 3 letter acronym, eg USD, GBP
-     * @param timeInMillis The time at which to get the price, in milliseconds since epoch
-     * @return A double value
+     * @param timeInSeconds The time at which to get the price, in seconds since epoch
+     * @return A double value, which <b>is not</b> rounded to any significant figures
      */
     fun getEthHistoricPrice(
             wei: BigInteger,
             currency: String,
-            timeInMillis: Long
+            timeInSeconds: Long
     ): Observable<Double> = rxPinning.call<Double> {
-        walletApi.getEthHistoricPrice(wei, currency, timeInMillis)
-                .flatMap { parseStringValue(it.string()) }
+        priceApi.getHistoricPrice("eth", currency, timeInSeconds)
+                .map {
+                    val exchangeRate = BigDecimal.valueOf(it)
+                    val ethDecimal = BigDecimal(wei)
+                    return@map exchangeRate.multiply(ethDecimal.divide(WEI_PER_ETHER))
+                            .toDouble()
+                }
                 .compose(RxUtil.applySchedulersToObservable())
-    }
-
-    private fun parseStringValue(value: String): Observable<Double> {
-        return Observable.fromCallable {
-            // Historic prices are in English format, using Locale.getDefault() will result in
-            // a parse exception in some regions
-            val format = NumberFormat.getInstance(Locale.ENGLISH)
-            val number = format.parse(value)
-            number.toDouble()
-        }
     }
 
     private fun getLastPrice(currencyName: String, cryptoCurrency: CryptoCurrencies): Double {
@@ -169,7 +174,7 @@ class ExchangeRateFactory private constructor() {
         } else {
             throw ApiException(call.errorBody()!!.string())
         }
-    }.compose(RxUtil.applySchedulersToCompletable())
+    }
 
     private fun getEthTicker(): Completable = Completable.fromCallable {
         val call = api.ethTickerMap.execute()
@@ -179,7 +184,7 @@ class ExchangeRateFactory private constructor() {
         } else {
             throw ApiException(call.errorBody()!!.string())
         }
-    }.compose(RxUtil.applySchedulersToCompletable())
+    }
 
     private fun getBtcTickerItem(currencyName: String) = btcTickerData!![currencyName]
 

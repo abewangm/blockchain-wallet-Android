@@ -3,7 +3,7 @@ package piuk.blockchain.android.util.extensions
 import java.math.BigInteger
 
 fun BigInteger.getAmountRange(): String {
-    val SATOSHIS = 1000000L
+    val SATOSHIS = 100_000_000L
 
     return when ((toLong() / SATOSHIS)) {
         in 0.0..0.05 -> "0 - 0.05 BTC"

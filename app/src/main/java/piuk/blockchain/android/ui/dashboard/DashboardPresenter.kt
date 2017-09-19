@@ -49,7 +49,6 @@ class DashboardPresenter @Inject constructor(
     private val metadataObservable = rxBus.register(MetadataEvent::class.java)
 
     override fun onViewReady() {
-        updateChartsData(TimeSpan.YEAR)
         view.notifyItemAdded(displayList, 0)
 
         metadataObservable.flatMap { getOnboardingStatusObservable() }
@@ -69,11 +68,12 @@ class DashboardPresenter @Inject constructor(
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         this.cryptoCurrency = cryptoCurrency
-        updatePrices()
+        updateCryptoPrice()
         updateChartsData(TimeSpan.YEAR)
     }
 
     internal fun onResume() {
+        updateChartsData(TimeSpan.YEAR)
         updateAllBalances()
         updatePrices()
     }
@@ -82,16 +82,16 @@ class DashboardPresenter @Inject constructor(
         exchangeRateFactory.updateTickers()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
-                        {
-                            view.updateCryptoCurrencyPrice(
-                                    if (cryptoCurrency == CryptoCurrencies.BTC)
-                                        getBtcString() else getEthString()
-                            )
-                        },
-                        {
-                            Timber.e(it)
-                        }
+                        { updateCryptoPrice() },
+                        { Timber.e(it) }
                 )
+    }
+
+    private fun updateCryptoPrice() {
+        view.updateCryptoCurrencyPrice(
+                if (cryptoCurrency == CryptoCurrencies.BTC)
+                    getBtcString() else getEthString()
+        )
     }
 
     private fun updateChartsData(timeSpan: TimeSpan) {

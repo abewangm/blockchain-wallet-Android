@@ -47,7 +47,7 @@ class ChartsDataManager(private val historicPriceApi: PriceApi, rxBus: RxBus) {
             TimeSpan.DAY -> Scale.FIFTEEN_MINUTES
         }
 
-        return historicPriceApi.getHistoricPrices(
+        return historicPriceApi.getHistoricPriceSeries(
                 cryptoCurrency.symbol,
                 fiatCurrency,
                 getStartTimeForTimeSpan(timeSpan),

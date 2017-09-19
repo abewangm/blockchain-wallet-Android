@@ -334,13 +334,13 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
             return exchangeRateFactory.getBtcHistoricPrice(
                     transaction.getTotal().longValue(),
                     currency,
-                    transaction.getTimeStamp() * 1000)
+                    transaction.getTimeStamp())
                     .map(aDouble -> getTransactionString(transaction, aDouble));
         } else {
             return exchangeRateFactory.getEthHistoricPrice(
                     transaction.getTotal(),
                     currency,
-                    transaction.getTimeStamp() * 1000)
+                    transaction.getTimeStamp())
                     .map(aDouble -> getTransactionString(transaction, aDouble));
         }
     }
