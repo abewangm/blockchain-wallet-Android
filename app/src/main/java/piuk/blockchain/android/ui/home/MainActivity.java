@@ -348,16 +348,16 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             ((ReceiveFragment) getCurrentFragment()).onBackPressed();
         } else //noinspection StatementWithEmptyBody
             if (getCurrentFragment() instanceof DashboardFragment) {
-            // Ignore
-        } else if (getCurrentFragment() instanceof ContactConfirmRequestFragment) {
-            // Remove Notes fragment from stack
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
-        } else {
-            // Switch to balance fragment
-            balanceFragment = BalanceFragment.newInstance(false);
-            replaceFragmentWithAnimation(balanceFragment);
-        }
+                handleBackPressed();
+            } else if (getCurrentFragment() instanceof ContactConfirmRequestFragment) {
+                // Remove Notes fragment from stack
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
+            } else {
+                // Switch to balance fragment
+                balanceFragment = BalanceFragment.newInstance(false);
+                replaceFragmentWithAnimation(balanceFragment);
+            }
     }
 
     public void handleBackPressed() {
@@ -449,12 +449,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                 });
 
         // Set selected appropriately.
-        if (getCurrentFragment() instanceof BalanceFragment) {
+        if (getCurrentFragment() instanceof DashboardFragment) {
             binding.bottomNavigation.setCurrentItem(1);
+        } else if (getCurrentFragment() instanceof BalanceFragment) {
+            binding.bottomNavigation.setCurrentItem(2);
         } else if (getCurrentFragment() instanceof SendFragment) {
             binding.bottomNavigation.setCurrentItem(0);
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
-            binding.bottomNavigation.setCurrentItem(2);
+            binding.bottomNavigation.setCurrentItem(3);
         }
 
         if (!BuildConfig.CONTACTS_ENABLED) {
@@ -605,14 +607,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         }
     }
 
-    public void restoreBottomNavigation() {
-        binding.bottomNavigation.restoreBottomNavigation(true);
-    }
-
-    public void hideBottomNavigation() {
-        binding.bottomNavigation.hideBottomNavigation(true);
-    }
-
     @SuppressWarnings("ConstantConditions")
     @Override
     public boolean isBuySellPermitted() {
@@ -724,9 +718,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
-                                            PaymentRequestType paymentRequestType,
-                                            String contactId,
+    public void onTransactionNotesRequested(@NonNull PaymentConfirmationDetails paymentConfirmationDetails,
+                                            @NonNull PaymentRequestType paymentRequestType,
+                                            @NonNull String contactId,
                                             long satoshis,
                                             int accountPosition) {
         addFragment(ContactConfirmRequestFragment.newInstance(paymentConfirmationDetails,

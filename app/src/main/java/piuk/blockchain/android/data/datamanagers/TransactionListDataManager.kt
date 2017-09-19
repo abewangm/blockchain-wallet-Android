@@ -13,36 +13,28 @@ import piuk.blockchain.android.data.transactions.EthDisplayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import java.util.*
 
-class TransactionListDataManager(private val payloadManager: PayloadManager,
-                                 private val ethDataManager: EthDataManager,
-                                 private val transactionListStore: TransactionListStore) {
+class TransactionListDataManager(
+        private val payloadManager: PayloadManager,
+        private val ethDataManager: EthDataManager,
+        private val transactionListStore: TransactionListStore
+) {
 
     fun fetchTransactions(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> {
-        return Observable.fromCallable {
-            val result: List<Displayable> = when (itemAccount.type) {
-                ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY ->
-                    payloadManager.getAllTransactions(limit, offset)
-                            .map { BtcDisplayable(it) }
-                ItemAccount.TYPE.ALL_LEGACY ->
-                    payloadManager.getImportedAddressesTransactions(limit, offset)
-                            .map { BtcDisplayable(it) }
-                ItemAccount.TYPE.ETHEREUM ->
-                    ethDataManager.getEthTransactions().blockingIterable()
-                            .map { EthDisplayable(ethDataManager.getEthAddress()!!, it) }
-                else ->
-                    if (FormatsUtil.isValidXpub(itemAccount.address)) {
-                        payloadManager.getAccountTransactions(itemAccount.address, limit, offset)
-                                .map { BtcDisplayable(it) }
-                    } else {
-                        payloadManager.getImportedAddressesTransactions(limit, offset)
-                                .map { BtcDisplayable(it) }
-                    }
+        val observable: Observable<List<Displayable>> = when (itemAccount.type) {
+            ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> getAllTransactionsObservable(limit, offset)
+            ItemAccount.TYPE.ALL_LEGACY -> getLegacyObservable(limit, offset)
+            ItemAccount.TYPE.ETHEREUM -> getEthereumObservable()
+            else -> if (FormatsUtil.isValidXpub(itemAccount.address)) {
+                getAccountObservable(itemAccount, limit, offset)
+            } else {
+                getLegacyObservable(limit, offset)
             }
+        }
 
-            insertTransactionList(result.toMutableList())
-
-            return@fromCallable transactionListStore.list
-        }.compose(RxUtil.applySchedulersToObservable())
+        return observable.doOnNext { insertTransactionList(it.toMutableList()) }
+                .map { transactionListStore.list }
+                .doOnError { emptyList<Displayable>() }
+                .compose(RxUtil.applySchedulersToObservable())
     }
 
     /**
@@ -136,5 +128,36 @@ class TransactionListDataManager(private val payloadManager: PayloadManager,
                 .filter { pendingMap.containsKey(it.hash) }
                 .forEach { pendingMap.remove(it.hash) }
     }
+
+    private fun getAllTransactionsObservable(limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                payloadManager.getAllTransactions(limit, offset)
+                        .map { BtcDisplayable(it) }
+            }
+
+    private fun getLegacyObservable(limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                payloadManager.getImportedAddressesTransactions(limit, offset)
+                        .map { BtcDisplayable(it) }
+            }
+
+    private fun getAccountObservable(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                payloadManager.getAccountTransactions(itemAccount.address, limit, offset)
+                        .map { BtcDisplayable(it) }
+            }
+
+    private fun getEthereumObservable(): Observable<List<Displayable>> = ethDataManager.getLatestBlock()
+            .flatMap { latestBlock ->
+                ethDataManager.getEthTransactions()
+                        .map {
+                            EthDisplayable(
+                                    ethDataManager.getEthResponseModel()!!,
+                                    it,
+                                    latestBlock.blockHeight
+                            )
+                        }.toList()
+                        .toObservable()
+            }
 
 }

@@ -4,6 +4,7 @@ import com.subgraph.orchid.encoders.Hex
 import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.EthereumWallet
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
+import info.blockchain.wallet.ethereum.data.EthLatestBlock
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.util.MetadataUtil
@@ -14,10 +15,11 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
-import timber.log.Timber
 import java.math.BigInteger
+import piuk.blockchain.android.util.annotations.Mockable
 import java.util.*
 
+@Mockable
 class EthDataManager(
         private val payloadManager: PayloadManager,
         private val ethAccountApi: EthAccountApi,
@@ -49,9 +51,16 @@ class EthDataManager(
     /**
      * Returns the user's ETH account object if previously fetched.
      *
-     * @return A nullable [EthAddressResponse] object
+     * @return A nullable [CombinedEthModel] object
      */
-    fun getEthAddress() = ethDataStore.ethAddressResponse
+    fun getEthResponseModel() = ethDataStore.ethAddressResponse
+
+    /**
+     * Returns the user's [EthereumWallet] object if previously fetched.
+     *
+     * @return A nullable [EthereumWallet] object
+     */
+    fun getEthWallet() = ethDataStore.ethWallet
 
     /**
      * Returns a steam of [EthTransaction] objects associated with a user's ETH address specifically
@@ -68,6 +77,17 @@ class EthDataManager(
         }
 
         return Observable.empty()
+    }
+
+    /**
+     * Returns a [EthLatestBlock] object which contains information about the most recently
+     * mined block.
+     *
+     * @return An [Observable] wrapping an [EthLatestBlock]
+     */
+    fun getLatestBlock(): Observable<EthLatestBlock> = rxPinning.call<EthLatestBlock> {
+        ethAccountApi.latestBlock
+                .compose(RxUtil.applySchedulersToObservable())
     }
 
     /**

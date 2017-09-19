@@ -106,6 +106,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 }
             }
         }
+
+        onViewReady()
     }
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
@@ -214,9 +216,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun onResume() {
         super.onResume()
-        tabs.getTabAt(0)?.select()
         presenter.onResume()
-        onViewReady()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
         }
@@ -427,8 +427,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 this
         )
 
-        val layoutManager = LinearLayoutManager(context)
-        recyclerview.layoutManager = layoutManager
+        recyclerview.layoutManager = LinearLayoutManager(context)
         recyclerview.adapter = balanceAdapter
         // Disable blinking animations in RecyclerView
         val animator = recyclerview.itemAnimator

@@ -16,11 +16,11 @@ import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.AnnouncementData
 import piuk.blockchain.android.ui.base.BasePresenter
-import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.dashboard.models.OnboardingModel
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.home.models.MetadataEvent
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.*
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
@@ -39,7 +39,8 @@ class DashboardPresenter @Inject constructor(
         private val stringUtils: StringUtils,
         private val appUtil: AppUtil,
         private val buyDataManager: BuyDataManager,
-        private val rxBus: RxBus
+        private val rxBus: RxBus,
+        private val swipeToReceiveHelper: SwipeToReceiveHelper
 ) : BasePresenter<DashboardView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
@@ -49,10 +50,11 @@ class DashboardPresenter @Inject constructor(
 
     override fun onViewReady() {
         updateChartsData(TimeSpan.YEAR)
-        updateAllBalances()
         view.notifyItemAdded(displayList, 0)
 
         metadataObservable.flatMap { getOnboardingStatusObservable() }
+                .doOnNext { swipeToReceiveHelper.storeEthAddress() }
+                .doOnNext { updateAllBalances() }
                 .doOnNext { checkLatestAnnouncement() }
                 .subscribe(
                         { /* No-op */ },
@@ -71,7 +73,12 @@ class DashboardPresenter @Inject constructor(
         // TODO: Update graph data once ETH supported  
     }
 
-    internal fun updatePrices() {
+    internal fun onResume() {
+        updateAllBalances()
+        updatePrices()
+    }
+
+    private fun updatePrices() {
         exchangeRateFactory.updateTickers()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
@@ -81,10 +88,7 @@ class DashboardPresenter @Inject constructor(
                                         getBtcString() else getEthString()
                             )
                         },
-                        {
-                            Timber.e(it)
-                            view.showToast(R.string.dashboard_charts_price_error, ToastCustom.TYPE_ERROR)
-                        }
+                        { Timber.e(it) }
                 )
     }
 
@@ -120,8 +124,7 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun updateAllBalances() {
-        ethDataManager.getEthereumWallet(stringUtils.getString(R.string.eth_default_account_label))
-                .flatMap { ethDataManager.fetchEthAddress() }
+        ethDataManager.fetchEthAddress()
                 .flatMapCompletable { ethAddressResponse ->
                     payloadDataManager.updateAllBalances()
                             .doOnComplete {
@@ -142,10 +145,7 @@ class DashboardPresenter @Inject constructor(
                             }
                 }.subscribe(
                 { /* No-op*/ },
-                {
-                    Timber.e(it)
-                    view.showToast(R.string.dashboard_charts_price_error, ToastCustom.TYPE_ERROR)
-                }
+                { Timber.e(it) }
         )
     }
 

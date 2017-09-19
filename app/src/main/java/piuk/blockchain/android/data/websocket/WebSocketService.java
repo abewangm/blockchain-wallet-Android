@@ -121,9 +121,9 @@ public class WebSocketService extends Service {
             }
 
             return addrs;
-        } else if (!swipeToReceiveHelper.getReceiveAddresses().isEmpty()) {
-            final String[] addrs = new String[swipeToReceiveHelper.getReceiveAddresses().size()];
-            final List<String> receiveAddresses = swipeToReceiveHelper.getReceiveAddresses();
+        } else if (!swipeToReceiveHelper.getBitcoinReceiveAddresses().isEmpty()) {
+            final String[] addrs = new String[swipeToReceiveHelper.getBitcoinReceiveAddresses().size()];
+            final List<String> receiveAddresses = swipeToReceiveHelper.getBitcoinReceiveAddresses();
             for (int i = 0; i < receiveAddresses.size(); i++) {
                 final String address = receiveAddresses.get(i);
                 addrs[i] = address;
