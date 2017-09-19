@@ -17,7 +17,7 @@ abstract class Displayable {
     abstract val hash: String
     abstract val inputsMap: HashMap<String, BigInteger>
     abstract val outputsMap: HashMap<String, BigInteger>
-    open val confirmations = 3
+    open val confirmations = 0
     open val watchOnly: Boolean = false
     open val doubleSpend: Boolean = false
     open val isPending: Boolean = false
@@ -27,7 +27,8 @@ abstract class Displayable {
 @Mockable
 data class EthDisplayable(
         private val combinedEthModel: CombinedEthModel,
-        private val ethTransaction: EthTransaction
+        private val ethTransaction: EthTransaction,
+        private val blockHeight: Long
 ) : Displayable() {
 
     override val cryptoCurrency: CryptoCurrencies
@@ -53,7 +54,8 @@ data class EthDisplayable(
         get() = HashMap<String, BigInteger>().apply {
             put(ethTransaction.to, ethTransaction.value)
         }
-
+    override val confirmations: Int
+        get() = (blockHeight - ethTransaction.blockNumber).toInt()
 }
 
 @Mockable

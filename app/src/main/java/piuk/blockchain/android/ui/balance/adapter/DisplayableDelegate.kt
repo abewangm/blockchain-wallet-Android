@@ -39,6 +39,9 @@ class DisplayableDelegate<in T>(
         private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
+    private val CONFIRMATIONS_BTC = 3
+    private val CONFIRMATIONS_ETH = 12
+
     private val prefsUtil = PrefsUtil(activity)
     private val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     private val dateUtil = DateUtil(activity)
@@ -235,7 +238,10 @@ class DisplayableDelegate<in T>(
             tx: Displayable,
             @DrawableRes colorLight: Int,
             @DrawableRes colorDark: Int
-    ) = if (tx.confirmations < 3) colorLight else colorDark
+    ) = if (tx.confirmations < getRequiredConfirmations(tx)) colorLight else colorDark
+
+    private fun getRequiredConfirmations(tx: Displayable) =
+            if (tx.cryptoCurrency == CryptoCurrencies.BTC) CONFIRMATIONS_BTC else CONFIRMATIONS_ETH
 
     private fun getRealTxPosition(position: Int, items: List<T>): Int {
         val diff = items.size - items.count { it is Displayable }
@@ -259,4 +265,5 @@ class DisplayableDelegate<in T>(
             contactNameLayout.gone()
         }
     }
+
 }
