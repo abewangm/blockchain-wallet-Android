@@ -844,8 +844,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                         { it.printStackTrace() })
     }
 
-    override fun showTransactionSuccess(hash: String,
-                                          transactionValue: Long) {
+    override fun showTransactionSuccess(hash: String, transactionValue: Long) {
         playAudio()
 
         val appRate = AppRate(activity)
@@ -868,9 +867,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             if (appRate.shouldShowDialog()) {
                 val ratingDialog = appRate.rateDialog
                 ratingDialog.setOnDismissListener { d -> finishPage() }
-                show()
                 setOnDismissListener({ d -> ratingDialog.show() })
+            } else {
+                setOnDismissListener({ d -> finishPage() })
             }
+
+            show()
         }
 
         dialogHandler.postDelayed(dialogRunnable, (5 * 1000).toLong())
