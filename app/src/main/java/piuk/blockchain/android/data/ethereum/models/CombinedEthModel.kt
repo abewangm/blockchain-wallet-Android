@@ -51,4 +51,7 @@ class CombinedEthModel(private val ethAddressResponseMap: EthAddressResponseMap)
     fun getAccounts(): List<String> =
             ethAddressResponseMap.ethAddressResponseMap.values.map { it.account }
 
+    fun getNonce(): BigInteger {
+        return BigInteger.valueOf(getAddressResponse()!!.nonce.toLong())
+    }
 }

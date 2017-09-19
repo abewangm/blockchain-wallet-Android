@@ -103,5 +103,5 @@ interface SendView : View {
 
     fun dismissConfirmationDialog()
 
-    fun finishPage(paymentMade: Boolean)
+    fun finishPage()
 }

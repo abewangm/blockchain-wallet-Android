@@ -20,6 +20,7 @@ import io.reactivex.functions.Consumer
 import io.reactivex.subjects.PublishSubject
 import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.ECKey
+import org.web3j.protocol.core.methods.request.RawTransaction
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.answers.Logging
@@ -207,60 +208,95 @@ class SendPresenter @Inject constructor(
 
         view.showProgressDialog(R.string.app_name)
 
-        val changeAddress: String
-        val keys = ArrayList<ECKey>()
-        try {
-            if (pendingTransaction.isHD()) {
-                val account = pendingTransaction.sendingObject.accountObject as Account
-                changeAddress = payloadDataManager.getNextChangeAddress(account).blockingFirst()
-
-                if (payloadDataManager.isDoubleEncrypted) {
-                    payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+        getBtcChangeAddress()!!
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnError {
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
                 }
-                keys.addAll(payloadDataManager.getHDKeysForSigning(account, pendingTransaction.unspentOutputBundle))
+                .map { pendingTransaction.changeAddress = it }
+                .flatMap { getBtcKeys() }
+                .flatMap {
+                    sendDataManager.submitPayment(pendingTransaction.unspentOutputBundle,
+                            it,
+                            pendingTransaction.receivingAddress,
+                            pendingTransaction.changeAddress,
+                            pendingTransaction.bigIntFee,
+                            pendingTransaction.bigIntAmount)
+                }
+                .subscribe({ hash ->
+                    Logging.logCustom(PaymentSentEvent()
+                            .putSuccess(true)
+                            .putAmountForRange(pendingTransaction.bigIntAmount))
 
-            } else {
-                val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
-                changeAddress = legacyAddress.address
-                keys.add(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)!!)
+                    clearBtcUnspentResponseCache()
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
+                    incrementBtcReceiveAddress()
+                    handleSuccessfulPayment(hash)
+                }) { throwable ->
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+
+                    Logging.logCustom(PaymentSentEvent()
+                            .putSuccess(false)
+                            .putAmountForRange(pendingTransaction.bigIntAmount))
+                }
+    }
+
+    private fun getBtcKeys(): Observable<MutableList<ECKey?>>? {
+        if (pendingTransaction.isHD()) {
+            val account = pendingTransaction.sendingObject.accountObject as Account
+
+            if (payloadDataManager.isDoubleEncrypted) {
+                payloadDataManager.decryptHDWallet(verifiedSecondPassword)
             }
-
-        } catch (e: Exception) {
-            Timber.e(e)
-            view.dismissProgressDialog()
-            view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
-            return
+            return Observable.just(payloadDataManager.getHDKeysForSigning(account, pendingTransaction.unspentOutputBundle))
+        } else {
+            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+            return Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
         }
+    }
 
-        compositeDisposable.add(
-                sendDataManager.submitPayment(
-                        pendingTransaction.unspentOutputBundle,
-                        keys,
-                        pendingTransaction.receivingAddress,
-                        changeAddress,
-                        pendingTransaction.bigIntFee,
-                        pendingTransaction.bigIntAmount)
-                        .doAfterTerminate { view.dismissProgressDialog() }
-                        .subscribe(
-                                { hash ->
-                                    Logging.logCustom(PaymentSentEvent()
-                                            .putSuccess(true)
-                                            .putAmountForRange(pendingTransaction.bigIntAmount))
-
-                                    clearBtcUnspentResponseCache()
-                                    view.dismissConfirmationDialog()
-                                    handleSuccessfulBtcPayment(hash)
-                                }) { throwable ->
-                            view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
-
-                            Logging.logCustom(PaymentSentEvent()
-                                    .putSuccess(false)
-                                    .putAmountForRange(pendingTransaction.bigIntAmount))
-                        })
+    private fun getBtcChangeAddress(): Observable<String>? {
+        if (pendingTransaction.isHD()) {
+            val account = pendingTransaction.sendingObject.accountObject as Account
+            return payloadDataManager.getNextChangeAddress(account)
+        } else {
+            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+            return Observable.just(legacyAddress.address)
+        }
     }
 
     private fun submitEthTransaction() {
 
+        createEthTransaction()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnError {
+                    Timber.e(it)
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                }
+                .flatMap { ethDataManager.signEthTransaction(it) }
+                .flatMap { ethDataManager.pushEthTx(it!!) }
+                .subscribe({
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
+                    handleSuccessfulPayment(it)
+                }, {
+                    Timber.e(it)
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                })
+    }
+
+    private fun createEthTransaction(): Observable<RawTransaction> {
+        return Observable
+                .just(ethDataManager.getEthAddress()!!.getNonce())
+                .flatMap {
+                    Observable.just(ethDataManager.createEthTransaction(
+                            nonce = it,
+                            to = pendingTransaction.receivingAddress,
+                            gasPrice = BigInteger.valueOf(feeOptions.regularFee),
+                            gasLimit = BigInteger.valueOf(feeOptions.gasLimit),
+                            weiValue = pendingTransaction.bigIntAmount))
+                }
     }
 
     private fun clearBtcUnspentResponseCache() {
@@ -273,18 +309,21 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    private fun handleSuccessfulBtcPayment(hash: String) {
-        insertPlaceHolderTransaction(hash, pendingTransaction)
-
+    private fun incrementBtcReceiveAddress() {
         if (pendingTransaction.isHD()) {
             val account = pendingTransaction.sendingObject.accountObject as Account
             payloadDataManager.incrementChangeAddress(account)
             payloadDataManager.incrementReceiveAddress(account)
             updateInternalBalances()
         }
-        if (view != null) {
-            view.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
-        }
+    }
+
+    private fun handleSuccessfulPayment(hash: String) {
+        //TODO - place holder for btc and eth
+//        insertPlaceHolderTransaction(hash, pendingTransaction)
+
+        view?.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
+
         pendingTransaction.clear()
         unspentApiResponses.clear()
 
@@ -574,7 +613,7 @@ class SendPresenter @Inject constructor(
                         feeDataManager.btcFeeOptions
                                 .doOnError({ ignored ->
                                     view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
-                                    view.finishPage(false)
+                                    view.finishPage()
                                 })
                                 .doOnTerminate({ feeOptions = dynamicFeeCache.getBtcFeeOptions()!! })
                                 .subscribe({ feeOptions -> dynamicFeeCache.btcFeeOptions = feeOptions },{ it.printStackTrace() }))
@@ -586,7 +625,7 @@ class SendPresenter @Inject constructor(
                         feeDataManager.ethFeeOptions
                                 .doOnError({ ignored ->
                                     view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
-                                    view.finishPage(false)
+                                    view.finishPage()
                                 })
                                 .doOnTerminate({ feeOptions = dynamicFeeCache.ethFeeOptions!! })
                                 .subscribe({ feeOptions -> dynamicFeeCache.ethFeeOptions = feeOptions },{ it.printStackTrace() }))
@@ -823,6 +862,17 @@ class SendPresenter @Inject constructor(
 
     internal fun calculateUnspentEth(combinedEthModel: CombinedEthModel, spendAll: Boolean, amountToSendText: String?) {
 
+        //TODO continue work here
+//        Timber.d("vos bigIntFee; "+pendingTransaction.bigIntFee)
+//        Timber.d("vos gasLimit: "+feeOptions.gasLimit)
+//        Timber.d("vos bigIntAmount: "+pendingTransaction.bigIntAmount)
+
+        //gasLimit 21_000
+        //"message" : "insufficient funds for gas * price + value"
+
+        //gasLimit 21
+        //"message" : "intrinsic gas too low"
+
         val gwei = BigDecimal.valueOf(feeOptions.gasLimit * feeOptions.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
 
@@ -963,7 +1013,7 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    internal fun onSendingLegacyAddressSelected(legacyAddress: LegacyAddress) {
+    internal fun onSendingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
 
         pendingTransaction.receivingObject = ItemAccount(legacyAddress.label, null, null, null, legacyAddress, legacyAddress.address)
 
@@ -974,7 +1024,7 @@ class SendPresenter @Inject constructor(
         view.updateSendingAddress(label)
     }
 
-    internal fun onSendingAccountSelected(account: Account) {
+    internal fun onSendingBtcAccountSelected(account: Account) {
 
         pendingTransaction.receivingObject = ItemAccount(account.label, null, null, null, account, null)
 
@@ -986,7 +1036,7 @@ class SendPresenter @Inject constructor(
         view.updateSendingAddress(label)
     }
 
-    internal fun onReceivingLegacyAddressSelected(legacyAddress: LegacyAddress) {
+    internal fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
 
         pendingTransaction.receivingObject = ItemAccount(legacyAddress.label, null, null, null, legacyAddress, legacyAddress.address)
         pendingTransaction.receivingAddress = legacyAddress.address
@@ -1037,8 +1087,8 @@ class SendPresenter @Inject constructor(
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
 
             when (any) {
-                is LegacyAddress -> onSendingLegacyAddressSelected(any)
-                is Account -> onSendingAccountSelected(any)
+                is LegacyAddress -> onSendingBtcLegacyAddressSelected(any)
+                is Account -> onSendingBtcAccountSelected(any)
                 else -> throw IllegalArgumentException("No method for handling $type available")
             }
 
@@ -1058,7 +1108,7 @@ class SendPresenter @Inject constructor(
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
 
             when (any) {
-                is LegacyAddress -> onReceivingLegacyAddressSelected(any)
+                is LegacyAddress -> onReceivingBtcLegacyAddressSelected(any)
                 is Account -> onReceivingAccountSelected(any)
                 else -> throw IllegalArgumentException("No method for handling $type available")
             }

@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.ethereum
 
+import com.subgraph.orchid.encoders.Hex
 import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.EthereumWallet
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
@@ -8,10 +9,13 @@ import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.util.MetadataUtil
 import io.reactivex.Completable
 import io.reactivex.Observable
+import org.web3j.protocol.core.methods.request.RawTransaction
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import timber.log.Timber
+import java.math.BigInteger
 import java.util.*
 
 class EthDataManager(
@@ -116,17 +120,39 @@ class EthDataManager(
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
+    //TODO we need to derive private key if we're going to spend eth - no point in just using address from metadata unless double encryted
     private fun fetchOrCreateEthereumWallet(defaultLabel: String): EthereumWallet {
         val masterKey = payloadManager.payload.hdWallets[0].masterKey
         val metadataNode = MetadataUtil.deriveMetadataNode(masterKey)
 
-        var ethWallet = EthereumWallet.load(metadataNode)
-
-        if (ethWallet == null) {
-            ethWallet = EthereumWallet(masterKey, defaultLabel)
+//        var ethWallet = EthereumWallet.load(metadataNode)
+//
+//        if (ethWallet == null) {
+            var ethWallet = EthereumWallet(masterKey, defaultLabel)
             ethWallet.save()
-        }
+//        }
 
         return ethWallet
+    }
+
+    /**
+     * @param GASPRICE - representing the fee the sender is willing to pay for gas. One unit of gas corresponds to the execution of one atomic instruction, i.e. a computational step,
+     * @param gasLimit - representing the maximum number of computational steps the transaction execution is allowed to take,
+     * @param weiValue - The amount of wei to transfer from the sender to the recipient,
+     */
+    fun createEthTransaction(nonce: BigInteger, to: String, gasPrice: BigInteger, gasLimit: BigInteger, weiValue: BigInteger): RawTransaction? {
+        return RawTransaction.createEtherTransaction(
+                nonce,
+                gasPrice,
+                gasLimit,
+                to,
+                weiValue);
+    }
+
+    fun signEthTransaction(rawTransaction: RawTransaction) = Observable.just(ethDataStore.ethWallet?.signTransaction(rawTransaction))
+
+    fun pushEthTx(signedTxBytes: ByteArray): Observable<String>? {
+        return ethAccountApi.pushTx("0x" + String(Hex.encode(signedTxBytes)))
+                .compose(RxUtil.applySchedulersToObservable())
     }
 }

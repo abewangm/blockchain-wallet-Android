@@ -241,12 +241,14 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             (activity as BaseAuthActivity).setupToolbar(
                     (activity as MainActivity).supportActionBar, R.string.send_bitcoin)
         } else {
-            finishPage(false)
+            finishPage()
         }
     }
 
-    override fun finishPage(paymentMade: Boolean) {
-
+    override fun finishPage() {
+        listener?.apply {
+            onSendFragmentClose()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -417,6 +419,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         }
 
         override fun afterTextChanged(editable: Editable) {
+            Timber.d("vos fiat afterTextChanged")
             presenter.updateCryptoTextField(editable, amountContainer.amountFiat)
             updateTotals()
         }
@@ -460,6 +463,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     fun onChangeFeeClicked() {
+        confirmPaymentDialog?.dismiss()
     }
 
     fun onContinueClicked() {
@@ -863,7 +867,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             // Won't show if contact transaction, as other dialog takes preference
             if (appRate.shouldShowDialog()) {
                 val ratingDialog = appRate.rateDialog
-                ratingDialog.setOnDismissListener { d -> finishPage(true) }
+                ratingDialog.setOnDismissListener { d -> finishPage() }
                 show()
                 setOnDismissListener({ d -> ratingDialog.show() })
             }
