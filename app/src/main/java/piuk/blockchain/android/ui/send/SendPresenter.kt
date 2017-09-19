@@ -287,13 +287,17 @@ class SendPresenter @Inject constructor(
     }
 
     private fun createEthTransaction(): Observable<RawTransaction> {
+
+        val feeGwei = BigDecimal.valueOf(feeOptions.regularFee)
+        val feeWei = Convert.toWei(feeGwei, Convert.Unit.GWEI)
+
         return Observable
-                .just(ethDataManager.getEthAddress()!!.getNonce())
+                .just(ethDataManager.getEthResponseModel()!!.getNonce())
                 .flatMap {
                     Observable.just(ethDataManager.createEthTransaction(
                             nonce = it,
                             to = pendingTransaction.receivingAddress,
-                            gasPrice = BigInteger.valueOf(feeOptions.regularFee),
+                            gasPrice = feeWei.toBigInteger(),
                             gasLimit = BigInteger.valueOf(feeOptions.gasLimit),
                             weiValue = pendingTransaction.bigIntAmount))
                 }
@@ -861,17 +865,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun calculateUnspentEth(combinedEthModel: CombinedEthModel, spendAll: Boolean, amountToSendText: String?) {
-
-        //TODO continue work here
-//        Timber.d("vos bigIntFee; "+pendingTransaction.bigIntFee)
-//        Timber.d("vos gasLimit: "+feeOptions.gasLimit)
-//        Timber.d("vos bigIntAmount: "+pendingTransaction.bigIntAmount)
-
-        //gasLimit 21_000
-        //"message" : "insufficient funds for gas * price + value"
-
-        //gasLimit 21
-        //"message" : "intrinsic gas too low"
 
         val gwei = BigDecimal.valueOf(feeOptions.gasLimit * feeOptions.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
