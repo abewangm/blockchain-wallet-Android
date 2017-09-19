@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
@@ -64,9 +65,9 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew, NumericKeyboardCallback {
+class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericKeyboardCallback {
 
-    @Inject lateinit var sendPresenterNew: SendPresenterNew
+    @Inject lateinit var sendPresenter: SendPresenter
 
     private var backPressed: Long = 0
     private val COOL_DOWN_MILLIS = 2 * 1000
@@ -123,7 +124,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             if (ConnectivityStatus.hasConnectivity(activity)) {
                 presenter.onContinueClicked()
             } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+                showSnackbar(R.string.check_connectivity_exit, Snackbar.LENGTH_LONG)
             }
         }
         max.setOnClickListener({ presenter.onSpendMaxClicked() })
@@ -156,7 +157,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         super.onPause()
     }
 
-    override fun createPresenter() = sendPresenterNew
+    override fun createPresenter() = sendPresenter
 
     override fun getMvpView() = this
 
@@ -240,12 +241,14 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             (activity as BaseAuthActivity).setupToolbar(
                     (activity as MainActivity).supportActionBar, R.string.send_bitcoin)
         } else {
-            finishPage(false)
+            finishPage()
         }
     }
 
-    override fun finishPage(paymentMade: Boolean) {
-
+    override fun finishPage() {
+        listener?.apply {
+            onSendFragmentClose()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -267,7 +270,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             val intent = Intent(activity, CaptureActivity::class.java)
             startActivityForResult(intent, code)
         } else {
-            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR)
+            showSnackbar(R.string.camera_unavailable, Snackbar.LENGTH_LONG)
         }
     }
 
@@ -330,6 +333,10 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     override fun updateCryptoCurrency(currency: String) {
         amountContainer.currencyCrypto.setText(currency)
+    }
+
+    override fun updateFiatCurrency(currency: String) {
+        amountContainer.currencyFiat.setText(currency)
     }
 
     override fun disableCryptoTextChangeListener() {
@@ -412,6 +419,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
 
         override fun afterTextChanged(editable: Editable) {
+            Timber.d("vos fiat afterTextChanged")
             presenter.updateCryptoTextField(editable, amountContainer.amountFiat)
             updateTotals()
         }
@@ -455,13 +463,14 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     fun onChangeFeeClicked() {
+        confirmPaymentDialog?.dismiss()
     }
 
     fun onContinueClicked() {
         if (ConnectivityStatus.hasConnectivity(activity)) {
             presenter.onContinueClicked()
         } else {
-            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+            showSnackbar(R.string.check_connectivity_exit, Snackbar.LENGTH_LONG)
         }
     }
 
@@ -490,8 +499,27 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         backPressed = System.currentTimeMillis()
     }
 
-    override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
+    fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
         ToastCustom.makeText(activity, getString(message), ToastCustom.LENGTH_SHORT, toastType)
+    }
+
+    override fun showSnackbar(@StringRes message: Int, duration: Int) {
+        val snackbar = Snackbar.make(activity.findViewById(R.id.coordinator_layout), message,
+                duration)
+                .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
+
+        if (duration == Snackbar.LENGTH_INDEFINITE) {
+            snackbar.setAction(R.string.ok_cap, {})
+        }
+
+        snackbar.show()
+    }
+
+    override fun showEthContractSnackbar() {
+        Snackbar.make(activity.findViewById(R.id.coordinator_layout), R.string.eth_support_contract_not_allowed,
+                Snackbar.LENGTH_INDEFINITE)
+                .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
+                .setAction(R.string.learn_more, {showSnackbar(R.string.eth_support_only_eth, Snackbar.LENGTH_INDEFINITE)}).show()
     }
 
     override fun showSendingFieldDropdown() {
@@ -839,7 +867,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             // Won't show if contact transaction, as other dialog takes preference
             if (appRate.shouldShowDialog()) {
                 val ratingDialog = appRate.rateDialog
-                ratingDialog.setOnDismissListener { d -> finishPage(true) }
+                ratingDialog.setOnDismissListener { d -> finishPage() }
                 show()
                 setOnDismissListener({ d -> ratingDialog.show() })
             }
@@ -880,8 +908,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         fun newInstance(scanData: String?,
                         scanRoute: String?,
-                        selectedAccountPosition: Int): SendFragmentNew {
-            val fragment = SendFragmentNew()
+                        selectedAccountPosition: Int): SendFragment {
+            val fragment = SendFragment()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, scanData)
             args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute)
@@ -893,8 +921,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         fun newInstance(uri: String,
                         contactId: String,
                         contactMdid: String,
-                        fctxId: String): SendFragmentNew {
-            val fragment = SendFragmentNew()
+                        fctxId: String): SendFragment {
+            val fragment = SendFragment()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, uri)
             args.putString(ARGUMENT_CONTACT_ID, contactId)

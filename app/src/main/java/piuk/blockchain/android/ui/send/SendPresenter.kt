@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.send
 
 import android.content.Intent
+import android.support.design.widget.Snackbar
 import android.text.Editable
 import android.widget.EditText
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -17,7 +18,9 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.subjects.PublishSubject
+import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.ECKey
+import org.web3j.protocol.core.methods.request.RawTransaction
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.answers.Logging
@@ -40,7 +43,6 @@ import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
-import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.util.*
@@ -56,7 +58,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class SendPresenterNew @Inject constructor(
+class SendPresenter @Inject constructor(
         private val walletAccountHelper: WalletAccountHelper,
         private val payloadDataManager: PayloadDataManager,
         private val currencyState: CurrencyState,
@@ -71,7 +73,7 @@ class SendPresenterNew @Inject constructor(
         private val environmentSettings: EnvironmentSettings,
         private val sslVerifyUtil: SSLVerifyUtil,
         private val transactionListDataManager: TransactionListDataManager
-) : BasePresenter<SendViewNew>() {
+) : BasePresenter<SendView>() {
 
     val locale by unsafeLazy { Locale.getDefault() }
     val currencyHelper by unsafeLazy { ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory, currencyState) }
@@ -103,7 +105,7 @@ class SendPresenterNew @Inject constructor(
 
         setupTextChangeSubject()
         updateTicker()
-        setCryptoCurrency()
+        updateCurrencyUnits()
     }
 
     fun onBitcoinChosen() {
@@ -120,7 +122,7 @@ class SendPresenterNew @Inject constructor(
         clearCryptoAmount()
         clearReceivingAddress()
         view.setCryptoMaxLength(17)
-        setCryptoCurrency()
+        updateCurrencyUnits()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
         view.showFeePriority()
     }
@@ -140,7 +142,7 @@ class SendPresenterNew @Inject constructor(
         clearCryptoAmount()
         clearReceivingAddress()
         view.setCryptoMaxLength(30)
-        setCryptoCurrency()
+        updateCurrencyUnits()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
         view.hideFeePriority()
     }
@@ -154,29 +156,42 @@ class SendPresenterNew @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
 
-                if (isValidBitcoinTransaction()) {
-
-                    if(pendingTransaction.isWatchOnly()) {
-                        //returns to spendFromWatchOnly*BIP38 -> showPaymentReview()
-                        view.showSpendFromWatchOnlyWarning((pendingTransaction.sendingObject.accountObject as LegacyAddress).address)
-                    } else if(pendingTransaction.isWatchOnly() && verifiedSecondPassword != null) {
-                        //Second password already verified
-                        showPaymentReview()
-                    } else {
-                        //Checks if second pw needed then -> onNoSecondPassword()
-                        view.showSecondPasswordDialog()
-                    }
-                }
+                Observable.just(validateBitcoinTransaction())
+                        .doAfterTerminate { view?.dismissProgressDialog() }
+                        .compose(RxUtil.addObservableToCompositeDisposable(this))
+                        .subscribe({
+                            if (it.left) {
+                                if (pendingTransaction.isWatchOnly()) {
+                                    //returns to spendFromWatchOnly*BIP38 -> showPaymentReview()
+                                    view.showSpendFromWatchOnlyWarning((pendingTransaction.sendingObject.accountObject as LegacyAddress).address)
+                                } else if (pendingTransaction.isWatchOnly() && verifiedSecondPassword != null) {
+                                    //Second password already verified
+                                    showPaymentReview()
+                                } else {
+                                    //Checks if second pw needed then -> onNoSecondPassword()
+                                    view.showSecondPasswordDialog()
+                                }
+                            } else {
+                                view.showSnackbar(it.right, Snackbar.LENGTH_LONG)
+                            }
+                        }, { Timber.e(it) })
             }
             CryptoCurrencies.ETHER -> {
 
-                if (iValidEtherTransaction()) {
-                    showPaymentReview()
-                }
+                validateEtherTransaction()
+                        .doAfterTerminate { view?.dismissProgressDialog() }
+                        .compose(RxUtil.addObservableToCompositeDisposable(this))
+                        .subscribe({
+                            if (it.left) {
+                                showPaymentReview()
+                            } else if(it.right == R.string.eth_support_contract_not_allowed) {
+                                view.showEthContractSnackbar()
+                            } else {
+                                view.showSnackbar(it.right, Snackbar.LENGTH_LONG)
+                            }
+                        }, { Timber.e(it) })
             }
         }
-
-        view?.dismissProgressDialog()
     }
 
     /**
@@ -193,60 +208,95 @@ class SendPresenterNew @Inject constructor(
 
         view.showProgressDialog(R.string.app_name)
 
-        val changeAddress: String
-        val keys = ArrayList<ECKey>()
-        try {
-            if (pendingTransaction.isHD()) {
-                val account = pendingTransaction.sendingObject.accountObject as Account
-                changeAddress = payloadDataManager.getNextChangeAddress(account).blockingFirst()
-
-                if (payloadDataManager.isDoubleEncrypted) {
-                    payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+        getBtcChangeAddress()!!
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnError {
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
                 }
-                keys.addAll(payloadDataManager.getHDKeysForSigning(account, pendingTransaction.unspentOutputBundle))
+                .map { pendingTransaction.changeAddress = it }
+                .flatMap { getBtcKeys() }
+                .flatMap {
+                    sendDataManager.submitPayment(pendingTransaction.unspentOutputBundle,
+                            it,
+                            pendingTransaction.receivingAddress,
+                            pendingTransaction.changeAddress,
+                            pendingTransaction.bigIntFee,
+                            pendingTransaction.bigIntAmount)
+                }
+                .subscribe({ hash ->
+                    Logging.logCustom(PaymentSentEvent()
+                            .putSuccess(true)
+                            .putAmountForRange(pendingTransaction.bigIntAmount))
 
-            } else {
-                val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
-                changeAddress = legacyAddress.address
-                keys.add(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)!!)
+                    clearBtcUnspentResponseCache()
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
+                    incrementBtcReceiveAddress()
+                    handleSuccessfulPayment(hash)
+                }) { throwable ->
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+
+                    Logging.logCustom(PaymentSentEvent()
+                            .putSuccess(false)
+                            .putAmountForRange(pendingTransaction.bigIntAmount))
+                }
+    }
+
+    private fun getBtcKeys(): Observable<MutableList<ECKey?>>? {
+        if (pendingTransaction.isHD()) {
+            val account = pendingTransaction.sendingObject.accountObject as Account
+
+            if (payloadDataManager.isDoubleEncrypted) {
+                payloadDataManager.decryptHDWallet(verifiedSecondPassword)
             }
-
-        } catch (e: Exception) {
-            Timber.e(e)
-            view.dismissProgressDialog()
-            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
-            return
+            return Observable.just(payloadDataManager.getHDKeysForSigning(account, pendingTransaction.unspentOutputBundle))
+        } else {
+            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+            return Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
         }
+    }
 
-        compositeDisposable.add(
-                sendDataManager.submitPayment(
-                        pendingTransaction.unspentOutputBundle,
-                        keys,
-                        pendingTransaction.receivingAddress,
-                        changeAddress,
-                        pendingTransaction.bigIntFee,
-                        pendingTransaction.bigIntAmount)
-                        .doAfterTerminate { view.dismissProgressDialog() }
-                        .subscribe(
-                                { hash ->
-                                    Logging.logCustom(PaymentSentEvent()
-                                            .putSuccess(true)
-                                            .putAmountForRange(pendingTransaction.bigIntAmount))
-
-                                    clearBtcUnspentResponseCache()
-                                    view.dismissConfirmationDialog()
-                                    handleSuccessfulBtcPayment(hash)
-                                }) { throwable ->
-                            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
-
-                            Logging.logCustom(PaymentSentEvent()
-                                    .putSuccess(false)
-                                    .putAmountForRange(pendingTransaction.bigIntAmount))
-                        })
+    private fun getBtcChangeAddress(): Observable<String>? {
+        if (pendingTransaction.isHD()) {
+            val account = pendingTransaction.sendingObject.accountObject as Account
+            return payloadDataManager.getNextChangeAddress(account)
+        } else {
+            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+            return Observable.just(legacyAddress.address)
+        }
     }
 
     private fun submitEthTransaction() {
 
+        createEthTransaction()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnError {
+                    Timber.e(it)
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                }
+                .flatMap { ethDataManager.signEthTransaction(it) }
+                .flatMap { ethDataManager.pushEthTx(it!!) }
+                .subscribe({
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
+                    handleSuccessfulPayment(it)
+                }, {
+                    Timber.e(it)
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                })
+    }
+
+    private fun createEthTransaction(): Observable<RawTransaction> {
+        return Observable
+                .just(ethDataManager.getEthAddress()!!.getNonce())
+                .flatMap {
+                    Observable.just(ethDataManager.createEthTransaction(
+                            nonce = it,
+                            to = pendingTransaction.receivingAddress,
+                            gasPrice = BigInteger.valueOf(feeOptions.regularFee),
+                            gasLimit = BigInteger.valueOf(feeOptions.gasLimit),
+                            weiValue = pendingTransaction.bigIntAmount))
+                }
     }
 
     private fun clearBtcUnspentResponseCache() {
@@ -259,18 +309,21 @@ class SendPresenterNew @Inject constructor(
         }
     }
 
-    private fun handleSuccessfulBtcPayment(hash: String) {
-        insertPlaceHolderTransaction(hash, pendingTransaction)
-
+    private fun incrementBtcReceiveAddress() {
         if (pendingTransaction.isHD()) {
             val account = pendingTransaction.sendingObject.accountObject as Account
             payloadDataManager.incrementChangeAddress(account)
             payloadDataManager.incrementReceiveAddress(account)
             updateInternalBalances()
         }
-        if (view != null) {
-            view.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
-        }
+    }
+
+    private fun handleSuccessfulPayment(hash: String) {
+        //TODO - place holder for btc and eth
+//        insertPlaceHolderTransaction(hash, pendingTransaction)
+
+        view?.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
+
         pendingTransaction.clear()
         unspentApiResponses.clear()
 
@@ -468,7 +521,10 @@ class SendPresenterNew @Inject constructor(
         view.updateReceivingHint(hint)
     }
 
-    internal fun setCryptoCurrency() {
+    internal fun updateCurrencyUnits() {
+
+        view.updateFiatCurrency(currencyHelper.fiatUnit)
+
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> view.updateCryptoCurrency(currencyHelper.btcUnit)
             CryptoCurrencies.ETHER -> view.updateCryptoCurrency(currencyHelper.ethUnit)
@@ -556,8 +612,8 @@ class SendPresenterNew @Inject constructor(
                 compositeDisposable.add(
                         feeDataManager.btcFeeOptions
                                 .doOnError({ ignored ->
-                                    view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR)
-                                    view.finishPage(false)
+                                    view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
+                                    view.finishPage()
                                 })
                                 .doOnTerminate({ feeOptions = dynamicFeeCache.getBtcFeeOptions()!! })
                                 .subscribe({ feeOptions -> dynamicFeeCache.btcFeeOptions = feeOptions },{ it.printStackTrace() }))
@@ -568,8 +624,8 @@ class SendPresenterNew @Inject constructor(
                 compositeDisposable.add(
                         feeDataManager.ethFeeOptions
                                 .doOnError({ ignored ->
-                                    view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR)
-                                    view.finishPage(false)
+                                    view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
+                                    view.finishPage()
                                 })
                                 .doOnTerminate({ feeOptions = dynamicFeeCache.ethFeeOptions!! })
                                 .subscribe({ feeOptions -> dynamicFeeCache.ethFeeOptions = feeOptions },{ it.printStackTrace() }))
@@ -792,7 +848,7 @@ class SendPresenterNew @Inject constructor(
         if(ethDataManager.getEthResponseModel() == null) {
             ethDataManager.fetchEthAddress()
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnError { view.showToast(R.string.api_fail, ToastCustom.TYPE_ERROR) }
+                    .doOnError { view.showSnackbar(R.string.api_fail, Snackbar.LENGTH_INDEFINITE) }
                     .subscribe(Consumer {
                         calculateUnspentEth(it, spendAll, amountToSendText)
                     })
@@ -805,6 +861,17 @@ class SendPresenterNew @Inject constructor(
     }
 
     internal fun calculateUnspentEth(combinedEthModel: CombinedEthModel, spendAll: Boolean, amountToSendText: String?) {
+
+        //TODO continue work here
+//        Timber.d("vos bigIntFee; "+pendingTransaction.bigIntFee)
+//        Timber.d("vos gasLimit: "+feeOptions.gasLimit)
+//        Timber.d("vos bigIntAmount: "+pendingTransaction.bigIntAmount)
+
+        //gasLimit 21_000
+        //"message" : "insufficient funds for gas * price + value"
+
+        //gasLimit 21
+        //"message" : "intrinsic gas too low"
 
         val gwei = BigDecimal.valueOf(feeOptions.gasLimit * feeOptions.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
@@ -880,7 +947,7 @@ class SendPresenterNew @Inject constructor(
             address = scanData
             view?.updateCryptoAmount("")
         } else {
-            view.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR)
+            view.showSnackbar(R.string.invalid_bitcoin_address, Snackbar.LENGTH_LONG)
             return
         }
 
@@ -898,7 +965,7 @@ class SendPresenterNew @Inject constructor(
         val format = privateKeyFactory.getFormat(scanData)
 
         if(format == null) {
-            view?.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR)
+            view?.showSnackbar(R.string.privkey_error, Snackbar.LENGTH_LONG)
         }
 
         when (format) {
@@ -914,7 +981,7 @@ class SendPresenterNew @Inject constructor(
             setTempLegacyAddressPrivateKey(legacyAddress, key)
 
         } catch (e: Exception) {
-            view?.showToast(R.string.no_private_key, ToastCustom.TYPE_ERROR)
+            view?.showSnackbar(R.string.no_private_key, Snackbar.LENGTH_LONG)
             Timber.e(e)
         }
 
@@ -926,7 +993,7 @@ class SendPresenterNew @Inject constructor(
                         .subscribe({ ecKey ->
                             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
                             setTempLegacyAddressPrivateKey(legacyAddress, ecKey)
-                        }) { throwable -> view?.showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR) })
+                        }) { throwable -> view?.showSnackbar(R.string.bip38_error, Snackbar.LENGTH_LONG) })
     }
 
     private fun setTempLegacyAddressPrivateKey(legacyAddress: LegacyAddress, key: ECKey?) {
@@ -942,11 +1009,11 @@ class SendPresenterNew @Inject constructor(
 
             showPaymentReview()
         } else {
-            view?.showToast(R.string.invalid_private_key, ToastCustom.TYPE_ERROR)
+            view?.showSnackbar(R.string.invalid_private_key, Snackbar.LENGTH_LONG)
         }
     }
 
-    internal fun onSendingLegacyAddressSelected(legacyAddress: LegacyAddress) {
+    internal fun onSendingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
 
         pendingTransaction.receivingObject = ItemAccount(legacyAddress.label, null, null, null, legacyAddress, legacyAddress.address)
 
@@ -957,7 +1024,7 @@ class SendPresenterNew @Inject constructor(
         view.updateSendingAddress(label)
     }
 
-    internal fun onSendingAccountSelected(account: Account) {
+    internal fun onSendingBtcAccountSelected(account: Account) {
 
         pendingTransaction.receivingObject = ItemAccount(account.label, null, null, null, account, null)
 
@@ -969,7 +1036,7 @@ class SendPresenterNew @Inject constructor(
         view.updateSendingAddress(label)
     }
 
-    internal fun onReceivingLegacyAddressSelected(legacyAddress: LegacyAddress) {
+    internal fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
 
         pendingTransaction.receivingObject = ItemAccount(legacyAddress.label, null, null, null, legacyAddress, legacyAddress.address)
         pendingTransaction.receivingAddress = legacyAddress.address
@@ -1010,7 +1077,7 @@ class SendPresenterNew @Inject constructor(
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
                     /* No-op */
-                }, { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
+                }, { view.showSnackbar(R.string.unexpected_error, Snackbar.LENGTH_LONG) })
     }
 
     internal fun selectSendingAccount(data: Intent?) {
@@ -1020,8 +1087,8 @@ class SendPresenterNew @Inject constructor(
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
 
             when (any) {
-                is LegacyAddress -> onSendingLegacyAddressSelected(any)
-                is Account -> onSendingAccountSelected(any)
+                is LegacyAddress -> onSendingBtcLegacyAddressSelected(any)
+                is Account -> onSendingBtcAccountSelected(any)
                 else -> throw IllegalArgumentException("No method for handling $type available")
             }
 
@@ -1041,7 +1108,7 @@ class SendPresenterNew @Inject constructor(
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
 
             when (any) {
-                is LegacyAddress -> onReceivingLegacyAddressSelected(any)
+                is LegacyAddress -> onReceivingBtcLegacyAddressSelected(any)
                 is Account -> onReceivingAccountSelected(any)
                 else -> throw IllegalArgumentException("No method for handling $type available")
             }
@@ -1089,69 +1156,84 @@ class SendPresenterNew @Inject constructor(
         return bAmount.compareTo(BigInteger.ZERO) >= 0
     }
 
-    private fun isValidBitcoinTransaction(): Boolean {
-
+    private fun validateBitcoinTransaction(): Pair<Boolean, Int> {
         var validated = true
+        var errorMessage = R.string.unexpected_error
 
         //Validate address
         if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
-            view?.showToast(R.string.invalid_bitcoin_address, ToastCustom.TYPE_ERROR)
+            errorMessage = R.string.invalid_bitcoin_address
             validated = false
         }
 
         //Validate amount
         if (!isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
-            view?.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
-            return false
+            errorMessage = R.string.invalid_amount
+            validated = false
         }
 
         // Validate sufficient funds
         if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.spendableOutputs == null) {
-            view?.showToast(R.string.no_confirmed_funds, ToastCustom.TYPE_ERROR)
-            return false
+            errorMessage = R.string.no_confirmed_funds
+            validated = false
         }
 
         if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
-            view?.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR)
-            return false
+            errorMessage = R.string.insufficient_funds
+            validated = false
         }
 
         if (pendingTransaction.unspentOutputBundle.spendableOutputs.isEmpty()) {
-            view?.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR)
-            return false
+            errorMessage = R.string.insufficient_funds
+            validated = false
         }
 
-        return validated
+        return Pair.of(validated, errorMessage)
     }
 
     private fun isValidEtherAmount(bAmount: BigInteger?): Boolean {
         return (bAmount != null && bAmount.compareTo(BigInteger.ZERO) >= 0)
     }
 
-    private fun iValidEtherTransaction(): Boolean {
+    private fun validateEtherTransaction(): Observable<Pair<Boolean, Int>>{
 
-        var validated = true
+        if(pendingTransaction.receivingAddress == null) {
+            return Observable.just(Pair.of(false, R.string.eth_invalid_address))
+        } else {
+            return ethDataManager.getIfContract(pendingTransaction.receivingAddress)
+                    .map { isContract ->
 
-        //Validate address
-        if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidEthereumAddress(pendingTransaction.receivingAddress)) {
-            view?.showToast(R.string.invalid_ether_address, ToastCustom.TYPE_ERROR)
-            validated = false
+                        var validated = true
+                        var errorMessage = R.string.unexpected_error
+
+                        //Validate not contract
+                        if (isContract) {
+                            errorMessage = R.string.eth_support_contract_not_allowed
+                            validated = false
+                        }
+
+                        //Validate address
+                        if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidEthereumAddress(pendingTransaction.receivingAddress)) {
+                            errorMessage = R.string.eth_invalid_address
+                            validated = false
+                        }
+
+                        //Validate amount
+                        if (!isValidEtherAmount(pendingTransaction.bigIntAmount) || pendingTransaction.bigIntAmount.compareTo(BigInteger.ZERO) <= 0) {
+                            errorMessage = R.string.invalid_amount
+                            validated = false
+                        }
+
+                        // Validate sufficient funds
+                        if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
+                            errorMessage = R.string.insufficient_funds
+                            validated = false
+                        }
+
+
+                        Pair.of(validated, errorMessage)
+                    }
         }
-
-        //Validate amount
-        if (!isValidEtherAmount(pendingTransaction.bigIntAmount)) {
-            view?.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
-            return false
-        }
-
-        // Validate sufficient funds
-        if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
-            view?.showToast(R.string.insufficient_funds, ToastCustom.TYPE_ERROR)
-            return false
-        }
-
-        return validated
-
     }
 
     /**

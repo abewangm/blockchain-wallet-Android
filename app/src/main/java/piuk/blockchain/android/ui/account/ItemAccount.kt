@@ -28,7 +28,6 @@ class ItemAccount {
         // Empty constructor for serialization
     }
 
-    //TODO This is disgusting
     fun getAddressString(): String {
 
         if (accountObject is Account) {
@@ -38,7 +37,7 @@ class ItemAccount {
             //legacy address
             return (accountObject as LegacyAddress).address
         } else {
-            //legacy address
+            //eth address
             return (accountObject as EthereumAccount).address
         }
     }
