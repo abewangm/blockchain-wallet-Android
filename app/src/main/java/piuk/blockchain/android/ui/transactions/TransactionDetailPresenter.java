@@ -155,7 +155,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         String fromAddress = displayable.getInputsMap().keySet().iterator().next();
         String toAddress = displayable.getOutputsMap().keySet().iterator().next();
 
-        String ethAddress = ethDataManager.getEthAddress().getAddressResponse().getAccount();
+        String ethAddress = ethDataManager.getEthResponseModel().getAddressResponse().getAccount();
         if (fromAddress.equals(ethAddress)) {
             fromAddress = stringUtils.getString(R.string.eth_default_account_label);
         }

@@ -13,8 +13,10 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.util.annotations.Mockable
 import java.util.*
 
+@Mockable
 class EthDataManager(
         private val payloadManager: PayloadManager,
         private val ethAccountApi: EthAccountApi,
@@ -46,9 +48,16 @@ class EthDataManager(
     /**
      * Returns the user's ETH account object if previously fetched.
      *
-     * @return A nullable [EthAddressResponse] object
+     * @return A nullable [CombinedEthModel] object
      */
-    fun getEthAddress() = ethDataStore.ethAddressResponse
+    fun getEthResponseModel() = ethDataStore.ethAddressResponse
+
+    /**
+     * Returns the user's [EthereumWallet] object if previously fetched.
+     *
+     * @return A nullable [EthereumWallet] object
+     */
+    fun getEthWallet() = ethDataStore.ethWallet
 
     /**
      * Returns a steam of [EthTransaction] objects associated with a user's ETH address specifically

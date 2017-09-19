@@ -20,6 +20,7 @@ import piuk.blockchain.android.ui.dashboard.models.OnboardingModel
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.home.models.MetadataEvent
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.*
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
@@ -38,7 +39,8 @@ class DashboardPresenter @Inject constructor(
         private val stringUtils: StringUtils,
         private val appUtil: AppUtil,
         private val buyDataManager: BuyDataManager,
-        private val rxBus: RxBus
+        private val rxBus: RxBus,
+        private val swipeToReceiveHelper: SwipeToReceiveHelper
 ) : BasePresenter<DashboardView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
@@ -51,6 +53,7 @@ class DashboardPresenter @Inject constructor(
         view.notifyItemAdded(displayList, 0)
 
         metadataObservable.flatMap { getOnboardingStatusObservable() }
+                .doOnNext { swipeToReceiveHelper.storeEthAddress() }
                 .doOnNext { updateAllBalances() }
                 .doOnNext { checkLatestAnnouncement() }
                 .subscribe(

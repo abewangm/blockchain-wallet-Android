@@ -460,7 +460,8 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         // Defer to background thread as deriving addresses is quite processor intensive
         getCompositeDisposable().add(
                 Completable.fromCallable(() -> {
-                    swipeToReceiveHelper.updateAndStoreAddresses();
+                    swipeToReceiveHelper.updateAndStoreBitcoinAddresses();
+                    swipeToReceiveHelper.storeEthAddress();
                     return Void.TYPE;
                 }).subscribeOn(Schedulers.computation())
                         .subscribe(() -> {

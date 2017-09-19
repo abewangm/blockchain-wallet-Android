@@ -152,7 +152,7 @@ class TransactionListDataManager(
                 ethDataManager.getEthTransactions()
                         .map {
                             EthDisplayable(
-                                    ethDataManager.getEthAddress()!!,
+                                    ethDataManager.getEthResponseModel()!!,
                                     it,
                                     latestBlock.blockHeight
                             )
