@@ -783,7 +783,9 @@
     <string name="bitcoin">BITCOIN</string>
     <string name="eth_to_field_helper">Enter ether address or select</string>
     <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
-    <string name="invalid_ether_address">Invalid Ether address</string>
+    <string name="eth_invalid_address">Invalid Ether address</string>
+    <string name="eth_support_contract_not_allowed">Contract addresses are not supported.</string>
+    <string name="eth_support_only_eth">At the moment we only support ETH - you cannot receive REP, ICN GNT, GNO, DGD, BCP</string>
 
     <!-- DASHBOARD -->
     <string name="dashboard_title">Dashboard</string>

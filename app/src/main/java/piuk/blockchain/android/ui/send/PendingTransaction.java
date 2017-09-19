@@ -17,6 +17,7 @@ public class PendingTransaction {
     public ItemAccount receivingObject;
     public String note;
     public String receivingAddress;
+    public String changeAddress;
     public BigInteger bigIntFee;
     public BigInteger bigIntAmount;
     public int addressToReceiveIndex;

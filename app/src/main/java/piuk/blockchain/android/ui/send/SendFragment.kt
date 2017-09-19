@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
@@ -64,9 +65,9 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewNew, NumericKeyboardCallback {
+class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericKeyboardCallback {
 
-    @Inject lateinit var sendPresenterNew: SendPresenterNew
+    @Inject lateinit var sendPresenter: SendPresenter
 
     private var backPressed: Long = 0
     private val COOL_DOWN_MILLIS = 2 * 1000
@@ -123,10 +124,10 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             if (ConnectivityStatus.hasConnectivity(activity)) {
                 presenter.onContinueClicked()
             } else {
-                showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+                showSnackbar(R.string.check_connectivity_exit, Snackbar.LENGTH_LONG)
             }
         }
-        max.setOnClickListener({ presenter.onSpendAllClicked(getFeePriority()) })
+        max.setOnClickListener({ presenter.onSpendMaxClicked() })
 
         onViewReady()
     }
@@ -156,7 +157,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         super.onPause()
     }
 
-    override fun createPresenter() = sendPresenterNew
+    override fun createPresenter() = sendPresenter
 
     override fun getMvpView() = this
 
@@ -240,12 +241,14 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             (activity as BaseAuthActivity).setupToolbar(
                     (activity as MainActivity).supportActionBar, R.string.send_bitcoin)
         } else {
-            finishPage(false)
+            finishPage()
         }
     }
 
-    override fun finishPage(paymentMade: Boolean) {
-
+    override fun finishPage() {
+        listener?.apply {
+            onSendFragmentClose()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -267,7 +270,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             val intent = Intent(activity, CaptureActivity::class.java)
             startActivityForResult(intent, code)
         } else {
-            showToast(R.string.camera_unavailable, ToastCustom.TYPE_ERROR)
+            showSnackbar(R.string.camera_unavailable, Snackbar.LENGTH_LONG)
         }
     }
 
@@ -330,6 +333,10 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
     override fun updateCryptoCurrency(currency: String) {
         amountContainer.currencyCrypto.setText(currency)
+    }
+
+    override fun updateFiatCurrency(currency: String) {
+        amountContainer.currencyFiat.setText(currency)
     }
 
     override fun disableCryptoTextChangeListener() {
@@ -398,6 +405,7 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         override fun afterTextChanged(editable: Editable) {
             presenter.updateFiatTextField(editable, amountContainer.amountCrypto)
+            updateTotals()
         }
     }
 
@@ -411,7 +419,9 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         }
 
         override fun afterTextChanged(editable: Editable) {
+            Timber.d("vos fiat afterTextChanged")
             presenter.updateCryptoTextField(editable, amountContainer.amountFiat)
+            updateTotals()
         }
     }
 
@@ -453,13 +463,14 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     fun onChangeFeeClicked() {
+        confirmPaymentDialog?.dismiss()
     }
 
     fun onContinueClicked() {
         if (ConnectivityStatus.hasConnectivity(activity)) {
             presenter.onContinueClicked()
         } else {
-            showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
+            showSnackbar(R.string.check_connectivity_exit, Snackbar.LENGTH_LONG)
         }
     }
 
@@ -488,8 +499,27 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         backPressed = System.currentTimeMillis()
     }
 
-    override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
+    fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
         ToastCustom.makeText(activity, getString(message), ToastCustom.LENGTH_SHORT, toastType)
+    }
+
+    override fun showSnackbar(@StringRes message: Int, duration: Int) {
+        val snackbar = Snackbar.make(activity.findViewById(R.id.coordinator_layout), message,
+                duration)
+                .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
+
+        if (duration == Snackbar.LENGTH_INDEFINITE) {
+            snackbar.setAction(R.string.ok_cap, {})
+        }
+
+        snackbar.show()
+    }
+
+    override fun showEthContractSnackbar() {
+        Snackbar.make(activity.findViewById(R.id.coordinator_layout), R.string.eth_support_contract_not_allowed,
+                Snackbar.LENGTH_INDEFINITE)
+                .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
+                .setAction(R.string.learn_more, {showSnackbar(R.string.eth_support_only_eth, Snackbar.LENGTH_INDEFINITE)}).show()
     }
 
     override fun showSendingFieldDropdown() {
@@ -531,11 +561,11 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
                         textInputLayout.setVisibility(View.GONE)
                         updateTotals()
                     }
-//                    2 -> if (presenter.shouldShowAdvancedFeeWarning()) {
-//                        alertCustomSpend()
-//                    } else {
-//                        displayCustomFeeField()
-//                    }
+                    2 -> if (presenter.shouldShowAdvancedFeeWarning()) {
+                        alertCustomSpend()
+                    } else {
+                        displayCustomFeeField()
+                    }
                 }
 
                 val options = presenter.getFeeOptionsForDropDown().get(position)
@@ -551,19 +581,6 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         textviewFeeAbsolute.setOnClickListener({ spinnerPriority.performClick() })
         textviewFeeType.setText(R.string.fee_options_regular)
         textviewFeeTime.setText(R.string.fee_options_regular_time)
-
-        //TODO this calls updateTotals multiple times on startup
-        RxTextView.textChanges(amountContainer.amountCrypto)
-                .debounce(400, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ updateTotals() },{ it.printStackTrace() })
-
-        RxTextView.textChanges(amountContainer.amountFiat)
-                .debounce(400, TimeUnit.MILLISECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ updateTotals() },{ it.printStackTrace() })
     }
 
     override fun enableFeeDropdown() {
@@ -577,14 +594,11 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
     }
 
     internal fun updateTotals() {
-        presenter.calculateTransactionAmounts(
-                spendAll = false,
-                amountToSendText = amountContainer.amountCrypto.getText().toString(),
-                feePriority = getFeePriority())
+        presenter.onCryptoTextchange(amountContainer.amountCrypto.getText().toString())
     }
 
     @FeeType.FeePriorityDef
-    private fun getFeePriority(): Int {
+    override fun getFeePriority(): Int {
         val position = spinnerPriority.getSelectedItemPosition()
         when (position) {
             1 -> return FeeType.FEE_OPTION_PRIORITY
@@ -770,26 +784,67 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         confirmPaymentDialog?.dismiss()
     }
 
-    interface OnSendFragmentInteractionListener {
-        fun onSendFragmentClose()
+    internal fun alertCustomSpend() {
+        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(R.string.transaction_fee)
+                .setMessage(R.string.fee_options_advanced_warning)
+                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    presenter.disableAdvancedFeeWarning()
+                    displayCustomFeeField()
+                }
+                .setNegativeButton(android.R.string.cancel) { dialog, which -> spinnerPriority.setSelection(0) }
+                .show()
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        if (context is OnSendFragmentInteractionListener) {
-            listener = context
-        } else {
-            throw RuntimeException(context!!.toString() + " must implement OnSendFragmentInteractionListener")
-        }
+    override fun setFeePrioritySelection(index: Int) {
+        spinnerPriority.setSelection(index)
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        listener = null
+    internal fun displayCustomFeeField() {
+        textviewFeeAbsolute.setVisibility(View.GONE)
+        textviewFeeTime.setVisibility(View.INVISIBLE)
+        textInputLayout.setVisibility(View.VISIBLE)
+        buttonContinue.setEnabled(false)
+        textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint))
+
+        edittextCustomFee.setOnFocusChangeListener({ v, hasFocus ->
+            if (hasFocus || !edittextCustomFee.getText().toString().isEmpty()) {
+                textInputLayout.setHint(getString(R.string.fee_options_sat_byte_inline_hint,
+                        presenter.getFeeOptions()?.getRegularFee().toString(),
+                        presenter.getFeeOptions()?.getPriorityFee().toString()))
+            } else if (edittextCustomFee.getText().toString().isEmpty()) {
+                textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint))
+            } else {
+                textInputLayout.setHint(getString(R.string.fee_options_sat_byte_hint))
+            }
+        })
+
+        RxTextView.textChanges(edittextCustomFee)
+                .skip(1)
+                .map<String>({ it.toString() })
+                .doOnNext { value -> buttonContinue.setEnabled(!value.isEmpty() && value != "0") }
+                .filter { value -> !value.isEmpty() }
+                .map<Long>({ java.lang.Long.valueOf(it) })
+                .onErrorReturnItem(0L)
+                .doOnNext { value ->
+
+                    if (presenter.getFeeOptions() != null && value < presenter.getFeeOptions()!!.getLimits().getMin()) {
+                        textInputLayout.setError(getString(R.string.fee_options_fee_too_low))
+                    } else if (presenter.getFeeOptions() != null && value > presenter.getFeeOptions()!!.getLimits().getMax()) {
+                        textInputLayout.setError(getString(R.string.fee_options_fee_too_high))
+                    } else {
+                        textInputLayout.setError(null)
+                    }
+                }
+                .debounce(300, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { value -> updateTotals() },
+                        { it.printStackTrace() })
     }
 
-    override fun showTransactionSuccess(hash: String,
-                                          transactionValue: Long) {
+    override fun showTransactionSuccess(hash: String, transactionValue: Long) {
         playAudio()
 
         val appRate = AppRate(activity)
@@ -811,13 +866,34 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
             // Won't show if contact transaction, as other dialog takes preference
             if (appRate.shouldShowDialog()) {
                 val ratingDialog = appRate.rateDialog
-                ratingDialog.setOnDismissListener { d -> finishPage(true) }
-                show()
+                ratingDialog.setOnDismissListener { d -> finishPage() }
                 setOnDismissListener({ d -> ratingDialog.show() })
+            } else {
+                setOnDismissListener({ d -> finishPage() })
             }
+
+            show()
         }
 
         dialogHandler.postDelayed(dialogRunnable, (5 * 1000).toLong())
+    }
+
+    interface OnSendFragmentInteractionListener {
+        fun onSendFragmentClose()
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context is OnSendFragmentInteractionListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context!!.toString() + " must implement OnSendFragmentInteractionListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
     }
 
     companion object {
@@ -834,8 +910,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
 
         fun newInstance(scanData: String?,
                         scanRoute: String?,
-                        selectedAccountPosition: Int): SendFragmentNew {
-            val fragment = SendFragmentNew()
+                        selectedAccountPosition: Int): SendFragment {
+            val fragment = SendFragment()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, scanData)
             args.putString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE, scanRoute)
@@ -847,8 +923,8 @@ class SendFragmentNew : BaseFragment<SendViewNew, SendPresenterNew>(), SendViewN
         fun newInstance(uri: String,
                         contactId: String,
                         contactMdid: String,
-                        fctxId: String): SendFragmentNew {
-            val fragment = SendFragmentNew()
+                        fctxId: String): SendFragment {
+            val fragment = SendFragment()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, uri)
             args.putString(ARGUMENT_CONTACT_ID, contactId)

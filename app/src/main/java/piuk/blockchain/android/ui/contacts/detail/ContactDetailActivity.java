@@ -14,7 +14,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ActivityContactDetailBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.home.MainActivity;
-import piuk.blockchain.android.ui.send.SendFragmentNew;
+import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
@@ -81,7 +81,7 @@ public class ContactDetailActivity extends BaseAuthActivity implements
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragmentById = fragmentManager.findFragmentById(R.id.content_frame);
-        if (fragmentById != null && fragmentById instanceof SendFragmentNew) {
+        if (fragmentById != null && fragmentById instanceof SendFragment) {
             submitFragmentTransaction(
                     ContactDetailFragment.newInstance(
                             getIntent().getStringExtra(KEY_BUNDLE_CONTACT_ID)));
