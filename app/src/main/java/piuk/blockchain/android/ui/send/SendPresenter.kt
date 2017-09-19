@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import info.blockchain.api.data.UnspentOutputs
 import info.blockchain.wallet.api.WalletApi
 import info.blockchain.wallet.api.data.FeeOptions
+import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
@@ -39,6 +40,9 @@ import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.services.EventService
+import piuk.blockchain.android.data.transactions.BtcDisplayable
+import piuk.blockchain.android.data.transactions.Displayable
+import piuk.blockchain.android.data.transactions.EthDisplayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -231,6 +235,7 @@ class SendPresenter @Inject constructor(
                     clearBtcUnspentResponseCache()
                     view.dismissProgressDialog()
                     view.dismissConfirmationDialog()
+                    insertBtcPlaceHolderTransaction(hash, pendingTransaction)
                     incrementBtcReceiveAddress()
                     handleSuccessfulPayment(hash)
                 }) { throwable ->
@@ -287,13 +292,17 @@ class SendPresenter @Inject constructor(
     }
 
     private fun createEthTransaction(): Observable<RawTransaction> {
+
+        val feeGwei = BigDecimal.valueOf(feeOptions.regularFee)
+        val feeWei = Convert.toWei(feeGwei, Convert.Unit.GWEI)
+
         return Observable
-                .just(ethDataManager.getEthAddress()!!.getNonce())
+                .just(ethDataManager.getEthResponseModel()!!.getNonce())
                 .flatMap {
                     Observable.just(ethDataManager.createEthTransaction(
                             nonce = it,
                             to = pendingTransaction.receivingAddress,
-                            gasPrice = BigInteger.valueOf(feeOptions.regularFee),
+                            gasPrice = feeWei.toBigInteger(),
                             gasLimit = BigInteger.valueOf(feeOptions.gasLimit),
                             weiValue = pendingTransaction.bigIntAmount))
                 }
@@ -319,8 +328,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun handleSuccessfulPayment(hash: String) {
-        //TODO - place holder for btc and eth
-//        insertPlaceHolderTransaction(hash, pendingTransaction)
 
         view?.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
 
@@ -357,7 +364,7 @@ class SendPresenter @Inject constructor(
     /**
      * After sending btc we create a "placeholder" tx until websocket handler refreshes list
      */
-    private fun insertPlaceHolderTransaction(hash: String, pendingTransaction: PendingTransaction) {
+    private fun insertBtcPlaceHolderTransaction(hash: String, pendingTransaction: PendingTransaction) {
         val inputs = HashMap<String, BigInteger>()
         pendingTransaction.sendingObject.label?.let {
             inputs.put(pendingTransaction.sendingObject.label!!, pendingTransaction.bigIntAmount)
@@ -375,8 +382,8 @@ class SendPresenter @Inject constructor(
         tx.inputsMap = inputs
         tx.outputsMap = outputs
         tx.isPending = true
-        // STOPSHIP: 24/08/2017
-//      transactionListDataManager.insertTransactionIntoListAndReturnSorted(tx);
+
+        transactionListDataManager.insertTransactionIntoListAndReturnSorted(BtcDisplayable(tx));
     }
 
     internal fun onNoSecondPassword() {
@@ -861,17 +868,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun calculateUnspentEth(combinedEthModel: CombinedEthModel, spendAll: Boolean, amountToSendText: String?) {
-
-        //TODO continue work here
-//        Timber.d("vos bigIntFee; "+pendingTransaction.bigIntFee)
-//        Timber.d("vos gasLimit: "+feeOptions.gasLimit)
-//        Timber.d("vos bigIntAmount: "+pendingTransaction.bigIntAmount)
-
-        //gasLimit 21_000
-        //"message" : "insufficient funds for gas * price + value"
-
-        //gasLimit 21
-        //"message" : "intrinsic gas too low"
 
         val gwei = BigDecimal.valueOf(feeOptions.gasLimit * feeOptions.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
