@@ -10,6 +10,7 @@ import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.util.MetadataUtil
 import io.reactivex.Completable
 import io.reactivex.Observable
+import org.bitcoinj.core.ECKey
 import org.web3j.protocol.core.methods.request.RawTransaction
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
@@ -17,6 +18,7 @@ import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
 import java.math.BigInteger
 import piuk.blockchain.android.util.annotations.Mockable
+import timber.log.Timber
 import java.util.*
 
 @Mockable
@@ -140,17 +142,16 @@ class EthDataManager(
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
-    //TODO we need to derive private key if we're going to spend eth - no point in just using address from metadata unless double encryted
     private fun fetchOrCreateEthereumWallet(defaultLabel: String): EthereumWallet {
         val masterKey = payloadManager.payload.hdWallets[0].masterKey
         val metadataNode = MetadataUtil.deriveMetadataNode(masterKey)
 
-//        var ethWallet = EthereumWallet.load(metadataNode)
-//
-//        if (ethWallet == null) {
-            var ethWallet = EthereumWallet(masterKey, defaultLabel)
+        var ethWallet = EthereumWallet.load(metadataNode)
+
+        if (ethWallet == null || ethWallet.account == null || !ethWallet.account.isCorrect) {
+            ethWallet = EthereumWallet(masterKey, defaultLabel)
             ethWallet.save()
-//        }
+        }
 
         return ethWallet
     }
@@ -169,7 +170,7 @@ class EthDataManager(
                 weiValue);
     }
 
-    fun signEthTransaction(rawTransaction: RawTransaction) = Observable.just(ethDataStore.ethWallet?.signTransaction(rawTransaction))
+    fun signEthTransaction(rawTransaction: RawTransaction, ecKey: ECKey) = Observable.just(ethDataStore.ethWallet?.account?.signTransaction(rawTransaction, ecKey))
 
     fun pushEthTx(signedTxBytes: ByteArray): Observable<String>? {
         return ethAccountApi.pushTx("0x" + String(Hex.encode(signedTxBytes)))
