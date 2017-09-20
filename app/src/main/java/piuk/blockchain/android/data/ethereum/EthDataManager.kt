@@ -7,9 +7,10 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthLatestBlock
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.payload.PayloadManager
-import info.blockchain.wallet.util.MetadataUtil
 import io.reactivex.Completable
 import io.reactivex.Observable
+import org.bitcoinj.core.ECKey
+import org.bitcoinj.crypto.DeterministicKey
 import org.web3j.protocol.core.methods.request.RawTransaction
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
@@ -134,23 +135,21 @@ class EthDataManager(
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Observable] returning EthereumWallet
      */
-    fun getEthereumWallet(defaultLabel: String): Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
-        Observable.fromCallable { fetchOrCreateEthereumWallet(defaultLabel) }
+    fun initEthereumWallet(metadataNode: DeterministicKey, defaultLabel: String): Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
+        Observable.fromCallable { fetchOrCreateEthereumWallet(metadataNode, defaultLabel) }
                 .doOnNext { ethDataStore.ethWallet = it }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
-    //TODO we need to derive private key if we're going to spend eth - no point in just using address from metadata unless double encryted
-    private fun fetchOrCreateEthereumWallet(defaultLabel: String): EthereumWallet {
-        val masterKey = payloadManager.payload.hdWallets[0].masterKey
-        val metadataNode = MetadataUtil.deriveMetadataNode(masterKey)
+    private fun fetchOrCreateEthereumWallet(metadataNode: DeterministicKey, defaultLabel: String): EthereumWallet {
 
-//        var ethWallet = EthereumWallet.load(metadataNode)
-//
-//        if (ethWallet == null) {
-            var ethWallet = EthereumWallet(masterKey, defaultLabel)
+        var ethWallet = EthereumWallet.load(metadataNode)
+
+        if (ethWallet == null || ethWallet.account == null || !ethWallet.account.isCorrect) {
+            val masterKey = payloadManager.payload.hdWallets[0].masterKey
+            ethWallet = EthereumWallet(masterKey, defaultLabel)
             ethWallet.save()
-//        }
+        }
 
         return ethWallet
     }
@@ -169,7 +168,7 @@ class EthDataManager(
                 weiValue);
     }
 
-    fun signEthTransaction(rawTransaction: RawTransaction) = Observable.just(ethDataStore.ethWallet?.signTransaction(rawTransaction))
+    fun signEthTransaction(rawTransaction: RawTransaction, ecKey: ECKey) = Observable.just(ethDataStore.ethWallet?.account?.signTransaction(rawTransaction, ecKey))
 
     fun pushEthTx(signedTxBytes: ByteArray): Observable<String>? {
         return ethAccountApi.pushTx("0x" + String(Hex.encode(signedTxBytes)))

@@ -419,7 +419,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         }
 
         override fun afterTextChanged(editable: Editable) {
-            Timber.d("vos fiat afterTextChanged")
             presenter.updateCryptoTextField(editable, amountContainer.amountFiat)
             updateTotals()
         }
