@@ -988,7 +988,7 @@ class SendPresenter @Inject constructor(
 
     internal fun spendFromWatchOnlyBIP38(pw: String, scanData: String) {
         compositeDisposable.add(
-                sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.getNetworkParameters())
+                sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.networkParameters)
                         .subscribe({ ecKey ->
                             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
                             setTempLegacyAddressPrivateKey(legacyAddress, ecKey)
@@ -997,12 +997,12 @@ class SendPresenter @Inject constructor(
 
     private fun setTempLegacyAddressPrivateKey(legacyAddress: LegacyAddress, key: ECKey?) {
         if (key != null && key.hasPrivKey() && legacyAddress.address == key.toAddress(
-                environmentSettings.getNetworkParameters()).toString()) {
+                environmentSettings.networkParameters).toString()) {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             val tempLegacyAddress = LegacyAddress()
             tempLegacyAddress.setPrivateKeyFromBytes(key.privKeyBytes)
-            tempLegacyAddress.address = key.toAddress(environmentSettings.getNetworkParameters()).toString()
+            tempLegacyAddress.address = key.toAddress(environmentSettings.networkParameters).toString()
             tempLegacyAddress.label = legacyAddress.label
             pendingTransaction.sendingObject.accountObject = tempLegacyAddress
 
