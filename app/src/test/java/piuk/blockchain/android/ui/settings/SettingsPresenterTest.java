@@ -25,6 +25,7 @@ import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -56,6 +57,7 @@ public class SettingsPresenterTest {
     @Mock private StringUtils stringUtils;
     @Mock private PrefsUtil prefsUtil;
     @Mock private AccessState accessState;
+    @Mock private SwipeToReceiveHelper swipeToReceiveHelper;
 
     @Before
     public void setUp() throws Exception {
@@ -68,7 +70,8 @@ public class SettingsPresenterTest {
                 payloadDataManager,
                 stringUtils,
                 prefsUtil,
-                accessState);
+                accessState,
+                swipeToReceiveHelper);
         subject.initView(activity);
     }
 

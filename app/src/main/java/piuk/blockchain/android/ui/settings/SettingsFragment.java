@@ -62,7 +62,6 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
-import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
@@ -179,7 +178,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         torPref = (SwitchPreferenceCompat) findPreference("tor");
         torPref.setOnPreferenceClickListener(this);
         torPref.setOnPreferenceChangeListener((preference, newValue) -> {
-            settingsPresenter.updateTor((Boolean)newValue);
+            settingsPresenter.updateTor((Boolean) newValue);
             return true;
         });
 
@@ -202,16 +201,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
         swipeToReceivePrefs.setOnPreferenceClickListener(this);
         swipeToReceivePrefs.setOnPreferenceChangeListener((preference, newValue) -> {
             if (!((Boolean) newValue)) {
-                // Clear stored addresses
-                PrefsUtil prefsUtil = new PrefsUtil(getContext());
-                prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ACCOUNT_NAME);
-                prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ADDRESSES);
+                settingsPresenter.clearSwipeToReceiveData();
             } else {
                 new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                         .setTitle(R.string.swipe_receive_hint)
                         .setMessage(R.string.swipe_receive_address_info)
-                        .setPositiveButton(android.R.string.ok, null)
-                        .create()
+                        .setPositiveButton(android.R.string.ok, (dialogInterface, i) ->
+                                settingsPresenter.storeSwipeToReceiveAddresses())
+                        .setCancelable(false)
                         .show();
             }
             return true;

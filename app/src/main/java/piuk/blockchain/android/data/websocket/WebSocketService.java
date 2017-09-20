@@ -31,7 +31,6 @@ public class WebSocketService extends Service {
 
     public static final String ACTION_INTENT = "info.blockchain.wallet.WebSocketService.SUBSCRIBE_TO_ADDRESS";
     public static final String BITCOIN_ADDRESS = "address";
-    public static final String ETH_ADDRESS = "eth_address";
     public static final String X_PUB = "x_pub";
     private final IBinder binder = new LocalBinder();
     @Inject protected PayloadDataManager payloadDataManager;
@@ -52,10 +51,6 @@ public class WebSocketService extends Service {
                 }
                 if (intent.hasExtra(X_PUB) && webSocketHandler != null) {
                     webSocketHandler.subscribeToXpub(intent.getStringExtra(X_PUB));
-                }
-                // TODO: 20/09/2017 I'm not sure this will ever be used
-                if (intent.hasExtra(ETH_ADDRESS) && webSocketHandler != null) {
-                    webSocketHandler.subscribeToEthAccount(intent.getStringExtra(ETH_ADDRESS));
                 }
             }
         }

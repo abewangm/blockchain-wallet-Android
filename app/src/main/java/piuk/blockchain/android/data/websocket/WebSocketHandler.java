@@ -112,7 +112,7 @@ class WebSocketHandler extends WebSocketListener {
         }
     }
 
-    public void subscribeToEthAccount(String ethAddress) {
+    private void subscribeToEthAccount(String ethAddress) {
         if (ethAddress != null && !ethAddress.isEmpty()) {
             sendToEthConnection("{\"op\":\"account_sub\", \"account\":\"" + ethAddress + "\"}");
         }
