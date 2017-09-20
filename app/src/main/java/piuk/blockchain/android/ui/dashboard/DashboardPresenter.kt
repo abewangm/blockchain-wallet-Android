@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.dashboard
 
-import info.blockchain.api.data.Point
+import android.support.annotation.VisibleForTesting
+import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Observable
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -46,12 +47,12 @@ class DashboardPresenter @Inject constructor(
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
     private var cryptoCurrency = CryptoCurrencies.BTC
     private val displayList = mutableListOf<Any>(ChartDisplayable())
-    private val metadataObservable = rxBus.register(MetadataEvent::class.java)
+    private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
 
     override fun onViewReady() {
-        updateChartsData(TimeSpan.YEAR)
         view.notifyItemAdded(displayList, 0)
 
+        // Triggers various updates to the page once all metadata is loaded
         metadataObservable.flatMap { getOnboardingStatusObservable() }
                 .doOnNext { swipeToReceiveHelper.storeEthAddress() }
                 .doOnNext { updateAllBalances() }
@@ -69,11 +70,12 @@ class DashboardPresenter @Inject constructor(
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         this.cryptoCurrency = cryptoCurrency
-        updatePrices()
-        // TODO: Update graph data once ETH supported  
+        updateCryptoPrice()
+        updateChartsData(TimeSpan.YEAR)
     }
 
     internal fun onResume() {
+        updateChartsData(TimeSpan.YEAR)
         updateAllBalances()
         updatePrices()
     }
@@ -82,14 +84,16 @@ class DashboardPresenter @Inject constructor(
         exchangeRateFactory.updateTickers()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
-                        {
-                            view.updateCryptoCurrencyPrice(
-                                    if (cryptoCurrency == CryptoCurrencies.BTC)
-                                        getBtcString() else getEthString()
-                            )
-                        },
+                        { updateCryptoPrice() },
                         { Timber.e(it) }
                 )
+    }
+
+    private fun updateCryptoPrice() {
+        view.updateCryptoCurrencyPrice(
+                if (cryptoCurrency == CryptoCurrencies.BTC)
+                    getBtcString() else getEthString()
+        )
     }
 
     private fun updateChartsData(timeSpan: TimeSpan) {
@@ -98,10 +102,10 @@ class DashboardPresenter @Inject constructor(
         view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
 
         when (timeSpan) {
-            TimeSpan.YEAR -> chartsDataManager.getYearPrice()
-            TimeSpan.MONTH -> chartsDataManager.getMonthPrice()
-            TimeSpan.WEEK -> chartsDataManager.getWeekPrice()
-            else -> throw IllegalArgumentException("Day isn't currently supported")
+            TimeSpan.YEAR -> chartsDataManager.getYearPrice(cryptoCurrency, getFiatCurrency())
+            TimeSpan.MONTH -> chartsDataManager.getMonthPrice(cryptoCurrency, getFiatCurrency())
+            TimeSpan.WEEK -> chartsDataManager.getWeekPrice(cryptoCurrency, getFiatCurrency())
+            TimeSpan.DAY -> chartsDataManager.getDayPrice(cryptoCurrency, getFiatCurrency())
         }.compose(RxUtil.addObservableToCompositeDisposable(this))
                 .toList()
                 .doOnSubscribe { view.updateChartState(ChartsState.Loading) }
@@ -113,13 +117,14 @@ class DashboardPresenter @Inject constructor(
                 )
     }
 
-    private fun getChartsData(list: List<Point>): ChartsState.Data {
+    private fun getChartsData(list: List<PriceDatum>): ChartsState.Data {
         return ChartsState.Data(
                 data = list,
-                fiatSymbol = "$", // Dollar only supported currency right now
+                fiatSymbol = getCurrencySymbol(),
                 getChartYear = { updateChartsData(TimeSpan.YEAR) },
                 getChartMonth = { updateChartsData(TimeSpan.MONTH) },
-                getChartWeek = { updateChartsData(TimeSpan.WEEK) }
+                getChartWeek = { updateChartsData(TimeSpan.WEEK) },
+                getChartDay = { updateChartsData(TimeSpan.DAY) }
         )
     }
 
@@ -131,12 +136,13 @@ class DashboardPresenter @Inject constructor(
                                 val btcBalance = transactionListDataManager.getBtcBalance(ItemAccount().apply {
                                     type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
                                 })
+                                val ethBalance = ethAddressResponse.getTotalBalance()
                                 view.updateBtcBalance(getBtcBalanceString(btcBalance))
-                                view.updateEthBalance(getEthBalanceString(ethAddressResponse.getTotalBalance()))
+                                view.updateEthBalance(getEthBalanceString(ethBalance))
 
                                 val btcFiat = exchangeRateFactory.getLastBtcPrice(getFiatCurrency()) * (btcBalance / 1e8)
                                 val ethFiat = BigDecimal(exchangeRateFactory.getLastEthPrice(getFiatCurrency()))
-                                        .multiply(Convert.fromWei(BigDecimal(ethAddressResponse.getTotalBalance()), Convert.Unit.ETHER))
+                                        .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
 
                                 val totalDouble = btcFiat.plus(ethFiat.toDouble())
 
@@ -169,7 +175,7 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun dismissAnnouncement() {
-        prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
+        prefsUtil.setValue(ETH_ANNOUNCEMENT_DISMISSED, true)
         if (displayList.any { it is AnnouncementData }) {
             displayList.removeAll { it is AnnouncementData }
             view.notifyItemRemoved(displayList, 0)
@@ -190,8 +196,8 @@ class DashboardPresenter @Inject constructor(
     private fun checkLatestAnnouncement() {
         // If user hasn't completed onboarding, ignore announcements
         if (isOnboardingComplete()) {
-            if (!prefsUtil.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, false)) {
-                prefsUtil.setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, true)
+            if (!prefsUtil.getValue(ETH_ANNOUNCEMENT_DISMISSED, false)) {
+                prefsUtil.setValue(ETH_ANNOUNCEMENT_DISMISSED, true)
                 showAnnouncement()
             }
         }
@@ -240,6 +246,7 @@ class DashboardPresenter @Inject constructor(
 
         return OnboardingModel(
                 pages,
+                // TODO: These are neat and clever, but make things pretty hard to test. Replace with callbacks.
                 dismissOnboarding = {
                     displayList.removeAll { it is OnboardingModel }
                     view.notifyItemRemoved(displayList, 0)
@@ -247,6 +254,14 @@ class DashboardPresenter @Inject constructor(
                 onboardingComplete = { setOnboardingComplete(true) },
                 onboardingNotComplete = { setOnboardingComplete(false) }
         )
+    }
+
+    private fun isOnboardingComplete() =
+            // If wallet isn't newly created, don't show onboarding
+            prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) || !appUtil.isNewlyCreated
+
+    private fun setOnboardingComplete(completed: Boolean) {
+        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, completed)
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -276,16 +291,14 @@ class DashboardPresenter @Inject constructor(
 
     private fun getCurrencySymbol() = exchangeRateFactory.getSymbol(getFiatCurrency())
 
-    // USD only supported currency for now
     private fun getBtcString(): String {
-        val lastBtcPrice = getLastBtcPrice("USD")
-        return "$${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastBtcPrice)}"
+        val lastBtcPrice = getLastBtcPrice(getFiatCurrency())
+        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastBtcPrice)}"
     }
 
-    // USD only supported currency for now
     private fun getEthString(): String {
-        val lastEthPrice = getLastEthPrice("USD")
-        return "$${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastEthPrice)}"
+        val lastEthPrice = getLastEthPrice(getFiatCurrency())
+        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastEthPrice)}"
     }
 
     private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
@@ -300,12 +313,10 @@ class DashboardPresenter @Inject constructor(
 
     private fun getLastEthPrice(fiat: String) = exchangeRateFactory.getLastEthPrice(fiat)
 
-    private fun isOnboardingComplete() =
-            // If wallet isn't newly created, don't show onboarding
-            prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false) || !appUtil.isNewlyCreated
+    companion object {
 
-    private fun setOnboardingComplete(completed: Boolean) {
-        prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, completed)
+        @VisibleForTesting const val ETH_ANNOUNCEMENT_DISMISSED = "ETH_ANNOUNCEMENT_DISMISSED"
+
     }
 
 }
@@ -313,11 +324,12 @@ class DashboardPresenter @Inject constructor(
 sealed class ChartsState {
 
     data class Data(
-            val data: List<Point>,
+            val data: List<PriceDatum>,
             val fiatSymbol: String,
             val getChartYear: () -> Unit,
             val getChartMonth: () -> Unit,
-            val getChartWeek: () -> Unit
+            val getChartWeek: () -> Unit,
+            val getChartDay: () -> Unit
     ) : ChartsState()
 
     object Error : ChartsState()

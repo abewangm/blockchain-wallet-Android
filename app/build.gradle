@@ -126,15 +126,19 @@ android {
     }
     dataBinding.enabled true
 
-    // Always show the result of every unit test, even if it passes.
-    testOptions.unitTests.all {
-        testLogging {
-            events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
-        }
-        reports.junitXml.destination = file('../build/test-results/')
-        // Required for correct coverage of Robolectric tests
-        jacoco {
-            includeNoLocationClasses = true
+    testOptions {
+        // Fix for Robolectric bug when using AAPT2
+        unitTests.includeAndroidResources true
+        // Always show the result of every unit test, even if it passes.
+        unitTests.all {
+            testLogging {
+                events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+            }
+            reports.junitXml.destination = file('../build/test-results/')
+            // Required for correct coverage of Robolectric tests
+            jacoco {
+                includeNoLocationClasses = true
+            }
         }
     }
 }
@@ -232,7 +236,7 @@ dependencies {
     testImplementation 'org.json:json:20140107'
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
-    testImplementation('org.robolectric:robolectric:3.3.2') {
+    testImplementation('org.robolectric:robolectric:3.4.2') {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }
