@@ -7,11 +7,6 @@ import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
-import piuk.blockchain.android.BlockchainTestApplication
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper
@@ -19,8 +14,6 @@ import piuk.blockchain.android.ui.onboarding.OnboardingActivity.EXTRAS_EMAIL_ONL
 import piuk.blockchain.android.util.PrefsUtil
 import java.lang.IllegalStateException
 
-@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
-@RunWith(RobolectricTestRunner::class)
 class OnboardingPresenterTest {
 
     private lateinit var subject: OnboardingPresenter
@@ -40,7 +33,9 @@ class OnboardingPresenterTest {
     @Throws(Exception::class)
     fun onViewReadySettingsFailureEmailOnly() {
         // Arrange
-        val intent = Intent().apply { putExtra(EXTRAS_EMAIL_ONLY, true) }
+        val intent: Intent = mock()
+        whenever(intent.getBooleanExtra(EXTRAS_EMAIL_ONLY, false)).thenReturn(true)
+        whenever(intent.hasExtra(EXTRAS_EMAIL_ONLY)).thenReturn(true)
         whenever(mockActivity.pageIntent).thenReturn(intent)
         whenever(mockSettingsDataManager.settings).thenReturn(Observable.error { Throwable() })
         // Act

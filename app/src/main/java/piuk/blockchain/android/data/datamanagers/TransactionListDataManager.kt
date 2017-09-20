@@ -11,8 +11,10 @@ import piuk.blockchain.android.data.transactions.BtcDisplayable
 import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.data.transactions.EthDisplayable
 import piuk.blockchain.android.ui.account.ItemAccount
+import piuk.blockchain.android.util.annotations.Mockable
 import java.util.*
 
+@Mockable
 class TransactionListDataManager(
         private val payloadManager: PayloadManager,
         private val ethDataManager: EthDataManager,

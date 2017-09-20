@@ -2,13 +2,12 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
-import info.blockchain.api.statistics.Statistics;
-import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthAccountApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
+import info.blockchain.wallet.prices.PriceApi;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import dagger.Module;
@@ -220,10 +219,7 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected ChartsDataManager provideChartsDataManager(RxBus rxBus) {
-        return new ChartsDataManager(new Statistics(
-                BlockchainFramework.getRetrofitApiInstance(),
-                BlockchainFramework.getApiCode()),
-                rxBus);
+        return new ChartsDataManager(new PriceApi(), rxBus);
     }
 
 }

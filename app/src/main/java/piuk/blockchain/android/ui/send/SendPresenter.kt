@@ -529,11 +529,13 @@ class SendPresenter @Inject constructor(
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> hint = R.string.to_field_helper
                 CryptoCurrencies.ETHER -> hint = R.string.eth_to_field_helper
+                else -> throw IllegalArgumentException("BCC is not currently supported")
             }
         } else {
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> hint = R.string.to_field_helper_no_dropdown
                 CryptoCurrencies.ETHER -> hint = R.string.eth_to_field_helper_no_dropdown
+                else -> throw IllegalArgumentException("BCC is not currently supported")
             }
         }
 
@@ -547,6 +549,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> view.updateCryptoCurrency(currencyHelper.btcUnit)
             CryptoCurrencies.ETHER -> view.updateCryptoCurrency(currencyHelper.ethUnit)
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 
