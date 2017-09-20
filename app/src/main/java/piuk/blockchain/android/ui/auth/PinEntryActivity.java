@@ -57,8 +57,8 @@ public class PinEntryActivity extends BaseAuthActivity implements
             fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,
-                    fragment,
-                    fragment);
+                    new Fragment(),
+                    new Fragment());
 
             lockViewpager();
         } else {

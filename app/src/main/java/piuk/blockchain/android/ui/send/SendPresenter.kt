@@ -8,12 +8,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import info.blockchain.api.data.UnspentOutputs
 import info.blockchain.wallet.api.WalletApi
 import info.blockchain.wallet.api.data.FeeOptions
+import info.blockchain.wallet.ethereum.EthereumAccount
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.payment.Payment
 import info.blockchain.wallet.util.FormatsUtil
+import info.blockchain.wallet.util.MetadataUtil
 import info.blockchain.wallet.util.PrivateKeyFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -187,7 +189,8 @@ class SendPresenter @Inject constructor(
                         .compose(RxUtil.addObservableToCompositeDisposable(this))
                         .subscribe({
                             if (it.left) {
-                                showPaymentReview()
+                                //Checks if second pw needed then -> onNoSecondPassword()
+                                view.showSecondPasswordDialog()
                             } else if(it.right == R.string.eth_support_contract_not_allowed) {
                                 view.showEthContractSnackbar()
                             } else {
@@ -279,7 +282,16 @@ class SendPresenter @Inject constructor(
                     Timber.e(it)
                     view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
                 }
-                .flatMap { ethDataManager.signEthTransaction(it) }
+                .flatMap {
+
+                    if (payloadDataManager.isDoubleEncrypted) {
+                        payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+                    }
+
+                    val ecKey = EthereumAccount.deriveECKey(payloadDataManager.wallet.hdWallets[0].masterKey,
+                            0)
+                    ethDataManager.signEthTransaction(it, ecKey)
+                }
                 .flatMap { ethDataManager.pushEthTx(it!!) }
                 .subscribe({
                     view.dismissProgressDialog()
