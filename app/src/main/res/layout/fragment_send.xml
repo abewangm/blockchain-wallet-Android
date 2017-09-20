@@ -19,7 +19,6 @@
                 fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_below="@id/accounts_spinner"
                 android:layout_gravity="bottom"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 android:background="@color/primary_navy_medium"

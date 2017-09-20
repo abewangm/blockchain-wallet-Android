@@ -19,6 +19,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
@@ -36,6 +37,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -636,6 +638,48 @@ public class SettingsPresenterTest {
         verify(activity).hideProgressDialog();
         //noinspection WrongConstant
         verify(activity, times(2)).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+    }
+
+    @Test
+    public void storeSwipeToReceiveAddressesSuccessful() throws Exception {
+        // Arrange
+
+        // Act
+        subject.storeSwipeToReceiveAddresses();
+        // Assert
+        verify(swipeToReceiveHelper).updateAndStoreBitcoinAddresses();
+        verify(swipeToReceiveHelper).storeEthAddress();
+        verifyNoMoreInteractions(swipeToReceiveHelper);
+        verify(activity).showProgressDialog(R.string.please_wait);
+        verify(activity).hideProgressDialog();
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void storeSwipeToReceiveAddressesFailed() throws Exception {
+        // Arrange
+        doThrow(NullPointerException.class).when(swipeToReceiveHelper).updateAndStoreBitcoinAddresses();
+        // Act
+        subject.storeSwipeToReceiveAddresses();
+        // Assert
+        verify(swipeToReceiveHelper).updateAndStoreBitcoinAddresses();
+        verifyNoMoreInteractions(swipeToReceiveHelper);
+        verify(activity).showProgressDialog(R.string.please_wait);
+        verify(activity).hideProgressDialog();
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void clearSwipeToReceiveData() throws Exception {
+        // Arrange
+
+        // Act
+        subject.clearSwipeToReceiveData();
+        // Assert
+        verify(prefsUtil).removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ACCOUNT_NAME);
+        verify(prefsUtil).removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ADDRESSES);
+        verify(prefsUtil).removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ETH_ADDRESS);
     }
 
 }

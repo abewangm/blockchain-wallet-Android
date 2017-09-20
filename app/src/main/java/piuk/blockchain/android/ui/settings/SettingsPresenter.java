@@ -555,4 +555,5 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ADDRESSES);
         prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ETH_ADDRESS);
     }
+
 }

@@ -58,8 +58,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_INTENT && activity != null) {
-                onViewReady()
-                recyclerview.scrollToPosition(0)
+                tabs?.post { tabs.getTabAt(0)?.select() }
+                recyclerview?.scrollToPosition(0)
             }
         }
     }
