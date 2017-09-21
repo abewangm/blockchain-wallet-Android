@@ -218,8 +218,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
         balanceAdapter = new BalanceAdapter(
                 getActivity(),
                 btcExchangeRate,
-                // STOPSHIP: 29/08/2017 Add ETH exchange rate
-                0.0,
+                getPresenter().getEthExchangeRate(),
                 isBtc,
                 new BalanceListClickListener() {
                     @Override

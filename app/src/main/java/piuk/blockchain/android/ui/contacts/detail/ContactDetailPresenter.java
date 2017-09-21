@@ -400,4 +400,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
         rxBus.unregister(NotificationPayload.class, notificationObservable);
     }
 
+    public double getEthExchangeRate() {
+        return exchangeRateFactory.getLastEthPrice(getFiatCurrency());
+    }
 }
