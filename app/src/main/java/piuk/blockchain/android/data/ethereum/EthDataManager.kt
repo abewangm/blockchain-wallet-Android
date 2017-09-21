@@ -16,8 +16,8 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
-import java.math.BigInteger
 import piuk.blockchain.android.util.annotations.Mockable
+import java.math.BigInteger
 import java.util.*
 
 @Mockable
@@ -135,13 +135,19 @@ class EthDataManager(
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Observable] returning EthereumWallet
      */
-    fun initEthereumWallet(metadataNode: DeterministicKey, defaultLabel: String): Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
+    fun initEthereumWallet(
+            metadataNode: DeterministicKey,
+            defaultLabel: String
+    ): Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
         Observable.fromCallable { fetchOrCreateEthereumWallet(metadataNode, defaultLabel) }
                 .doOnNext { ethDataStore.ethWallet = it }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
-    private fun fetchOrCreateEthereumWallet(metadataNode: DeterministicKey, defaultLabel: String): EthereumWallet {
+    private fun fetchOrCreateEthereumWallet(
+            metadataNode: DeterministicKey,
+            defaultLabel: String
+    ): EthereumWallet {
 
         var ethWallet = EthereumWallet.load(metadataNode)
 
@@ -155,23 +161,32 @@ class EthDataManager(
     }
 
     /**
-     * @param GASPRICE - representing the fee the sender is willing to pay for gas. One unit of gas corresponds to the execution of one atomic instruction, i.e. a computational step,
-     * @param gasLimit - representing the maximum number of computational steps the transaction execution is allowed to take,
-     * @param weiValue - The amount of wei to transfer from the sender to the recipient,
+     * @param gasPrice Represents the fee the sender is willing to pay for gas. One unit of gas
+     *                 corresponds to the execution of one atomic instruction, i.e. a computational step
+     * @param gasLimit Represents the maximum number of computational steps the transaction
+     *                 execution is allowed to take
+     * @param weiValue The amount of wei to transfer from the sender to the recipient
      */
-    fun createEthTransaction(nonce: BigInteger, to: String, gasPrice: BigInteger, gasLimit: BigInteger, weiValue: BigInteger): RawTransaction? {
-        return RawTransaction.createEtherTransaction(
-                nonce,
-                gasPrice,
-                gasLimit,
-                to,
-                weiValue);
-    }
+    fun createEthTransaction(
+            nonce: BigInteger,
+            to: String,
+            gasPrice: BigInteger,
+            gasLimit: BigInteger,
+            weiValue: BigInteger
+    ): RawTransaction? = RawTransaction.createEtherTransaction(
+            nonce,
+            gasPrice,
+            gasLimit,
+            to,
+            weiValue)
 
-    fun signEthTransaction(rawTransaction: RawTransaction, ecKey: ECKey) = Observable.just(ethDataStore.ethWallet?.account?.signTransaction(rawTransaction, ecKey))
+    fun signEthTransaction(rawTransaction: RawTransaction, ecKey: ECKey): Observable<ByteArray> =
+            Observable.fromCallable {
+                ethDataStore.ethWallet!!.account!!.signTransaction(rawTransaction, ecKey)
+            }
 
-    fun pushEthTx(signedTxBytes: ByteArray): Observable<String>? {
-        return ethAccountApi.pushTx("0x" + String(Hex.encode(signedTxBytes)))
-                .compose(RxUtil.applySchedulersToObservable())
-    }
+    fun pushEthTx(signedTxBytes: ByteArray): Observable<String> =
+            ethAccountApi.pushTx("0x" + String(Hex.encode(signedTxBytes)))
+                    .compose(RxUtil.applySchedulersToObservable())
+
 }

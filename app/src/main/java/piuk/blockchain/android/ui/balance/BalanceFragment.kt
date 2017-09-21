@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.balance
 
-
 import android.content.*
 import android.content.pm.ShortcutManager
 import android.os.Bundle

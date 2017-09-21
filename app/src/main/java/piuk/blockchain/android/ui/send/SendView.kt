@@ -14,7 +14,7 @@ interface SendView : View {
 
     fun updateCryptoCurrency(currency: String)
 
-    fun updateFiatCurrency(unit: String)
+    fun updateFiatCurrency(currency: String)
 
     fun updateCryptoAmount(amountString: String?)
 
@@ -22,7 +22,7 @@ interface SendView : View {
 
     fun updateWarning(message: String)
 
-    fun updateMaxAvailable(max: String)
+    fun updateMaxAvailable(maxAmount: String)
 
     fun updateMaxAvailableColor(@ColorRes color: Int)
 

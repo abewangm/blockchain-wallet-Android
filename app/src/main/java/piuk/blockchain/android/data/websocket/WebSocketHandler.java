@@ -7,13 +7,13 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.utils.Convert;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
@@ -291,7 +291,7 @@ class WebSocketHandler extends WebSocketListener {
 
     private void attemptParseEthMessage(String message) {
         try {
-            ObjectMapper mapper = new ObjectMapper().registerModule(new KotlinModule());
+            ObjectMapper mapper = new ObjectMapper();
             EthWebsocketResponse response = mapper.readValue(message, EthWebsocketResponse.class);
 
             String from = response.getTx().getFrom();
@@ -300,7 +300,7 @@ class WebSocketHandler extends WebSocketListener {
                 String title = context.getString(R.string.app_name);
                 String marquee = context.getString(R.string.received_ethereum)
                         + " "
-                        + Convert.fromWei(response.getTx().getValue(), Convert.Unit.ETHER)
+                        + Convert.fromWei(new BigDecimal(response.getTx().getValue()), Convert.Unit.ETHER)
                         + " ETH";
 
                 String text = marquee

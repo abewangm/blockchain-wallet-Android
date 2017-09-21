@@ -66,7 +66,7 @@
                     android:clickable="@{viewModel.accountModel.labelClickable}"
                     android:gravity="center_vertical"
                     android:minHeight="72dp"
-                    android:onClick="@{viewModel.onClickChangeLabel}"
+                    android:onClick="@{viewModel::onClickChangeLabel}"
                     android:orientation="vertical"
                     android:paddingBottom="4dp">
 
@@ -116,7 +116,7 @@
                     android:clickable="@{viewModel.accountModel.defaultClickable}"
                     android:gravity="center_vertical"
                     android:minHeight="72dp"
-                    android:onClick="@{viewModel.onClickDefault}"
+                    android:onClick="@{viewModel::onClickDefault}"
                     android:paddingLeft="16dp"
                     android:text="@{viewModel.accountModel.defaultText}"
                     android:textColor="@{viewModel.accountModel.defaultTextColor}"
@@ -140,7 +140,7 @@
                     android:background="?attr/selectableItemBackground"
                     android:clickable="@{viewModel.accountModel.xprivClickable}"
                     android:minHeight="72dp"
-                    android:onClick="@{viewModel.onClickScanXpriv}"
+                    android:onClick="@{viewModel::onClickScanXpriv}"
                     android:orientation="vertical"
                     android:paddingBottom="4dp"
                     android:visibility="@{viewModel.accountModel.scanPrivateKeyVisibility}">
@@ -212,7 +212,7 @@
                     android:background="?attr/selectableItemBackground"
                     android:clickable="@{viewModel.accountModel.xpubClickable}"
                     android:minHeight="72dp"
-                    android:onClick="@{viewModel.onClickShowXpub}"
+                    android:onClick="@{viewModel::onClickShowXpub}"
                     android:orientation="vertical"
                     android:paddingBottom="4dp">
 
@@ -289,7 +289,7 @@
                     android:clickable="@{viewModel.accountModel.archiveClickable}"
                     android:gravity="center_vertical"
                     android:minHeight="72dp"
-                    android:onClick="@{viewModel.onClickArchive}"
+                    android:onClick="@{viewModel::onClickArchive}"
                     android:orientation="vertical"
                     android:paddingBottom="4dp"
                     android:paddingTop="16dp"
