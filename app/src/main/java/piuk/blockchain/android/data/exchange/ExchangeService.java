@@ -129,13 +129,20 @@ public class ExchangeService {
 
     void reloadExchangeData() {
         MetadataNodeFactory metadataNodeFactory = payloadManager.getMetadataNodeFactory();
-        DeterministicKey metadataNode = metadataNodeFactory.getMetadataNode();
 
-        if (metadataNode != null) {
-            Observable<Metadata> exchangeDataStream = getMetadata(metadataNode);
-            exchangeDataStream.subscribeWith(metadataSubject);
+        if(metadataNodeFactory != null) {
+            DeterministicKey metadataNode = metadataNodeFactory.getMetadataNode();
+
+            if (metadataNode != null) {
+                Observable<Metadata> exchangeDataStream = getMetadata(metadataNode);
+                exchangeDataStream.subscribeWith(metadataSubject);
+            } else {
+                Timber.e("MetadataNode not generated yet. Wallet possibly double encrypted.");
+            }
         } else {
-            Timber.e("MetadataNode not generated yet. Wallet possibly double encrypted.");
+            //PayloadManager likely to have been cleared at this point.
+            //TODO This avoids high velocity crash. A proper analyses why this happens would be beneficial.
+            Timber.e("ExchangeService.reloadExchangeData - MetadataNodeFactory is null.");
         }
     }
 
