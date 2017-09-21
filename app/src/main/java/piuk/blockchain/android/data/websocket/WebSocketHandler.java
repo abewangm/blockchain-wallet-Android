@@ -6,9 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.utils.Convert;
 
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
@@ -25,10 +29,13 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.ethereum.EthDataManager;
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.websocket.models.EthWebsocketResponse;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
@@ -50,6 +57,8 @@ class WebSocketHandler extends WebSocketListener {
     private boolean stoppedDeliberately = false;
     private String[] xpubs;
     private String[] addrs;
+    private String ethAccount;
+    private EthDataManager ethDataManager;
     private NotificationManager notificationManager;
     private String guid;
     private HashSet<String> subHashSet = new HashSet<>();
@@ -58,7 +67,7 @@ class WebSocketHandler extends WebSocketListener {
     private MonetaryUtil monetaryUtil;
     private Context context;
     private OkHttpClient okHttpClient;
-    private WebSocket webSocketConnection;
+    private WebSocket btcConnection, ethConnection;
     private boolean connected;
     private PayloadDataManager payloadDataManager;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -67,35 +76,45 @@ class WebSocketHandler extends WebSocketListener {
     public WebSocketHandler(Context context,
                             OkHttpClient okHttpClient,
                             PayloadDataManager payloadDataManager,
+                            EthDataManager ethDataManager,
                             NotificationManager notificationManager,
                             EnvironmentSettings environmentSettings,
                             MonetaryUtil monetaryUtil,
                             String guid,
                             String[] xpubs,
                             String[] addrs,
+                            String ethAccount,
                             RxBus rxBus) {
 
         this.context = context;
         this.okHttpClient = okHttpClient;
         this.payloadDataManager = payloadDataManager;
+        this.ethDataManager = ethDataManager;
         this.notificationManager = notificationManager;
         this.environmentSettings = environmentSettings;
         this.monetaryUtil = monetaryUtil;
         this.guid = guid;
         this.xpubs = xpubs;
         this.addrs = addrs;
+        this.ethAccount = ethAccount;
         this.rxBus = rxBus;
     }
 
     public void subscribeToXpub(String xpub) {
         if (xpub != null && !xpub.isEmpty()) {
-            send("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
+            sendToBtcConnection("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
         }
     }
 
     public void subscribeToAddress(String address) {
         if (address != null && !address.isEmpty()) {
-            send("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
+            sendToBtcConnection("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
+        }
+    }
+
+    private void subscribeToEthAccount(String ethAddress) {
+        if (ethAddress != null && !ethAddress.isEmpty()) {
+            sendToEthConnection("{\"op\":\"account_sub\", \"account\":\"" + ethAddress + "\"}");
         }
     }
 
@@ -122,21 +141,37 @@ class WebSocketHandler extends WebSocketListener {
 
     private void stop() {
         if (isConnected()) {
-            webSocketConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
-            webSocketConnection = null;
+            btcConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
+            ethConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
+            btcConnection = null;
+            ethConnection = null;
         }
     }
 
-    private void send(String message) {
+    private void sendToBtcConnection(String message) {
         // Make sure each message is only sent once per socket lifetime
         if (!subHashSet.contains(message)) {
             try {
                 if (isConnected()) {
-                    webSocketConnection.send(message);
+                    btcConnection.send(message);
                     subHashSet.add(message);
                 }
             } catch (Exception e) {
-                Timber.e("send: ", e);
+                Timber.e(e, "Send to BTC websocket failed");
+            }
+        }
+    }
+
+    private void sendToEthConnection(String message) {
+        // Make sure each message is only sent once per socket lifetime
+        if (!subHashSet.contains(message)) {
+            try {
+                if (isConnected()) {
+                    ethConnection.send(message);
+                    subHashSet.add(message);
+                }
+            } catch (Exception e) {
+                Timber.e(e, "Send to ETH websocket failed");
             }
         }
     }
@@ -145,7 +180,7 @@ class WebSocketHandler extends WebSocketListener {
         if (guid == null) {
             return;
         }
-        send("{\"op\":\"wallet_sub\",\"guid\":\"" + guid + "\"}");
+        sendToBtcConnection("{\"op\":\"wallet_sub\",\"guid\":\"" + guid + "\"}");
 
         for (String xpub : xpubs) {
             subscribeToXpub(xpub);
@@ -154,6 +189,8 @@ class WebSocketHandler extends WebSocketListener {
         for (String addr : addrs) {
             subscribeToAddress(addr);
         }
+
+        subscribeToEthAccount(ethAccount);
     }
 
     private void attemptReconnection() {
@@ -162,7 +199,7 @@ class WebSocketHandler extends WebSocketListener {
                     getReconnectionObservable()
                             .subscribe(
                                     value -> Timber.d("attemptReconnection: " + value),
-                                    throwable -> Timber.e("attemptReconnection: ", throwable)));
+                                    throwable -> Timber.e(throwable, "Attempt reconnection failed")));
         }
     }
 
@@ -173,7 +210,7 @@ class WebSocketHandler extends WebSocketListener {
     }
 
     private boolean isConnected() {
-        return webSocketConnection != null && connected;
+        return btcConnection != null && ethConnection != null && connected;
     }
 
     private void updateBalancesAndTransactions() {
@@ -189,12 +226,18 @@ class WebSocketHandler extends WebSocketListener {
     }
 
     private void startWebSocket() {
-        Request request = new Request.Builder()
-                .url(environmentSettings.getWebsocketUrl())
+        Request btcRequest = new Request.Builder()
+                .url(environmentSettings.getBtcWebsocketUrl())
                 .addHeader("Origin", "https://blockchain.info")
                 .build();
 
-        webSocketConnection = okHttpClient.newWebSocket(request, this);
+        Request ethRequest = new Request.Builder()
+                .url(environmentSettings.getEthWebsocketUrl())
+                .addHeader("Origin", "https://blockchain.info")
+                .build();
+
+        btcConnection = okHttpClient.newWebSocket(btcRequest, this);
+        ethConnection = okHttpClient.newWebSocket(ethRequest, this);
     }
 
     @Override
@@ -214,8 +257,10 @@ class WebSocketHandler extends WebSocketListener {
                 jsonObject = new JSONObject(text);
                 attemptParseMessage(text, jsonObject);
             } catch (JSONException je) {
-                Timber.e("onTextMessage: ", je);
+                Timber.e(je);
             }
+        } else if (text.contains("account_sub")) {
+            attemptParseEthMessage(text);
         } else {
             // Ignore content and broadcast anyway so that SwipeToReceive can update
             sendBroadcast();
@@ -244,6 +289,41 @@ class WebSocketHandler extends WebSocketListener {
         }).compose(RxUtil.applySchedulersToCompletable());
     }
 
+    private void attemptParseEthMessage(String message) {
+        try {
+            ObjectMapper mapper = new ObjectMapper().registerModule(new KotlinModule());
+            EthWebsocketResponse response = mapper.readValue(message, EthWebsocketResponse.class);
+
+            String from = response.getTx().getFrom();
+            // Check if money was received or sent
+            if (ethAccount != null && !ethAccount.equals(from)) {
+                String title = context.getString(R.string.app_name);
+                String marquee = context.getString(R.string.received_ethereum)
+                        + " "
+                        + Convert.fromWei(response.getTx().getValue(), Convert.Unit.ETHER)
+                        + " ETH";
+
+                String text = marquee
+                        + " "
+                        + context.getString(R.string.from).toLowerCase() + " " + response.getTx().getFrom();
+
+                triggerNotification(title, marquee, text);
+            }
+
+            if (ethDataManager.getEthWallet() != null) {
+                downloadEthTransactions()
+                        .subscribe(
+                                combinedEthModel -> sendBroadcast(),
+                                throwable -> Timber.e(throwable, "downloadEthTransactions failed"));
+            }
+        } catch (Exception e) {
+            Timber.e(e);
+            sendBroadcast();
+        }
+    }
+
+    // TODO: 20/09/2017 Here we should probably parse this info into objects rather than doing it manually
+    // TODO: 20/09/2017 Get a list of all possible payloads construct objects
     private void attemptParseMessage(String message, JSONObject jsonObject) {
         try {
             String op = (String) jsonObject.get("op");
@@ -303,10 +383,16 @@ class WebSocketHandler extends WebSocketListener {
 
                 String title = context.getString(R.string.app_name);
                 if (totalValue > 0L) {
-                    String marquee = context.getString(R.string.received_bitcoin) + " " + monetaryUtil.getBtcFormat().format((double) totalValue / 1e8) + " BTC";
+                    String marquee = context.getString(R.string.received_bitcoin)
+                            + " "
+                            + monetaryUtil.getBtcFormat().format((double) totalValue / 1e8)
+                            + " BTC";
                     String text = marquee;
                     if (totalValue > 0) {
-                        text += " from " + inAddr;
+                        text += " "
+                                + context.getString(R.string.from).toLowerCase()
+                                + " "
+                                + inAddr;
                     }
 
                     triggerNotification(title, marquee, text);
@@ -332,14 +418,16 @@ class WebSocketHandler extends WebSocketListener {
                         //noinspection ThrowableResultOfMethodCallIgnored
                         downloadChangedPayload().subscribe(
                                 () -> showToast().subscribe(new IgnorableDefaultObserver<>()),
-                                throwable -> Timber.e("attemptParseMessage: ", throwable));
+                                throwable -> Timber.e(throwable, "downloadChangedPayload failed"));
                     }
 
                     onChangeHashSet.add(message);
                 }
+            } else if (message.contains("account_sub")) {
+                attemptParseEthMessage(message);
             }
         } catch (Exception e) {
-            Timber.e("attemptParseMessage: ", e);
+            Timber.e(e, "attemptParseMessage");
         }
     }
 
@@ -361,6 +449,11 @@ class WebSocketHandler extends WebSocketListener {
                     payloadDataManager.getTempPassword()).subscribe(this::updateBalancesAndTransactions);
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    private Observable<CombinedEthModel> downloadEthTransactions() {
+        return ethDataManager.fetchEthAddress()
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     private void triggerNotification(String title, String marquee, String text) {

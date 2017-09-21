@@ -17,7 +17,6 @@ import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
-import piuk.blockchain.android.util.OSUtil
 import piuk.blockchain.android.util.extensions.*
 import javax.inject.Inject
 
@@ -48,8 +47,6 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Listen for updates to stored addresses
-        startWebSocketService()
 
         imageview_qr.setOnClickListener { showClipboardWarning() }
         textview_address.setOnClickListener { showClipboardWarning() }
@@ -123,19 +120,6 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
                 })
                 .setNegativeButton(R.string.no, null)
                 .show()
-    }
-
-    private fun startWebSocketService() {
-        val intent = Intent(context, WebSocketService::class.java)
-
-        if (!OSUtil(activity).isServiceRunning(WebSocketService::class.java)) {
-            activity.startService(intent)
-        } else {
-            // Restarting this here ensures re-subscription after app restart - the service may remain
-            // running, but the subscription to the WebSocket won't be restarted unless onCreate called
-            activity.stopService(intent)
-            activity.startService(intent)
-        }
     }
 
     companion object {

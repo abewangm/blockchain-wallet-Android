@@ -79,14 +79,16 @@ android {
             dimension "environment"
             buildConfigProperty "EXPLORER_URL", buildProperties.secrets['prodExplorer']
             buildConfigProperty "API_URL", buildProperties.secrets['prodApiServer']
-            buildConfigProperty "WEBSOCKET_URL", buildProperties.secrets['prodWebsocketServer']
+            buildConfigProperty "BITCOIN_WEBSOCKET_URL", buildProperties.secrets['prodBtcWebsocket']
+            buildConfigProperty "ETHEREUM_WEBSOCKET_URL", buildProperties.secrets['prodEthWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_prod"'
         }
         envDev {
             dimension "environment"
             buildConfigProperty "EXPLORER_URL", buildProperties.secrets['devExplorer']
             buildConfigProperty "API_URL", buildProperties.secrets['devApiServer']
-            buildConfigProperty "WEBSOCKET_URL", buildProperties.secrets['devWebsocket']
+            buildConfigProperty "BITCOIN_WEBSOCKET_URL", buildProperties.secrets['devBtcWebsocket']
+            buildConfigProperty "ETHEREUM_WEBSOCKET_URL", buildProperties.secrets['devEthWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_dev"'
             versionNameSuffix '-dev'
         }
@@ -94,7 +96,8 @@ android {
             dimension "environment"
             buildConfigProperty "EXPLORER_URL", buildProperties.secrets['stagingExplorer']
             buildConfigProperty "API_URL", buildProperties.secrets['stagingApiServer']
-            buildConfigProperty "WEBSOCKET_URL", buildProperties.secrets['stagingWebsocket']
+            buildConfigProperty "BITCOIN_WEBSOCKET_URL", buildProperties.secrets['stagingBtcWebsocket']
+            buildConfigProperty "ETHEREUM_WEBSOCKET_URL", buildProperties.secrets['stagingEthWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_staging"'
             versionNameSuffix '-staging'
         }
@@ -102,7 +105,8 @@ android {
             dimension "environment"
             buildConfigProperty "EXPLORER_URL", buildProperties.secrets['testnetExplorer']
             buildConfigProperty "API_URL", buildProperties.secrets['testnetApiServer']
-            buildConfigProperty "WEBSOCKET_URL", buildProperties.secrets['testnetWebsocket']
+            buildConfigProperty "BITCOIN_WEBSOCKET_URL", buildProperties.secrets['testnetBtcWebsocket']
+            buildConfigProperty "ETHEREUM_WEBSOCKET_URL", buildProperties.secrets['testnetEthWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_testnet"'
             versionNameSuffix '-testnet'
         }
@@ -219,6 +223,8 @@ dependencies {
     }
     // Device specs
     implementation 'com.facebook.device.yearclass:yearclass:2.0.0'
+    // Jackson Kotlin
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0'
 
     // UI/Instrumentation Tests
     androidTestImplementation 'junit:junit:4.12'

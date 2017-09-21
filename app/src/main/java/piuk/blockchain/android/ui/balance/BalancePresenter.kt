@@ -66,7 +66,6 @@ class BalancePresenter @Inject constructor(
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
         subscribeToEvents()
-        storeSwipeReceiveAddresses()
 
         ethDataManager.fetchEthAddress()
                 .doOnError { Timber.e(it) }

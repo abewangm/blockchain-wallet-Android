@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
@@ -28,8 +30,11 @@ import piuk.blockchain.android.util.annotations.Thunk;
 public class WebSocketService extends Service {
 
     public static final String ACTION_INTENT = "info.blockchain.wallet.WebSocketService.SUBSCRIBE_TO_ADDRESS";
+    public static final String BITCOIN_ADDRESS = "address";
+    public static final String X_PUB = "x_pub";
     private final IBinder binder = new LocalBinder();
     @Inject protected PayloadDataManager payloadDataManager;
+    @Inject protected EthDataManager ethDataManager;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected NotificationManager notificationManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
@@ -41,11 +46,11 @@ public class WebSocketService extends Service {
         @Override
         public void onReceive(Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_INTENT)) {
-                if (intent.hasExtra("address") && webSocketHandler != null) {
-                    webSocketHandler.subscribeToAddress(intent.getStringExtra("address"));
+                if (intent.hasExtra(BITCOIN_ADDRESS) && webSocketHandler != null) {
+                    webSocketHandler.subscribeToAddress(intent.getStringExtra(BITCOIN_ADDRESS));
                 }
-                if (intent.hasExtra("xpub") && webSocketHandler != null) {
-                    webSocketHandler.subscribeToXpub(intent.getStringExtra("xpub"));
+                if (intent.hasExtra(X_PUB) && webSocketHandler != null) {
+                    webSocketHandler.subscribeToXpub(intent.getStringExtra(X_PUB));
                 }
             }
         }
@@ -67,19 +72,18 @@ public class WebSocketService extends Service {
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(receiver, filter);
 
-        String[] addrs = getAddresses();
-        String[] xpubs = getXpubs();
-
         webSocketHandler = new WebSocketHandler(
                 getApplicationContext(),
                 okHttpClient,
                 payloadDataManager,
+                ethDataManager,
                 notificationManager,
                 new EnvironmentSettings(),
                 new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
                 prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
-                xpubs,
-                addrs,
+                getXpubs(),
+                getAddresses(),
+                getEthAccount(),
                 rxBus);
 
         webSocketHandler.start();
@@ -132,6 +136,16 @@ public class WebSocketService extends Service {
         } else {
             return new String[0];
         }
+    }
+
+    @Nullable
+    private String getEthAccount() {
+        if (ethDataManager.getEthWallet() != null && ethDataManager.getEthWallet().getAccount() != null) {
+            return ethDataManager.getEthWallet().getAccount().getAddress();
+        } else if (swipeToReceiveHelper.getEthReceiveAddress() != null) {
+            return swipeToReceiveHelper.getEthReceiveAddress();
+        }
+        return null;
     }
 
     @Override

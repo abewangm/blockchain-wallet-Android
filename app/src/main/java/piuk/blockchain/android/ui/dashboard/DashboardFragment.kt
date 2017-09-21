@@ -1,6 +1,9 @@
 package piuk.blockchain.android.ui.dashboard
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
@@ -12,6 +15,7 @@ import kotlinx.android.synthetic.main.fragment_dashboard.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
+import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
@@ -29,8 +33,16 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override val shouldShowBuy: Boolean
         get() = AndroidUtils.is19orHigher()
 
-    private val dashboardAdapter by unsafeLazy { DashboardDelegateAdapter(activity) }
     @Inject lateinit var dashboardPresenter: DashboardPresenter
+    private val dashboardAdapter by unsafeLazy { DashboardDelegateAdapter(activity) }
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == BalanceFragment.ACTION_INTENT && activity != null) {
+                // Update balances
+                presenter?.onResume()
+            }
+        }
+    }
 
     init {
         Injector.INSTANCE.presenterComponent.inject(this)
@@ -71,6 +83,13 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         super.onResume()
         setupToolbar()
         presenter.onResume()
+        LocalBroadcastManager.getInstance(context)
+                .registerReceiver(receiver, IntentFilter(BalanceFragment.ACTION_INTENT))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver)
     }
 
     override fun notifyItemAdded(displayItems: MutableList<Any>, position: Int) {

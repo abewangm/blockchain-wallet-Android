@@ -16,11 +16,13 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.currency.CryptoCurrencies;
+import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityPinEntryBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment;
 import piuk.blockchain.android.util.AppUtil;
+import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -53,7 +55,6 @@ public class PinEntryActivity extends BaseAuthActivity implements
         final FragmentPagerAdapter fragmentPagerAdapter;
         if (shouldHideSwipeToReceive()) {
             // Don't bother instantiating the QR fragment + Presenter if not necessary
-            Fragment fragment = new Fragment();
             fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,
@@ -73,6 +74,8 @@ public class PinEntryActivity extends BaseAuthActivity implements
                     pinEntryFragment,
                     bitcoinFragment,
                     ethFragment);
+
+            startWebSocketService();
         }
 
         binding.viewpager.setOffscreenPageLimit(3);
@@ -164,6 +167,19 @@ public class PinEntryActivity extends BaseAuthActivity implements
     @Override
     public void onPageScrollStateChanged(int state) {
         // No-op
+    }
+
+    private void startWebSocketService() {
+        Intent intent = new Intent(this, WebSocketService.class);
+
+        if (!new OSUtil(this).isServiceRunning(WebSocketService.class)) {
+            startService(intent);
+        } else {
+            // Restarting this here ensures re-subscription after app restart - the service may remain
+            // running, but the subscription to the WebSocket won't be restarted unless onCreate called
+            stopService(intent);
+            startService(intent);
+        }
     }
 
     private static class SwipeToReceiveFragmentPagerAdapter extends FragmentPagerAdapter {

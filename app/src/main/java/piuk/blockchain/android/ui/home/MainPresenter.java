@@ -4,13 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 
-import org.bitcoinj.crypto.DeterministicKey;
-
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthereumWallet;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
+
+import org.bitcoinj.crypto.DeterministicKey;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -19,6 +19,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
@@ -40,6 +41,7 @@ import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.OSUtil;
@@ -50,6 +52,7 @@ import timber.log.Timber;
 public class MainPresenter extends BasePresenter<MainView> {
 
     private OSUtil osUtil;
+    private SwipeToReceiveHelper swipeToReceiveHelper;
     private Observable<NotificationPayload> notificationObservable;
     private PrefsUtil prefs;
     private AppUtil appUtil;
@@ -86,7 +89,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                   FeeDataManager feeDataManager,
                   EnvironmentSettings environmentSettings,
                   PromptManager promptManager,
-                  EthDataManager ethDataManager) {
+                  EthDataManager ethDataManager,
+                  SwipeToReceiveHelper swipeToReceiveHelper) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -106,6 +110,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.promptManager = promptManager;
         this.ethDataManager = ethDataManager;
         osUtil = new OSUtil(applicationContext);
+        this.swipeToReceiveHelper = swipeToReceiveHelper;
     }
 
     private void initPrompts(Context context) {
@@ -147,6 +152,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                                 getView().hideProgressDialog();
 
                                 initPrompts(getView().getActivityContext());
+                                storeSwipeReceiveAddresses();
 
                                 rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
 
@@ -176,12 +182,22 @@ public class MainPresenter extends BasePresenter<MainView> {
         }
     }
 
+    private void storeSwipeReceiveAddresses() {
+        // Defer to background thread as deriving addresses is quite processor intensive
+        Completable.fromCallable(() -> {
+            swipeToReceiveHelper.updateAndStoreBitcoinAddresses();
+            return Void.TYPE;
+        }).subscribeOn(Schedulers.computation())
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(() -> { /* No-op*/ }, Timber::e);
+    }
+
     private Observable<MetadataNodeFactory> initMetadataNodesObservable() {
         return payloadDataManager.loadNodes()
                 .flatMap(loaded -> {
                     if (loaded) {
                         return payloadDataManager.getMetadataNodeFactory();
-                    }else {
+                    } else {
                         if (!payloadManager.getPayload().isDoubleEncryption()) {
                             return payloadDataManager.generateNodes(null)
                                     .andThen(payloadDataManager.getMetadataNodeFactory());
@@ -191,7 +207,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                     }
                 });
     }
-
 
     private Completable feesCompletable() {
         return feeDataManager.getBtcFeeOptions()
@@ -366,8 +381,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                     .andThen(payloadDataManager.getMetadataNodeFactory())
                     .map(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
                     .subscribe(ethereumWalletObservable -> {
-                //no-op
-            }, Throwable::printStackTrace);
+                        //no-op
+                    }, Throwable::printStackTrace);
         }
     }
 }

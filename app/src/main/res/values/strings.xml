@@ -208,6 +208,7 @@
     <string name="address_lookup_fail">Could not retrieve address. Please enter address manually.</string>
 
     <string name="received_bitcoin">Received Bitcoin</string>
+    <string name="received_ethereum">Received Ethereum</string>
 
     <string-array name="mnemonic_word_requests">
         <item>first word</item>
