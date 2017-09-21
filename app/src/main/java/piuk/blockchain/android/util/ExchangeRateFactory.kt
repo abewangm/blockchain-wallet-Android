@@ -166,6 +166,7 @@ class ExchangeRateFactory private constructor() {
         return lastPrice
     }
 
+    @Suppress("DEPRECATION")
     private fun getBtcTicker(): Completable = Completable.fromCallable {
         val call = api.btcTickerMap.execute()
         if (call.isSuccessful) {
@@ -176,6 +177,7 @@ class ExchangeRateFactory private constructor() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun getEthTicker(): Completable = Completable.fromCallable {
         val call = api.ethTickerMap.execute()
         if (call.isSuccessful) {

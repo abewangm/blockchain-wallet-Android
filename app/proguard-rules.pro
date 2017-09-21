@@ -145,5 +145,16 @@
 -keep public class info.blockchain.wallet.metadata.data.** { *; }
 -keep public class info.blockchain.wallet.payload.data.** { *; }
 -keep public class piuk.blockchain.android.data.exchange.models.** { *; }
+-keep public class piuk.blockchain.android.data.websocket.models.** { *; }
 -keep public class info.blockchain.wallet.ethereum.** { *; }
 -keep public class info.blockchain.wallet.ethereum.data.** { *; }
+-keep public class info.blockchain.wallet.prices.data.** { *; }
+
+# Javapoet
+-dontwarn com.squareup.javapoet.**
+
+# Spongycastle
+-dontwarn org.spongycastle.**
+
+# Web3j
+-dontwarn org.web3j.codegen.**
