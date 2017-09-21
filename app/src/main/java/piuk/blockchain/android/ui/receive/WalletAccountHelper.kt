@@ -71,9 +71,6 @@ class WalletAccountHelper(
     /**
      * Returns a list of [ItemAccount] objects containing only [LegacyAddress] objects.
      *
-     * @param isBtc Whether or not you wish to have the [ItemAccount] objects returned with
-     * [ItemAccount.displayBalance] showing BTC or fiat
-     *
      * @return Returns a list of [ItemAccount] objects
      */
     fun getLegacyAddresses() = payloadManager.payload.legacyAddressList
@@ -118,6 +115,17 @@ class WalletAccountHelper(
                 it.address
         )
     } ?: emptyList()
+
+    fun getDefaultAccount(): ItemAccount {
+        return when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> getDefaultBtcAccount()
+            else -> getDefaultEthAccount()
+        }
+    }
+
+    fun getEthAccount() = mutableListOf<ItemAccount>().apply {
+        add(getDefaultEthAccount())
+    }
 
     /**
      * Returns the balance of an [Account] in Satoshis
@@ -171,14 +179,7 @@ class WalletAccountHelper(
         }
     }
 
-    fun getDefaultAccount(): ItemAccount {
-        return when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> getDefaultBtcAccount()
-            else -> getDefaultEthAccount()
-        }
-    }
-
-    internal fun getDefaultBtcAccount(): ItemAccount {
+    private fun getDefaultBtcAccount(): ItemAccount {
         val account = payloadManager.payload.hdWallets[0].accounts[payloadManager.payload.hdWallets[0].defaultAccountIdx]
         return ItemAccount(
                 account.label,
@@ -190,7 +191,7 @@ class WalletAccountHelper(
         )
     }
 
-    internal fun getDefaultEthAccount(): ItemAccount {
+    private fun getDefaultEthAccount(): ItemAccount {
         val ethAccount = ethDataStore.ethWallet?.account
         return ItemAccount(
                 ethAccount?.label,
@@ -201,9 +202,4 @@ class WalletAccountHelper(
                 ethAccount?.address)
     }
 
-    fun getEthAccount(): Collection<ItemAccount> {
-        return mutableListOf<ItemAccount>().apply {
-            add(getDefaultEthAccount())
-        }
-    }
 }

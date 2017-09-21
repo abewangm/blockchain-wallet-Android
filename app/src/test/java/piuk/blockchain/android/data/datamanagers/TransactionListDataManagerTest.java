@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import info.blockchain.wallet.ethereum.data.EthLatestBlock;
+import info.blockchain.wallet.ethereum.data.EthTransaction;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Account;
@@ -11,16 +13,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel;
 import piuk.blockchain.android.data.stores.TransactionListStore;
+import piuk.blockchain.android.data.transactions.BtcDisplayable;
 import piuk.blockchain.android.data.transactions.Displayable;
 import piuk.blockchain.android.ui.account.ItemAccount;
 
+import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -50,7 +59,16 @@ public class TransactionListDataManagerTest extends RxTest {
     public void fetchTransactionsAccountTagAll() throws Exception {
         // Arrange
         Account account = new Account();
-        List<TransactionSummary> transactionSummaries = Collections.singletonList(new TransactionSummary());
+        TransactionSummary summary = new TransactionSummary();
+        summary.setConfirmations(3);
+        summary.setDirection(TransactionSummary.Direction.RECEIVED);
+        summary.setFee(BigInteger.ONE);
+        summary.setTotal(BigInteger.TEN);
+        summary.setHash("hash");
+        summary.setInputsMap(new HashMap<>());
+        summary.setOutputsMap(new HashMap<>());
+        summary.setTime(1000000L);
+        List<TransactionSummary> transactionSummaries = Collections.singletonList(summary);
         when(payloadManager.getAllTransactions(0, 0)).thenReturn(transactionSummaries);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
@@ -67,7 +85,16 @@ public class TransactionListDataManagerTest extends RxTest {
     public void fetchTransactionsAccountTagImported() throws Exception {
         // Arrange
         Account account = new Account();
-        List<TransactionSummary> transactionSummaries = Collections.singletonList(new TransactionSummary());
+        TransactionSummary summary = new TransactionSummary();
+        summary.setConfirmations(3);
+        summary.setDirection(TransactionSummary.Direction.RECEIVED);
+        summary.setFee(BigInteger.ONE);
+        summary.setTotal(BigInteger.TEN);
+        summary.setHash("hash");
+        summary.setInputsMap(new HashMap<>());
+        summary.setOutputsMap(new HashMap<>());
+        summary.setTime(1000000L);
+        List<TransactionSummary> transactionSummaries = Collections.singletonList(summary);
         when(payloadManager.getImportedAddressesTransactions(0, 0)).thenReturn(transactionSummaries);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
@@ -85,16 +112,78 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
         Account account = new Account();
         String xPub = "xpub6CfLQa8fLgtp8E7tc1khAhrZYPm82okmugxP7TrhMPkPFKANhdCUd4TDJKUYLCxZskG2U7Q689CVBxs2EjJA7dyvjCzN5UYWwZbY2qVpymw";
-        List<TransactionSummary> transactionSummaries = Collections.singletonList(new TransactionSummary());
+        TransactionSummary summary = new TransactionSummary();
+        summary.setConfirmations(3);
+        summary.setDirection(TransactionSummary.Direction.RECEIVED);
+        summary.setFee(BigInteger.ONE);
+        summary.setTotal(BigInteger.TEN);
+        summary.setHash("hash");
+        summary.setInputsMap(new HashMap<>());
+        summary.setOutputsMap(new HashMap<>());
+        summary.setTime(1000000L);
+        List<TransactionSummary> transactionSummaries = Collections.singletonList(summary);
         when(payloadManager.getAccountTransactions(xPub, 0, 0)).thenReturn(transactionSummaries);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
+        itemAccount.setType(ItemAccount.TYPE.SINGLE_ACCOUNT);
         itemAccount.setAddress(xPub);
         // Act
         TestObserver<List<Displayable>> testObserver =
                 subject.fetchTransactions(itemAccount, 0, 0).test();
         // Assert
         verify(payloadManager).getAccountTransactions(xPub, 0, 0);
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+    }
+
+    @Test
+    public void fetchTransactionsAccountNoXpub() throws Exception {
+        // Arrange
+        Account account = new Account();
+        String xPub = "invalid xpub";
+        TransactionSummary summary = new TransactionSummary();
+        summary.setConfirmations(3);
+        summary.setDirection(TransactionSummary.Direction.RECEIVED);
+        summary.setFee(BigInteger.ONE);
+        summary.setTotal(BigInteger.TEN);
+        summary.setHash("hash");
+        summary.setInputsMap(new HashMap<>());
+        summary.setOutputsMap(new HashMap<>());
+        summary.setTime(1000000L);
+        List<TransactionSummary> transactionSummaries = Collections.singletonList(summary);
+        when(payloadManager.getImportedAddressesTransactions( 0, 0)).thenReturn(transactionSummaries);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setType(ItemAccount.TYPE.SINGLE_ACCOUNT);
+        itemAccount.setAddress(xPub);
+        // Act
+        TestObserver<List<Displayable>> testObserver =
+                subject.fetchTransactions(itemAccount, 0, 0).test();
+        // Assert
+        verify(payloadManager).getImportedAddressesTransactions(0, 0);
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+    }
+
+    @Test
+    public void fetchTransactionsEthereum() throws Exception {
+        // Arrange
+        EthLatestBlock latestBlock = mock(EthLatestBlock.class);
+        EthTransaction transaction = mock(EthTransaction.class);
+        when(transaction.getHash()).thenReturn("hash");
+        CombinedEthModel ethModel = mock(CombinedEthModel.class);
+        when(ethDataManager.getLatestBlock()).thenReturn(Observable.just(latestBlock));
+        when(ethDataManager.getEthTransactions()).thenReturn(Observable.just(transaction));
+        when(ethDataManager.getEthResponseModel()).thenReturn(ethModel);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setType(ItemAccount.TYPE.ETHEREUM);
+        // Act
+        TestObserver<List<Displayable>> testObserver =
+                subject.fetchTransactions(itemAccount, 0, 0).test();
+        // Assert
+        verify(ethDataManager).getLatestBlock();
+        verify(ethDataManager).getEthTransactions();
+        verify(ethDataManager).getEthResponseModel();
         testObserver.assertComplete();
         testObserver.assertNoErrors();
     }
@@ -123,20 +212,20 @@ public class TransactionListDataManagerTest extends RxTest {
     @Test
     public void insertTransactionIntoListAndReturnSorted() throws Exception {
         // Arrange
-//        TransactionSummary tx0 = new TransactionSummary();
-//        tx0.setTime(0L);
-//        TransactionSummary tx1 = new TransactionSummary();
-//        tx1.setTime(500L);
-//        TransactionSummary tx2 = new TransactionSummary();
-//        tx2.setTime(1000L);
-//        transactionListStore.insertTransactions(Arrays.asList(tx1, tx0));
-//        // Act
-//        List<TransactionSummary> value = subject.insertTransactionIntoListAndReturnSorted(tx2);
-//        // Assert
-//        assertNotNull(value);
-//        assertEquals(tx2, value.get(0));
-//        assertEquals(tx1, value.get(1));
-//        assertEquals(tx0, value.get(2));
+        Displayable tx0 = mock(BtcDisplayable.class);
+        when(tx0.getTimeStamp()).thenReturn(0L);
+        Displayable tx1 = mock(BtcDisplayable.class);
+        when(tx1.getTimeStamp()).thenReturn(500L);
+        Displayable tx2 = mock(BtcDisplayable.class);
+        when(tx2.getTimeStamp()).thenReturn(1000L);
+        transactionListStore.insertTransactions(Arrays.asList(tx1, tx0));
+        // Act
+        List<Displayable> value = subject.insertTransactionIntoListAndReturnSorted(tx2);
+        // Assert
+        assertNotNull(value);
+        assertEquals(tx2, value.get(0));
+        assertEquals(tx1, value.get(1));
+        assertEquals(tx0, value.get(2));
     }
 
     @Test
@@ -205,42 +294,63 @@ public class TransactionListDataManagerTest extends RxTest {
         assertEquals(1_000_000_000_000L, value);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void getBtcBalanceEthereum() throws Exception {
+        // Arrange
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setType(ItemAccount.TYPE.ETHEREUM);
+        // Act
+        subject.getBtcBalance(itemAccount);
+        // Assert
+
+    }
+
     @Test
     public void getTxFromHashFound() {
         // Arrange
-//        String txHash = "TX_HASH";
-//        TransactionSummary tx0 = new TransactionSummary();
-//        tx0.setHash("");
-//        TransactionSummary tx1 = new TransactionSummary();
-//        tx1.setHash("");
-//        TransactionSummary tx2 = new TransactionSummary();
-//        tx2.setHash(txHash);
-//        transactionListStore.insertTransactions(Arrays.asList(tx0, tx1, tx2));
-//        // Act
-//        TestObserver<TransactionSummary> testObserver = subject.getTxFromHash(txHash).test();
-//        // Assert
-//        testObserver.assertComplete();
-//        testObserver.assertNoErrors();
-//        testObserver.assertValue(tx2);
+        String txHash = "TX_HASH";
+        Displayable tx0 = mock(BtcDisplayable.class);
+        when(tx0.getHash()).thenReturn("");
+        Displayable tx1 = mock(BtcDisplayable.class);
+        when(tx1.getHash()).thenReturn("");
+        Displayable tx2 = mock(BtcDisplayable.class);
+        when(tx2.getHash()).thenReturn(txHash);
+        transactionListStore.insertTransactions(Arrays.asList(tx0, tx1, tx2));
+        // Act
+        TestObserver<Displayable> testObserver = subject.getTxFromHash(txHash).test();
+        // Assert
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        testObserver.assertValue(tx2);
     }
 
     @Test
     public void getTxFromHashNotFound() {
         // Arrange
-//        String txHash = "TX_HASH";
-//        TransactionSummary tx0 = new TransactionSummary();
-//        tx0.setHash("");
-//        TransactionSummary tx1 = new TransactionSummary();
-//        tx1.setHash("");
-//        TransactionSummary tx2 = new TransactionSummary();
-//        tx2.setHash("");
-//        transactionListStore.insertTransactions(Arrays.asList(tx0, tx1, tx2));
-//        // Act
-//        TestObserver<TransactionSummary> testObserver = subject.getTxFromHash(txHash).test();
-//        // Assert
-//        testObserver.assertTerminated();
-//        testObserver.assertNoValues();
-//        testObserver.assertError(NoSuchElementException.class);
+        String txHash = "TX_HASH";
+        Displayable tx0 = mock(BtcDisplayable.class);
+        when(tx0.getHash()).thenReturn("");
+        Displayable tx1 = mock(BtcDisplayable.class);
+        when(tx1.getHash()).thenReturn("");
+        Displayable tx2 = mock(BtcDisplayable.class);
+        when(tx2.getHash()).thenReturn("");
+        transactionListStore.insertTransactions(Arrays.asList(tx0, tx1, tx2));
+        // Act
+        TestObserver<Displayable> testObserver = subject.getTxFromHash(txHash).test();
+        // Assert
+        testObserver.assertTerminated();
+        testObserver.assertNoValues();
+        testObserver.assertError(NoSuchElementException.class);
+    }
+
+    @Test
+    public void getTxConfirmationsMap() throws Exception {
+        // Arrange
+
+        // Act
+        HashMap<String, Integer> result = subject.getTxConfirmationsMap();
+        // Assert
+        assertNotNull(result);
     }
 
 }

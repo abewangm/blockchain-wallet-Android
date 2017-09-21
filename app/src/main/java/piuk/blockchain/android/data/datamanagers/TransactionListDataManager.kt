@@ -75,7 +75,7 @@ class TransactionListDataManager(
             ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> payloadManager.walletBalance.toLong()
             ItemAccount.TYPE.ALL_LEGACY -> payloadManager.importedAddressesBalance.toLong()
             ItemAccount.TYPE.SINGLE_ACCOUNT -> payloadManager.getAddressBalance(itemAccount.address).toLong()
-            else -> 0
+            else -> throw IllegalArgumentException("You can't get the BTC balance of an ETH account")
         }
     }
 
@@ -86,11 +86,10 @@ class TransactionListDataManager(
      * @return An Observable object wrapping a Tx. Will call onError if not found with a
      * NullPointerException
      */
-    fun getTxFromHash(transactionHash: String): Single<Displayable> {
-        return Observable.fromIterable(getTransactionList())
-                .filter { it.hash == transactionHash }
-                .firstOrError()
-    }
+    fun getTxFromHash(transactionHash: String): Single<Displayable> =
+            Observable.fromIterable(getTransactionList())
+                    .filter { it.hash == transactionHash }
+                    .firstOrError()
 
     /**
      * Returns a [HashMap] where a [Displayable] hash is used as a key against
@@ -126,8 +125,7 @@ class TransactionListDataManager(
             newlyFetchedTxs: List<Displayable>,
             pendingMap: HashMap<String, Displayable>
     ) {
-        newlyFetchedTxs
-                .filter { pendingMap.containsKey(it.hash) }
+        newlyFetchedTxs.filter { pendingMap.containsKey(it.hash) }
                 .forEach { pendingMap.remove(it.hash) }
     }
 

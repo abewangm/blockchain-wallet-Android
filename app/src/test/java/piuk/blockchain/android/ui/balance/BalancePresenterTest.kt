@@ -29,7 +29,10 @@ import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
 import java.math.BigInteger
 
 class BalancePresenterTest {
@@ -69,12 +72,14 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun onViewReady() {
         // This *could* be tested but would be absolutely enormous, and most of it's child functions
         // have been tested elsewhere in this class.
     }
 
     @Test
+    @Throws(Exception::class)
     fun onViewDestroyed() {
         // Arrange
         val contactsEventObservable = Observable.just(ContactsEvent.INIT)
@@ -92,6 +97,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun onResume() {
         // Arrange
         val itemAccount = ItemAccount()
@@ -102,22 +108,25 @@ class BalancePresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2717.0)
+        whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(318.0)
         // Act
         subject.onResume()
         // Assert
         verify(currencyState, times(2)).isDisplayingCryptoCurrency
         verifyNoMoreInteractions(accessState)
-        verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
+        verify(exchangeRateFactory).getLastEthPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(view).onViewTypeChanged(true, 0)
-        verify(view).onExchangeRateUpdated(2717.0, 0.0, true)
+        verify(view).onExchangeRateUpdated(2717.0, 318.0, true)
         verifyNoMoreInteractions(view)
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onAccountChosen success update ui with content state`() {
         // Arrange
         val itemAccount = ItemAccount()
@@ -133,7 +142,6 @@ class BalancePresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2717.0)
-        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
         // Act
         subject.onAccountChosen(0)
         // Assert
@@ -146,19 +154,18 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verify(prefsUtil).setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(buyDataManager).canBuy
-        verifyNoMoreInteractions(buyDataManager)
         verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).setUiState(UiState.LOADING)
         verify(view).setUiState(UiState.CONTENT)
         verify(view).onTransactionsUpdated(listOf(transactionSummary))
         verifyNoMoreInteractions(view)
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onAccountChosen success empty account update ui with empty state`() {
         // Arrange
         val itemAccount = ItemAccount()
@@ -173,7 +180,6 @@ class BalancePresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(0)
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2717.0)
-        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
         // Act
         subject.onAccountChosen(0)
         // Assert
@@ -186,19 +192,18 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verify(prefsUtil).setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(buyDataManager).canBuy
-        verifyNoMoreInteractions(buyDataManager)
         verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).setUiState(UiState.LOADING)
         verify(view).setUiState(UiState.EMPTY)
         verify(view).onTransactionsUpdated(emptyList())
         verifyNoMoreInteractions(view)
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onAccountChosen failure`() {
         // Arrange
         val itemAccount = ItemAccount()
@@ -214,11 +219,13 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(payloadDataManager)
         verify(transactionListDataManager).fetchTransactions(itemAccount, 50, 0)
         verifyNoMoreInteractions(transactionListDataManager)
+        verify(view).setUiState(UiState.LOADING)
         verify(view).setUiState(UiState.FAILURE)
         verifyNoMoreInteractions(view)
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onRefreshRequested failure`() {
         val itemAccount = ItemAccount()
         val transactionSummary: Displayable = mock()
@@ -247,6 +254,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onRefreshRequested contacts not enabled`() {
         val itemAccount = ItemAccount()
         val transactionSummary: Displayable = mock()
@@ -264,7 +272,6 @@ class BalancePresenterTest {
         whenever(contactsDataManager.fetchContacts()).thenReturn(Completable.complete())
         whenever(contactsDataManager.getContactsWithUnreadPaymentRequests()).thenReturn(Observable.empty())
         whenever(contactsDataManager.refreshFacilitatedTransactions()).thenReturn(Observable.empty())
-        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
         whenever(view.isContactsEnabled).thenReturn(true)
         // Act
         subject.onRefreshRequested()
@@ -283,22 +290,20 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verify(prefsUtil).setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(buyDataManager).canBuy
-        verifyNoMoreInteractions(buyDataManager)
         verify(view).isContactsEnabled
         verify(view).onTotalBalanceUpdated("0.0 BTC")
         verify(view).setUiState(UiState.CONTENT)
-        verify(view, times(2)).onTransactionsUpdated(listOf(transactionSummary))
+        verify(view, times(2)).onTransactionsUpdated(emptyList())
         verify(view).onContactsHashMapUpdated(any())
         verify(view).showFctxRequiringAttention(any())
         verifyNoMoreInteractions(view)
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onRefreshRequested contacts enabled`() {
         val itemAccount = ItemAccount()
         val transactionSummary: Displayable = mock()
@@ -328,7 +333,6 @@ class BalancePresenterTest {
         whenever(contactsDataManager.getTransactionDisplayMap()).thenReturn(HashMap())
         whenever(stringUtils.getString(R.string.contacts_pending_transaction)).thenReturn("")
         whenever(stringUtils.getString(R.string.contacts_transaction_history)).thenReturn("")
-        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
         whenever(view.isContactsEnabled).thenReturn(true)
         // Act
         subject.onRefreshRequested()
@@ -342,7 +346,6 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(accessState)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verify(prefsUtil).setValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
@@ -364,6 +367,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun setViewType() {
         // Arrange
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
@@ -386,6 +390,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun invertViewType() {
         // Arrange
         whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
@@ -410,6 +415,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun areLauncherShortcutsEnabled() {
         // Arrange
         whenever(prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true))
@@ -423,6 +429,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionClicked contact not found`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -438,6 +445,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionClicked transaction not found`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -453,6 +461,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionClicked waiting for address & initiator`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -474,6 +483,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionClicked waiting for payment & initiator`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -495,6 +505,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionClicked waiting for address & receiver, only one account`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -516,6 +527,9 @@ class BalancePresenterTest {
         whenever(contactsDataManager.getContactFromFctxId(fctxId)).thenReturn(Single.just(contact))
         val account = Account().apply { label = "" }
         whenever(payloadDataManager.accounts).thenReturn(listOf(account))
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(0.0)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
+                .thenReturn("USD")
         // Act
         subject.onPendingTransactionClicked(fctxId)
         // Assert
@@ -526,6 +540,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionClicked waiting for address & receiver, multiple accounts`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -547,6 +562,9 @@ class BalancePresenterTest {
         whenever(contactsDataManager.getContactFromFctxId(fctxId)).thenReturn(Single.just(contact))
         val account = Account().apply { label = "" }
         whenever(payloadDataManager.accounts).thenReturn(listOf(account, account))
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(0.0)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
+                .thenReturn("USD")
         // Act
         subject.onPendingTransactionClicked(fctxId)
         // Assert
@@ -557,6 +575,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionClicked waiting for payment & rpr initiator`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -587,6 +606,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionClicked waiting for payment & pr receiver`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -610,6 +630,9 @@ class BalancePresenterTest {
             this.name = name
         }
         whenever(contactsDataManager.getContactFromFctxId(fctxId)).thenReturn(Single.just(contact))
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(0.0)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
+                .thenReturn("USD")
         // Act
         subject.onPendingTransactionClicked(fctxId)
         // Assert
@@ -620,6 +643,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionLongClicked waiting for address & initiator`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -645,6 +669,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onPendingTransactionLongClicked waiting for payment & initiator`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -669,6 +694,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun declineTransaction() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -680,6 +706,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onAccountChosen for payment contact not found`() {
         // Arrange
         val accountPosition = 0
@@ -698,6 +725,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onAccountChosen for payment successful`() {
         // Arrange
         val accountPosition = 0
@@ -759,6 +787,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onAccountChosen for payment failed`() {
         // Arrange
         val accountPosition = 0
@@ -808,6 +837,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `confirmDeclineTransaction successful`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -846,6 +876,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `confirmDeclineTransaction failed`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -879,6 +910,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `confirmCancelTransaction successful`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -917,6 +949,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `confirmCancelTransaction failed`() {
         // Arrange
         val fctxId = "FCTX_ID"
@@ -952,6 +985,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getBitcoinClicked API less than 19`() {
         // Arrange
         whenever(view.shouldShowBuy).thenReturn(false)
@@ -965,6 +999,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getBitcoinClicked canBuy returns true`() {
         // Arrange
         whenever(buyDataManager.canBuy).thenReturn(Observable.just(true))
@@ -980,6 +1015,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getBitcoinClicked canBuy returns false`() {
         // Arrange
         whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
@@ -995,6 +1031,7 @@ class BalancePresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getAllDisplayableAccounts() {
         // Arrange
         val legacyAddrArchived = LegacyAddress().apply { tag = LegacyAddress.ARCHIVED_ADDRESS }
@@ -1031,13 +1068,13 @@ class BalancePresenterTest {
         verify(payloadDataManager).walletBalance
         verify(payloadDataManager).importedAddressesBalance
         verifyNoMoreInteractions(payloadDataManager)
-        verify(currencyState, times(4)).isDisplayingCryptoCurrency
+        verify(currencyState, times(5)).isDisplayingCryptoCurrency
         verifyNoMoreInteractions(accessState)
-        verify(prefsUtil, times(4)).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        verify(prefsUtil, times(5)).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, times(5)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verifyNoMoreInteractions(prefsUtil)
-        // 2 accounts, "All" and "Imported"
-        result.size `should equal to` 4
+        // 3 accounts, "All", "Imported" and "Ethereum"
+        result.size `should equal to` 5
     }
 
 }

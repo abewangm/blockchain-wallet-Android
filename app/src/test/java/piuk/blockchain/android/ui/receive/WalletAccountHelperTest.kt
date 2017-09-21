@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.receive
 
 import com.nhaarman.mockito_kotlin.*
+import info.blockchain.wallet.ethereum.EthereumAccount
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.AddressBook
@@ -10,6 +11,7 @@ import org.amshove.kluent.`should equal`
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.ethereum.EthDataStore
 import piuk.blockchain.android.util.ExchangeRateFactory
@@ -25,7 +27,7 @@ class WalletAccountHelperTest {
     private val prefsUtil: PrefsUtil = mock()
     private val exchangeRateFactory: ExchangeRateFactory = mock()
     private val currencyState: CurrencyState = mock()
-    private val ethDataStore: EthDataStore = mock()
+    private val ethDataStore: EthDataStore = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
 
     @Before
     fun setUp() {
@@ -40,6 +42,7 @@ class WalletAccountHelperTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getAccountItems should return one Account and one LegacyAddress`() {
         // Arrange
         val label = "LABEL"
@@ -59,6 +62,7 @@ class WalletAccountHelperTest {
                 .thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("GBP")
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
         val result = subject.getAccountItems()
         // Assert
@@ -72,6 +76,7 @@ class WalletAccountHelperTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getHdAccounts should return single Account`() {
         // Arrange
         val label = "LABEL"
@@ -87,6 +92,7 @@ class WalletAccountHelperTest {
                 .thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("GBP")
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
         val result = subject.getAccountItems()
         // Assert
@@ -99,6 +105,22 @@ class WalletAccountHelperTest {
     }
 
     @Test
+    @Throws(Exception::class)
+    fun `getAccountItems when currency is ETH should return one account`() {
+        // Arrange
+        val ethAccount: EthereumAccount = mock()
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
+        whenever(ethDataStore.ethWallet?.account).thenReturn(ethAccount)
+        // Act
+        val result = subject.getAccountItems()
+        // Assert
+        verify(ethDataStore, atLeastOnce()).ethWallet
+        result.size `should be` 1
+        result[0].accountObject `should equal` ethAccount
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun `getLegacyAddresses should return single LegacyAddress`() {
         // Arrange
         val address = "ADDRESS"
@@ -125,6 +147,7 @@ class WalletAccountHelperTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getAddressBookEntries should return single item`() {
         // Arrange
         val addressBook = AddressBook()
@@ -136,6 +159,7 @@ class WalletAccountHelperTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getAddressBookEntries should return empty list`() {
         // Arrange
         whenever(payloadManager.payload.addressBook)
@@ -144,6 +168,42 @@ class WalletAccountHelperTest {
         val result = subject.getAddressBookEntries()
         // Assert
         result.size `should equal` 0
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getDefaultAccount should return ETH account`() {
+        // Arrange
+        val ethAccount: EthereumAccount = mock()
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
+        whenever(ethDataStore.ethWallet?.account).thenReturn(ethAccount)
+        // Act
+        val result = subject.getDefaultAccount()
+        // Assert
+        verify(ethDataStore, atLeastOnce()).ethWallet
+        result.accountObject `should equal` ethAccount
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getDefaultAccount should return BTC account`() {
+        // Arrange
+        val btcAccount: Account = mock()
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
+        whenever(payloadManager.payload.hdWallets[0].defaultAccountIdx).thenReturn(0)
+        whenever(payloadManager.payload.hdWallets[0].accounts[0]).thenReturn(btcAccount)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
+                .thenReturn(0)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
+                .thenReturn("GBP")
+        // Act
+        val result = subject.getDefaultAccount()
+        // Assert
+        verify(payloadManager, atLeastOnce()).payload
+        verify(prefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        verifyNoMoreInteractions(prefsUtil)
+        result.accountObject `should equal` btcAccount
     }
 
 }
