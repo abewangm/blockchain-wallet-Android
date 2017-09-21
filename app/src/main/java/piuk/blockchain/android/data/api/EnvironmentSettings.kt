@@ -7,7 +7,9 @@ import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.TestNet3Params
 
 import piuk.blockchain.android.BuildConfig
+import piuk.blockchain.android.util.annotations.Mockable
 
+@Mockable
 class EnvironmentSettings {
 
     fun shouldShowDebugMenu(): Boolean {

@@ -66,7 +66,7 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateEmail(String email) {
         return rxPinning.call(() -> settingsService.updateEmail(email))
-                .flatMap(responseBody -> fetchSettings())
+                .flatMap(ignored -> fetchSettings())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -78,7 +78,7 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateSms(String sms) {
         return rxPinning.call(() -> settingsService.updateSms(sms))
-                .flatMap(responseBody -> fetchSettings())
+                .flatMap(ignored -> fetchSettings())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -91,7 +91,7 @@ public class SettingsDataManager {
      */
     public Observable<Settings> verifySms(String code) {
         return rxPinning.call(() -> settingsService.verifySms(code))
-                .flatMap(responseBody -> fetchSettings())
+                .flatMap(ignored -> fetchSettings())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -103,7 +103,7 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateTor(boolean blocked) {
         return rxPinning.call(() -> settingsService.updateTor(blocked))
-                .flatMap(responseBody -> fetchSettings())
+                .flatMap(ignored -> fetchSettings())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -116,7 +116,7 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateTwoFactor(int authType) {
         return rxPinning.call(() -> settingsService.updateTwoFactor(authType))
-                .flatMap(responseBody -> fetchSettings())
+                .flatMap(ignored -> fetchSettings())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -132,7 +132,7 @@ public class SettingsDataManager {
         if (notifications.isEmpty() || notifications.contains(SettingsManager.NOTIFICATION_TYPE_NONE)) {
             // No notification type registered, enable
             return rxPinning.call(() -> settingsService.enableNotifications(true))
-                    .flatMap(responseBody -> updateNotifications(notificationType))
+                    .flatMap(ignored -> updateNotifications(notificationType))
                     .compose(RxUtil.applySchedulersToObservable());
         } else if (notifications.size() == 1
                 && ((notifications.contains(SettingsManager.NOTIFICATION_TYPE_EMAIL)
@@ -141,11 +141,11 @@ public class SettingsDataManager {
                 && notificationType == SettingsManager.NOTIFICATION_TYPE_EMAIL))) {
             // Contains another type already, send "All"
             return rxPinning.call(() -> settingsService.enableNotifications(true))
-                    .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_ALL))
+                    .flatMap(ignored -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_ALL))
                     .compose(RxUtil.applySchedulersToObservable());
         } else {
             return rxPinning.call(() -> settingsService.enableNotifications(true))
-                    .flatMap(responseBody -> fetchSettings())
+                    .flatMap(ignored -> fetchSettings())
                     .compose(RxUtil.applySchedulersToObservable());
         }
     }
@@ -174,7 +174,7 @@ public class SettingsDataManager {
             if (notifications.get(0).equals(notificationType)) {
                 // Remove all
                 return rxPinning.call(() -> settingsService.enableNotifications(false))
-                        .flatMap(responseBody -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_NONE))
+                        .flatMap(ignored -> updateNotifications(SettingsManager.NOTIFICATION_TYPE_NONE))
                         .compose(RxUtil.applySchedulersToObservable());
             } else {
                 // Notification type not present, no need to remove it
@@ -197,7 +197,7 @@ public class SettingsDataManager {
      */
     private Observable<Settings> updateNotifications(int notificationType) {
         return rxPinning.call(() -> settingsService.updateNotifications(notificationType))
-                .flatMap(responseBody -> fetchSettings())
+                .flatMap(ignored -> fetchSettings())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -217,7 +217,7 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateBtcUnit(String btcUnit) {
         return rxPinning.call(() -> settingsService.updateBtcUnit(btcUnit))
-                .flatMap(responseBody -> fetchSettings())
+                .flatMap(ignored -> fetchSettings())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
@@ -229,7 +229,7 @@ public class SettingsDataManager {
      */
     public Observable<Settings> updateFiatUnit(String fiatUnit) {
         return rxPinning.call(() -> settingsService.updateFiatUnit(fiatUnit))
-                .flatMap(responseBody -> fetchSettings())
+                .flatMap(ignored -> fetchSettings())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 }
