@@ -36,6 +36,8 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.text.DecimalFormat
 import java.util.*
 import javax.inject.Inject
@@ -135,7 +137,7 @@ class BalancePresenter @Inject constructor(
         view.onViewTypeChanged(isBtc, getBtcUnitType())
         if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
             view.onTotalBalanceUpdated(
-                    getEthBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
+                    getEthBalanceString(isBtc, BigDecimal(chosenAccount?.absoluteBalance ?: 0L)))
         } else {
             view.onTotalBalanceUpdated(
                     getBtcBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
@@ -391,7 +393,7 @@ class BalancePresenter @Inject constructor(
             absoluteBalance = ethDataManager.getEthResponseModel()?.getTotalBalance()?.toLong() ?: 0L
             displayBalance = getEthBalanceString(
                     currencyState.isDisplayingCryptoCurrency,
-                    absoluteBalance ?: 0L
+                    BigDecimal(ethDataManager.getEthResponseModel()?.getTotalBalance() ?: BigInteger.ZERO)
             )
         })
 
@@ -456,7 +458,7 @@ class BalancePresenter @Inject constructor(
         return if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
             ethDataManager.fetchEthAddress()
                     .doOnNext {
-                        val ethBalance = it.getTotalBalance().toLong()
+                        val ethBalance = BigDecimal(it.getTotalBalance())
                         val ethString = getEthBalanceString(currencyState.isDisplayingCryptoCurrency, ethBalance)
                         view.onTotalBalanceUpdated(ethString)
                     }.flatMap { Observable.empty<Nothing>() }
@@ -597,17 +599,17 @@ class BalancePresenter @Inject constructor(
         }
     }
 
-    // STOPSHIP: This should be a BigDecimal
-    private fun getEthBalanceString(isEth: Boolean, ethBalance: Long): String {
+    private fun getEthBalanceString(isEth: Boolean, ethBalance: BigDecimal): String {
         val strFiat = getFiatCurrency()
-        val fiatBalance = exchangeRateFactory.getLastEthPrice(strFiat) * (ethBalance / 1e18)
+        val fiatBalance = BigDecimal.valueOf(exchangeRateFactory.getLastEthPrice(strFiat))
+                .multiply(Convert.fromWei(ethBalance, Convert.Unit.ETHER))
         val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
-                .run { format(Convert.fromWei(ethBalance.toString(), Convert.Unit.ETHER)) }
+                .run { format(Convert.fromWei(ethBalance, Convert.Unit.ETHER)) }
 
         return if (isEth) {
             "$number ETH"
         } else {
-            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
+            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance.toDouble())} $strFiat"
         }
     }
 
