@@ -281,6 +281,10 @@ class SendPresenter @Inject constructor(
         createEthTransaction()
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnError { view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE) }
+                .doOnTerminate {
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
+                }
                 .flatMap {
 
                     if (payloadDataManager.isDoubleEncrypted) {
@@ -292,9 +296,8 @@ class SendPresenter @Inject constructor(
                     return@flatMap ethDataManager.signEthTransaction(it, ecKey)
                 }
                 .flatMap { ethDataManager.pushEthTx(it) }
+                .flatMap { ethDataManager.setLastTxHashComplatable(it) }
                 .subscribe({
-                    view.dismissProgressDialog()
-                    view.dismissConfirmationDialog()
                     handleSuccessfulPayment(it)
                 }, {
                     Timber.e(it)
@@ -339,7 +342,7 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    private fun handleSuccessfulPayment(hash: String) {
+    private fun handleSuccessfulPayment(hash: String): String {
 
         view?.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
 
@@ -347,6 +350,8 @@ class SendPresenter @Inject constructor(
         unspentApiResponses.clear()
 
         logAddressInputMetric()
+
+        return hash;
     }
 
     private fun logAddressInputMetric() {
