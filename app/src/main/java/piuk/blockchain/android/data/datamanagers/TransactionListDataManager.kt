@@ -75,7 +75,7 @@ class TransactionListDataManager(
             ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> payloadManager.walletBalance.toLong()
             ItemAccount.TYPE.ALL_LEGACY -> payloadManager.importedAddressesBalance.toLong()
             ItemAccount.TYPE.SINGLE_ACCOUNT -> payloadManager.getAddressBalance(itemAccount.address).toLong()
-            else -> 0
+            else -> throw IllegalArgumentException("You can't get the BTC balance of an ETH account")
         }
     }
 
@@ -126,8 +126,7 @@ class TransactionListDataManager(
             newlyFetchedTxs: List<Displayable>,
             pendingMap: HashMap<String, Displayable>
     ) {
-        newlyFetchedTxs
-                .filter { pendingMap.containsKey(it.hash) }
+        newlyFetchedTxs.filter { pendingMap.containsKey(it.hash) }
                 .forEach { pendingMap.remove(it.hash) }
     }
 
