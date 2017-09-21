@@ -34,10 +34,10 @@ public class AboutDialog extends AppCompatDialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_about, null);
 
-        TextView about = (TextView) view.findViewById(R.id.about);
-        TextView licenses = (TextView) view.findViewById(R.id.licenses);
-        TextView rateUs = (TextView) view.findViewById(R.id.rate_us);
-        TextView freeWallet = (TextView) view.findViewById(R.id.free_wallet);
+        TextView about = view.findViewById(R.id.about);
+        TextView licenses = view.findViewById(R.id.licenses);
+        TextView rateUs = view.findViewById(R.id.rate_us);
+        TextView freeWallet = view.findViewById(R.id.free_wallet);
 
         about.setText(getString(R.string.about, BuildConfig.VERSION_NAME, String.valueOf(Calendar.getInstance().get(Calendar.YEAR))));
 
@@ -54,7 +54,7 @@ public class AboutDialog extends AppCompatDialogFragment {
 
         licenses.setOnClickListener(v -> {
             View layout = View.inflate(getActivity(), R.layout.dialog_licenses, null);
-            WebView webView = (WebView) layout.findViewById(R.id.webview);
+            WebView webView = layout.findViewById(R.id.webview);
             webView.loadUrl(("file:///android_asset/licenses.html"));
             new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
                     .setView(layout)
