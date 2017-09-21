@@ -17,6 +17,7 @@ import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PrivateKeyFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
 import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.ECKey
@@ -1251,9 +1252,11 @@ class SendPresenter @Inject constructor(
         if (pendingTransaction.receivingAddress == null) {
             return Observable.just(Pair.of(false, R.string.eth_invalid_address))
         } else {
-            return ethDataManager.getIfContract(pendingTransaction.receivingAddress)
-                    .map { isContract ->
 
+            return Observable.combineLatest(
+                    ethDataManager.getIfContract(pendingTransaction.receivingAddress),
+                    ethDataManager.hasUnconfirmedEthTransactions(),
+                    BiFunction { isContract, hasUnconfirmedTransactions ->
                         var validated = true
                         var errorMessage = R.string.unexpected_error
 
@@ -1281,9 +1284,14 @@ class SendPresenter @Inject constructor(
                             validated = false
                         }
 
+                        //Validate address does not have unconfirmed funds
+                        if (hasUnconfirmedTransactions) {
+                            errorMessage = R.string.eth_unconfirmed_wait
+                            validated = false
+                        }
 
                         Pair.of(validated, errorMessage)
-                    }
+                    })
         }
     }
 
