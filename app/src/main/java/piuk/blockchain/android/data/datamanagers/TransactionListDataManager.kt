@@ -86,11 +86,10 @@ class TransactionListDataManager(
      * @return An Observable object wrapping a Tx. Will call onError if not found with a
      * NullPointerException
      */
-    fun getTxFromHash(transactionHash: String): Single<Displayable> {
-        return Observable.fromIterable(getTransactionList())
-                .filter { it.hash == transactionHash }
-                .firstOrError()
-    }
+    fun getTxFromHash(transactionHash: String): Single<Displayable> =
+            Observable.fromIterable(getTransactionList())
+                    .filter { it.hash == transactionHash }
+                    .firstOrError()
 
     /**
      * Returns a [HashMap] where a [Displayable] hash is used as a key against

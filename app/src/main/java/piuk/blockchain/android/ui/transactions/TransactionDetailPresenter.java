@@ -102,6 +102,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         } else if (pageIntent != null && pageIntent.hasExtra(KEY_TRANSACTION_HASH)) {
             getCompositeDisposable().add(
                     transactionListDataManager.getTxFromHash(pageIntent.getStringExtra(KEY_TRANSACTION_HASH))
+                            .doOnSuccess(displayable -> this.displayable = displayable)
                             .subscribe(
                                     this::updateUiFromTransaction,
                                     throwable -> getView().pageFinish()));
@@ -317,13 +318,13 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
     @VisibleForTesting
     void setTransactionColor(Displayable transaction) {
         if (transaction.getDirection() == Direction.TRANSFERRED) {
-            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(displayable.getCryptoCurrency())
+            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(transaction.getCryptoCurrency())
                     ? R.color.product_gray_transferred_50 : R.color.product_gray_transferred);
         } else if (transaction.getDirection() == Direction.SENT) {
-            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(displayable.getCryptoCurrency())
+            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(transaction.getCryptoCurrency())
                     ? R.color.product_red_sent_50 : R.color.product_red_sent);
         } else {
-            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(displayable.getCryptoCurrency())
+            getView().setTransactionColour(transaction.getConfirmations() < getRequiredConfirmations(transaction.getCryptoCurrency())
                     ? R.color.product_green_received_50 : R.color.product_green_received);
         }
     }
