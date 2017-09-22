@@ -17,6 +17,7 @@ import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PrivateKeyFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
 import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.ECKey
@@ -281,6 +282,10 @@ class SendPresenter @Inject constructor(
         createEthTransaction()
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnError { view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE) }
+                .doOnTerminate {
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
+                }
                 .flatMap {
 
                     if (payloadDataManager.isDoubleEncrypted) {
@@ -292,9 +297,8 @@ class SendPresenter @Inject constructor(
                     return@flatMap ethDataManager.signEthTransaction(it, ecKey)
                 }
                 .flatMap { ethDataManager.pushEthTx(it) }
+                .flatMap { ethDataManager.setLastTxHashComplatable(it) }
                 .subscribe({
-                    view.dismissProgressDialog()
-                    view.dismissConfirmationDialog()
                     handleSuccessfulPayment(it)
                 }, {
                     Timber.e(it)
@@ -339,7 +343,7 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    private fun handleSuccessfulPayment(hash: String) {
+    private fun handleSuccessfulPayment(hash: String): String {
 
         view?.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
 
@@ -347,6 +351,8 @@ class SendPresenter @Inject constructor(
         unspentApiResponses.clear()
 
         logAddressInputMetric()
+
+        return hash;
     }
 
     private fun logAddressInputMetric() {
@@ -1246,9 +1252,11 @@ class SendPresenter @Inject constructor(
         if (pendingTransaction.receivingAddress == null) {
             return Observable.just(Pair.of(false, R.string.eth_invalid_address))
         } else {
-            return ethDataManager.getIfContract(pendingTransaction.receivingAddress)
-                    .map { isContract ->
 
+            return Observable.combineLatest(
+                    ethDataManager.getIfContract(pendingTransaction.receivingAddress),
+                    ethDataManager.hasUnconfirmedEthTransactions(),
+                    BiFunction { isContract, hasUnconfirmedTransactions ->
                         var validated = true
                         var errorMessage = R.string.unexpected_error
 
@@ -1276,9 +1284,14 @@ class SendPresenter @Inject constructor(
                             validated = false
                         }
 
+                        //Validate address does not have unconfirmed funds
+                        if (hasUnconfirmedTransactions) {
+                            errorMessage = R.string.eth_unconfirmed_wait
+                            validated = false
+                        }
 
                         Pair.of(validated, errorMessage)
-                    }
+                    })
         }
     }
 

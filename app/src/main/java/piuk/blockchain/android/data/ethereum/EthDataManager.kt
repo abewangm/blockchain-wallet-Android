@@ -17,8 +17,10 @@ import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.util.annotations.Mockable
+import timber.log.Timber
 import java.math.BigInteger
 import java.util.*
+import java.util.concurrent.Callable
 
 @Mockable
 class EthDataManager(
@@ -64,7 +66,7 @@ class EthDataManager(
     fun getEthWallet() = ethDataStore.ethWallet
 
     /**
-     * Returns a steam of [EthTransaction] objects associated with a user's ETH address specifically
+     * Returns a stream of [EthTransaction] objects associated with a user's ETH address specifically
      * for displaying in the transaction list. These are cached and may be empty if the account
      * hasn't previously been fetched.
      *
@@ -77,6 +79,16 @@ class EthDataManager(
                     .compose(RxUtil.applySchedulersToObservable())
         }
 
+        return Observable.empty()
+    }
+
+    fun hasUnconfirmedEthTransactions(): Observable<Boolean> {
+        //TODO This is not working
+        ethDataStore.ethAddressResponse?.let {
+            return Observable.fromIterable(it.getTransactions())
+                    .filter { list -> list.hash == ethDataStore.ethWallet!!.lastTransactionHash }
+                    .flatMap { Observable.just(it == null) }
+        }
         return Observable.empty()
     }
 
@@ -189,4 +201,14 @@ class EthDataManager(
             ethAccountApi.pushTx("0x" + String(Hex.encode(signedTxBytes)))
                     .compose(RxUtil.applySchedulersToObservable())
 
+    fun setLastTxHashComplatable(txHash: String) = Observable
+            .fromCallable(Callable { setLastTxHash(txHash) })
+            .compose(RxUtil.applySchedulersToObservable())
+
+    private fun setLastTxHash(txHash: String): String {
+        ethDataStore.ethWallet!!.lastTransactionHash = txHash
+        ethDataStore.ethWallet!!.save()
+
+        return txHash;
+    }
 }

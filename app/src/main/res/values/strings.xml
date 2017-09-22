@@ -787,6 +787,7 @@
     <string name="eth_invalid_address">Invalid Ether address</string>
     <string name="eth_support_contract_not_allowed">Contract addresses are not supported.</string>
     <string name="eth_support_only_eth">At the moment we only support ETH - you cannot receive REP, ICN GNT, GNO, DGD, BCP</string>
+    <string name="eth_unconfirmed_wait">Please wait until your previous transaction confirms</string>
 
     <!-- DASHBOARD -->
     <string name="dashboard_title">Dashboard</string>
