@@ -231,10 +231,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         }
     }
 
-    override fun setTabSelection(tabIndex: Int) {
-        tabs.getTabAt(tabIndex)?.select()
-    }
-
     private fun setupToolbar() {
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
@@ -587,6 +583,10 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     override fun disableFeeDropdown() {
         spinnerPriority.isEnabled = false
         textviewFeeAbsolute.isEnabled = false
+    }
+
+    override fun setSendButtonEnabled(enabled: Boolean) {
+        buttonContinue.isEnabled = enabled
     }
 
     internal fun updateTotals() {

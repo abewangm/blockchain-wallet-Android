@@ -85,26 +85,24 @@ class EthDataManager(
 
     /**
      * Returns an [EthTxDetails] containing information about a specific ETH transaction. This object
-     * is wrapped in an [Optional] object, whereby an [Optional.None] represents the transaction still
-     * being in the mempool. Can also return a normal [Throwable] response.
+     * is wrapped in an [Optional], whereby [Optional.None] represents the transaction still
+     * being in the mempool. Can also return a normal [Throwable] response if the server has issues,
+     * no connection on the device etc.
      *
      * @param hash The hash of the transaction you wish to check
      * @return An [Observable] wrapping an [Optional]
      */
     fun getTransaction(hash: String): Observable<Optional<EthTxDetails>> = rxPinning.call<Optional<EthTxDetails>> {
         ethAccountApi.getTransaction(hash)
-                .map { Optional.Some(it) }
+                .map<Optional<EthTxDetails>> { Optional.Some(it) }
                 .onErrorResumeNext { throwable: Throwable ->
                     if (throwable is HttpException) {
-                        if (throwable.code() == 400
-                                && throwable.response().message().contains(
+                        if (throwable.code() == 400 && throwable.response().errorBody()?.string()!!.contains(
                                 "transaction not found",
                                 ignoreCase = true
-                        )) {
-                            Observable.just(Optional.None)
-                        }
+                        )) return@onErrorResumeNext Observable.just(Optional.None)
                     }
-                    Observable.error { throwable }
+                    return@onErrorResumeNext Observable.error { throwable }
                 }.compose(RxUtil.applySchedulersToObservable())
     }
 
@@ -114,14 +112,20 @@ class EthDataManager(
      *
      * @return An [Observable] wrapping a [Boolean]
      */
-    fun hasUnconfirmedEthTransactions(): Observable<Boolean> {
-        val ethAddressResponse = ethDataStore.ethAddressResponse
-        return if (ethAddressResponse != null) {
-            hasUnconfirmedTx(ethAddressResponse)
-        } else {
-            Observable.just(false)
-        }
-    }
+    fun hasUnconfirmedEthTransactions(): Observable<Boolean> =
+            if (!ethDataStore.ethWallet?.lastTransactionHash.isNullOrEmpty()) {
+                getTransaction(ethDataStore.ethWallet!!.lastTransactionHash)
+                        .flatMap {
+                            when (it) {
+                            // Tx is found, need to compare to block height
+                                is Optional.Some -> isTxUnConfirmed(it.element)
+                            // Tx not found, tx is unconfirmed
+                                Optional.None -> Observable.just(true)
+                            }
+                        }
+            } else {
+                Observable.just(false)
+            }
 
     /**
      * Returns a [EthLatestBlock] object which contains information about the most recently
@@ -247,21 +251,6 @@ class EthDataManager(
 
         return ethWallet
     }
-
-    private fun hasUnconfirmedTx(it: CombinedEthModel): Observable<Boolean> =
-            if (!ethDataStore.ethWallet?.lastTransactionHash.isNullOrEmpty()) {
-                getTransaction(ethDataStore.ethWallet!!.lastTransactionHash)
-                        .flatMap {
-                            when (it) {
-                            // Tx is found, need to compare to block height
-                                is Optional.Some -> isTxUnConfirmed(it.element)
-                            // Tx not found, tx is unconfirmed
-                                Optional.None -> Observable.just(true)
-                            }
-                        }
-            } else {
-                Observable.just(false)
-            }
 
     private fun isTxUnConfirmed(ethTxDetails: EthTxDetails): Observable<Boolean> =
             rxPinning.call<Boolean> {

@@ -120,9 +120,9 @@ class SendPresenter @Inject constructor(
 
     fun onBitcoinChosen() {
         compositeDisposable.clear()
+        view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         updateTicker()
-        view.setTabSelection(0)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
         view.enableFeeDropdown()
@@ -139,10 +139,10 @@ class SendPresenter @Inject constructor(
 
     fun onEtherChosen() {
         compositeDisposable.clear()
+        view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.setFeePrioritySelection(0)
         updateTicker()
-        view.setTabSelection(1)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
         view.disableFeeDropdown()
@@ -155,6 +155,7 @@ class SendPresenter @Inject constructor(
         updateCurrencyUnits()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
         view.hideFeePriority()
+        checkForUnconfirmedTx()
     }
 
     internal fun onContinueClicked() {
@@ -164,7 +165,6 @@ class SendPresenter @Inject constructor(
 
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
-
                 Observable.just(validateBitcoinTransaction())
                         .doAfterTerminate { view?.dismissProgressDialog() }
                         .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -186,7 +186,6 @@ class SendPresenter @Inject constructor(
                         }, { Timber.e(it) })
             }
             CryptoCurrencies.ETHER -> {
-
                 validateEtherTransaction()
                         .doAfterTerminate { view?.dismissProgressDialog() }
                         .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -284,23 +283,24 @@ class SendPresenter @Inject constructor(
                     view.dismissConfirmationDialog()
                 }
                 .flatMap {
-
                     if (payloadDataManager.isDoubleEncrypted) {
                         payloadDataManager.decryptHDWallet(verifiedSecondPassword)
                     }
 
-                    val ecKey = EthereumAccount.deriveECKey(payloadDataManager.wallet.hdWallets[0].masterKey,
-                            0)
+                    val ecKey = EthereumAccount.deriveECKey(
+                            payloadDataManager.wallet.hdWallets[0].masterKey,
+                            0
+                    )
                     return@flatMap ethDataManager.signEthTransaction(it, ecKey)
                 }
                 .flatMap { ethDataManager.pushEthTx(it) }
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
-                .subscribe({
-                    handleSuccessfulPayment(it)
-                }, {
-                    Timber.e(it)
-                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
-                })
+                .subscribe(
+                        { handleSuccessfulPayment(it) },
+                        {
+                            Timber.e(it)
+                            view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                        })
     }
 
     private fun createEthTransaction(): Observable<RawTransaction> {
@@ -346,7 +346,7 @@ class SendPresenter @Inject constructor(
 
         logAddressInputMetric()
 
-        return hash;
+        return hash
     }
 
     private fun logAddressInputMetric() {
@@ -450,7 +450,6 @@ class SendPresenter @Inject constructor(
             CryptoCurrencies.BTC -> {
                 details.isLargeTransaction = isLargeTransaction()
                 details.btcSuggestedFee = currencyHelper.getTextFromSatoshis(absoluteSuggestedFee.toLong(), getDefaultDecimalSeparator())
-//                details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.consumedAmount.compareTo(BigInteger.ZERO) == 1 //Unused
 
                 details.cryptoTotal = currencyHelper.getTextFromSatoshis(pendingTransaction.total.toLong(), getDefaultDecimalSeparator())
                 details.cryptoAmount = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntAmount.toLong(), getDefaultDecimalSeparator())
@@ -515,7 +514,6 @@ class SendPresenter @Inject constructor(
     private fun getAddressList(): List<ItemAccount> = walletAccountHelper.getAccountItems()
 
     private fun setReceiveHint(accountsCount: Int) {
-
         val hint: Int = if (accountsCount > 1) {
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> R.string.to_field_helper
@@ -1259,6 +1257,20 @@ class SendPresenter @Inject constructor(
         }
     }
 
+    private fun checkForUnconfirmedTx() {
+        ethDataManager.hasUnconfirmedEthTransactions()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { unconfirmed ->
+                            view?.setSendButtonEnabled(!unconfirmed)
+                            if (unconfirmed) {
+                                view?.updateMaxAvailable(stringUtils.getString(R.string.eth_unconfirmed_wait))
+                                view?.updateMaxAvailableColor(R.color.product_red_medium)
+                            }
+                        },
+                        { Timber.e(it) })
+    }
+
     /**
      * Returns true if bitcoin transaction is large by checking against 3 criteria:
      *
@@ -1287,6 +1299,8 @@ class SendPresenter @Inject constructor(
     }
 
     companion object {
+
         private val PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend"
+
     }
 }

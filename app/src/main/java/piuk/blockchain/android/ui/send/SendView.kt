@@ -33,8 +33,6 @@ interface SendView : View {
     //Set property
     fun setCryptoMaxLength(length: Int)
 
-    fun setTabSelection(tabIndex: Int)
-
     fun setFeePrioritySelection(index: Int)
 
     fun clearWarning()
@@ -68,6 +66,8 @@ interface SendView : View {
     fun enableFeeDropdown()
 
     fun disableFeeDropdown()
+
+    fun setSendButtonEnabled(enabled: Boolean)
 
     // Fetch value
     fun getCustomFeeValue(): Long
