@@ -71,8 +71,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     @Inject lateinit var sendPresenter: SendPresenter
 
     private var backPressed: Long = 0
-    private val COOL_DOWN_MILLIS = 2 * 1000
-
     private var progressDialog: MaterialProgressDialog? = null
     private var confirmPaymentDialog: ConfirmPaymentDialog? = null
     private var transactionSuccessDialog: AlertDialog? = null
@@ -81,7 +79,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     private val dialogHandler = Handler()
     private val dialogRunnable = Runnable {
         transactionSuccessDialog?.apply {
-            if(isShowing) {
+            if (isShowing) {
                 dismiss()
             }
         }
@@ -276,8 +274,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
-        if(resultCode != Activity.RESULT_OK)return
+        if (resultCode != Activity.RESULT_OK) return
 
         when (requestCode) {
             SCAN_URI -> presenter.handleURIScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT), EventService.EVENT_TX_INPUT_FROM_QR)
@@ -426,16 +423,15 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     private fun handleIncomingArguments() {
-
         if (arguments != null) {
             presenter.selectSendingBtcAccount(arguments.getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, -1))
 
-                val scanData = arguments.getString(ARGUMENT_SCAN_DATA)
-                val metricInputFlag = arguments.getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE)
+            val scanData = arguments.getString(ARGUMENT_SCAN_DATA)
+            val metricInputFlag = arguments.getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE)
 
-                if (scanData != null) {
-                    presenter.handleURIScan(scanData, metricInputFlag)
-                }
+            if (scanData != null) {
+                presenter.handleURIScan(scanData, metricInputFlag)
+            }
 
         } else {
             presenter.selectDefaultSendingAccount()
@@ -504,8 +500,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun showSnackbar(@StringRes message: Int, duration: Int) {
-        val snackbar = Snackbar.make(activity.findViewById(R.id.coordinator_layout), message,
-                duration)
+        val snackbar = Snackbar.make(activity.findViewById(R.id.coordinator_layout), message, duration)
                 .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
 
         if (duration == Snackbar.LENGTH_INDEFINITE) {
@@ -519,7 +514,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         Snackbar.make(activity.findViewById(R.id.coordinator_layout), R.string.eth_support_contract_not_allowed,
                 Snackbar.LENGTH_INDEFINITE)
                 .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
-                .setAction(R.string.learn_more, {showSnackbar(R.string.eth_support_only_eth, Snackbar.LENGTH_INDEFINITE)}).show()
+                .setAction(R.string.learn_more, { showSnackbar(R.string.eth_support_only_eth, Snackbar.LENGTH_INDEFINITE) })
+                .show()
     }
 
     override fun showSendingFieldDropdown() {
@@ -594,7 +590,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     internal fun updateTotals() {
-        presenter.onCryptoTextchange(amountContainer.amountCrypto.text.toString())
+        presenter.onCryptoTextChange(amountContainer.amountCrypto.text.toString())
     }
 
     @FeeType.FeePriorityDef
@@ -827,10 +823,9 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 .map { it.toString() }
                 .doOnNext { buttonContinue.isEnabled = !it.isEmpty() && it != "0" }
                 .filter { !it.isEmpty() }
-                .map{ java.lang.Long.valueOf(it) }
+                .map { java.lang.Long.valueOf(it) }
                 .onErrorReturnItem(0L)
                 .doOnNext { value ->
-
                     if (presenter.getFeeOptions() != null && value < presenter.getFeeOptions()!!.limits.min) {
                         textInputLayout.error = getString(R.string.fee_options_fee_too_low)
                     } else if (presenter.getFeeOptions() != null && value > presenter.getFeeOptions()!!.limits.max) {
@@ -903,18 +898,20 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
         const val SCAN_URI = 2010
         const val SCAN_PRIVX = 2011
-
         const val ARGUMENT_SCAN_DATA = "scan_data"
         const val ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position"
         const val ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE = "address_input_route"
 
-        private val ARGUMENT_CONTACT_ID = "contact_id"
-        private val ARGUMENT_CONTACT_MDID = "contact_mdid"
-        private val ARGUMENT_FCTX_ID = "fctx_id"
+        private const val COOL_DOWN_MILLIS = 2 * 1000
+        private const val ARGUMENT_CONTACT_ID = "contact_id"
+        private const val ARGUMENT_CONTACT_MDID = "contact_mdid"
+        private const val ARGUMENT_FCTX_ID = "fctx_id"
 
-        fun newInstance(scanData: String?,
-                        scanRoute: String?,
-                        selectedAccountPosition: Int): SendFragment {
+        fun newInstance(
+                scanData: String?,
+                scanRoute: String?,
+                selectedAccountPosition: Int
+        ): SendFragment {
             val fragment = SendFragment()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, scanData)
@@ -924,10 +921,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             return fragment
         }
 
-        fun newInstance(uri: String,
-                        contactId: String,
-                        contactMdid: String,
-                        fctxId: String): SendFragment {
+        fun newInstance(
+                uri: String,
+                contactId: String,
+                contactMdid: String,
+                fctxId: String
+        ): SendFragment {
             val fragment = SendFragment()
             val args = Bundle()
             args.putString(ARGUMENT_SCAN_DATA, uri)
