@@ -100,7 +100,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                     accounts_spinner.invisible()
                     presenter.onAccountChosen(presenter.activeAccountAndAddressList.lastIndex)
                 } else {
-                    accounts_spinner.visible()
+                    if (accountsAdapter?.count ?: 1 > 1) {
+                        accounts_spinner.visible()
+                    } else if (accountsAdapter?.count ?: 1 == 1) {
+                        accounts_spinner.setSelection(0, false)
+                        accounts_spinner.invisible()
+                    }
                     presenter.onAccountChosen(0)
                 }
             }

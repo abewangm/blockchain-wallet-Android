@@ -170,14 +170,24 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
         amountContainer.amountCrypto.setText("")
         amountContainer.amountCrypto.requestFocus()
+
+        toContainer.toAddressEditTextView.setOnFocusChangeListener { _, focused ->
+            handleEditTextFocus(focused)
+        }
+
+        edittextCustomFee.setOnFocusChangeListener { _, focused ->
+            handleEditTextFocus(focused)
+        }
     }
 
     private fun closeKeypad() {
         keyboard.setNumpadVisibility(View.GONE)
     }
 
-    private fun isKeyboardVisible(): Boolean {
-        return keyboard.isVisible
+    private fun isKeyboardVisible(): Boolean = keyboard.isVisible
+
+    private fun handleEditTextFocus(focused: Boolean) {
+        if (focused) closeKeypad()
     }
 
     override fun onKeypadClose() {
