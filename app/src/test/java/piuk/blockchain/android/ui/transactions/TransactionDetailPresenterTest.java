@@ -303,7 +303,7 @@ public class TransactionDetailPresenterTest extends RxTest {
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings({"ConstantConditions", "unchecked"})
     @Test
     public void onViewReadyTransactionFoundViaHashEthereum() throws Exception {
         // Arrange
