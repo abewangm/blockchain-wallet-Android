@@ -36,7 +36,25 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/textview_week"
         app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toEndOf="@+id/textview_year"
+        app:layout_constraintTop_toBottomOf="@+id/chart"
+        tools:ignore="MissingPrefix" />
+
+    <TextView
+        android:id="@+id/textview_all_time"
+        fontPath="fonts/Montserrat-Light.ttf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:text="@string/dashboard_time_span_all_time"
+        android:textColor="@color/primary_navy_medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/textview_year"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chart"
         tools:ignore="MissingPrefix" />
 
@@ -53,7 +71,7 @@
         app:layout_constraintEnd_toStartOf="@+id/textview_month"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@id/textview_all_time"
         app:layout_constraintTop_toBottomOf="@+id/chart"
         tools:ignore="MissingPrefix" />
 

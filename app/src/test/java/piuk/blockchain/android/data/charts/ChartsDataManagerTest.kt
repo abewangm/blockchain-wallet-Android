@@ -16,7 +16,7 @@ import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.rxjava.RxBus
 
-class ChartsDataManagerTest: RxTest() {
+class ChartsDataManagerTest : RxTest() {
 
     private lateinit var subject: ChartsDataManager
     private val historicPriceApi: PriceApi = mock()
@@ -26,6 +26,58 @@ class ChartsDataManagerTest: RxTest() {
     override fun setUp() {
         super.setUp()
         subject = ChartsDataManager(historicPriceApi, rxBus)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getAllTimePrice BTC`() {
+        // Arrange
+        val btc = CryptoCurrencies.BTC
+        val fiat = "USD"
+        whenever(historicPriceApi.getHistoricPriceSeries(
+                btc.symbol,
+                fiat,
+                FIRST_BTC_ENTRY_TIME,
+                Scale.FIVE_DAYS
+        )).thenReturn(Observable.just(listOf(PriceDatum())))
+        // Act
+        val testObserver = subject.getAllTimePrice(btc, fiat).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        verify(historicPriceApi).getHistoricPriceSeries(
+                btc.symbol,
+                fiat,
+                FIRST_BTC_ENTRY_TIME,
+                Scale.FIVE_DAYS
+        )
+        verifyNoMoreInteractions(historicPriceApi)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getAllTimePrice ETH`() {
+        // Arrange
+        val eth = CryptoCurrencies.ETHER
+        val fiat = "USD"
+        whenever(historicPriceApi.getHistoricPriceSeries(
+                eth.symbol,
+                fiat,
+                FIRST_ETH_ENTRY_TIME,
+                Scale.FIVE_DAYS
+        )).thenReturn(Observable.just(listOf(PriceDatum())))
+        // Act
+        val testObserver = subject.getAllTimePrice(eth, fiat).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        verify(historicPriceApi).getHistoricPriceSeries(
+                eth.symbol,
+                fiat,
+                FIRST_ETH_ENTRY_TIME,
+                Scale.FIVE_DAYS
+        )
+        verifyNoMoreInteractions(historicPriceApi)
     }
 
     @Test
