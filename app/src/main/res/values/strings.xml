@@ -725,12 +725,12 @@
     <string name="onboarding_check_inbox_title">Check Your Inbox</string>
     <string name="onboarding_check_inbox_summary">Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
     <string name="onboarding_verify_email">Verify email</string>
-    <string name="onboarding_receive_bitcoin">Receive Bitcoin</string>
+    <string name="onboarding_receive_bitcoin">Receive Funds</string>
     <string name="onboarding_current_price">Current Price:</string>
     <string name="onboarding_qr_codes">QR Codes</string>
     <string name="onboarding_scan_address">Scan Address</string>
     <string name="onboarding_buy_content">We work with exchange partners all over the world, so you can buy bitcoin directly from your wallet.</string>
-    <string name="onboarding_receive_content">Send your wallet address to a friend to request bitcoin. An address is a string of random letters and numbers that change for each transaction.</string>
+    <string name="onboarding_receive_content">Send your wallet address to a friend to request funds. An address is a string of random letters and numbers that change for each transaction.</string>
     <string name="onboarding_qr_codes_content">An address can also be shown as a QR code. Scan a friend’s QR code to quickly capture their wallet address.</string>
 
     <!-- BUY BITCOIN -->
