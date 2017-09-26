@@ -6,6 +6,7 @@ import info.blockchain.wallet.ethereum.EthereumWallet
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthLatestBlock
 import info.blockchain.wallet.ethereum.data.EthTransaction
+import info.blockchain.wallet.ethereum.data.EthTxDetails
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -16,11 +17,11 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.util.annotations.Mockable
-import timber.log.Timber
+import retrofit2.HttpException
 import java.math.BigInteger
 import java.util.*
-import java.util.concurrent.Callable
 
 @Mockable
 class EthDataManager(
@@ -82,15 +83,49 @@ class EthDataManager(
         return Observable.empty()
     }
 
-    fun hasUnconfirmedEthTransactions(): Observable<Boolean> {
-        //TODO This is not working
-        ethDataStore.ethAddressResponse?.let {
-            return Observable.fromIterable(it.getTransactions())
-                    .filter { list -> list.hash == ethDataStore.ethWallet!!.lastTransactionHash }
-                    .flatMap { Observable.just(it == null) }
-        }
-        return Observable.empty()
+    /**
+     * Returns an [EthTxDetails] containing information about a specific ETH transaction. This object
+     * is wrapped in an [Optional], whereby [Optional.None] represents the transaction still
+     * being in the mempool. Can also return a normal [Throwable] response if the server has issues,
+     * no connection on the device etc.
+     *
+     * @param hash The hash of the transaction you wish to check
+     * @return An [Observable] wrapping an [Optional]
+     */
+    fun getTransaction(hash: String): Observable<Optional<EthTxDetails>> = rxPinning.call<Optional<EthTxDetails>> {
+        ethAccountApi.getTransaction(hash)
+                .map<Optional<EthTxDetails>> { Optional.Some(it) }
+                .onErrorResumeNext { throwable: Throwable ->
+                    if (throwable is HttpException) {
+                        if (throwable.code() == 400 && throwable.response().errorBody()?.string()!!.contains(
+                                "transaction not found",
+                                ignoreCase = true
+                        )) return@onErrorResumeNext Observable.just(Optional.None)
+                    }
+                    return@onErrorResumeNext Observable.error { throwable }
+                }.compose(RxUtil.applySchedulersToObservable())
     }
+
+    /**
+     * Returns whether or not the user's ETH account currently has unconfirmed transactions, and
+     * therefore shouldn't be allowed to send funds until confirmation.
+     *
+     * @return An [Observable] wrapping a [Boolean]
+     */
+    fun hasUnconfirmedEthTransactions(): Observable<Boolean> =
+            if (!ethDataStore.ethWallet?.lastTransactionHash.isNullOrEmpty()) {
+                getTransaction(ethDataStore.ethWallet!!.lastTransactionHash)
+                        .flatMap {
+                            when (it) {
+                            // Tx is found, need to compare to block height
+                                is Optional.Some -> isTxUnConfirmed(it.element)
+                            // Tx not found, tx is unconfirmed
+                                Optional.None -> Observable.just(true)
+                            }
+                        }
+            } else {
+                Observable.just(false)
+            }
 
     /**
      * Returns a [EthLatestBlock] object which contains information about the most recently
@@ -156,22 +191,6 @@ class EthDataManager(
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
-    private fun fetchOrCreateEthereumWallet(
-            metadataNode: DeterministicKey,
-            defaultLabel: String
-    ): EthereumWallet {
-
-        var ethWallet = EthereumWallet.load(metadataNode)
-
-        if (ethWallet == null || ethWallet.account == null || !ethWallet.account.isCorrect) {
-            val masterKey = payloadManager.payload.hdWallets[0].masterKey
-            ethWallet = EthereumWallet(masterKey, defaultLabel)
-            ethWallet.save()
-        }
-
-        return ethWallet
-    }
-
     /**
      * @param gasPrice Represents the fee the sender is willing to pay for gas. One unit of gas
      *                 corresponds to the execution of one atomic instruction, i.e. a computational step
@@ -190,25 +209,60 @@ class EthDataManager(
             gasPrice,
             gasLimit,
             to,
-            weiValue)
+            weiValue
+    )
 
     fun signEthTransaction(rawTransaction: RawTransaction, ecKey: ECKey): Observable<ByteArray> =
             Observable.fromCallable {
                 ethDataStore.ethWallet!!.account!!.signTransaction(rawTransaction, ecKey)
             }
 
-    fun pushEthTx(signedTxBytes: ByteArray): Observable<String> =
-            ethAccountApi.pushTx("0x" + String(Hex.encode(signedTxBytes)))
-                    .compose(RxUtil.applySchedulersToObservable())
+    fun pushEthTx(signedTxBytes: ByteArray): Observable<String> = rxPinning.call<String> {
+        ethAccountApi.pushTx("0x" + String(Hex.encode(signedTxBytes)))
+                .compose(RxUtil.applySchedulersToObservable())
+    }
 
-    fun setLastTxHashComplatable(txHash: String) = Observable
-            .fromCallable(Callable { setLastTxHash(txHash) })
-            .compose(RxUtil.applySchedulersToObservable())
+    fun setLastTxHashObservable(txHash: String): Observable<String> = rxPinning.call<String> {
+        Observable.fromCallable { setLastTxHash(txHash) }
+                .compose(RxUtil.applySchedulersToObservable())
+    }
 
+    @Throws(Exception::class)
     private fun setLastTxHash(txHash: String): String {
         ethDataStore.ethWallet!!.lastTransactionHash = txHash
         ethDataStore.ethWallet!!.save()
 
-        return txHash;
+        return txHash
     }
+
+    @Throws(Exception::class)
+    private fun fetchOrCreateEthereumWallet(
+            metadataNode: DeterministicKey,
+            defaultLabel: String
+    ): EthereumWallet {
+
+        var ethWallet = EthereumWallet.load(metadataNode)
+
+        if (ethWallet == null || ethWallet.account == null || !ethWallet.account.isCorrect) {
+            val masterKey = payloadManager.payload.hdWallets[0].masterKey
+            ethWallet = EthereumWallet(masterKey, defaultLabel)
+            ethWallet.save()
+        }
+
+        return ethWallet
+    }
+
+    private fun isTxUnConfirmed(ethTxDetails: EthTxDetails): Observable<Boolean> =
+            rxPinning.call<Boolean> {
+                ethAccountApi.latestBlock
+                        .map { it.blockHeight - ethTxDetails.blockNumber < ETH_MIN_CONFIRMATIONS }
+                        .compose(RxUtil.applySchedulersToObservable())
+            }
+
+    companion object {
+
+        private const val ETH_MIN_CONFIRMATIONS = 12
+
+    }
+
 }

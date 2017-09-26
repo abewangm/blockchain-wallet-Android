@@ -120,9 +120,9 @@ class SendPresenter @Inject constructor(
 
     fun onBitcoinChosen() {
         compositeDisposable.clear()
+        view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         updateTicker()
-        view.setTabSelection(0)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
         view.enableFeeDropdown()
@@ -139,10 +139,10 @@ class SendPresenter @Inject constructor(
 
     fun onEtherChosen() {
         compositeDisposable.clear()
+        view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.setFeePrioritySelection(0)
         updateTicker()
-        view.setTabSelection(1)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
         view.disableFeeDropdown()
@@ -155,17 +155,16 @@ class SendPresenter @Inject constructor(
         updateCurrencyUnits()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
         view.hideFeePriority()
+        checkForUnconfirmedTx()
     }
 
     internal fun onContinueClicked() {
-
         view?.showProgressDialog(R.string.app_name)
 
         checkManualAddressInput()
 
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
-
                 Observable.just(validateBitcoinTransaction())
                         .doAfterTerminate { view?.dismissProgressDialog() }
                         .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -187,7 +186,6 @@ class SendPresenter @Inject constructor(
                         }, { Timber.e(it) })
             }
             CryptoCurrencies.ETHER -> {
-
                 validateEtherTransaction()
                         .doAfterTerminate { view?.dismissProgressDialog() }
                         .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -216,7 +214,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun submitBitcoinTransaction() {
-
         view.showProgressDialog(R.string.app_name)
 
         getBtcChangeAddress()!!
@@ -278,7 +275,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun submitEthTransaction() {
-
         createEthTransaction()
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnError { view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE) }
@@ -287,32 +283,31 @@ class SendPresenter @Inject constructor(
                     view.dismissConfirmationDialog()
                 }
                 .flatMap {
-
                     if (payloadDataManager.isDoubleEncrypted) {
                         payloadDataManager.decryptHDWallet(verifiedSecondPassword)
                     }
 
-                    val ecKey = EthereumAccount.deriveECKey(payloadDataManager.wallet.hdWallets[0].masterKey,
-                            0)
+                    val ecKey = EthereumAccount.deriveECKey(
+                            payloadDataManager.wallet.hdWallets[0].masterKey,
+                            0
+                    )
                     return@flatMap ethDataManager.signEthTransaction(it, ecKey)
                 }
                 .flatMap { ethDataManager.pushEthTx(it) }
-                .flatMap { ethDataManager.setLastTxHashComplatable(it) }
-                .subscribe({
-                    handleSuccessfulPayment(it)
-                }, {
-                    Timber.e(it)
-                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
-                })
+                .flatMap { ethDataManager.setLastTxHashObservable(it) }
+                .subscribe(
+                        { handleSuccessfulPayment(it) },
+                        {
+                            Timber.e(it)
+                            view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                        })
     }
 
     private fun createEthTransaction(): Observable<RawTransaction> {
-
         val feeGwei = BigDecimal.valueOf(feeOptions!!.regularFee)
         val feeWei = Convert.toWei(feeGwei, Convert.Unit.GWEI)
 
-        return Observable
-                .just(ethDataManager.getEthResponseModel()!!.getNonce())
+        return Observable.just(ethDataManager.getEthResponseModel()!!.getNonce())
                 .map {
                     ethDataManager.createEthTransaction(
                             nonce = it,
@@ -344,7 +339,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun handleSuccessfulPayment(hash: String): String {
-
         view?.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
 
         pendingTransaction.clear()
@@ -352,7 +346,7 @@ class SendPresenter @Inject constructor(
 
         logAddressInputMetric()
 
-        return hash;
+        return hash
     }
 
     private fun logAddressInputMetric() {
@@ -376,7 +370,6 @@ class SendPresenter @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e)
         }
-
     }
 
     /**
@@ -414,7 +407,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun showPaymentReview() {
-
         val paymentDetails = getConfirmationDetails()
         var allowFeeChange = true
 
@@ -458,7 +450,6 @@ class SendPresenter @Inject constructor(
             CryptoCurrencies.BTC -> {
                 details.isLargeTransaction = isLargeTransaction()
                 details.btcSuggestedFee = currencyHelper.getTextFromSatoshis(absoluteSuggestedFee.toLong(), getDefaultDecimalSeparator())
-//                details.hasConsumedAmounts = pendingTransaction.unspentOutputBundle.consumedAmount.compareTo(BigInteger.ZERO) == 1 //Unused
 
                 details.cryptoTotal = currencyHelper.getTextFromSatoshis(pendingTransaction.total.toLong(), getDefaultDecimalSeparator())
                 details.cryptoAmount = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntAmount.toLong(), getDefaultDecimalSeparator())
@@ -523,7 +514,6 @@ class SendPresenter @Inject constructor(
     private fun getAddressList(): List<ItemAccount> = walletAccountHelper.getAccountItems()
 
     private fun setReceiveHint(accountsCount: Int) {
-
         val hint: Int = if (accountsCount > 1) {
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> R.string.to_field_helper
@@ -542,7 +532,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun updateCurrencyUnits() {
-
         view.updateFiatCurrency(currencyHelper.fiatUnit)
 
         when (currencyState.cryptoCurrency) {
@@ -559,7 +548,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun selectSendingBtcAccount(accountPosition: Int) {
-
         if (accountPosition >= 0) {
             var label = getAddressList()[accountPosition].label
             if (label == null || label.isEmpty()) {
@@ -571,12 +559,10 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    internal fun getDefaultDecimalSeparator(): String {
-        return DecimalFormatSymbols.getInstance().decimalSeparator.toString()
-    }
+    internal fun getDefaultDecimalSeparator(): String =
+            DecimalFormatSymbols.getInstance().decimalSeparator.toString()
 
     internal fun updateCryptoTextField(editable: Editable, editText: EditText) {
-
         val maxLength = 2
         val fiat = EditTextFormatUtil.formatEditable(editable,
                 maxLength,
@@ -595,7 +581,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun updateFiatTextField(editable: Editable, editText: EditText) {
-
         val crypto = EditTextFormatUtil.formatEditable(editable,
                 currencyHelper.maxCryptoDecimalLength,
                 editText,
@@ -617,7 +602,6 @@ class SendPresenter @Inject constructor(
      * Get cached dynamic fee from new Fee options endpoint
      */
     private fun getSuggestedFee() {
-
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
                 feeOptions = dynamicFeeCache.btcFeeOptions!!
@@ -650,9 +634,7 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    internal fun getFeeOptions(): FeeOptions? {
-        return dynamicFeeCache.btcFeeOptions
-    }
+    internal fun getFeeOptions(): FeeOptions? = dynamicFeeCache.btcFeeOptions
 
     internal fun getFeeOptionsForDropDown(): List<DisplayFeeOptions> {
         val regular = DisplayFeeOptions(
@@ -671,7 +653,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun getFeePerKbFromPriority(@FeeType.FeePriorityDef feePriorityTemp: Int): BigInteger {
-
         getSuggestedFee()
 
         if (feeOptions == null) {
@@ -713,10 +694,9 @@ class SendPresenter @Inject constructor(
     }
 
     /**
-     * Update absolute fee with smallest dinomination of crypto currency (satoshi, wei, etc)
+     * Update absolute fee with smallest denomination of crypto currency (satoshi, wei, etc)
      */
     private fun updateFee(fee: BigInteger) {
-
         absoluteSuggestedFee = fee
 
         val cryptoPrice: String
@@ -764,7 +744,7 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    internal fun onCryptoTextchange(cryptoText: String) {
+    internal fun onCryptoTextChange(cryptoText: String) {
         textChangeSubject.onNext(cryptoText)
     }
 
@@ -772,7 +752,6 @@ class SendPresenter @Inject constructor(
      * Calculate amounts on crypto text change
      */
     private fun setupTextChangeSubject() {
-
         textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -827,14 +806,14 @@ class SendPresenter @Inject constructor(
                             updateFee(getSuggestedAbsoluteFee(coins, amountToSend, feePerKb))
 
                             suggestedFeePayment(coins, amountToSend, spendAll, feePerKb)
-
-                        }, { throwable ->
-                    Timber.e(throwable)
-                    // No unspent outputs
-                    updateMaxAvailable(BigInteger.ZERO)
-                    updateFee(BigInteger.ZERO)
-                    pendingTransaction.unspentOutputBundle = null
-                })
+                        },
+                        { throwable ->
+                            Timber.e(throwable)
+                            // No unspent outputs
+                            updateMaxAvailable(BigInteger.ZERO)
+                            updateFee(BigInteger.ZERO)
+                            pendingTransaction.unspentOutputBundle = null
+                        })
     }
 
     /**
@@ -873,7 +852,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun getEthAccountResponse(spendAll: Boolean, amountToSendText: String?) {
-
         view.showMaxAvailable()
 
         if (ethDataManager.getEthResponseModel() == null) {
@@ -917,7 +895,6 @@ class SendPresenter @Inject constructor(
 
         //Format for display
         if (!currencyState.isDisplayingCryptoCurrency) {
-
             val fiatBalance = currencyHelper.lastPrice * availableEth.toLong()
 
             val fiatBalanceFormatted = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit).format(fiatBalance)
@@ -938,7 +915,6 @@ class SendPresenter @Inject constructor(
 
     @Suppress("CascadeIf")
     internal fun handleURIScan(untrimmedscanData: String?, scanRoute: String) {
-
         if (untrimmedscanData == null) return
 
         metricInputFlag = scanRoute
@@ -967,7 +943,6 @@ class SendPresenter @Inject constructor(
             } catch (e: Exception) {
                 //ignore
             }
-
         } else if (FormatsUtil.isValidEthereumAddress(scanData)) {
             onEtherChosen()
             address = scanData
@@ -985,7 +960,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun handlePrivxScan(scanData: String?) {
-
         if (scanData == null) return
 
         val format = privateKeyFactory.getFormat(scanData)
@@ -1010,16 +984,15 @@ class SendPresenter @Inject constructor(
             view?.showSnackbar(R.string.no_private_key, Snackbar.LENGTH_LONG)
             Timber.e(e)
         }
-
     }
 
     internal fun spendFromWatchOnlyBIP38(pw: String, scanData: String) {
-        compositeDisposable.add(
-                sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.networkParameters)
-                        .subscribe({
-                            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
-                            setTempLegacyAddressPrivateKey(legacyAddress, it)
-                        }) { view?.showSnackbar(R.string.bip38_error, Snackbar.LENGTH_LONG) })
+        sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.networkParameters)
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({
+                    val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+                    setTempLegacyAddressPrivateKey(legacyAddress, it)
+                }) { view?.showSnackbar(R.string.bip38_error, Snackbar.LENGTH_LONG) }
     }
 
     private fun setTempLegacyAddressPrivateKey(legacyAddress: LegacyAddress, key: ECKey?) {
@@ -1040,7 +1013,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onSendingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
-
         pendingTransaction.receivingObject = ItemAccount(
                 legacyAddress.label,
                 null,
@@ -1051,14 +1023,13 @@ class SendPresenter @Inject constructor(
         )
 
         var label = legacyAddress.label
-        if (label == null || label.isEmpty()) {
+        if (label.isNullOrEmpty()) {
             label = legacyAddress.address
         }
         view.updateSendingAddress(label)
     }
 
     private fun onSendingBtcAccountSelected(account: Account) {
-
         pendingTransaction.receivingObject = ItemAccount(
                 account.label,
                 null,
@@ -1069,7 +1040,7 @@ class SendPresenter @Inject constructor(
         )
 
         var label = account.label
-        if (label == null || label.isEmpty()) {
+        if (label.isNullOrEmpty()) {
             label = account.xpub
         }
 
@@ -1077,7 +1048,6 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
-
         pendingTransaction.receivingObject = ItemAccount(
                 legacyAddress.label,
                 null,
@@ -1089,7 +1059,7 @@ class SendPresenter @Inject constructor(
         pendingTransaction.receivingAddress = legacyAddress.address
 
         var label = legacyAddress.label
-        if (label == null || label.isEmpty()) {
+        if (label.isNullOrEmpty()) {
             label = legacyAddress.address
         }
         view.updateReceivingAddress(label)
@@ -1099,16 +1069,14 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    private fun shouldWarnWatchOnly(): Boolean {
-        return prefsUtil.getValue(PREF_WARN_WATCH_ONLY_SPEND, true)
-    }
+    private fun shouldWarnWatchOnly(): Boolean =
+            prefsUtil.getValue(PREF_WARN_WATCH_ONLY_SPEND, true)
 
     internal fun setWarnWatchOnlySpend(warn: Boolean) {
         prefsUtil.setValue(PREF_WARN_WATCH_ONLY_SPEND, warn)
     }
 
     private fun onReceivingAccountSelected(account: Account) {
-
         pendingTransaction.receivingObject = ItemAccount(
                 account.label,
                 null,
@@ -1119,7 +1087,7 @@ class SendPresenter @Inject constructor(
         )
 
         var label = account.label
-        if (label == null || label.isEmpty()) {
+        if (label.isNullOrEmpty()) {
             label = account.xpub
         }
         view.updateReceivingAddress(label)
@@ -1133,7 +1101,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun selectSendingAccount(data: Intent?) {
-
         try {
             val type: Class<*> = Class.forName(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
@@ -1143,7 +1110,6 @@ class SendPresenter @Inject constructor(
                 is Account -> onSendingBtcAccountSelected(any)
                 else -> throw IllegalArgumentException("No method for handling $type available")
             }
-
         } catch (e: ClassNotFoundException) {
             Timber.e(e)
             selectDefaultSendingAccount()
@@ -1154,7 +1120,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun selectReceivingAccount(data: Intent?) {
-
         try {
             val type: Class<*> = Class.forName(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
@@ -1164,7 +1129,6 @@ class SendPresenter @Inject constructor(
                 is Account -> onReceivingAccountSelected(any)
                 else -> throw IllegalArgumentException("No method for handling $type available")
             }
-
         } catch (e: ClassNotFoundException) {
             Timber.e(e)
         } catch (e: IOException) {
@@ -1248,12 +1212,10 @@ class SendPresenter @Inject constructor(
     }
 
     private fun validateEtherTransaction(): Observable<Pair<Boolean, Int>> {
-
         if (pendingTransaction.receivingAddress == null) {
             return Observable.just(Pair.of(false, R.string.eth_invalid_address))
         } else {
-
-            return Observable.combineLatest(
+            return Observable.zip(
                     ethDataManager.getIfContract(pendingTransaction.receivingAddress),
                     ethDataManager.hasUnconfirmedEthTransactions(),
                     BiFunction { isContract, hasUnconfirmedTransactions ->
@@ -1295,6 +1257,20 @@ class SendPresenter @Inject constructor(
         }
     }
 
+    private fun checkForUnconfirmedTx() {
+        ethDataManager.hasUnconfirmedEthTransactions()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { unconfirmed ->
+                            view?.setSendButtonEnabled(!unconfirmed)
+                            if (unconfirmed) {
+                                view?.updateMaxAvailable(stringUtils.getString(R.string.eth_unconfirmed_wait))
+                                view?.updateMaxAvailableColor(R.color.product_red_medium)
+                            }
+                        },
+                        { Timber.e(it) })
+    }
+
     /**
      * Returns true if bitcoin transaction is large by checking against 3 criteria:
      *
@@ -1305,7 +1281,7 @@ class SendPresenter @Inject constructor(
     private fun isLargeTransaction(): Boolean {
         val valueString = monetaryUtil.getFiatFormat("USD")
                 .format(exchangeRateFactory.getLastBtcPrice("USD") * absoluteSuggestedFee.toDouble() / 1e8)
-        val usdValue = java.lang.Double.parseDouble(currencyHelper.stripSeparator(valueString, getDefaultDecimalSeparator()))
+        val usdValue = currencyHelper.stripSeparator(valueString, getDefaultDecimalSeparator()).toDouble()
         val txSize = sendDataManager.estimateSize(pendingTransaction.unspentOutputBundle.spendableOutputs.size, 2)//assume change
         val relativeFee = absoluteSuggestedFee.toDouble() / pendingTransaction.bigIntAmount.toDouble() * 100.0
 
@@ -1323,6 +1299,8 @@ class SendPresenter @Inject constructor(
     }
 
     companion object {
+
         private val PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend"
+
     }
 }
