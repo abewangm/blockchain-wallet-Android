@@ -34,7 +34,7 @@
 
                 <TextView
                     android:id="@+id/textview_balance"
-                    fontPath="fonts/Montserrat-Regular.ttf"
+                    fontPath="fonts/Montserrat-Light.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
@@ -42,7 +42,7 @@
                     android:includeFontPadding="false"
                     android:text="0.0"
                     android:textColor="@color/white"
-                    android:textSize="28sp"
+                    android:textSize="32sp"
                     tools:ignore="MissingPrefix"
                     tools:text="10.0000002 BTC" />
 

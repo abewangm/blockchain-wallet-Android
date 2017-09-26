@@ -206,7 +206,7 @@
     <string name="confirm_password">パスワードの確認</string>
     <string name="check_email_to_auth_login">メールを確認してこのログイン試行を許可してください。</string>
     <string name="transaction_fee">取引手数料</string>
-    <string name="transaction_occur_when">ビットコインを送受信する際に取引が発生します。</string>
+    <string name="transaction_occur_when_bitcoin">ビットコインを送受信する際に取引が発生します。</string>
     <string name="click">クリック</string>
     <string name="to_start_sending_and_receiving_btc">してビットコインの送受信を開始。</string>
 

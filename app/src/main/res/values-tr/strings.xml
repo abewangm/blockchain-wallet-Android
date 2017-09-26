@@ -206,7 +206,7 @@
     <string name="confirm_password">Şifreyi Onayla</string>
     <string name="check_email_to_auth_login">Bu oturum açma denemesini onaylamak için lütfen e-postanızı kontrol edin.</string>
     <string name="transaction_fee">İşlem Ücreti</string>
-    <string name="transaction_occur_when">İşlemler, bitcoin aldığınızda ve gönderdiğinizde oluşur.</string>
+    <string name="transaction_occur_when_bitcoin">İşlemler, bitcoin aldığınızda ve gönderdiğinizde oluşur.</string>
     <string name="click">Tıklayarak</string>
     <string name="to_start_sending_and_receiving_btc">bitcoin göndermeye ve almaya başlayın.</string>
 

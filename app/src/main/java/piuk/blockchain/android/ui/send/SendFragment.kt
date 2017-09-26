@@ -51,15 +51,13 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.home.MainActivity.SCAN_URI
 import piuk.blockchain.android.ui.zxing.CaptureActivity
 import piuk.blockchain.android.util.AppRate
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
-import piuk.blockchain.android.util.extensions.invisible
-import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -101,7 +99,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             inflater: LayoutInflater?,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = container!!.inflate(R.layout.fragment_send)
+    ): View? = container?.inflate(R.layout.fragment_send)
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -126,7 +124,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 showSnackbar(R.string.check_connectivity_exit, Snackbar.LENGTH_LONG)
             }
         }
-        max.setOnClickListener({ presenter.onSpendMaxClicked() })
+        max.setOnClickListener { presenter.onSpendMaxClicked() }
 
         onViewReady()
     }
@@ -138,7 +136,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         menu?.clear()
-        inflater!!.inflate(R.menu.menu_send, menu)
+        inflater?.inflate(R.menu.menu_send, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -201,10 +199,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT)
-        layoutParams.setMargins(0,
-                0,
-                0,
-                activity.resources.getDimension(R.dimen.action_bar_height).toInt())
         scrollView.layoutParams = layoutParams
     }
 
@@ -223,7 +217,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT)
-        layoutParams.setMargins(0, 0, 0, 0)
         scrollView.layoutParams = layoutParams
     }
 
@@ -262,7 +255,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     PermissionUtil.requestCameraPermissionFromFragment(view!!.rootView, this)
                 } else {
-                    startScanActivity(SCAN_URI)
+                    startScanActivity(MainActivity.SCAN_URI)
                 }
                 true
             }
@@ -273,7 +266,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     private fun startScanActivity(code: Int) {
         if (!AppUtil(activity).isCameraOpen) {
             val intent = Intent(activity, CaptureActivity::class.java)
-            startActivityForResult(intent, code)
+            activity.startActivityForResult(intent, code)
         } else {
             showSnackbar(R.string.camera_unavailable, Snackbar.LENGTH_LONG)
         }
@@ -283,7 +276,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         if (resultCode != Activity.RESULT_OK) return
 
         when (requestCode) {
-            SCAN_URI -> presenter.handleURIScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT), EventService.EVENT_TX_INPUT_FROM_QR)
+            MainActivity.SCAN_URI -> presenter.handleURIScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT), EventService.EVENT_TX_INPUT_FROM_QR)
             SCAN_PRIVX -> presenter.handlePrivxScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT))
             AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> presenter.selectReceivingAccount(data)
             AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> presenter.selectSendingAccount(data)
@@ -305,10 +298,10 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     private fun setupReceivingView() {
         //Avoid OntouchListener - causes paste issues on some Samsung devices
-        toContainer.toAddressEditTextView.setOnClickListener({
+        toContainer.toAddressEditTextView.setOnClickListener {
             toContainer.toAddressEditTextView.setText("")
             presenter.clearReceivingObject()
-        })
+        }
         //LongClick listener required to clear receive address in memory when user long clicks to paste
         toContainer.toAddressEditTextView.setOnLongClickListener({ v ->
             toContainer.toAddressEditTextView.setText("")
@@ -327,12 +320,14 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 }
                 .subscribe(IgnorableDefaultObserver())
 
-        toContainer.toArrow.setOnClickListener({
-            AccountChooserActivity.startForResult(this,
+        toContainer.toArrow.setOnClickListener {
+            AccountChooserActivity.startForResult(
+                    this,
                     AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                     PaymentRequestType.SEND,
-                    getString(R.string.to))
-        })
+                    getString(R.string.to)
+            )
+        }
     }
 
     override fun updateCryptoCurrency(currency: String) {
@@ -445,8 +440,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     private fun setupSendingView() {
-        fromContainer.fromAddressTextView.setOnClickListener({ startFromFragment() })
-        fromContainer.fromArrowImage.setOnClickListener({ startFromFragment() })
+        fromContainer.fromAddressTextView.setOnClickListener { startFromFragment() }
+        fromContainer.fromArrowImage.setOnClickListener { startFromFragment() }
     }
 
     override fun updateSendingAddress(label: String) {
@@ -480,7 +475,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         presenter.submitPayment()
     }
 
-    override fun getReceivingAddress() = toContainer.toAddressEditTextView.editableText.toString()
+    override fun getReceivingAddress() = toContainer.toAddressEditTextView.getTextString()
 
     fun onBackPressed() {
         if (isKeyboardVisible()) {
@@ -488,6 +483,10 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         } else {
             handleBackPressed()
         }
+    }
+
+    override fun setTabSelection(tabIndex: Int) {
+        tabs.getTabAt(tabIndex)?.select()
     }
 
     private fun handleBackPressed() {
@@ -517,9 +516,11 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun showEthContractSnackbar() {
-        Snackbar.make(activity.findViewById(R.id.coordinator_layout), R.string.eth_support_contract_not_allowed,
-                Snackbar.LENGTH_INDEFINITE)
-                .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
+        Snackbar.make(
+                activity.findViewById(R.id.coordinator_layout),
+                R.string.eth_support_contract_not_allowed,
+                Snackbar.LENGTH_INDEFINITE
+        ).setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
                 .setAction(R.string.learn_more, { showSnackbar(R.string.eth_support_only_eth, Snackbar.LENGTH_INDEFINITE) })
                 .show()
     }
@@ -580,7 +581,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             }
         }
 
-        textviewFeeAbsolute.setOnClickListener({ spinnerPriority.performClick() })
+        textviewFeeAbsolute.setOnClickListener { spinnerPriority.performClick() }
         textviewFeeType.setText(R.string.fee_options_regular)
         textviewFeeTime.setText(R.string.fee_options_regular_time)
     }
@@ -742,7 +743,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun showSpendFromWatchOnlyWarning(address: String) {
-
         AlertDialog.Builder(activity, R.style.AlertDialogStyle)
                 .setTitle(R.string.privx_required)
                 .setMessage(String.format(getString(R.string.watch_only_spend_instructionss), address))
@@ -754,7 +754,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                         startScanActivity(SCAN_PRIVX)
                     }
                 }
-                .setNegativeButton(android.R.string.cancel, null).show()
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
     }
 
     override fun showSecondPasswordDialog() {
@@ -852,7 +853,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                         { it.printStackTrace() })
     }
 
-    override fun showTransactionSuccess(hash: String, transactionValue: Long) {
+    override fun showTransactionSuccess(
+            hash: String,
+            transactionValue: Long,
+            cryptoCurrency: CryptoCurrencies
+    ) {
+
         playAudio()
 
         val appRate = AppRate(activity)
@@ -862,12 +868,11 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         val dialogBuilder = AlertDialog.Builder(activity)
         val dialogView = View.inflate(activity, R.layout.modal_transaction_success, null)
         transactionSuccessDialog = dialogBuilder.setView(dialogView)
+                .setTitle(R.string.transaction_submitted)
                 .setPositiveButton(getString(R.string.done), null)
                 .create()
 
         transactionSuccessDialog?.apply {
-            setTitle(R.string.transaction_submitted)
-
             // If should show app rate, success dialog shows first and launches
             // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
             // happen if the user chooses to rate the app - they'll return to the main page.
@@ -880,10 +885,14 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 setOnDismissListener { finishPage() }
             }
 
+            if (cryptoCurrency == CryptoCurrencies.ETHER) {
+                setMessage(getString(R.string.eth_transaction_complete))
+            }
+
             show()
         }
 
-        dialogHandler.postDelayed(dialogRunnable, (5 * 1000).toLong())
+        dialogHandler.postDelayed(dialogRunnable, (10 * 1000).toLong())
     }
 
     interface OnSendFragmentInteractionListener {
@@ -906,7 +915,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     companion object {
 
-        const val SCAN_URI = 2010
         const val SCAN_PRIVX = 2011
         const val ARGUMENT_SCAN_DATA = "scan_data"
         const val ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position"

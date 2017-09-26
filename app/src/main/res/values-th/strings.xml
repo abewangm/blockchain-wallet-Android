@@ -206,7 +206,7 @@
     <string name="confirm_password">ยืนยันรหัสผ่าน</string>
     <string name="check_email_to_auth_login">โปรดตรวจสอบอีเมลของคุณเพื่ออนุมัติความพยายามในการล็อกอินครั้งนี้</string>
     <string name="transaction_fee">ค่าธรรมเนียมธุรกรรม</string>
-    <string name="transaction_occur_when">ธุรกรรมจะเกิดขึ้นเมื่อคุณได้รับหรือส่ง bitcoin</string>
+    <string name="transaction_occur_when_bitcoin">ธุรกรรมจะเกิดขึ้นเมื่อคุณได้รับหรือส่ง bitcoin</string>
     <string name="click">คลิก</string>
     <string name="to_start_sending_and_receiving_btc">เพื่อเริ่มส่งและรับ bitcoin</string>
 

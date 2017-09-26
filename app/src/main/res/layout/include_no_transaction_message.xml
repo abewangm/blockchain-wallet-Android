@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center_horizontal"
-                android:text="@string/transaction_occur_when"
+                android:text="@string/transaction_occur_when_bitcoin"
                 android:textColor="@color/primary_gray_dark"
                 android:textSize="14sp"
                 tools:ignore="MissingPrefix" />

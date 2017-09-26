@@ -52,7 +52,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
             inflater: LayoutInflater?,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ) = container!!.inflate(R.layout.fragment_dashboard)
+    ) = container?.inflate(R.layout.fragment_dashboard)
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -135,7 +135,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun startReceiveFragment() {
         LocalBroadcastManager.getInstance(activity)
-                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
+                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
     }
 
     override fun createPresenter() = dashboardPresenter

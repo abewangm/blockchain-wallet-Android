@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.send
 
 import android.support.annotation.ColorRes
 import android.support.annotation.StringRes
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.View
 
@@ -32,6 +33,8 @@ interface SendView : View {
 
     //Set property
     fun setCryptoMaxLength(length: Int)
+
+    fun setTabSelection(tabIndex: Int)
 
     fun setFeePrioritySelection(index: Int)
 
@@ -97,7 +100,7 @@ interface SendView : View {
 
     fun showLargeTransactionWarning()
 
-    fun showTransactionSuccess(hash: String, transactionValue: Long)
+    fun showTransactionSuccess(hash: String, transactionValue: Long, cryptoCurrency: CryptoCurrencies)
 
     fun dismissProgressDialog()
 

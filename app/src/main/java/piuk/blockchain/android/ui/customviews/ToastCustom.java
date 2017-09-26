@@ -36,7 +36,7 @@ public class ToastCustom {
 
         LayoutInflater inflate = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflate.inflate(R.layout.transient_notification, null);
-        TextView tv = (TextView) v.findViewById(R.id.message);
+        TextView tv = v.findViewById(R.id.message);
         tv.setText(text);
 
         switch (type) {

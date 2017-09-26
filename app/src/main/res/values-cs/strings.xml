@@ -206,7 +206,7 @@
     <string name="confirm_password">Potvrdit heslo</string>
     <string name="check_email_to_auth_login">Prosím zkontrolujte svůj e-mail a potvrďte tento pokus o přihlášení.</string>
     <string name="transaction_fee">Poplatek za transakci</string>
-    <string name="transaction_occur_when">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
+    <string name="transaction_occur_when_bitcoin">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
     <string name="click">Kliknutím</string>
     <string name="to_start_sending_and_receiving_btc">spustíte odesílání a příjem bitcoinů.</string>
 

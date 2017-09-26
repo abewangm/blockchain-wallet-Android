@@ -206,7 +206,7 @@
     <string name="confirm_password">Подтвердить пароль</string>
     <string name="check_email_to_auth_login">Проверьте свою электронную почту, чтобы одобрить эту попытку входа.</string>
     <string name="transaction_fee">Комиссия транзакции</string>
-    <string name="transaction_occur_when">Транзакции осуществляются, когда вы получаете и отправляете bitcoin.</string>
+    <string name="transaction_occur_when_bitcoin">Транзакции осуществляются, когда вы получаете и отправляете bitcoin.</string>
     <string name="click">Нажмите</string>
     <string name="to_start_sending_and_receiving_btc">для начала отправки и получения bitcoin.</string>
 

@@ -88,7 +88,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         )
 
         textview_balance.setOnClickListener { presenter.invertViewType() }
-        button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
 
         setUiState(UiState.LOADING)
 
@@ -415,6 +414,20 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private fun onEmptyState() {
         setShowRefreshing(false)
         no_transaction_include.visible()
+        if (tabs.selectedTabPosition == 0) {
+            button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
+            button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
+            description.setText(R.string.transaction_occur_when_bitcoin)
+        } else {
+            button_get_bitcoin.setText(R.string.onboarding_get_eth)
+            button_get_bitcoin.setOnClickListener { startReceiveFragmentEth() }
+            description.setText(R.string.transaction_occur_when_eth)
+        }
+    }
+
+    private fun startReceiveFragmentEth() {
+        LocalBroadcastManager.getInstance(activity)
+                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
     }
 
     private fun onContentLoaded() {

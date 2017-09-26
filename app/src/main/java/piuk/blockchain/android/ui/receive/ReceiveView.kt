@@ -7,6 +7,8 @@ import piuk.blockchain.android.ui.customviews.ToastCustom
 
 interface ReceiveView : View {
 
+    val isContactsEnabled: Boolean
+
     fun getQrBitmap(): Bitmap
 
     fun getContactName(): String

@@ -55,13 +55,12 @@ public class AccountChooserActivity extends BaseMvpActivity<AccountChooserView, 
             throw new AssertionError("Request type must be passed to AccountChooserActivity");
         } else {
             paymentRequestType = (PaymentRequestType) intent.getSerializableExtra(EXTRA_REQUEST_TYPE);
-            int requestCode = getIntent().getIntExtra(EXTRA_REQUEST_CODE, -1);
 
             String title = getIntent().getStringExtra(EXTRA_ACTIVITY_TITLE);
             if (title == null) {
                 throw new AssertionError("Title string must be passed to AccountChooserActivity");
             } else {
-                binding.toolbar.toolbarGeneral.setTitle(title);
+                setupToolbar(binding.toolbar.toolbarGeneral, title);
             }
 
             setSupportActionBar(binding.toolbar.toolbarGeneral);

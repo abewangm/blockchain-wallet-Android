@@ -14,7 +14,7 @@
 
     <string name="send_bitcoin">Send</string>
     <string name="receive_bitcoin">Receive</string>
-    <string name="overview">Overview</string>
+    <string name="overview">Transactions</string>
 
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
@@ -234,7 +234,8 @@
     <string name="check_email_to_auth_login">Please check your email to approve this login attempt.</string>
     <string name="transaction_fee">Transaction Fee</string>
     <string name="your_transactions">No Transactions</string>
-    <string name="transaction_occur_when">Transactions occur when you receive and send bitcoin.</string>
+    <string name="transaction_occur_when_bitcoin">Transactions occur when you receive and send bitcoin.</string>
+    <string name="transaction_occur_when_eth">Transactions occur when you receive and send ether.</string>
     <string name="click">Click</string>
     <string name="to_start_sending_and_receiving_btc">to start sending and receiving bitcoin.</string>
 
@@ -521,7 +522,7 @@
     <string name="security_centre_add_email_message">Add and verify your email address to receive alerts, prevent suspicious activity, and recover your Wallet ID if forgotten.</string>
     <string name="security_centre_add_email_positive_button">Add</string>
     <string name="security_centre_backup_title">Backup your funds</string>
-    <string name="security_centre_backup_message">For your security, we do not keep any passwords on file. Backup your wallet to ensure your bitcoins are safe in case you lose your password. </string>
+    <string name="security_centre_backup_message">For your security, we do not keep any passwords on file. Backup your wallet to ensure your funds are safe in case you lose your password. </string>
     <string name="security_centre_backup_positive_button">Backup</string>
     <string name="security_centre_two_fa_message">Prevent unauthorized access to your wallet. Enable 2-Step Verification to increase wallet security.</string>
 
@@ -531,7 +532,7 @@
     <string name="backup_button_start">Start backup</string>
     <string name="backup_write_down_words">It is important to make sure you write down your words exactly as they appear here and in this order.</string>
     <string name="backup_header_complete">Backup Complete</string>
-    <string name="backup_complete_message">You can use your Backup Phrase to restore your funds if you lose your password. Anyone with access to your Backup Phrase can access your bitcoin so remember to keep it offline somewhere safe and secure.</string>
+    <string name="backup_complete_message">You can use your Backup Phrase to restore your funds if you lose your password. Anyone with access to your Backup Phrase can access your funds so remember to keep it offline somewhere safe and secure.</string>
     <string name="backup_again">Backup again</string>
     <string name="backup_confirmed">Backup confirmed</string>
     <string name="backup_last">Last backup: %1$s</string>
@@ -712,7 +713,7 @@
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
-    <string name="swipe_receive_preference_summary">Reveal a receive address when you swipe left on the PIN screen, making receiving bitcoin even faster.</string>
+    <string name="swipe_receive_preference_summary">Reveal a receive address when you swipe left on the PIN screen, making receiving funds even faster.</string>
     <string name="swipe_receive_address_info">Five addresses will be loaded consecutively, after which logging in is required to show new addresses.</string>
     <string name="swipe_receive_no_addresses">No more addresses can be loaded right now. Log in to the app to load more.</string>
 
@@ -724,17 +725,18 @@
     <string name="onboarding_check_inbox_title">Check Your Inbox</string>
     <string name="onboarding_check_inbox_summary">Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
     <string name="onboarding_verify_email">Verify email</string>
-    <string name="onboarding_receive_bitcoin">Receive Bitcoin</string>
+    <string name="onboarding_receive_bitcoin">Receive Funds</string>
     <string name="onboarding_current_price">Current Price:</string>
     <string name="onboarding_qr_codes">QR Codes</string>
     <string name="onboarding_scan_address">Scan Address</string>
     <string name="onboarding_buy_content">We work with exchange partners all over the world, so you can buy bitcoin directly from your wallet.</string>
-    <string name="onboarding_receive_content">Send your wallet address to a friend to request bitcoin. An address is a string of random letters and numbers that change for each transaction.</string>
+    <string name="onboarding_receive_content">Send your wallet address to a friend to request funds. An address is a string of random letters and numbers that change for each transaction.</string>
     <string name="onboarding_qr_codes_content">An address can also be shown as a QR code. Scan a friend’s QR code to quickly capture their wallet address.</string>
 
     <!-- BUY BITCOIN -->
     <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
     <string name="onboarding_get_bitcoin">Get Bitcoin</string>
+    <string name="onboarding_get_eth">Get Ether</string>
     <string name="onboarding_complete_title">That\'s it for now!</string>
     <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
     <string name="onboarding_start_over">Start Over</string>
@@ -788,6 +790,7 @@
     <string name="eth_support_contract_not_allowed">Contract addresses are not supported.</string>
     <string name="eth_support_only_eth">At the moment we only support ETH - you cannot receive REP, ICN GNT, GNO, DGD, BCP</string>
     <string name="eth_unconfirmed_wait">Please wait until your previous transaction confirms</string>
+    <string name="eth_transaction_complete">Transaction complete! Your transactions and balance will update soon, this can take a few minutes.\n</string>
 
     <!-- DASHBOARD -->
     <string name="dashboard_title">Dashboard</string>

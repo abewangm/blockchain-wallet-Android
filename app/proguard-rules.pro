@@ -158,3 +158,7 @@
 
 # Web3j
 -dontwarn org.web3j.codegen.**
+
+# MPAndroidChart
+-keep class com.github.mikephil.charting.** { *; }
+-dontwarn io.realm.**

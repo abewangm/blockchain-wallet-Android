@@ -36,60 +36,43 @@
             android:focusable="true"
             android:focusableInTouchMode="true">
 
-            <android.support.constraint.ConstraintLayout
+            <LinearLayout
                 android:id="@+id/sendMainContent"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/action_bar_height">
 
                 <include
                     android:id="@+id/fromContainer"
-                    layout="@layout/include_from_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="parent" />
+                    layout="@layout/include_from_row" />
 
                 <View
                     android:id="@+id/divider1"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="8dp"
-                    android:background="@color/primary_gray_light"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fromContainer" />
+                    android:background="@color/primary_gray_light" />
 
                 <include
                     android:id="@+id/toContainer"
-                    layout="@layout/include_to_row_editable"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/divider1" />
+                    layout="@layout/include_to_row_editable" />
 
                 <View
                     android:id="@+id/divider2"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="8dp"
-                    android:background="@color/primary_gray_light"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/toContainer" />
+                    android:background="@color/primary_gray_light" />
 
                 <include
                     android:id="@+id/amountContainer"
                     layout="@layout/include_amount_row"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/divider2" />
+                    android:layout_marginTop="8dp" />
 
                 <ProgressBar
                     android:id="@+id/progressBarMaxAvailable"
@@ -98,9 +81,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:gravity="center_horizontal|center_vertical"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/amountContainer"
                     tools:visibility="visible" />
 
                 <TextView
@@ -112,21 +92,16 @@
                     android:paddingRight="16dp"
                     android:textSize="14sp"
                     android:visibility="invisible"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/amountContainer"
                     tools:text="Use total minus fees: 0.00394932"
-                    tools:textColor="@color/primary_blue_accent" />
+                    tools:textColor="@color/primary_blue_accent"
+                    tools:visibility="visible" />
 
                 <View
                     android:id="@+id/divider3"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="8dp"
-                    android:background="@color/primary_gray_light"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/max" />
+                    android:background="@color/primary_gray_light" />
 
                 <!-- FEES TYPE -->
                 <android.support.constraint.ConstraintLayout
@@ -254,7 +229,7 @@
                     <Spinner
                         android:id="@+id/spinnerPriority"
                         android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:layout_height="wrap_content"
                         android:dropDownSelector="?attr/selectableItemBackground"
                         android:dropDownWidth="250dp"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -266,10 +241,8 @@
 
                 <View
                     android:id="@+id/divider4"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginEnd="0dp"
-                    android:layout_marginStart="0dp"
                     android:layout_marginTop="8dp"
                     android:background="@color/primary_gray_light"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -279,11 +252,11 @@
                 <TextView
                     android:id="@+id/arbitraryWarning"
                     fontPath="fonts/Montserrat-Regular.ttf"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
                     android:layout_marginTop="8dp"
                     android:gravity="center"
                     android:textColor="@color/product_red_medium"
@@ -294,7 +267,8 @@
                     app:layout_constraintTop_toBottomOf="@+id/divider4"
                     app:layout_constraintVertical_bias="0.0"
                     tools:ignore="MissingPrefix"
-                    tools:text="@string/insufficient_funds" />
+                    tools:text="@string/insufficient_funds"
+                    tools:visibility="visible" />
 
                 <Button
                     android:id="@+id/buttonContinue"
@@ -312,9 +286,8 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/arbitraryWarning" />
 
-            </android.support.constraint.ConstraintLayout>
+            </LinearLayout>
         </ScrollView>
-
     </LinearLayout>
 
     <piuk.blockchain.android.ui.customviews.NumericKeyboard

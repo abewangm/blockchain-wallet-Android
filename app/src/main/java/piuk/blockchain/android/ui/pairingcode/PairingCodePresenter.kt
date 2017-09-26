@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.pairing_code
+package piuk.blockchain.android.ui.pairingcode
 
 import android.graphics.Bitmap
 import io.reactivex.Observable
@@ -30,7 +30,7 @@ class PairingCodePresenter @Inject constructor(
     internal val firstStep =
             String.format(stringUtils.getString(R.string.pairing_code_instruction_1), WEB_WALLET_URL)
 
-    fun generatePairingQr() {
+    internal fun generatePairingQr() {
         pairingEncryptionPasswordObservable
                 .doOnSubscribe { view.showProgressSpinner() }
                 .doAfterTerminate { view.hideProgressSpinner() }

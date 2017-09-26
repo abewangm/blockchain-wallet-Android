@@ -55,6 +55,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
@@ -76,7 +77,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.dashboard.DashboardFragment;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
-import piuk.blockchain.android.ui.pairing_code.PairingCodeActivity;
+import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
@@ -103,6 +104,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
     public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
+    public static final String ACTION_RECEIVE_ETH = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE_ETH";
     public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
@@ -121,6 +123,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final int CONTACTS_EDIT = 2010;
 
     @Thunk boolean drawerIsOpen = false;
+    private boolean handlingResult = false;
 
     @Inject MainPresenter mainPresenter;
     @Thunk ActivityMainBinding binding;
@@ -134,6 +137,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;
     private boolean initialized;
+    @Thunk CryptoCurrencies selectedCurrency = CryptoCurrencies.BTC;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -142,6 +146,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                 requestScan();
             } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
                 binding.bottomNavigation.setCurrentItem(3);
+            } else if (intent.getAction().equals(ACTION_RECEIVE_ETH) && getActivity() != null) {
+                selectedCurrency = CryptoCurrencies.ETHER;
+                binding.bottomNavigation.setCurrentItem(3);
+                // Reset after selection, this is a temporary fix until we handle system-wide currency prefs properly
+                selectedCurrency = CryptoCurrencies.BTC;
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 BuyActivity.start(MainActivity.this);
             }
@@ -165,7 +174,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                     onStartBalanceFragment(paymentMade);
                     break;
                 case 3:
-                    startReceiveFragment();
+                    startReceiveFragment(selectedCurrency);
                     break;
             }
         }
@@ -185,11 +194,13 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         IntentFilter filterSend = new IntentFilter(ACTION_SEND);
         IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
+        IntentFilter filterReceiveEth = new IntentFilter(ACTION_RECEIVE_ETH);
         IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveEth);
 
         appUtil = new AppUtil(this);
         balanceFragment = BalanceFragment.newInstance(false);
@@ -257,7 +268,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         super.onResume();
         appUtil.deleteQR();
         getPresenter().updateTicker();
-        resetNavigationDrawer();
+        if (!handlingResult) {
+            resetNavigationDrawer();
+        }
+        handlingResult = false;
     }
 
     @Override
@@ -317,6 +331,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        handlingResult = true;
         if (resultCode == RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
@@ -763,12 +778,17 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     private void startSendFragment(@Nullable String scanData, @Nullable String scanRoute) {
-        SendFragment sendFragment = SendFragment.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
+        binding.bottomNavigation.removeOnTabSelectedListener();
+        binding.bottomNavigation.setCurrentItem(0);
+        binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
+        SendFragment sendFragment =
+                SendFragment.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
         addFragmentToBackStack(sendFragment);
     }
 
-    private void startReceiveFragment() {
-        ReceiveFragment receiveFragment = ReceiveFragment.newInstance(getSelectedAccountFromFragments());
+    private void startReceiveFragment(CryptoCurrencies selectedCurrency) {
+        ReceiveFragment receiveFragment =
+                ReceiveFragment.newInstance(getSelectedAccountFromFragments(), selectedCurrency);
         addFragmentToBackStack(receiveFragment);
     }
 

@@ -130,7 +130,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-            android:name=".ui.pairing_code.PairingCodeActivity"
+            android:name=".ui.pairingcode.PairingCodeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service

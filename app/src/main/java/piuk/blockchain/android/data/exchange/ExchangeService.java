@@ -130,7 +130,7 @@ public class ExchangeService {
     void reloadExchangeData() {
         MetadataNodeFactory metadataNodeFactory = payloadManager.getMetadataNodeFactory();
 
-        if(metadataNodeFactory != null) {
+        if (metadataNodeFactory != null) {
             DeterministicKey metadataNode = metadataNodeFactory.getMetadataNode();
 
             if (metadataNode != null) {
@@ -152,7 +152,7 @@ public class ExchangeService {
         ).compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Observable<Boolean> hasCoinifyAccount() {
+    Observable<Boolean> hasCoinifyAccount() {
         return getExchangeData()
                 .flatMap(metadata -> Observable
                         .fromCallable(() -> {

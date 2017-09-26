@@ -205,7 +205,7 @@
     <string name="confirm_password">암호 확인</string>
     <string name="check_email_to_auth_login">이 로그인 시도를 승인 받으려면 이메일을 확인하세요</string>
     <string name="transaction_fee">거래 수수료</string>
-    <string name="transaction_occur_when">비트코인을 받거나 보낼 때 거래가 생깁니다.</string>
+    <string name="transaction_occur_when_bitcoin">비트코인을 받거나 보낼 때 거래가 생깁니다.</string>
     <string name="click">클릭</string>
     <string name="to_start_sending_and_receiving_btc">비트코인 보내기와 받기를 시작하려면</string>
 

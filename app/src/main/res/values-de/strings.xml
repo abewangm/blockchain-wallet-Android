@@ -206,7 +206,7 @@
     <string name="confirm_password">Passwort bestätigen</string>
     <string name="check_email_to_auth_login">Bitte überprüfen Sie Ihre E-Mails zur Genehmigung dieses Anmeldeversuchs.</string>
     <string name="transaction_fee">Transaktionsgebühr</string>
-    <string name="transaction_occur_when">Transaktionen erfolgen durch den Empfang und Versand von Bitcoins.</string>
+    <string name="transaction_occur_when_bitcoin">Transaktionen erfolgen durch den Empfang und Versand von Bitcoins.</string>
     <string name="click">Einfach klicken</string>
     <string name="to_start_sending_and_receiving_btc">und schon können Sie Bitcoins senden und empfangen.</string>
 

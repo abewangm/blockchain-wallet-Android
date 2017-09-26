@@ -68,6 +68,7 @@ class ReceivePresenterTest {
     @Throws(Exception::class)
     fun `onViewReady hide contacts introduction`() {
         // Arrange
+        whenever(activity.isContactsEnabled).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false))
                 .thenReturn(true)
         // Act
@@ -75,6 +76,7 @@ class ReceivePresenterTest {
         // Assert
         verify(prefsUtil).getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false)
         verifyNoMoreInteractions(prefsUtil)
+        verify(activity).isContactsEnabled
         verify(activity).hideContactsIntroduction()
         verifyNoMoreInteractions(activity)
     }
@@ -83,6 +85,7 @@ class ReceivePresenterTest {
     @Throws(Exception::class)
     fun `onViewReady show contacts introduction`() {
         // Arrange
+        whenever(activity.isContactsEnabled).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false))
                 .thenReturn(false)
         // Act
@@ -90,7 +93,22 @@ class ReceivePresenterTest {
         // Assert
         verify(prefsUtil).getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false)
         verifyNoMoreInteractions(prefsUtil)
+        verify(activity).isContactsEnabled
         verify(activity).showContactsIntroduction()
+        verifyNoMoreInteractions(activity)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onViewReady don't show contacts`() {
+        // Arrange
+        whenever(activity.isContactsEnabled).thenReturn(false)
+        // Act
+        subject.onViewReady()
+        // Assert
+        verifyZeroInteractions(prefsUtil)
+        verify(activity).isContactsEnabled
+        verify(activity).hideContactsIntroduction()
         verifyNoMoreInteractions(activity)
     }
 

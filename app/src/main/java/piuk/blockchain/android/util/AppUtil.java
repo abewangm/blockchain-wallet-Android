@@ -32,12 +32,10 @@ public class AppUtil {
     @Inject Lazy<PayloadManager> payloadManager;
     private Context context;
     private AlertDialog alertDialog;
-    private String receiveQRFileName;
 
     public AppUtil(Context context) {
         Injector.getInstance().getAppComponent().inject(this);
         this.context = context;
-        receiveQRFileName = context.getExternalCacheDir() + File.separator + "qr.png";
     }
 
     public void clearCredentials() {
@@ -65,11 +63,15 @@ public class AppUtil {
     }
 
     public String getReceiveQRFilename() {
-        return receiveQRFileName;
+        // getExternalCacheDir can return null if permission for write storage not granted
+        // or if running on an emulator
+        return context.getExternalCacheDir() + File.separator + "qr.png";
     }
 
     public void deleteQR() {
-        File file = new File(receiveQRFileName);
+        // getExternalCacheDir can return null if permission for write storage not granted
+        // or if running on an emulator
+        File file = new File(context.getExternalCacheDir() + File.separator + "qr.png");
         if (file.exists()) {
             file.delete();
         }

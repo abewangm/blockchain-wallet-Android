@@ -36,6 +36,7 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
@@ -64,6 +65,9 @@ import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveView, NumericKeyboardCallback {
+
+    override val isContactsEnabled: Boolean
+        get() = BuildConfig.CONTACTS_ENABLED
 
     @Inject lateinit var receivePresenter: ReceivePresenter
     private var bottomSheetDialog: BottomSheetDialog? = null
@@ -117,16 +121,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         setCustomKeypad()
 
         scrollview.post { scrollview.scrollTo(0, 0) }
-        presenter.onSelectDefault(defaultAccountPosition)
-    }
 
-    private fun setupToolbar() {
-        if ((activity as AppCompatActivity).supportActionBar != null) {
-            (activity as BaseAuthActivity).setupToolbar(
-                    (activity as MainActivity).supportActionBar, R.string.receive_bitcoin)
-        } else {
-            finishPage()
-        }
+        selectTabIfNecessary()
     }
 
     override fun startContactSelectionActivity() {
@@ -136,6 +132,24 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 PaymentRequestType.CONTACT,
                 getString(R.string.from)
         )
+    }
+
+    private fun selectTabIfNecessary() {
+        val currency = arguments.getSerializable(ARG_SELECTED_CRYPTOCURRENCY) as CryptoCurrencies
+        if (currency == CryptoCurrencies.ETHER) {
+            tabs_receive.getTabAt(1)?.select()
+        } else {
+            presenter.onSelectDefault(defaultAccountPosition)
+        }
+    }
+
+    private fun setupToolbar() {
+        if ((activity as AppCompatActivity).supportActionBar != null) {
+            (activity as BaseAuthActivity).setupToolbar(
+                    (activity as MainActivity).supportActionBar, R.string.receive_bitcoin)
+        } else {
+            finishPage()
+        }
     }
 
     private fun setupLayout() {
@@ -251,7 +265,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     private val btcTextWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
-            Timber.d("afterTextChanged")
             var editable = s
             amountCrypto.removeTextChangedListener(this)
             editable = EditTextFormatUtil.formatEditable(
@@ -282,7 +295,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     private val fiatTextWatcher = object : TextWatcher {
         override fun afterTextChanged(s: Editable) {
-            Timber.d("afterTextChanged")
             var editable = s
             amountFiat.removeTextChangedListener(this)
             val maxLength = 2
@@ -361,16 +373,21 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override fun displayBitcoinLayout() {
         divider1.visible()
         amount_container.visible()
-        divider_to.visible()
-        to_container.visible()
         divider3.visible()
 
-        @Suppress("ConstantConditionIf")
-        if (BuildConfig.CONTACTS_ENABLED) {
+        if (isContactsEnabled) {
             from_container.visible()
             textview_whats_this.visible()
             divider4.visible()
             button_request.visible()
+        }
+
+        if (!presenter.shouldShowDropdown()) {
+            to_container.gone()
+            divider_to.gone()
+        } else {
+            to_container.visible()
+            divider_to.visible()
         }
     }
 
@@ -384,8 +401,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         to_container.gone()
         divider3.gone()
 
-        @Suppress("ConstantConditionIf")
-        if (BuildConfig.CONTACTS_ENABLED) {
+        if (isContactsEnabled) {
             from_container.gone()
             textview_whats_this.gone()
             divider4.gone()
@@ -462,6 +478,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
 
         bottomSheetDialog?.apply { show() }
+        if (bottomSheetDialog == null) {
+            toast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
+        }
     }
 
     private fun onShareClicked() {
@@ -679,13 +698,15 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     companion object {
 
-        private val ARG_SELECTED_ACCOUNT_POSITION = "selected_account_position"
+        private val ARG_SELECTED_ACCOUNT_POSITION = "ARG_SELECTED_ACCOUNT_POSITION"
+        private val ARG_SELECTED_CRYPTOCURRENCY = "ARG_SELECTED_CRYPTOCURRENCY"
         private val COOL_DOWN_MILLIS = 2 * 1000
 
         @JvmStatic
-        fun newInstance(selectedAccountPosition: Int) = ReceiveFragment().apply {
+        fun newInstance(selectedAccountPosition: Int, cryptoCurrency: CryptoCurrencies) = ReceiveFragment().apply {
             arguments = Bundle().apply {
                 putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition)
+                putSerializable(ARG_SELECTED_CRYPTOCURRENCY, cryptoCurrency)
             }
         }
     }
