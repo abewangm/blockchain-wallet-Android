@@ -24,9 +24,19 @@ public class FeeDataManager {
      *
      * @return An {@link Observable} wrapping a {@link FeeOptions} object
      */
-    public Observable<FeeOptions> getFeeOptions() {
+    public Observable<FeeOptions> getBtcFeeOptions() {
         return rxPinning.call(() -> feeApi.getFeeOptions())
                 .compose(RxUtil.applySchedulersToObservable());
     }
 
+    /**
+     * Returns a {@link FeeOptions} object which contains both a "regular" and a "priority" fee
+     * option for Ethereum.
+     *
+     * @return An {@link Observable} wrapping a {@link FeeOptions} object
+     */
+    public Observable<FeeOptions> getEthFeeOptions() {
+        return rxPinning.call(() -> feeApi.getEthFeeOptions())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
 }

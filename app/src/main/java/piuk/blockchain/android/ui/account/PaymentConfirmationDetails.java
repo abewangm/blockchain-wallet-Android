@@ -7,13 +7,13 @@ public class PaymentConfirmationDetails implements Parcelable {
 
     public String fromLabel;
     public String toLabel;
-    public String btcUnit;
+    public String cryptoUnit;
     public String fiatUnit;
-    public String btcAmount;
+    public String cryptoAmount;
     public String fiatAmount;
-    public String btcFee;
+    public String cryptoFee;
     public String fiatFee;
-    public String btcTotal;
+    public String cryptoTotal;
     public String fiatTotal;
     public String btcSuggestedFee;
     public String fiatSymbol;
@@ -27,13 +27,13 @@ public class PaymentConfirmationDetails implements Parcelable {
     protected PaymentConfirmationDetails(Parcel in) {
         fromLabel = in.readString();
         toLabel = in.readString();
-        btcUnit = in.readString();
+        cryptoUnit = in.readString();
         fiatUnit = in.readString();
-        btcAmount = in.readString();
+        cryptoAmount = in.readString();
         fiatAmount = in.readString();
-        btcFee = in.readString();
+        cryptoFee = in.readString();
         fiatFee = in.readString();
-        btcTotal = in.readString();
+        cryptoTotal = in.readString();
         fiatTotal = in.readString();
         btcSuggestedFee = in.readString();
         fiatSymbol = in.readString();
@@ -62,13 +62,13 @@ public class PaymentConfirmationDetails implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(fromLabel);
         dest.writeString(toLabel);
-        dest.writeString(btcUnit);
+        dest.writeString(cryptoUnit);
         dest.writeString(fiatUnit);
-        dest.writeString(btcAmount);
+        dest.writeString(cryptoAmount);
         dest.writeString(fiatAmount);
-        dest.writeString(btcFee);
+        dest.writeString(cryptoFee);
         dest.writeString(fiatFee);
-        dest.writeString(btcTotal);
+        dest.writeString(cryptoTotal);
         dest.writeString(fiatTotal);
         dest.writeString(btcSuggestedFee);
         dest.writeString(fiatSymbol);
@@ -81,13 +81,13 @@ public class PaymentConfirmationDetails implements Parcelable {
         return "PaymentConfirmationDetails{" +
                 "fromLabel='" + fromLabel + '\'' +
                 ", toLabel='" + toLabel + '\'' +
-                ", btcUnit='" + btcUnit + '\'' +
+                ", cryptoUnit='" + cryptoUnit + '\'' +
                 ", fiatUnit='" + fiatUnit + '\'' +
-                ", btcAmount='" + btcAmount + '\'' +
+                ", cryptoAmount='" + cryptoAmount + '\'' +
                 ", fiatAmount='" + fiatAmount + '\'' +
-                ", btcFee='" + btcFee + '\'' +
+                ", cryptoFee='" + cryptoFee + '\'' +
                 ", fiatFee='" + fiatFee + '\'' +
-                ", btcTotal='" + btcTotal + '\'' +
+                ", cryptoTotal='" + cryptoTotal + '\'' +
                 ", fiatTotal='" + fiatTotal + '\'' +
                 ", btcSuggestedFee='" + btcSuggestedFee + '\'' +
                 ", fiatSymbol='" + fiatSymbol + '\'' +

@@ -4,6 +4,9 @@ import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
+import piuk.blockchain.android.data.ethereum.EthDataStore
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -16,46 +19,48 @@ import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 class WalletAccountHelper(
         private val payloadManager: PayloadManager,
         private val stringUtils: StringUtils,
-        prefsUtil: PrefsUtil,
-        exchangeRateFactory: ExchangeRateFactory
+        private val prefsUtil: PrefsUtil,
+        private val exchangeRateFactory: ExchangeRateFactory,
+        private val currencyState: CurrencyState,
+        private val ethDataStore: EthDataStore
 ) {
     private val btcUnitType: Int by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC) }
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(btcUnitType) }
     private val btcUnit: String by unsafeLazy { monetaryUtil.getBtcUnit(btcUnitType) }
     private val fiatUnit: String by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY) }
-    private val btcExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastPrice(fiatUnit) }
+    private val btcExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastBtcPrice(fiatUnit) }
 
     /**
      * Returns a list of [ItemAccount] objects containing both HD accounts and [LegacyAddress]
      * objects, eg from importing accounts.
      *
-     * @param isBtc Whether or not you wish to have the [ItemAccount] objects returned with
-     * [ItemAccount.displayBalance] showing BTC or fiat
-     *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getAccountItems(isBtc: Boolean) = mutableListOf<ItemAccount>().apply {
-        // V3
-        addAll(getHdAccounts(isBtc))
-        // V2l
-        addAll(getLegacyAddresses(isBtc))
-    }.toList()
+    fun getAccountItems(): List<ItemAccount> {
+        return when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> mutableListOf<ItemAccount>().apply {
+                // V3
+                addAll(getHdAccounts())
+                // V2l
+                addAll(getLegacyAddresses())
+            }.toList()
+
+            else -> getEthAccount().toList()
+        }
+    }
 
     /**
      * Returns a list of [ItemAccount] objects containing only HD accounts.
      *
-     * @param isBtc Whether or not you wish to have the [ItemAccount] objects returned with
-     * [ItemAccount.displayBalance] showing BTC or fiat
-     *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getHdAccounts(isBtc: Boolean) = payloadManager.payload.hdWallets[0].accounts
+    fun getHdAccounts() = payloadManager.payload.hdWallets[0].accounts
             // Skip archived account
             .filterNot { it.isArchived }
             .map {
                 ItemAccount(
                         it.label,
-                        getAccountBalance(it, isBtc, btcExchangeRate, fiatUnit, btcUnit),
+                        getAccountBalance(it, btcExchangeRate, fiatUnit, btcUnit),
                         null,
                         getAccountAbsoluteBalance(it),
                         it,
@@ -66,12 +71,9 @@ class WalletAccountHelper(
     /**
      * Returns a list of [ItemAccount] objects containing only [LegacyAddress] objects.
      *
-     * @param isBtc Whether or not you wish to have the [ItemAccount] objects returned with
-     * [ItemAccount.displayBalance] showing BTC or fiat
-     *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getLegacyAddresses(isBtc: Boolean) = payloadManager.payload.legacyAddressList
+    fun getLegacyAddresses() = payloadManager.payload.legacyAddressList
             // Skip archived address
             .filterNot { it.tag == LegacyAddress.ARCHIVED_ADDRESS }
             .map {
@@ -89,7 +91,7 @@ class WalletAccountHelper(
 
                 ItemAccount(
                         labelOrAddress,
-                        getAddressBalance(it, isBtc, btcExchangeRate, fiatUnit, btcUnit),
+                        getAddressBalance(it, btcExchangeRate, fiatUnit, btcUnit),
                         tag,
                         getAddressAbsoluteBalance(it),
                         it,
@@ -114,6 +116,17 @@ class WalletAccountHelper(
         )
     } ?: emptyList()
 
+    fun getDefaultAccount(): ItemAccount {
+        return when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> getDefaultBtcAccount()
+            else -> getDefaultEthAccount()
+        }
+    }
+
+    fun getEthAccount() = mutableListOf<ItemAccount>().apply {
+        add(getDefaultEthAccount())
+    }
+
     /**
      * Returns the balance of an [Account] in Satoshis
      */
@@ -125,7 +138,6 @@ class WalletAccountHelper(
      */
     private fun getAccountBalance(
             account: Account,
-            isBTC: Boolean,
             btcExchange: Double,
             fiatUnit: String,
             btcUnit: String
@@ -133,11 +145,11 @@ class WalletAccountHelper(
 
         val btcBalance = getAccountAbsoluteBalance(account)
 
-        if (!isBTC) {
+        return if (!currencyState.isDisplayingCryptoCurrency) {
             val fiatBalance = btcExchange * (btcBalance / 1e8)
-            return "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
+            "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
         } else {
-            return "(${monetaryUtil.getDisplayAmount(btcBalance)} $btcUnit)"
+            "(${monetaryUtil.getDisplayAmount(btcBalance)} $btcUnit)"
         }
     }
 
@@ -152,7 +164,6 @@ class WalletAccountHelper(
      */
     private fun getAddressBalance(
             legacyAddress: LegacyAddress,
-            isBTC: Boolean,
             btcExchange: Double,
             fiatUnit: String,
             btcUnit: String
@@ -160,12 +171,35 @@ class WalletAccountHelper(
 
         val btcBalance = getAddressAbsoluteBalance(legacyAddress)
 
-        if (!isBTC) {
+        return if (!currencyState.isDisplayingCryptoCurrency) {
             val fiatBalance = btcExchange * (btcBalance / 1e8)
-            return "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
+            "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
         } else {
-            return "(${monetaryUtil.getDisplayAmount(btcBalance)} $btcUnit)"
+            "(${monetaryUtil.getDisplayAmount(btcBalance)} $btcUnit)"
         }
+    }
+
+    private fun getDefaultBtcAccount(): ItemAccount {
+        val account = payloadManager.payload.hdWallets[0].accounts[payloadManager.payload.hdWallets[0].defaultAccountIdx]
+        return ItemAccount(
+                account.label,
+                getAccountBalance(account, btcExchangeRate, fiatUnit, btcUnit),
+                null,
+                getAccountAbsoluteBalance(account),
+                account,
+                account.xpub
+        )
+    }
+
+    private fun getDefaultEthAccount(): ItemAccount {
+        val ethAccount = ethDataStore.ethWallet?.account
+        return ItemAccount(
+                ethAccount?.label,
+                "0 ETH",
+                null,
+                0,
+                ethAccount,
+                ethAccount?.address)
     }
 
 }

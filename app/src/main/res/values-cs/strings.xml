@@ -157,8 +157,6 @@
     <string name="navigate">Navigovat</string>
     <string name="enable_geo">Pro vyhledání aktuální polohy povolte prosím GPS nebo jinou lokalizační službu. Kliknutím na OK přejdete na nastavení lokalizační služby, kde můžete akci provést.</string>
 
-    <string name="my_addresses">Adresy</string>
-    <string name="addresses">Adresy</string>
     <string name="create_new">Vytvořit novou</string>
     <string name="import_address">Importovat adresu</string>
     <string name="save_name">Uložit název</string>
@@ -169,7 +167,6 @@
 
     <string name="ssl_pinning_invalid">Připnutí certifikátu SSL se nezdařilo. Může to znamenat škodlivou aktivitu. Dříve než budete pokračovat, ověřte síťové připojení a zařízení.</string>
 
-    <string name="merchant_map">Mapa prodejců</string>
     <string name="merchant_suggest">Doporučte prodejce</string>
     <string name="name">Název</string>
     <string name="location">Místo</string>
@@ -209,7 +206,7 @@
     <string name="confirm_password">Potvrdit heslo</string>
     <string name="check_email_to_auth_login">Prosím zkontrolujte svůj e-mail a potvrďte tento pokus o přihlášení.</string>
     <string name="transaction_fee">Poplatek za transakci</string>
-    <string name="transaction_occur_when">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
+    <string name="transaction_occur_when_bitcoin">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
     <string name="click">Kliknutím</string>
     <string name="to_start_sending_and_receiving_btc">spustíte odesílání a příjem bitcoinů.</string>
 

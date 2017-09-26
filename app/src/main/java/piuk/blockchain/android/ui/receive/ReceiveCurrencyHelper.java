@@ -1,13 +1,19 @@
 package piuk.blockchain.android.ui.receive;
 
+import org.web3j.utils.Convert;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
+import timber.log.Timber;
 
 public class ReceiveCurrencyHelper {
 
@@ -15,15 +21,18 @@ public class ReceiveCurrencyHelper {
     private Locale locale;
     private final PrefsUtil prefsUtil;
     private final ExchangeRateFactory exchangeRateFactory;
+    private CurrencyState currencyState;
 
     public ReceiveCurrencyHelper(MonetaryUtil monetaryUtil,
                                  Locale locale,
                                  PrefsUtil prefsUtil,
-                                 ExchangeRateFactory exchangeRateFactory) {
+                                 ExchangeRateFactory exchangeRateFactory,
+                                 CurrencyState currencyState) {
         this.monetaryUtil = monetaryUtil;
         this.locale = locale;
         this.prefsUtil = prefsUtil;
         this.exchangeRateFactory = exchangeRateFactory;
+        this.currencyState = currencyState;
     }
 
     /**
@@ -33,6 +42,18 @@ public class ReceiveCurrencyHelper {
      */
     public String getBtcUnit() {
         return monetaryUtil.getBtcUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+    }
+
+    public String getEthUnit() {
+        return monetaryUtil.getEthUnit(MonetaryUtil.UNIT_ETH);
+    }
+
+    public String getCryptoUnit() {
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return getBtcUnit();
+        } else {
+            return getEthUnit();
+        }
     }
 
     /**
@@ -50,7 +71,11 @@ public class ReceiveCurrencyHelper {
      * @return A double exchange rate
      */
     public double getLastPrice() {
-        return exchangeRateFactory.getLastPrice(getFiatUnit());
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return exchangeRateFactory.getLastBtcPrice(getFiatUnit());
+        } else {
+            return exchangeRateFactory.getLastEthPrice(getFiatUnit());
+        }
     }
 
     /**
@@ -90,7 +115,12 @@ public class ReceiveCurrencyHelper {
      * @return The amount of BTC/mBits/bits as a double
      */
     public double getUndenominatedAmount(double amount) {
-        return monetaryUtil.getUndenominatedAmount(amount);
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return monetaryUtil.getUndenominatedAmount(amount);
+        } else {
+            // TODO: 01/09/2017 Currently ontly handling Ether
+            return amount;
+        }
     }
 
     /**
@@ -101,6 +131,17 @@ public class ReceiveCurrencyHelper {
      */
     public Double getDenominatedBtcAmount(double amount) {
         return monetaryUtil.getDenominatedAmount(amount);
+    }
+
+    // TODO: 05/09/2017 This seems to be hardcoded for BTC?
+    public String getFormattedCryptoStringFromFiat(double fiatAmount) {
+        double cryptoAmount = fiatAmount / getLastPrice();
+        return getFormattedBtcString(cryptoAmount);
+    }
+    public String getFormattedFiatStringFromCrypto(double cryptoAmount) {
+        double uAmount = getUndenominatedAmount(cryptoAmount);
+        double fiatAmount = getLastPrice() * uAmount;
+        return getFormattedFiatString(fiatAmount);
     }
 
     /**
@@ -123,6 +164,20 @@ public class ReceiveCurrencyHelper {
                 break;
         }
         return maxLength;
+    }
+
+    /**
+     * Get the maximum number of decimal points for the current Crypto unit
+     *
+     * @return The max number of allowed decimal points
+     */
+    public int getMaxCryptoDecimalLength() {
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return getMaxBtcDecimalLength();
+        } else {
+            // TODO: 31/08/2017 Ether max?
+            return 30;
+        }
     }
 
     /**
@@ -163,4 +218,60 @@ public class ReceiveCurrencyHelper {
         return amount.compareTo(BigInteger.valueOf(2100000000000000L)) == 1;
     }
 
+    /**
+     * Returns btc amount from satoshis.
+     *
+     * @return btc, mbtc or bits relative to what is set in monetaryUtil
+     */
+    public String getTextFromSatoshis(long satoshis, String decimalSeparator) {
+        String displayAmount = monetaryUtil.getDisplayAmount(satoshis);
+        displayAmount = displayAmount.replace(".", decimalSeparator);
+        return displayAmount;
+    }
+
+    /**
+     * Returns amount of satoshis from btc amount. This could be btc, mbtc or bits.
+     *
+     * @return satoshis
+     */
+    public BigInteger getSatoshisFromText(String text, String decimalSeparator) {
+        if (text == null || text.isEmpty()) return BigInteger.ZERO;
+
+        String amountToSend = stripSeparator(text, decimalSeparator);
+
+        Double amount;
+        try {
+            amount = java.lang.Double.parseDouble(amountToSend);
+        } catch (NumberFormatException e) {
+            amount = 0.0;
+        }
+
+        return BigDecimal.valueOf(monetaryUtil.getUndenominatedAmount(amount))
+                .multiply(BigDecimal.valueOf(100000000))
+                .toBigInteger();
+    }
+
+    /**
+     * Returns amount of wei from ether amount.
+     *
+     * @return satoshis
+     */
+    public BigInteger getWeiFromText(String text, String decimalSeparator) {
+        if (text == null || text.isEmpty()) return BigInteger.ZERO;
+
+        String amountToSend = stripSeparator(text, decimalSeparator);
+
+        Double amount;
+        try {
+            amount = java.lang.Double.parseDouble(amountToSend);
+        } catch (NumberFormatException e) {
+            amount = 0.0;
+        }
+
+        return Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger();
+    }
+
+    public String stripSeparator(String text, String decimalSeparator) {
+        return text.trim().replace(" ","").replace(decimalSeparator, ".");
+    }
 }

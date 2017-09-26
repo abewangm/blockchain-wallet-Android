@@ -213,11 +213,12 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
     private void setUpAdapter(boolean isBtc) {
         String fiatString = getPresenter().getPrefsUtil().getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
         int btcFormat = getPresenter().getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
-        double lastPrice = ExchangeRateFactory.getInstance().getLastPrice(fiatString);
+        double btcExchangeRate = ExchangeRateFactory.getInstance().getLastBtcPrice(fiatString);
 
         balanceAdapter = new BalanceAdapter(
                 getActivity(),
-                lastPrice,
+                btcExchangeRate,
+                getPresenter().getEthExchangeRate(),
                 isBtc,
                 new BalanceListClickListener() {
                     @Override

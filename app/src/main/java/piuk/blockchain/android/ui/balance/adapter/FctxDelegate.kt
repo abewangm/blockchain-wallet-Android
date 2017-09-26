@@ -26,16 +26,16 @@ import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 
 class FctxDelegate<in T>(
-        val activity: Activity,
-        var btcExchangeRate: Double,
-        var isBtc: Boolean,
-        val listClickListener: BalanceListClickListener
+        activity: Activity,
+        private var btcExchangeRate: Double,
+        private var isBtc: Boolean,
+        private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
-    val dateUtil = DateUtil(activity)
-    val stringUtils = StringUtils(activity)
-    val prefsUtil = PrefsUtil(activity)
-    val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
+    private val dateUtil = DateUtil(activity)
+    private val stringUtils = StringUtils(activity)
+    private val prefsUtil = PrefsUtil(activity)
+    private val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is ContactTransactionModel

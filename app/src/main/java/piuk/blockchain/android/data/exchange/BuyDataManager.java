@@ -49,10 +49,9 @@ public class BuyDataManager {
     }
 
     public synchronized Observable<Boolean> getCanBuy() {
-
         initReplaySubjects();
 
-        return Observable.combineLatest(isBuyRolledOut(), isCoinifyAllowed(), isUnocoinAllowed(),
+        return Observable.zip(isBuyRolledOut(), isCoinifyAllowed(), isUnocoinAllowed(),
                 (isBuyRolledOut, allowCoinify, allowUnocoin) -> isBuyRolledOut && (allowCoinify || allowUnocoin));
     }
 
@@ -73,7 +72,7 @@ public class BuyDataManager {
      * @return An {@link Observable} wrapping a boolean value
      */
     private Observable<Boolean> isCoinifyAllowed() {
-        return Observable.combineLatest(isInCoinifyCountry(), buyConditions.coinifyWhitelistedSource,
+        return Observable.zip(isInCoinifyCountry(), buyConditions.coinifyWhitelistedSource,
                 (coinifyCountry, whiteListed) -> coinifyCountry || whiteListed);
     }
 
@@ -115,7 +114,7 @@ public class BuyDataManager {
     }
 
     private Observable<Boolean> isUnocoinAllowed() {
-        return Observable.combineLatest(isInUnocoinCountry(), isUnocoinWhitelisted(), isUnocoinEnabledOnAndroid(),
+        return Observable.zip(isInUnocoinCountry(), isUnocoinWhitelisted(), isUnocoinEnabledOnAndroid(),
                 (unocoinCountry, whiteListed, androidEnabled) -> (unocoinCountry || whiteListed) && androidEnabled);
     }
 

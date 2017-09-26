@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.balance
 
-
 import android.content.*
 import android.content.pm.ShortcutManager
 import android.os.Bundle
@@ -17,8 +16,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
-import kotlinx.android.synthetic.main.include_onboarding_complete.*
-import kotlinx.android.synthetic.main.include_onboarding_viewpager.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
@@ -31,10 +28,7 @@ import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
-import piuk.blockchain.android.ui.onboarding.OnboardingPagerAdapter
-import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.ui.receive.ReceiveFragment
-import piuk.blockchain.android.ui.send.SendFragment
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
@@ -42,7 +36,7 @@ import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.OnItemSelectedListener
-import piuk.blockchain.android.util.helperfunctions.OnPageChangeListener
+import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import javax.inject.Inject
 
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
@@ -56,7 +50,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     // Adapters
     private var accountsAdapter: BalanceHeaderAdapter? = null
     private var balanceAdapter: BalanceAdapter? = null
-    private var onboardingPagerAdapter: OnboardingPagerAdapter? = null
 
     private var progressDialog: MaterialProgressDialog? = null
     private var interactionListener: OnFragmentInteractionListener? = null
@@ -64,8 +57,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_INTENT && activity != null) {
-                onViewReady()
-                recyclerview.scrollToPosition(0)
+                tabs?.post { tabs.getTabAt(0)?.select() }
+                recyclerview?.scrollToPosition(0)
             }
         }
     }
@@ -95,12 +88,29 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         )
 
         textview_balance.setOnClickListener { presenter.invertViewType() }
-        button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
 
-        if (!presenter.isOnboardingComplete()) {
-            initOnboardingPager()
-        }
         setUiState(UiState.LOADING)
+
+        tabs.apply {
+            addTab(tabs.newTab().setText(R.string.bitcoin))
+            addTab(tabs.newTab().setText(R.string.ether))
+            setOnTabSelectedListener {
+                if (it == 1) {
+                    accounts_spinner.invisible()
+                    presenter.onAccountChosen(presenter.activeAccountAndAddressList.lastIndex)
+                } else {
+                    if (accountsAdapter?.count ?: 1 > 1) {
+                        accounts_spinner.visible()
+                    } else if (accountsAdapter?.count ?: 1 == 1) {
+                        accounts_spinner.setSelection(0, false)
+                        accounts_spinner.invisible()
+                    }
+                    presenter.onAccountChosen(0)
+                }
+            }
+        }
+
+        onViewReady()
     }
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
@@ -134,7 +144,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun onAccountsUpdated(
             accounts: List<ItemAccount>,
-            lastPrice: Double,
+            lastBtcPrice: Double,
             fiat: String,
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean
@@ -147,7 +157,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                     isBtc,
                     monetaryUtil,
                     fiat,
-                    lastPrice
+                    lastBtcPrice
             ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
 
             accounts_spinner.adapter = accountsAdapter
@@ -195,30 +205,21 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         balanceAdapter?.onContactsMapChanged(transactionDisplayMap)
     }
 
-    override fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean) {
+    override fun onExchangeRateUpdated(
+            btcExchangeRate: Double,
+            ethExchangeRate: Double,
+            isBtc: Boolean
+    ) {
         if (balanceAdapter == null) {
-            setUpRecyclerView(exchangeRate, isBtc)
+            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc)
         } else {
-            balanceAdapter?.onPriceUpdated(exchangeRate)
-        }
-    }
-
-    override fun onLoadOnboardingPages(pages: List<OnboardingPagerContent>) {
-        if (onboardingPagerAdapter != null) {
-            onboardingPagerAdapter!!.notifyPagesChanged(pages)
-
-            pager_onboarding.post({
-                progress_bar.gone()
-            })
-
-            indicator.setViewPager(pager_onboarding)
+            balanceAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
         }
     }
 
     override fun onResume() {
         super.onResume()
         presenter.onResume()
-        onViewReady()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
         }
@@ -244,19 +245,16 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun showFctxRequiringAttention(number: Int) {
-        activity?.let {
-            (activity as MainActivity).setMessagesCount(number)
-        }
+        activity?.let { (activity as MainActivity).setMessagesCount(number) }
     }
 
-    override fun showToast(message: Int, toastType: String) = context.toast(message, toastType)
+    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
     override fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?) {
-        val message: String
-        if (!note.isNullOrEmpty()) {
-            message = getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note)
+        val message: String = if (!note.isNullOrEmpty()) {
+            getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note)
         } else {
-            message = getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount)
+            getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount)
         }
 
         AlertDialog.Builder(activity, R.style.AlertDialogStyle)
@@ -281,11 +279,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             name: String,
             note: String?
     ) {
-        val message: String
-        if (!note.isNullOrEmpty()) {
-            message = getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
+        val message: String = if (!note.isNullOrEmpty()) {
+            getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
         } else {
-            message = getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
+            getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
         }
 
         AlertDialog.Builder(activity, R.style.AlertDialogStyle)
@@ -337,11 +334,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
         spinner.onItemSelectedListener = OnItemSelectedListener { selection[0] = it }
 
-        var message: String
-        if (!note.isNullOrEmpty()) {
-            message = getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
+        var message: String = if (!note.isNullOrEmpty()) {
+            getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
         } else {
-            message = getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
+            getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
         }
 
         message += "\n\n${getString(R.string.contacts_balance_dialog_choose_account_message)}\n"
@@ -368,11 +364,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun startBuyActivity() {
-        LocalBroadcastManager.getInstance(activity).sendBroadcast(Intent(MainActivity.ACTION_BUY))
+        LocalBroadcastManager.getInstance(activity)
+                .sendBroadcast(Intent(MainActivity.ACTION_BUY))
     }
 
     override fun startReceiveFragment() {
-        LocalBroadcastManager.getInstance(activity).sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
+        LocalBroadcastManager.getInstance(activity)
+                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
     }
 
     override fun showProgressDialog() {
@@ -416,57 +414,20 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private fun onEmptyState() {
         setShowRefreshing(false)
         no_transaction_include.visible()
-
-        if (!presenter.isOnboardingComplete()) {
-            framelayout_onboarding.visible()
+        if (tabs.selectedTabPosition == 0) {
+            button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
+            button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
+            description.setText(R.string.transaction_occur_when_bitcoin)
         } else {
-            framelayout_onboarding.gone()
+            button_get_bitcoin.setText(R.string.onboarding_get_eth)
+            button_get_bitcoin.setOnClickListener { startReceiveFragmentEth() }
+            description.setText(R.string.transaction_occur_when_eth)
         }
     }
 
-    private fun initOnboardingPager() {
-        if (onboardingPagerAdapter == null) {
-            onboardingPagerAdapter = OnboardingPagerAdapter(context)
-            pager_onboarding.adapter = onboardingPagerAdapter
-            pager_onboarding.addOnPageChangeListener(OnPageChangeListener { position, positionOffset ->
-                val count = onboardingPagerAdapter?.count ?: 0
-                if (position == count - 1) {
-                    // Last page
-                    onboarding_complete_layout.visible()
-                    pager_onboarding.setPagingEnabled(false)
-                    presenter.setOnboardingComplete(true)
-                } else if (position == count - 2) {
-                    // Second last page
-                    onboarding_complete_layout.visible()
-                    viewPagerIndicator.alpha = 1 - positionOffset
-                    onboarding_complete_layout.alpha = positionOffset
-                    presenter.setOnboardingComplete(false)
-                } else {
-                    viewPagerIndicator.visible()
-                    onboarding_complete_layout.invisible()
-                    viewPagerIndicator.alpha = 1.0f
-                    presenter.setOnboardingComplete(false)
-                }
-            })
-        }
-
-        btn_skip_all.setOnClickListener { dismissOnboarding() }
-        onboarding_close.setOnClickListener { dismissOnboarding() }
-
-        button_start_over.setOnClickListener {
-            onboarding_complete_layout.invisible()
-            pager_onboarding.currentItem = 0
-            pager_onboarding.setPagingEnabled(true)
-            viewPagerIndicator.visible()
-            viewPagerIndicator.alpha = 1.0f
-            presenter.setOnboardingComplete(false)
-        }
-    }
-
-    private fun dismissOnboarding() {
-        framelayout_onboarding.gone()
-        presenter.setOnboardingComplete(true)
-        onboardingPagerAdapter = null
+    private fun startReceiveFragmentEth() {
+        LocalBroadcastManager.getInstance(activity)
+                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
     }
 
     private fun onContentLoaded() {
@@ -474,16 +435,16 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.gone()
     }
 
-    private fun setUpRecyclerView(exchangeRate: Double, isBtc: Boolean) {
+    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean) {
         balanceAdapter = BalanceAdapter(
                 activity,
-                exchangeRate,
+                btcExchangeRate,
+                ethExchangeRate,
                 isBtc,
                 this
-        ).apply { setHasStableIds(true) }
+        )
 
-        val layoutManager = LinearLayoutManager(context)
-        recyclerview.layoutManager = layoutManager
+        recyclerview.layoutManager = LinearLayoutManager(context)
         recyclerview.adapter = balanceAdapter
         // Disable blinking animations in RecyclerView
         val animator = recyclerview.itemAnimator
@@ -537,12 +498,15 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         const val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
         const val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
         const val KEY_TRANSACTION_HASH = "transaction_hash"
-        const val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
+        private const val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
 
         @JvmStatic
         fun newInstance(broadcastingPayment: Boolean): BalanceFragment {
-            val args = Bundle().apply { putBoolean(ARGUMENT_BROADCASTING_PAYMENT, broadcastingPayment) }
-            return BalanceFragment().apply { arguments = args }
+            return BalanceFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean(ARGUMENT_BROADCASTING_PAYMENT, broadcastingPayment)
+                }
+            }
         }
 
     }

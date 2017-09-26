@@ -26,14 +26,16 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
+import android.widget.FrameLayout;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -53,6 +55,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
@@ -72,7 +75,9 @@ import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragmen
 import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.dashboard.DashboardFragment;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
+import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
@@ -99,6 +104,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
     public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
+    public static final String ACTION_RECEIVE_ETH = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE_ETH";
     public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
@@ -117,6 +123,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final int CONTACTS_EDIT = 2010;
 
     @Thunk boolean drawerIsOpen = false;
+    private boolean handlingResult = false;
 
     @Inject MainPresenter mainPresenter;
     @Thunk ActivityMainBinding binding;
@@ -130,6 +137,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;
     private boolean initialized;
+    @Thunk CryptoCurrencies selectedCurrency = CryptoCurrencies.BTC;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -137,7 +145,12 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
                 requestScan();
             } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
-                binding.bottomNavigation.setCurrentItem(2);
+                binding.bottomNavigation.setCurrentItem(3);
+            } else if (intent.getAction().equals(ACTION_RECEIVE_ETH) && getActivity() != null) {
+                selectedCurrency = CryptoCurrencies.ETHER;
+                binding.bottomNavigation.setCurrentItem(3);
+                // Reset after selection, this is a temporary fix until we handle system-wide currency prefs properly
+                selectedCurrency = CryptoCurrencies.BTC;
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 BuyActivity.start(MainActivity.this);
             }
@@ -155,10 +168,13 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                     }
                     break;
                 case 1:
-                    onStartBalanceFragment(paymentMade);
+                    startDashboardFragment();
                     break;
                 case 2:
-                    startReceiveFragment();
+                    onStartBalanceFragment(paymentMade);
+                    break;
+                case 3:
+                    startReceiveFragment(selectedCurrency);
                     break;
             }
         }
@@ -178,11 +194,13 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         IntentFilter filterSend = new IntentFilter(ACTION_SEND);
         IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
+        IntentFilter filterReceiveEth = new IntentFilter(ACTION_RECEIVE_ETH);
         IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveEth);
 
         appUtil = new AppUtil(this);
         balanceFragment = BalanceFragment.newInstance(false);
@@ -221,11 +239,12 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         // Create items
         AHBottomNavigationItem item1 = new AHBottomNavigationItem(R.string.send_bitcoin, R.drawable.vector_send, R.color.white);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.overview, R.drawable.vector_transactions, R.color.white);
-        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.white);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem(R.string.dashboard_title, R.drawable.vector_home, R.color.white);
+        AHBottomNavigationItem item3 = new AHBottomNavigationItem(R.string.overview, R.drawable.vector_transactions, R.color.white);
+        AHBottomNavigationItem item4 = new AHBottomNavigationItem(R.string.receive_bitcoin, R.drawable.vector_receive, R.color.white);
 
         // Add items
-        binding.bottomNavigation.addItems(Arrays.asList(item1, item2, item3));
+        binding.bottomNavigation.addItems(Arrays.asList(item1, item2, item3, item4));
 
         // Styling
         binding.bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.primary_blue_accent));
@@ -235,9 +254,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         Typeface typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
         binding.bottomNavigation.setTitleTypeface(typeface);
 
-        // Select transactions by default
-        binding.bottomNavigation.setCurrentItem(1);
+        // Select Dashboard by default
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
+        binding.bottomNavigation.setCurrentItem(1);
 
         handleIncomingIntent();
         applyFontToNavDrawer();
@@ -249,7 +268,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         super.onResume();
         appUtil.deleteQR();
         getPresenter().updateTicker();
-        resetNavigationDrawer();
+        if (!handlingResult) {
+            resetNavigationDrawer();
+        }
+        handlingResult = false;
     }
 
     @Override
@@ -309,6 +331,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        handlingResult = true;
         if (resultCode == RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
@@ -338,15 +361,18 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             ((SendFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
             ((ReceiveFragment) getCurrentFragment()).onBackPressed();
-        } else if (getCurrentFragment() instanceof ContactConfirmRequestFragment) {
-            // Remove Notes fragment from stack
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
-        } else {
-            // Switch to balance fragment
-            balanceFragment = BalanceFragment.newInstance(false);
-            replaceFragmentWithAnimation(balanceFragment);
-        }
+        } else //noinspection StatementWithEmptyBody
+            if (getCurrentFragment() instanceof DashboardFragment) {
+                handleBackPressed();
+            } else if (getCurrentFragment() instanceof ContactConfirmRequestFragment) {
+                // Remove Notes fragment from stack
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().remove(getCurrentFragment()).commit();
+            } else {
+                // Switch to balance fragment
+                balanceFragment = BalanceFragment.newInstance(false);
+                replaceFragmentWithAnimation(balanceFragment);
+            }
     }
 
     public void handleBackPressed() {
@@ -392,6 +418,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             case R.id.nav_contacts:
                 startActivityForResult(new Intent(this, ContactsListActivity.class), CONTACTS_EDIT);
                 break;
+            case R.id.login_web_wallet:
+                PairingCodeActivity.start(this);
+                break;
             case R.id.nav_map:
                 startMerchantActivity();
                 break;
@@ -435,26 +464,20 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                 });
 
         // Set selected appropriately.
-        if (getCurrentFragment() instanceof BalanceFragment) {
+        if (getCurrentFragment() instanceof DashboardFragment) {
             binding.bottomNavigation.setCurrentItem(1);
+        } else if (getCurrentFragment() instanceof BalanceFragment) {
+            binding.bottomNavigation.setCurrentItem(2);
         } else if (getCurrentFragment() instanceof SendFragment) {
             binding.bottomNavigation.setCurrentItem(0);
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
-            binding.bottomNavigation.setCurrentItem(2);
+            binding.bottomNavigation.setCurrentItem(3);
         }
 
         if (!BuildConfig.CONTACTS_ENABLED) {
             MenuItem contactsMenuItem = binding.navigationView.getMenu().findItem(R.id.nav_contacts);
             contactsMenuItem.setVisible(false);
         }
-    }
-
-    @Override
-    public void updateCurrentPrice(String price) {
-        View headerView = binding.navigationView.getHeaderView(0);
-        TextView currentPrice = headerView.findViewById(R.id.textview_current_price);
-
-        runOnUiThread(() -> currentPrice.setText(price));
     }
 
     private void startMerchantActivity() {
@@ -599,14 +622,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         }
     }
 
-    public void restoreBottomNavigation() {
-        binding.bottomNavigation.restoreBottomNavigation(true);
-    }
-
-    public void hideBottomNavigation() {
-        binding.bottomNavigation.hideBottomNavigation(true);
-    }
-
     @SuppressWarnings("ConstantConditions")
     @Override
     public boolean isBuySellPermitted() {
@@ -713,20 +728,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onSendFragmentClose(boolean paymentMade) {
-        this.paymentMade = paymentMade;
-        binding.bottomNavigation.setCurrentItem(1);
-    }
-
-    @Override
     public void onReceiveFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
     }
 
     @Override
-    public void onTransactionNotesRequested(PaymentConfirmationDetails paymentConfirmationDetails,
-                                            PaymentRequestType paymentRequestType,
-                                            String contactId,
+    public void onTransactionNotesRequested(@NonNull PaymentConfirmationDetails paymentConfirmationDetails,
+                                            @NonNull PaymentRequestType paymentRequestType,
+                                            @NonNull String contactId,
                                             long satoshis,
                                             int accountPosition) {
         addFragment(ContactConfirmRequestFragment.newInstance(paymentConfirmationDetails,
@@ -768,14 +777,24 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         addFragmentToBackStack(ContactRequestSuccessFragment.newInstance(paymentRequestType, contactName, btcAmount));
     }
 
-    private void startSendFragment(@Nullable String scanData, String scanRoute) {
-        SendFragment sendFragment = SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
+    private void startSendFragment(@Nullable String scanData, @Nullable String scanRoute) {
+        binding.bottomNavigation.removeOnTabSelectedListener();
+        binding.bottomNavigation.setCurrentItem(0);
+        binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
+        SendFragment sendFragment =
+                SendFragment.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
         addFragmentToBackStack(sendFragment);
     }
 
-    private void startReceiveFragment() {
-        ReceiveFragment receiveFragment = ReceiveFragment.newInstance(getSelectedAccountFromFragments());
+    private void startReceiveFragment(CryptoCurrencies selectedCurrency) {
+        ReceiveFragment receiveFragment =
+                ReceiveFragment.newInstance(getSelectedAccountFromFragments(), selectedCurrency);
         addFragmentToBackStack(receiveFragment);
+    }
+
+    private void startDashboardFragment() {
+        DashboardFragment fragment = DashboardFragment.newInstance();
+        addFragmentToBackStack(fragment);
     }
 
     private int getSelectedAccountFromFragments() {
@@ -826,7 +845,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.removeOnTabSelectedListener();
         binding.bottomNavigation.setCurrentItem(0);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
-        addFragmentToBackStack(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
+        addFragmentToBackStack(SendFragment.Companion.newInstance(uri, recipientId, mdid, fctxId));
     }
 
     @Override
@@ -849,5 +868,35 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     protected MainView getView() {
         return this;
+    }
+
+    @Override
+    public void showSecondPasswordDialog() {
+        AppCompatEditText editText = new AppCompatEditText(this);
+        editText.setHint(R.string.password);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        FrameLayout frameLayout = ViewUtils.getAlertDialogPaddedView(this, editText);
+
+        new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.eth_now_supporting)
+                .setMessage(R.string.eth_second_password_prompt)
+                .setView(frameLayout)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    ViewUtils.hideKeyboard(this);
+                    getPresenter().generateMetadataHDNodeAndEthereumWallet(editText.getText().toString());
+                })
+                .create()
+                .show();
+    }
+
+    @Override
+    public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
+        ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void onSendFragmentClose() {
+        binding.bottomNavigation.setCurrentItem(1);
     }
 }

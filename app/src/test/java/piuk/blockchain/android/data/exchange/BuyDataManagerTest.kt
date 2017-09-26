@@ -1,19 +1,14 @@
 package piuk.blockchain.android.data.exchange
 
-import com.nhaarman.mockito_kotlin.*
-import info.blockchain.wallet.api.data.Settings
-import info.blockchain.wallet.api.data.WalletOptions
-import io.reactivex.Observable
-import io.reactivex.subjects.ReplaySubject
-import org.junit.Assert
+import com.nhaarman.mockito_kotlin.mock
 import org.junit.Before
-import org.junit.Test
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
 
+// TODO: Fix this test please
 class BuyDataManagerTest : RxTest() {
 
     private lateinit var subject: BuyDataManager

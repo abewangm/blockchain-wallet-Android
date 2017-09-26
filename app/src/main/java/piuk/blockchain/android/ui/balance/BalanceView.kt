@@ -19,7 +19,7 @@ interface BalanceView : View {
 
     fun onTotalBalanceUpdated(balance: String)
 
-    fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean)
+    fun onExchangeRateUpdated(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean)
 
     fun showProgressDialog()
 
@@ -29,7 +29,7 @@ interface BalanceView : View {
 
     fun onAccountsUpdated(
             accounts: List<ItemAccount>,
-            lastPrice: Double,
+            lastBtcPrice: Double,
             fiat: String,
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean
@@ -70,7 +70,5 @@ interface BalanceView : View {
     fun startBuyActivity()
 
     fun startReceiveFragment()
-
-    fun onLoadOnboardingPages(pages: List<OnboardingPagerContent>)
 
 }

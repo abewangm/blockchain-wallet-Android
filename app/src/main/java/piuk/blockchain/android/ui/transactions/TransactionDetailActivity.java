@@ -31,6 +31,7 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.databinding.ActivityTransactionDetailsBinding;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseMvpActivity;
@@ -40,6 +41,9 @@ import piuk.blockchain.android.util.ViewUtils;
 
 public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetailView, TransactionDetailPresenter>
         implements TransactionDetailView {
+
+    public static final String BTC_URL = "https://blockchain.info/tx/";
+    public static final String ETH_URL = "https://etherscan.io/tx/";
 
     @Inject TransactionDetailPresenter transactionDetailPresenter;
     private ActivityTransactionDetailsBinding binding;
@@ -173,11 +177,18 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
     }
 
     @Override
-    public void setStatus(String status, String hash) {
+    public void setStatus(@NonNull CryptoCurrencies cryptoCurrency,
+                          @Nullable String status,
+                          @Nullable String hash) {
+
         binding.status.setText(status);
+        int buttonText = cryptoCurrency == CryptoCurrencies.BTC
+                ? R.string.transaction_detail_verify : R.string.transaction_detail_verify_etherscan;
+        binding.buttonVerify.setText(buttonText);
         binding.buttonVerify.setOnClickListener(v -> {
+            String url = cryptoCurrency == CryptoCurrencies.BTC ? BTC_URL : ETH_URL;
             Intent viewIntent = new Intent(Intent.ACTION_VIEW);
-            viewIntent.setData(Uri.parse("https://blockchain.info/tx/" + getPresenter().getTransactionHash()));
+            viewIntent.setData(Uri.parse(url + getPresenter().getTransactionHash()));
             startActivity(viewIntent);
         });
     }
@@ -193,9 +204,10 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_share:
+                String url = getPresenter().getTransactionType() == CryptoCurrencies.BTC ? BTC_URL : ETH_URL;
                 Intent shareIntent = new Intent();
                 shareIntent.setAction(Intent.ACTION_SEND);
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "https://blockchain.info/tx/" + getPresenter().getTransactionHash());
+                shareIntent.putExtra(Intent.EXTRA_TEXT, url + getPresenter().getTransactionHash());
                 shareIntent.setType("text/plain");
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.transaction_detail_share_chooser)));
                 return true;

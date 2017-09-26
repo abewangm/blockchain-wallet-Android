@@ -6,22 +6,28 @@ import info.blockchain.wallet.api.data.FeeOptions;
 
 public class DynamicFeeCache {
 
-    private FeeOptions feeOptions;
+    private FeeOptions btcFeeOptions;
+    private FeeOptions ethFeeOptions;
 
     public DynamicFeeCache() {
         // No-op
     }
 
     @Nullable
-    public FeeOptions getFeeOptions() {
-        return feeOptions;
+    public FeeOptions getBtcFeeOptions() {
+        return btcFeeOptions;
     }
 
-    public void setFeeOptions(FeeOptions feeOptions) {
-        this.feeOptions = feeOptions;
+    public void setBtcFeeOptions(FeeOptions btcFeeOptions) {
+        this.btcFeeOptions = btcFeeOptions;
     }
 
-    public void destroy() {
-        feeOptions = null;
+    @Nullable
+    public FeeOptions getEthFeeOptions() {
+        return ethFeeOptions;
+    }
+
+    public void setEthFeeOptions(FeeOptions ethFeeOptions) {
+        this.ethFeeOptions = ethFeeOptions;
     }
 }

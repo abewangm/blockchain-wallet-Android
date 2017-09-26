@@ -157,8 +157,6 @@
     <string name="navigate">Навігація</string>
     <string name="enable_geo">Щоб знайти це місце розташування, активуйте GPS або інші види геолокації. Натисніть OK, щоб перейти до налаштувань послуг геолокації, щоб дозволити вам це зробити.</string>
 
-    <string name="my_addresses">Адреси</string>
-    <string name="addresses">Адреси</string>
     <string name="create_new">Створити нову</string>
     <string name="import_address">Імпортування адрес</string>
     <string name="save_name">Зберегти назву</string>
@@ -169,7 +167,6 @@
 
     <string name="ssl_pinning_invalid">Закріпити сертифікат SSL не вдалося. Це може свідчити про небезпечну активність. Перш ніж продовжити, будь ласка, перевірте підключення до мережі та пристрій.</string>
 
-    <string name="merchant_map">Мапа підприємця</string>
     <string name="merchant_suggest">Рекомендувати підприємця</string>
     <string name="name">Назва</string>
     <string name="location">Місцезнаходження</string>
@@ -209,7 +206,7 @@
     <string name="confirm_password">Підтвердити пароль</string>
     <string name="check_email_to_auth_login">Будь ласка, перевірте свою електронну пошту, щоб підтвердити цю спробу входу в систему.</string>
     <string name="transaction_fee">Комісія за транзакцію</string>
-    <string name="transaction_occur_when">Коли ви отримуєте чи відправляєте bitcoin, це відображається у транзакціях.</string>
+    <string name="transaction_occur_when_bitcoin">Коли ви отримуєте чи відправляєте bitcoin, це відображається у транзакціях.</string>
     <string name="click">Натисніть,</string>
     <string name="to_start_sending_and_receiving_btc">щоб почати отримувати та відправляти bitcoin.</string>
 

@@ -157,8 +157,6 @@
     <string name="navigate">Gezin</string>
     <string name="enable_geo">Mevcut konumu bulmak için GPS veya başka bir konum bulma hizmetini etkinleştirin. Bunu yapabilmeniz için konum hizmetleri ayarlarına gitmek için TAMAM\'a tıklayın.</string>
 
-    <string name="my_addresses">Adresler</string>
-    <string name="addresses">Adresler</string>
     <string name="create_new">Yeni Oluştur</string>
     <string name="import_address">Adres Al</string>
     <string name="save_name">Ad kaydedildi</string>
@@ -169,7 +167,6 @@
 
     <string name="ssl_pinning_invalid">SSL sertifikası sabitleme başarısız oldu. Bu, kötü amaçlı aktiviteye işaret edebilir. Lütfen devam etmeden önce ağ bağlantınızı ve cihazınızı doğrulayın.</string>
 
-    <string name="merchant_map">Tacir Haritası</string>
     <string name="merchant_suggest">Tacir Öner</string>
     <string name="name">Ad</string>
     <string name="location">Konum</string>
@@ -209,7 +206,7 @@
     <string name="confirm_password">Şifreyi Onayla</string>
     <string name="check_email_to_auth_login">Bu oturum açma denemesini onaylamak için lütfen e-postanızı kontrol edin.</string>
     <string name="transaction_fee">İşlem Ücreti</string>
-    <string name="transaction_occur_when">İşlemler, bitcoin aldığınızda ve gönderdiğinizde oluşur.</string>
+    <string name="transaction_occur_when_bitcoin">İşlemler, bitcoin aldığınızda ve gönderdiğinizde oluşur.</string>
     <string name="click">Tıklayarak</string>
     <string name="to_start_sending_and_receiving_btc">bitcoin göndermeye ve almaya başlayın.</string>
 
