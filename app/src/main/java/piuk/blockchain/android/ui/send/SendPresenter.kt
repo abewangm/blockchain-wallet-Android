@@ -155,9 +155,8 @@ class SendPresenter @Inject constructor(
         clearReceivingAddress()
         view.setCryptoMaxLength(30)
         updateCurrencyUnits()
-        calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
-        view.hideFeePriority()
         checkForUnconfirmedTx()
+        view.hideFeePriority()
     }
 
     internal fun onContinueClicked() {
@@ -241,7 +240,7 @@ class SendPresenter @Inject constructor(
                     view.dismissConfirmationDialog()
                     insertBtcPlaceHolderTransaction(hash, pendingTransaction)
                     incrementBtcReceiveAddress()
-                    handleSuccessfulPayment(hash)
+                    handleSuccessfulPayment(hash, CryptoCurrencies.BTC)
                 }) {
                     Timber.e(it)
                     view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
@@ -298,7 +297,7 @@ class SendPresenter @Inject constructor(
                 .flatMap { ethDataManager.pushEthTx(it) }
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
                 .subscribe(
-                        { handleSuccessfulPayment(it) },
+                        { handleSuccessfulPayment(it, CryptoCurrencies.ETHER) },
                         {
                             Timber.e(it)
                             view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
@@ -340,8 +339,8 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    private fun handleSuccessfulPayment(hash: String): String {
-        view?.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong())
+    private fun handleSuccessfulPayment(hash: String, cryptoCurrency: CryptoCurrencies): String {
+        view?.showTransactionSuccess(hash, pendingTransaction.bigIntAmount.toLong(), cryptoCurrency)
 
         pendingTransaction.clear()
         unspentApiResponses.clear()
@@ -768,6 +767,7 @@ class SendPresenter @Inject constructor(
     }
 
     private fun calculateSpendableAmounts(spendAll: Boolean, amountToSendText: String?) {
+        view.setSendButtonEnabled(true)
         view.hideMaxAvailable()
         view.clearWarning()
 
@@ -1268,6 +1268,8 @@ class SendPresenter @Inject constructor(
                             if (unconfirmed) {
                                 view?.updateMaxAvailable(stringUtils.getString(R.string.eth_unconfirmed_wait))
                                 view?.updateMaxAvailableColor(R.color.product_red_medium)
+                            } else {
+                                calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
                             }
                         },
                         { Timber.e(it) })

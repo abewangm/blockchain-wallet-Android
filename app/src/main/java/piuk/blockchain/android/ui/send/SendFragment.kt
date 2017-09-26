@@ -747,7 +747,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun showSpendFromWatchOnlyWarning(address: String) {
-
         AlertDialog.Builder(activity, R.style.AlertDialogStyle)
                 .setTitle(R.string.privx_required)
                 .setMessage(String.format(getString(R.string.watch_only_spend_instructionss), address))
@@ -759,7 +758,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                         startScanActivity(SCAN_PRIVX)
                     }
                 }
-                .setNegativeButton(android.R.string.cancel, null).show()
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
     }
 
     override fun showSecondPasswordDialog() {
@@ -857,7 +857,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                         { it.printStackTrace() })
     }
 
-    override fun showTransactionSuccess(hash: String, transactionValue: Long) {
+    override fun showTransactionSuccess(
+            hash: String,
+            transactionValue: Long,
+            cryptoCurrency: CryptoCurrencies
+    ) {
+
         playAudio()
 
         val appRate = AppRate(activity)
@@ -867,12 +872,11 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         val dialogBuilder = AlertDialog.Builder(activity)
         val dialogView = View.inflate(activity, R.layout.modal_transaction_success, null)
         transactionSuccessDialog = dialogBuilder.setView(dialogView)
+                .setTitle(R.string.transaction_submitted)
                 .setPositiveButton(getString(R.string.done), null)
                 .create()
 
         transactionSuccessDialog?.apply {
-            setTitle(R.string.transaction_submitted)
-
             // If should show app rate, success dialog shows first and launches
             // rate dialog on dismiss. Dismissing rate dialog then closes the page. This will
             // happen if the user chooses to rate the app - they'll return to the main page.
@@ -885,10 +889,14 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 setOnDismissListener { finishPage() }
             }
 
+            if (cryptoCurrency == CryptoCurrencies.ETHER) {
+                setMessage(getString(R.string.eth_transaction_complete))
+            }
+
             show()
         }
 
-        dialogHandler.postDelayed(dialogRunnable, (5 * 1000).toLong())
+        dialogHandler.postDelayed(dialogRunnable, (10 * 1000).toLong())
     }
 
     interface OnSendFragmentInteractionListener {
