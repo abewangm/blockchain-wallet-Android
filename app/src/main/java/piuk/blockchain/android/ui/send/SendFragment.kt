@@ -57,10 +57,7 @@ import piuk.blockchain.android.util.AppRate
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
-import piuk.blockchain.android.util.extensions.invisible
-import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -102,7 +99,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             inflater: LayoutInflater?,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = container!!.inflate(R.layout.fragment_send)
+    ): View? = container?.inflate(R.layout.fragment_send)
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -127,7 +124,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 showSnackbar(R.string.check_connectivity_exit, Snackbar.LENGTH_LONG)
             }
         }
-        max.setOnClickListener({ presenter.onSpendMaxClicked() })
+        max.setOnClickListener { presenter.onSpendMaxClicked() }
 
         onViewReady()
     }
@@ -139,7 +136,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         menu?.clear()
-        inflater!!.inflate(R.menu.menu_send, menu)
+        inflater?.inflate(R.menu.menu_send, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -202,10 +199,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT)
-        layoutParams.setMargins(0,
-                0,
-                0,
-                activity.resources.getDimension(R.dimen.action_bar_height).toInt())
         scrollView.layoutParams = layoutParams
     }
 
@@ -224,7 +217,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT)
-        layoutParams.setMargins(0, 0, 0, 0)
         scrollView.layoutParams = layoutParams
     }
 
@@ -306,10 +298,10 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     private fun setupReceivingView() {
         //Avoid OntouchListener - causes paste issues on some Samsung devices
-        toContainer.toAddressEditTextView.setOnClickListener({
+        toContainer.toAddressEditTextView.setOnClickListener {
             toContainer.toAddressEditTextView.setText("")
             presenter.clearReceivingObject()
-        })
+        }
         //LongClick listener required to clear receive address in memory when user long clicks to paste
         toContainer.toAddressEditTextView.setOnLongClickListener({ v ->
             toContainer.toAddressEditTextView.setText("")
@@ -328,12 +320,14 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 }
                 .subscribe(IgnorableDefaultObserver())
 
-        toContainer.toArrow.setOnClickListener({
-            AccountChooserActivity.startForResult(this,
+        toContainer.toArrow.setOnClickListener {
+            AccountChooserActivity.startForResult(
+                    this,
                     AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                     PaymentRequestType.SEND,
-                    getString(R.string.to))
-        })
+                    getString(R.string.to)
+            )
+        }
     }
 
     override fun updateCryptoCurrency(currency: String) {
@@ -446,8 +440,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     private fun setupSendingView() {
-        fromContainer.fromAddressTextView.setOnClickListener({ startFromFragment() })
-        fromContainer.fromArrowImage.setOnClickListener({ startFromFragment() })
+        fromContainer.fromAddressTextView.setOnClickListener { startFromFragment() }
+        fromContainer.fromArrowImage.setOnClickListener { startFromFragment() }
     }
 
     override fun updateSendingAddress(label: String) {
@@ -481,7 +475,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         presenter.submitPayment()
     }
 
-    override fun getReceivingAddress() = toContainer.toAddressEditTextView.editableText.toString()
+    override fun getReceivingAddress() = toContainer.toAddressEditTextView.getTextString()
 
     fun onBackPressed() {
         if (isKeyboardVisible()) {
@@ -522,9 +516,11 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun showEthContractSnackbar() {
-        Snackbar.make(activity.findViewById(R.id.coordinator_layout), R.string.eth_support_contract_not_allowed,
-                Snackbar.LENGTH_INDEFINITE)
-                .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
+        Snackbar.make(
+                activity.findViewById(R.id.coordinator_layout),
+                R.string.eth_support_contract_not_allowed,
+                Snackbar.LENGTH_INDEFINITE
+        ).setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
                 .setAction(R.string.learn_more, { showSnackbar(R.string.eth_support_only_eth, Snackbar.LENGTH_INDEFINITE) })
                 .show()
     }
@@ -585,7 +581,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             }
         }
 
-        textviewFeeAbsolute.setOnClickListener({ spinnerPriority.performClick() })
+        textviewFeeAbsolute.setOnClickListener { spinnerPriority.performClick() }
         textviewFeeType.setText(R.string.fee_options_regular)
         textviewFeeTime.setText(R.string.fee_options_regular_time)
     }
