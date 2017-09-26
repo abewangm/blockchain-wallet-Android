@@ -67,4 +67,7 @@ interface PersistentPrefs {
 
     void clear();
 
+    void logOut();
+
+    void logIn();
 }

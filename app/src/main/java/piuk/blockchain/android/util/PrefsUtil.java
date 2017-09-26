@@ -88,4 +88,25 @@ public class PrefsUtil implements PersistentPrefs {
         editor.clear();
         editor.apply();
     }
+
+    /**
+     * Clears everything but the GUID for logging back in
+     */
+    @Override
+    public void logOut() {
+        String guid = getValue(PrefsUtil.KEY_GUID, "");
+        clear();
+
+        setValue(PrefsUtil.LOGGED_OUT, true);
+        setValue(PrefsUtil.KEY_GUID, guid);
+    }
+
+    /**
+     * Reset value once user logged in
+     */
+    @Override
+    public void logIn() {
+        setValue(PrefsUtil.LOGGED_OUT, false);
+    }
+
 }
