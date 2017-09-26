@@ -478,6 +478,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
 
         bottomSheetDialog?.apply { show() }
+        if (bottomSheetDialog == null) {
+            toast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
+        }
     }
 
     private fun onShareClicked() {
