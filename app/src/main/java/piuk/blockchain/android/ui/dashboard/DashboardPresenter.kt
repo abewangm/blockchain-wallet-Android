@@ -71,11 +71,11 @@ class DashboardPresenter @Inject constructor(
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         this.cryptoCurrency = cryptoCurrency
         updateCryptoPrice()
-        updateChartsData(TimeSpan.YEAR)
+        updateChartsData(TimeSpan.MONTH)
     }
 
     internal fun onResume() {
-        updateChartsData(TimeSpan.YEAR)
+        updateChartsData(TimeSpan.MONTH)
         updateAllBalances()
         updatePrices()
     }
@@ -102,6 +102,7 @@ class DashboardPresenter @Inject constructor(
         view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
 
         when (timeSpan) {
+            TimeSpan.ALL_TIME -> chartsDataManager.getAllTimePrice(cryptoCurrency, getFiatCurrency())
             TimeSpan.YEAR -> chartsDataManager.getYearPrice(cryptoCurrency, getFiatCurrency())
             TimeSpan.MONTH -> chartsDataManager.getMonthPrice(cryptoCurrency, getFiatCurrency())
             TimeSpan.WEEK -> chartsDataManager.getWeekPrice(cryptoCurrency, getFiatCurrency())
@@ -117,16 +118,15 @@ class DashboardPresenter @Inject constructor(
                 )
     }
 
-    private fun getChartsData(list: List<PriceDatum>): ChartsState.Data {
-        return ChartsState.Data(
-                data = list,
-                fiatSymbol = getCurrencySymbol(),
-                getChartYear = { updateChartsData(TimeSpan.YEAR) },
-                getChartMonth = { updateChartsData(TimeSpan.MONTH) },
-                getChartWeek = { updateChartsData(TimeSpan.WEEK) },
-                getChartDay = { updateChartsData(TimeSpan.DAY) }
-        )
-    }
+    private fun getChartsData(list: List<PriceDatum>) = ChartsState.Data(
+            data = list,
+            fiatSymbol = getCurrencySymbol(),
+            getChartAllTime = { updateChartsData(TimeSpan.ALL_TIME) },
+            getChartYear = { updateChartsData(TimeSpan.YEAR) },
+            getChartMonth = { updateChartsData(TimeSpan.MONTH) },
+            getChartWeek = { updateChartsData(TimeSpan.WEEK) },
+            getChartDay = { updateChartsData(TimeSpan.DAY) }
+    )
 
     private fun updateAllBalances() {
         ethDataManager.fetchEthAddress()
@@ -326,6 +326,7 @@ sealed class ChartsState {
     data class Data(
             val data: List<PriceDatum>,
             val fiatSymbol: String,
+            val getChartAllTime: () -> Unit,
             val getChartYear: () -> Unit,
             val getChartMonth: () -> Unit,
             val getChartWeek: () -> Unit,

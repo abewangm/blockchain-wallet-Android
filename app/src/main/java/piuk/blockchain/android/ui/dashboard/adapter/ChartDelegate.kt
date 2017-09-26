@@ -47,6 +47,15 @@ class ChartDelegate<in T>(
                 "fonts/Montserrat-Light.ttf"
         )
     }
+    private val buttonsList by unsafeLazy {
+        listOf(
+                viewHolder!!.day,
+                viewHolder!!.week,
+                viewHolder!!.month,
+                viewHolder!!.year,
+                viewHolder!!.allTime
+        )
+    }
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is ChartDisplayable
@@ -94,6 +103,7 @@ class ChartDelegate<in T>(
             it.week.setOnClickListener { data.getChartWeek() }
             it.month.setOnClickListener { data.getChartMonth() }
             it.year.setOnClickListener { data.getChartYear() }
+            it.allTime.setOnClickListener { data.getChartAllTime() }
 
             it.progressBar.gone()
             it.chart.apply {
@@ -144,10 +154,11 @@ class ChartDelegate<in T>(
     private fun selectButton(timeSpan: TimeSpan, viewHolder: ChartViewHolder?) {
         viewHolder?.let {
             when (timeSpan) {
-                TimeSpan.WEEK -> setTextViewSelected(viewHolder.week, listOf(viewHolder.day, viewHolder.month, viewHolder.year))
-                TimeSpan.MONTH -> setTextViewSelected(viewHolder.month, listOf(viewHolder.day, viewHolder.week, viewHolder.year))
-                TimeSpan.YEAR -> setTextViewSelected(viewHolder.year, listOf(viewHolder.day, viewHolder.week, viewHolder.month))
-                TimeSpan.DAY -> setTextViewSelected(viewHolder.day, listOf(viewHolder.week, viewHolder.month, viewHolder.year))
+                TimeSpan.ALL_TIME -> setTextViewSelected(viewHolder.allTime)
+                TimeSpan.YEAR -> setTextViewSelected(viewHolder.year)
+                TimeSpan.MONTH -> setTextViewSelected(viewHolder.month)
+                TimeSpan.WEEK -> setTextViewSelected(viewHolder.week)
+                TimeSpan.DAY -> setTextViewSelected(viewHolder.day)
             }
         }
     }
@@ -165,7 +176,7 @@ class ChartDelegate<in T>(
             }
             else -> {
                 viewHolder?.let {
-                   it.chart.xAxis.setValueFormatter { fl, _ ->
+                    it.chart.xAxis.setValueFormatter { fl, _ ->
                         SimpleDateFormat("MMM dd").format(Date(fl.toLong() * 1000))
                     }
                 }
@@ -173,17 +184,18 @@ class ChartDelegate<in T>(
         }
     }
 
-    private fun setTextViewSelected(selected: TextView, unselected: List<TextView>) {
+    private fun setTextViewSelected(selected: TextView) {
         with(selected) {
             paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG
             CalligraphyUtils.applyFontToTextView(this, typefaceRegular)
         }
-        unselected.map {
-            with(it) {
-                paintFlags = paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
-                CalligraphyUtils.applyFontToTextView(this, typefaceLight)
-            }
-        }
+        buttonsList.filterNot { it === selected }
+                .map {
+                    with(it) {
+                        paintFlags = paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+                        CalligraphyUtils.applyFontToTextView(this, typefaceLight)
+                    }
+                }
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -223,6 +235,7 @@ class ChartDelegate<in T>(
         internal var week: TextView = itemView.textview_week
         internal var month: TextView = itemView.textview_month
         internal var year: TextView = itemView.textview_year
+        internal var allTime: TextView = itemView.textview_all_time
         internal var price: TextView = itemView.textview_price
         internal var currency: TextView = itemView.textview_currency
         internal var progressBar: ProgressBar = itemView.progress_bar

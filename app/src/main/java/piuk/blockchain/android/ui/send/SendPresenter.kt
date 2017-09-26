@@ -922,6 +922,7 @@ class SendPresenter @Inject constructor(
         metricInputFlag = scanRoute
 
         var scanData = untrimmedscanData.trim { it <= ' ' }
+                .replace("ethereum:", "")
         val address: String
         var amount: String?
 

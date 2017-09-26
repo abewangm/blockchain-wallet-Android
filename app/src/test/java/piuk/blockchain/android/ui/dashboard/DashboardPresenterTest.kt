@@ -235,7 +235,7 @@ class DashboardPresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(3.0)
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(chartsDataManager.getYearPrice(CryptoCurrencies.BTC, "USD"))
+        whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.BTC, "USD"))
                 .thenReturn(Observable.just(PriceDatum()))
         // Act
         subject.updateSelectedCurrency(CryptoCurrencies.BTC)
@@ -260,7 +260,7 @@ class DashboardPresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
         whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(chartsDataManager.getYearPrice(CryptoCurrencies.ETHER, "USD"))
+        whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.ETHER, "USD"))
                 .thenReturn(Observable.just(PriceDatum()))
         // Act
         subject.updateSelectedCurrency(CryptoCurrencies.ETHER)
@@ -285,7 +285,7 @@ class DashboardPresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(3.0)
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(chartsDataManager.getYearPrice(CryptoCurrencies.BTC, "USD"))
+        whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.BTC, "USD"))
                 .thenReturn(Observable.just(PriceDatum()))
         whenever(exchangeRateFactory.updateTickers()).thenReturn(Completable.complete())
         val combinedEthModel: CombinedEthModel = mock()
