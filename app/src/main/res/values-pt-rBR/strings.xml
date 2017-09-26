@@ -206,7 +206,7 @@
     <string name="confirm_password">Confirmar senha</string>
     <string name="check_email_to_auth_login">Verifique seu e-mail para aprovar esta tentativa de acesso.</string>
     <string name="transaction_fee">Taxa de Transação</string>
-    <string name="transaction_occur_when">As transações ocorrem quando você recebe e envia bitcoins.</string>
+    <string name="transaction_occur_when_bitcoin">As transações ocorrem quando você recebe e envia bitcoins.</string>
     <string name="click">Clique</string>
     <string name="to_start_sending_and_receiving_btc">para iniciar o envio e o recebimento de bitcoins.</string>
 

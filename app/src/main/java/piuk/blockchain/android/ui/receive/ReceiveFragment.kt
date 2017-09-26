@@ -66,6 +66,9 @@ import javax.inject.Inject
 @Suppress("MemberVisibilityCanPrivate")
 class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveView, NumericKeyboardCallback {
 
+    override val isContactsEnabled: Boolean
+        get() = BuildConfig.CONTACTS_ENABLED
+
     @Inject lateinit var receivePresenter: ReceivePresenter
     private var bottomSheetDialog: BottomSheetDialog? = null
     private var listener: OnReceiveFragmentInteractionListener? = null
@@ -370,16 +373,21 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override fun displayBitcoinLayout() {
         divider1.visible()
         amount_container.visible()
-        divider_to.visible()
-        to_container.visible()
         divider3.visible()
 
-        @Suppress("ConstantConditionIf")
-        if (BuildConfig.CONTACTS_ENABLED) {
+        if (isContactsEnabled) {
             from_container.visible()
             textview_whats_this.visible()
             divider4.visible()
             button_request.visible()
+        }
+
+        if (!presenter.shouldShowDropdown()) {
+            to_container.gone()
+            divider_to.gone()
+        } else {
+            to_container.visible()
+            divider_to.visible()
         }
     }
 
@@ -393,8 +401,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         to_container.gone()
         divider3.gone()
 
-        @Suppress("ConstantConditionIf")
-        if (BuildConfig.CONTACTS_ENABLED) {
+        if (isContactsEnabled) {
             from_container.gone()
             textview_whats_this.gone()
             divider4.gone()

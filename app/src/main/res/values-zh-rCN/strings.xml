@@ -206,7 +206,7 @@
     <string name="confirm_password">确认密码</string>
     <string name="check_email_to_auth_login">请检查您的电子邮件以同意该登录尝试。</string>
     <string name="transaction_fee">交易费</string>
-    <string name="transaction_occur_when">接收和发送比特币时会产生交易。</string>
+    <string name="transaction_occur_when_bitcoin">接收和发送比特币时会产生交易。</string>
     <string name="click">单击</string>
     <string name="to_start_sending_and_receiving_btc">开始发送和接收比特币。</string>
 

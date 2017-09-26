@@ -254,7 +254,7 @@
                     <Spinner
                         android:id="@+id/spinnerPriority"
                         android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:layout_height="wrap_content"
                         android:dropDownSelector="?attr/selectableItemBackground"
                         android:dropDownWidth="250dp"
                         app:layout_constraintBottom_toBottomOf="parent"

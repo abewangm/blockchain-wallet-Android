@@ -206,7 +206,7 @@
     <string name="confirm_password">Xác nhận mật khẩu</string>
     <string name="check_email_to_auth_login">Vui lòng kiểm tra email của bạn để chấp nhận lần đăng nhập này.</string>
     <string name="transaction_fee">Phí giao dịch</string>
-    <string name="transaction_occur_when">Các giao dịch xuất hiện khi bạn nhận và gửi bitcoin.</string>
+    <string name="transaction_occur_when_bitcoin">Các giao dịch xuất hiện khi bạn nhận và gửi bitcoin.</string>
     <string name="click">Nhấn</string>
     <string name="to_start_sending_and_receiving_btc">để bắt đầu gửi và nhận bitcoin.</string>
 

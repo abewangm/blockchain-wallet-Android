@@ -50,11 +50,13 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     override fun onViewReady() {
-        if (prefsUtil.getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false)) {
-            view.hideContactsIntroduction()
-        } else {
-            view.showContactsIntroduction()
-        }
+        if (view.isContactsEnabled) {
+            if (prefsUtil.getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false)) {
+                view.hideContactsIntroduction()
+            } else {
+                view.showContactsIntroduction()
+            }
+        } else view.hideContactsIntroduction()
     }
 
     internal fun onSendToContactClicked() {
