@@ -157,8 +157,6 @@
     <string name="navigate">案内</string>
     <string name="enable_geo">現在の位置を見つけるにはGPSかその他の位置特定サービを有効にしてください。OKをクリックしてサービス設定を表示</string>
 
-    <string name="my_addresses">アドレス</string>
-    <string name="addresses">アドレス</string>
     <string name="create_new">新規作成</string>
     <string name="import_address">アドレスのインポート</string>
     <string name="save_name">名前を保存</string>
@@ -169,7 +167,6 @@
 
     <string name="ssl_pinning_invalid">SSL証明書のピニングに失敗しました。悪意のあるアクティビティが行われている可能性があります。続行する前にネットワーク接続とデバイスを確認してください。</string>
 
-    <string name="merchant_map">商人マップ</string>
     <string name="merchant_suggest">商人を提案</string>
     <string name="name">名称</string>
     <string name="location">場所</string>
@@ -209,7 +206,7 @@
     <string name="confirm_password">パスワードの確認</string>
     <string name="check_email_to_auth_login">メールを確認してこのログイン試行を許可してください。</string>
     <string name="transaction_fee">取引手数料</string>
-    <string name="transaction_occur_when">ビットコインを送受信する際に取引が発生します。</string>
+    <string name="transaction_occur_when_bitcoin">ビットコインを送受信する際に取引が発生します。</string>
     <string name="click">クリック</string>
     <string name="to_start_sending_and_receiving_btc">してビットコインの送受信を開始。</string>
 

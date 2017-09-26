@@ -157,8 +157,6 @@
     <string name="navigate">Navigasikan</string>
     <string name="enable_geo">Aktifkan baik GPS atau layanan lokasi lainnya untuk menemukan lokasi saat ini. Klik OK untuk menuju ke pengaturan layanan lokasi sehingga Anda bisa melakukannya.</string>
 
-    <string name="my_addresses">Alamat-alamat</string>
-    <string name="addresses">Alamat-alamat</string>
     <string name="create_new">Buat Baru</string>
     <string name="import_address">Impor Alamat</string>
     <string name="save_name">Simpan nama</string>
@@ -169,7 +167,6 @@
 
     <string name="ssl_pinning_invalid">Penyematan sertifikat SSL gagal. Hal ini mungkin mengindikasikan aktivitas mencurigakan. Mohon verifikasi sambungan internet dan perangkat Anda sebelum melanjutkan.</string>
 
-    <string name="merchant_map">Peta Pedagang</string>
     <string name="merchant_suggest">Sarankan Penjual</string>
     <string name="name">Nama</string>
     <string name="location">Lokasi</string>
@@ -209,7 +206,7 @@
     <string name="confirm_password">Konfirmasi Sandi</string>
     <string name="check_email_to_auth_login">Mohon periksa surel Anda untuk menyetujui upaya masuk ini.</string>
     <string name="transaction_fee">Biaya Transaksi</string>
-    <string name="transaction_occur_when">Transaksi terjadi ketika Anda menerima dan mengirim bitcoin.</string>
+    <string name="transaction_occur_when_bitcoin">Transaksi terjadi ketika Anda menerima dan mengirim bitcoin.</string>
     <string name="click">Klik</string>
     <string name="to_start_sending_and_receiving_btc">untuk mulai mengirim dan menerima bitcoin.</string>
 

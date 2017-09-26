@@ -1,7 +1,7 @@
 machine:
   environment:
     ANDROID_HOME: /usr/local/android-sdk-linux
-    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
+    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError"'
     _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
   java:
     version: oraclejdk8
@@ -43,7 +43,7 @@ dependencies:
 
 test:
   override:
-    - ./gradlew assembleEnvProdMinApi21Debug testEnvProdMinApi21DebugUnitTest testEnvProdMinApi21DebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace --console=plain
+    - ./gradlew assembleEnvProdMinApi21Debug testEnvProdMinApi21DebugUnitTest testEnvProdMinApi21DebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pkotlin.incremental=false -Pandroid.threadPoolSize=1 --stacktrace --console=plain
   post:
     # Move unit test XML to correct directory
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/

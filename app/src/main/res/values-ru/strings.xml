@@ -157,8 +157,6 @@
     <string name="navigate">Навигация</string>
     <string name="enable_geo">Включите GPS или любую другую службу определения местоположения для поиска текущего местоположения. Чтобы сделать это, нажмите ОК, чтобы перейти к настройкам службы определения местоположения.</string>
 
-    <string name="my_addresses">Адреса</string>
-    <string name="addresses">Адреса</string>
     <string name="create_new">Создать новый</string>
     <string name="import_address">Импортировать адреса</string>
     <string name="save_name">Сохранить имя</string>
@@ -169,7 +167,6 @@
 
     <string name="ssl_pinning_invalid">SSL-сертификат закрепить не удалось. Это может указывать на злонамеренную активность. Прежде чем продолжить, проверьте сетевое подключение и устройство.</string>
 
-    <string name="merchant_map">Карта расположения торговцев</string>
     <string name="merchant_suggest">Предложить торговца</string>
     <string name="name">Имя</string>
     <string name="location">Местоположение</string>
@@ -209,7 +206,7 @@
     <string name="confirm_password">Подтвердить пароль</string>
     <string name="check_email_to_auth_login">Проверьте свою электронную почту, чтобы одобрить эту попытку входа.</string>
     <string name="transaction_fee">Комиссия транзакции</string>
-    <string name="transaction_occur_when">Транзакции осуществляются, когда вы получаете и отправляете bitcoin.</string>
+    <string name="transaction_occur_when_bitcoin">Транзакции осуществляются, когда вы получаете и отправляете bitcoin.</string>
     <string name="click">Нажмите</string>
     <string name="to_start_sending_and_receiving_btc">для начала отправки и получения bitcoin.</string>
 

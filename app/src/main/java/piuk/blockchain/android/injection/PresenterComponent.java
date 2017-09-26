@@ -22,13 +22,14 @@ import piuk.blockchain.android.ui.contacts.detail.ContactDetailFragment;
 import piuk.blockchain.android.ui.contacts.list.ContactsListActivity;
 import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragment;
 import piuk.blockchain.android.ui.createwallet.CreateWalletActivity;
+import piuk.blockchain.android.ui.dashboard.DashboardFragment;
 import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.home.MainActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.login.LoginActivity;
 import piuk.blockchain.android.ui.login.ManualPairingActivity;
 import piuk.blockchain.android.ui.onboarding.OnboardingActivity;
-import piuk.blockchain.android.ui.pairing_code.PairingCodeActivity;
+import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.receive.ReceiveQrActivity;
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
@@ -83,8 +84,6 @@ public interface PresenterComponent {
 
     void inject(@NotNull ManualPairingActivity manualPairingActivity);
 
-    void inject(@NotNull SendFragment sendFragment);
-
     void inject(@NotNull MainActivity mainActivity);
 
     void inject(@NotNull PinEntryFragment pinEntryFragment);
@@ -116,4 +115,8 @@ public interface PresenterComponent {
     void inject(@NotNull PairingCodeActivity pairingCodeActivity);
 
     void inject(@NotNull LandingActivity landingActivity);
+
+    void inject(@NotNull SendFragment sendFragment);
+
+    void inject(@NotNull DashboardFragment dashboardFragment);
 }

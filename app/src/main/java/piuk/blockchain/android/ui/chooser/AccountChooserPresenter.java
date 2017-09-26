@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.chooser;
 
-import android.util.Log;
-
 import info.blockchain.wallet.contacts.data.Contact;
 
 import java.util.ArrayList;
@@ -11,12 +9,12 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
@@ -29,6 +27,7 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
     private StringUtils stringUtils;
     private ContactsDataManager contactsDataManager;
     private AccessState accessState;
+    private CurrencyState currencyState;
 
     private List<ItemAccount> itemAccounts = new ArrayList<>();
 
@@ -36,12 +35,14 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
     AccountChooserPresenter(WalletAccountHelper walletAccountHelper,
                             StringUtils stringUtils,
                             ContactsDataManager contactsDataManager,
-                            AccessState accessState) {
+                            AccessState accessState,
+                            CurrencyState currencyState) {
 
         this.walletAccountHelper = walletAccountHelper;
         this.stringUtils = stringUtils;
         this.contactsDataManager = contactsDataManager;
         this.accessState = accessState;
+        this.currencyState = currencyState;
     }
 
     @Override
@@ -137,13 +138,13 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
 
     private Observable<List<ItemAccount>> getAccountList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getHdAccounts(accessState.isBtc()));
+        result.addAll(walletAccountHelper.getHdAccounts());
         return Observable.just(result);
     }
 
     private Observable<List<ItemAccount>> getImportedList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
-        result.addAll(walletAccountHelper.getLegacyAddresses(accessState.isBtc()));
+        result.addAll(walletAccountHelper.getLegacyAddresses());
         return Observable.just(result);
     }
 

@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.transactions;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 
 import info.blockchain.wallet.multiaddress.TransactionSummary;
@@ -9,13 +8,13 @@ import info.blockchain.wallet.payload.data.Wallet;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.Completable;
@@ -26,15 +25,20 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
+import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.transactions.BtcDisplayable;
+import piuk.blockchain.android.data.transactions.Displayable;
+import piuk.blockchain.android.data.transactions.EthDisplayable;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -47,7 +51,7 @@ import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
 
-@SuppressWarnings({"PrivateMemberAccessBetweenOuterAndInnerClass", "WeakerAccess"})
+@SuppressWarnings("WeakerAccess")
 public class TransactionDetailPresenterTest extends RxTest {
 
     private TransactionDetailPresenter subject;
@@ -59,12 +63,7 @@ public class TransactionDetailPresenterTest extends RxTest {
     @Mock TransactionDetailView activity;
     @Mock ExchangeRateFactory exchangeRateFactory;
     @Mock ContactsDataManager contactsDataManager;
-
-    // Transactions
-    private TransactionSummary txMoved = new TransactionSummary();
-    private TransactionSummary txSent = new TransactionSummary();
-    private TransactionSummary txReceived = new TransactionSummary();
-    private List<TransactionSummary> txList;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) EthDataManager ethDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -74,20 +73,6 @@ public class TransactionDetailPresenterTest extends RxTest {
         when(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(MonetaryUtil.UNIT_BTC);
         when(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn(PrefsUtil.DEFAULT_CURRENCY);
 
-        // Fees are realistic for current block size
-        txMoved.setDirection(TransactionSummary.Direction.TRANSFERRED);
-        txMoved.setTotal(BigInteger.TEN);
-        txMoved.setFee(BigInteger.ONE);
-        txMoved.setHash("txMoved_hash");
-        txSent.setDirection(TransactionSummary.Direction.SENT);
-        txSent.setTotal(BigInteger.TEN);
-        txSent.setFee(BigInteger.ONE);
-        txSent.setHash("txSent_hash");
-        txReceived.setDirection(TransactionSummary.Direction.RECEIVED);
-        txReceived.setTotal(BigInteger.TEN);
-        txReceived.setFee(BigInteger.ONE);
-        txReceived.setHash("txReceived_hash");
-        txList = Arrays.asList(txMoved, txSent, txReceived);
         Locale.setDefault(new Locale("EN", "US"));
         subject = new TransactionDetailPresenter(transactionHelper,
                 prefsUtil,
@@ -95,7 +80,8 @@ public class TransactionDetailPresenterTest extends RxTest {
                 stringUtils,
                 transactionListDataManager,
                 exchangeRateFactory,
-                contactsDataManager);
+                contactsDataManager,
+                ethDataManager);
         subject.initView(activity);
     }
 
@@ -187,6 +173,19 @@ public class TransactionDetailPresenterTest extends RxTest {
     @Test
     public void onViewReadyTransactionFoundInList() throws Exception {
         // Arrange
+        Displayable displayableToFind = mock(BtcDisplayable.class);
+        when(displayableToFind.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        when(displayableToFind.getDirection()).thenReturn(TransactionSummary.Direction.TRANSFERRED);
+        when(displayableToFind.getHash()).thenReturn("txMoved_hash");
+        when(displayableToFind.getTotal()).thenReturn(BigInteger.valueOf(1_000L));
+        when(displayableToFind.getFee()).thenReturn(BigInteger.valueOf(1L));
+
+        Displayable displayable2 = mock(BtcDisplayable.class);
+        when(displayable2.getHash()).thenReturn("");
+
+        Displayable displayable3 = mock(BtcDisplayable.class);
+        when(displayable3.getHash()).thenReturn("");
+
         Intent mockIntent = mock(Intent.class);
         Wallet mockPayload = mock(Wallet.class);
         when(mockIntent.hasExtra(KEY_TRANSACTION_LIST_POSITION)).thenReturn(true);
@@ -194,19 +193,23 @@ public class TransactionDetailPresenterTest extends RxTest {
         when(mockPayload.getTxNotes()).thenReturn(new HashMap<>());
         when(activity.getPageIntent()).thenReturn(mockIntent);
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
-        when(transactionListDataManager.getTransactionList()).thenReturn(txList);
-        when(stringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
+        when(transactionListDataManager.getTransactionList())
+                .thenReturn(Arrays.asList(displayableToFind, displayable2, displayable3));
+        when(stringUtils.getString(R.string.transaction_detail_pending))
+                .thenReturn("Pending (%1$s/%2$s Confirmations)");
         HashMap<String, BigInteger> inputs = new HashMap<>();
         HashMap<String, BigInteger> outputs = new HashMap<>();
         inputs.put("addr1", BigInteger.valueOf(1000L));
         outputs.put("addr2", BigInteger.valueOf(2000L));
         Pair pair = Pair.of(inputs, outputs);
-        when(transactionHelper.filterNonChangeAddresses(any(TransactionSummary.class))).thenReturn(pair);
+        when(transactionHelper.filterNonChangeAddresses(any(Displayable.class))).thenReturn(pair);
         when(payloadDataManager.addressToLabel("addr1")).thenReturn("account1");
         when(payloadDataManager.addressToLabel("addr2")).thenReturn("account2");
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
-        when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong()))
+                .thenReturn(Observable.just(price));
+        when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred))
+                .thenReturn("Value when moved: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         HashMap<String, ContactTransactionDisplayModel> notesMap = new HashMap<>();
         notesMap.put("txMoved_hash", new ContactTransactionDisplayModel(
@@ -220,7 +223,7 @@ public class TransactionDetailPresenterTest extends RxTest {
         subject.onViewReady();
         // Assert
         verify(activity).getPageIntent();
-        verify(activity).setStatus("Pending (0/3 Confirmations)", "txMoved_hash");
+        verify(activity).setStatus(CryptoCurrencies.BTC, "Pending (0/3 Confirmations)", "txMoved_hash");
         verify(activity).setTransactionType(TransactionSummary.Direction.TRANSFERRED);
         verify(activity).setTransactionColour(R.color.product_gray_transferred_50);
         verify(activity).setDescription(null);
@@ -240,6 +243,12 @@ public class TransactionDetailPresenterTest extends RxTest {
     @Test
     public void onViewReadyTransactionFoundViaHash() throws Exception {
         // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.TRANSFERRED);
+        when(displayable.getHash()).thenReturn("txMoved_hash");
+        when(displayable.getTotal()).thenReturn(BigInteger.valueOf(1_000L));
+        when(displayable.getFee()).thenReturn(BigInteger.valueOf(1L));
         Intent mockIntent = mock(Intent.class);
         Wallet mockPayload = mock(Wallet.class);
         when(mockIntent.hasExtra(KEY_TRANSACTION_HASH)).thenReturn(true);
@@ -249,19 +258,22 @@ public class TransactionDetailPresenterTest extends RxTest {
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(activity.getPageIntent()).thenReturn(mockIntent);
         when(transactionListDataManager.getTxFromHash("txMoved_hash"))
-                .thenReturn(Single.just(txMoved));
-        when(stringUtils.getString(R.string.transaction_detail_pending)).thenReturn("Pending (%1$s/%2$s Confirmations)");
+                .thenReturn(Single.just(displayable));
+        when(stringUtils.getString(R.string.transaction_detail_pending))
+                .thenReturn("Pending (%1$s/%2$s Confirmations)");
         HashMap<String, BigInteger> inputs = new HashMap<>();
         HashMap<String, BigInteger> outputs = new HashMap<>();
         inputs.put("addr1", BigInteger.valueOf(1000L));
         outputs.put("addr2", BigInteger.valueOf(2000L));
         Pair pair = Pair.of(inputs, outputs);
-        when(transactionHelper.filterNonChangeAddresses(any(TransactionSummary.class))).thenReturn(pair);
+        when(transactionHelper.filterNonChangeAddresses(any(Displayable.class))).thenReturn(pair);
         when(payloadDataManager.addressToLabel("addr1")).thenReturn("account1");
         when(payloadDataManager.addressToLabel("addr2")).thenReturn("account2");
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
-        when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred)).thenReturn("Value when moved: ");
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong()))
+                .thenReturn(Observable.just(price));
+        when(stringUtils.getString(R.string.transaction_detail_value_at_time_transferred))
+                .thenReturn("Value when moved: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         HashMap contactsMap = new HashMap<String, ContactTransactionDisplayModel>();
         contactsMap.put("txMoved_hash", new ContactTransactionDisplayModel(
@@ -275,7 +287,7 @@ public class TransactionDetailPresenterTest extends RxTest {
         subject.onViewReady();
         // Assert
         verify(activity).getPageIntent();
-        verify(activity).setStatus("Pending (0/3 Confirmations)", "txMoved_hash");
+        verify(activity).setStatus(CryptoCurrencies.BTC, "Pending (0/3 Confirmations)", "txMoved_hash");
         verify(activity).setTransactionType(TransactionSummary.Direction.TRANSFERRED);
         verify(activity).setTransactionColour(R.color.product_gray_transferred_50);
         verify(activity).setDescription(null);
@@ -291,67 +303,166 @@ public class TransactionDetailPresenterTest extends RxTest {
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressLint("VisibleForTests")
+    @SuppressWarnings({"ConstantConditions", "unchecked"})
+    @Test
+    public void onViewReadyTransactionFoundViaHashEthereum() throws Exception {
+        // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.ETHER);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.SENT);
+        when(displayable.getHash()).thenReturn("hash");
+        when(displayable.getTotal()).thenReturn(BigInteger.valueOf(1_000L));
+        when(displayable.getFee()).thenReturn(BigInteger.valueOf(1L));
+        HashMap<String, BigInteger> maps = new HashMap<>();
+        maps.put("", BigInteger.TEN);
+        when(displayable.getInputsMap()).thenReturn(maps);
+        when(displayable.getOutputsMap()).thenReturn(maps);
+        Intent mockIntent = mock(Intent.class);
+        when(mockIntent.hasExtra(KEY_TRANSACTION_HASH)).thenReturn(true);
+        when(mockIntent.getStringExtra(KEY_TRANSACTION_HASH)).thenReturn("hash");
+        when(activity.getPageIntent()).thenReturn(mockIntent);
+        when(transactionListDataManager.getTxFromHash("hash"))
+                .thenReturn(Single.just(displayable));
+        when(stringUtils.getString(R.string.transaction_detail_pending))
+                .thenReturn("Pending (%1$s/%2$s Confirmations)");
+        when(stringUtils.getString(R.string.eth_default_account_label))
+                .thenReturn("My Ethereum Wallet");
+        HashMap<String, BigInteger> inputs = new HashMap<>();
+        HashMap<String, BigInteger> outputs = new HashMap<>();
+        inputs.put("addr1", BigInteger.valueOf(1000L));
+        outputs.put("addr2", BigInteger.valueOf(2000L));
+        Pair pair = Pair.of(inputs, outputs);
+        when(transactionHelper.filterNonChangeAddresses(any(Displayable.class))).thenReturn(pair);
+        double price = 1000.00D;
+        when(exchangeRateFactory.getEthHistoricPrice(any(), anyString(), anyLong()))
+                .thenReturn(Observable.just(price));
+        when(stringUtils.getString(R.string.transaction_detail_value_at_time_sent))
+                .thenReturn("Value when sent: ");
+        when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
+        HashMap contactsMap = new HashMap<String, ContactTransactionDisplayModel>();
+        contactsMap.put("hash", new ContactTransactionDisplayModel(
+                "",
+                "",
+                "",
+                "Adam"
+        ));
+        when(contactsDataManager.getTransactionDisplayMap()).thenReturn(contactsMap);
+        when(ethDataManager.getEthResponseModel().getAddressResponse().getAccount()).thenReturn("");
+        when(ethDataManager.getTransactionNotes("hash")).thenReturn("note");
+        // Act
+        subject.onViewReady();
+        // Assert
+        verify(activity).getPageIntent();
+        verify(activity).setStatus(CryptoCurrencies.ETHER, "Pending (0/12 Confirmations)", "hash");
+        verify(activity).setTransactionType(TransactionSummary.Direction.SENT);
+        verify(activity).setTransactionColour(R.color.product_red_sent_50);
+        verify(activity).setDescription(anyString());
+        verify(activity).setDate(anyString());
+        verify(activity).setToAddresses(any());
+        verify(activity).setFromAddress(any());
+        verify(activity).setFee(anyString());
+        verify(activity).setTransactionValueBtc(anyString());
+        verify(activity).setTransactionValueFiat(anyString());
+        verify(activity).onDataLoaded();
+        verify(activity).setIsDoubleSpend(anyBoolean());
+        verifyNoMoreInteractions(activity);
+    }
+
     @Test
     public void getTransactionValueStringUsd() {
         // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.SENT);
+        when(displayable.getTotal()).thenReturn(BigInteger.valueOf(1_000L));
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong())).thenReturn(Observable.just(price));
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong()))
+                .thenReturn(Observable.just(price));
         when(stringUtils.getString(anyInt())).thenReturn("Value when sent: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
         TestObserver<String> observer =
-                subject.getTransactionValueString("USD", txSent).test();
+                subject.getTransactionValueString("USD", displayable).test();
         // Assert
+        verify(exchangeRateFactory).getBtcHistoricPrice(anyLong(), anyString(), anyLong());
         assertEquals("Value when sent: $1,000.00", observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
-    public void getTransactionValueStringReceived() {
+    public void getTransactionValueStringReceivedEth() {
         // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.ETHER);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.RECEIVED);
+        when(displayable.getTotal()).thenReturn(BigInteger.valueOf(1_000L));
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong()))
+        when(exchangeRateFactory.getEthHistoricPrice(any(), anyString(), anyLong()))
                 .thenReturn(Observable.just(price));
         when(stringUtils.getString(anyInt())).thenReturn("Value when received: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
-        TestObserver<String> observer = subject.getTransactionValueString("USD", txReceived).test();
+        TestObserver<String> observer = subject.getTransactionValueString("USD", displayable).test();
         // Assert
+        verify(exchangeRateFactory).getEthHistoricPrice(any(), anyString(), anyLong());
         assertEquals("Value when received: $1,000.00", observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void getTransactionValueStringTransferred() {
         // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.SENT);
+        when(displayable.getTotal()).thenReturn(BigInteger.valueOf(1_000L));
         double price = 1000.00D;
-        when(exchangeRateFactory.getHistoricPrice(anyLong(), anyString(), anyLong()))
+        when(exchangeRateFactory.getBtcHistoricPrice(anyLong(), anyString(), anyLong()))
                 .thenReturn(Observable.just(price));
         when(stringUtils.getString(anyInt())).thenReturn("Value when transferred: ");
         when(exchangeRateFactory.getSymbol(anyString())).thenReturn("$");
         // Act
-        TestObserver<String> observer = subject.getTransactionValueString("USD", txSent).test();
+        TestObserver<String> observer = subject.getTransactionValueString("USD", displayable).test();
         // Assert
+        verify(exchangeRateFactory).getBtcHistoricPrice(anyLong(), anyString(), anyLong());
         assertEquals("Value when transferred: $1,000.00", observer.values().get(0));
         observer.onComplete();
         observer.assertNoErrors();
     }
 
     @Test
-    public void updateTransactionNoteSuccess() throws Exception {
+    public void updateTransactionNoteBtcSuccess() throws Exception {
         // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getHash()).thenReturn("hash");
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        subject.displayable = displayable;
         when(payloadDataManager.updateTransactionNotes(anyString(), anyString()))
                 .thenReturn(Completable.complete());
-        subject.mTransaction = txMoved;
         // Act
         subject.updateTransactionNote("note");
         // Assert
-        verify(payloadDataManager).updateTransactionNotes(txMoved.getHash(), "note");
+        verify(payloadDataManager).updateTransactionNotes("hash", "note");
+        //noinspection WrongConstant
+        verify(activity).showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
+        verify(activity).setDescription("note");
+    }
+
+    @Test
+    public void updateTransactionNoteEthSuccess() throws Exception {
+        // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getHash()).thenReturn("hash");
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.ETHER);
+        subject.displayable = displayable;
+        when(ethDataManager.updateTransactionNotes(anyString(), anyString()))
+                .thenReturn(Completable.complete());
+        // Act
+        subject.updateTransactionNote("note");
+        // Assert
+        verify(ethDataManager).updateTransactionNotes("hash", "note");
         //noinspection WrongConstant
         verify(activity).showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
         verify(activity).setDescription("note");
@@ -360,131 +471,163 @@ public class TransactionDetailPresenterTest extends RxTest {
     @Test
     public void updateTransactionNoteFailure() throws Exception {
         // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getHash()).thenReturn("hash");
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        subject.displayable = displayable;
         when(payloadDataManager.updateTransactionNotes(anyString(), anyString()))
                 .thenReturn(Completable.error(new Throwable()));
-        subject.mTransaction = txMoved;
         // Act
         subject.updateTransactionNote("note");
         // Assert
-        verify(payloadDataManager).updateTransactionNotes(txMoved.getHash(), "note");
+        verify(payloadDataManager).updateTransactionNotes("hash", "note");
         //noinspection WrongConstant
         verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
     }
 
     @Test
-    public void getTransactionNote() throws Exception {
+    public void getTransactionNoteBtc() throws Exception {
         // Arrange
-        when(payloadDataManager.getTransactionNotes(txSent.getHash())).thenReturn("note");
-        subject.mTransaction = txSent;
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getHash()).thenReturn("hash");
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        subject.displayable = displayable;
+        when(payloadDataManager.getTransactionNotes("hash")).thenReturn("note");
         // Act
         String value = subject.getTransactionNote();
         // Assert
         assertEquals("note", value);
+        verify(payloadDataManager).getTransactionNotes("hash");
+    }
+
+    @Test
+    public void getTransactionNoteEth() throws Exception {
+        // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getHash()).thenReturn("hash");
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.ETHER);
+        subject.displayable = displayable;
+        when(ethDataManager.getTransactionNotes("hash")).thenReturn("note");
+        // Act
+        String value = subject.getTransactionNote();
+        // Assert
+        assertEquals("note", value);
+        verify(ethDataManager).getTransactionNotes("hash");
     }
 
     @Test
     public void getTransactionHash() throws Exception {
         // Arrange
-        subject.mTransaction = txSent;
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getHash()).thenReturn("hash");
+        subject.displayable = displayable;
         // Act
         String value = subject.getTransactionHash();
         // Assert
-        assertEquals(txSent.getHash(), value);
+        assertEquals("hash", value);
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionStatusNoConfirmations() {
         // Arrange
         when(stringUtils.getString(R.string.transaction_detail_pending))
                 .thenReturn("Pending (%1$s/%2$s Confirmations)");
         // Act
-        subject.setConfirmationStatus("hash", 0);
+        subject.setConfirmationStatus(CryptoCurrencies.ETHER, "hash", 0);
         // Assert
-        verify(activity).setStatus("Pending (0/3 Confirmations)", "hash");
+        verify(activity).setStatus(CryptoCurrencies.ETHER, "Pending (0/12 Confirmations)", "hash");
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionStatusConfirmed() {
         // Arrange
         when(stringUtils.getString(R.string.transaction_detail_confirmed)).thenReturn("Confirmed");
-        txMoved.setConfirmations(3);
         // Act
-        subject.setConfirmationStatus("hash", 3);
+        subject.setConfirmationStatus(CryptoCurrencies.BTC, "hash", 3);
         // Assert
-        verify(activity).setStatus("Confirmed", "hash");
+        verify(activity).setStatus(CryptoCurrencies.BTC, "Confirmed", "hash");
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorMove() {
         // Arrange
-
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getConfirmations()).thenReturn(0);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.TRANSFERRED);
         // Act
-        subject.setTransactionColor(txMoved);
+        subject.setTransactionColor(displayable);
         // Assert
         verify(activity).setTransactionColour(R.color.product_gray_transferred_50);
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorMoveConfirmed() {
         // Arrange
-        txMoved.setConfirmations(3);
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getConfirmations()).thenReturn(3);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.TRANSFERRED);
         // Act
-        subject.setTransactionColor(txMoved);
+        subject.setTransactionColor(displayable);
         // Assert
         verify(activity).setTransactionColour(R.color.product_gray_transferred);
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorSent() {
         // Arrange
-
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getConfirmations()).thenReturn(2);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.SENT);
         // Act
-        subject.setTransactionColor(txSent);
+        subject.setTransactionColor(displayable);
         // Assert
         verify(activity).setTransactionColour(R.color.product_red_sent_50);
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorSentConfirmed() {
         // Arrange
-        txSent.setConfirmations(3);
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getConfirmations()).thenReturn(3);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.SENT);
         // Act
-        subject.setTransactionColor(txSent);
+        subject.setTransactionColor(displayable);
         // Assert
         verify(activity).setTransactionColour(R.color.product_red_sent);
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorReceived() {
         // Arrange
-
+        Displayable displayable = mock(EthDisplayable.class);
+        when(displayable.getConfirmations()).thenReturn(7);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.ETHER);
+        when(displayable.getDirection()).thenReturn(TransactionSummary.Direction.RECEIVED);
         // Act
-        subject.setTransactionColor(txReceived);
+        subject.setTransactionColor(displayable);
         // Assert
         verify(activity).setTransactionColour(R.color.product_green_received_50);
         verifyNoMoreInteractions(activity);
     }
 
-    @SuppressLint("VisibleForTests")
     @Test
     public void setTransactionColorReceivedConfirmed() {
         // Arrange
-        txReceived.setConfirmations(3);
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getConfirmations()).thenReturn(3);
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
         // Act
-        subject.setTransactionColor(txReceived);
+        subject.setTransactionColor(displayable);
         // Assert
         verify(activity).setTransactionColour(R.color.product_green_received);
         verifyNoMoreInteractions(activity);

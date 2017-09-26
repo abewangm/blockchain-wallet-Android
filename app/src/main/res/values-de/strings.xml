@@ -157,8 +157,6 @@
     <string name="navigate">Navigieren</string>
     <string name="enable_geo">Zur Auffindung Ihres aktuellen Standorts aktivieren Sie GPS oder einen anderen Standortdienst. Klicken Sie dazu auf OK und gehen Sie zu den Standortdiensteinstellungen.</string>
 
-    <string name="my_addresses">Adressen</string>
-    <string name="addresses">Adressen</string>
     <string name="create_new">Neu erstellen</string>
     <string name="import_address">Adresse importieren</string>
     <string name="save_name">Namen speichern</string>
@@ -169,7 +167,6 @@
 
     <string name="ssl_pinning_invalid">Die SSL-Zertifikatsbestätigung ist fehlgeschlagen. Dies weist eventuell auf ein Gefahrenrisiko hin. Bevor Sie fortfahren, überprüfen Sie bitte Gerät und Netzwerkverbindung.</string>
 
-    <string name="merchant_map">Händlerkarte</string>
     <string name="merchant_suggest">Händler vorschlagen</string>
     <string name="name">Name</string>
     <string name="location">Standort</string>
@@ -209,7 +206,7 @@
     <string name="confirm_password">Passwort bestätigen</string>
     <string name="check_email_to_auth_login">Bitte überprüfen Sie Ihre E-Mails zur Genehmigung dieses Anmeldeversuchs.</string>
     <string name="transaction_fee">Transaktionsgebühr</string>
-    <string name="transaction_occur_when">Transaktionen erfolgen durch den Empfang und Versand von Bitcoins.</string>
+    <string name="transaction_occur_when_bitcoin">Transaktionen erfolgen durch den Empfang und Versand von Bitcoins.</string>
     <string name="click">Einfach klicken</string>
     <string name="to_start_sending_and_receiving_btc">und schon können Sie Bitcoins senden und empfangen.</string>
 

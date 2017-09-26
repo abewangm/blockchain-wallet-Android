@@ -51,7 +51,7 @@ public class TransferFundsDataManager {
         return Observable.fromCallable(() -> {
 
             BigInteger suggestedFeePerKb =
-                    BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000);
+                    BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000);
 
             List<PendingTransaction> pendingTransactionList = new ArrayList<>();
             List<LegacyAddress> legacyAddresses = payloadDataManager.getWallet().getLegacyAddressList();

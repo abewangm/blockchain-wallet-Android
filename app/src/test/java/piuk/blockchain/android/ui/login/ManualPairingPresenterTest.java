@@ -501,8 +501,6 @@ public class ManualPairingPresenterTest {
         mSubject.submitTwoFactorCode(responseObject, sessionId, guid, password, code);
         // Assert
         verify(mActivity).showProgressDialog(anyInt(), isNull(), eq(false));
-        // TODO: 12/04/2017 There's a bug in Mockito here were it asserts that this was called twice.
-        // Check this with Mockito 2.8.0 when it makes it onto bintray
         verify(mActivity, atLeastOnce()).dismissProgressDialog();
         verify(mActivity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verify(mAuthDataManager).submitTwoFactorCode(sessionId, guid, code);
@@ -523,8 +521,6 @@ public class ManualPairingPresenterTest {
         mSubject.submitTwoFactorCode(responseObject, sessionId, guid, password, code);
         // Assert
         verify(mActivity).showProgressDialog(anyInt(), isNull(), eq(false));
-        // TODO: 12/04/2017 There's a bug in Mockito here were it asserts that this was called twice.
-        // Check this with Mockito 2.8.0 when it makes it onto bintray
         verify(mActivity, atLeastOnce()).dismissProgressDialog();
         verify(mActivity).goToPinPage();
         verify(mAuthDataManager).submitTwoFactorCode(sessionId, guid, code);

@@ -148,7 +148,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                 long balanceAfterFee = payloadDataManager.getAddressBalance(
                         legacyAddress.getAddress()).longValue() -
                         sendDataManager.estimatedFee(1, 1,
-                                BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000))
+                                BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000))
                                 .longValue();
 
                 if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
@@ -302,15 +302,15 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         }
 
         String fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY);
-        String btcUnit = monetaryUtil.getBTCUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
-        double exchangeRate = exchangeRateFactory.getLastPrice(fiatUnit);
+        String btcUnit = monetaryUtil.getBtcUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+        double exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit);
 
-        details.btcAmount = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.longValue());
-        details.btcFee = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntFee.longValue());
+        details.cryptoAmount = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.longValue());
+        details.cryptoFee = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntFee.longValue());
         details.btcSuggestedFee = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntFee.longValue());
-        details.btcUnit = btcUnit;
+        details.cryptoUnit = btcUnit;
         details.fiatUnit = fiatUnit;
-        details.btcTotal = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee).longValue());
+        details.cryptoTotal = monetaryUtil.getDisplayAmount(pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee).longValue());
 
         details.fiatFee = monetaryUtil.getFiatFormat(fiatUnit)
                 .format(exchangeRate * (pendingTransaction.bigIntFee.doubleValue() / 1e8));
@@ -460,7 +460,8 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         // Defer to background thread as deriving addresses is quite processor intensive
         getCompositeDisposable().add(
                 Completable.fromCallable(() -> {
-                    swipeToReceiveHelper.updateAndStoreAddresses();
+                    swipeToReceiveHelper.updateAndStoreBitcoinAddresses();
+                    swipeToReceiveHelper.storeEthAddress();
                     return Void.TYPE;
                 }).subscribeOn(Schedulers.computation())
                         .subscribe(() -> {
@@ -719,7 +720,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         return sendDataManager.getUnspentOutputs(legacyAddress.getAddress())
                 .flatMap(unspentOutputs -> {
                     BigInteger suggestedFeePerKb =
-                            BigInteger.valueOf(dynamicFeeCache.getFeeOptions().getRegularFee() * 1000);
+                            BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000);
 
                     Pair<BigInteger, BigInteger> sweepableCoins =
                             sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);

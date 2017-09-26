@@ -127,7 +127,7 @@ class NumericKeyboard @JvmOverloads constructor(
         }
     }
 
-    private fun hideKeyboard() {
+    fun hideKeyboard() {
         if (isVisible) {
             startAnimation(AnimationUtils.loadAnimation(context, R.anim.top_down))
             gone()

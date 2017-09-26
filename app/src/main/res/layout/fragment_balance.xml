@@ -10,7 +10,7 @@
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/balance_bar_height"
+        android:layout_height="128dp"
         android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay">
 
@@ -34,14 +34,15 @@
 
                 <TextView
                     android:id="@+id/textview_balance"
-                    fontPath="fonts/Montserrat-Regular.ttf"
+                    fontPath="fonts/Montserrat-Light.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:gravity="center_horizontal"
                     android:includeFontPadding="false"
+                    android:text="0.0"
                     android:textColor="@color/white"
-                    android:textSize="28sp"
+                    android:textSize="32sp"
                     tools:ignore="MissingPrefix"
                     tools:text="10.0000002 BTC" />
 
@@ -56,6 +57,20 @@
                     android:spinnerMode="dropdown"
                     android:theme="@style/SpinnerWhite"
                     tools:text="All wallets" />
+
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tabs"
+                    fontPath="fonts/Montserrat-Regular.ttf"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_below="@id/accounts_spinner"
+                    android:layout_gravity="bottom"
+                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                    app:tabContentStart="72dp"
+                    app:tabGravity="fill"
+                    app:tabIndicatorColor="@android:color/white"
+                    app:tabIndicatorHeight="4dp"
+                    app:tabMode="fixed" />
             </RelativeLayout>
 
         </android.support.design.widget.CollapsingToolbarLayout>

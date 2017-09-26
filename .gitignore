@@ -33,3 +33,6 @@ secrets.properties
 
 # Fabric API Key
 fabric.properties
+
+# Release output
+app/**/release/output.json

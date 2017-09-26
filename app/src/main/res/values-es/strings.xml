@@ -157,8 +157,6 @@
     <string name="navigate">Navegar</string>
     <string name="enable_geo">Activa el GPS o cualquier otro servicio de localización para encontrar tu ubicación actual. Haz clic en Aceptar para ir a la configuración de servicios de localización para poder activarlos.</string>
 
-    <string name="my_addresses">Direcciones</string>
-    <string name="addresses">Direcciones</string>
     <string name="create_new">Crear Nuevo</string>
     <string name="import_address">Importar la dirección</string>
     <string name="save_name">Guardar nombre</string>
@@ -169,7 +167,6 @@
 
     <string name="ssl_pinning_invalid">Se ha producido un error en la fijación del certificado SSL. Esto podría ser señal de actividad maliciosa. Por favor verifica tu conexión de red y el dispositivo antes de continuar.</string>
 
-    <string name="merchant_map">Mapa del comerciante</string>
     <string name="merchant_suggest">Sugerir comerciante</string>
     <string name="name">Nombre</string>
     <string name="location">Ubicación</string>
@@ -209,7 +206,7 @@
     <string name="confirm_password">Confirmar contraseña</string>
     <string name="check_email_to_auth_login">Revisa tu correo electrónico para aprobar este intento de inicio de sesión.</string>
     <string name="transaction_fee">Comisión de transacción</string>
-    <string name="transaction_occur_when">Las transacciones se producen al recibir y enviar bitcoin.</string>
+    <string name="transaction_occur_when_bitcoin">Las transacciones se producen al recibir y enviar bitcoin.</string>
     <string name="click">Haz clic</string>
     <string name="to_start_sending_and_receiving_btc">para comenzar a enviar y recibir bitcoin.</string>
 

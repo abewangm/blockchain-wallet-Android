@@ -205,6 +205,7 @@
                         fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginRight="8dp"
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         tools:text="1XUzFYTvEjWxLkqtL4100MQ7zyzRvq9xXX" />

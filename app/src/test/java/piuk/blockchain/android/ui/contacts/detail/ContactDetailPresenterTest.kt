@@ -25,6 +25,7 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -48,6 +49,7 @@ class ContactDetailPresenterTest {
     private val mockAccessState: AccessState = mock()
     private val mockTransactionListDataManager: TransactionListDataManager = mock()
     private val mockExchangeRateFactory: ExchangeRateFactory = mock()
+    private val mockCurrencyState: CurrencyState = mock()
 
     @Before
     @Throws(Exception::class)
@@ -59,7 +61,8 @@ class ContactDetailPresenterTest {
                 mockRxBus,
                 mockTransactionListDataManager,
                 mockAccessState,
-                mockExchangeRateFactory
+                mockExchangeRateFactory,
+                mockCurrencyState
         )
         subject.initView(mockActivity)
     }
@@ -120,7 +123,7 @@ class ContactDetailPresenterTest {
         whenever(mockContactsManager.getContactList())
                 .thenReturn(Observable.fromIterable(listOf(contact0, contact1, contact2)))
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
-        whenever(mockAccessState.isBtc).thenReturn(true)
+        whenever(mockCurrencyState.isDisplayingCryptoCurrency()).thenReturn(true)
         // Act
         subject.onViewReady()
         // Assert
@@ -128,7 +131,7 @@ class ContactDetailPresenterTest {
         verify(mockActivity).updateContactName(contactName)
         verify(mockActivity, times(2)).onTransactionsUpdated(any(), eq(true))
         verifyNoMoreInteractions(mockActivity)
-        verify(mockAccessState, times(2)).isBtc
+        verify(mockCurrencyState, times(2)).isDisplayingCryptoCurrency()
         verifyNoMoreInteractions(mockAccessState)
         verify(mockContactsManager).getContactList()
         verify(mockContactsManager).fetchContacts()
@@ -363,7 +366,7 @@ class ContactDetailPresenterTest {
         whenever(mockContactsManager.fetchContacts()).thenReturn(Completable.complete())
         val notificationObservable = PublishSubject.create<NotificationPayload>()
         whenever(mockRxBus.register(NotificationPayload::class.java)).thenReturn(notificationObservable)
-        whenever(mockAccessState.isBtc).thenReturn(true)
+        whenever(mockCurrencyState.isDisplayingCryptoCurrency()).thenReturn(true)
         // Act
         subject.onContactRenamed(newName)
         // Assert
@@ -374,7 +377,7 @@ class ContactDetailPresenterTest {
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_OK))
         verify(mockActivity, times(2)).onTransactionsUpdated(any(), eq(true))
         verifyNoMoreInteractions(mockActivity)
-        verify(mockAccessState, times(2)).isBtc
+        verify(mockCurrencyState, times(2)).isDisplayingCryptoCurrency()
         verifyNoMoreInteractions(mockAccessState)
         verify(mockContactsManager).renameContact(contactId, newName)
         verify(mockContactsManager).getContactList()
@@ -551,7 +554,7 @@ class ContactDetailPresenterTest {
             address = ""
         }
         contact.addFacilitatedTransaction(facilitatedTransaction)
-        whenever(mockExchangeRateFactory.getLastPrice("USD")).thenReturn(2770.10)
+        whenever(mockExchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2770.10)
         whenever(mockPrefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         // Act
@@ -800,7 +803,7 @@ class ContactDetailPresenterTest {
         // Act
         subject.onBtcFormatChanged(true)
         // Assert
-        verify(mockAccessState).setIsBtc(true)
+        verify(mockCurrencyState).setDisplayingCryptoCurrency(true)
         verifyNoMoreInteractions(mockAccessState)
     }
 
@@ -867,13 +870,13 @@ class ContactDetailPresenterTest {
         }
         val values = listOf(fctx0, fctx1, fctx2)
         val captor = argumentCaptor<List<JvmType.Object>>()
-        whenever(mockAccessState.isBtc).thenReturn(true)
+        whenever(mockCurrencyState.isDisplayingCryptoCurrency()).thenReturn(true)
         // Act
         subject.sortAndUpdateTransactions(values)
         // Assert
         verify(mockActivity).onTransactionsUpdated(captor.capture(), eq(true))
         verifyNoMoreInteractions(mockActivity)
-        verify(mockAccessState).isBtc
+        verify(mockCurrencyState).isDisplayingCryptoCurrency()
         verifyNoMoreInteractions(mockAccessState)
         val list = captor.firstValue
         (list[0] as ContactTransactionModel).contactName shouldEqual contactName

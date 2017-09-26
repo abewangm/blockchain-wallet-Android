@@ -11,9 +11,9 @@ import piuk.blockchain.android.data.stores.Optional
 
 class SettingsDataStoreTest : RxTest() {
 
-    lateinit var subject: SettingsDataStore
-    lateinit var webSource: Observable<Settings>
-    val memoryStore: SettingsMemoryStore = mock()
+    private lateinit var subject: SettingsDataStore
+    private lateinit var webSource: Observable<Settings>
+    private val memoryStore: SettingsMemoryStore = mock()
 
     @Test
     fun `getSettings using DefaultFetchStrategy from websource`() {

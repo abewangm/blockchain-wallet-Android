@@ -676,4 +676,8 @@ public class PayloadDataManager {
     public boolean validateSecondPassword(String secondPassword) {
         return payloadManager.validateSecondPassword(secondPassword);
     }
+
+    public void decryptHDWallet(String secondPassword) throws Exception {
+        payloadManager.getPayload().decryptHDWallet(0, secondPassword);
+    }
 }
