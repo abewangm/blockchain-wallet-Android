@@ -70,7 +70,7 @@ class ChartDelegate<in T>(
             payloads: List<*>
     ) {
         viewHolder = holder as ChartViewHolder
-        showTimeSpanSelected(TimeSpan.YEAR)
+        showTimeSpanSelected(TimeSpan.MONTH)
     }
 
     internal fun updateChartState(chartsState: ChartsState) {
