@@ -83,7 +83,7 @@ public class AccessState {
     }
 
     public void logIn() {
-        prefs.setValue(PrefsUtil.LOGGED_OUT, false);
+        prefs.logIn();
     }
 
     public void setIsLoggedIn(boolean loggedIn) {
@@ -97,7 +97,7 @@ public class AccessState {
     }
 
     public void unpairWallet() {
-        prefs.clear();
+        prefs.logOut();
         rxBus.emitEvent(AuthEvent.class, AuthEvent.UNPAIR);
     }
 
