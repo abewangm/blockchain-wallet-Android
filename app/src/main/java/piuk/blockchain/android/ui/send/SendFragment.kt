@@ -51,6 +51,7 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.home.MainActivity.SCAN_URI
 import piuk.blockchain.android.ui.zxing.CaptureActivity
 import piuk.blockchain.android.util.AppRate
 import piuk.blockchain.android.util.AppUtil
@@ -262,7 +263,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     PermissionUtil.requestCameraPermissionFromFragment(view!!.rootView, this)
                 } else {
-                    startScanActivity(SCAN_URI)
+                    startScanActivity(MainActivity.SCAN_URI)
                 }
                 true
             }
@@ -273,7 +274,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     private fun startScanActivity(code: Int) {
         if (!AppUtil(activity).isCameraOpen) {
             val intent = Intent(activity, CaptureActivity::class.java)
-            startActivityForResult(intent, code)
+            activity.startActivityForResult(intent, code)
         } else {
             showSnackbar(R.string.camera_unavailable, Snackbar.LENGTH_LONG)
         }
@@ -283,7 +284,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         if (resultCode != Activity.RESULT_OK) return
 
         when (requestCode) {
-            SCAN_URI -> presenter.handleURIScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT), EventService.EVENT_TX_INPUT_FROM_QR)
+            MainActivity.SCAN_URI -> presenter.handleURIScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT), EventService.EVENT_TX_INPUT_FROM_QR)
             SCAN_PRIVX -> presenter.handlePrivxScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT))
             AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> presenter.selectReceivingAccount(data)
             AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> presenter.selectSendingAccount(data)
@@ -488,6 +489,10 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         } else {
             handleBackPressed()
         }
+    }
+
+    override fun setTabSelection(tabIndex: Int) {
+        tabs.getTabAt(tabIndex)?.select()
     }
 
     private fun handleBackPressed() {
@@ -906,7 +911,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     companion object {
 
-        const val SCAN_URI = 2010
         const val SCAN_PRIVX = 2011
         const val ARGUMENT_SCAN_DATA = "scan_data"
         const val ARGUMENT_SELECTED_ACCOUNT_POSITION = "selected_account_position"

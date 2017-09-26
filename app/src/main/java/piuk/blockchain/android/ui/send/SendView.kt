@@ -33,6 +33,8 @@ interface SendView : View {
     //Set property
     fun setCryptoMaxLength(length: Int)
 
+    fun setTabSelection(tabIndex: Int)
+
     fun setFeePrioritySelection(index: Int)
 
     fun clearWarning()

@@ -123,6 +123,7 @@ class SendPresenter @Inject constructor(
         view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         updateTicker()
+        view.setTabSelection(0)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
         view.enableFeeDropdown()
@@ -143,6 +144,7 @@ class SendPresenter @Inject constructor(
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.setFeePrioritySelection(0)
         updateTicker()
+        view.setTabSelection(1)
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
         view.disableFeeDropdown()
@@ -938,7 +940,7 @@ class SendPresenter @Inject constructor(
 
             //Convert to correct units
             try {
-                amount = monetaryUtil.getDisplayAmount(java.lang.Long.parseLong(amount))
+                amount = monetaryUtil.getDisplayAmount(amount.toLong())
                 view?.updateCryptoAmount(amount)
             } catch (e: Exception) {
                 //ignore

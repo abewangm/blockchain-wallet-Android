@@ -123,6 +123,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final int CONTACTS_EDIT = 2010;
 
     @Thunk boolean drawerIsOpen = false;
+    private boolean handlingResult = false;
 
     @Inject MainPresenter mainPresenter;
     @Thunk ActivityMainBinding binding;
@@ -267,7 +268,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         super.onResume();
         appUtil.deleteQR();
         getPresenter().updateTicker();
-        resetNavigationDrawer();
+        if (!handlingResult) {
+            resetNavigationDrawer();
+        }
+        handlingResult = false;
     }
 
     @Override
@@ -327,6 +331,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        handlingResult = true;
         if (resultCode == RESULT_OK && requestCode == SCAN_URI
                 && data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
             String strResult = data.getStringExtra(CaptureActivity.SCAN_RESULT);
@@ -773,7 +778,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     private void startSendFragment(@Nullable String scanData, @Nullable String scanRoute) {
-        SendFragment sendFragment = SendFragment.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
+        binding.bottomNavigation.removeOnTabSelectedListener();
+        binding.bottomNavigation.setCurrentItem(0);
+        binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
+        SendFragment sendFragment =
+                SendFragment.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
         addFragmentToBackStack(sendFragment);
     }
 
