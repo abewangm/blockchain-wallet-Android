@@ -135,7 +135,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun startReceiveFragment() {
         LocalBroadcastManager.getInstance(activity)
-                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
+                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
     }
 
     override fun createPresenter() = dashboardPresenter

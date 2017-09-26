@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.pairing_code
+package piuk.blockchain.android.ui.pairingcode
 
 import android.graphics.Bitmap
 import com.nhaarman.mockito_kotlin.*
@@ -15,8 +15,8 @@ import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.auth.AuthDataManager
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.util.StringUtils
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)

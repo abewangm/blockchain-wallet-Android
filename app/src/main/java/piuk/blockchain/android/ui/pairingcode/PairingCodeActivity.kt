@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.pairing_code
+package piuk.blockchain.android.ui.pairingcode
 
 import android.content.Context
 import android.content.Intent
@@ -15,7 +15,6 @@ import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 import javax.inject.Inject
-
 
 @Suppress("UNUSED_PARAMETER")
 class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresenter>(), PairingCodeView {
@@ -37,9 +36,7 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
         onViewReady()
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return consume { onBackPressed() }
-    }
+    override fun onSupportNavigateUp(): Boolean = consume { onBackPressed() }
 
     override fun onQrLoaded(bitmap: Bitmap) {
         tv_warning.setText(R.string.pairing_code_warning_2)

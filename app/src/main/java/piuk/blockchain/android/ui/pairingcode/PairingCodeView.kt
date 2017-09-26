@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.pairing_code
+package piuk.blockchain.android.ui.pairingcode
 
 import android.graphics.Bitmap
 import android.support.annotation.StringRes

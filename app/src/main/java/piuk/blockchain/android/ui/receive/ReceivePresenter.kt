@@ -79,6 +79,7 @@ class ReceivePresenter @Inject internal constructor(
                 else
                     legacyAddress.address
         )
+
         legacyAddress.address.let {
             selectedAddress = it
             view.updateReceiveAddress(it)
@@ -102,6 +103,7 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     internal fun onEthSelected() {
+        compositeDisposable.clear()
         view.hideBitcoinLayout()
         selectedAccount = null
         ethDataStore.ethAddressResponse!!.getAddressResponse()!!.account.let {
@@ -112,6 +114,7 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     internal fun onSelectDefault(defaultAccountPosition: Int) {
+        compositeDisposable.clear()
         view.displayBitcoinLayout()
         onAccountSelected(
                 if (defaultAccountPosition > -1)
@@ -142,27 +145,25 @@ class ReceivePresenter @Inject internal constructor(
         this.selectedContactId = null
     }
 
-    internal fun getConfirmationDetails(): PaymentConfirmationDetails {
-        return PaymentConfirmationDetails().apply {
-            val position = getSelectedAccountPosition()
-            fromLabel = payloadDataManager.getAccount(position).label
-            toLabel = view.getContactName()
+    internal fun getConfirmationDetails() = PaymentConfirmationDetails().apply {
+        val position = getSelectedAccountPosition()
+        fromLabel = payloadDataManager.getAccount(position).label
+        toLabel = view.getContactName()
 
-            val btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-            val fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-            val exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit)
+        val btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        val fiatUnit = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        val exchangeRate = exchangeRateFactory.getLastBtcPrice(fiatUnit)
 
-            val satoshis = getSatoshisFromText(view.getBtcAmount())
+        val satoshis = getSatoshisFromText(view.getBtcAmount())
 
-            cryptoAmount = getTextFromSatoshis(satoshis.toLong())
-            this.cryptoUnit = monetaryUtil.getBtcUnit(btcUnit)
-            this.fiatUnit = fiatUnit
+        cryptoAmount = getTextFromSatoshis(satoshis.toLong())
+        this.cryptoUnit = monetaryUtil.getBtcUnit(btcUnit)
+        this.fiatUnit = fiatUnit
 
-            fiatAmount = monetaryUtil.getFiatFormat(fiatUnit)
-                    .format(exchangeRate * (satoshis.toDouble() / 1e8))
+        fiatAmount = monetaryUtil.getFiatFormat(fiatUnit)
+                .format(exchangeRate * (satoshis.toDouble() / 1e8))
 
-            fiatSymbol = exchangeRateFactory.getSymbol(fiatUnit)
-        }
+        fiatSymbol = exchangeRateFactory.getSymbol(fiatUnit)
     }
 
     internal fun onShowBottomSheetSelected() {
@@ -194,7 +195,6 @@ class ReceivePresenter @Inject internal constructor(
         view.updateBtcTextField(currencyHelper.getFormattedBtcString(btcAmount))
     }
 
-    // TODO: Test me against valid Segwit address, although we don't currently generate these
     private fun getBitcoinUri(address: String, amount: String): String {
         require(FormatsUtil.isValidBitcoinAddress(address)) {
             "$address is not a valid Bitcoin address"

@@ -209,6 +209,7 @@ class ChartDelegate<in T>(
             xAxis.textColor = ContextCompat.getColor(context, R.color.primary_gray_medium)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.isGranularityEnabled = true
+            setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
         }
     }
 
