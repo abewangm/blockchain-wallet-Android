@@ -7,7 +7,6 @@ import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
 import kotlin.properties.Delegates
 
-
 class BalanceAdapter(
         activity: Activity,
         btcExchangeRate: Double,

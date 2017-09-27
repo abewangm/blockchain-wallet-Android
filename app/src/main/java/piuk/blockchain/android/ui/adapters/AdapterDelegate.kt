@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.adapters
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 
-
 /**
  * This delegate provides methods to hook in this delegate to [RecyclerView.Adapter] lifecycle.
  * This hook is provided by [AdapterDelegatesManager].

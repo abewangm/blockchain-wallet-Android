@@ -95,7 +95,7 @@ class LandingActivity : BaseMvpActivity<LandingView, LandingPresenter>(), Landin
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setMessage(getString(R.string.check_connectivity_exit))
                 .setCancelable(false)
-                .setNegativeButton(R.string.exit) { _, _ -> finishAffinity()}
+                .setNegativeButton(R.string.exit) { _, _ -> finishAffinity() }
                 .setPositiveButton(R.string.retry) { _, _ ->
                     val intent = Intent(this, LandingActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)

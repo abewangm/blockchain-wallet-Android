@@ -7,7 +7,7 @@ import piuk.blockchain.android.data.stores.PersistentStore
 import piuk.blockchain.android.util.annotations.Mockable
 
 @Mockable
-class SettingsMemoryStore: SettingsStore, PersistentStore<Settings> {
+class SettingsMemoryStore : SettingsStore, PersistentStore<Settings> {
 
     private var settings: Optional<Settings> = Optional.None
 

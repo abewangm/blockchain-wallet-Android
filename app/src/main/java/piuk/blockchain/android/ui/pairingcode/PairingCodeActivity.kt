@@ -33,6 +33,8 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
 
         pairing_first_step.text = presenter.firstStep
 
+        button_qr_toggle.setOnClickListener { onClickQRToggle() }
+
         onViewReady()
     }
 
@@ -65,11 +67,11 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
 
     override fun getView(): PairingCodeView = this
 
-    fun onClickQRToggle(view: View) {
+    private fun onClickQRToggle() {
         if (main_layout.visibility == View.VISIBLE) {
             // Show pairing QR
             main_layout.gone()
-            btn_qr_toggle.setText(R.string.pairing_code_hide_qr)
+            button_qr_toggle.setText(R.string.pairing_code_hide_qr)
             qr_layout.visible()
             iv_qr.gone()
 
@@ -78,7 +80,7 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
             // Hide pairing QR
             tv_warning.setText(R.string.pairing_code_warning_1)
             main_layout.visible()
-            btn_qr_toggle.setText(R.string.pairing_code_show_qr)
+            button_qr_toggle.setText(R.string.pairing_code_show_qr)
             qr_layout.gone()
         }
     }
@@ -91,4 +93,5 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
             context.startActivity(intent)
         }
     }
+
 }

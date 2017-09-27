@@ -36,6 +36,7 @@ class LandingPresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onViewReady show debug`() {
         //Arrange
         whenever(environmentSettings.shouldShowDebugMenu()).thenReturn(true)
@@ -44,11 +45,12 @@ class LandingPresenterTest {
         //Act
         subject.onViewReady()
         //Assert
-        verify(mockActivity).showToast("Current environment: env_prod",ToastCustom.TYPE_GENERAL)
+        verify(mockActivity).showToast("Current environment: env_prod", ToastCustom.TYPE_GENERAL)
         verify(mockActivity).showDebugMenu()
     }
 
     @Test
+    @Throws(Exception::class)
     fun `onViewReady no debug`() {
         //Arrange
         whenever(environmentSettings.shouldShowDebugMenu()).thenReturn(false)
@@ -59,6 +61,7 @@ class LandingPresenterTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun initPreLoginPrompts() {
         //Arrange
 

@@ -27,7 +27,6 @@ import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import javax.inject.Inject
 
-
 class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), DashboardView {
 
     override val shouldShowBuy: Boolean

@@ -225,7 +225,6 @@ class ChartDelegate<in T>(
         }
     }
 
-
     private class ChartViewHolder internal constructor(
             itemView: View
     ) : RecyclerView.ViewHolder(itemView) {

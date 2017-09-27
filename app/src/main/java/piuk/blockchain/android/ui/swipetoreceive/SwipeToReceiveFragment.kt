@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.swipetoreceive
 
-
 import android.content.*
 import android.graphics.Bitmap
 import android.os.Bundle
