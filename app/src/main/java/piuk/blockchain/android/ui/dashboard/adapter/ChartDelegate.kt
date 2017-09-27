@@ -174,6 +174,14 @@ class ChartDelegate<in T>(
                     it.chart.xAxis.granularity
                 }
             }
+            TimeSpan.ALL_TIME -> {
+                viewHolder?.let {
+                    it.chart.xAxis.setValueFormatter { fl, _ ->
+                        SimpleDateFormat("YYYY").format(Date(fl.toLong() * 1000))
+                    }
+                    it.chart.xAxis.granularity
+                }
+            }
             else -> {
                 viewHolder?.let {
                     it.chart.xAxis.setValueFormatter { fl, _ ->
