@@ -78,9 +78,8 @@ jobs:
       - store_artifacts:
           path: app/build/reports
           destination: Test Reports
-      - store_artifacts:
-          path: lint-report.html
-          destination: Lint Report HTML
+      - store_test_results:
+          path: build/test-results
 
 workflows:
   version: 2
