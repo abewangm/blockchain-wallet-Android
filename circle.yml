@@ -23,16 +23,20 @@ jobs:
           key: android-cache-
 
       - run:
+          name: chmod scripts
+          command: chmod -R -x /scripts
+
+      - run:
           name: Start Gradle Daemon
           command: nohup ./gradlew
 
       - run:
           name: Install Dependencies
-          command: bash ./scripts/ci_depedencies.sh
+          command: ./scripts/ci_depedencies.sh
 
       - run:
           name: Build Tests
-          command: bash ./scripts/ci_assemble.sh
+          command: ./scripts/ci_assemble.sh
 
       - save_cache:
           paths:
@@ -47,7 +51,7 @@ jobs:
 
       - run:
           name: Run Tests
-          command: bash ./scripts/ci_unit_tests.sh
+          command: ./scripts/ci_unit_tests.sh
 
       - store_artifacts:
           path: app/build/reports
@@ -75,8 +79,12 @@ jobs:
             - gradle-
 
       - run:
+          name: chmod scripts
+          command: chmod -R -x /scripts
+
+      - run:
           name: Run Checks
-          command: bash ./scripts/ci_quality.sh
+          command: ./scripts/ci_quality.sh
 
       - store_artifacts:
           path: app/build/reports
