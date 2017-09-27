@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.home;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Typeface;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -670,8 +672,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         buyWebView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     private void checkTradesIfReady() {
-        if (initialized && webViewLoginDetails != null) {
+        if (initialized && webViewLoginDetails != null && isBuySellPermitted()) {
             frontendJavascriptManager.checkForCompletedTrades(webViewLoginDetails);
         }
     }

@@ -36,3 +36,6 @@ fabric.properties
 
 # Release output
 app/**/release/output.json
+
+# Lint report
+app/lint-report.html

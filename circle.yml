@@ -28,11 +28,11 @@ jobs:
 
       - run:
           name: Install Dependencies
-          command: ./gradlew app:dependencies
+          command: scripts/ci_depedencies.sh
 
       - run:
           name: Build Tests
-          command: ./gradlew assembleEnvProdMinApi21Debug -Dpre-dex=false -Pkotlin.incremental=false
+          command: scripts/ci_assemble.sh
 
       - save_cache:
           paths:
@@ -47,7 +47,7 @@ jobs:
 
       - run:
           name: Run Tests
-          command: ./gradlew testEnvProdMinApi21DebugUnitTest testEnvProdMinApi21DebugUnitTestCoverage coveralls -Dpre-dex=false -Pkotlin.incremental=false 
+          command: scripts/ci_unit_tests.sh
 
       - store_artifacts:
           path: app/build/reports
@@ -57,6 +57,40 @@ jobs:
           destination: Test Result XML
       - store_test_results:
           path: build/test-results
+
+  checks:
+    docker:
+      - image: circleci/android:api-26-alpha
+    steps:
+      - checkout
+      - run:
+          name: Decode API Keys and Secrets
+          command: |
+            echo $FIREBASE_API_JSON  | base64 --decode > app/google-services.json
+            echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
+
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+            - gradle-
+
+      - run:
+          name: Run Checks
+          command: scripts/ci_quality.sh
+
+      - store_artifacts:
+          path: app/build/reports
+          destination: Test Reports
+      - store_artifacts:
+          path: lint-report.html
+          destination: Lint Report HTML
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - checks
 
 notify:
   webhooks:

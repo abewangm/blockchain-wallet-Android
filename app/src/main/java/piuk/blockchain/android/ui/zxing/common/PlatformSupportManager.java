@@ -74,8 +74,15 @@ public abstract class PlatformSupportManager<T> {
           Class<? extends T> clazz = Class.forName(className).asSubclass(managedInterface);
           Log.i(TAG, "Using implementation " + clazz + " of " + managedInterface + " for SDK " + minVersion);
           return clazz.getConstructor().newInstance();
-        } catch (ClassNotFoundException | IllegalAccessException | NoSuchMethodException
-                | InstantiationException | InvocationTargetException cnfe) {
+        } catch (ClassNotFoundException cnfe) {
+          Log.w(TAG, cnfe);
+        } catch (IllegalAccessException cnfe) {
+          Log.w(TAG, cnfe);
+        } catch (NoSuchMethodException cnfe) {
+          Log.w(TAG, cnfe);
+        } catch (InstantiationException cnfe) {
+          Log.w(TAG, cnfe);
+        } catch (InvocationTargetException cnfe) {
           Log.w(TAG, cnfe);
         }
       }

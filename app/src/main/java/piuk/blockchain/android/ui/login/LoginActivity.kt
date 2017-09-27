@@ -6,8 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
-import android.view.MenuItem
-import android.view.View
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
@@ -21,6 +19,7 @@ import piuk.blockchain.android.ui.zxing.CaptureActivity
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.helperfunctions.consume
 import javax.inject.Inject
 
 class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
@@ -40,6 +39,9 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
         setupToolbar(toolbar_general, R.string.pair_your_wallet)
 
         pairingFirstStep.text = getString(R.string.pair_wallet_step_1, EnvironmentSettings().explorerUrl + "wallet")
+
+        button_manual_pair.setOnClickListener { onClickManualPair() }
+        button_scan.setOnClickListener { onClickQRPair() }
     }
 
     override fun createPresenter() = loginPresenter
@@ -50,19 +52,14 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
         // No-op
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            android.R.id.home -> onBackPressed()
-        }
-        return super.onOptionsItemSelected(item)
-    }
+    override fun onSupportNavigateUp() = consume { onBackPressed() }
 
     override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == PAIRING_QR) {
-            if (data != null && data.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
+            if (data?.getStringExtra(CaptureActivity.SCAN_RESULT) != null) {
                 presenter.pairWithQR(data.getStringExtra(CaptureActivity.SCAN_RESULT))
             }
         }
@@ -102,8 +99,7 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
         startActivity(intent)
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun onClickQRPair(view: View) {
+    private fun onClickQRPair() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             PermissionUtil.requestCameraPermissionFromActivity(mainLayout, this)
         } else {
@@ -111,8 +107,7 @@ class LoginActivity : BaseMvpActivity<LoginView, LoginPresenter>(), LoginView {
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun onClickManualPair(view: View) {
+    private fun onClickManualPair() {
         startActivity(Intent(this, ManualPairingActivity::class.java))
     }
 

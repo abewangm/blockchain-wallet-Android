@@ -3,6 +3,8 @@
     <style name="AppTheme" parent="BaseTheme">
         <!-- v21 specific styles go here -->
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:toolbarStyle">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
 
     <style name="AppTheme.MainActivity">
