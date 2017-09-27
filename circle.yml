@@ -55,6 +55,7 @@ jobs:
           path: build/test-results
 
   checks:
+    resource_class: large
     docker:
       - image: circleci/android:api-26-alpha
     steps:
