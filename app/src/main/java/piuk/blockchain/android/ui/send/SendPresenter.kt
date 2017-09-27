@@ -73,7 +73,6 @@ class SendPresenter @Inject constructor(
         private val feeDataManager: FeeDataManager,
         private val privateKeyFactory: PrivateKeyFactory,
         private val environmentSettings: EnvironmentSettings,
-        private val sslVerifyUtil: SSLVerifyUtil,
         private val transactionListDataManager: TransactionListDataManager
 ) : BasePresenter<SendView>() {
 
@@ -111,15 +110,14 @@ class SendPresenter @Inject constructor(
     }
 
     override fun onViewReady() {
-        sslVerifyUtil.validateSSL()
-
         setupTextChangeSubject()
         updateTicker()
         updateCurrencyUnits()
     }
 
-    fun onBitcoinChosen() {
+    internal fun onBitcoinChosen() {
         compositeDisposable.clear()
+        view.showFeePriority()
         view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         updateTicker()
@@ -135,11 +133,11 @@ class SendPresenter @Inject constructor(
         view.setCryptoMaxLength(17)
         updateCurrencyUnits()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
-        view.showFeePriority()
     }
 
-    fun onEtherChosen() {
+    internal fun onEtherChosen() {
         compositeDisposable.clear()
+        view.hideFeePriority()
         view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.setFeePrioritySelection(0)
@@ -156,7 +154,6 @@ class SendPresenter @Inject constructor(
         view.setCryptoMaxLength(30)
         updateCurrencyUnits()
         checkForUnconfirmedTx()
-        view.hideFeePriority()
     }
 
     internal fun onContinueClicked() {

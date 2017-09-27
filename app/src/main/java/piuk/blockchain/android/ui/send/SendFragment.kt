@@ -225,6 +225,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             addTab(tabs.newTab().setText(R.string.bitcoin))
             addTab(tabs.newTab().setText(R.string.ether))
             setOnTabSelectedListener {
+                ViewUtils.hideKeyboard(activity)
+                closeKeypad()
                 if (it == 0) {
                     presenter.onBitcoinChosen()
                 } else {
@@ -660,14 +662,14 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     override fun showFeePriority() {
         textviewFeeType.visible()
         textviewFeeTime.visible()
-        spaceTextView.visible()
+        spacer.visible()
         spinnerPriority.visible()
     }
 
     override fun hideFeePriority() {
         textviewFeeType.gone()
         textviewFeeTime.gone()
-        spaceTextView.gone()
+        spacer.gone()
         spinnerPriority.invisible()
     }
 
