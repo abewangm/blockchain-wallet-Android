@@ -1013,7 +1013,7 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onSendingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
-        pendingTransaction.receivingObject = ItemAccount(
+        pendingTransaction.sendingObject = ItemAccount(
                 legacyAddress.label,
                 null,
                 null,
@@ -1027,10 +1027,11 @@ class SendPresenter @Inject constructor(
             label = legacyAddress.address
         }
         view.updateSendingAddress(label)
+        calculateSpendableAmounts(false, "0")
     }
 
     private fun onSendingBtcAccountSelected(account: Account) {
-        pendingTransaction.receivingObject = ItemAccount(
+        pendingTransaction.sendingObject = ItemAccount(
                 account.label,
                 null,
                 null,
@@ -1045,6 +1046,7 @@ class SendPresenter @Inject constructor(
         }
 
         view.updateSendingAddress(label)
+        calculateSpendableAmounts(false, "0")
     }
 
     private fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
