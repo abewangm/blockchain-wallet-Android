@@ -28,11 +28,11 @@ jobs:
 
       - run:
           name: Install Dependencies
-          command: ./scripts/ci_depedencies.sh
+          command: bash ./scripts/ci_depedencies.sh
 
       - run:
           name: Build Tests
-          command: ./scripts/ci_assemble.sh
+          command: bash ./scripts/ci_assemble.sh
 
       - save_cache:
           paths:
@@ -47,7 +47,7 @@ jobs:
 
       - run:
           name: Run Tests
-          command: ./scripts/ci_unit_tests.sh
+          command: bash ./scripts/ci_unit_tests.sh
 
       - store_artifacts:
           path: app/build/reports
@@ -76,7 +76,7 @@ jobs:
 
       - run:
           name: Run Checks
-          command: ./scripts/ci_quality.sh
+          command: bash ./scripts/ci_quality.sh
 
       - store_artifacts:
           path: app/build/reports
