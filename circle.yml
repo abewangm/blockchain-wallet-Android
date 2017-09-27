@@ -24,7 +24,7 @@ jobs:
 
       - run:
           name: chmod scripts
-          command: chmod -R -x /scripts
+          command: chmod -R -x scripts
 
       - run:
           name: Start Gradle Daemon
@@ -80,7 +80,7 @@ jobs:
 
       - run:
           name: chmod scripts
-          command: chmod -R -x /scripts
+          command: chmod -R -x scripts
 
       - run:
           name: Run Checks
