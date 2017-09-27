@@ -182,6 +182,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             setOnLongClickListener { consume { onShareClicked() } }
         }
 
+        // Receive address
+        textview_receiving_address.setOnClickListener { showClipboardWarning() }
+
         toAddressTextView.setOnClickListener {
             AccountChooserActivity.startForResult(
                     this,
@@ -327,7 +330,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override fun getBtcAmount() = amountCrypto.getTextString()
 
     override fun updateReceiveAddress(address: String) {
-        edittext_receiving_address.setText(address)
+        textview_receiving_address.text = address
     }
 
     override fun hideContactsIntroduction() {
@@ -359,14 +362,14 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun showQrLoading() {
         image_qr.invisible()
-        edittext_receiving_address.invisible()
+        textview_receiving_address.invisible()
         progressbar.visible()
     }
 
     override fun showQrCode(bitmap: Bitmap?) {
         progressbar.invisible()
         image_qr.visible()
-        edittext_receiving_address.visible()
+        textview_receiving_address.visible()
         image_qr.setImageBitmap(bitmap)
     }
 
@@ -567,7 +570,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes) { _, _ ->
                     val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Send address", edittext_receiving_address.getTextString())
+                    val clip = ClipData.newPlainText("Send address", textview_receiving_address.text)
                     toast(R.string.copied_to_clipboard)
                     clipboard.primaryClip = clip
                 }

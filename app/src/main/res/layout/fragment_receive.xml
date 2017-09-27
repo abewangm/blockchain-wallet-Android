@@ -80,20 +80,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textview_receive_helper" />
 
-            <EditText
-                android:id="@+id/edittext_receiving_address"
+            <TextView
+                android:id="@+id/textview_receiving_address"
                 fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal|center_vertical"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:background="@android:color/transparent"
+                android:layout_marginTop="-8dp"
                 android:gravity="center_horizontal|center_vertical"
-                android:inputType="none"
-                android:textAlignment="gravity"
+                android:padding="8dp"
                 android:textColor="@color/primary_gray_dark"
-                android:textIsSelectable="true"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -109,7 +107,7 @@
                 android:background="@color/primary_gray_light"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/edittext_receiving_address" />
+                app:layout_constraintTop_toBottomOf="@+id/textview_receiving_address" />
 
             <include
                 android:id="@+id/amount_container"
