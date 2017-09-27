@@ -25,7 +25,6 @@ import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragmen
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import javax.inject.Inject
 
-
 class ContactConfirmRequestPresenter @Inject internal constructor(
         private val contactsDataManager: ContactsDataManager,
         private val payloadDataManager: PayloadDataManager

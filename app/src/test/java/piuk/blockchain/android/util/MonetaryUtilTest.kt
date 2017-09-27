@@ -12,6 +12,7 @@ class MonetaryUtilTest {
     val subject = MonetaryUtil(0)
 
     @Test
+    @Throws(Exception::class)
     fun `updateUnit bits`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MICRO_BTC)
@@ -22,6 +23,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `updateUnit mBTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MILLI_BTC)
@@ -32,6 +34,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `updateUnit BTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.UNIT_BTC)
@@ -42,6 +45,7 @@ class MonetaryUtilTest {
     }
 
     @Test(expected = IllegalArgumentException::class)
+    @Throws(Exception::class)
     fun `updateUnit invalid format`() {
         // Arrange
         subject.updateUnit(7)
@@ -52,6 +56,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getBTCFormat() {
         // Arrange
 
@@ -62,9 +67,10 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getFiatFormat() {
         // Arrange
-        val currency ="GBP"
+        val currency = "GBP"
         // Act
         val result = subject.getFiatFormat(currency)
         // Assert
@@ -72,6 +78,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getBTCUnits() {
         // Arrange
 
@@ -83,6 +90,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun getBtcUnit() {
         // Arrange
 
@@ -93,6 +101,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmount bits`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MICRO_BTC)
@@ -103,6 +112,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmount mBTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MILLI_BTC)
@@ -113,6 +123,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmount BTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.UNIT_BTC)
@@ -123,6 +134,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getUndenominatedAmount long bits`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MICRO_BTC)
@@ -133,6 +145,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getUndenominatedAmount long mBTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MILLI_BTC)
@@ -143,6 +156,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getUndenominatedAmount long BTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.UNIT_BTC)
@@ -153,6 +167,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getUndenominatedAmount double bits`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MICRO_BTC)
@@ -163,6 +178,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getUndenominatedAmount double mBTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MILLI_BTC)
@@ -173,6 +189,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getUndenominatedAmount double BTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.UNIT_BTC)
@@ -183,6 +200,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDenominatedAmount bits`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MICRO_BTC)
@@ -193,6 +211,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDenominatedAmount mBTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MILLI_BTC)
@@ -203,6 +222,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDenominatedAmount BTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.UNIT_BTC)
@@ -213,6 +233,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmountWithFormatting long bits`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MICRO_BTC)
@@ -223,6 +244,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmountWithFormatting long mBTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MILLI_BTC)
@@ -233,6 +255,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmountWithFormatting long BTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.UNIT_BTC)
@@ -243,6 +266,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmountWithFormatting double bits`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MICRO_BTC)
@@ -253,6 +277,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmountWithFormatting double mBTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.MILLI_BTC)
@@ -263,6 +288,7 @@ class MonetaryUtilTest {
     }
 
     @Test
+    @Throws(Exception::class)
     fun `getDisplayAmountWithFormatting double BTC`() {
         // Arrange
         subject.updateUnit(MonetaryUtil.UNIT_BTC)

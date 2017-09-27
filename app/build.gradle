@@ -246,15 +246,14 @@ dependencies {
     testImplementation 'org.json:json:20140107'
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
-    testImplementation('org.robolectric:robolectric:3.4.2') {
-        exclude group: 'com.google.guava'
-        exclude group: 'com.google.protobuf'
-    }
-    // Unit Tests in Kotlin
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation 'org.amshove.kluent:kluent:1.19'
     testImplementation("com.nhaarman:mockito-kotlin:1.5.0") {
         exclude module: 'kotlin-stdlib'
+    }
+    testImplementation('org.robolectric:robolectric:3.4.2') {
+        exclude group: 'com.google.guava'
+        exclude group: 'com.google.protobuf'
     }
 }
 

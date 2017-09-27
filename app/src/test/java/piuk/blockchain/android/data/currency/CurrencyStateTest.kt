@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.currency
 
 import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import org.junit.Assert
 import org.junit.Before
@@ -25,99 +24,106 @@ class CurrencyStateTest : RxTest() {
     @Throws(Exception::class)
     fun getSelectedCryptoCurrencyDefault() {
         // Arrange
-        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name)).thenReturn(CryptoCurrencies.BTC.name)
+        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name))
+                .thenReturn(CryptoCurrencies.BTC.name)
         subject.init(mockPrefs)
         // Act
 
         // Assert
-        Assert.assertEquals(subject.getCryptoCurrency(), CryptoCurrencies.BTC)
+        Assert.assertEquals(subject.cryptoCurrency, CryptoCurrencies.BTC)
     }
 
     @Test
     @Throws(Exception::class)
     fun getSelectedCryptoCurrencyEther() {
         // Arrange
-        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name)).thenReturn(CryptoCurrencies.ETHER.name)
+        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name))
+                .thenReturn(CryptoCurrencies.ETHER.name)
         subject.init(mockPrefs)
         // Act
 
         // Assert
-        Assert.assertEquals(subject.getCryptoCurrency(), CryptoCurrencies.ETHER)
+        Assert.assertEquals(subject.cryptoCurrency, CryptoCurrencies.ETHER)
     }
 
     @Test
     @Throws(Exception::class)
     fun getSetSelectedCryptoCurrencyBtc() {
         // Arrange
-        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name)).thenReturn(CryptoCurrencies.ETHER.name)
+        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name))
+                .thenReturn(CryptoCurrencies.ETHER.name)
         subject.init(mockPrefs)
         // Act
-        subject.setCryptoCurrency(CryptoCurrencies.BTC)
+        subject.cryptoCurrency = CryptoCurrencies.BTC
         // Assert
-        Assert.assertEquals(subject.getCryptoCurrency(), CryptoCurrencies.BTC)
+        Assert.assertEquals(subject.cryptoCurrency, CryptoCurrencies.BTC)
     }
 
     @Test
     @Throws(Exception::class)
     fun getSetSelectedCryptoCurrencyEther() {
         // Arrange
-        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name)).thenReturn(CryptoCurrencies.ETHER.name)
+        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name))
+                .thenReturn(CryptoCurrencies.ETHER.name)
         subject.init(mockPrefs)
         // Act
-        subject.setCryptoCurrency(CryptoCurrencies.ETHER)
+        subject.cryptoCurrency = CryptoCurrencies.ETHER
         // Assert
-        Assert.assertEquals(subject.getCryptoCurrency(), CryptoCurrencies.ETHER)
+        Assert.assertEquals(subject.cryptoCurrency, CryptoCurrencies.ETHER)
     }
 
     @Test
     @Throws(Exception::class)
     fun isDisplayingCryptoDefault() {
         // Arrange
-        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name)).thenReturn(CryptoCurrencies.ETHER.name)
+        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name))
+                .thenReturn(CryptoCurrencies.ETHER.name)
         subject.init(mockPrefs)
         // Act
 
         // Assert
-        Assert.assertTrue(subject.isDisplayingCryptoCurrency())
+        Assert.assertTrue(subject.isDisplayingCryptoCurrency)
     }
 
     @Test
     @Throws(Exception::class)
     fun isDisplayingCryptoFalse() {
         // Arrange
-        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name)).thenReturn(CryptoCurrencies.ETHER.name)
+        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name))
+                .thenReturn(CryptoCurrencies.ETHER.name)
         subject.init(mockPrefs)
         // Act
-        subject.setDisplayingCryptoCurrency(false)
+        subject.isDisplayingCryptoCurrency = false
         // Assert
-        Assert.assertFalse(subject.isDisplayingCryptoCurrency())
+        Assert.assertFalse(subject.isDisplayingCryptoCurrency)
     }
 
     @Test
     @Throws(Exception::class)
     fun isDisplayingCryptoTrue() {
         // Arrange
-        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name)).thenReturn(CryptoCurrencies.ETHER.name)
+        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name))
+                .thenReturn(CryptoCurrencies.ETHER.name)
         subject.init(mockPrefs)
         // Act
-        subject.setDisplayingCryptoCurrency(true)
+        subject.isDisplayingCryptoCurrency = true
         // Assert
-        Assert.assertTrue(subject.isDisplayingCryptoCurrency())
+        Assert.assertTrue(subject.isDisplayingCryptoCurrency)
     }
-
 
     @Test
     @Throws(Exception::class)
     fun toggleCryptoCurrency() {
         // Arrange
-        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name)).thenReturn(CryptoCurrencies.BTC.name)
+        whenever(mockPrefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name))
+                .thenReturn(CryptoCurrencies.BTC.name)
         subject.init(mockPrefs)
         // Act
         // Assert
-        Assert.assertEquals(subject.getCryptoCurrency(), CryptoCurrencies.BTC)
+        Assert.assertEquals(subject.cryptoCurrency, CryptoCurrencies.BTC)
         subject.toggleCryptoCurrency()
-        Assert.assertEquals(subject.getCryptoCurrency(), CryptoCurrencies.ETHER)
+        Assert.assertEquals(subject.cryptoCurrency, CryptoCurrencies.ETHER)
         subject.toggleCryptoCurrency()
-        Assert.assertEquals(subject.getCryptoCurrency(), CryptoCurrencies.BTC)
+        Assert.assertEquals(subject.cryptoCurrency, CryptoCurrencies.BTC)
     }
 }

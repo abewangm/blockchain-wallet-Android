@@ -4,7 +4,7 @@ import android.support.v7.app.AlertDialog
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
-interface LandingView: View {
+interface LandingView : View {
 
     fun showDebugMenu()
 

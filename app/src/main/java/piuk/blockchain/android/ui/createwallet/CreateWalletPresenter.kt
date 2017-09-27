@@ -85,7 +85,7 @@ class CreateWalletPresenter @Inject constructor(
                 }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.creating_wallet) }
-                .doOnTerminate{ view.dismissProgressDialog() }
+                .doOnTerminate { view.dismissProgressDialog() }
                 .subscribe({
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL, email)
                     view.startPinEntryActivity()
@@ -112,7 +112,7 @@ class CreateWalletPresenter @Inject constructor(
                 }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.restoring_wallet) }
-                .doOnTerminate{ view.dismissProgressDialog() }
+                .doOnTerminate { view.dismissProgressDialog() }
                 .subscribe({
                     prefsUtil.setValue(PrefsUtil.KEY_EMAIL, email)
                     prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, true)

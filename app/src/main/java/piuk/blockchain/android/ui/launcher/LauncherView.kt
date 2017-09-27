@@ -5,7 +5,7 @@ import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 
-interface LauncherView: View {
+interface LauncherView : View {
 
     fun getPageIntent(): Intent
 

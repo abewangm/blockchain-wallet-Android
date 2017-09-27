@@ -4,7 +4,6 @@ import android.support.v4.util.SparseArrayCompat
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 
-
 /**
  * This class manages the [AdapterDelegate] objects and delegates functions to the appropriate
  * delegates for the current object type. Register and remove [AdapterDelegate] objects here, and
@@ -14,7 +13,7 @@ import android.view.ViewGroup
  */
 class AdapterDelegatesManager<T> {
 
-    private val PAYLOADS_EMPTY_LIST = ArrayList<Any>()
+    private val arrayList = ArrayList<Any>()
 
     private var delegates: SparseArrayCompat<AdapterDelegate<T>> = SparseArrayCompat()
 
@@ -96,7 +95,7 @@ class AdapterDelegatesManager<T> {
         val delegate = getDelegateForViewType(viewHolder.itemViewType)
                 ?: throw NullPointerException("No delegate found for item at position $position for view type  ${viewHolder.itemViewType}")
 
-        delegate.onBindViewHolder(items, position, viewHolder, payloads ?: PAYLOADS_EMPTY_LIST)
+        delegate.onBindViewHolder(items, position, viewHolder, payloads ?: arrayList)
     }
 
     /**
@@ -109,7 +108,7 @@ class AdapterDelegatesManager<T> {
      * @param viewHolder    The [RecyclerView.ViewHolder] for the current item
      */
     fun onBindViewHolder(items: List<T>, position: Int, viewHolder: RecyclerView.ViewHolder?) =
-            onBindViewHolder(items, position, viewHolder, PAYLOADS_EMPTY_LIST)
+            onBindViewHolder(items, position, viewHolder, arrayList)
 
     /**
      * Returns the [AdapterDelegate] for a given view type

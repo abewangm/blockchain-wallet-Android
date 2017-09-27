@@ -28,9 +28,6 @@ import javax.inject.Inject
 @Mockable
 class ExchangeRateFactory private constructor() {
 
-    private final val SATOSHIS_PER_BITCOIN = BigDecimal.valueOf(100_000_000L)
-    private final val WEI_PER_ETHER = BigDecimal.valueOf(1e18)
-
     private object Holder {
         val INSTANCE = ExchangeRateFactory()
     }
@@ -42,8 +39,8 @@ class ExchangeRateFactory private constructor() {
     private var btcTickerData: TreeMap<String, TickerItem>? = null
     private var ethTickerData: TreeMap<String, TickerItem>? = null
 
-    @Inject lateinit final var prefsUtil: PrefsUtil
-    @Inject lateinit final var rxBus: RxBus
+    @Inject final lateinit var prefsUtil: PrefsUtil
+    @Inject final lateinit var rxBus: RxBus
 
     init {
         @Suppress("LeakingThis") // This will be resolved in the future
@@ -194,8 +191,11 @@ class ExchangeRateFactory private constructor() {
 
     companion object {
 
-        private val PREF_LAST_KNOWN_BTC_PRICE = "LAST_KNOWN_BTC_VALUE_FOR_CURRENCY_"
-        private val PREF_LAST_KNOWN_ETH_PRICE = "LAST_KNOWN_ETH_VALUE_FOR_CURRENCY_"
+        private const val PREF_LAST_KNOWN_BTC_PRICE = "LAST_KNOWN_BTC_VALUE_FOR_CURRENCY_"
+        private const val PREF_LAST_KNOWN_ETH_PRICE = "LAST_KNOWN_ETH_VALUE_FOR_CURRENCY_"
+
+        private val SATOSHIS_PER_BITCOIN = BigDecimal.valueOf(100_000_000L)
+        private val WEI_PER_ETHER = BigDecimal.valueOf(1e18)
 
         @JvmStatic
         val instance: ExchangeRateFactory by unsafeLazy { Holder.INSTANCE }

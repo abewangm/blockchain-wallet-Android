@@ -110,6 +110,6 @@ class OnboardingDelegate<in T>(
         internal var viewPager: LockableViewPager = itemView.pager_onboarding
         internal var indicator: CircleIndicator = itemView.indicator
 
-
     }
+
 }
