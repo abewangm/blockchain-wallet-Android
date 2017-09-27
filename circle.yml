@@ -27,10 +27,6 @@ jobs:
           command: nohup ./gradlew
 
       - run:
-          name: Install Dependencies
-          command: ./scripts/ci_depedencies.sh
-
-      - run:
           name: Build Tests
           command: ./scripts/ci_assemble.sh
 

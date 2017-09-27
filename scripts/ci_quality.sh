@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-./gradlew --no-daemon --stacktrace lintEnvProdMinApi16Debug
+./gradlew lintEnvProdMinApi16Debug -Dpre-dex=false -Pkotlin.incremental=false --no-daemon --stacktrace
