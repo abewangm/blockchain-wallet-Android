@@ -110,6 +110,7 @@ class SendPresenter @Inject constructor(
     }
 
     override fun onViewReady() {
+        resetAccountList()
         setupTextChangeSubject()
         updateTicker()
         updateCurrencyUnits()
@@ -600,39 +601,30 @@ class SendPresenter @Inject constructor(
      * Get cached dynamic fee from new Fee options endpoint
      */
     private fun getSuggestedFee() {
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-                feeOptions = dynamicFeeCache.btcFeeOptions!!
-                // Refresh fee cache
-                compositeDisposable.add(
-                        feeDataManager.btcFeeOptions
-                                .doOnError {
-                                    view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
-                                    view.finishPage()
-                                    Timber.e(it)
-                                }
-                                .doOnTerminate { feeOptions = dynamicFeeCache.btcFeeOptions!! }
-                                .subscribe({ dynamicFeeCache.btcFeeOptions = it }) { it.printStackTrace() })
-            }
-            CryptoCurrencies.ETHER -> {
-                feeOptions = dynamicFeeCache.ethFeeOptions!!
-                // Refresh fee cache
-                compositeDisposable.add(
-                        feeDataManager.ethFeeOptions
-                                .doOnError {
-                                    view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
-                                    view.finishPage()
-                                    Timber.e(it)
-                                }
-                                .doOnTerminate { feeOptions = dynamicFeeCache.ethFeeOptions!! }
-                                .subscribe({ dynamicFeeCache.ethFeeOptions = it }) { it.printStackTrace() })
+        val observable = when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> feeDataManager.btcFeeOptions
+                    .doOnSubscribe { feeOptions = dynamicFeeCache.btcFeeOptions!! }
+                    .doOnNext { dynamicFeeCache.btcFeeOptions = it }
 
-            }
+            CryptoCurrencies.ETHER -> feeDataManager.ethFeeOptions
+                    .doOnSubscribe { feeOptions = dynamicFeeCache.ethFeeOptions!! }
+                    .doOnNext { dynamicFeeCache.ethFeeOptions = it }
+
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
+
+        observable.compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { /* No-op */ },
+                        {
+                            Timber.e(it)
+                            view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
+                            view.finishPage()
+                        }
+                )
     }
 
-    internal fun getFeeOptions(): FeeOptions? = dynamicFeeCache.btcFeeOptions
+    internal fun getBitcoinFeeOptions(): FeeOptions? = dynamicFeeCache.btcFeeOptions
 
     internal fun getFeeOptionsForDropDown(): List<DisplayFeeOptions> {
         val regular = DisplayFeeOptions(
@@ -897,7 +889,8 @@ class SendPresenter @Inject constructor(
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $number")
         }
 
-        if (maxAvailable <= Payment.DUST) {
+        // No dust in Ethereum
+        if (maxAvailable <= BigInteger.ZERO) {
             view.updateMaxAvailable(stringUtils.getString(R.string.insufficient_funds))
             view.updateMaxAvailableColor(R.color.product_red_medium)
         } else {

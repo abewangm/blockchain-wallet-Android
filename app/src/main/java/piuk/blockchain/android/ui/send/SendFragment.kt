@@ -822,8 +822,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         edittextCustomFee.setOnFocusChangeListener({ _, hasFocus ->
             if (hasFocus || !edittextCustomFee.text.toString().isEmpty()) {
                 textInputLayout.hint = getString(R.string.fee_options_sat_byte_inline_hint,
-                        presenter.getFeeOptions()?.regularFee.toString(),
-                        presenter.getFeeOptions()?.priorityFee.toString())
+                        presenter.getBitcoinFeeOptions()?.regularFee.toString(),
+                        presenter.getBitcoinFeeOptions()?.priorityFee.toString())
             } else if (edittextCustomFee.text.toString().isEmpty()) {
                 textInputLayout.hint = getString(R.string.fee_options_sat_byte_hint)
             } else {
@@ -839,9 +839,9 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 .map { java.lang.Long.valueOf(it) }
                 .onErrorReturnItem(0L)
                 .doOnNext { value ->
-                    if (presenter.getFeeOptions() != null && value < presenter.getFeeOptions()!!.limits.min) {
+                    if (presenter.getBitcoinFeeOptions() != null && value < presenter.getBitcoinFeeOptions()!!.limits.min) {
                         textInputLayout.error = getString(R.string.fee_options_fee_too_low)
-                    } else if (presenter.getFeeOptions() != null && value > presenter.getFeeOptions()!!.limits.max) {
+                    } else if (presenter.getBitcoinFeeOptions() != null && value > presenter.getBitcoinFeeOptions()!!.limits.max) {
                         textInputLayout.error = getString(R.string.fee_options_fee_too_high)
                     } else {
                         textInputLayout.error = null
