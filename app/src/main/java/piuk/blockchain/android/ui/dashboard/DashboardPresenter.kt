@@ -48,6 +48,7 @@ class DashboardPresenter @Inject constructor(
     private var cryptoCurrency = CryptoCurrencies.BTC
     private val displayList = mutableListOf<Any>(ChartDisplayable())
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
+    private var timeSpan = TimeSpan.MONTH
 
     override fun onViewReady() {
         view.notifyItemAdded(displayList, 0)
@@ -71,11 +72,11 @@ class DashboardPresenter @Inject constructor(
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         this.cryptoCurrency = cryptoCurrency
         updateCryptoPrice()
-        updateChartsData(TimeSpan.MONTH)
+        updateChartsData(timeSpan)
     }
 
     internal fun onResume() {
-        updateChartsData(TimeSpan.MONTH)
+        updateChartsData(timeSpan)
         updateAllBalances()
         updatePrices()
     }
@@ -97,6 +98,7 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun updateChartsData(timeSpan: TimeSpan) {
+        this.timeSpan = timeSpan
         compositeDisposable.clear()
 
         view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))

@@ -134,7 +134,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_price" />
+        app:layout_constraintTop_toBottomOf="@+id/textview_price"
+        tools:ignore="RtlHardcoded,RtlSymmetry" />
 
     <ProgressBar
         android:id="@+id/progress_bar"

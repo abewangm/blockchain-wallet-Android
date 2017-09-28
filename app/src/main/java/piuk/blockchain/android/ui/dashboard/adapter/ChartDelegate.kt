@@ -175,29 +175,16 @@ class ChartDelegate<in T>(
 
     @SuppressLint("SimpleDateFormat")
     private fun setDateFormatter(timeSpan: TimeSpan) {
-        when (timeSpan) {
-            TimeSpan.DAY -> {
-                viewHolder?.let {
-                    it.chart.xAxis.setValueFormatter { fl, _ ->
-                        SimpleDateFormat("H:00").format(Date(fl.toLong() * 1000))
-                    }
-                    it.chart.xAxis.granularity
-                }
-            }
-            TimeSpan.ALL_TIME -> {
-                viewHolder?.let {
-                    it.chart.xAxis.setValueFormatter { fl, _ ->
-                        SimpleDateFormat("YYYY").format(Date(fl.toLong() * 1000))
-                    }
-                    it.chart.xAxis.granularity
-                }
-            }
-            else -> {
-                viewHolder?.let {
-                    it.chart.xAxis.setValueFormatter { fl, _ ->
-                        SimpleDateFormat("MMM dd").format(Date(fl.toLong() * 1000))
-                    }
-                }
+        val dateFormat = when (timeSpan) {
+            TimeSpan.ALL_TIME -> SimpleDateFormat("YYYY")
+            TimeSpan.YEAR -> SimpleDateFormat("MMM ''YY")
+            TimeSpan.MONTH, TimeSpan.WEEK -> SimpleDateFormat("dd. MMM")
+            TimeSpan.DAY -> SimpleDateFormat("H:00")
+        }
+
+        viewHolder?.let {
+            it.chart.xAxis.setValueFormatter { fl, _ ->
+                dateFormat.format(Date(fl.toLong() * 1000))
             }
         }
     }
@@ -236,7 +223,7 @@ class ChartDelegate<in T>(
             xAxis.textColor = ContextCompat.getColor(context, R.color.primary_gray_medium)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.isGranularityEnabled = true
-            setExtraOffsets(16f, 0f, 16f, 10f)
+            setExtraOffsets(8f, 0f, 0f, 10f)
             setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
         }
     }
