@@ -10,6 +10,7 @@ import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.data.charts.ChartsDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
@@ -36,6 +37,7 @@ class DashboardPresenterTest {
     private val rxBus: RxBus = mock()
     private val swipeToReceiveHelper: SwipeToReceiveHelper = mock()
     private val view: DashboardView = mock()
+    private val currencyState: CurrencyState = mock()
 
     @Before
     fun setUp() {
@@ -51,7 +53,8 @@ class DashboardPresenterTest {
                 appUtil,
                 buyDataManager,
                 rxBus,
-                swipeToReceiveHelper
+                swipeToReceiveHelper,
+                currencyState
         )
 
         subject.initView(view)
@@ -323,6 +326,32 @@ class DashboardPresenterTest {
         verify(exchangeRateFactory).getLastEthPrice("USD")
         verify(exchangeRateFactory).updateTickers()
         verify(exchangeRateFactory, atLeastOnce()).getSymbol("USD")
+        verifyNoMoreInteractions(exchangeRateFactory)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun invertViewType() {
+        // Arrange
+        subject.btcBalance = 1_000_000_000L
+        subject.ethBalance = BigInteger.valueOf(1_000_000_000_000_000_000L)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
+                .thenReturn("USD")
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2.0)
+        whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
+        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
+        // Act
+        subject.invertViewType()
+        // Assert
+        verify(view).updateBtcBalance("20.00 USD")
+        verify(view).updateEthBalance("3.00 USD")
+        verifyNoMoreInteractions(view)
+        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        verifyNoMoreInteractions(prefsUtil)
+        verify(exchangeRateFactory, atLeastOnce()).getLastBtcPrice("USD")
+        verify(exchangeRateFactory).getLastEthPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
     }
 
