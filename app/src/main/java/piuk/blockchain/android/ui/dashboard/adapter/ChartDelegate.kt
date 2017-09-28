@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.dashboard.adapter
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.graphics.Paint
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
@@ -10,10 +11,13 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.utils.MPPointF
 import kotlinx.android.synthetic.main.item_chart.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.TimeSpan
@@ -29,11 +33,13 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 class ChartDelegate<in T>(
         private val activity: Activity
 ) : AdapterDelegate<T> {
 
     private var viewHolder: ChartViewHolder? = null
+    private var fiatSymbol: String? = null
 
     private val typefaceRegular by unsafeLazy {
         TypefaceUtils.load(
@@ -96,7 +102,8 @@ class ChartDelegate<in T>(
     }
 
     private fun showData(data: ChartsState.Data) {
-        configureChart(data.fiatSymbol)
+        fiatSymbol = data.fiatSymbol
+        configureChart()
 
         viewHolder?.let {
             it.day.setOnClickListener { data.getChartDay() }
@@ -119,6 +126,9 @@ class ChartDelegate<in T>(
                     setDrawCircleHole(false)
                     setCircleColor(ContextCompat.getColor(activity, R.color.primary_navy_medium))
                     setDrawFilled(false)
+                    isHighlightEnabled = true
+                    setDrawHighlightIndicators(false)
+                    marker = ValueMarker(context, R.layout.item_chart_marker)
                 })
 
                 animateX(500)
@@ -207,16 +217,13 @@ class ChartDelegate<in T>(
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun configureChart(fiatSymbol: String) {
+    private fun configureChart() {
         viewHolder?.chart?.apply {
             setDrawGridBackground(false)
             setDrawBorders(false)
-            setTouchEnabled(false)
             setScaleEnabled(false)
             setPinchZoom(false)
             isDoubleTapToZoomEnabled = false
-            isHighlightPerTapEnabled = false
-            isHighlightPerDragEnabled = false
             description.isEnabled = false
             legend.isEnabled = false
             axisLeft.setDrawGridLines(false)
@@ -229,11 +236,38 @@ class ChartDelegate<in T>(
             xAxis.textColor = ContextCompat.getColor(context, R.color.primary_gray_medium)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.isGranularityEnabled = true
-            setExtraOffsets(0f, 0f, 0f, 10f)
+            setExtraOffsets(16f, 0f, 16f, 10f)
             setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
         }
     }
 
+    inner class ValueMarker(
+            context: Context,
+            layoutResource: Int
+    ) : MarkerView(context, layoutResource) {
+
+        private val date = findViewById<TextView>(R.id.textview_marker_date)
+        private val price = findViewById<TextView>(R.id.textview_marker_price)
+
+        private var mpPointF: MPPointF? = null
+
+        @SuppressLint("SimpleDateFormat", "SetTextI18n")
+        override fun refreshContent(e: Entry, highlight: Highlight) {
+            date.text = SimpleDateFormat("E, MMM dd, HH:mm").format(Date(e.x.toLong() * 1000))
+            price.text = "$fiatSymbol${e.y}"
+
+            super.refreshContent(e, highlight)
+        }
+
+        override fun getOffset(): MPPointF {
+            if (mpPointF == null) {
+                // Center the marker horizontally and vertically
+                mpPointF = MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
+            }
+
+            return mpPointF!!
+        }
+    }
 
     private class ChartViewHolder internal constructor(
             itemView: View
