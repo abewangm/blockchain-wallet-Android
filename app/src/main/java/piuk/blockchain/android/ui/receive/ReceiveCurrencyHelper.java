@@ -13,7 +13,6 @@ import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import timber.log.Timber;
 
 public class ReceiveCurrencyHelper {
 
@@ -175,8 +174,7 @@ public class ReceiveCurrencyHelper {
         if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
             return getMaxBtcDecimalLength();
         } else {
-            // TODO: 31/08/2017 Ether max?
-            return 30;
+            return 18;
         }
     }
 
