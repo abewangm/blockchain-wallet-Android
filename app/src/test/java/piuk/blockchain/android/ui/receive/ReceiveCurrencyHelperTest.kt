@@ -303,7 +303,7 @@ class ReceiveCurrencyHelperTest {
         // Act
         val value = subject.maxCryptoDecimalLength
         // Assert
-        value `should equal to` 30
+        value `should equal to` 18
     }
 
     @Test

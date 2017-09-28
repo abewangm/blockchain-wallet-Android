@@ -771,12 +771,8 @@ class SendPresenter @Inject constructor(
         val feePerKb = getFeePerKbFromPriority(view.getFeePriority())
 
         when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-                calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
-            }
-            CryptoCurrencies.ETHER -> {
-                getEthAccountResponse(spendAll, amountToSendText)
-            }
+            CryptoCurrencies.BTC -> calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
+            CryptoCurrencies.ETHER -> getEthAccountResponse(spendAll, amountToSendText)
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
@@ -857,13 +853,10 @@ class SendPresenter @Inject constructor(
             ethDataManager.fetchEthAddress()
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnError { view.showSnackbar(R.string.api_fail, Snackbar.LENGTH_INDEFINITE) }
-                    .subscribe {
-                        calculateUnspentEth(it, spendAll, amountToSendText)
-                    }
+                    .subscribe { calculateUnspentEth(it, spendAll, amountToSendText) }
         } else {
-            val combinedEthModel = ethDataManager.getEthResponseModel()
-            combinedEthModel?.let {
-                calculateUnspentEth(combinedEthModel, spendAll, amountToSendText)
+            ethDataManager.getEthResponseModel()?.let {
+                calculateUnspentEth(it, spendAll, amountToSendText)
             }
         }
     }
@@ -899,8 +892,8 @@ class SendPresenter @Inject constructor(
             val fiatBalanceFormatted = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit).format(fiatBalance)
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $fiatBalanceFormatted ${currencyHelper.fiatUnit}")
         } else {
-            val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 16 }
-                    .run { format(availableEth.toDouble()) }
+            val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 18 }
+                    .run { format(availableEth) }
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $number")
         }
 
