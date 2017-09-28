@@ -126,20 +126,18 @@
                         android:gravity="center|left"
                         android:text="@string/fee"
                         android:textColor="@color/primary_gray_dark"
-                        app:layout_constraintEnd_toStartOf="@+id/spaceTextView"
+                        app:layout_constraintEnd_toStartOf="@+id/spacer"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="MissingPrefix" />
 
-                    <TextView
-                        android:id="@+id/spaceTextView"
-                        fontPath="fonts/Montserrat-Light.ttf"
+                    <android.support.v4.widget.Space
+                        android:id="@+id/spacer"
                         android:layout_width="50dp"
                         android:layout_height="wrap_content"
                         android:layout_marginRight="8dp"
                         android:layout_marginTop="8dp"
                         android:gravity="center|left"
-                        android:textColor="@color/primary_gray_dark"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="MissingPrefix" />
@@ -234,7 +232,7 @@
                         android:dropDownWidth="250dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="@+id/spaceTextView"
+                        app:layout_constraintStart_toStartOf="@+id/spacer"
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </android.support.constraint.ConstraintLayout>

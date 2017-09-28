@@ -174,6 +174,14 @@ class ChartDelegate<in T>(
                     it.chart.xAxis.granularity
                 }
             }
+            TimeSpan.ALL_TIME -> {
+                viewHolder?.let {
+                    it.chart.xAxis.setValueFormatter { fl, _ ->
+                        SimpleDateFormat("YYYY").format(Date(fl.toLong() * 1000))
+                    }
+                    it.chart.xAxis.granularity
+                }
+            }
             else -> {
                 viewHolder?.let {
                     it.chart.xAxis.setValueFormatter { fl, _ ->
@@ -221,6 +229,7 @@ class ChartDelegate<in T>(
             xAxis.textColor = ContextCompat.getColor(context, R.color.primary_gray_medium)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.isGranularityEnabled = true
+            setExtraOffsets(0f, 0f, 0f, 10f)
             setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
         }
     }

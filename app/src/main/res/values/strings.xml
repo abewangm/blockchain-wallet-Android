@@ -13,7 +13,7 @@
     <string name="please_wait">Please wait</string>
 
     <string name="send_bitcoin">Send</string>
-    <string name="receive_bitcoin">Receive</string>
+    <string name="receive_bitcoin">Request</string>
     <string name="overview">Transactions</string>
 
     <string name="cancel">Cancel</string>
@@ -208,7 +208,7 @@
     <string name="address_lookup_fail">Could not retrieve address. Please enter address manually.</string>
 
     <string name="received_bitcoin">Received Bitcoin</string>
-    <string name="received_ethereum">Received Ethereum</string>
+    <string name="received_ethereum">Received Ether</string>
 
     <string-array name="mnemonic_word_requests">
         <item>first word</item>
@@ -461,9 +461,9 @@
 
     <!-- SHARE RECEIVE ADDRESS -->
     <string name="email_request_subject">Bitcoin payment request</string>
-    <string name="email_request_subject_eth">Ethereum payment request</string>
+    <string name="email_request_subject_eth">Ether payment request</string>
     <string name="email_request_body">Please send%1$s BTC to the Bitcoin address %2$s.</string>
-    <string name="email_request_body_eth">Please send ETH to the Ethereum address %1$s.</string>
+    <string name="email_request_body_eth">Please send ETH to the Ether address %1$s.</string>
     <string name="email_request_body_fallback">attached</string>
     <string name="share_instructions">Tap to copy this address. Share it with the sender via email or text.</string>
 
@@ -725,7 +725,7 @@
     <string name="onboarding_check_inbox_title">Check Your Inbox</string>
     <string name="onboarding_check_inbox_summary">Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
     <string name="onboarding_verify_email">Verify email</string>
-    <string name="onboarding_receive_bitcoin">Receive Funds</string>
+    <string name="onboarding_receive_bitcoin">Request Funds</string>
     <string name="onboarding_current_price">Current Price:</string>
     <string name="onboarding_qr_codes">QR Codes</string>
     <string name="onboarding_scan_address">Scan Address</string>
@@ -779,7 +779,7 @@
     <string name="dismiss">Dismiss</string>
     
     <!-- ETHEREUM BALANCE -->
-    <string name="eth_default_account_label">My Ethereum Wallet</string>
+    <string name="eth_default_account_label">My Ether Wallet</string>
     <string name="eth_now_supporting">Now supporting Ether</string>
     <string name="eth_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to set up your Ether wallet.</string>
     <string name="ether">ETHER</string>
@@ -788,7 +788,7 @@
     <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
     <string name="eth_invalid_address">Invalid Ether address</string>
     <string name="eth_support_contract_not_allowed">Contract addresses are not supported.</string>
-    <string name="eth_support_only_eth">At the moment we only support ETH - you cannot receive REP, ICN GNT, GNO, DGD, BCP</string>
+    <string name="eth_support_only_eth">At the moment we only support ETH - you cannot receive tokens to this address</string>
     <string name="eth_unconfirmed_wait">Please wait until your previous transaction confirms</string>
     <string name="eth_transaction_complete">Transaction complete! Your transactions and balance will update soon, this can take a few minutes.\n</string>
 

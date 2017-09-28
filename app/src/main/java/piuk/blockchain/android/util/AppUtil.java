@@ -24,6 +24,7 @@ import piuk.blockchain.android.ui.launcher.LauncherActivity;
 
 import static piuk.blockchain.android.util.PersistentPrefs.KEY_OVERLAY_TRUSTED;
 
+@SuppressWarnings("WeakerAccess")
 public class AppUtil {
 
     private static final String REGEX_UUID = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";

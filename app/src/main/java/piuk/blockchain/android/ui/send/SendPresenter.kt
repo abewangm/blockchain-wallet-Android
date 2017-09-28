@@ -73,7 +73,6 @@ class SendPresenter @Inject constructor(
         private val feeDataManager: FeeDataManager,
         private val privateKeyFactory: PrivateKeyFactory,
         private val environmentSettings: EnvironmentSettings,
-        private val sslVerifyUtil: SSLVerifyUtil,
         private val transactionListDataManager: TransactionListDataManager
 ) : BasePresenter<SendView>() {
 
@@ -111,15 +110,14 @@ class SendPresenter @Inject constructor(
     }
 
     override fun onViewReady() {
-        sslVerifyUtil.validateSSL()
-
         setupTextChangeSubject()
         updateTicker()
         updateCurrencyUnits()
     }
 
-    fun onBitcoinChosen() {
+    internal fun onBitcoinChosen() {
         compositeDisposable.clear()
+        view.showFeePriority()
         view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         updateTicker()
@@ -135,11 +133,11 @@ class SendPresenter @Inject constructor(
         view.setCryptoMaxLength(17)
         updateCurrencyUnits()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
-        view.showFeePriority()
     }
 
-    fun onEtherChosen() {
+    internal fun onEtherChosen() {
         compositeDisposable.clear()
+        view.hideFeePriority()
         view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.setFeePrioritySelection(0)
@@ -156,7 +154,6 @@ class SendPresenter @Inject constructor(
         view.setCryptoMaxLength(30)
         updateCurrencyUnits()
         checkForUnconfirmedTx()
-        view.hideFeePriority()
     }
 
     internal fun onContinueClicked() {
@@ -1016,7 +1013,7 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onSendingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
-        pendingTransaction.receivingObject = ItemAccount(
+        pendingTransaction.sendingObject = ItemAccount(
                 legacyAddress.label,
                 null,
                 null,
@@ -1030,10 +1027,11 @@ class SendPresenter @Inject constructor(
             label = legacyAddress.address
         }
         view.updateSendingAddress(label)
+        calculateSpendableAmounts(false, "0")
     }
 
     private fun onSendingBtcAccountSelected(account: Account) {
-        pendingTransaction.receivingObject = ItemAccount(
+        pendingTransaction.sendingObject = ItemAccount(
                 account.label,
                 null,
                 null,
@@ -1048,6 +1046,7 @@ class SendPresenter @Inject constructor(
         }
 
         view.updateSendingAddress(label)
+        calculateSpendableAmounts(false, "0")
     }
 
     private fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
