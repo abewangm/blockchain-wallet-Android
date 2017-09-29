@@ -104,7 +104,7 @@ class SendPresenter @Inject constructor(
      * External changes.
      * Possible currency change, Account/address archive, Balance change
      */
-    fun onBroadcastReceived() {
+    internal fun onBroadcastReceived() {
         updateTicker()
         resetAccountList()
     }
@@ -117,44 +117,38 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun onBitcoinChosen() {
-        compositeDisposable.clear()
         view.showFeePriority()
-        view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
-        updateTicker()
         view.setTabSelection(0)
-        absoluteSuggestedFee = BigInteger.ZERO
-        view.updateFeeAmount("")
         view.enableFeeDropdown()
-        resetAccountList()
-        selectDefaultSendingAccount()
-        view.hideMaxAvailable()
-        clearCryptoAmount()
-        clearReceivingAddress()
         view.setCryptoMaxLength(17)
-        updateCurrencyUnits()
+        resetState()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
     }
 
     internal fun onEtherChosen() {
-        compositeDisposable.clear()
         view.hideFeePriority()
-        view?.setSendButtonEnabled(true)
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.setFeePrioritySelection(0)
-        updateTicker()
         view.setTabSelection(1)
+        view.disableFeeDropdown()
+        view.setCryptoMaxLength(30)
+        resetState()
+        checkForUnconfirmedTx()
+    }
+
+    private fun resetState() {
+        compositeDisposable.clear()
+        view?.setSendButtonEnabled(true)
+        updateTicker()
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
-        view.disableFeeDropdown()
         resetAccountList()
         selectDefaultSendingAccount()
         view.hideMaxAvailable()
         clearCryptoAmount()
         clearReceivingAddress()
-        view.setCryptoMaxLength(30)
         updateCurrencyUnits()
-        checkForUnconfirmedTx()
     }
 
     internal fun onContinueClicked() {
