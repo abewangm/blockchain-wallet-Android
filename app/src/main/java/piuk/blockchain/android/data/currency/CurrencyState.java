@@ -23,8 +23,8 @@ public class CurrencyState {
     public void init(PrefsUtil prefs) {
         this.prefs = prefs;
         String value = prefs.getValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE, CryptoCurrencies.BTC.name());
-        this.cryptoCurrency = CryptoCurrencies.valueOf(value);
-        this.isDisplayingCryptoCurrency = true;
+        cryptoCurrency = CryptoCurrencies.valueOf(value);
+        isDisplayingCryptoCurrency = true;
     }
 
     public CryptoCurrencies getCryptoCurrency() {
@@ -37,7 +37,6 @@ public class CurrencyState {
     }
 
     public void toggleCryptoCurrency() {
-
         if (cryptoCurrency == CryptoCurrencies.BTC) {
             cryptoCurrency = CryptoCurrencies.ETHER;
         } else {
@@ -46,6 +45,10 @@ public class CurrencyState {
 
         setCryptoCurrency(cryptoCurrency);
 
+    }
+
+    public void toggleDisplayingCrypto() {
+        isDisplayingCryptoCurrency = !isDisplayingCryptoCurrency;
     }
 
     public boolean isDisplayingCryptoCurrency() {

@@ -76,6 +76,9 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
             this.adapter = dashboardAdapter
         }
 
+        textview_btc.setOnClickListener { presenter.invertViewType() }
+        textview_eth.setOnClickListener { presenter.invertViewType() }
+
         onViewReady()
     }
 

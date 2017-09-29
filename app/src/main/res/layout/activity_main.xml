@@ -55,6 +55,7 @@
             android:background="@android:color/white"
             app:headerLayout="@layout/navigation_drawer_header"
             app:insetForeground="@color/primary_navy_dark"
+            app:itemTextColor="@color/primary_gray_dark"
             app:menu="@menu/menu_nav_drawer" />
     </android.support.v4.widget.DrawerLayout>
 </layout>
