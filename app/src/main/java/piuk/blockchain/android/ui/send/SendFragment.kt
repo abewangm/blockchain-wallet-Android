@@ -28,6 +28,7 @@ import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.alert_watch_only_spend.view.*
 import kotlinx.android.synthetic.main.fragment_send.*
+import kotlinx.android.synthetic.main.include_amount_row.*
 import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
@@ -163,18 +164,14 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         keyboard.setDecimalSeparator(presenter.getDefaultDecimalSeparator())
 
         // Enable custom keypad and disables default keyboard from popping up
-        keyboard.enableOnView(amountContainer.amountCrypto)
-        keyboard.enableOnView(amountContainer.amountFiat)
+        keyboard.enableOnView(amountCrypto)
+        keyboard.enableOnView(amountFiat)
 
-        amountContainer.amountCrypto.setText("")
-        amountContainer.amountCrypto.requestFocus()
+        amountCrypto.setText("")
+        amountCrypto.requestFocus()
 
         toContainer.toAddressEditTextView.setOnFocusChangeListener { _, focused ->
-            handleEditTextFocus(focused)
-        }
-
-        edittextCustomFee.setOnFocusChangeListener { _, focused ->
-            handleEditTextFocus(focused)
+            if (focused) closeKeypad()
         }
     }
 
@@ -183,10 +180,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     private fun isKeyboardVisible(): Boolean = keyboard.isVisible
-
-    private fun handleEditTextFocus(focused: Boolean) {
-        if (focused) closeKeypad()
-    }
 
     override fun onKeypadClose() {
         // Show bottom nav if applicable
@@ -618,7 +611,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     override fun getCustomFeeValue(): Long {
         val amount = edittextCustomFee.text.toString()
-        return if (!amount.isEmpty()) java.lang.Long.valueOf(amount) else 0
+        return if (!amount.isEmpty()) amount.toLong() else 0
     }
 
     override fun showMaxAvailable() {
@@ -662,14 +655,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     override fun showFeePriority() {
         textviewFeeType.visible()
         textviewFeeTime.visible()
-        spacer.visible()
         spinnerPriority.visible()
     }
 
     override fun hideFeePriority() {
         textviewFeeType.gone()
         textviewFeeTime.gone()
-        spacer.gone()
         spinnerPriority.invisible()
     }
 
@@ -836,7 +827,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 .map { it.toString() }
                 .doOnNext { buttonContinue.isEnabled = !it.isEmpty() && it != "0" }
                 .filter { !it.isEmpty() }
-                .map { java.lang.Long.valueOf(it) }
+                .map { it.toLong() }
                 .onErrorReturnItem(0L)
                 .doOnNext { value ->
                     if (presenter.getBitcoinFeeOptions() != null && value < presenter.getBitcoinFeeOptions()!!.limits.min) {
@@ -852,7 +843,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { updateTotals() },
-                        { it.printStackTrace() })
+                        { Timber.e(it) })
     }
 
     override fun showTransactionSuccess(

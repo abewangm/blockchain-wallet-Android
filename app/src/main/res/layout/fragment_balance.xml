@@ -40,7 +40,6 @@
                     android:layout_alignParentTop="true"
                     android:gravity="center_horizontal"
                     android:includeFontPadding="false"
-                    android:text="0.0"
                     android:textColor="@color/white"
                     android:textSize="32sp"
                     tools:ignore="MissingPrefix"
