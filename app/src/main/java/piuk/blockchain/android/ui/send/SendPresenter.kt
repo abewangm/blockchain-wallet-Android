@@ -124,6 +124,7 @@ class SendPresenter @Inject constructor(
         view.setCryptoMaxLength(17)
         resetState()
         calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
+        view.enableInput()
     }
 
     internal fun onEtherChosen() {
@@ -1246,9 +1247,11 @@ class SendPresenter @Inject constructor(
                         { unconfirmed ->
                             view?.setSendButtonEnabled(!unconfirmed)
                             if (unconfirmed) {
+                                view?.disableInput()
                                 view?.updateMaxAvailable(stringUtils.getString(R.string.eth_unconfirmed_wait))
                                 view?.updateMaxAvailableColor(R.color.product_red_medium)
                             } else {
+                                view.enableInput()
                                 calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
                             }
                         },
