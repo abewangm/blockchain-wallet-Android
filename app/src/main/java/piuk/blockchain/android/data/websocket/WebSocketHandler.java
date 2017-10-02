@@ -295,8 +295,9 @@ class WebSocketHandler extends WebSocketListener {
             EthWebsocketResponse response = mapper.readValue(message, EthWebsocketResponse.class);
 
             String from = response.getTx().getFrom();
+            String to = response.getTx().getTo();
             // Check if money was received or sent
-            if (ethAccount != null && !ethAccount.equals(from)) {
+            if (ethAccount != null && !ethAccount.equals(from) && ethAccount.equals(to)) {
                 String title = context.getString(R.string.app_name);
                 String marquee = context.getString(R.string.received_ethereum)
                         + " "
