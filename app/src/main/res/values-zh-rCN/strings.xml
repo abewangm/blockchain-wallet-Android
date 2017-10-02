@@ -452,7 +452,6 @@
     <string name="contacts_payment_request_send_note">为什么您想要发送 %1$s 比特币？这是选项的，将与 %1$s 分享。</string>
     <string name="contacts_payment_request_receive_note">为什么您想要 %1$s 向您发送比特币？这是选项的，将与 %1$s 分享。</string>
     <string name="contacts_send_address_message">这会向您的联系人发送一个地址。继续？</string>
-    <string name="contacts_register_nodes_failure">我们无法将您与联系人服务相连接。请重试以启用完整功能。</string>
     <string name="contacts_too_much_sent">似乎您发送的比特币多于所要求的。若希望，您可以向您的联系人请求退还一些。我们尚未将付款标记为完成。</string>
     <string name="contacts_too_little_sent">似乎您发送的比特币少于所要求的。您的联系人仍然会接收您发出的比特币，但是，我们尚未将付款标记为完成。</string>
     <string name="contacts_second_password_prompt">若要使用该服务，我们需要您输入您的第二个密码。您应只需要输入这个一次便可以使用联系人功能。</string>

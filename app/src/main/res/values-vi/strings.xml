@@ -452,7 +452,6 @@
     <string name="contacts_payment_request_send_note">Tại sao bạn muốn gửi bitcoin đến %1$s? Đây là một tùy chọn và sẽ được chia sẻ với %1$s.</string>
     <string name="contacts_payment_request_receive_note">Tại sao bạn muốn %1$s gửi bitcoin cho bạn? Đây là một tùy chọn và sẽ được chia sẻ với %1$s.</string>
     <string name="contacts_send_address_message">Thao tác này sẽ gửi một địa chỉ đến liên lạc của bạn. Tiến hành?</string>
-    <string name="contacts_register_nodes_failure">Chúng tôi không thể kết nối bạn đến với dịch vụ danh bạ. Vui lòng thử lại để kích hoạt đầy đủ tính năng.</string>
     <string name="contacts_too_much_sent">Có vẻ như bạn đã gửi bitcoin nhiều hơn yêu cầu. Bạn có thể yêu cầu gửi lại một ít từ liên lạc của mình nếu muốn. Chúng tôi chưa đánh dấu hoàn tất cho thanh toán của bạn.</string>
     <string name="contacts_too_little_sent">Có vẻ như bạn đã gửi bitcoin ít hơn yêu cầu. Liên lạc của bạn sẽ vẫn nhận được số bitcoin mà bạn đã gửi, nhưng chúng tôi chưa đánh dấu hoàn tất cho thanh toán của bạn.</string>
     <string name="contacts_second_password_prompt">Để sử dụng dịch vụ này, chúng tôi yêu cầu bạn nhập mật khẩu cấp hai của mình. Bạn chỉ nên nhập mật khẩu này khi sử dụng chức năng Danh bạ.</string>

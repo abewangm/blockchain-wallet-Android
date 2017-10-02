@@ -452,7 +452,6 @@
     <string name="contacts_payment_request_send_note">%1$sビットコインを送信する理由は何ですか？これは任意であり、%1$sと共有されます。</string>
     <string name="contacts_payment_request_receive_note">%1$sにビットコインを送信させたい理由は何ですか？これは任意であり、%1$sと共有されます。</string>
     <string name="contacts_send_address_message">これをすることであなたの連絡先にアドレスが送信されます。続行しますか？</string>
-    <string name="contacts_register_nodes_failure">連絡先サービスに接続できませんでした。完全な機能を有効にするには再試行してください。</string>
     <string name="contacts_too_much_sent">リクエストされている以上のビットコインを送信したようです。ご希望の場合は連絡先の相手に返金をリクエストできます。決済が完了とマークされていません。</string>
     <string name="contacts_too_little_sent">リクエストされている額よりも少ないビットコインを送信したようです。連絡先の相手はビットコインを受け取りますが、決済が完了とマークされません。</string>
     <string name="contacts_second_password_prompt">このサービスを使用するには2番目のパスワードが必要です。連絡先機能を使用するため、これは一回のみ入力が必要です。</string>

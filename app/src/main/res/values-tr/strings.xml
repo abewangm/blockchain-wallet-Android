@@ -452,7 +452,6 @@
     <string name="contacts_payment_request_send_note">%1$s bitcoin göndermek istediğinizden emin misiniz? Bu, isteğe bağlıdır ve %1$s ile paylaşılacaktır.</string>
     <string name="contacts_payment_request_receive_note">%1$s size neden bitcoin göndermeli? Bu, isteğe bağlıdır ve %1$s ile paylaşılacaktır.</string>
     <string name="contacts_send_address_message">Bu, kişinize bir adres gönderecektir. Devam etsin mi?</string>
-    <string name="contacts_register_nodes_failure">Kişiler hizmetine sizi bağlayamadık. Lütfen tam işlevselliği etkinleştirmek için yeniden deneyin.</string>
     <string name="contacts_too_much_sent">Öyle görünüyor ki talep edilenden daha fazla bitcoin gönderdiniz. İsterseniz kişinizden birazını geri isteyebilirsiniz. Ödemeyi tamamlanmış olarak işaretlemedik.</string>
     <string name="contacts_too_little_sent">Öyle görünüyor ki talep edilenden daha az bitcoin gönderdiniz. Kişiniz, göndermiş olduğunuz bitcoin tutarını yine de alacak ancak ödemeyi tamamlanmış olarak işaretlemedik.</string>
     <string name="contacts_second_password_prompt">Bu hizmeti kullanmak için ikinci şifrenizi girmenizi rica ediyoruz. Kişiler işlevini kullanmak için bunu sadece bir kez girmeniz gerekecek.</string>
