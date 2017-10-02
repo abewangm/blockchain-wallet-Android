@@ -452,7 +452,6 @@
     <string name="contacts_payment_request_send_note">Proč byste chtěli poslat %1$s bitcoin? Toto je volitelné a bude sdíleno s %1$s.</string>
     <string name="contacts_payment_request_receive_note">Proč byste chtěli od %1$s obdržet bitcoin? Toto je volitelné a bude sdíleno s %1$s.</string>
     <string name="contacts_send_address_message">Tímto bude Vašemu kontaktu odeslána adresa. Pokračovat?</string>
-    <string name="contacts_register_nodes_failure">Vaše připojení ke službě kontaktů se nezdařilo. Chcete-li aktivovat úplnou funkčnost, zkuste to prosím znovu.</string>
     <string name="contacts_too_much_sent">Zdá se, že jste odeslali více bitcoinů, než bylo požadováno. Můžete požádat o vrácení některých z nich od svého kontaktu, budete-li chtít. Ještě jste neoznačili platbu jako dokončenou.</string>
     <string name="contacts_too_little_sent">Zdá se, že jste odeslali méně bitcoinů, než bylo požadováno. Váš kontakt bude stále moci přijmout bitcoiny, které jste odeslali, ale platbu jsme neoznačili jako dokončenou.</string>
     <string name="contacts_second_password_prompt">Abyste mohli tuto službu použít, vyžadujeme od Vás zadání druhého hesla. Pro použití funkce Kontakty stačí zadat toto pouze jednou.</string>

@@ -546,12 +546,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void showMetadataNodeRegistrationFailure() {
+    public void showMetadataNodeFailure() {
         if (!isFinishing()) {
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
-                    .setMessage(R.string.contacts_register_nodes_failure)
-                    .setPositiveButton(R.string.retry, (dialog, which) -> getPresenter().checkForMessages())
+                    .setMessage(R.string.metadata_load_failure)
+                    .setPositiveButton(R.string.retry, (dialog, which) -> getPresenter().initMetadataElements())
+                    .setNegativeButton(R.string.exit, (dialog, which) -> AccessState.getInstance().logout(this))
+                    .setCancelable(false)
                     .create()
                     .show();
         }
