@@ -59,6 +59,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             if (intent.action == ACTION_INTENT && activity != null) {
                 tabs?.post { tabs.getTabAt(0)?.select() }
                 recyclerview?.scrollToPosition(0)
+                presenter.onViewReady()
             }
         }
     }
