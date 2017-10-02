@@ -8,13 +8,11 @@ import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
 import javax.inject.Inject
 
-
 class SwipeToReceivePresenter @Inject constructor(
         private val dataManager: QrCodeDataManager,
         private val swipeToReceiveHelper: SwipeToReceiveHelper
 ) : BasePresenter<SwipeToReceiveView>() {
 
-    private val DIMENSION_QR_CODE = 600
     private val bitcoinAddress: Single<String>
         get() = swipeToReceiveHelper.getNextAvailableBitcoinAddressSingle()
     private val ethereumAddress: Single<String>
@@ -54,6 +52,12 @@ class SwipeToReceivePresenter @Inject constructor(
                             },
                             { _ -> view.setUiState(UiState.FAILURE) })
         }
+    }
+
+    companion object {
+
+        private const val DIMENSION_QR_CODE = 600
+
     }
 
 }

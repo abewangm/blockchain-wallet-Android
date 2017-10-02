@@ -179,43 +179,43 @@ class CreateWalletPresenterTest {
 
         // Act
         subject.passwordStrength = 80
-        subject.validateCredentials("john", "MyTestWallet","MyTestWallet")
+        subject.validateCredentials("john", "MyTestWallet", "MyTestWallet")
         // Assert
         verify(view).showToast(R.string.invalid_email, ToastCustom.TYPE_ERROR)
         verifyNoMoreInteractions(view)
     }
 
     @Test
-    fun `validateCredentials short_password`() {
+    fun `validateCredentials short password`() {
         // Arrange
 
         // Act
         subject.passwordStrength = 80
-        subject.validateCredentials("john@snow.com", "aaa","aaa")
+        subject.validateCredentials("john@snow.com", "aaa", "aaa")
         // Assert
         verify(view).showToast(R.string.invalid_password_too_short, ToastCustom.TYPE_ERROR)
         verifyNoMoreInteractions(view)
     }
 
     @Test
-    fun `validateCredentials password_missmatch`() {
+    fun `validateCredentials password missmatch`() {
         // Arrange
 
         // Act
         subject.passwordStrength = 80
-        subject.validateCredentials("john@snow.com", "MyTestWallet","MyTestWallet2")
+        subject.validateCredentials("john@snow.com", "MyTestWallet", "MyTestWallet2")
         // Assert
         verify(view).showToast(R.string.password_mismatch_error, ToastCustom.TYPE_ERROR)
         verifyNoMoreInteractions(view)
     }
 
     @Test
-    fun `validateCredentials weak_password`() {
+    fun `validateCredentials weak password`() {
         // Arrange
 
         // Act
         subject.passwordStrength = 20
-        subject.validateCredentials("john@snow.com", "aaaaaa","aaaaaa")
+        subject.validateCredentials("john@snow.com", "aaaaaa", "aaaaaa")
         // Assert
         verify(view).showWeakPasswordDialog(any(), any())
         verifyNoMoreInteractions(view)

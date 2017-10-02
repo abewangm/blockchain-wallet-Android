@@ -33,7 +33,6 @@ import uk.co.chrisjenx.calligraphy.TypefaceUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class ChartDelegate<in T>(
         private val activity: Activity
 ) : AdapterDelegate<T> {
@@ -42,16 +41,10 @@ class ChartDelegate<in T>(
     private var fiatSymbol: String? = null
 
     private val typefaceRegular by unsafeLazy {
-        TypefaceUtils.load(
-                activity.assets,
-                "fonts/Montserrat-Regular.ttf"
-        )
+        TypefaceUtils.load(activity.assets, "fonts/Montserrat-Regular.ttf")
     }
     private val typefaceLight by unsafeLazy {
-        TypefaceUtils.load(
-                activity.assets,
-                "fonts/Montserrat-Light.ttf"
-        )
+        TypefaceUtils.load(activity.assets, "fonts/Montserrat-Light.ttf")
     }
     private val buttonsList by unsafeLazy {
         listOf(

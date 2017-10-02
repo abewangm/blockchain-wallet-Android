@@ -4,8 +4,8 @@ import android.content.Intent
 import info.blockchain.wallet.api.data.Settings
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACT_ACCEPTED
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -13,7 +13,6 @@ import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PrefsUtil
 import javax.inject.Inject
-
 
 class LauncherPresenter @Inject constructor(
         private val appUtil: AppUtil,
@@ -130,4 +129,5 @@ class LauncherPresenter @Inject constructor(
     companion object {
         const val INTENT_EXTRA_VERIFIED = "verified"
     }
+
 }

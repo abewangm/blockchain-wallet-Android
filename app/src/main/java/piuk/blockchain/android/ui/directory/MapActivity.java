@@ -12,6 +12,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +43,8 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.util.annotations.Thunk;
 
+@SuppressWarnings("FieldCanBeLocal")
+@SuppressLint("MissingPermission")
 public class MapActivity extends BaseAuthActivity implements LocationListener, OnMapReadyCallback {
 
     private static final long MIN_TIME = 400;
@@ -256,6 +259,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             dividerCafe.setBackgroundColor(cafeSelected ? color_category_unselected : color_cafe_selected);
             cafeSelected = !cafeSelected;
             drawData(false, null, null, false);
+            v.performClick();
             return false;
         });
 
@@ -266,6 +270,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             dividerDrink.setBackgroundColor(drinkSelected ? color_category_unselected : color_drink_selected);
             drinkSelected = !drinkSelected;
             drawData(false, null, null, false);
+            v.performClick();
             return false;
         });
 
@@ -276,6 +281,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             dividerEat.setBackgroundColor(eatSelected ? color_category_unselected : color_eat_selected);
             eatSelected = !eatSelected;
             drawData(false, null, null, false);
+            v.performClick();
             return false;
         });
 
@@ -286,6 +292,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             dividerSpend.setBackgroundColor(spendSelected ? color_category_unselected : color_spend_selected);
             spendSelected = !spendSelected;
             drawData(false, null, null, false);
+            v.performClick();
             return false;
         });
 
@@ -296,6 +303,7 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
             dividerATM.setBackgroundColor(atmSelected ? color_category_unselected : color_atm_selected);
             atmSelected = !atmSelected;
             drawData(false, null, null, false);
+            v.performClick();
             return false;
         });
 
@@ -553,10 +561,10 @@ public class MapActivity extends BaseAuthActivity implements LocationListener, O
     }
 
     private void doSuggest() {
-        Intent intent = new Intent(MapActivity.this, SuggestMerchantActivity.class);
-        intent.putExtra("ULAT", currLocation.getLatitude());
-        intent.putExtra("ULON", currLocation.getLongitude());
-        startActivity(intent);
+//        Intent intent = new Intent(MapActivity.this, SuggestMerchantActivity.class);
+//        intent.putExtra("ULAT", currLocation.getLatitude());
+//        intent.putExtra("ULON", currLocation.getLongitude());
+//        startActivity(intent);
     }
 
     @Override

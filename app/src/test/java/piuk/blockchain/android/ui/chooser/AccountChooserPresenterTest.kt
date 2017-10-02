@@ -18,7 +18,6 @@ import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.util.StringUtils
 import java.util.*
 
-
 class AccountChooserPresenterTest {
 
     private lateinit var subject: AccountChooserPresenter
@@ -119,7 +118,7 @@ class AccountChooserPresenterTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeSend_contactsEnabled() {
+    fun `onViewReadyRequestTypeSend contactsEnabled`() {
         // Arrange
         whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
         whenever(mockActivity.isContactsEnabled).thenReturn(true)
@@ -151,7 +150,7 @@ class AccountChooserPresenterTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeSend_contactsDisabled() {
+    fun `onViewReadyRequestTypeSend contactsDisabled`() {
         // Arrange
         whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
         whenever(mockActivity.isContactsEnabled).thenReturn(false)
@@ -172,10 +171,5 @@ class AccountChooserPresenterTest {
         // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
         captor.firstValue.size shouldEqual 8
     }
+
 }
-
-
-
-
-
-

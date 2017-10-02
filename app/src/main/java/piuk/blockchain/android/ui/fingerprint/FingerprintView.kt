@@ -6,7 +6,7 @@ import android.support.annotation.DrawableRes
 import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 
-interface FingerprintView: View {
+interface FingerprintView : View {
 
     fun getBundle(): Bundle?
 

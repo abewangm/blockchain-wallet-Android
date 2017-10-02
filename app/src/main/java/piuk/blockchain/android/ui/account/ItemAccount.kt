@@ -29,16 +29,10 @@ class ItemAccount {
     }
 
     fun getAddressString(): String {
-
-        if (accountObject is Account) {
-            //xpub
-            return (accountObject as Account).xpub
-        } else if (accountObject is LegacyAddress){
-            //legacy address
-            return (accountObject as LegacyAddress).address
-        } else {
-            //eth address
-            return (accountObject as EthereumAccount).address
+        return when (accountObject) {
+            is Account -> (accountObject as Account).xpub
+            is LegacyAddress -> (accountObject as LegacyAddress).address
+            else -> (accountObject as EthereumAccount).address
         }
     }
 
@@ -62,6 +56,5 @@ class ItemAccount {
         this.accountObject = accountObject
         this.type = type
     }
-
 
 }

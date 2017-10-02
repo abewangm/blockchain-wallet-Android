@@ -1,7 +1,9 @@
 package piuk.blockchain.android.ui.buy;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -48,20 +50,25 @@ public class FrontendJavascriptManager {
         frontendJavascript.onShowTx(txHash);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     void activateMobileBuyFromJson(WebViewLoginDetails webViewLoginDetails, boolean firstLogin) {
         String script = createActivateFromJsonScript(webViewLoginDetails, firstLogin);
         executeScript(script);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void checkForCompletedTrades(WebViewLoginDetails webViewLoginDetails) {
         String script = createCheckForCompletedTradesScript(webViewLoginDetails);
         executeScript(script);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     void teardown() {
         executeScript("teardown()");
     }
 
+    @SuppressWarnings("unchecked")
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void executeScript(String script) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "Executing: " + script);

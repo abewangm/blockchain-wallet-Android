@@ -141,25 +141,25 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
     }
 
     private fun hideEntropyContainer() {
-        TransitionManager.beginDelayedTransition(mainConstraintLayout);
+        TransitionManager.beginDelayedTransition(mainConstraintLayout)
         applyConstraintSet.setVisibility(R.id.entropy_container, ConstraintSet.INVISIBLE)
         applyConstraintSet.applyTo(mainConstraintLayout)
     }
 
     private fun showEntropyContainer() {
-        TransitionManager.beginDelayedTransition(mainConstraintLayout);
+        TransitionManager.beginDelayedTransition(mainConstraintLayout)
         applyConstraintSet.setVisibility(R.id.entropy_container, ConstraintSet.VISIBLE)
         applyConstraintSet.applyTo(mainConstraintLayout)
     }
 
     private fun showCreateWalletButton() {
-        TransitionManager.beginDelayedTransition(mainConstraintLayout);
+        TransitionManager.beginDelayedTransition(mainConstraintLayout)
         applyConstraintSet.setVisibility(R.id.command_next, ConstraintSet.VISIBLE)
         applyConstraintSet.applyTo(mainConstraintLayout)
     }
 
     private fun hideCreateWalletButton() {
-        TransitionManager.beginDelayedTransition(mainConstraintLayout);
+        TransitionManager.beginDelayedTransition(mainConstraintLayout)
         applyConstraintSet.setVisibility(R.id.command_next, ConstraintSet.GONE)
         applyConstraintSet.applyTo(mainConstraintLayout)
     }

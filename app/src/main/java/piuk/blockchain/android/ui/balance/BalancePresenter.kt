@@ -288,7 +288,6 @@ class BalancePresenter @Inject constructor(
                         { view.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR) })
     }
 
-
     internal fun declineTransaction(fctxId: String) = view.showTransactionDeclineDialog(fctxId)
 
     internal fun confirmDeclineTransaction(fctxId: String) {
