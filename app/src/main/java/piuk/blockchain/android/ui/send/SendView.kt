@@ -72,6 +72,10 @@ interface SendView : View {
 
     fun setSendButtonEnabled(enabled: Boolean)
 
+    fun disableInput()
+
+    fun enableInput()
+
     // Fetch value
     fun getCustomFeeValue(): Long
 

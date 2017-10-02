@@ -31,6 +31,7 @@ import kotlinx.android.synthetic.main.fragment_send.*
 import kotlinx.android.synthetic.main.include_amount_row.*
 import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
+import kotlinx.android.synthetic.main.include_to_row_editable.*
 import kotlinx.android.synthetic.main.include_to_row_editable.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
@@ -904,6 +905,20 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     override fun onDetach() {
         super.onDetach()
         listener = null
+    }
+
+    override fun enableInput() {
+        toAddressEditTextView.isEnabled = true
+        toArrow.isEnabled = true
+        amountCrypto.isEnabled = true
+        amountFiat.isEnabled = true
+    }
+
+    override fun disableInput() {
+        toAddressEditTextView.isEnabled = false
+        toArrow.isEnabled = false
+        amountCrypto.isEnabled = false
+        amountFiat.isEnabled = false
     }
 
     companion object {
