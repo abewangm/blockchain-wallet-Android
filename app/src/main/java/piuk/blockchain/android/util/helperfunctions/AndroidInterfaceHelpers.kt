@@ -61,7 +61,7 @@ fun TabLayout.setOnTabSelectedListener(function: (position: Int) -> Unit) {
 
         override fun onTabSelected(p0: TabLayout.Tab?) {
             // Pass the currently selected tab position
-            function.invoke(selectedTabPosition)
+            function(selectedTabPosition)
         }
     })
 
