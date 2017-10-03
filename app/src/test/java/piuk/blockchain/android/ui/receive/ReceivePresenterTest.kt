@@ -215,6 +215,7 @@ class ReceivePresenterTest {
         // Act
         subject.onAccountSelected(account)
         // Assert
+        verify(activity).setTabSelection(0)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
@@ -239,6 +240,7 @@ class ReceivePresenterTest {
         // Act
         subject.onAccountSelected(account)
         // Assert
+        verify(activity).setTabSelection(0)
         verify(activity).updateReceiveLabel(label)
         verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
         verifyNoMoreInteractions(activity)
@@ -263,6 +265,7 @@ class ReceivePresenterTest {
         // Act
         subject.onEthSelected()
         // Assert
+        verify(activity).setTabSelection(1)
         verify(activity).hideBitcoinLayout()
         verify(activity).updateReceiveAddress(ethAccount)
         verify(activity).showQrLoading()
@@ -290,6 +293,7 @@ class ReceivePresenterTest {
         // Act
         subject.onSelectDefault(accountPosition)
         // Assert
+        verify(activity).setTabSelection(0)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
@@ -322,6 +326,7 @@ class ReceivePresenterTest {
         // Act
         subject.onSelectDefault(accountPosition)
         // Assert
+        verify(activity).setTabSelection(0)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
