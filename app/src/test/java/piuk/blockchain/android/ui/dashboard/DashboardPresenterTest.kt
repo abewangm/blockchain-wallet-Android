@@ -64,6 +64,7 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding complete, no announcement`() {
         // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
@@ -116,6 +117,7 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding not complete`() {
         // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
@@ -172,6 +174,7 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding complete with announcement`() {
         // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
@@ -288,6 +291,7 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun onResume() {
         // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")

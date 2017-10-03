@@ -47,7 +47,7 @@ class DashboardPresenter @Inject constructor(
 ) : BasePresenter<DashboardView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-    private var cryptoCurrency = CryptoCurrencies.BTC
+    private lateinit var cryptoCurrency: CryptoCurrencies
     private val displayList = mutableListOf<Any>(ChartDisplayable())
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     private var timeSpan = TimeSpan.MONTH
@@ -55,6 +55,7 @@ class DashboardPresenter @Inject constructor(
     @VisibleForTesting var ethBalance = BigInteger.ZERO
 
     override fun onViewReady() {
+        cryptoCurrency = currencyState.cryptoCurrency
         view.notifyItemAdded(displayList, 0)
 
         // Triggers various updates to the page once all metadata is loaded
@@ -75,14 +76,24 @@ class DashboardPresenter @Inject constructor(
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         this.cryptoCurrency = cryptoCurrency
+        currencyState.cryptoCurrency = cryptoCurrency
         updateCryptoPrice()
         updateChartsData(timeSpan)
     }
 
     internal fun onResume() {
+        cryptoCurrency = currencyState.cryptoCurrency
         updateChartsData(timeSpan)
         updateAllBalances()
         updatePrices()
+    }
+
+    fun getCurrentCryptoCurrency(): Int {
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> return 0
+            CryptoCurrencies.ETHER -> return 1
+            else -> return 1
+        }
     }
 
     internal fun invertViewType() {
