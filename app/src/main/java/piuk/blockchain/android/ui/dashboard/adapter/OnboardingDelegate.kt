@@ -20,7 +20,7 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.visible
-import piuk.blockchain.android.util.helperfunctions.OnPageChangeListener
+import piuk.blockchain.android.util.helperfunctions.onPageChangeListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 
 class OnboardingDelegate<in T>(
@@ -48,7 +48,7 @@ class OnboardingDelegate<in T>(
         val pagerItems = data.pagerContent
 
         holder.viewPager.adapter = onboardingPagerAdapter
-        holder.viewPager.addOnPageChangeListener(OnPageChangeListener { page, positionOffset ->
+        holder.viewPager.addOnPageChangeListener(onPageChangeListener { page, positionOffset ->
             val count = onboardingPagerAdapter.count
             if (page == count - 1) {
                 // Last page

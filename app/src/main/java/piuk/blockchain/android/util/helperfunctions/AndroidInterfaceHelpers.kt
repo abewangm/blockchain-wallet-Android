@@ -8,7 +8,7 @@ import android.widget.AdapterView
 /**
  * Allow us to use a functional interface in place of implementing members that we might not need to.
  */
-inline fun OnItemSelectedListener(
+inline fun onItemSelectedListener(
         crossinline function: (position: Int) -> Unit
 ): AdapterView.OnItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
@@ -26,7 +26,7 @@ inline fun OnItemSelectedListener(
 /**
  * Allow us to use a functional interface in place of implementing members that we might not need to.
  */
-inline fun OnPageChangeListener(
+inline fun onPageChangeListener(
         crossinline function: (position: Int, positionOffset: Float) -> Unit
 ): ViewPager.OnPageChangeListener = object : ViewPager.OnPageChangeListener {
 
@@ -61,7 +61,7 @@ fun TabLayout.setOnTabSelectedListener(function: (position: Int) -> Unit) {
 
         override fun onTabSelected(p0: TabLayout.Tab?) {
             // Pass the currently selected tab position
-            function.invoke(selectedTabPosition)
+            function(selectedTabPosition)
         }
     })
 

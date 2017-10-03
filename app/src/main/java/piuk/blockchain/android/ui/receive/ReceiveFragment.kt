@@ -88,7 +88,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             if (intent.action == BalanceFragment.ACTION_INTENT) {
                 presenter?.let {
                     // Update UI with new Address + QR
-                    if (tabs_receive.selectedTabPosition == 0) {
+                    if (tabs_receive?.selectedTabPosition == 0) {
                         presenter.onSelectDefault(defaultAccountPosition)
                     }
                 }
@@ -122,7 +122,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         setupLayout()
         setCustomKeypad()
 
-        scrollview.post { scrollview.scrollTo(0, 0) }
+        scrollview?.post { scrollview.scrollTo(0, 0) }
 
         selectTabIfNecessary()
     }
@@ -452,7 +452,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             try {
                 val contact = ObjectMapper().readValue(
                         data.getStringExtra(EXTRA_SELECTED_ITEM),
-                        Contact::class.java)
+                        Contact::class.java
+                )
                 presenter.selectedContactId = contact.id
                 from_container.fromAddressTextView.text = contact.name
 
