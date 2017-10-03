@@ -18,7 +18,9 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.fasterxml.jackson.databind.ObjectMapper
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.payload.data.Account
@@ -233,25 +235,27 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
 
         button_request.setOnClickListener {
-            if (presenter.selectedContactId == null) {
-                showToast(R.string.contact_select_first, ToastCustom.TYPE_ERROR)
-            } else if (!presenter.isValidAmount(getBtcAmount())) {
-                showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
-            } else {
-                listener?.onTransactionNotesRequested(
-                        presenter.getConfirmationDetails(),
-                        PaymentRequestType.REQUEST,
-                        presenter.selectedContactId!!,
-                        presenter.currencyHelper.getLongAmount(
-                                amountCrypto.text.toString()),
-                        presenter.getSelectedAccountPosition()
-                )
-            }
+            // TODO: This may or may not need enabling again in the future  
+//            if (presenter.selectedContactId == null) {
+//                showToast(R.string.contact_select_first, ToastCustom.TYPE_ERROR)
+//            } else if (!presenter.isValidAmount(getBtcAmount())) {
+//                showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
+//            } else {
+//                listener?.onTransactionNotesRequested(
+//                        presenter.getConfirmationDetails(),
+//                        PaymentRequestType.REQUEST,
+//                        presenter.selectedContactId!!,
+//                        presenter.currencyHelper.getLongAmount(
+//                                amountCrypto.text.toString()),
+//                        presenter.getSelectedAccountPosition()
+//                )
+//            }
+            
+            onShareClicked()
         }
 
         @Suppress("ConstantConditionIf")
         if (!BuildConfig.CONTACTS_ENABLED) {
-            button_request.gone()
             from_container.gone()
             textview_whats_this.gone()
             divider4.gone()
@@ -544,17 +548,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
         toast(message, toastType)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        menu?.clear()
-        inflater?.inflate(R.menu.menu_receive, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?) = when (item!!.itemId) {
-        R.id.action_share -> consume { onShareClicked() }
-        else -> super.onOptionsItemSelected(item)
     }
 
     fun getSelectedAccountPosition(): Int = presenter.getSelectedAccountPosition()
