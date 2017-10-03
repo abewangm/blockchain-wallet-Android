@@ -110,7 +110,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
         setCustomKeypad()
 
-        CurrencyState.getInstance().cryptoCurrency = CryptoCurrencies.BTC
         setTabs()
         handleIncomingArguments()
         setupSendingView()
@@ -144,6 +143,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     override fun onResume() {
         super.onResume()
+        presenter.onResume()
         setupToolbar()
         closeKeypad()
 
