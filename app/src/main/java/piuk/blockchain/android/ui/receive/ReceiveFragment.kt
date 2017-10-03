@@ -123,8 +123,10 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         setCustomKeypad()
 
         scrollview.post { scrollview.scrollTo(0, 0) }
+    }
 
-        selectTabIfNecessary()
+    override fun setTabSelection(tabIndex: Int) {
+        tabs_receive.getTabAt(tabIndex)?.select()
     }
 
     override fun startContactSelectionActivity() {
@@ -134,15 +136,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 PaymentRequestType.CONTACT,
                 getString(R.string.from)
         )
-    }
-
-    private fun selectTabIfNecessary() {
-        val currency = arguments.getSerializable(ARG_SELECTED_CRYPTOCURRENCY) as CryptoCurrencies
-        if (currency == CryptoCurrencies.ETHER) {
-            tabs_receive.getTabAt(1)?.select()
-        } else {
-            presenter.onSelectDefault(defaultAccountPosition)
-        }
     }
 
     private fun setupToolbar() {
@@ -359,6 +352,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun onResume() {
         super.onResume()
+        presenter.onResume(defaultAccountPosition)
         closeKeypad()
         setupToolbar()
         LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, intentFilter)

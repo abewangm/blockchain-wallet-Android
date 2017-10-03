@@ -118,8 +118,8 @@ class SendPresenter @Inject constructor(
 
     fun onResume() {
         when(currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> view.setTabSelection(0)
-            CryptoCurrencies.ETHER -> view.setTabSelection(1)
+            CryptoCurrencies.BTC -> onBitcoinChosen()
+            CryptoCurrencies.ETHER -> onEtherChosen()
         }
     }
 

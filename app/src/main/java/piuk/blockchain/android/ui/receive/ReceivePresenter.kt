@@ -9,6 +9,7 @@ import org.bitcoinj.core.Coin
 import org.bitcoinj.uri.BitcoinURI
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
 import piuk.blockchain.android.data.ethereum.EthDataStore
@@ -21,6 +22,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.DecimalFormat
@@ -59,6 +61,13 @@ class ReceivePresenter @Inject internal constructor(
         } else view.hideContactsIntroduction()
     }
 
+    fun onResume(defaultAccountPosition: Int) {
+        when(currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> onSelectDefault(defaultAccountPosition)
+            CryptoCurrencies.ETHER -> onEthSelected()
+        }
+    }
+
     internal fun onSendToContactClicked() {
         view.startContactSelectionActivity()
     }
@@ -90,6 +99,8 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     internal fun onAccountSelected(account: Account) {
+        currencyState.cryptoCurrency = CryptoCurrencies.BTC
+        view.setTabSelection(0)
         selectedAccount = account
         view.updateReceiveLabel(account.label)
         payloadDataManager.getNextReceiveAddress(account)
@@ -105,7 +116,9 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     internal fun onEthSelected() {
+        currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         compositeDisposable.clear()
+        view.setTabSelection(1)
         view.hideBitcoinLayout()
         selectedAccount = null
         ethDataStore.ethAddressResponse!!.getAddressResponse()!!.account.let {
