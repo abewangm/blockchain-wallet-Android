@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
@@ -37,6 +38,7 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
+import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -98,21 +100,34 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             addTab(tabs.newTab().setText(R.string.ether))
             setOnTabSelectedListener {
                 if (it == 1) {
-                    accounts_spinner.invisible()
-                    presenter.onAccountChosen(presenter.activeAccountAndAddressList.lastIndex)
+                    presenter.updateSelectedCurrency(CryptoCurrencies.ETHER)
                 } else {
-                    if (accountsAdapter?.count ?: 1 > 1) {
-                        accounts_spinner.visible()
-                    } else if (accountsAdapter?.count ?: 1 == 1) {
-                        accounts_spinner.setSelection(0, false)
-                        accounts_spinner.invisible()
-                    }
-                    presenter.onAccountChosen(0)
+                    presenter.updateSelectedCurrency(CryptoCurrencies.BTC)
                 }
             }
         }
 
         onViewReady()
+    }
+
+    override fun updateSelectedCurrency(cryptoCurrencies: CryptoCurrencies) {
+        when(cryptoCurrencies) {
+            CryptoCurrencies.BTC -> tabs?.getTabAt(0)?.select()
+            CryptoCurrencies.ETHER -> tabs?.getTabAt(1)?.select()
+        }
+    }
+
+    override fun showAccountSpinner() {
+        if (accountsAdapter?.count ?: 1 > 1) {
+            accounts_spinner.visible()
+        } else if (accountsAdapter?.count ?: 1 == 1) {
+            accounts_spinner.setSelection(0, false)
+            accounts_spinner.invisible()
+        }
+    }
+
+    override fun hideAccountSpinner() {
+        accounts_spinner.invisible()
     }
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {

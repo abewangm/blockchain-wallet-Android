@@ -45,6 +45,7 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import org.jetbrains.annotations.NotNull;
 
+import timber.log.Timber;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -614,6 +615,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             balanceFragment = BalanceFragment.newInstance(true);
             paymentMade = false;
         }
+        balanceFragment.updateSelectedCurrency(mainPresenter.getCurrentCryptoCurrency());
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
     }

@@ -152,7 +152,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="16dp"
-        android:text="@string/dashboard_bitcoin_price"
+        tools:text="@string/dashboard_bitcoin_price"
         android:textAllCaps="true"
         android:textColor="@color/primary_navy_medium"
         android:textSize="14sp"

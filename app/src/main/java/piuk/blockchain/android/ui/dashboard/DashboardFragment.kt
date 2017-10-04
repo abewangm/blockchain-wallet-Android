@@ -60,6 +60,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         tabs_dashboard.apply {
             addTab(tabs_dashboard.newTab().setText(R.string.bitcoin))
             addTab(tabs_dashboard.newTab().setText(R.string.ether))
+            getTabAt(presenter.getCurrentCryptoCurrency())?.select()
             setOnTabSelectedListener {
                 if (it == 0) {
                     presenter.updateSelectedCurrency(CryptoCurrencies.BTC)
@@ -125,6 +126,10 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun updateCryptoCurrencyPrice(price: String) {
         dashboardAdapter.updateCurrencyPrice(price)
+    }
+
+    override fun updateDashboardSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        dashboardAdapter.updateSelectedCurrency(cryptoCurrency)
     }
 
     override fun showToast(message: Int, toastType: String) {
