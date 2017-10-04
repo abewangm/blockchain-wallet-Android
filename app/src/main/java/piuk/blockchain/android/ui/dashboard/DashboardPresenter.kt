@@ -135,7 +135,9 @@ class DashboardPresenter @Inject constructor(
                 .doOnSuccess { view.updateChartState(getChartsData(it)) }
                 .doOnError { view.updateChartState(ChartsState.Error) }
                 .subscribe(
-                        { /* No-op */ },
+                        {
+                            view.updateDashboardSelectedCurrency(cryptoCurrency)
+                        },
                         { Timber.e(it) }
                 )
     }

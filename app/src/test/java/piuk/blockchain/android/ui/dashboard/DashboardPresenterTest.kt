@@ -252,6 +252,7 @@ class DashboardPresenterTest {
         // Assert
         verify(view, times(3)).updateChartState(any())
         verify(view).updateCryptoCurrencyPrice(any())
+        verify(view).updateDashboardSelectedCurrency(any())
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -277,6 +278,7 @@ class DashboardPresenterTest {
         subject.updateSelectedCurrency(CryptoCurrencies.ETHER)
         // Assert
         verify(view, times(3)).updateChartState(any())
+        verify(view).updateDashboardSelectedCurrency(any())
         verify(view).updateCryptoCurrencyPrice(any())
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
@@ -322,6 +324,7 @@ class DashboardPresenterTest {
         verify(view).updateBtcBalance("210.0 BTC")
         verify(view).updateEthBalance("0.00000002 ETH")
         verify(view).updateTotalBalance("\$420.00")
+        verify(view).updateDashboardSelectedCurrency(any())
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)

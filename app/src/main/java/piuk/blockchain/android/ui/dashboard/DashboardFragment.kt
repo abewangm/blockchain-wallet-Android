@@ -127,6 +127,10 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         dashboardAdapter.updateCurrencyPrice(price)
     }
 
+    override fun updateDashboardSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        dashboardAdapter.updateSelectedCurrency(cryptoCurrency)
+    }
+
     override fun showToast(message: Int, toastType: String) {
         toast(message, toastType)
     }
