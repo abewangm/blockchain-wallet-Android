@@ -83,13 +83,14 @@ class BalancePresenter @Inject constructor(
                             when(currencyState.cryptoCurrency) {
                                 CryptoCurrencies.BTC -> {
                                     chosenAccount = activeAccountAndAddressList[0]
+                                    onAccountChosen(0)
                                 }
                                 CryptoCurrencies.ETHER -> {
                                     chosenAccount = activeAccountAndAddressList[activeAccountAndAddressList.lastIndex]
+                                    onAccountChosen(activeAccountAndAddressList.lastIndex)
                                 }
                             }
 
-                            setupTransactions()
                             view.updateSelectedCurrency(currencyState.cryptoCurrency)
                         },
                         { Timber.e(it) }
