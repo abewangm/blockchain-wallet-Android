@@ -27,6 +27,8 @@ import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactsEvent;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
@@ -71,6 +73,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private EnvironmentSettings environmentSettings;
     private PromptManager promptManager;
     private EthDataManager ethDataManager;
+    private CurrencyState currencyState;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -90,7 +93,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                   EnvironmentSettings environmentSettings,
                   PromptManager promptManager,
                   EthDataManager ethDataManager,
-                  SwipeToReceiveHelper swipeToReceiveHelper) {
+                  SwipeToReceiveHelper swipeToReceiveHelper,
+                  CurrencyState currencyState) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -111,6 +115,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.ethDataManager = ethDataManager;
         osUtil = new OSUtil(applicationContext);
         this.swipeToReceiveHelper = swipeToReceiveHelper;
+        this.currencyState = currencyState;
     }
 
     private void initPrompts(Context context) {
@@ -388,5 +393,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                         //no-op
                     }, Throwable::printStackTrace);
         }
+    }
+
+    public CryptoCurrencies getCurrentCryptoCurrency() {
+        return currencyState.getCryptoCurrency();
     }
 }

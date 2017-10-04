@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.balance
 
 import android.support.annotation.StringRes
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.base.View
@@ -71,4 +72,9 @@ interface BalanceView : View {
 
     fun startReceiveFragment()
 
+    fun updateSelectedCurrency(cryptoCurrencies: CryptoCurrencies)
+
+    fun hideAccountSpinner()
+
+    fun showAccountSpinner()
 }

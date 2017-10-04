@@ -16,6 +16,7 @@ import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
 import piuk.blockchain.android.data.contacts.models.ContactsEvent
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
@@ -76,10 +77,21 @@ class BalancePresenter @Inject constructor(
                 .doOnNext {
                     activeAccountAndAddressList.clear()
                     activeAccountAndAddressList.addAll(getAllDisplayableAccounts())
-                    chosenAccount = activeAccountAndAddressList[0]
                 }
                 .subscribe(
-                        { setupTransactions() },
+                        {
+                            when(currencyState.cryptoCurrency) {
+                                CryptoCurrencies.BTC -> {
+                                    chosenAccount = activeAccountAndAddressList[0]
+                                }
+                                CryptoCurrencies.ETHER -> {
+                                    chosenAccount = activeAccountAndAddressList[activeAccountAndAddressList.lastIndex]
+                                }
+                            }
+
+                            setupTransactions()
+                            view.updateSelectedCurrency(currencyState.cryptoCurrency)
+                        },
                         { Timber.e(it) }
                 )
     }
@@ -623,5 +635,20 @@ class BalancePresenter @Inject constructor(
 
     private fun getFiatCurrency() =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+
+    fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currencyState.cryptoCurrency = cryptoCurrency
+
+        when(cryptoCurrency) {
+            CryptoCurrencies.BTC -> {
+                view.showAccountSpinner()
+                onAccountChosen(0)
+            }
+            CryptoCurrencies.ETHER -> {
+                view.hideAccountSpinner()
+                onAccountChosen(activeAccountAndAddressList.lastIndex)
+            }
+        }
+    }
 
 }

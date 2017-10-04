@@ -200,7 +200,10 @@ class DashboardPresenter @Inject constructor(
                     image = R.drawable.vector_eth_offset,
                     emoji = "",
                     closeFunction = { dismissAnnouncement() },
-                    linkFunction = { view.startReceiveFragment() }
+                    linkFunction = {
+                        currencyState.cryptoCurrency = CryptoCurrencies.ETHER
+                        view.startReceiveFragment()
+                    }
             )
 
             displayList.add(0, announcementData)
