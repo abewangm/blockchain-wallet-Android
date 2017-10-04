@@ -24,54 +24,55 @@
             app:layout_scrollFlags="snap|scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
-            <RelativeLayout
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabs"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_gravity="bottom"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:tabContentStart="72dp"
+                app:tabGravity="fill"
+                app:tabIndicatorColor="@android:color/white"
+                app:tabIndicatorHeight="4dp"
+                app:tabMode="fixed" />
+
+            <android.support.constraint.ConstraintLayout
                 android:id="@+id/balance_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:fitsSystemWindows="true"
-                app:layout_collapseMode="parallax">
+                android:background="@color/primary_navy_medium"
+                app:layout_collapseMode="parallax"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/textview_balance"
                     fontPath="fonts/Montserrat-Light.ttf"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:gravity="center_horizontal"
-                    android:includeFontPadding="false"
                     android:textColor="@color/white"
                     android:textSize="32sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     tools:ignore="MissingPrefix"
-                    tools:text="10.0000002 BTC" />
+                    tools:text="1.03252623 BTC" />
 
-                <android.support.v7.widget.AppCompatSpinner
+                <Spinner
                     android:id="@+id/accounts_spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/textview_balance"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="-8dp"
-                    android:dropDownVerticalOffset="8dp"
                     android:spinnerMode="dropdown"
                     android:theme="@style/SpinnerWhite"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textview_balance"
                     tools:text="All wallets" />
 
-                <android.support.design.widget.TabLayout
-                    android:id="@+id/tabs"
-                    fontPath="fonts/Montserrat-Regular.ttf"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_below="@id/accounts_spinner"
-                    android:layout_gravity="bottom"
-                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                    app:tabContentStart="72dp"
-                    app:tabGravity="fill"
-                    app:tabIndicatorColor="@android:color/white"
-                    app:tabIndicatorHeight="4dp"
-                    app:tabMode="fixed" />
-            </RelativeLayout>
-
+            </android.support.constraint.ConstraintLayout>
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 

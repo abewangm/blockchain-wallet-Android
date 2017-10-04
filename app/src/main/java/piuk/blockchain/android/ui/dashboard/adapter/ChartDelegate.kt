@@ -4,10 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.support.annotation.ColorRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.github.mikephil.charting.charts.LineChart
@@ -97,6 +100,7 @@ class ChartDelegate<in T>(
     private fun showData(data: ChartsState.Data) {
         fiatSymbol = data.fiatSymbol
         configureChart()
+        updatePercentChange(data)
 
         viewHolder?.let {
             it.day.setOnClickListener { data.getChartDay() }
@@ -127,6 +131,32 @@ class ChartDelegate<in T>(
                 animateX(500)
             }
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updatePercentChange(data: ChartsState.Data) {
+        val first = data.data.first()
+        val last = data.data.last()
+        val difference = last.price - first.price
+        val percentChange = (difference / first.price) * 100
+
+        viewHolder?.apply {
+            percentage.text = "${String.format("%.1f", percentChange)}%"
+            when {
+                percentChange < 0 -> updateArrow(arrow, 0f, R.color.product_red_medium)
+                percentChange == 0.0 -> arrow.invisible()
+                else -> updateArrow(arrow, 180f, R.color.product_green_medium)
+            }
+        }
+    }
+
+    private fun updateArrow(arrow: ImageView, rotation: Float, @ColorRes color: Int) {
+        arrow.visible()
+        arrow.rotation = rotation
+        arrow.setColorFilter(
+                ContextCompat.getColor(arrow.context, color),
+                PorterDuff.Mode.SRC_ATOP
+        )
     }
 
     private fun showLoading() {
@@ -260,8 +290,10 @@ class ChartDelegate<in T>(
         internal var year: TextView = itemView.textview_year
         internal var allTime: TextView = itemView.textview_all_time
         internal var price: TextView = itemView.textview_price
+        internal var percentage: TextView = itemView.textview_percentage
         internal var currency: TextView = itemView.textview_currency
         internal var progressBar: ProgressBar = itemView.progress_bar
+        internal var arrow: ImageView = itemView.imageview_arrow
 
     }
 

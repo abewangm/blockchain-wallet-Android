@@ -27,6 +27,7 @@ import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import javax.inject.Inject
 
+@Suppress("MemberVisibilityCanPrivate")
 class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), DashboardView {
 
     override val shouldShowBuy: Boolean
@@ -112,15 +113,15 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     }
 
     override fun updateEthBalance(balance: String) {
-        textview_eth.text = balance
+        textview_eth?.text = balance
     }
 
     override fun updateBtcBalance(balance: String) {
-        textview_btc.text = balance
+        textview_btc?.text = balance
     }
 
     override fun updateTotalBalance(balance: String) {
-        textview_total.text = balance
+        textview_total?.text = balance
     }
 
     override fun updateCryptoCurrencyPrice(price: String) {
