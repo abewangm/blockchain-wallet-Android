@@ -45,6 +45,7 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import org.jetbrains.annotations.NotNull;
 
+import timber.log.Timber;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -341,7 +342,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_BACKUP) {
             resetNavigationDrawer();
-        } else if (requestCode == SETTINGS_EDIT || requestCode == CONTACTS_EDIT) {
+        } else if (requestCode == SETTINGS_EDIT || requestCode == CONTACTS_EDIT || requestCode == ACCOUNT_EDIT) {
+            // Re-init balance fragment so that it reloads all accounts/settings incase of changes
+            if (balanceFragment != null) {
+                balanceFragment = BalanceFragment.newInstance(false);
+            }
             // Reset state incase of changing currency etc
             binding.bottomNavigation.setCurrentItem(1);
             // Pass this result to balance fragment
@@ -548,12 +553,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void showMetadataNodeRegistrationFailure() {
+    public void showMetadataNodeFailure() {
         if (!isFinishing()) {
             new AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
-                    .setMessage(R.string.contacts_register_nodes_failure)
-                    .setPositiveButton(R.string.retry, (dialog, which) -> getPresenter().checkForMessages())
+                    .setMessage(R.string.metadata_load_failure)
+                    .setPositiveButton(R.string.retry, (dialog, which) -> getPresenter().initMetadataElements())
+                    .setNegativeButton(R.string.exit, (dialog, which) -> AccessState.getInstance().logout(this))
+                    .setCancelable(false)
                     .create()
                     .show();
         }
@@ -608,6 +615,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             balanceFragment = BalanceFragment.newInstance(true);
             paymentMade = false;
         }
+        balanceFragment.updateSelectedCurrency(mainPresenter.getCurrentCryptoCurrency());
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
     }

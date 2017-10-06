@@ -452,7 +452,6 @@
     <string name="contacts_payment_request_send_note">Waarom zou je %1$s bitcoin willen verzenden? Dit is optioneel en zal worden gedeeld met %1$s.</string>
     <string name="contacts_payment_request_receive_note">Waarom zou je willen dat %1$s je bitcoin zou zenden? Dit is optioneel en zal worden gedeeld met %1$s.</string>
     <string name="contacts_send_address_message">Hiermee zend je een adres naar je contactpersoon. Wil je doorgaan?</string>
-    <string name="contacts_register_nodes_failure">We konden je niet verbinden met de contactendienst. Probeer het nogmaals om volledige functionaliteit in te schakelen.</string>
     <string name="contacts_too_much_sent">Het lijkt erop dat je meer bitcoin verzond dan was aangevraagd. Je kunt, als je wilt, wat terugvragen van je contactpersoon. We hebben de betaling niet als voltooid gemarkeerd.</string>
     <string name="contacts_too_little_sent">Het lijkt erop dat je minder bitcoin verzond dan was aangevraagd. Je contactpersoon zal de bitcoin ontvangen die je verzond, maar we hebben de betaling niet als voltooid gemarkeerd.</string>
     <string name="contacts_second_password_prompt">Om deze dienst te kunnen gebruiken, vereisen we dat je jouw tweede wachtwoord invoert. Je hoeft dit maar één keer in te voeren om de functionaliteit van Contactpersonen te gebruiken.</string>

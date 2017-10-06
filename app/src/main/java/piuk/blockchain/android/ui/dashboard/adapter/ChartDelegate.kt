@@ -2,18 +2,25 @@ package piuk.blockchain.android.ui.dashboard.adapter
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.support.annotation.ColorRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.utils.MPPointF
 import kotlinx.android.synthetic.main.item_chart.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.TimeSpan
@@ -34,18 +41,13 @@ class ChartDelegate<in T>(
 ) : AdapterDelegate<T> {
 
     private var viewHolder: ChartViewHolder? = null
+    private var fiatSymbol: String? = null
 
     private val typefaceRegular by unsafeLazy {
-        TypefaceUtils.load(
-                activity.assets,
-                "fonts/Montserrat-Regular.ttf"
-        )
+        TypefaceUtils.load(activity.assets, "fonts/Montserrat-Regular.ttf")
     }
     private val typefaceLight by unsafeLazy {
-        TypefaceUtils.load(
-                activity.assets,
-                "fonts/Montserrat-Light.ttf"
-        )
+        TypefaceUtils.load(activity.assets, "fonts/Montserrat-Light.ttf")
     }
     private val buttonsList by unsafeLazy {
         listOf(
@@ -96,7 +98,9 @@ class ChartDelegate<in T>(
     }
 
     private fun showData(data: ChartsState.Data) {
-        configureChart(data.fiatSymbol)
+        fiatSymbol = data.fiatSymbol
+        configureChart()
+        updatePercentChange(data)
 
         viewHolder?.let {
             it.day.setOnClickListener { data.getChartDay() }
@@ -119,11 +123,40 @@ class ChartDelegate<in T>(
                     setDrawCircleHole(false)
                     setCircleColor(ContextCompat.getColor(activity, R.color.primary_navy_medium))
                     setDrawFilled(false)
+                    isHighlightEnabled = true
+                    setDrawHighlightIndicators(false)
+                    marker = ValueMarker(context, R.layout.item_chart_marker)
                 })
 
                 animateX(500)
             }
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updatePercentChange(data: ChartsState.Data) {
+        val first = data.data.first()
+        val last = data.data.last()
+        val difference = last.price - first.price
+        val percentChange = (difference / first.price) * 100
+
+        viewHolder?.apply {
+            percentage.text = "${String.format("%.1f", percentChange)}%"
+            when {
+                percentChange < 0 -> updateArrow(arrow, 0f, R.color.product_red_medium)
+                percentChange == 0.0 -> arrow.invisible()
+                else -> updateArrow(arrow, 180f, R.color.product_green_medium)
+            }
+        }
+    }
+
+    private fun updateArrow(arrow: ImageView, rotation: Float, @ColorRes color: Int) {
+        arrow.visible()
+        arrow.rotation = rotation
+        arrow.setColorFilter(
+                ContextCompat.getColor(arrow.context, color),
+                PorterDuff.Mode.SRC_ATOP
+        )
     }
 
     private fun showLoading() {
@@ -165,21 +198,16 @@ class ChartDelegate<in T>(
 
     @SuppressLint("SimpleDateFormat")
     private fun setDateFormatter(timeSpan: TimeSpan) {
-        when (timeSpan) {
-            TimeSpan.DAY -> {
-                viewHolder?.let {
-                    it.chart.xAxis.setValueFormatter { fl, _ ->
-                        SimpleDateFormat("H:00").format(Date(fl.toLong() * 1000))
-                    }
-                    it.chart.xAxis.granularity
-                }
-            }
-            else -> {
-                viewHolder?.let {
-                    it.chart.xAxis.setValueFormatter { fl, _ ->
-                        SimpleDateFormat("MMM dd").format(Date(fl.toLong() * 1000))
-                    }
-                }
+        val dateFormat = when (timeSpan) {
+            TimeSpan.ALL_TIME -> SimpleDateFormat("YYYY")
+            TimeSpan.YEAR -> SimpleDateFormat("MMM ''YY")
+            TimeSpan.MONTH, TimeSpan.WEEK -> SimpleDateFormat("dd. MMM")
+            TimeSpan.DAY -> SimpleDateFormat("H:00")
+        }
+
+        viewHolder?.let {
+            it.chart.xAxis.setValueFormatter { fl, _ ->
+                dateFormat.format(Date(fl.toLong() * 1000))
             }
         }
     }
@@ -199,16 +227,13 @@ class ChartDelegate<in T>(
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun configureChart(fiatSymbol: String) {
+    private fun configureChart() {
         viewHolder?.chart?.apply {
             setDrawGridBackground(false)
             setDrawBorders(false)
-            setTouchEnabled(false)
             setScaleEnabled(false)
             setPinchZoom(false)
             isDoubleTapToZoomEnabled = false
-            isHighlightPerTapEnabled = false
-            isHighlightPerDragEnabled = false
             description.isEnabled = false
             legend.isEnabled = false
             axisLeft.setDrawGridLines(false)
@@ -221,7 +246,36 @@ class ChartDelegate<in T>(
             xAxis.textColor = ContextCompat.getColor(context, R.color.primary_gray_medium)
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.isGranularityEnabled = true
+            setExtraOffsets(8f, 0f, 0f, 10f)
             setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
+        }
+    }
+
+    inner class ValueMarker(
+            context: Context,
+            layoutResource: Int
+    ) : MarkerView(context, layoutResource) {
+
+        private val date = findViewById<TextView>(R.id.textview_marker_date)
+        private val price = findViewById<TextView>(R.id.textview_marker_price)
+
+        private var mpPointF: MPPointF? = null
+
+        @SuppressLint("SimpleDateFormat", "SetTextI18n")
+        override fun refreshContent(e: Entry, highlight: Highlight) {
+            date.text = SimpleDateFormat("E, MMM dd, HH:mm").format(Date(e.x.toLong() * 1000))
+            price.text = "$fiatSymbol${e.y}"
+
+            super.refreshContent(e, highlight)
+        }
+
+        override fun getOffset(): MPPointF {
+            if (mpPointF == null) {
+                // Center the marker horizontally and vertically
+                mpPointF = MPPointF((-(width / 2)).toFloat(), (-height).toFloat())
+            }
+
+            return mpPointF!!
         }
     }
 
@@ -236,8 +290,10 @@ class ChartDelegate<in T>(
         internal var year: TextView = itemView.textview_year
         internal var allTime: TextView = itemView.textview_all_time
         internal var price: TextView = itemView.textview_price
+        internal var percentage: TextView = itemView.textview_percentage
         internal var currency: TextView = itemView.textview_currency
         internal var progressBar: ProgressBar = itemView.progress_bar
+        internal var arrow: ImageView = itemView.imageview_arrow
 
     }
 

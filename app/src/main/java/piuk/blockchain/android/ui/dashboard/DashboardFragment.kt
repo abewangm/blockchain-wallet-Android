@@ -27,6 +27,7 @@ import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import javax.inject.Inject
 
+@Suppress("MemberVisibilityCanPrivate")
 class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), DashboardView {
 
     override val shouldShowBuy: Boolean
@@ -59,6 +60,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         tabs_dashboard.apply {
             addTab(tabs_dashboard.newTab().setText(R.string.bitcoin))
             addTab(tabs_dashboard.newTab().setText(R.string.ether))
+            getTabAt(presenter.getCurrentCryptoCurrency())?.select()
             setOnTabSelectedListener {
                 if (it == 0) {
                     presenter.updateSelectedCurrency(CryptoCurrencies.BTC)
@@ -74,6 +76,9 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
             layoutManager = LinearLayoutManager(activity)
             this.adapter = dashboardAdapter
         }
+
+        textview_btc.setOnClickListener { presenter.invertViewType() }
+        textview_eth.setOnClickListener { presenter.invertViewType() }
 
         onViewReady()
     }
@@ -108,19 +113,23 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     }
 
     override fun updateEthBalance(balance: String) {
-        textview_eth.text = balance
+        textview_eth?.text = balance
     }
 
     override fun updateBtcBalance(balance: String) {
-        textview_btc.text = balance
+        textview_btc?.text = balance
     }
 
     override fun updateTotalBalance(balance: String) {
-        textview_total.text = balance
+        textview_total?.text = balance
     }
 
     override fun updateCryptoCurrencyPrice(price: String) {
         dashboardAdapter.updateCurrencyPrice(price)
+    }
+
+    override fun updateDashboardSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        dashboardAdapter.updateSelectedCurrency(cryptoCurrency)
     }
 
     override fun showToast(message: Int, toastType: String) {

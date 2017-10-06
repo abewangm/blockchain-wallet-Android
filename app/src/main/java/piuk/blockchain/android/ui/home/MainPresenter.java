@@ -27,6 +27,8 @@ import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactsEvent;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
@@ -71,6 +73,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private EnvironmentSettings environmentSettings;
     private PromptManager promptManager;
     private EthDataManager ethDataManager;
+    private CurrencyState currencyState;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -90,7 +93,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                   EnvironmentSettings environmentSettings,
                   PromptManager promptManager,
                   EthDataManager ethDataManager,
-                  SwipeToReceiveHelper swipeToReceiveHelper) {
+                  SwipeToReceiveHelper swipeToReceiveHelper,
+                  CurrencyState currencyState) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -111,6 +115,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.ethDataManager = ethDataManager;
         osUtil = new OSUtil(applicationContext);
         this.swipeToReceiveHelper = swipeToReceiveHelper;
+        this.currencyState = currencyState;
     }
 
     private void initPrompts(Context context) {
@@ -137,49 +142,53 @@ public class MainPresenter extends BasePresenter<MainView> {
 
             getView().showProgressDialog(R.string.please_wait);
 
-            initMetadataNodesObservable()
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
-                    .flatMapCompletable(metadataNodeFactory -> {
-                        //Initialise contacts
-                        //contactsDataManager.initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode());
-                        //payloadDataManager.registerMdid()
-                        //contactsDataManager.publishXpub()
-                        return Completable.complete();
-                    })
-                    .andThen(feesCompletable())
-                    .doAfterTerminate(() -> {
-                                getView().hideProgressDialog();
-
-                                initPrompts(getView().getActivityContext());
-                                storeSwipeReceiveAddresses();
-
-                                rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
-
-                                if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
-                                    String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
-                                    prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
-                                    getView().onScanInput(strUri);
-                                }
-                            }
-                    )
-                    .subscribe(() -> {
-                        if (getView().isBuySellPermitted()) {
-                            initBuyService();
-                        } else {
-                            getView().setBuySellEnabled(false);
-                        }
-                        initContactsService();
-                    }, throwable -> {
-                        //noinspection StatementWithEmptyBody
-                        if (throwable instanceof InvalidCredentialsException) {
-                            // Wallet double encrypted and needs to be decrypted to set up ether wallet, contacts etc
-                            getView().showSecondPasswordDialog();
-                        } else {
-                            getView().showMetadataNodeRegistrationFailure();
-                        }
-                    });
+            initMetadataElements();
         }
+    }
+
+    void initMetadataElements() {
+        initMetadataNodesObservable()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
+                .flatMapCompletable(metadataNodeFactory -> {
+                    //Initialise contacts
+                    //contactsDataManager.initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode());
+                    //payloadDataManager.registerMdid()
+                    //contactsDataManager.publishXpub()
+                    return Completable.complete();
+                })
+                .andThen(feesCompletable())
+                .doAfterTerminate(() -> {
+                            getView().hideProgressDialog();
+
+                            initPrompts(getView().getActivityContext());
+                            storeSwipeReceiveAddresses();
+
+                            rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
+
+                            if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
+                                String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
+                                prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
+                                getView().onScanInput(strUri);
+                            }
+                        }
+                )
+                .subscribe(() -> {
+                    if (getView().isBuySellPermitted()) {
+                        initBuyService();
+                    } else {
+                        getView().setBuySellEnabled(false);
+                    }
+                    initContactsService();
+                }, throwable -> {
+                    //noinspection StatementWithEmptyBody
+                    if (throwable instanceof InvalidCredentialsException) {
+                        // Wallet double encrypted and needs to be decrypted to set up ether wallet, contacts etc
+                        getView().showSecondPasswordDialog();
+                    } else {
+                        getView().showMetadataNodeFailure();
+                    }
+                });
     }
 
     private void storeSwipeReceiveAddresses() {
@@ -384,5 +393,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                         //no-op
                     }, Throwable::printStackTrace);
         }
+    }
+
+    public CryptoCurrencies getCurrentCryptoCurrency() {
+        return currencyState.getCryptoCurrency();
     }
 }

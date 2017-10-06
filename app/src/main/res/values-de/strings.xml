@@ -452,7 +452,6 @@
     <string name="contacts_payment_request_send_note">Warum möchten Sie %1$s Bitcoin senden? Dies ist optional und wird mit %1$s geteilt.</string>
     <string name="contacts_payment_request_receive_note">Warum möchten Sie, dass %1$s Ihnen Bitcoin sendet? Dies ist optional und wird mit %1$s geteilt.</string>
     <string name="contacts_send_address_message">Dadurch wird Ihrem Kontakt eine Adresse zugesendet. Fortfahren?</string>
-    <string name="contacts_register_nodes_failure">Wir konnten Sie nicht mit dem Kontaktservice verbinden. Bitte versuchen Sie es erneut, um alle Funktionen nutzen zu können.</string>
     <string name="contacts_too_much_sent">Anscheinend haben Sie mehr als die erforderliche Anzahl an Bitcoin gesendet. Bei Bedarf können Sie Ihren Kontakt bitten, eine entsprechende Rückerstattung zu leisten. Wir haben die Zahlung nicht als abgeschlossen gekennzeichnet.</string>
     <string name="contacts_too_little_sent">Anscheinend haben Sie weniger als die erforderliche Anzahl an Bitcoin gesendet. Ihr Kontakt wird zwar das von Ihnen gesendete Bitcoin erhalten, doch wir haben die Zahlung nicht als abgeschlossen gekennzeichnet.</string>
     <string name="contacts_second_password_prompt">Zur Benutzung dieses Service müssen Sie uns das zweite Passwort angeben. Zur Verwendung der Kontaktfunktion ist nur eine einmalige Eingabe erforderlich.</string>

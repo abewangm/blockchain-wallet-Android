@@ -73,7 +73,6 @@ class SendPresenter @Inject constructor(
         private val feeDataManager: FeeDataManager,
         private val privateKeyFactory: PrivateKeyFactory,
         private val environmentSettings: EnvironmentSettings,
-        private val sslVerifyUtil: SSLVerifyUtil,
         private val transactionListDataManager: TransactionListDataManager
 ) : BasePresenter<SendView>() {
 
@@ -105,58 +104,59 @@ class SendPresenter @Inject constructor(
      * External changes.
      * Possible currency change, Account/address archive, Balance change
      */
-    fun onBroadcastReceived() {
+    internal fun onBroadcastReceived() {
         updateTicker()
         resetAccountList()
     }
 
     override fun onViewReady() {
-        sslVerifyUtil.validateSSL()
-
+        resetAccountList()
         setupTextChangeSubject()
         updateTicker()
         updateCurrencyUnits()
     }
 
-    fun onBitcoinChosen() {
-        compositeDisposable.clear()
-        view?.setSendButtonEnabled(true)
-        currencyState.cryptoCurrency = CryptoCurrencies.BTC
-        updateTicker()
-        view.setTabSelection(0)
-        absoluteSuggestedFee = BigInteger.ZERO
-        view.updateFeeAmount("")
-        view.enableFeeDropdown()
-        resetAccountList()
-        selectDefaultSendingAccount()
-        view.hideMaxAvailable()
-        clearCryptoAmount()
-        clearReceivingAddress()
-        view.setCryptoMaxLength(17)
-        updateCurrencyUnits()
-        calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
-        view.showFeePriority()
+    fun onResume() {
+        when(currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> onBitcoinChosen()
+            CryptoCurrencies.ETHER -> onEtherChosen()
+        }
     }
 
-    fun onEtherChosen() {
-        compositeDisposable.clear()
-        view?.setSendButtonEnabled(true)
+    internal fun onBitcoinChosen() {
+        view.showFeePriority()
+        currencyState.cryptoCurrency = CryptoCurrencies.BTC
+        view.setTabSelection(0)
+        view.enableFeeDropdown()
+        view.setCryptoMaxLength(17)
+        resetState()
+        calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
+        view.enableInput()
+    }
+
+    internal fun onEtherChosen() {
+        view.hideFeePriority()
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.setFeePrioritySelection(0)
-        updateTicker()
         view.setTabSelection(1)
+        view.disableFeeDropdown()
+        view.setCryptoMaxLength(30)
+        resetState()
+        checkForUnconfirmedTx()
+    }
+
+    private fun resetState() {
+        compositeDisposable.clear()
+        view?.setSendButtonEnabled(true)
+        updateTicker()
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
-        view.disableFeeDropdown()
         resetAccountList()
         selectDefaultSendingAccount()
         view.hideMaxAvailable()
         clearCryptoAmount()
         clearReceivingAddress()
-        view.setCryptoMaxLength(30)
         updateCurrencyUnits()
-        checkForUnconfirmedTx()
-        view.hideFeePriority()
     }
 
     internal fun onContinueClicked() {
@@ -603,39 +603,30 @@ class SendPresenter @Inject constructor(
      * Get cached dynamic fee from new Fee options endpoint
      */
     private fun getSuggestedFee() {
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-                feeOptions = dynamicFeeCache.btcFeeOptions!!
-                // Refresh fee cache
-                compositeDisposable.add(
-                        feeDataManager.btcFeeOptions
-                                .doOnError {
-                                    view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
-                                    view.finishPage()
-                                    Timber.e(it)
-                                }
-                                .doOnTerminate { feeOptions = dynamicFeeCache.btcFeeOptions!! }
-                                .subscribe({ dynamicFeeCache.btcFeeOptions = it }) { it.printStackTrace() })
-            }
-            CryptoCurrencies.ETHER -> {
-                feeOptions = dynamicFeeCache.ethFeeOptions!!
-                // Refresh fee cache
-                compositeDisposable.add(
-                        feeDataManager.ethFeeOptions
-                                .doOnError {
-                                    view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
-                                    view.finishPage()
-                                    Timber.e(it)
-                                }
-                                .doOnTerminate { feeOptions = dynamicFeeCache.ethFeeOptions!! }
-                                .subscribe({ dynamicFeeCache.ethFeeOptions = it }) { it.printStackTrace() })
+        val observable = when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> feeDataManager.btcFeeOptions
+                    .doOnSubscribe { feeOptions = dynamicFeeCache.btcFeeOptions!! }
+                    .doOnNext { dynamicFeeCache.btcFeeOptions = it }
 
-            }
+            CryptoCurrencies.ETHER -> feeDataManager.ethFeeOptions
+                    .doOnSubscribe { feeOptions = dynamicFeeCache.ethFeeOptions!! }
+                    .doOnNext { dynamicFeeCache.ethFeeOptions = it }
+
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
+
+        observable.compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { /* No-op */ },
+                        {
+                            Timber.e(it)
+                            view.showSnackbar(R.string.confirm_payment_fee_sync_error, Snackbar.LENGTH_LONG)
+                            view.finishPage()
+                        }
+                )
     }
 
-    internal fun getFeeOptions(): FeeOptions? = dynamicFeeCache.btcFeeOptions
+    internal fun getBitcoinFeeOptions(): FeeOptions? = dynamicFeeCache.btcFeeOptions
 
     internal fun getFeeOptionsForDropDown(): List<DisplayFeeOptions> {
         val regular = DisplayFeeOptions(
@@ -774,12 +765,8 @@ class SendPresenter @Inject constructor(
         val feePerKb = getFeePerKbFromPriority(view.getFeePriority())
 
         when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-                calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
-            }
-            CryptoCurrencies.ETHER -> {
-                getEthAccountResponse(spendAll, amountToSendText)
-            }
+            CryptoCurrencies.BTC -> calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
+            CryptoCurrencies.ETHER -> getEthAccountResponse(spendAll, amountToSendText)
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
@@ -860,13 +847,10 @@ class SendPresenter @Inject constructor(
             ethDataManager.fetchEthAddress()
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnError { view.showSnackbar(R.string.api_fail, Snackbar.LENGTH_INDEFINITE) }
-                    .subscribe {
-                        calculateUnspentEth(it, spendAll, amountToSendText)
-                    }
+                    .subscribe { calculateUnspentEth(it, spendAll, amountToSendText) }
         } else {
-            val combinedEthModel = ethDataManager.getEthResponseModel()
-            combinedEthModel?.let {
-                calculateUnspentEth(combinedEthModel, spendAll, amountToSendText)
+            ethDataManager.getEthResponseModel()?.let {
+                calculateUnspentEth(it, spendAll, amountToSendText)
             }
         }
     }
@@ -902,12 +886,13 @@ class SendPresenter @Inject constructor(
             val fiatBalanceFormatted = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit).format(fiatBalance)
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $fiatBalanceFormatted ${currencyHelper.fiatUnit}")
         } else {
-            val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 16 }
-                    .run { format(availableEth.toDouble()) }
+            val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 18 }
+                    .run { format(availableEth) }
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $number")
         }
 
-        if (maxAvailable <= Payment.DUST) {
+        // No dust in Ethereum
+        if (maxAvailable <= BigInteger.ZERO) {
             view.updateMaxAvailable(stringUtils.getString(R.string.insufficient_funds))
             view.updateMaxAvailableColor(R.color.product_red_medium)
         } else {
@@ -1016,7 +1001,7 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onSendingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
-        pendingTransaction.receivingObject = ItemAccount(
+        pendingTransaction.sendingObject = ItemAccount(
                 legacyAddress.label,
                 null,
                 null,
@@ -1030,10 +1015,11 @@ class SendPresenter @Inject constructor(
             label = legacyAddress.address
         }
         view.updateSendingAddress(label)
+        calculateSpendableAmounts(false, "0")
     }
 
     private fun onSendingBtcAccountSelected(account: Account) {
-        pendingTransaction.receivingObject = ItemAccount(
+        pendingTransaction.sendingObject = ItemAccount(
                 account.label,
                 null,
                 null,
@@ -1048,6 +1034,7 @@ class SendPresenter @Inject constructor(
         }
 
         view.updateSendingAddress(label)
+        calculateSpendableAmounts(false, "0")
     }
 
     private fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
@@ -1267,9 +1254,11 @@ class SendPresenter @Inject constructor(
                         { unconfirmed ->
                             view?.setSendButtonEnabled(!unconfirmed)
                             if (unconfirmed) {
+                                view?.disableInput()
                                 view?.updateMaxAvailable(stringUtils.getString(R.string.eth_unconfirmed_wait))
                                 view?.updateMaxAvailableColor(R.color.product_red_medium)
                             } else {
+                                view.enableInput()
                                 calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
                             }
                         },

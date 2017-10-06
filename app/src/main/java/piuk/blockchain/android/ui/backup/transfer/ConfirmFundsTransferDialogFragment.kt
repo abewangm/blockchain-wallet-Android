@@ -17,7 +17,7 @@ import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.AddressAdapter
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
-import piuk.blockchain.android.util.helperfunctions.OnItemSelectedListener
+import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
 import javax.inject.Inject
@@ -70,7 +70,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
                 true
         ).apply { setDropDownViewResource(R.layout.spinner_dropdown) }
         spinner_destination.adapter = receiveToAdapter
-        spinner_destination.onItemSelectedListener = OnItemSelectedListener {
+        spinner_destination.onItemSelectedListener = onItemSelectedListener {
             spinner_destination.setSelection(spinner_destination.selectedItemPosition)
             presenter.accountSelected(spinner_destination.selectedItemPosition)
         }

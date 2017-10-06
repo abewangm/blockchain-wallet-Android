@@ -27,7 +27,7 @@ interface MainView extends View {
 
     void clearAllDynamicShortcuts();
 
-    void showMetadataNodeRegistrationFailure();
+    void showMetadataNodeFailure();
 
     void setBuySellEnabled(boolean enabled);
 

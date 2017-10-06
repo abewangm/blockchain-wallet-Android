@@ -55,6 +55,7 @@ public class AnimatedPasswordInputLayout extends TextInputLayout {
                         return false;
                     }
                 }
+                v.performClick();
                 return false;
             });
         }

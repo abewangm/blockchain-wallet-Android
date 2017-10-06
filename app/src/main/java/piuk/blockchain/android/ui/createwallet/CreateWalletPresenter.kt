@@ -92,6 +92,7 @@ class CreateWalletPresenter @Inject constructor(
                     Logging.logSignUp(SignUpEvent()
                             .putSuccess(true))
                 }, {
+                    Timber.e(it)
                     view.showToast(R.string.hd_error, ToastCustom.TYPE_ERROR)
                     appUtil.clearCredentialsAndRestart()
                     Logging.logSignUp(SignUpEvent()
@@ -119,8 +120,8 @@ class CreateWalletPresenter @Inject constructor(
                     view.startPinEntryActivity()
                     Logging.logCustom(RecoverWalletEvent()
                             .putSuccess(true))
-                }, { throwable ->
-                    Timber.e(throwable)
+                }, {
+                    Timber.e(it)
                     view.showToast(R.string.restore_failed, ToastCustom.TYPE_ERROR)
                     Logging.logCustom(RecoverWalletEvent()
                             .putSuccess(false))

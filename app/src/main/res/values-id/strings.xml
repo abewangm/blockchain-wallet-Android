@@ -453,7 +453,6 @@
     <string name="contacts_payment_request_send_note">Mengapa Anda ingin mengirim bitcoin %1$s? Ini adalah opsional dan akan dibagikan dengan %1$s.</string>
     <string name="contacts_payment_request_receive_note">Mengapa Anda ingin %1$s untuk mengirim Anda bitcoin? Ini adalah opsional dan akan dibagikan dengan %1$s.</string>
     <string name="contacts_send_address_message">Ini akan mengirim alamat ke kontak Anda. Memproses?</string>
-    <string name="contacts_register_nodes_failure">Kita tidak bisa menghubungkan Anda ke layanan kontak. Silakan coba lagi untuk mengaktifkan fungsi penuh.</string>
     <string name="contacts_too_much_sent">Sepertinya Anda mengirim lebih banyak bitcoin dari yang diminta. Anda dapat meminta beberapa kembali dari kontak Anda jika Anda inginkan. Kami belum menandai pembayaran sebagai lengkap.</string>
     <string name="contacts_too_little_sent">Sepertinya Anda mengirim bitcoin kurang dari yang diminta. Kontak Anda akan tetap menerima bitcoin yang Anda dikirim, tapi kami belum menandai pembayaran sebagai lengkap.</string>
     <string name="contacts_second_password_prompt">Untuk menggunakan layanan ini, kami meminta Anda untuk memasukkan kata sandi kedua Anda. Anda hanya perlu memasukkan ini sekali menggunakan fungsi Kontak.</string>

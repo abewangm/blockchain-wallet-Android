@@ -8,6 +8,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.ChartsDataManager
 import piuk.blockchain.android.data.charts.TimeSpan
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.exchange.BuyDataManager
@@ -41,15 +42,20 @@ class DashboardPresenter @Inject constructor(
         private val appUtil: AppUtil,
         private val buyDataManager: BuyDataManager,
         private val rxBus: RxBus,
-        private val swipeToReceiveHelper: SwipeToReceiveHelper
+        private val swipeToReceiveHelper: SwipeToReceiveHelper,
+        private val currencyState: CurrencyState
 ) : BasePresenter<DashboardView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-    private var cryptoCurrency = CryptoCurrencies.BTC
+    private lateinit var cryptoCurrency: CryptoCurrencies
     private val displayList = mutableListOf<Any>(ChartDisplayable())
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
+    private var timeSpan = TimeSpan.MONTH
+    @VisibleForTesting var btcBalance = 0L
+    @VisibleForTesting var ethBalance = BigInteger.ZERO
 
     override fun onViewReady() {
+        cryptoCurrency = currencyState.cryptoCurrency
         view.notifyItemAdded(displayList, 0)
 
         // Triggers various updates to the page once all metadata is loaded
@@ -70,14 +76,29 @@ class DashboardPresenter @Inject constructor(
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         this.cryptoCurrency = cryptoCurrency
+        currencyState.cryptoCurrency = cryptoCurrency
         updateCryptoPrice()
-        updateChartsData(TimeSpan.MONTH)
+        updateChartsData(timeSpan)
     }
 
     internal fun onResume() {
-        updateChartsData(TimeSpan.MONTH)
+        cryptoCurrency = currencyState.cryptoCurrency
+        updateChartsData(timeSpan)
         updateAllBalances()
         updatePrices()
+    }
+
+    fun getCurrentCryptoCurrency(): Int {
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> return 0
+            CryptoCurrencies.ETHER -> return 1
+            else -> return 1
+        }
+    }
+
+    internal fun invertViewType() {
+        currencyState.toggleDisplayingCrypto()
+        updateCryptoBalances()
     }
 
     private fun updatePrices() {
@@ -97,6 +118,7 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun updateChartsData(timeSpan: TimeSpan) {
+        this.timeSpan = timeSpan
         compositeDisposable.clear()
 
         view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
@@ -113,7 +135,9 @@ class DashboardPresenter @Inject constructor(
                 .doOnSuccess { view.updateChartState(getChartsData(it)) }
                 .doOnError { view.updateChartState(ChartsState.Error) }
                 .subscribe(
-                        { /* No-op */ },
+                        {
+                            view.updateDashboardSelectedCurrency(cryptoCurrency)
+                        },
                         { Timber.e(it) }
                 )
     }
@@ -133,12 +157,11 @@ class DashboardPresenter @Inject constructor(
                 .flatMapCompletable { ethAddressResponse ->
                     payloadDataManager.updateAllBalances()
                             .doOnComplete {
-                                val btcBalance = transactionListDataManager.getBtcBalance(ItemAccount().apply {
+                                btcBalance = transactionListDataManager.getBtcBalance(ItemAccount().apply {
                                     type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
                                 })
-                                val ethBalance = ethAddressResponse.getTotalBalance()
-                                view.updateBtcBalance(getBtcBalanceString(btcBalance))
-                                view.updateEthBalance(getEthBalanceString(ethBalance))
+                                ethBalance = ethAddressResponse.getTotalBalance()
+                                updateCryptoBalances()
 
                                 val btcFiat = exchangeRateFactory.getLastBtcPrice(getFiatCurrency()) * (btcBalance / 1e8)
                                 val ethFiat = BigDecimal(exchangeRateFactory.getLastEthPrice(getFiatCurrency()))
@@ -155,6 +178,17 @@ class DashboardPresenter @Inject constructor(
         )
     }
 
+    private fun updateCryptoBalances() {
+        view.updateBtcBalance(getBtcBalanceString(
+                currencyState.isDisplayingCryptoCurrency,
+                btcBalance
+        ))
+        view.updateEthBalance(getEthBalanceString(
+                currencyState.isDisplayingCryptoCurrency,
+                ethBalance
+        ))
+    }
+
     private fun showAnnouncement() {
         // Don't add the announcement if there already is one
         if (displayList.none { it is AnnouncementData }) {
@@ -166,7 +200,10 @@ class DashboardPresenter @Inject constructor(
                     image = R.drawable.vector_eth_offset,
                     emoji = "",
                     closeFunction = { dismissAnnouncement() },
-                    linkFunction = { view.startReceiveFragment() }
+                    linkFunction = {
+                        currencyState.cryptoCurrency = CryptoCurrencies.ETHER
+                        view.startReceiveFragment()
+                    }
             )
 
             displayList.add(0, announcementData)
@@ -279,14 +316,29 @@ class DashboardPresenter @Inject constructor(
         )
     }
 
-    private fun getBtcBalanceString(btcBalance: Long): String =
-            "${monetaryUtil.getDisplayAmountWithFormatting(btcBalance)} ${getBtcDisplayUnits()}"
+    private fun getBtcBalanceString(isBtc: Boolean, btcBalance: Long): String {
+        val strFiat = getFiatCurrency()
+        val fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8)
 
-    private fun getEthBalanceString(ethBalance: BigInteger): String {
+        return if (isBtc) {
+            "${monetaryUtil.getDisplayAmountWithFormatting(btcBalance)} ${getBtcDisplayUnits()}"
+        } else {
+            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
+        }
+    }
+
+    private fun getEthBalanceString(isEth: Boolean, ethBalance: BigInteger): String {
+        val strFiat = getFiatCurrency()
+        val fiatBalance = BigDecimal.valueOf(exchangeRateFactory.getLastEthPrice(strFiat))
+                .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
         val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
                 .run { format(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER)) }
 
-        return "$number ETH"
+        return if (isEth) {
+            "$number ETH"
+        } else {
+            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance.toDouble())} $strFiat"
+        }
     }
 
     private fun getCurrencySymbol() = exchangeRateFactory.getSymbol(getFiatCurrency())

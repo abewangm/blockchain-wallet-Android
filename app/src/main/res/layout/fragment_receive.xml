@@ -36,7 +36,8 @@
         <android.support.constraint.ConstraintLayout
             android:id="@+id/receive_main_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp">
 
             <TextView
                 android:id="@+id/textview_receive_helper"
@@ -80,20 +81,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textview_receive_helper" />
 
-            <EditText
-                android:id="@+id/edittext_receiving_address"
+            <TextView
+                android:id="@+id/textview_receiving_address"
                 fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal|center_vertical"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:background="@android:color/transparent"
+                android:layout_marginTop="-8dp"
                 android:gravity="center_horizontal|center_vertical"
-                android:inputType="none"
-                android:textAlignment="gravity"
+                android:padding="8dp"
                 android:textColor="@color/primary_gray_dark"
-                android:textIsSelectable="true"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -109,7 +108,7 @@
                 android:background="@color/primary_gray_light"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/edittext_receiving_address" />
+                app:layout_constraintTop_toBottomOf="@+id/textview_receiving_address" />
 
             <include
                 android:id="@+id/amount_container"
@@ -175,7 +174,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider3" />
+                app:layout_constraintTop_toBottomOf="@+id/divider3"
+                tools:ignore="RtlHardcoded" />
 
             <View
                 android:id="@+id/divider4"
@@ -190,12 +190,12 @@
             <Button
                 android:id="@+id/button_request"
                 style="@style/ButtonStyle"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="48dp"
+                android:layout_marginRight="48dp"
                 android:layout_marginTop="16dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:text="@string/contacts_request_money_receive"
+                android:text="@string/receive_bitcoin"
                 android:theme="@style/ButtonLightBlueTheme"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

@@ -18,7 +18,9 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.fasterxml.jackson.databind.ObjectMapper
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.payload.data.Account
@@ -77,6 +79,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     private var backPressed: Long = 0
     private var textChangeSubject = PublishSubject.create<String>()
     private var defaultAccountPosition = -1
+    private var handlingActivityResult = false
 
     private val intentFilter = IntentFilter(BalanceFragment.ACTION_INTENT)
     private val defaultDecimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator.toString()
@@ -86,7 +89,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             if (intent.action == BalanceFragment.ACTION_INTENT) {
                 presenter?.let {
                     // Update UI with new Address + QR
-                    if (tabs_receive.selectedTabPosition == 0) {
+                    if (tabs_receive?.selectedTabPosition == 0) {
                         presenter.onSelectDefault(defaultAccountPosition)
                     }
                 }
@@ -120,9 +123,11 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         setupLayout()
         setCustomKeypad()
 
-        scrollview.post { scrollview.scrollTo(0, 0) }
+        scrollview?.post { scrollview.scrollTo(0, 0) }
+    }
 
-        selectTabIfNecessary()
+    override fun setTabSelection(tabIndex: Int) {
+        tabs_receive.getTabAt(tabIndex)?.select()
     }
 
     override fun startContactSelectionActivity() {
@@ -132,15 +137,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 PaymentRequestType.CONTACT,
                 getString(R.string.from)
         )
-    }
-
-    private fun selectTabIfNecessary() {
-        val currency = arguments.getSerializable(ARG_SELECTED_CRYPTOCURRENCY) as CryptoCurrencies
-        if (currency == CryptoCurrencies.ETHER) {
-            tabs_receive.getTabAt(1)?.select()
-        } else {
-            presenter.onSelectDefault(defaultAccountPosition)
-        }
     }
 
     private fun setupToolbar() {
@@ -181,6 +177,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             setOnClickListener { showClipboardWarning() }
             setOnLongClickListener { consume { onShareClicked() } }
         }
+
+        // Receive address
+        textview_receiving_address.setOnClickListener { showClipboardWarning() }
 
         toAddressTextView.setOnClickListener {
             AccountChooserActivity.startForResult(
@@ -230,25 +229,27 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
 
         button_request.setOnClickListener {
-            if (presenter.selectedContactId == null) {
-                showToast(R.string.contact_select_first, ToastCustom.TYPE_ERROR)
-            } else if (!presenter.isValidAmount(getBtcAmount())) {
-                showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
-            } else {
-                listener?.onTransactionNotesRequested(
-                        presenter.getConfirmationDetails(),
-                        PaymentRequestType.REQUEST,
-                        presenter.selectedContactId!!,
-                        presenter.currencyHelper.getLongAmount(
-                                amountCrypto.text.toString()),
-                        presenter.getSelectedAccountPosition()
-                )
-            }
+            // TODO: This may or may not need enabling again in the future  
+//            if (presenter.selectedContactId == null) {
+//                showToast(R.string.contact_select_first, ToastCustom.TYPE_ERROR)
+//            } else if (!presenter.isValidAmount(getBtcAmount())) {
+//                showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
+//            } else {
+//                listener?.onTransactionNotesRequested(
+//                        presenter.getConfirmationDetails(),
+//                        PaymentRequestType.REQUEST,
+//                        presenter.selectedContactId!!,
+//                        presenter.currencyHelper.getLongAmount(
+//                                amountCrypto.text.toString()),
+//                        presenter.getSelectedAccountPosition()
+//                )
+//            }
+            
+            onShareClicked()
         }
 
         @Suppress("ConstantConditionIf")
         if (!BuildConfig.CONTACTS_ENABLED) {
-            button_request.gone()
             from_container.gone()
             textview_whats_this.gone()
             divider4.gone()
@@ -327,7 +328,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override fun getBtcAmount() = amountCrypto.getTextString()
 
     override fun updateReceiveAddress(address: String) {
-        edittext_receiving_address.setText(address)
+        textview_receiving_address.text = address
     }
 
     override fun hideContactsIntroduction() {
@@ -352,6 +353,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun onResume() {
         super.onResume()
+
+        if(!handlingActivityResult)
+            presenter.onResume(defaultAccountPosition)
+
+        handlingActivityResult = false
+
         closeKeypad()
         setupToolbar()
         LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, intentFilter)
@@ -359,14 +366,14 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun showQrLoading() {
         image_qr.invisible()
-        edittext_receiving_address.invisible()
+        textview_receiving_address.invisible()
         progressbar.visible()
     }
 
     override fun showQrCode(bitmap: Bitmap?) {
         progressbar.invisible()
         image_qr.visible()
-        edittext_receiving_address.visible()
+        textview_receiving_address.visible()
         image_qr.setImageBitmap(bitmap)
     }
 
@@ -414,6 +421,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        handlingActivityResult = true
+
         // Set receiving account
         if (resultCode == Activity.RESULT_OK
                 && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
@@ -445,7 +455,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             try {
                 val contact = ObjectMapper().readValue(
                         data.getStringExtra(EXTRA_SELECTED_ITEM),
-                        Contact::class.java)
+                        Contact::class.java
+                )
                 presenter.selectedContactId = contact.id
                 from_container.fromAddressTextView.text = contact.name
 
@@ -543,17 +554,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         toast(message, toastType)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        menu?.clear()
-        inflater?.inflate(R.menu.menu_receive, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?) = when (item!!.itemId) {
-        R.id.action_share -> consume { onShareClicked() }
-        else -> super.onOptionsItemSelected(item)
-    }
-
     fun getSelectedAccountPosition(): Int = presenter.getSelectedAccountPosition()
 
     fun onBackPressed() {
@@ -567,7 +567,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes) { _, _ ->
                     val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Send address", edittext_receiving_address.getTextString())
+                    val clip = ClipData.newPlainText("Send address", textview_receiving_address.text)
                     toast(R.string.copied_to_clipboard)
                     clipboard.primaryClip = clip
                 }
