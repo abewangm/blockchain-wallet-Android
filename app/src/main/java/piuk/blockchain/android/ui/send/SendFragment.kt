@@ -38,7 +38,6 @@ import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
-import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.injection.Injector
@@ -75,6 +74,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     private var confirmPaymentDialog: ConfirmPaymentDialog? = null
     private var transactionSuccessDialog: AlertDialog? = null
     private var listener: OnSendFragmentInteractionListener? = null
+    private var handlingActivityResult = false
 
     private val dialogHandler = Handler()
     private val dialogRunnable = Runnable {
@@ -143,7 +143,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     override fun onResume() {
         super.onResume()
-        presenter.onResume()
+
+        if(!handlingActivityResult)
+            presenter.onResume()
+
+        handlingActivityResult = false
+
         setupToolbar()
         closeKeypad()
 
@@ -269,6 +274,9 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        handlingActivityResult = true
+
         if (resultCode != Activity.RESULT_OK) return
 
         when (requestCode) {

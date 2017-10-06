@@ -79,6 +79,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     private var backPressed: Long = 0
     private var textChangeSubject = PublishSubject.create<String>()
     private var defaultAccountPosition = -1
+    private var handlingActivityResult = false
 
     private val intentFilter = IntentFilter(BalanceFragment.ACTION_INTENT)
     private val defaultDecimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator.toString()
@@ -352,7 +353,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun onResume() {
         super.onResume()
-        presenter.onResume(defaultAccountPosition)
+
+        if(!handlingActivityResult)
+            presenter.onResume(defaultAccountPosition)
+
+        handlingActivityResult = false
+
         closeKeypad()
         setupToolbar()
         LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, intentFilter)
@@ -415,6 +421,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        handlingActivityResult = true
+
         // Set receiving account
         if (resultCode == Activity.RESULT_OK
                 && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
