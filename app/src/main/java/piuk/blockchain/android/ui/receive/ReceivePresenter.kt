@@ -129,6 +129,7 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     internal fun onSelectDefault(defaultAccountPosition: Int) {
+        currencyState.cryptoCurrency = CryptoCurrencies.BTC
         compositeDisposable.clear()
         view.displayBitcoinLayout()
         onAccountSelected(
