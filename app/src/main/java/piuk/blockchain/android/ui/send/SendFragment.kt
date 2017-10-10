@@ -429,6 +429,9 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     private fun handleIncomingArguments() {
         if (arguments != null) {
+
+            handlingActivityResult = true
+
             presenter.selectSendingBtcAccount(arguments.getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, -1))
 
             val scanData = arguments.getString(ARGUMENT_SCAN_DATA)
