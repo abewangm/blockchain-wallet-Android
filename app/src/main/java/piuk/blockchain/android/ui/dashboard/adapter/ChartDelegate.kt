@@ -199,8 +199,8 @@ class ChartDelegate<in T>(
     @SuppressLint("SimpleDateFormat")
     private fun setDateFormatter(timeSpan: TimeSpan) {
         val dateFormat = when (timeSpan) {
-            TimeSpan.ALL_TIME -> SimpleDateFormat("YYYY")
-            TimeSpan.YEAR -> SimpleDateFormat("MMM ''YY")
+            TimeSpan.ALL_TIME -> SimpleDateFormat("yyyy")
+            TimeSpan.YEAR -> SimpleDateFormat("MMM ''yy")
             TimeSpan.MONTH, TimeSpan.WEEK -> SimpleDateFormat("dd. MMM")
             TimeSpan.DAY -> SimpleDateFormat("H:00")
         }
