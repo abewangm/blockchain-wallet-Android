@@ -148,6 +148,8 @@ public class MainPresenter extends BasePresenter<MainView> {
             getView().kickToLauncherPage();
         } else {
 
+            initReplaySubjects();
+
             startWebSocketService();
             logEvents();
 
