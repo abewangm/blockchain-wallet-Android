@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.ethereum.EthereumWallet;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
@@ -14,15 +15,19 @@ import org.bitcoinj.crypto.DeterministicKey;
 
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
@@ -74,6 +79,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     private PromptManager promptManager;
     private EthDataManager ethDataManager;
     private CurrencyState currencyState;
+    private AuthDataManager authDataManager;
+
+    ReplaySubject<WalletOptions> walletOptionsSource = ReplaySubject.create(1);
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -94,7 +102,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                   PromptManager promptManager,
                   EthDataManager ethDataManager,
                   SwipeToReceiveHelper swipeToReceiveHelper,
-                  CurrencyState currencyState) {
+                  CurrencyState currencyState,
+                  AuthDataManager authDataManager) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -113,9 +122,10 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.environmentSettings = environmentSettings;
         this.promptManager = promptManager;
         this.ethDataManager = ethDataManager;
-        osUtil = new OSUtil(applicationContext);
+        this.osUtil = new OSUtil(applicationContext);
         this.swipeToReceiveHelper = swipeToReceiveHelper;
         this.currencyState = currencyState;
+        this.authDataManager = authDataManager;
     }
 
     private void initPrompts(Context context) {
@@ -143,7 +153,62 @@ public class MainPresenter extends BasePresenter<MainView> {
             getView().showProgressDialog(R.string.please_wait);
 
             initMetadataElements();
+
+            initReplaySubjects();
+
+            doWalletOptionsChecks();
         }
+    }
+
+    /**
+     * ReplaySubjects will re-emit items it observed.
+     * It is safe to assumed that walletOptions and
+     * the user's country code won't change during an active session.
+     */
+    private void initReplaySubjects() {
+        Observable<WalletOptions> walletOptionsStream = authDataManager.getWalletOptions();
+        walletOptionsStream.subscribeWith(walletOptionsSource);
+    }
+
+    /*
+    Only used for mobile_notice at the moment.
+    WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
+     */
+    private void doWalletOptionsChecks() {
+        walletOptionsSource
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(walletOptions -> {
+
+                    Map<String, String> mobileNotice = walletOptions.getMobileNotice();
+
+                    if (mobileNotice != null && mobileNotice.size() > 0) {
+
+                        String lcid = Locale.getDefault().getLanguage()+"-"+Locale.getDefault().getCountry();
+                        String language = Locale.getDefault().getLanguage();
+
+                        if(mobileNotice.containsKey(language)) {
+                            getView().showCustomPrompt(getWarningPrompt(mobileNotice.get(language)));
+                        } else if(mobileNotice.containsKey(lcid)){
+                            //Regional
+                            getView().showCustomPrompt(getWarningPrompt(mobileNotice.get(lcid)));
+                        } else {
+                            //Default
+                            getView().showCustomPrompt(getWarningPrompt(mobileNotice.get("en")));
+                        }
+                    }
+                });
+    }
+
+    private SecurityPromptDialog getWarningPrompt(String message) {
+        SecurityPromptDialog prompt =  SecurityPromptDialog.newInstance(
+                R.string.warning,
+                message,
+                R.drawable.vector_warning,
+                R.string.ok_cap,
+                false,
+                false);
+        prompt.setPositiveButtonListener(view -> prompt.dismiss());
+        return prompt;
     }
 
     void initMetadataElements() {
