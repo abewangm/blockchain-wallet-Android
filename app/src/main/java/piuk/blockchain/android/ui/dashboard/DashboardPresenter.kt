@@ -225,6 +225,7 @@ class DashboardPresenter @Inject constructor(
         } else
             buyDataManager.canBuy
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .doOnNext { displayList.removeAll { it is OnboardingModel } }
                     .doOnNext { displayList.add(0, getOnboardingPages(it)) }
                     .doOnNext { view.notifyItemAdded(displayList, 0) }
                     .doOnError { Timber.e(it) }
