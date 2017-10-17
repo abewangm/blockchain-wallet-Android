@@ -60,8 +60,8 @@ class ReceivePresenter @Inject internal constructor(
         } else view.hideContactsIntroduction()
     }
 
-    fun onResume(defaultAccountPosition: Int) {
-        when(currencyState.cryptoCurrency) {
+    internal fun onResume(defaultAccountPosition: Int) {
+        when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onSelectDefault(defaultAccountPosition)
             CryptoCurrencies.ETHER -> onEthSelected()
             else -> throw IllegalArgumentException("BCC is not currently supported")
@@ -150,8 +150,17 @@ class ReceivePresenter @Inject internal constructor(
         generateQrCode(getBitcoinUri(selectedAddress!!, amount))
     }
 
-    internal fun getSelectedAccountPosition(): Int =
-            payloadDataManager.wallet!!.hdWallets[0].accounts.indexOf(selectedAccount)
+    internal fun getSelectedAccountPosition(): Int {
+        return if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) {
+            -1
+        } else {
+            val position = payloadDataManager.accounts.asIterable()
+                    .indexOfFirst { it.xpub == selectedAccount?.xpub }
+            payloadDataManager.getPositionOfAccountInActiveList(
+                    if (position > -1) position else payloadDataManager.defaultAccountIndex
+            )
+        }
+    }
 
     internal fun setWarnWatchOnlySpend(warn: Boolean) {
         prefsUtil.setValue(KEY_WARN_WATCH_ONLY_SPEND, warn)

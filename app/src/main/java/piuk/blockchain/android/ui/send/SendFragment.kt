@@ -429,7 +429,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     private fun handleIncomingArguments() {
         if (arguments != null) {
-
+            // TODO: This doesn't currently work; it gets reset by onViewReady which is called
+            // after this method. Not worth fixing for this release.
             presenter.selectSendingBtcAccount(arguments.getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, -1))
 
             val scanData = arguments.getString(ARGUMENT_SCAN_DATA)
