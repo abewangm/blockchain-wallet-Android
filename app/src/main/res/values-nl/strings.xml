@@ -12,7 +12,6 @@
     <string name="please_wait">Even geduld a.u.b.</string>
 
     <string name="send_bitcoin">Verzenden</string>
-    <string name="receive_bitcoin">Ontvangen</string>
 
     <string name="cancel">Annuleren</string>
     <string name="yes">Ja</string>
@@ -206,7 +205,6 @@
     <string name="confirm_password">Wachtwoord bevestigen</string>
     <string name="check_email_to_auth_login">Check uw e-mail om deze inlogpoging goed te keuren.</string>
     <string name="transaction_fee">Transactietarief</string>
-    <string name="transaction_occur_when_bitcoin">Transacties vinden plaats wanneer u Bitcoins ontvangt en verzendt.</string>
     <string name="click">Klik op</string>
     <string name="to_start_sending_and_receiving_btc">om te beginnen met het verzenden en ontvangen van Bitcoins.</string>
 
@@ -317,7 +315,6 @@
     <string name="transaction_surge">De Bitcoin Mining Network heeft momenteel een hoog activiteitenvolume, waardoor de aanbevolen tarieven hoger zijn dan normaal.</string>
     <string name="unsupported_encryption_version">Portemonnee-versie %1$s niet ondersteund.</string>
     <string name="logout">Uitloggen</string>
-    <string name="to_field_helper">Voer Bitcoin-adres in of selecteer</string>
 
     <string name="update">Updaten</string>
     <string name="mobile">Mobiel</string>
@@ -345,7 +342,6 @@
 
     <string name="two_fa">2-ledige verificatie</string>
     <string name="tor_requests">Tor-verzoeken blokkeren</string>
-    <string name="tor_summary">Wilt u de toegang tot uw portemonnee blokkeren voor IP-adressen waarvan bekend is dat ze deel uitmaken van het anonieme Tor-netwerk. Het Tor-netwerk wordt vaak gebruikt door hackers om te proberen toegang te krijgen tot portemonnees van Blockchain-gebruikers.</string>
     <string name="change_password">Wachtwoord wijzigen</string>
     <string name="email_notifications">E-mailmeldingen</string>
     <string name="email_notifications_summary">Krijg een melding wanneer u Bitcoins ontvangt.</string>
@@ -373,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">U bent uitgelogd of er is een fout opgetreden bij het decoderen van uw portemonnee. Voer hieronder uw wachtwoord in om in te loggen.</string>
     <string name="logged_out_forget_wallet">Als u deze portemonnee wilt vergeten en opnieuw wilt beginnen, druk dan op \'Portemonnee vergeten\'.</string>
-
-    <string name="api_fail">Kan geen verbinding maken met server. Probeer het later opnieuw.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Dit is een extra grote bitcoin-transactie. Uw portemonnee moet vele kleinere betalingen die u in het verleden heeft ontvangen combineren. Dit vereist een relatief hoog tarief om snel te worden bevestigd.</string>
     <string name="go_back">Ga terug</string>
@@ -425,14 +419,11 @@
     <string name="shortcut_receive_qr_long">Toon QR-code voor ontvangstadres</string>
     <string name="shortcut_receive_qr_error">Sorry, er trad een fout op bij het genereren van de QR-code</string>
     <string name="shortcut_settings_enable">Snelkoppelingen Startservice</string>
-    <string name="shortcut_settings_summary">Schakel deze optie in om een ontvangadres te tonen wanneer u het app-icoon in de startservice lang ingedrukt houdt, waardoor u nog sneller Bitcoins kunt ontvangen.</string>
 
     <string name="swipe_receive_hint">Veeg om te ontvangen</string>
-    <string name="swipe_receive_preference_summary">Schakel deze optie in om een ontvangadres te tonen wanneer u naar links veegt op het PIN-scherm, waardoor u nog sneller Bitcoins kunt ontvangen. Er zullen achtereenvolgens vijf adressen worden geladen, waarna het nodig is om u aan te melden om nieuwe adressen te tonen.</string>
     <string name="swipe_receive_no_addresses">Er kunnen op dit moment geen adressen meer geladen worden. Meld u aan bij de app om meer adressen te laden.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Overzicht</string>
     <string name="create_a_wallet">Maak een portemonnee</string>
     <string name="log_in">Log in</string>
     <string name="wallets">Portemonnees</string>
@@ -442,7 +433,6 @@
     <string name="confirm_upgrade_header">Hoi, we hebben deze nieuwe functies aan je Blockchain portemonnee toegevoegd:</string>
     <string name="verify_email2">Uw geverifieerde e-mailadres wordt gebruikt om inlogcodes naar te verzenden wanneer een verdachte of ongebruikelijke activiteit wordt ontdekt, om u te herinneren aan de inlog-ID van uw portemonnee en om u aankondigingen van Bitcoin-betalingen te sturen als u tegoeden ontvangt.</string>
     <string name="enable_screenshots">Screenshots inschakelen</string>
-    <string name="enable_screenshots_summary">Je staat op het punt om screenshots in te schakelen voor de Blockchain app. Sommige schermen binnen de applicatie kunnen gevoelige data tonen. Andere applicaties zullen toegang hebben tot deze screenshots.</string>
 
     <string name="information">Informatie</string>
     <string name="transaction_detail_verify">Bij Blockchain.info verifiëren</string>
@@ -474,12 +464,10 @@
     <string name="onboarding_check_inbox_title">Controleer je Inbox</string>
     <string name="onboarding_check_inbox_summary">Zoek een e-mail van Blockchain en klik op de verificatielink om het instellen van je portemonnee te voltooien.</string>
     <string name="onboarding_verify_email">E-mail verifiëren</string>
-    <string name="onboarding_receive_bitcoin">Bitcoin ontvangen</string>
     <string name="onboarding_current_price">Huidige koers:</string>
     <string name="onboarding_qr_codes">QR-codes</string>
     <string name="onboarding_scan_address">Adres scannen</string>
     <string name="onboarding_buy_content">Wij werken met uitwisselingspartners uit de hele wereld, zodat je bitcoin direct uit je portemonnee kunt kopen.</string>
-    <string name="onboarding_receive_content">Stuur het adres van je portemonnee naar een vriend om bitcoin aan te vragen. Een adres is een reeks willekeurige letters en getallen doe voor elke transactie worden gewijzigd.</string>
     <string name="onboarding_qr_codes_content">Een adres kan ook als een QR-code worden getoond. Scan de QR-code van een vriend om het adres van hun portemonnee snel vast te leggen.</string>
 
     <string name="onboarding_buy_bitcoin">Bitcoins kopen</string>
@@ -568,7 +556,6 @@
     <string name="contacts_no_contacts_found">Geen contactpersonen gevonden</string>
     <string name="contacts_pairing_method_title">Contactpersoon toevoegen</string>
     <string name="contacts_title">Contactpersonen</string>
-    <string name="security_centre_backup_message">Voor uw veiligheid bewaren we geen wachtwoorden in ons bestand. Maak een back-up van uw portemonnee om ervoor te zorgen dat uw Bitcoins veilig zijn voor als u uw wachtwoord kwijt bent. </string>
     <string name="security_centre_backup_positive_button">Back-up</string>
     <string name="security_centre_email_message">We hebben een e-mail gestuurd naar %1$s. Zoek een e-mail van Blockchain en klik op de verificatielink om het instellen van uw portemonnee te voltooien.</string>
     <string name="security_centre_email_title">Controleer uw e-mail</string>
@@ -597,7 +584,6 @@
     <string name="transaction_detail_pending">In afwachting van (%1$s/%2$s bevestigingen)</string>
     <string name="transaction_detail_description_hint">Waar is dit voor?</string>
     <string name="transaction_detail_confirmed">Bevestigd</string>
-    <string name="to_field_helper_no_dropdown">Bitcoin-adres invoeren</string>
     <string name="share_instructions">Tik om dit adres te kopiëren. Deel het met de afzender via e-mail of tekstbericht.</string>
     <string name="security_centre_two_fa_message">Voorkom onbevoegde toegang tot uw portemonnee. Schakel de tweeledige verificatiemethode in om de beveiliging van uw portemonnee te vergroten.</string>
     <string name="security_centre_backup_title">Maak een back-up van uw tegoeden</string>
@@ -630,7 +616,6 @@
     <string name="sms_notifications_summary">Schakel de aanmeldingen aan, zodat u een SMS krijgt wanneer u bitcoin hebt ontvangen.</string>
     <string name="backup_header">Back-upregel</string>
     <string name="backup_explanation">Voor uw veiligheid bewaart Blockchain geen wachtwoorden in haar bestand. De volgende back-upregel bestaande uit 12 woorden biedt toegang tot uw saldo indien u uw wachtwoord hebt verloren. Zorg ervoor dat u dit op een stuk papier schrijft en ergens veilig bewaart. </string>
-    <string name="backup_complete_message">U kunt uw back-upregel gebruiken voor het herstellen van uw saldo indien u uw wachtwoord hebt verloren. Iedereen die toegang heeft tot uw back-upregel, heeft ook toegang tot uw bitcoin. Voor uw veiligheid kunt u deze daarom beter offline bewaren.</string>
     <string name="backup_verify_heading">Voer de volgende woorden in van uw back-upregel om het back-upproces te kunnen voltooien.</string>
     <string name="backup_lost_mnemonic">Bent u de back-upregel bestaande uit 12 woorden vergeten?</string>
     <string name="trade_complete">Transactie voltooid</string>
@@ -662,4 +647,75 @@
     <string name="fee_options_advanced_warning">Deze functie wordt alleen aanbevolen voor geavanceerde gebruikers. Indien u voor een aangepast bedrag kiest, loopt u het risico dat u teveel betaald of dat uw transactie niet wordt bevestigd.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">Normaal: %1$s, Prioritiet: %2$s</string>
+
+    <string name="receive_bitcoin">Verzoek</string>
+    <string name="overview">Transacties</string>
+    <string name="sending">Aan het verzenden</string>
+    <string name="receiving">Aan het ontvangen</string>
+    <string name="paid">Betaald</string>
+    <string name="payment_request">Betaalverzoek</string>
+    <string name="restoring_wallet">Portemonnee aan het herstellen.</string>
+    <string name="support_leaving_app_warning">Dit zal de app afsluiten en u naar uw browser brengen. Doorgaan?</string>
+    <string name="addresses">Bitcoin-adressen</string>
+    <string name="merchant_map">Bitcoin-verkoperskaart</string>
+    <string name="received_ethereum">Ontvangen Ether</string>
+    <string name="transaction_occur_when_bitcoin">Transacties vinden plaats wanneer u Bitcoins ontvangt en verzendt.</string>
+    <string name="transaction_occur_when_eth">Transacties vinden plaats wanneer u ether ontvangt en verzendt.</string>
+    <string name="to_field_helper">Voer Bitcoin-adres in of selecteer</string>
+    <string name="to_field_helper_no_dropdown">Voer Bitcoin-adres in</string>
+    <string name="tor_summary">Blokkeer IP-adressen die bekend staan als onderdeel van het anomieme Tor-netwerk. Het Tor-netwerk wordt vaak gebruikt door hackers die toegang proberen te krijgen tot de portemonnees van Blockchain.</string>
+    <string name="enable_screenshots_summary">Sommige schermen in de pplictie kunnen gevoelige gegevens weergeven. Andere applicaties zullen toegang hebben tot deze screenshots.</string>
+    <string name="two_fa_summary">Bescherm uw portemonnee tegen onbevoegd gebruik door de tweeledige verificatie in te schakelen.</string>
+    <string name="two_fa_description">Bescherm uw portemonnee tegen onbevoegd gebruik door de tweeledige verificatie in te schakelen. U kunt ervoor kiezen om uw mobiele telefoonnummer te gebruiken om uw portemonnee te beveiligen. Deze code wordt aangevraagd wanneer u toegang probeert te krijgen tot uw portemonnee via de webbrowser.\n\nOm andere verificatiemethoden te gebruiken, kunt u zich inloggen op onze webportemonnee op %1$s</string>
+    <string name="email_request_subject_eth">Ether-betaalverzoek</string>
+    <string name="email_request_body_eth">Stuur ETH naar het Ether-adres %1$s.</string>
+    <string name="api_fail">Kan geen verbinding maken met de server. Probeer het later opnieuw.</string>
+    <string name="transaction_detail_verify_etherscan">Verifieer op Etherscan.io</string>
+    <string name="security_centre_backup_message">Voor uw veiligheid bewaren we geen wachtwoorden in ons bestand. Maak een back-up van uw portemonnee om ervoor te zorgen dat uw geld veilig is als u uw wachtwoord kwijt bent. </string>
+    <string name="backup_complete_message">U kunt uw herstelregel gebruiken voor het herstellen van uw saldo indien u uw wachtwoord kwijt bent. Iedereen die toegang heeft tot uw herstelregel, heeft toegang tot uw geld, dus zorg ervoor dat u deze ergens veilig offline bewaard.</string>
+    <string name="shortcut_settings_summary">Onthul een ontvangstadres als u lang op het app-icoontje in de launcher drukt, waardoor de Bitcoins nog sneller worden ontvangen.</string>
+
+    <string name="confirm">Bevestigen</string>
+    <string name="pending">In behandeling</string>
+    <string name="transactions">Transacties</string>
+
+    <string name="swipe_receive_preference_summary">Onthul een ontvangstadres wanneer u op het PIN-scherm naar links veegt, waardoor u nog sneller tegoeden krijgt.</string>
+    <string name="swipe_receive_address_info">Er zullen achtereenvolgens vijf adressen worden geladen, waarna het nodig is om u aan te melden om nieuwe adressen te tonen.</string>
+    <string name="onboarding_receive_bitcoin">Geld aanvragen</string>
+    <string name="onboarding_receive_content">Stuur uw portemonneeadres naar een vriend om geld te vragen. Een adres is een reeks willekeurige letters en getallen die voor elke transactie worden gewijzigd.</string>
+    <string name="onboarding_get_eth">Neem Ether</string>
+    <string name="buy_second_password_prompt">Om deze dienst te kunnen gebruiken, vereisen we dat u uw tweede wachtwoord invoert. U hoeft deze slechts één keer in te voeren om de Koop-functionaliteit te gebruiken.</string>
+    <string name="what_s_this">Wat is dit?</string>
+    <string name="dismiss">Afwijzen</string>
+
+    <string name="eth_default_account_label">Mijn Ether-portemonnee</string>
+    <string name="eth_now_supporting">Ether wordt nu ondersteund</string>
+    <string name="eth_second_password_prompt">Om deze dienst te kunnen gebruiken, vereisen we dat u uw tweede wachtwoord invoert. U hoeft deze keer slechts één keer in te voeren om uw Ether-portemonnee in te stellen.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Voer Ether-adres in of selecteer</string>
+    <string name="eth_to_field_helper_no_dropdown">Voer Ether-adres in</string>
+    <string name="eth_invalid_address">Ongeldig Ether-adres</string>
+    <string name="eth_support_contract_not_allowed">Contractadressen worden niet ondersteund.</string>
+    <string name="eth_support_only_eth">Op dit moment ondersteunen we alleen ETH - u kunt geen tokens ontvangen op dit adres</string>
+    <string name="eth_unconfirmed_wait">Wacht tot uw vorige transactie is bevestigd</string>
+    <string name="eth_transaction_complete">Transactie voltooid! Uw transacties en balans worden binnenkort geüpdatet, dit kan enkele minuten duren.\n</string>
+
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_time_span_day">Dag</string>
+    <string name="dashboard_time_span_week">Week</string>
+    <string name="dashboard_time_span_month">Maand</string>
+    <string name="dashboard_time_span_year">Jaar</string>
+    <string name="dashboard_time_span_all_time">Altijd</string>
+    <string name="dashboard_bitcoin_price">Bitcoin-prijs</string>
+    <string name="dashboard_ether_price">Ether-prijs</string>
+    <string name="dashboard_charts_error">Fout bij het laden van grafiekgegevens</string>
+    <string name="dashboard_charts_price_error">Fout bij het ophalen van prijsgegevens</string>
+
+    <string name="onboarding_ether_title">Ether wordt nu ondersteund</string>
+    <string name="onboarding_ether_description">U heeft gevraagd, wij hebben geluisterd. Met enthousiasme laten we weten dat uw Blockchain-portemonnee u nu in staat stelt om naadloos Ether te verzenden en te ontvangen!</string>
+    <string name="onboarding_ether_cta">Aan de slag met ether</string>
+
+    <string name="metadata_load_failure">Fout bij het laden van de volledige portemonnee-functionaliteit. Service kan tijdelijk onbeschikbaar zijn.</string>
+    <string name="fee_helper_message">Mijners ontvangen deze vergoeding om deze transactie te verwerken.</string>
 </resources>

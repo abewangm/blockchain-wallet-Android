@@ -12,7 +12,6 @@
     <string name="please_wait">Harap tunggu</string>
 
     <string name="send_bitcoin">Kirim</string>
-    <string name="receive_bitcoin">Terima</string>
 
     <string name="cancel">Batal</string>
     <string name="yes">Ya</string>
@@ -206,7 +205,6 @@
     <string name="confirm_password">Konfirmasi Sandi</string>
     <string name="check_email_to_auth_login">Mohon periksa surel Anda untuk menyetujui upaya masuk ini.</string>
     <string name="transaction_fee">Biaya Transaksi</string>
-    <string name="transaction_occur_when_bitcoin">Transaksi terjadi ketika Anda menerima dan mengirim bitcoin.</string>
     <string name="click">Klik</string>
     <string name="to_start_sending_and_receiving_btc">untuk mulai mengirim dan menerima bitcoin.</string>
 
@@ -318,7 +316,6 @@
     <string name="transaction_surge">Jaringan penggalian Bitcoin saat ini mengalami volume aktivitas yang tinggi, mengakibatkan biaya yang direkomendasikan yang lebih tinggi daripada biasanya.</string>
     <string name="unsupported_encryption_version">Versi dompet %1$s tidak didukung.</string>
     <string name="logout">Keluar</string>
-    <string name="to_field_helper">Masukkan alamat Bitcoin atau pilih</string>
 
     <string name="update">Pembaruan</string>
     <string name="mobile">Ponsel</string>
@@ -346,7 +343,6 @@
 
     <string name="two_fa">Verifikasi 2 langkah</string>
     <string name="tor_requests">Blok Permintaan Tor</string>
-    <string name="tor_summary">Apakah Anda ingin memblokir alamat IP yang dikenal sebagai bagian dari jaringan Tor anonim dari mengakses dompet Anda? Jaringan Tor sering digunakan oleh peretas yang mencoba untuk mengakses dompet-dompet pengguna Blockchain.</string>
     <string name="change_password">Ubah Kata Sandi</string>
     <string name="email_notifications">Pemberitahuan Surel</string>
     <string name="email_notifications_summary">Dapatkan pemberitahuan ketika Anda menerima bitcoin.</string>
@@ -374,8 +370,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Anda telah keluar atau ada kesalahan mendekripsi dompet Anda. Masukkan kata sandi Anda di bawah ini untuk masuk.</string>
     <string name="logged_out_forget_wallet">Jika Anda ingin melupakan dompet ini dan mulai dari awal, tekan \'Lupakan Dompet\'.</string>
-
-    <string name="api_fail">Tidak dapat terhubung ke server. Mohon coba lagi nanti.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Ini merupakan transaksi bitcoin yang terlalu besar. Dompet Anda perlu mengonsolidasi pembayaran yang lebih kecil yang Anda terima di masa lalu. Ini membutuhkan biaya yang relatif tinggi agar dapat dikonfirmasi dengan cepat.</string>
     <string name="go_back">Kembali</string>
@@ -426,14 +420,11 @@
     <string name="shortcut_receive_qr_long">Lihat QR code untuk menerima alamat</string>
     <string name="shortcut_receive_qr_error">Maaf, ada kesalahan menghasilkan kode QR</string>
     <string name="shortcut_settings_enable">Jalan Pintas Peluncur</string>
-    <string name="shortcut_settings_summary">Aktifkan opsi ini untuk mengungkapkan alamat terima ketika Anda menekan lama pada ikon aplikasi di peluncur, membuat menerima bitcoin lebih cepat.</string>
 
     <string name="swipe_receive_hint">Geser untuk menerima</string>
-    <string name="swipe_receive_preference_summary">Aktifkan opsi ini untuk mengungkapkan alamat penerima bila Anda mengusap layar PIN ke kiri, yang membuat penerimaan bitcoin menjadi lebih cepat. Lima alamat akan dimuat secara berturut-turut, yang setelahnya login diperlukan untuk menampilkan alamat baru.</string>
     <string name="swipe_receive_no_addresses">Tidak ada lagi alamat yang dapat dimuat sekarang. Masuk ke aplikasi untuk memuat lebih banyak.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Ikhtisar</string>
     <string name="create_a_wallet">Buat sebuah dompet</string>
     <string name="log_in">Log in</string>
     <string name="wallets">Dompet</string>
@@ -443,7 +434,6 @@
     <string name="confirm_upgrade_header">Hei, kami telah menambahkan fitur baru untuk dompet Blockchain Anda:</string>
     <string name="verify_email2">Alamat surel Anda yang telah diverifikasi digunakan untuk mengirimkan kode login ketika ada aktivitas mencurigakan atau tidak biasa terdeteksi, untuk mengingatkan Anda tentang Identitas login dompet Anda, dan untuk mengirim peringatan pembayaran bitcoin bila Anda menerima dana.</string>
     <string name="enable_screenshots">Aktifkan Screenshot</string>
-    <string name="enable_screenshots_summary">Anda akan mengaktifkan screenshot untuk aplikasi Blockchain. Beberapa layar dalam aplikasi dapat menampilkan data sensitif. Aplikasi lain akan dapat mengakses screenshot ini.</string>
 
     <string name="information">Informasi</string>
     <string name="transaction_detail_verify">Verifikasi Blockchain.info</string>
@@ -475,12 +465,10 @@
     <string name="onboarding_check_inbox_title">Periksa Kotak Masuk Anda</string>
     <string name="onboarding_check_inbox_summary">Carilah email dari Blockchain dan klik tautan verifikasi untuk menyelesaikan pengaturan dompet Anda.</string>
     <string name="onboarding_verify_email">Verifikasi email</string>
-    <string name="onboarding_receive_bitcoin">Terima Bitcoin</string>
     <string name="onboarding_current_price">Harga Saat ini:</string>
     <string name="onboarding_qr_codes">Kode QR</string>
     <string name="onboarding_scan_address">Pindai Alamat</string>
     <string name="onboarding_buy_content">Kami bekerja dengan mitra pertukaran di seluruh dunia, sehingga Anda dapat membeli bitcoin langsung dari dompet Anda.</string>
-    <string name="onboarding_receive_content">Kirim alamat dompet Anda kepada teman untuk meminta bitcoin. Alamat adalah deretan dari huruf dan angka acak yang berubah untuk setiap transaksi.</string>
     <string name="onboarding_qr_codes_content">Alamat juga dapat ditampilkan sebagai kode QR. Pindai kode QR teman untuk menangkap secara cepat alamat dompet mereka.</string>
 
     <string name="onboarding_buy_bitcoin">Beli Bitcoin</string>
@@ -569,7 +557,6 @@
     <string name="contacts_no_contacts_found">Tidak ada kontak ditemukan</string>
     <string name="contacts_pairing_method_title">Tambah Kontak</string>
     <string name="contacts_title">Kontak</string>
-    <string name="security_centre_backup_message">Untuk keamanan Anda, kami tidak menyimpan setiap kata sandi pada berkas. Cadangkan dompet Anda untuk memastikan Bitcoins Anda aman jika anda kehilangan kata sandi Anda. </string>
     <string name="security_centre_backup_positive_button">Cadangan</string>
     <string name="security_centre_email_message">Kami mengirimkan email ke %1$s. Carilah email dari Blockchain dan klik tautan verifikasi untuk menyelesaikan pengaturan dompet Anda.</string>
     <string name="security_centre_email_title">Periksa email Anda</string>
@@ -598,7 +585,6 @@
     <string name="transaction_detail_pending">Tertunda (%1$s/%2$s Konfirmasi)</string>
     <string name="transaction_detail_description_hint">Untuk apa ini?</string>
     <string name="transaction_detail_confirmed">Dikonfirmasi</string>
-    <string name="to_field_helper_no_dropdown">Masukkan alamat Bitcoin</string>
     <string name="share_instructions">Ketuk untuk menyalin alamat ini. Bagikan ini dengan pengirim melalui email atau teks.</string>
     <string name="security_centre_two_fa_message">Mencegah akses tidak sah ke dompet Anda. Aktifkan Verifikasi 2 Langkah untuk meningkatkan keamanan dompet.</string>
     <string name="security_centre_backup_title">Cadangkan dana Anda</string>
@@ -631,7 +617,6 @@
     <string name="sms_notifications_summary">Aktifkan pemberitahuan untuk menerima SMS kapa saja Anda menerima bitcoin.</string>
     <string name="backup_header">Cadangkan Frasa</string>
     <string name="backup_explanation">Untuk keamanan Anda, Blockchain tidak menyimpan kata sandi pada berkas. 12 kata Frasa Cadangan berikut akan memberi Anda akses ke dana Anda jika Anda kehilangan kata sandi Anda. Pastikan untuk menulis di selembar kertas dan menyimpannya di suatu tempat yang aman dan nyaman. </string>
-    <string name="backup_complete_message">Anda dapat menggunakan Frasa Cadangan Anda untuk mendapatkan kembali dana Anda jika Anda kehilangan kata sandi Anda. Siapa pun dengan akses pada Frasa Cadangan Anda dapat mengakses bitcoin Anda jadi ingat untuk menyimpannya offline di suatu tempat yang aman dan nyaman.</string>
     <string name="backup_verify_heading">Masukkan kata-kata berikut dari Frasa Cadangan Anda untuk menyelesaikan proses pencadangan.</string>
     <string name="backup_lost_mnemonic">Kehilangan 12 kata frasa cadangan Anda?</string>
     <string name="trade_complete">Perdagangan Selesai</string>
@@ -664,4 +649,74 @@
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">Reguler: %1$s, Prioritas: %2$s</string>
 
+    <string name="receive_bitcoin">Permintaan</string>
+    <string name="overview">Transaksi</string>
+    <string name="sending">Mengirim</string>
+    <string name="receiving">Menerima</string>
+    <string name="paid">Dibayar</string>
+    <string name="payment_request">Permintaan Pembayaran</string>
+    <string name="restoring_wallet">Memulihkan dompet.</string>
+    <string name="support_leaving_app_warning">Ini akan meninggalkan aplikasi dan membawa Anda ke peramban Anda. Lanjutkan?</string>
+    <string name="addresses">Alamat Bitcoin </string>
+    <string name="merchant_map">Peta Pedagang Bitcoin </string>
+    <string name="received_ethereum">Menerima Ether</string>
+    <string name="transaction_occur_when_bitcoin">Transaksi terjadi ketika Anda menerima dan mengirim bitcoin.</string>
+    <string name="transaction_occur_when_eth">Transaksi terjadi ketiak Anda menerima dan mengirim ether.</string>
+    <string name="to_field_helper">Masukkan alamat bitcoin dan pilih</string>
+    <string name="to_field_helper_no_dropdown">Masukkan alamat bitcoin</string>
+    <string name="tor_summary">Blokir alamat IP yang diketahui sebagai bagian dari jaringan anonim Tor. Jaringan Tor sering digunakan oleh peretas yang mencoba mengakses dompet pengguna Blockchain.</string>
+    <string name="enable_screenshots_summary">Beberapa layar dalam aplikasi dapat menampilkan data sensitif. Aplikasi lain akan dapat mengakses tangkapan layar ini.</string>
+    <string name="two_fa_summary">Lindungi dompet Anda dari akses yang tidak diizinkan dengan mengaktifkan Verifikasi 2 Langkah.</string>
+    <string name="two_fa_description">Lindungi dompet Anda dari akses yang tidak diizinkan dengan mengaktifkan Verifikasi 2 Langkah. Anda dapat memilih untuk menggunakan nomor ponsel Anda untuk mengamankan dompet Anda. Kode ini akan diminta ketika Anda mencoba mengakses dompet Anda lewat peramban web.\n\nUntuk menggunakan metode, harap masuk ke dompet web kami di %1$s</string>
+    <string name="email_request_subject_eth">Permintaan pembayaran Ether </string>
+    <string name="email_request_body_eth">Harap kirim ETH ke alamat Ether %1$s.</string>
+    <string name="api_fail">Tidak dapat terhubung ke server. Harap coba lagi nanti.</string>
+    <string name="transaction_detail_verify_etherscan">Verifikasi di Etherscan.io</string>
+    <string name="security_centre_backup_message">Untuk keamanan Anda, kami tidak menyimpan kata sandi pada berkas. Cadangkan dompet Anda untuk memastikan dana Anda aman apabila Anda kehilangan kata sandi Anda. </string>
+    <string name="backup_complete_message">Anda dapat menggunakan Frasa Cadangan Anda untuk mendapatkan kembali dana Anda jika Anda kehilangan kata sandi Anda. Siapa pun dengan akses ke Frase Cadangan Anda dapat mengakses dana Anda jadi ingat untuk menyimpannya offline di tempat yang aman dan nyaman.</string>
+    <string name="shortcut_settings_summary">Memperlihatkan alamat penerimaan ketika Anda menekan lama pada ikon aplikasi pada peluncur, memungkinkan menerima bitcoin lebih cepat.</string>
+
+    <string name="confirm">Konfirmasi</string>
+    <string name="pending">Tertunda</string>
+    <string name="transactions">Transaksi</string>
+
+    <string name="swipe_receive_preference_summary">Memperlihatkan alamat penerima ketika Anda mengusap ke kiri pada layar PIN, memungkinkan menerima dana lebih cepat.</string>
+    <string name="swipe_receive_address_info">Lima alamat akan dimuat secara berturut-turut, setelah itu login diperlukan untuk menampilkan alamat baru.</string>
+    <string name="onboarding_receive_bitcoin">Meminta Dana</string>
+    <string name="onboarding_receive_content">Mengirim alamat dompet Anda ke teman untuk meminta dana. Alamat adalah deretan dari huruf dan angka acak yang berubah untuk setiap transaksi.</string>
+    <string name="onboarding_get_eth">Dapatkan Ether</string>
+    <string name="buy_second_password_prompt">Untuk menggunakan layanan ini, kami meminta Anda untuk memasukkan kata sandi kedua Anda. Anda hanya perlu memasukkan ini sekali untuk menggunakan fungsionalitas Beli.</string>
+    <string name="what_s_this">Apa ini?</string>
+    <string name="dismiss">Buang</string>
+
+    <string name="eth_default_account_label">Dompet Ether Saya</string>
+    <string name="eth_now_supporting">Sekarang mendukung Ether</string>
+    <string name="eth_second_password_prompt">Untuk menggunakan layanan ini, kami meminta Anda untuk memasukkan kata sandi kedua Anda. Anda hanya perlu memasukkan ini sekali untuk mengatur dompet Ether Anda.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Masukkan alamat ether atau pilih</string>
+    <string name="eth_to_field_helper_no_dropdown">Masukkan alamat ether</string>
+    <string name="eth_invalid_address">Alamat Ether salah</string>
+    <string name="eth_support_contract_not_allowed">Alamat kontrak tidak didukung.</string>
+    <string name="eth_support_only_eth">Saat ini kami hanya mendukung ETH - Anda tidak dapat menerima token pada alamat ini</string>
+    <string name="eth_unconfirmed_wait">Harap tunggu sampai transaksi Anda sebelumnya dikonfirmasi</string>
+    <string name="eth_transaction_complete">Transaksi selesai! Transaksi dan saldo Anda akan segera diperbaharui, ini bisa butuh beberapa menit.\n</string>
+
+    <string name="dashboard_title">Dasbor</string>
+    <string name="dashboard_time_span_day">Hari</string>
+    <string name="dashboard_time_span_week">Minggu</string>
+    <string name="dashboard_time_span_month">Bulan</string>
+    <string name="dashboard_time_span_year">Tahun</string>
+    <string name="dashboard_time_span_all_time">Sepanjang Waktu</string>
+    <string name="dashboard_bitcoin_price">Harga bitcoin</string>
+    <string name="dashboard_ether_price">Harga ether</string>
+    <string name="dashboard_charts_error">Kesalahan dalam memuat data grafik</string>
+    <string name="dashboard_charts_price_error">Kesalahan dalam mengambil data harga</string>
+
+    <string name="onboarding_ether_title">Sekarang Mendukung Ether</string>
+    <string name="onboarding_ether_description">Anda bertanya, kami mendengarkan. Kami gembira memberi tahu bahwa dompet Blockchain Anda sekarang memungkinkan Anda untuk mengirim dan menerima ether dengan mulus!</string>
+    <string name="onboarding_ether_cta">Mulai dengan Ether</string>
+
+    <string name="metadata_load_failure">Kesalahan dalam memuat fungsionalitas dompet selengkapnya. Layanan mungkin tidak tersedia untuk sementara waktu.</string>
+    <string name="fee_helper_message">Penambang menerima upah ini untuk memproses transaksi ini.</string>
 </resources>

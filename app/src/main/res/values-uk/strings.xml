@@ -12,7 +12,6 @@
     <string name="please_wait">Будь ласка, зачекайте</string>
 
     <string name="send_bitcoin">Відправити</string>
-    <string name="receive_bitcoin">Отримати</string>
 
     <string name="cancel">Відміна</string>
     <string name="yes">Так</string>
@@ -206,7 +205,6 @@
     <string name="confirm_password">Підтвердити пароль</string>
     <string name="check_email_to_auth_login">Будь ласка, перевірте свою електронну пошту, щоб підтвердити цю спробу входу в систему.</string>
     <string name="transaction_fee">Комісія за транзакцію</string>
-    <string name="transaction_occur_when_bitcoin">Коли ви отримуєте чи відправляєте bitcoin, це відображається у транзакціях.</string>
     <string name="click">Натисніть,</string>
     <string name="to_start_sending_and_receiving_btc">щоб почати отримувати та відправляти bitcoin.</string>
 
@@ -317,7 +315,6 @@
     <string name="transaction_surge">Через високу активність мережа Bitcoin сильно перевантажена, ніж зазвичай, тому рекомендована плату за транзакцію незвично висока.</string>
     <string name="unsupported_encryption_version">Версія гаманця %1$s не підтримується.</string>
     <string name="logout">Вихід</string>
-    <string name="to_field_helper">Введіть Bitcoin-адресу або виберіть</string>
 
     <string name="update">Оновити</string>
     <string name="mobile">Мобільний</string>
@@ -345,7 +342,6 @@
 
     <string name="two_fa">2-крокове підтвердження</string>
     <string name="tor_requests">Блокувати запити з мережі Tor</string>
-    <string name="tor_summary">Бажаєте заблокувати доступ до гаманця з IP-адрес, які, як відомо, є частиною анонімної мережі Tor? Мережа Tor часто використовується хакерами, які намагаються отримати доступ до гаманців Blockchain.</string>
     <string name="change_password">Змінити пароль</string>
     <string name="email_notifications">Сповіщення ел. поштою</string>
     <string name="email_notifications_summary">Отримайте сповіщення, коли вам надійдуть bitcoin.</string>
@@ -373,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Ви вийшли або стався збій дешифрування вашого гаманця. Знизу введіть свій пароль, щоб увійти.</string>
     <string name="logged_out_forget_wallet">Якщо ви бажаєте забути цей гаманець або створити новий, натисніть \'Забути гаманець\'.</string>
-
-    <string name="api_fail">Неможливо з\'єднатись із сервером. Будь ласка, спробуйте пізніше.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Завищений розмір bitcoin-транзакції. Вашому гаманцю необхідно консолідувати багато менших платежів, які ви колись отримували. Для швидкого підтвердження, це вимагає відносно високої комісії.</string>
     <string name="go_back">Повернутись</string>
@@ -425,14 +419,11 @@
     <string name="shortcut_receive_qr_long">Дивитись QR код, щоб отримати адресу</string>
     <string name="shortcut_receive_qr_error">Вибачте, під час генерування QR коду стався збій</string>
     <string name="shortcut_settings_enable">Ярлики панелі запуску</string>
-    <string name="shortcut_settings_summary">Увімкніть цю опцію, щоб показати адресу отримувача, коли ви довго натиснете на іконку програми в панелі запуску, роблячи отримання bitcoin ще швидшим.</string>
 
     <string name="swipe_receive_hint">Пролистайте, щоб отримати</string>
-    <string name="swipe_receive_preference_summary">Увімкніть цю опцію, щоб показати адресу, коли ви проведете пальцем вліво на екрані PIN, що пришвидшить отримання bitcoin. Послідовно буде завантажено п\'ять адрес, після входу в систему потрібно буде показати нові адреси.</string>
     <string name="swipe_receive_no_addresses">Неможливо завантажити більше адрес прямо зараз. Щоб завантажити більше, увійдіть в програму.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Огляд</string>
     <string name="create_a_wallet">Створити гаманець</string>
     <string name="log_in">Вхід</string>
     <string name="wallets">Гаманці</string>
@@ -442,7 +433,6 @@
     <string name="confirm_upgrade_header"> Привіт, ми додали ось ці нові функції до вашого гаманця Blockchain:</string>
     <string name="verify_email2">Ваша підтверджена адреса електронної пошти використовується нами для відправки вам кодів для входу, або для інформування вас, якщо ми виявимо підозрілу чи нехарактерну активність по вашому рахунку, для нагадування вам ідентифікатора входу в гаманець або сповіщення про рух коштів по вашому рахунку.</string>
     <string name="enable_screenshots">Активувати скріншоти</string>
-    <string name="enable_screenshots_summary">Ви збирається увімкнути скріншот для Blockchain. Деякі зображення екрану всередині програми можуть відображати конфіденційні дані. Інші програми матимуть можливість отримати доступ до цих скріншотів.</string>
 
     <string name="information">Інформація</string>
     <string name="transaction_detail_verify">Підтвердити на Blockchain.info</string>
@@ -474,12 +464,10 @@
     <string name="onboarding_check_inbox_title">Перевірте папку вхідних повідомлень</string>
     <string name="onboarding_check_inbox_summary">Знайдіть лист від Blockchain і натисніть на посилання у ньому для підтвердження, щоб завершити налаштування гаманця.</string>
     <string name="onboarding_verify_email">Верифікувати електронну пошту</string>
-    <string name="onboarding_receive_bitcoin">Отримати Bitcoin</string>
     <string name="onboarding_current_price">Актуальний курс:</string>
     <string name="onboarding_qr_codes">QR коди</string>
     <string name="onboarding_scan_address">Сканувати адресу</string>
     <string name="onboarding_buy_content">Ми працюємо з партнерами-обмінниками у всьому світі, так що ви можете купити bitcoin прямо зі свого гаманця.</string>
-    <string name="onboarding_receive_content">Відправте адресу свого гаманця другу, щоб подати запит на отримання bitcoin. Адреса - це набір випадкових букв і цифр, які змінюються для кожної транзакції.</string>
     <string name="onboarding_qr_codes_content">Адреса може відображатись також у вигляді QR коду. Скануйте QR коди своїх друзів, щоб швидко внести адреси їхніх гаманців.</string>
 
     <string name="onboarding_buy_bitcoin">Купити Bitcoin</string>
@@ -567,7 +555,6 @@
     <string name="contacts_no_contacts_found">Контакти не знайдено</string>
     <string name="contacts_pairing_method_title">Додати контакт</string>
     <string name="contacts_title">Контакти</string>
-    <string name="security_centre_backup_message">Для вашої безпеки, ми не зберігаємо паролі у файлі. Зробіть резервну копію свого гаманця, щоб ваші bitcoin були у безпеці навіть якщо ви втратите пароль. </string>
     <string name="security_centre_backup_positive_button">Резервування</string>
     <string name="security_centre_email_message">Ми відправили електронний лист для %1$s. Знайдіть лист від Blockchain і натисніть на посилання у ньому для підтвердження, щоб завершити налаштування гаманця.</string>
     <string name="security_centre_email_title">Перевірте свою електронну пошту</string>
@@ -596,7 +583,6 @@
     <string name="transaction_detail_pending">В очікуванні (%1$s/%2$s підтверджень)</string>
     <string name="transaction_detail_description_hint">Що це?</string>
     <string name="transaction_detail_confirmed">Підтверджено</string>
-    <string name="to_field_helper_no_dropdown">Введіть адресу Bitcoin</string>
     <string name="share_instructions">Торкніться, щоб скопіювати цю адресу. Поділіться адресою з відправником через ел. повідомлення чи СМС.</string>
     <string name="security_centre_two_fa_message">Попереджає несанкційований доступ до вашого гаманця. Увімкніть двофакторну автентифікацію, щоб підвищити безпеку гаманця.</string>
     <string name="security_centre_backup_title">Створити резервну копію своїх коштів</string>
@@ -628,7 +614,6 @@
     <string name="sms_notifications_summary">Увімкнути сповіщення, щоб отримувати повідомлення, коли вам надійшов біткойн.</string>
     <string name="backup_header">Фраза для відновлення доступу</string>
     <string name="backup_explanation">Blockchain не зберігає паролі в базі задля вашої безпеки. Ця фраза для відновлення доступу з 12-ти слів надасть вам доступ до ваших коштів, якщо ви втратите пароль. Запишіть її на аркуші паперу і заховайте у безпечне місце. </string>
-    <string name="backup_complete_message">Ви можете використати вашу фразу для відновлення доступу, щоб відновити кошти у випадку втрати паролю. Будь-хто з доступом до вашої фрази для відновлення доступу може отримати доступ до ваших біткойнів, тому не забувайте зберігати її поза мережею у безпечному місці.</string>
     <string name="backup_verify_heading">Введіть слова з вашої фрази для відновлення доступу, щоб завершити процес відновлення.</string>
     <string name="backup_lost_mnemonic">Втратили вашу фразу для відновлення доступу з 12-ти слів?</string>
     <string name="trade_complete">Торгівлю завершено</string>
@@ -661,4 +646,74 @@
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">Звичайна: %1$s, Пріоритетна: %2$s</string>
 
+    <string name="receive_bitcoin">Запит</string>
+    <string name="overview">Транзакції</string>
+    <string name="sending">Надсилання</string>
+    <string name="receiving">Отримання</string>
+    <string name="paid">Оплачено</string>
+    <string name="payment_request">Запит платежу</string>
+    <string name="restoring_wallet">Відновлення гаманця.</string>
+    <string name="support_leaving_app_warning">Це призведе до залишення програми і перенесе вас у браузер. Продовжити?</string>
+    <string name="addresses">Bitcoin адреси</string>
+    <string name="merchant_map">Мапа Bitcoin Merchant</string>
+    <string name="received_ethereum">Отриманий Ether</string>
+    <string name="transaction_occur_when_bitcoin">Коли ви отримуєте чи відправляєте bitcoin, це відображається у транзакціях.</string>
+    <string name="transaction_occur_when_eth">Операції відбуваються, коли ви отримуєте та надсилаєте ether.</string>
+    <string name="to_field_helper">Введіть bitcoin адресу або виберіть</string>
+    <string name="to_field_helper_no_dropdown">Введіть bitcoin адресу</string>
+    <string name="tor_summary">Блокувати IP-адреси, які є, як відомо, частиною анонімної мережі Tor. Мережа Tor часто використовується хакерами для отримання доступу до гаманців користувачів Blockchain.</string>
+    <string name="enable_screenshots_summary">Деякі зображення в програмі можуть відображати конфіденційні дані. Інші програми матимуть можливість отримати доступ до цих скріншотів.</string>
+    <string name="two_fa_summary">2-крокове підтвердження захищає ваш гаманець від неавторизованого доступу.</string>
+    <string name="two_fa_description">2-крокове підтвердження захищає ваш гаманець від неавторизованого доступу. Щоб захистити свій гаманець, можете обрати свій номер моб. телефону. Цей код буде запитано під час спроби доступу до вашого гаманця через веб-браузер.\n\nЩоб використати інші способи автентифікації, будь ласка, увійдіть до нашого веб-гаманця на %1$s</string>
+    <string name="email_request_subject_eth">Запит на отримання Ether платежу</string>
+    <string name="email_request_body_eth">Будь ласка, відправте ETH на Ether адресу %1$s.</string>
+    <string name="api_fail">Неможливо з\'єднатися із сервером. Будь ласка, спробуйте пізніше.</string>
+    <string name="transaction_detail_verify_etherscan">Верифікуйте на Etherscan.io</string>
+    <string name="security_centre_backup_message">Для вашої безпеки, ми не зберігаємо паролі у файлі. Зробіть резервну копію свого гаманця, щоб зберегти свої кошти, якщо втратите свій пароль. </string>
+    <string name="backup_complete_message">Ви можете використати свою фразу для відновлення доступу, щоб відновити кошти у випадку втрати паролю. Кожен, хто має доступ до вашої Фрази для відновлення доступу, може отримати доступ до ваших коштів, тому не забувайте зберігати її в автономному режимі.</string>
+    <string name="shortcut_settings_summary">Вкажіть адресу для отримання, коли на панелі запуску довгим натисканням натискаєте на іконку програми, щоб пришвидшити отримання BTC.</string>
+
+    <string name="confirm">Підтвердити</string>
+    <string name="pending">Очікує</string>
+    <string name="transactions">Транзакції</string>
+
+    <string name="swipe_receive_preference_summary">Вкажіть адресу для отримання, коли проведете пальцем вліво на екрані PIN-коду, щоб пришвидшити отримання коштів.</string>
+    <string name="swipe_receive_address_info">Послідовно буде завантажено п\'ять адрес, після входу в систему потрібно буде показати нові адреси.</string>
+    <string name="onboarding_receive_bitcoin">Запитати кошти</string>
+    <string name="onboarding_receive_content">Щоб запитати кошти, відправте адресу свого гаманця другові. Адреса - це набір випадкових букв і цифр, які змінюються для кожної транзакції.</string>
+    <string name="onboarding_get_eth">Отримати Ether</string>
+    <string name="buy_second_password_prompt">Щоб скористатись цією послугою, вам треба ввести свій другий пароль. Щоб користуватися функцією купівлі, вам треба ввести це лише один раз.</string>
+    <string name="what_s_this">Що це?</string>
+    <string name="dismiss">Пропустити</string>
+
+    <string name="eth_default_account_label">Мій Еther гаманець</string>
+    <string name="eth_now_supporting">Вже підтримує Ether</string>
+    <string name="eth_second_password_prompt">Щоб скористатись цією послугою, вам треба ввести свій другий пароль. Щоб налаштувати свій Ether гаманець, вам треба ввести це лише один раз.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Введіть ether адресу або виберіть</string>
+    <string name="eth_to_field_helper_no_dropdown">Ввести ether адресу</string>
+    <string name="eth_invalid_address">Неправильна Ether адреса</string>
+    <string name="eth_support_contract_not_allowed">Контрактові адреси не підтримуються.</string>
+    <string name="eth_support_only_eth">На даний момент ми підтримуємо лише ETH - ви не можете отримувати tokens на цю адресу</string>
+    <string name="eth_unconfirmed_wait">Будь ласка, зачекайте, поки не підтвердиться ваша попередня транзакція</string>
+    <string name="eth_transaction_complete">Транзакцію завершено! Список ваших транзакцій та баланс скоро оновляться, це займе декілька хвилин.\n</string>
+
+    <string name="dashboard_title">Панель управління</string>
+    <string name="dashboard_time_span_day">День</string>
+    <string name="dashboard_time_span_week">Тиждень</string>
+    <string name="dashboard_time_span_month">Місяць</string>
+    <string name="dashboard_time_span_year">Рік</string>
+    <string name="dashboard_time_span_all_time">Весь час</string>
+    <string name="dashboard_bitcoin_price">Ціна Bitcoin</string>
+    <string name="dashboard_ether_price">Ціна Ether</string>
+    <string name="dashboard_charts_error">Помилка завантаження даних діаграми</string>
+    <string name="dashboard_charts_price_error">Помилка отримання даних про ціну</string>
+
+    <string name="onboarding_ether_title">Вже підтримується Ether</string>
+    <string name="onboarding_ether_description">Ви попросили, ми прислухалися. Раді вам повідомити, що ваш Blockchain гаманець тепер дозволяє без проблем відправляти та отримувати ether!</string>
+    <string name="onboarding_ether_cta">Початок роботи з Ether</string>
+
+    <string name="metadata_load_failure">Помилка завантаження гаманця з повною функціональністю. Послуга може бути тимчасово недоступною.</string>
+    <string name="fee_helper_message">Щоб обробити цю транзакцію, майнери отримують цю комісію.</string>
 </resources>
