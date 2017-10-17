@@ -869,6 +869,7 @@ class SendPresenter @Inject constructor(
 
         val addressResponse = combinedEthModel.getAddressResponse()
         maxAvailable = addressResponse!!.balance.minus(wei.toBigInteger())
+        maxAvailable = maxAvailable.max(BigInteger.ZERO)
 
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
         if (spendAll) {
