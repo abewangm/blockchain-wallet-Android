@@ -120,6 +120,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onBitcoinChosen()
             CryptoCurrencies.ETHER -> onEtherChosen()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 
@@ -541,7 +542,7 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    internal fun selectDefaultSendingAccount() {
+    private fun selectDefaultSendingAccount() {
         val accountItem = walletAccountHelper.getDefaultAccount()
         view.updateSendingAddress(accountItem.label!!)
         pendingTransaction.sendingObject = accountItem

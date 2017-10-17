@@ -78,9 +78,10 @@ class BalancePresenter @Inject constructor(
                     activeAccountAndAddressList.clear()
                     activeAccountAndAddressList.addAll(getAllDisplayableAccounts())
                 }
+                .doOnComplete { setupTransactions() }
                 .subscribe(
                         {
-                            when(currencyState.cryptoCurrency) {
+                            when (currencyState.cryptoCurrency) {
                                 CryptoCurrencies.BTC -> {
                                     chosenAccount = activeAccountAndAddressList[0]
                                     onAccountChosen(0)
@@ -89,6 +90,7 @@ class BalancePresenter @Inject constructor(
                                     chosenAccount = activeAccountAndAddressList[activeAccountAndAddressList.lastIndex]
                                     onAccountChosen(activeAccountAndAddressList.lastIndex)
                                 }
+                                else -> throw IllegalArgumentException("BCC is not currently supported")
                             }
 
                             view.updateSelectedCurrency(currencyState.cryptoCurrency)
@@ -484,7 +486,7 @@ class BalancePresenter @Inject constructor(
         }
     }
 
-    private fun getUpdateTickerObservable(): Observable<Boolean>? {
+    private fun getUpdateTickerObservable(): Observable<Boolean> {
         // Remove ETH from list of accounts
         val displayableAccounts = mutableListOf<ItemAccount>().apply {
             addAll(activeAccountAndAddressList)
@@ -640,7 +642,7 @@ class BalancePresenter @Inject constructor(
     fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         currencyState.cryptoCurrency = cryptoCurrency
 
-        when(cryptoCurrency) {
+        when (cryptoCurrency) {
             CryptoCurrencies.BTC -> {
                 view.showAccountSpinner()
                 onAccountChosen(0)
@@ -649,6 +651,7 @@ class BalancePresenter @Inject constructor(
                 view.hideAccountSpinner()
                 onAccountChosen(activeAccountAndAddressList.lastIndex)
             }
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 
