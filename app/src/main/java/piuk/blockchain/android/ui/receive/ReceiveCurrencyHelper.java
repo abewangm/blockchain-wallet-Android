@@ -132,10 +132,15 @@ public class ReceiveCurrencyHelper {
         return monetaryUtil.getDenominatedAmount(amount);
     }
 
-    // TODO: 05/09/2017 This seems to be hardcoded for BTC?
     public String getFormattedCryptoStringFromFiat(double fiatAmount) {
+
         double cryptoAmount = fiatAmount / getLastPrice();
-        return getFormattedBtcString(cryptoAmount);
+
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return getFormattedBtcString(cryptoAmount);
+        } else {
+            return cryptoAmount + "";
+        }
     }
     public String getFormattedFiatStringFromCrypto(double cryptoAmount) {
         double uAmount = getUndenominatedAmount(cryptoAmount);
