@@ -1,12 +1,12 @@
 package piuk.blockchain.android.ui.dashboard
 
 import android.support.annotation.VisibleForTesting
-import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Observable
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.ChartsDataManager
 import piuk.blockchain.android.data.charts.TimeSpan
+import piuk.blockchain.android.data.charts.models.ChartDatumDto
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
@@ -140,7 +140,7 @@ class DashboardPresenter @Inject constructor(
                 )
     }
 
-    private fun getChartsData(list: List<PriceDatum>) = ChartsState.Data(
+    private fun getChartsData(list: List<ChartDatumDto>) = ChartsState.Data(
             data = list,
             fiatSymbol = getCurrencySymbol(),
             getChartAllTime = { updateChartsData(TimeSpan.ALL_TIME) },
@@ -376,7 +376,7 @@ class DashboardPresenter @Inject constructor(
 sealed class ChartsState {
 
     data class Data(
-            val data: List<PriceDatum>,
+            val data: List<ChartDatumDto>,
             val fiatSymbol: String,
             val getChartAllTime: () -> Unit,
             val getChartYear: () -> Unit,
