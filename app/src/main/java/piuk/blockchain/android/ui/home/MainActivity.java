@@ -45,7 +45,6 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import org.jetbrains.annotations.NotNull;
 
-import timber.log.Timber;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 

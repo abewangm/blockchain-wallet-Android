@@ -62,13 +62,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * These tests fail with a security exception due to signing conflicts in AGP 3.0-beta6. This will
- * be resolved in future releases; all tests pass regardless.
- *
- * @see <a href=https://issuetracker.google.com/issues/65809932>Google Issue Tracker</a>
- */
-@Ignore
 @Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
 @RunWith(RobolectricTestRunner.class)
 public class AccountEditPresenterTest {
