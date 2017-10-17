@@ -551,7 +551,7 @@ class SendPresenter @Inject constructor(
     internal fun selectSendingBtcAccount(accountPosition: Int) {
         if (accountPosition >= 0) {
             var label = getAddressList()[accountPosition].label
-            if (label == null || label.isEmpty()) {
+            if (label.isNullOrEmpty()) {
                 label = getAddressList()[accountPosition].address
             }
             view.updateSendingAddress(label!!)

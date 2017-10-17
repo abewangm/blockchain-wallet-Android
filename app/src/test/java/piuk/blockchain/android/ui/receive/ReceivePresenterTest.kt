@@ -363,15 +363,30 @@ class ReceivePresenterTest {
 
     @Test
     @Throws(Exception::class)
-    fun getSelectedAccountPosition() {
+    fun `getSelectedAccountPosition ETH`() {
         // Arrange
-        val account = Account()
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
+        val xPub = "X_PUB"
+        val account = Account().apply { xpub = xPub }
         subject.selectedAccount = account
-        whenever(payloadDataManager.wallet.hdWallets[0].accounts.indexOf(account)).thenReturn(10)
+        whenever(payloadDataManager.accounts).thenReturn(listOf(account))
+        whenever(payloadDataManager.getPositionOfAccountInActiveList(0))
+                .thenReturn(10)
         // Act
         val result = subject.getSelectedAccountPosition()
         // Assert
         result `should equal to` 10
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getSelectedAccountPosition BTC`() {
+        // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
+        // Act
+        val result = subject.getSelectedAccountPosition()
+        // Assert
+        result `should equal to` -1
     }
 
     @Test
@@ -402,10 +417,19 @@ class ReceivePresenterTest {
     fun getConfirmationDetails() {
         // Arrange
         val label = "LABEL"
-        val account = Account().apply { this.label = label }
+        val xPub = "X_PUB"
+        val account = Account().apply {
+            this.label = label
+            xpub = xPub
+        }
         val contactName = "CONTACT_NAME"
         val accountPosition = 10
         subject.selectedAccount = account
+        whenever(payloadDataManager.accounts).thenReturn(listOf(account))
+        whenever(payloadDataManager.getPositionOfAccountInActiveList(0))
+                .thenReturn(10)
+        subject.selectedAccount = account
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         whenever(payloadDataManager.wallet.hdWallets[0].accounts.indexOf(account))
                 .thenReturn(accountPosition)
         whenever(activity.getContactName())
