@@ -10,6 +10,7 @@ import info.blockchain.wallet.ethereum.data.EthTxDetails
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.functions.Consumer
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.DeterministicKey
 import org.web3j.protocol.core.methods.request.RawTransaction
@@ -20,6 +21,7 @@ import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.util.annotations.Mockable
 import retrofit2.HttpException
+import timber.log.Timber
 import java.math.BigInteger
 import java.util.*
 
@@ -84,48 +86,22 @@ class EthDataManager(
     }
 
     /**
-     * Returns an [EthTxDetails] containing information about a specific ETH transaction. This object
-     * is wrapped in an [Optional], whereby [Optional.None] represents the transaction still
-     * being in the mempool. Can also return a normal [Throwable] response if the server has issues,
-     * no connection on the device etc.
-     *
-     * @param hash The hash of the transaction you wish to check
-     * @return An [Observable] wrapping an [Optional]
-     */
-    fun getTransaction(hash: String): Observable<Optional<EthTxDetails>> = rxPinning.call<Optional<EthTxDetails>> {
-        ethAccountApi.getTransaction(hash)
-                .map<Optional<EthTxDetails>> { Optional.Some(it) }
-                .onErrorResumeNext { throwable: Throwable ->
-                    if (throwable is HttpException) {
-                        if (throwable.code() == 400 && throwable.response().errorBody()?.string()!!.contains(
-                                "transaction not found",
-                                ignoreCase = true
-                        )) return@onErrorResumeNext Observable.just(Optional.None)
-                    }
-                    return@onErrorResumeNext Observable.error { throwable }
-                }.compose(RxUtil.applySchedulersToObservable())
-    }
-
-    /**
      * Returns whether or not the user's ETH account currently has unconfirmed transactions, and
      * therefore shouldn't be allowed to send funds until confirmation.
+     * We compare the last submitted tx hash with the newly created tx hash - if they match it means
+     * that the previous tx has not yet been processed.
      *
      * @return An [Observable] wrapping a [Boolean]
      */
-    fun hasUnconfirmedEthTransactions(): Observable<Boolean> =
-            if (!ethDataStore.ethWallet?.lastTransactionHash.isNullOrEmpty()) {
-                getTransaction(ethDataStore.ethWallet!!.lastTransactionHash)
-                        .flatMap {
-                            when (it) {
-                            // Tx is found, need to compare to block height
-                                is Optional.Some -> isTxUnConfirmed(it.element)
-                            // Tx not found, tx is unconfirmed
-                                Optional.None -> Observable.just(true)
-                            }
-                        }
-            } else {
-                Observable.just(false)
-            }
+    fun hasUnconfirmedEthTransactions(): Observable<Boolean> {
+
+        val lastTxHash = ethDataStore.ethWallet?.lastTransactionHash
+
+        return fetchEthAddress().flatMapIterable { it.getTransactions() }
+                .filter{ list -> list.hash == lastTxHash }
+                .toList()
+                .flatMapObservable { Observable.just(it.size == 0) }
+    }
 
     /**
      * Returns a [EthLatestBlock] object which contains information about the most recently
@@ -251,18 +227,4 @@ class EthDataManager(
 
         return ethWallet
     }
-
-    private fun isTxUnConfirmed(ethTxDetails: EthTxDetails): Observable<Boolean> =
-            rxPinning.call<Boolean> {
-                ethAccountApi.latestBlock
-                        .map { it.blockHeight - ethTxDetails.blockNumber < ETH_MIN_CONFIRMATIONS }
-                        .compose(RxUtil.applySchedulersToObservable())
-            }
-
-    companion object {
-
-        private const val ETH_MIN_CONFIRMATIONS = 12
-
-    }
-
 }

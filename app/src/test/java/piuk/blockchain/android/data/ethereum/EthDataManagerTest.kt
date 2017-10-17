@@ -3,10 +3,7 @@ package piuk.blockchain.android.data.ethereum
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.EthereumWallet
-import info.blockchain.wallet.ethereum.data.EthAddressResponseMap
-import info.blockchain.wallet.ethereum.data.EthLatestBlock
-import info.blockchain.wallet.ethereum.data.EthTransaction
-import info.blockchain.wallet.ethereum.data.EthTxDetails
+import info.blockchain.wallet.ethereum.data.*
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
 import okhttp3.MediaType
@@ -139,89 +136,20 @@ class EthDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun `getTransaction found`() {
-        // Arrange
-        val hash = "HASH"
-        val ethTxDetails: EthTxDetails = mock()
-        whenever(ethAccountApi.getTransaction(hash)).thenReturn(Observable.just(ethTxDetails))
-        // Act
-        val testObserver = subject.getTransaction(hash).test()
-        // Assert
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-        val value = testObserver.values()[0]
-        value `should be instance of` Optional.Some::class
-        (value as Optional.Some).element `should be` ethTxDetails
-        verify(ethAccountApi).getTransaction(hash)
-        verifyNoMoreInteractions(ethAccountApi)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `getTransaction not found`() {
-        // Arrange
-        val hash = "HASH"
-        val responseBody = ResponseBody.create(MediaType.parse("application/json"), "{\n" +
-                "\t\"message\": \"Transaction not found\"\n" +
-                "}")
-        val httpException = HttpException(Response.error<EthTxDetails>(400, responseBody))
-        whenever(ethAccountApi.getTransaction(hash)).thenReturn(Observable.error { httpException })
-        // Act
-        val testObserver = subject.getTransaction(hash).test()
-        // Assert
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-        val value = testObserver.values()[0]
-        value `should be instance of` Optional.None::class
-        verify(ethAccountApi).getTransaction(hash)
-        verifyNoMoreInteractions(ethAccountApi)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `getTransaction returns unknown error`() {
-        // Arrange
-        val hash = "HASH"
-        val responseBody = ResponseBody.create(MediaType.parse("application/json"), "{\n" +
-                "\t\"message\": \"Unknown error\"\n" +
-                "}")
-        val httpException = HttpException(Response.error<EthTxDetails>(500, responseBody))
-        whenever(ethAccountApi.getTransaction(hash)).thenReturn(Observable.error { httpException })
-        // Act
-        val testObserver = subject.getTransaction(hash).test()
-        // Assert
-        testObserver.assertNotComplete()
-        testObserver.assertError(Throwable::class.java)
-        verify(ethAccountApi).getTransaction(hash)
-        verifyNoMoreInteractions(ethAccountApi)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `getTransaction returns exception`() {
-        // Arrange
-        val hash = "HASH"
-        whenever(ethAccountApi.getTransaction(hash)).thenReturn(Observable.error { IOException() })
-        // Act
-        val testObserver = subject.getTransaction(hash).test()
-        // Assert
-        testObserver.assertNotComplete()
-        testObserver.assertError(IOException::class.java)
-        verify(ethAccountApi).getTransaction(hash)
-        verifyNoMoreInteractions(ethAccountApi)
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun `hasUnconfirmedEthTransactions response not found`() {
         // Arrange
-        whenever(ethDataStore.ethWallet).thenReturn(null)
+        val ethHash = "HASH"
+        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(ethHash)
+
+        val ethAddress = "ADDRESS"
+        whenever(ethDataStore.ethWallet!!.account.address).thenReturn(ethAddress)
+        whenever(ethAccountApi.getEthAddress(listOf(ethAddress)))
+                .thenReturn(null)
+
         // Act
         val testObserver = subject.hasUnconfirmedEthTransactions().test()
         // Assert
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-        testObserver.assertValue(false)
+        testObserver.assertNotComplete()
         verify(ethDataStore, atLeastOnce()).ethWallet
         verifyNoMoreInteractions(ethDataStore)
     }
@@ -230,29 +158,13 @@ class EthDataManagerTest : RxTest() {
     @Throws(Exception::class)
     fun `hasUnconfirmedEthTransactions last tx hash not found`() {
         // Arrange
-        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(null)
-        // Act
-        val testObserver = subject.hasUnconfirmedEthTransactions().test()
-        // Assert
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-        testObserver.assertValue(false)
-        verify(ethDataStore, atLeastOnce()).ethWallet
-        verifyNoMoreInteractions(ethDataStore)
-    }
+        val ethHash = "HASH"
+        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(ethHash)
+        val ethAddress = "ADDRESS"
+        whenever(ethDataStore.ethWallet!!.account.address).thenReturn(ethAddress)
+        whenever(ethAccountApi.getEthAddress(listOf(ethAddress)))
+                .thenReturn(Observable.empty())
 
-    @Test
-    @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions transaction has less than 12 confirmations`() {
-        // Arrange
-        val hash = "HASH"
-        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(hash)
-        val ethTxDetails: EthTxDetails = mock()
-        whenever(ethAccountApi.getTransaction(hash)).thenReturn(Observable.just(ethTxDetails))
-        val latestBlock: EthLatestBlock = mock()
-        whenever(ethAccountApi.latestBlock).thenReturn(Observable.just(latestBlock))
-        whenever(ethTxDetails.blockNumber).thenReturn(1)
-        whenever(latestBlock.blockHeight).thenReturn(10)
         // Act
         val testObserver = subject.hasUnconfirmedEthTransactions().test()
         // Assert
@@ -261,23 +173,32 @@ class EthDataManagerTest : RxTest() {
         testObserver.assertValue(true)
         verify(ethDataStore, atLeastOnce()).ethWallet
         verifyNoMoreInteractions(ethDataStore)
-        verify(ethAccountApi).getTransaction(hash)
-        verify(ethAccountApi).latestBlock
-        verifyNoMoreInteractions(ethAccountApi)
     }
 
     @Test
     @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions transaction has more than 12 confirmations`() {
+    fun `hasUnconfirmedEthTransactions last tx hash found`() {
         // Arrange
-        val hash = "HASH"
-        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(hash)
-        val ethTxDetails: EthTxDetails = mock()
-        whenever(ethAccountApi.getTransaction(hash)).thenReturn(Observable.just(ethTxDetails))
-        val latestBlock: EthLatestBlock = mock()
-        whenever(ethAccountApi.latestBlock).thenReturn(Observable.just(latestBlock))
-        whenever(ethTxDetails.blockNumber).thenReturn(1)
-        whenever(latestBlock.blockHeight).thenReturn(13)
+        val ethHash = "HASH"
+        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(ethHash)
+
+        val ethAddress = "ADDRESS"
+        whenever(ethDataStore.ethWallet!!.account.address).thenReturn(ethAddress)
+        val ethAddressResponseMap: EthAddressResponseMap = mock()
+        whenever(ethAccountApi.getEthAddress(listOf(ethAddress)))
+                .thenReturn(Observable.just(ethAddressResponseMap))
+        whenever(ethAccountApi.getEthAddress(listOf(ethAddress)))
+                .thenReturn(Observable.just(ethAddressResponseMap))
+
+        val ethAddressResponse: EthAddressResponse = mock()
+        whenever(ethAddressResponseMap.ethAddressResponseMap)
+                .thenReturn(mutableMapOf(Pair("",ethAddressResponse)))
+
+        val ethTransaction: EthTransaction = mock()
+        whenever(ethTransaction.hash).thenReturn(ethHash)
+        whenever(ethAddressResponse.transactions)
+                .thenReturn(listOf(ethTransaction, ethTransaction, ethTransaction))
+
         // Act
         val testObserver = subject.hasUnconfirmedEthTransactions().test()
         // Assert
@@ -285,9 +206,7 @@ class EthDataManagerTest : RxTest() {
         testObserver.assertNoErrors()
         testObserver.assertValue(false)
         verify(ethDataStore, atLeastOnce()).ethWallet
-        verifyNoMoreInteractions(ethDataStore)
-        verify(ethAccountApi).getTransaction(hash)
-        verify(ethAccountApi).latestBlock
+        verify(ethAccountApi, atLeastOnce()).getEthAddress(listOf(ethAddress))
         verifyNoMoreInteractions(ethAccountApi)
     }
 
