@@ -97,7 +97,7 @@ class EthDataManager(
 
         val lastTxHash = ethDataStore.ethWallet?.lastTransactionHash
 
-        return Observable.fromIterable(ethDataStore.ethAddressResponse?.getTransactions())
+        return fetchEthAddress().flatMapIterable { it.getTransactions() }
                 .filter{ list -> list.hash == lastTxHash }
                 .toList()
                 .flatMapObservable { Observable.just(it.size == 0) }
