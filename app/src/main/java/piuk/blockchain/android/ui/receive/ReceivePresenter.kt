@@ -22,7 +22,6 @@ import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.DecimalFormat
@@ -65,6 +64,7 @@ class ReceivePresenter @Inject internal constructor(
         when(currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onSelectDefault(defaultAccountPosition)
             CryptoCurrencies.ETHER -> onEthSelected()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 

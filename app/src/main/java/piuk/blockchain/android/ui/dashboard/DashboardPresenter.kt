@@ -1,12 +1,12 @@
 package piuk.blockchain.android.ui.dashboard
 
 import android.support.annotation.VisibleForTesting
-import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Observable
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.ChartsDataManager
 import piuk.blockchain.android.data.charts.TimeSpan
+import piuk.blockchain.android.data.charts.models.ChartDatumDto
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
@@ -51,8 +51,8 @@ class DashboardPresenter @Inject constructor(
     private val displayList = mutableListOf<Any>(ChartDisplayable())
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     private var timeSpan = TimeSpan.MONTH
-    @VisibleForTesting var btcBalance = 0L
-    @VisibleForTesting var ethBalance = BigInteger.ZERO
+    @VisibleForTesting var btcBalance: Long = 0L
+    @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
         cryptoCurrency = currencyState.cryptoCurrency
@@ -88,11 +88,11 @@ class DashboardPresenter @Inject constructor(
         updatePrices()
     }
 
-    fun getCurrentCryptoCurrency(): Int {
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> return 0
-            CryptoCurrencies.ETHER -> return 1
-            else -> return 1
+    internal fun getCurrentCryptoCurrency(): Int {
+        return when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> 0
+            CryptoCurrencies.ETHER -> 1
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 
@@ -135,14 +135,12 @@ class DashboardPresenter @Inject constructor(
                 .doOnSuccess { view.updateChartState(getChartsData(it)) }
                 .doOnError { view.updateChartState(ChartsState.Error) }
                 .subscribe(
-                        {
-                            view.updateDashboardSelectedCurrency(cryptoCurrency)
-                        },
+                        { view.updateDashboardSelectedCurrency(cryptoCurrency) },
                         { Timber.e(it) }
                 )
     }
 
-    private fun getChartsData(list: List<PriceDatum>) = ChartsState.Data(
+    private fun getChartsData(list: List<ChartDatumDto>) = ChartsState.Data(
             data = list,
             fiatSymbol = getCurrencySymbol(),
             getChartAllTime = { updateChartsData(TimeSpan.ALL_TIME) },
@@ -172,10 +170,12 @@ class DashboardPresenter @Inject constructor(
                                 val totalString = "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(totalDouble)}"
                                 view.updateTotalBalance(totalString)
                             }
-                }.subscribe(
-                { /* No-op*/ },
-                { Timber.e(it) }
-        )
+                }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { /* No-op*/ },
+                        { Timber.e(it) }
+                )
     }
 
     private fun updateCryptoBalances() {
@@ -376,7 +376,7 @@ class DashboardPresenter @Inject constructor(
 sealed class ChartsState {
 
     data class Data(
-            val data: List<PriceDatum>,
+            val data: List<ChartDatumDto>,
             val fiatSymbol: String,
             val getChartAllTime: () -> Unit,
             val getChartYear: () -> Unit,

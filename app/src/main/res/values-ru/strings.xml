@@ -12,7 +12,6 @@
     <string name="please_wait">Подождите</string>
 
     <string name="send_bitcoin">Отправить</string>
-    <string name="receive_bitcoin">Получить</string>
 
     <string name="cancel">Отмена</string>
     <string name="yes">Да</string>
@@ -206,7 +205,6 @@
     <string name="confirm_password">Подтвердить пароль</string>
     <string name="check_email_to_auth_login">Проверьте свою электронную почту, чтобы одобрить эту попытку входа.</string>
     <string name="transaction_fee">Комиссия транзакции</string>
-    <string name="transaction_occur_when_bitcoin">Транзакции осуществляются, когда вы получаете и отправляете bitcoin.</string>
     <string name="click">Нажмите</string>
     <string name="to_start_sending_and_receiving_btc">для начала отправки и получения bitcoin.</string>
 
@@ -317,7 +315,6 @@
     <string name="transaction_surge">Активность сети Bitcoin в настоящее время очень высока, поэтому рекомендуемые комиссии выше, чем обычно.</string>
     <string name="unsupported_encryption_version">Кошелек версии %1$s не поддерживается.</string>
     <string name="logout">Выйти</string>
-    <string name="to_field_helper">Введите адрес Bitcoin или выберите</string>
 
     <string name="update">Обновить</string>
     <string name="mobile">Мобильный телефон</string>
@@ -345,7 +342,6 @@
 
     <string name="two_fa">2-шаговую верификацию</string>
     <string name="tor_requests">Заблокировать запросы сети Tor</string>
-    <string name="tor_summary">Хотите запретить IP-адресам, известным как часть анонимной сети Tor, получать доступ к вашему кошельку? Сеть Tor часто используется хакерами, пытающимися получить доступ к кошелкам пользователей Blockchain.</string>
     <string name="change_password">Изменить пароль</string>
     <string name="email_notifications">Уведомления по электронной почте</string>
     <string name="email_notifications_summary">Получать уведомления о получении биткоинов.</string>
@@ -373,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Вы вышли из системы или произошла ошибка при дешифровке вашего кошелька. Введите свой пароль ниже для входа в систему.</string>
     <string name="logged_out_forget_wallet">Если вы хотите забыть об этом кошельке и начать заново, нажмите \'Забыть кошелек\'.</string>
-
-    <string name="api_fail">Не удалось подключиться к серверу. Попробуйте еще раз попозже.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Это слишком большая транзакция bitcoin. Ваш кошелек должен консолидировать много мелких платежей, которые вы получили ранее. Для быстрого подтверждения этой транзакции требуется относительно высокая комиссия.</string>
     <string name="go_back">Назад</string>
@@ -425,14 +419,11 @@
     <string name="shortcut_receive_qr_long">Смотреть QR-код для адреса получения</string>
     <string name="shortcut_receive_qr_error">К сожалению, при генерации QR-кода произошла ошибка</string>
     <string name="shortcut_settings_enable">Ярлыки средства запуска</string>
-    <string name="shortcut_settings_summary">Включите этот параметр, чтобы открыть адрес получения при долгом нажатии на значок приложения в средстве запуска. Так получение биткойнов станет еще быстрее.</string>
 
     <string name="swipe_receive_hint">Для получения проведите по экрану</string>
-    <string name="swipe_receive_preference_summary">Включите этот параметр, чтобы открыть адрес получения, когда проводите по экрану PIN-кода влево. Так получение биткойнов станет еще быстрее. Будут последовательно загружены пять адресов, после чего необходимо выполнить вход в систему, чтобы были показаны новые адреса.</string>
     <string name="swipe_receive_no_addresses">В данный момент нельзя загрузить больше адресов. Чтобы загрузить больше, войдите в приложение.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Обзор</string>
     <string name="create_a_wallet">Создать кошелек</string>
     <string name="log_in">Вход</string>
     <string name="wallets">Кошельки</string>
@@ -442,7 +433,6 @@
     <string name="confirm_upgrade_header">Смотрите, мы добавили эти новые функции вашему кошельку Blockchain:</string>
     <string name="verify_email2">Ваш подтвержденный электронный адрес используется для отправки кодов входа в систему, при подозрительной или необычной активности, для напоминания ID для доступа к кошельку и отправления сообщений о поступлении средств на счет.</string>
     <string name="enable_screenshots">Разрешить скриншоты</string>
-    <string name="enable_screenshots_summary">Вы собираетесь разрешить скриншоты в приложении Blockchain. Некоторые снимки экрана в приложении могут отображать конфиденциальную информацию. Другие приложения могут получить доступ к этим скриншотам.</string>
 
     <string name="information">Информация</string>
     <string name="transaction_detail_verify">Верифицировать на Blockchain.info</string>
@@ -474,12 +464,10 @@
     <string name="onboarding_check_inbox_title"> Проверьте почту</string>
     <string name="onboarding_check_inbox_summary">Чтобы завершить установку кошелька, найдите письмо от Blockchain и нажмите на ссылку верификации.</string>
     <string name="onboarding_verify_email">Верифицировать email</string>
-    <string name="onboarding_receive_bitcoin">Получить биткоины</string>
     <string name="onboarding_current_price">Текущая цена:</string>
     <string name="onboarding_qr_codes">QR-коды</string>
     <string name="onboarding_scan_address">Сканировать адрес</string>
     <string name="onboarding_buy_content">Мы работаем с партнерами по обмену со всего мира, поэтому вы можете покупать биткоины прямо из своего кошелька.</string>
-    <string name="onboarding_receive_content">Чтобы запросить биткоины, отправьте другу адрес своего кошелька.  Адрес - это цепочка произвольных букв и цифр, которые меняются с каждой сделкой.</string>
     <string name="onboarding_qr_codes_content">Адрес также может быть показан как Q-код. Сканируйте QR-код друга для быстрого считывания адреса его кошелька.</string>
 
     <string name="onboarding_buy_bitcoin">Купить Bitcoin</string>
@@ -568,7 +556,6 @@
     <string name="contacts_no_contacts_found">Контакты не обнаружены</string>
     <string name="contacts_pairing_method_title">Добавить контакт</string>
     <string name="contacts_title">Контакты</string>
-    <string name="security_centre_backup_message">Для вашей безопасности мы не храним пароли в архиве. Делайте резервное копирование вашего кошелька, чтобы обезопасить свои средства в биткоинах в случае потери пароля. </string>
     <string name="security_centre_backup_positive_button">Резервная копия</string>
     <string name="security_centre_email_message">Мы отправили письмо %1$s. Чтобы завершить установку кошелька, найдите письмо от Blockchain и нажмите на ссылку верификации.</string>
     <string name="security_centre_email_title">Проверьте электронную почту</string>
@@ -597,7 +584,6 @@
     <string name="transaction_detail_pending">Ожидается (%1$s/%2$s подтверждений)</string>
     <string name="transaction_detail_description_hint">Для чего это нужно?</string>
     <string name="transaction_detail_confirmed">Подтверждено</string>
-    <string name="to_field_helper_no_dropdown">Введите адрес Bitcoin </string>
     <string name="share_instructions">Нажмите, чтобы скопировать этот адрес. Поделиться этим с отправителем по электронной почте или SMS.</string>
     <string name="security_centre_two_fa_message">Не допускайте несанкционированного доступа к вашему кошельку. Включите 2-шаговую верификацию, чтобы повысить безопасность кошелька.</string>
     <string name="security_centre_backup_title">Выполните резервное копирование своих средств</string>
@@ -630,7 +616,6 @@
     <string name="sms_notifications_summary">Активируйте уведомления через СМС при получении биткойн.</string>
     <string name="backup_header">Резервная фраза</string>
     <string name="backup_explanation">Для вашей безопасности Blockchain не хранит пароли в архиве. Эта фраза для восстановления из 12 слов предоставит вам доступ к вашим средствам, если вы потеряете свой пароль. Обязательно запишите ее на бумаге и храните в надежном не доступном для других месте. </string>
-    <string name="backup_complete_message">Вы можете использовать свою фразу для восстановления доступа, чтобы восстановить свои средства, если пароль утерян. Каждый, кто знает вашу фразу для восстановления доступа, сможет иметь доступ к вашим средствам, поэтому сохраняйте ее в безопасном месте, не на своем устройстве.</string>
     <string name="backup_verify_heading">Чтобы завершить процесс восстановления, введите следующие слова из вашей фразы для восстановления доступа.</string>
     <string name="backup_lost_mnemonic">Утратили фразу для восстановления доступа?</string>
     <string name="trade_complete">Сделка завершена</string>
@@ -663,4 +648,74 @@
     <string name="fee_options_sat_byte_hint">сатоши за байт</string>
     <string name="fee_options_sat_byte_inline_hint">Обычная: %1$s, Приоритетная: %2$s</string>
 
+    <string name="receive_bitcoin">Запрос</string>
+    <string name="overview">Транзакции</string>
+    <string name="sending">Отправка</string>
+    <string name="receiving">Получение</string>
+    <string name="paid">Оплачено</string>
+    <string name="payment_request">Запрос платежа</string>
+    <string name="restoring_wallet">Восстановление кошелька.</string>
+    <string name="support_leaving_app_warning">Это действие оставит приложение и перенаправит вас в браузер. Продолжить?</string>
+    <string name="addresses">Bitcoin адреса</string>
+    <string name="merchant_map">Карта Bitcoin Merchant</string>
+    <string name="received_ethereum">Получить Ether</string>
+    <string name="transaction_occur_when_bitcoin">Транзакции осуществляются, когда вы получаете и отправляете bitcoin.</string>
+    <string name="transaction_occur_when_eth">Транзакции осуществляются, когда вы получаете и отправляете ether.</string>
+    <string name="to_field_helper">Введите bitcoin адрес или выберите</string>
+    <string name="to_field_helper_no_dropdown">Введите bitcoin адрес</string>
+    <string name="tor_summary">Блокировать IP-адреса, которые, как известно, являются частью анонимной сети Tor. Очень часто сеть Tor используется хакерами, пытающимися получить доступ к кошелькам пользователей Blockchain.</string>
+    <string name="enable_screenshots_summary">Некоторые экраны в приложении могут отображать конфиденциальные данные. Другие приложения могут получить доступ к этим скриншотам.</string>
+    <string name="two_fa_summary">Защитите свой кошелек от несанкционированного доступа, активировав 2-шаговую верификацию.</string>
+    <string name="two_fa_description">Защитите свой кошелек от несанкционированного доступа, активировав 2-шаговую верификацию. Для обеспечения безопасности кошелька можно использовать номер мобильного телефона. Этот код будет запрашиваться при попытке получить доступ к вашему кошельку через веб-браузер.\n\nЧтобы использовать другие методы проверки подлинности, зайдите в наш веб-кошелек через %1$s</string>
+    <string name="email_request_subject_eth">Запрос Ether платежа</string>
+    <string name="email_request_body_eth">Пожалуйста, отправьте ETH на Ether адрес %1$s.</string>
+    <string name="api_fail">Невозможно подключиться к серверу. Попробуйте еще раз попозже.</string>
+    <string name="transaction_detail_verify_etherscan">Верифицировать на Etherscan.io</string>
+    <string name="security_centre_backup_message">Для вашей безопасности мы не храним пароли в архиве. Сделайте резервную копию своего кошелька, чтобы сохранить в безопасности свои средства, если пароль утерян. </string>
+    <string name="backup_complete_message">Вы можете использовать свою фразу для восстановления доступа, чтобы восстановить свои средства, если пароль утерян. Любой человек, имеющий доступ к вашей Резервной фразе, может получить доступ к вашим средствам, поэтому не забудьте сохранить ее в автономном режиме в безопасном месте.</string>
+    <string name="shortcut_settings_summary">Выясните адрес получателя, когда долгим нажатием в панели запуска нажимаете на иконку приложения, чтобы получить BTC еще быстрее.</string>
+
+    <string name="confirm">Подтвердить</string>
+    <string name="pending">На рассмотрении</string>
+    <string name="transactions">Транзакции</string>
+
+    <string name="swipe_receive_preference_summary">Выясните адрес получателя, когда проводите по экрану влево на экране PIN кода, чтобы получить деньги еще быстрее.</string>
+    <string name="swipe_receive_address_info">Будут последовательно загружены пять адресов, после чего необходимо выполнить вход в систему, чтобы были показаны новые адреса.</string>
+    <string name="onboarding_receive_bitcoin">Запрос средств</string>
+    <string name="onboarding_receive_content">Чтобы запросить средства, отправьте адрес своего кошелька другу. Адрес - это цепочка произвольных букв и цифр, которые меняются с каждой сделкой.</string>
+    <string name="onboarding_get_eth">Получить Ether</string>
+    <string name="buy_second_password_prompt">Мы требуем ввода второго пароля, чтобы пользоваться этой услугой. Чтобы использовать функцию "Купить", вам нужно будет ввести это только один раз.</string>
+    <string name="what_s_this">Что это?</string>
+    <string name="dismiss">Пропустить</string>
+
+    <string name="eth_default_account_label">Мой Ether кошелек</string>
+    <string name="eth_now_supporting">Теперь поддерживается Ether</string>
+    <string name="eth_second_password_prompt">Мы требуем ввода второго пароля, чтобы пользоваться этой услугой. Чтобы настроить свой Ether кошелек, вам нужно будет ввести это только один раз..</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Введите адрес или выберите</string>
+    <string name="eth_to_field_helper_no_dropdown">Введите ether адрес</string>
+    <string name="eth_invalid_address">Неправильный ether адрес</string>
+    <string name="eth_support_contract_not_allowed">Контрактные адреса не поддерживаются.</string>
+    <string name="eth_support_only_eth">На данный момент мы поддерживаем только ETH - вы не можете получать tokens на этот адрес</string>
+    <string name="eth_unconfirmed_wait">Подождите, пока не подтвердиться ваша предыдущая транзакция</string>
+    <string name="eth_transaction_complete">Транзакция завершена! Информация о ваших транзакциях и баланс скоро будет обновлен, это может занять несколько минут.\n</string>
+
+    <string name="dashboard_title">Панель мониторинга</string>
+    <string name="dashboard_time_span_day">День</string>
+    <string name="dashboard_time_span_week">Неделя</string>
+    <string name="dashboard_time_span_month">Месяц</string>
+    <string name="dashboard_time_span_year">Год</string>
+    <string name="dashboard_time_span_all_time">Все время</string>
+    <string name="dashboard_bitcoin_price">Цена Bitcoin</string>
+    <string name="dashboard_ether_price">Цена Ether</string>
+    <string name="dashboard_charts_error">Ошибка загрузки данных диаграммы</string>
+    <string name="dashboard_charts_price_error">Ошибка получения данных о ценах</string>
+
+    <string name="onboarding_ether_title">Теперь уже поддерживается Ether</string>
+    <string name="onboarding_ether_description">Вы попросили, мы выслушали Рады вам сообщить, что ваш кошелек Blockchain теперь позволит вам беспрепятственно отправлять и получать ether!</string>
+    <string name="onboarding_ether_cta">Начало работы с Ether</string>
+
+    <string name="metadata_load_failure">Ошибка загрузки полнофункционального кошелька. Сервис может быть временно недоступен.</string>
+    <string name="fee_helper_message">Майнеры получают комиссию за обработку этой транзакции.</string>
 </resources>

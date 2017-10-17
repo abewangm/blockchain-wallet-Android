@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.dashboard
 
 import com.nhaarman.mockito_kotlin.*
-import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.any
@@ -9,6 +8,7 @@ import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.data.charts.ChartsDataManager
+import piuk.blockchain.android.data.charts.models.ChartDatumDto
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
@@ -246,7 +246,7 @@ class DashboardPresenterTest {
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(3.0)
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
         whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.BTC, "USD"))
-                .thenReturn(Observable.just(PriceDatum()))
+                .thenReturn(Observable.just(mock(ChartDatumDto::class)))
         // Act
         subject.updateSelectedCurrency(CryptoCurrencies.BTC)
         // Assert
@@ -273,7 +273,7 @@ class DashboardPresenterTest {
         whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
         whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.ETHER, "USD"))
-                .thenReturn(Observable.just(PriceDatum()))
+                .thenReturn(Observable.just(mock(ChartDatumDto::class)))
         // Act
         subject.updateSelectedCurrency(CryptoCurrencies.ETHER)
         // Assert
@@ -301,7 +301,7 @@ class DashboardPresenterTest {
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(3.0)
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
         whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.BTC, "USD"))
-                .thenReturn(Observable.just(PriceDatum()))
+                .thenReturn(Observable.just(mock(ChartDatumDto::class)))
         whenever(exchangeRateFactory.updateTickers()).thenReturn(Completable.complete())
         val combinedEthModel: CombinedEthModel = mock()
         whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))

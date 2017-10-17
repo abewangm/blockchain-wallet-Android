@@ -38,7 +38,6 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
-import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -75,7 +74,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             inflater: LayoutInflater?,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = container!!.inflate(R.layout.fragment_balance)
+    ) = container?.inflate(R.layout.fragment_balance)
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -111,9 +110,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun updateSelectedCurrency(cryptoCurrencies: CryptoCurrencies) {
-        when(cryptoCurrencies) {
+        when (cryptoCurrencies) {
             CryptoCurrencies.BTC -> tabs?.getTabAt(0)?.select()
             CryptoCurrencies.ETHER -> tabs?.getTabAt(1)?.select()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 

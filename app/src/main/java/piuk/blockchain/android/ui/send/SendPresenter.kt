@@ -117,9 +117,10 @@ class SendPresenter @Inject constructor(
     }
 
     fun onResume() {
-        when(currencyState.cryptoCurrency) {
+        when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onBitcoinChosen()
             CryptoCurrencies.ETHER -> onEtherChosen()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 
@@ -142,7 +143,6 @@ class SendPresenter @Inject constructor(
         view.disableFeeDropdown()
         view.setCryptoMaxLength(30)
         resetState()
-        checkForUnconfirmedTx()
     }
 
     private fun resetState() {
@@ -542,7 +542,7 @@ class SendPresenter @Inject constructor(
         }
     }
 
-    internal fun selectDefaultSendingAccount() {
+    private fun selectDefaultSendingAccount() {
         val accountItem = walletAccountHelper.getDefaultAccount()
         view.updateSendingAddress(accountItem.label!!)
         pendingTransaction.sendingObject = accountItem
@@ -898,6 +898,9 @@ class SendPresenter @Inject constructor(
         } else {
             view.updateMaxAvailableColor(R.color.primary_blue_accent)
         }
+
+        //Check if any pending ether txs exist and warn user
+        checkForUnconfirmedTx()
     }
 
     @Suppress("CascadeIf")
@@ -1259,7 +1262,6 @@ class SendPresenter @Inject constructor(
                                 view?.updateMaxAvailableColor(R.color.product_red_medium)
                             } else {
                                 view.enableInput()
-                                calculateSpendableAmounts(spendAll = false, amountToSendText = "0")
                             }
                         },
                         { Timber.e(it) })

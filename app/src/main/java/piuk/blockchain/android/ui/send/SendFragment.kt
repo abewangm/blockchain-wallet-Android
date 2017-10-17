@@ -429,17 +429,16 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     private fun handleIncomingArguments() {
         if (arguments != null) {
+
             presenter.selectSendingBtcAccount(arguments.getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, -1))
 
             val scanData = arguments.getString(ARGUMENT_SCAN_DATA)
             val metricInputFlag = arguments.getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE)
 
             if (scanData != null) {
+                handlingActivityResult = true
                 presenter.handleURIScan(scanData, metricInputFlag)
             }
-
-        } else {
-            presenter.selectDefaultSendingAccount()
         }
     }
 
@@ -564,7 +563,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                     0, 1 -> {
                         buttonContinue.isEnabled = true
                         textviewFeeAbsolute.visibility = View.VISIBLE
-                        textviewFeeTime.visibility = View.VISIBLE
                         textInputLayout.visibility = View.GONE
                         updateTotals()
                     }

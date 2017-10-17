@@ -258,15 +258,7 @@ public class ReceiveCurrencyHelper {
         if (text == null || text.isEmpty()) return BigInteger.ZERO;
 
         String amountToSend = stripSeparator(text, decimalSeparator);
-
-        Double amount;
-        try {
-            amount = java.lang.Double.parseDouble(amountToSend);
-        } catch (NumberFormatException e) {
-            amount = 0.0;
-        }
-
-        return Convert.toWei(amount.toString(), Convert.Unit.ETHER).toBigInteger();
+        return Convert.toWei(amountToSend, Convert.Unit.ETHER).toBigInteger();
     }
 
     public String stripSeparator(String text, String decimalSeparator) {

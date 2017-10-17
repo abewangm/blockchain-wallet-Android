@@ -87,6 +87,9 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         super.onResume()
         setupToolbar()
         presenter.onResume()
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+        }
         LocalBroadcastManager.getInstance(context)
                 .registerReceiver(receiver, IntentFilter(BalanceFragment.ACTION_INTENT))
     }
