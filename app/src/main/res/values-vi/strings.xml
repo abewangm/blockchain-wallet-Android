@@ -12,7 +12,6 @@
     <string name="please_wait">Vui lòng chờ</string>
 
     <string name="send_bitcoin">Gửi</string>
-    <string name="receive_bitcoin">Nhận</string>
 
     <string name="cancel">Hủy bỏ</string>
     <string name="yes">Có</string>
@@ -206,7 +205,6 @@
     <string name="confirm_password">Xác nhận mật khẩu</string>
     <string name="check_email_to_auth_login">Vui lòng kiểm tra email của bạn để chấp nhận lần đăng nhập này.</string>
     <string name="transaction_fee">Phí giao dịch</string>
-    <string name="transaction_occur_when_bitcoin">Các giao dịch xuất hiện khi bạn nhận và gửi bitcoin.</string>
     <string name="click">Nhấn</string>
     <string name="to_start_sending_and_receiving_btc">để bắt đầu gửi và nhận bitcoin.</string>
 
@@ -317,7 +315,6 @@
     <string name="transaction_surge">Mạng lưới dò tìm Bitcoin hiện đang rất đông, dẫn đến các phí được yêu cầu cao hơn thông thường.</string>
     <string name="unsupported_encryption_version">Phiên bản ví %1$s không được hỗ trợ.</string>
     <string name="logout">Đăng xuất</string>
-    <string name="to_field_helper">Nhập hoặc chọn địa chỉ Bitcoin</string>
 
     <string name="update">Cập nhật</string>
     <string name="mobile">Di động</string>
@@ -345,7 +342,6 @@
 
     <string name="two_fa">Xác minh 2 bước</string>
     <string name="tor_requests">Chặn các yêu cầu từ Tor</string>
-    <string name="tor_summary">Bạn có muốn chặn các địa chỉ IP, được biết đến là một phần của mạng ẩn danh Tor, khỏi việc truy cập vào ví của bạn? Mạng Tor được sử dụng thường xuyên bởi các hacker, những kẻ luôn cố gắng truy cập vào ví người dùng Blockchain.</string>
     <string name="change_password">Thay đổi mật khẩu</string>
     <string name="email_notifications">Thông báo Email</string>
     <string name="email_notifications_summary">Nhận thông báo khi bạn nhận bitcoin.</string>
@@ -373,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Bạn đã đăng xuất hoặc có lỗi khi mã hóa ví của bạn. Nhập mật khẩu của bạn vào bên dưới để đăng nhập.</string>
     <string name="logged_out_forget_wallet">Nếu bạn muốn quên ví này và bắt đầu lại, nhấn \'Quên ví\'.</string>
-
-    <string name="api_fail">Không thể kết nối đến máy chủ. Vui lòng thử lại sau.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Đây là một giao dịch bitcoin vượt kích cỡ. Ví của bạn cần tổng hợp nhiều thanh toán nhỏ hơn mà bạn đã nhận trong quá khứ. Điều này cần một khoản phí tương đối cao để được xác nhận nhanh chóng. </string>
     <string name="go_back">Trở lại</string>
@@ -425,14 +419,11 @@
     <string name="shortcut_receive_qr_long">Xem mã QR cho địa chỉ nhận</string>
     <string name="shortcut_receive_qr_error">Rất tiếc, có lỗi khi tạo mã QR</string>
     <string name="shortcut_settings_enable">Đường dẫn Launcher</string>
-    <string name="shortcut_settings_summary">Kích hoạt tùy chọn này để hiện địa chỉ nhận khi bạn nhấn giữ lâu biểu tượng ứng dụng trong launcher, giúp nhận bitcoin thậm chí nhanh hơn.</string>
 
     <string name="swipe_receive_hint">Vuốt để nhận</string>
-    <string name="swipe_receive_preference_summary">Bật tùy chọn này để hiện địa chỉ nhận khi bạn trượt qua trái trên màn hình mã PIN, giúp việc nhận bitcoin thậm chí còn nhanh hơn. Năm địa chỉ này sẽ được tải liên tục, sau đó cần đăng nhập để hiện các địa chỉ mới.</string>
     <string name="swipe_receive_no_addresses">Không có địa chỉ có thể tải bây giờ. Đăng nhập vào ứng dụng để tải thêm.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Tổng quan</string>
     <string name="create_a_wallet">Tạo ví</string>
     <string name="log_in">Đăng nhập</string>
     <string name="wallets">Ví</string>
@@ -442,7 +433,6 @@
     <string name="confirm_upgrade_header">Xin chào, chúng tôi đã thêm các tính năng mới sau đây vào ví Blockchain của bạn:</string>
     <string name="verify_email2">Địa chỉ email đã xác minh của bạn được sử dụng để gửi các mã đăng nhập khi phát hiện có hành vi đáng ngờ hoặc bất thường, nhắc nhở bạn về ID đăng nhập ví của mình, và để gửi thông báo thanh toán bitcoin khi bạn nhận được tiền.</string>
     <string name="enable_screenshots">Kích hoạt Chụp màn hình</string>
-    <string name="enable_screenshots_summary">Bạn đang kích hoạt tính năng chụp ảnh màn hình cho ứng dụng Blockchain. Một vài hình ảnh trong ứng dụng có thể hiển thị dữ liệu nhạy cảm. Những ứng dụng khác sẽ có thể truy cập các ảnh chụp màn hình này.</string>
 
     <string name="information">Thông tin</string>
     <string name="transaction_detail_verify">Xác minh trên Blockchain.info</string>
@@ -474,12 +464,10 @@
     <string name="onboarding_check_inbox_title">Kiểm tra Hộp thư đến</string>
     <string name="onboarding_check_inbox_summary">Tìm kiếm email từ Blockchain và nhấn vào liên kết xác minh để hoàn tất quá trình thiết lập ví của bạn.</string>
     <string name="onboarding_verify_email">Xác minh email</string>
-    <string name="onboarding_receive_bitcoin">Nhận Bitcoin</string>
     <string name="onboarding_current_price">Giá Hiện tại:</string>
     <string name="onboarding_qr_codes">Mã QR</string>
     <string name="onboarding_scan_address">Quét Địa chỉ</string>
     <string name="onboarding_buy_content">Chúng tôi làm việc với các đối tác giao dịch trên khắp thế giới, do đó bạn có thể mua bitcoin trực tiếp từ ví của mình.</string>
-    <string name="onboarding_receive_content">Gửi địa chỉ ví của bạn cho bạn bè để nhận bitcoin. Địa chỉ là một chuỗi các chữ cái và chữ số ngẫu nhiên thay đổi theo từng giao dịch.</string>
     <string name="onboarding_qr_codes_content">Địa chỉ cũng có thể được hiển thị dưới dạng mã QR. Quét mã QR của bạn bè để nhanh chóng biết được địa chỉ ví của họ.</string>
 
     <string name="onboarding_buy_bitcoin">Mua Bitcoin</string>
@@ -568,7 +556,6 @@
     <string name="contacts_no_contacts_found">Không tìm thấy danh bạ</string>
     <string name="contacts_pairing_method_title">Thêm liên lạc</string>
     <string name="contacts_title">Danh bạ</string>
-    <string name="security_centre_backup_message">Để đảm bảo an toàn cho bạn, chúng tôi không lưu trữ bất kỳ mật khẩu nào dưới dạng tập tin. Sao lưu ví để đảm bảo bitcoin của bạn được an toàn trong trường hợp bạn mất mật khẩu. </string>
     <string name="security_centre_backup_positive_button">Sao lưu</string>
     <string name="security_centre_email_message">Chúng tôi đã gửi email đến %1$s. Tìm kiếm email từ Blockchain và nhấn vào liên kết xác minh để hoàn tất quá trình thiết lập ví của bạn.</string>
     <string name="security_centre_email_title">Kiểm tra email của bạn</string>
@@ -597,7 +584,6 @@
     <string name="transaction_detail_pending">Đang chờ duyệt (%1$s/%2$s Xác nhận)</string>
     <string name="transaction_detail_description_hint">Cái này để làm gì?</string>
     <string name="transaction_detail_confirmed">Đã xác nhận</string>
-    <string name="to_field_helper_no_dropdown">Nhập địa chỉ Bitcoin</string>
     <string name="share_instructions">Nhấn để sao chép địa chỉ này. Chia sẻ với người gửi qua email hoặc tin nhắn.</string>
     <string name="security_centre_two_fa_message">Ngăn chặn truy cập trái phép đến ví của bạn. Kích hoạt Xác minh 2 bước để tăng cường bảo mật cho ví.</string>
     <string name="security_centre_backup_title">Sao lưu các khoản tiền của bạn</string>
@@ -630,7 +616,6 @@
     <string name="sms_notifications_summary">Bật thông báo để nhận tin nhắn khi bạn nhận được bitcoin.</string>
     <string name="backup_header">Nhóm từ Sao lưu</string>
     <string name="backup_explanation">Để đảm bảo an toàn cho bạn, Blockchain không lưu trữ bất kỳ mật khẩu nào dưới dạng tập tin. Nhóm từ Sao lưu gồm 12 từ sau đây sẽ cung cấp cho bạn quyền truy cập các khoản tiền của mình trong trường hợp bạn quên mật khẩu. Hãy đảm bảo viết nó vào một tờ giấy và lưu trữ tại một nơi an toàn và bảo mật. </string>
-    <string name="backup_complete_message">Bạn có thể sử dụng Nhóm từ Sao lưu của mình để khôi phục các khoản tiền nếu bạn bị mất mật khẩu. Bất kỳ ai truy cập vào Nhóm từ Sao lưu của bạn đều có thể truy cập vào bitcoin của bạn, vậy nên hãy lưu trữ nó ngoại tuyến tại một nơi an toàn và bảo mật.</string>
     <string name="backup_verify_heading">Nhập các từ sau đây từ Nhóm từ Sao lưu của bạn để hoàn tất quá trình sao lưu.</string>
     <string name="backup_lost_mnemonic">Bạn bị mất nhóm từ sao lưu gồm 12 từ của mình?</string>
     <string name="trade_complete">Giao dịch Hoàn tất</string>
@@ -662,5 +647,76 @@
     <string name="fee_options_advanced_warning">Tính năng này được đề xuất chỉ dành cho người dùng nâng cao. Nếu chọn phí tùy chỉnh, bạn có nguy cơ phải trả tiền quá mức hoặc giao dịch của bạn sẽ không bao giờ được xác nhận.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">Thông thường: %1$s, Ưu tiên: %2$s</string>
+
+    <string name="receive_bitcoin">Yêu cầu</string>
+    <string name="overview">Giao dịch</string>
+    <string name="sending">Gửi</string>
+    <string name="receiving">Nhận</string>
+    <string name="paid">Đã thanh toán</string>
+    <string name="payment_request">Yêu cầu Thanh toán</string>
+    <string name="restoring_wallet">Khôi phục ví.</string>
+    <string name="support_leaving_app_warning">Thao tác này sẽ thoát ứng dụng và đưa bạn đến trình duyệt. Tiếp tục?</string>
+    <string name="addresses">Địa chỉ Bitcoin</string>
+    <string name="merchant_map">Bản đồ Cổng thanh toán Bitcoin</string>
+    <string name="received_ethereum">Đã nhận Ether</string>
+    <string name="transaction_occur_when_bitcoin">Các giao dịch xuất hiện khi bạn nhận và gửi bitcoin.</string>
+    <string name="transaction_occur_when_eth">Các giao dịch xuất hiện khi bạn nhận và gửi ether.</string>
+    <string name="to_field_helper">Nhận địa chỉ bitcoin hoặc chọn</string>
+    <string name="to_field_helper_no_dropdown">Nhận địa chỉ bitcoin</string>
+    <string name="tor_summary">Chặn các địa chỉ IP nếu biết được là một phần của mạng ẩn danh Tor. Mạng Tor thường được các hacker sử dụng để cố gắng truy cập vào Ví của người dùng Blockchain.</string>
+    <string name="enable_screenshots_summary">Một số khung hình trong ứng dụng có thể hiển thị dữ liệu nhạy cảm. Những ứng dụng khác sẽ có thể truy cập các ảnh chụp màn hình này.</string>
+    <string name="two_fa_summary">Bảo vệ ví của bạn khỏi các truy cập trái phép bằng kích hoạt Xác minh 2 bước.</string>
+    <string name="two_fa_description">Bảo vệ ví của bạn khỏi các truy cập trái phép bằng kích hoạt Xác minh 2 bước. Bạn có thể lựa chọn sử dụng số điện thoại để bảo vệ ví của mình. Mã này sẽ được yêu cầu khi bạn cố gắng truy cập ví của mình thông qua trình duyệt web.\n\nĐể sử dụng các phương thức xác thực khác, vui lòng đăng nhập vào ví trên nền tảng web của chúng tôi tại địa chỉ %1$s</string>
+    <string name="email_request_subject_eth">Yêu cầu thanh toán Ether</string>
+    <string name="email_request_body_eth">Vui lòng gửi ETH đến địa chỉ Ether %1$s.</string>
+    <string name="api_fail">Không thể kết nối đến máy chủ. Vui lòng thử lại sau.</string>
+    <string name="transaction_detail_verify_etherscan">Xác minh trên Etherscan.io</string>
+    <string name="security_centre_backup_message">Để đảm bảo an toàn cho bạn, chúng tôi không lưu trữ bất kỳ mật khẩu nào dưới dạng tập tin. Sao lưu ví của bạn để đảm bảo sự an toan cho các khoản tiền trong trường hợp bạn quên mật khẩu của mình. </string>
+    <string name="backup_complete_message">Bạn có thể sử dụng Nhóm từ Sao lưu của mình để khôi phục các khoản tiền nếu bạn bị mất mật khẩu. Bất kỳ ai truy cập được vào Nhóm từ Sao lưu đều có thể tiếp cận các khoản tiền của bạn, do đó hãy nhớ luôn lưu trữ ngoại tuyến ở một nơi an toàn và đảm bảo.</string>
+    <string name="shortcut_settings_summary">Hiển thị địa chỉ nhận khi bạn nhấn giữ lâu vào biểu tượng ứng dụng trong trình khởi chạy, giúp việc nhận bitcoin thậm chí còn nhanh hơn.</string>
+
+    <string name="confirm">Xác nhận</string>
+    <string name="pending">Chưa giải quyết</string>
+    <string name="transactions">Giao dịch</string>
+
+    <string name="swipe_receive_preference_summary">Hiển thị địa chỉ nhận khi bạn vuốt sang trái trên màn hình mã PIN, giúp việc nhận các khoản tiền thậm chí còn nhanh hơn.</string>
+    <string name="swipe_receive_address_info">Năm địa chỉ sẽ được tải liên tục, sau đó cần đăng nhập để hiện các địa chỉ mới.</string>
+    <string name="onboarding_receive_bitcoin">Yêu cầu Khoản tiền</string>
+    <string name="onboarding_receive_content">Gửi địa chỉ ví của bạn đến một người bạn để yêu cầu khoản tiền. Địa chỉ là một chuỗi các chữ cái và chữ số ngẫu nhiên thay đổi theo từng giao dịch.</string>
+    <string name="onboarding_get_eth">Nhận Ether</string>
+    <string name="buy_second_password_prompt">Để sử dụng dịch vụ này, chúng tôi yêu cầu bạn nhập mật khẩu cấp hai của mình. Bạn chỉ cần nhập một lần này để sử dụng chức năng Mua.</string>
+    <string name="what_s_this">Đây là gì?</string>
+    <string name="dismiss">Bỏ qua</string>
+
+    <string name="eth_default_account_label">Ví Ether Của Tôi</string>
+    <string name="eth_now_supporting">Nay đã hỗ trợ Ether</string>
+    <string name="eth_second_password_prompt">Để sử dụng dịch vụ này, chúng tôi yêu cầu bạn nhập mật khẩu cấp hai của mình. Bạn chỉ cần nhập một lần này để thiết lập ví Ether của mình.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Nhập địa chỉ ether hoặc chọn</string>
+    <string name="eth_to_field_helper_no_dropdown">Nhập địa chỉ ether</string>
+    <string name="eth_invalid_address">Địa chỉ Ether không hợp lệ</string>
+    <string name="eth_support_contract_not_allowed">Các địa chỉ hợp đồng không được hỗ trợ.</string>
+    <string name="eth_support_only_eth">Hiện tại chúng tôi chỉ hỗ trợ ETH - bạn không thể nhận token đến vào địa chỉ này</string>
+    <string name="eth_unconfirmed_wait">Vui lòng đợi cho đến khi giao dịch trước của bạn được xác nhận</string>
+    <string name="eth_transaction_complete">Giao dịch hoàn tất! Các giao dịch và số dư của bạn sẽ sớm được cập nhật, quá trình này có thể mất vài phút.\n</string>
+
+    <string name="dashboard_title">Bảng điều khiển</string>
+    <string name="dashboard_time_span_day">Ngày</string>
+    <string name="dashboard_time_span_week">Tuần</string>
+    <string name="dashboard_time_span_month">Tháng</string>
+    <string name="dashboard_time_span_year">Năm</string>
+    <string name="dashboard_time_span_all_time">Tất cả Thời gian</string>
+    <string name="dashboard_bitcoin_price">Giá Bitcoin</string>
+    <string name="dashboard_ether_price">Giá Ether</string>
+    <string name="dashboard_charts_error">Lỗi khi tải dữ liệu biểu đồ</string>
+    <string name="dashboard_charts_price_error">Lỗi tìm nạp dữ liệu giá</string>
+
+    <string name="onboarding_ether_title">Nay Đã Hỗ Trợ Ether</string>
+    <string name="onboarding_ether_description">Bạn hỏi, chúng tôi lắng nghe. Chúng tôi rất vui mừng thông báo hiện nay ví Blockchain của bạn đã được phép gửi và nhận ether không gián đoạn!</string>
+    <string name="onboarding_ether_cta">Bắt Đầu Với Ether</string>
+
+    <string name="metadata_load_failure">Lỗi khi tải toàn bộ chức năng của ví. Dịch vụ có thể tạm thời không khả dụng.</string>
+    <string name="fee_helper_message">Các thợ đào nhận khoản phí này để xử lý giao dịch này.</string>
 
 </resources>

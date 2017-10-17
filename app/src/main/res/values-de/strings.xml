@@ -12,7 +12,6 @@
     <string name="please_wait">Bitte warten</string>
 
     <string name="send_bitcoin">Senden</string>
-    <string name="receive_bitcoin">Empfangen</string>
 
     <string name="cancel">Abbrechen</string>
     <string name="yes">Ja</string>
@@ -206,7 +205,6 @@
     <string name="confirm_password">Passwort bestätigen</string>
     <string name="check_email_to_auth_login">Bitte überprüfen Sie Ihre E-Mails zur Genehmigung dieses Anmeldeversuchs.</string>
     <string name="transaction_fee">Transaktionsgebühr</string>
-    <string name="transaction_occur_when_bitcoin">Transaktionen erfolgen durch den Empfang und Versand von Bitcoins.</string>
     <string name="click">Einfach klicken</string>
     <string name="to_start_sending_and_receiving_btc">und schon können Sie Bitcoins senden und empfangen.</string>
 
@@ -317,7 +315,6 @@
     <string name="transaction_surge">Das Bitcoin-Mining-Netzwerk wird derzeit stark beansprucht, weshalb der empfohlene Gebührensatz über dem regulären liegt.</string>
     <string name="unsupported_encryption_version">Wallet-Version %1$s wird nicht unterstütz.</string>
     <string name="logout">Abmelden</string>
-    <string name="to_field_helper">Geben Sie die Bitcoin-Adresse ein oder wählen Sie</string>
 
     <string name="update">Aktualisieren</string>
     <string name="mobile">Handy</string>
@@ -345,7 +342,6 @@
 
     <string name="two_fa">2-Schritt-Verifizierung</string>
     <string name="tor_requests">Tor-Anfragen sperren</string>
-    <string name="tor_summary">Möchten Sie verhindern, dass bekannterweise dem Anonymisierungsnetzwerk Tor zugehörige IP-Adressen Zugang zu Ihrer Wallet erhalten? Hackers versuchen häufig mithilfe des Tor-Netzwerkes, Zugriff auf Wallets von Blockchain-Benutzern zu bekommen.</string>
     <string name="change_password">Passwort ändern</string>
     <string name="email_notifications">E-Mail-Benachrichtigungen</string>
     <string name="email_notifications_summary">Erhalten Sie beim Empfang von Bitcoin eine Benachrichtigung.</string>
@@ -373,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Sie haben sich abgemeldet oder es ist beim Entschlüsseln Ihrer Wallet ein Fehler aufgetreten. Geben Sie zur Anmeldung das folgende Passwort ein.</string>
     <string name="logged_out_forget_wallet">Wenn Sie diese Wallet vergessen und nochmals von vorne anfangen möchten, drücken Sie auf \'Wallet Wallet\'.</string>
-
-    <string name="api_fail">Keine Serververbindung möglich. Bitte versuchen Sie es später erneut.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Diese Bitcoin-Transaktion ist zu groß. In Ihrer Wallet befinden sich viele kleine in der Vergangenheit eingegangene Zahlungen. Für eine schnelle Bestätigung ist eine relativ hohe Gebühr erforderlich.</string>
     <string name="go_back">Zurück</string>
@@ -425,14 +419,11 @@
     <string name="shortcut_receive_qr_long">QR-Code für Empfangsadresse ansehen</string>
     <string name="shortcut_receive_qr_error">Leider ist bei der Generierung des QR-Codes ein Fehler aufgetreten</string>
     <string name="shortcut_settings_enable">Startkürzel</string>
-    <string name="shortcut_settings_summary">Zur Anzeige einer Empfangsadresse bei längerem Druck auf das App-Symbol im Startbereich muss diese Option aktiviert werden. So können Sie Bitcoin noch schneller empfangen.</string>
 
     <string name="swipe_receive_hint">Zum Empfang wischen</string>
-    <string name="swipe_receive_preference_summary">Durch die Aktivierung dieser Option bekommen Sie eine Empfangsadresse angezeigt, wenn Sie auf dem PIN-Bildschirm nach links wischen. So lässt sich Bitcoin noch schneller empfangen. Es werden fünf Adressen hintereinander geladen. Danach ist zur Anzeige neuer Adressen eine Anmeldung erforderlich.</string>
     <string name="swipe_receive_no_addresses">Derzeit können keine weiteren Adresse geladen werden. Zum Laden zusätzlicher Adressen melden Sie sich bei der App an.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Überblick</string>
     <string name="create_a_wallet">Eine Wallet erstellen</string>
     <string name="log_in">Anmelden</string>
     <string name="wallets">Wallets</string>
@@ -442,7 +433,6 @@
     <string name="confirm_upgrade_header">Hallo! Wir haben Ihrer Blockchain-Wallet diese neuen Funktionen hinzugefügt:</string>
     <string name="verify_email2">Ihre verifizierte E-Mail-Adresse wird bei Feststellung verdächtiger Aktivitäten zur Übersendung von Anmeldecodes, aber auch zur Erinnerung an Ihre persönliche Wallet-Anmelde-ID und zum Versand von Bitcoin-Zahlungsbenachrichtigungen bei Eintreffen von Guthaben verwendet.</string>
     <string name="enable_screenshots">Bildschirmaufnahmen aktivieren</string>
-    <string name="enable_screenshots_summary">Sie sind dabei, für Ihrer Blockchain-App Bildschirmaufnahmen zu aktivieren. Einige App-interne Bildschirmanzeigen geben möglicherweise sensitive Daten preis. Außerdem können andere Anwendungen auf diese Aufnahmen zugreifen.</string>
 
     <string name="information">Information</string>
     <string name="transaction_detail_verify">Auf Blockchain.info überprüfen</string>
@@ -474,12 +464,10 @@
     <string name="onboarding_check_inbox_title">Überprüfen Sie Ihren Posteingang</string>
     <string name="onboarding_check_inbox_summary">Warten Sie auf eine E-Mail-Nachricht von Blockchain und klicken Sie zur Vervollständigung Ihrer Wallet-Einrichtung auf den darin enthaltenen Link.</string>
     <string name="onboarding_verify_email">E-Mail-Adresse verifizieren</string>
-    <string name="onboarding_receive_bitcoin">Bitcoin empfangen</string>
     <string name="onboarding_current_price">Aktueller Preis:</string>
     <string name="onboarding_qr_codes">QR-Codes</string>
     <string name="onboarding_scan_address">Adresse scannen</string>
     <string name="onboarding_buy_content">Wir arbeiten beim Geldwechsel mit Partnern aus allen Teilen der Welt zusammen, so dass man mit der eigenen Wallet Bitcoin direkt erwerben kann.</string>
-    <string name="onboarding_receive_content">Senden Sie einem Freund zur Anforderung von Bitcoin einfach Ihre Wallet-Adresse. Eine Adresse besteht aus einer Reihe beliebiger Buchstaben und Nummern, die bei jeder Transaktion unterschiedlich sind.</string>
     <string name="onboarding_qr_codes_content">Eine Adresse kann auch als QR-Code angezeigt werden. Zur schnellen Erlangung der Wallet-Adresse eines Freundes scannen Sie einfach dessen QR-Code ein.</string>
 
     <string name="onboarding_buy_bitcoin">Bitcoin kaufen</string>
@@ -568,7 +556,6 @@
     <string name="contacts_no_contacts_found">Es wurden keine Kontakte gefunden</string>
     <string name="contacts_pairing_method_title">Kontakt hinzufügen</string>
     <string name="contacts_title">Kontakte</string>
-    <string name="security_centre_backup_message">Zu Ihrem Schutz verwahren wir keine Passwörter. Sichern Sie Ihre Wallet, um den Schutz Ihrer Bitcoins im Falle eines Passwortverlusts zu garantieren. </string>
     <string name="security_centre_backup_positive_button">Backup</string>
     <string name="security_centre_email_message">Wir haben eine E-Mail an %1$s gesandt. Warten Sie auf eine E-Mail-Nachricht von Blockchain und klicken Sie zur Vervollständigung Ihrer Wallet-Einrichtung auf den darin enthaltenen Link.</string>
     <string name="security_centre_email_title">Überprüfen Sie Ihre E-Mail</string>
@@ -597,7 +584,6 @@
     <string name="transaction_detail_pending">Ausstehend (%1$s/%2$s Bestätigungen)</string>
     <string name="transaction_detail_description_hint">Wofür ist das?</string>
     <string name="transaction_detail_confirmed">Bestätigt</string>
-    <string name="to_field_helper_no_dropdown">Bitcoin-Adresse eingeben</string>
     <string name="share_instructions">Zum Kopieren diese Adresse berühren. Mit dem Sender per E-Mail oder Textnachricht teilen.</string>
     <string name="security_centre_two_fa_message">Schützen Sie Ihre Wallet vor unberechtigtem Zugriff. Zur Verbesserung des Walletschutzes aktivieren Sie die 2-Schritt-Authentifizierung.</string>
     <string name="security_centre_backup_title">Sichern Sie Ihr Guthaben</string>
@@ -630,7 +616,6 @@
     <string name="sms_notifications_summary">Wenn Sie jedes Mal per SMS vom Empfang von Bitcoin informiert werden möchten, aktivieren Sie Benachrichtigungen.</string>
     <string name="backup_header">Wiederherstellungspasswort</string>
     <string name="backup_explanation">Zu Ihrem Schutz bewahrt Blockchain keine Passwörter auf. Das folgende aus 12 Worten bestehende Wiederherstellungspasswort ermöglicht Ihnen im Falle eines Passwortverlusts den Zugang zu Ihrem Guthaben. Denken Sie daran, dieses auf einem Zettel zu notieren und an einem sicheren sowie geschützten Ort aufzubewahren. </string>
-    <string name="backup_complete_message">Sollten Sie Ihr Passwort verlieren, können Sie Ihr Guthaben mithilfe des Wiederherstellungspasswort wiedererlangen. Jede Person mit Zugang zu Ihrem Wiederherstellungspasswort hat die Möglichkeit, auf Ihr Bitcoin zuzugreifen. Denken Sie deshalb daran, es an einem sicheren und geschützten Ort offline aufzubewahren.</string>
     <string name="backup_verify_heading">Zum Abschluss des Wiederherstellungsverfahrens geben Sie bitte die folgenden Worte Ihres Wiederherstellungspasswortes ein.</string>
     <string name="backup_lost_mnemonic">Haben Sie Ihr 12 Worte umfassendes Wiederherstellungspasswort verloren?</string>
     <string name="trade_complete">Handel wurde abgeschlossen</string>
@@ -662,4 +647,75 @@
     <string name="fee_options_advanced_warning">Diese Funktion empfiehlt sich nur für erfahrene Benutzer. Wenn Sie sich entscheiden, Ihre Gebühr selbst zu bestimmen, laufen Sie Gefahr, zu viel für Ihre Transaktion zu bezahlen oder diese nie bestätigt zu bekommen.</string>
     <string name="fee_options_sat_byte_hint">Sat/B</string>
     <string name="fee_options_sat_byte_inline_hint">Regulär: %1$s, Priorität: %2$s</string>
+
+    <string name="receive_bitcoin">Anfordern</string>
+    <string name="overview">Transaktionen</string>
+    <string name="sending">Wird gesendet</string>
+    <string name="receiving">Wird empfangen</string>
+    <string name="paid">Bezahlt</string>
+    <string name="payment_request">Zahlungsaufforderung</string>
+    <string name="restoring_wallet">Wallet wiederherstellen.</string>
+    <string name="support_leaving_app_warning">Damit verlassen Sie die App und werden zu Ihrem Browser weitergeleitet. Weiter?</string>
+    <string name="addresses">Bitcoin-Adresse</string>
+    <string name="merchant_map">Bitcoin-Händler-Karte</string>
+    <string name="received_ethereum">Erhielt Ether</string>
+    <string name="transaction_occur_when_bitcoin">Transaktionen erfolgen durch den Empfang und Versand von Bitcoins.</string>
+    <string name="transaction_occur_when_eth">Transaktionen erfolgen durch den Empfang und Versand von Ether.</string>
+    <string name="to_field_helper">Geben Sie eine Bitcoin-Adresse ein oder wählen Sie</string>
+    <string name="to_field_helper_no_dropdown">Bitcoin-Adresse eingeben</string>
+    <string name="tor_summary">IP-Adressen sperren, die bekanntlich dem Anonymität bewahrenden Tor-Netzwerk angehören. Das Tor-Netzwerk wird häufig von Hackern bei ihrem Versuch, sich Zugang zu den Wallets von Blockchain-Benutzern zu verschaffen, verwendet.</string>
+    <string name="enable_screenshots_summary">Einige app-interne Bildschirme zeigen möglicherweise sensible Daten an. Außerdem können andere Anwendungen auf diese Aufnahmen zugreifen.</string>
+    <string name="two_fa_summary">Schützen Sie durch die Aktivierung der 2-Schritt-Verifizierung Ihre Wallet vor unberechtigten Zugriffen.</string>
+    <string name="two_fa_description">Schützen Sie durch die Aktivierung der 2-Schritt-Verifizierung Ihre Wallet vor unberechtigten Zugriffen. Sie können zur Sicherung Ihrer Wallet wahlweise Ihre Handynummer verwenden. Sobald Sie versuchen, auf Ihre Wallet über den Webbrowser zuzugreifen, werden Sie nach diesem Code gefragt.\n\nZur Verwendung eines anderen Authentifizierungsverfahrens loggen Sie sich bitte bei unserer Web-Wallet ein: %1$s</string>
+    <string name="email_request_subject_eth">Ether-Zahlungsaufforderung</string>
+    <string name="email_request_body_eth">Bitte ETH an folgende Ether-Adresse senden: %1$s</string>
+    <string name="api_fail">Es kann keine Verbindung mit dem Server hergestellt werden. Bitte erneut versuchen.</string>
+    <string name="transaction_detail_verify_etherscan">Auf Etherscan.io verifizieren</string>
+    <string name="security_centre_backup_message">Zu Ihrem Schutz verwahren wir keine Passwörter. Sichern Sie Ihre Wallet durch ein Backup, damit Ihr Guthaben auch bei einem Verlust des Passwortes auf jeden Fall geschützt ist. </string>
+    <string name="backup_complete_message">Sollten Sie Ihr Passwort verlieren, können Sie Ihr Guthaben mithilfe des Wiederherstellungspasswort wiedererlangen. Jeder, der Zugang zu Ihrem Wiederherstellungspasswort hat, kann auf Ihr Guthaben zugreifen. Deshalb sollten Sie daran denken, es offline an einem sicheren und geschützten Ort aufzubewahren.</string>
+    <string name="shortcut_settings_summary">Zum noch schnelleren Erhalt von Bitcoin drücken Sie etwas länger auf das App-Symbol im Programmstarter, woraufhin Ihnen eine Empfängeradresse angezeigt wird.</string>
+
+    <string name="confirm">Bestätigen</string>
+    <string name="pending">Ausstehend</string>
+    <string name="transactions">Transaktionen</string>
+
+    <string name="swipe_receive_preference_summary">Zum noch schnelleren Erhalt von Bitcoin wischen Sie auf dem PIN-Bildschirm nach links, woraufhin Ihnen eine Empfängeradresse angezeigt wird.</string>
+    <string name="swipe_receive_address_info">Es werden fünf Adressen hintereinander geladen. Danach ist zur Anzeige neuer Adressen eine Anmeldung erforderlich.</string>
+    <string name="onboarding_receive_bitcoin">Guthaben anfordern</string>
+    <string name="onboarding_receive_content">Senden Sie einem Freund zur Anforderung von Guthaben Ihre Wallet-Adresse. Eine Adresse besteht aus einer Reihe beliebiger Buchstaben und Nummern, die bei jeder Transaktion unterschiedlich sind.</string>
+    <string name="onboarding_get_eth">Ether erhalten</string>
+    <string name="buy_second_password_prompt">Zur Benutzung dieses Service müssen Sie uns das zweite Passwort angeben. Sie müssen dies nur einmal zur Benutzung der Kauffunktion eingeben.</string>
+    <string name="what_s_this">Was ist das?</string>
+    <string name="dismiss">Ausblenden</string>
+
+    <string name="eth_default_account_label">Meine Ether-Wallet</string>
+    <string name="eth_now_supporting">Jetzt mit Ether-Unterstützung</string>
+    <string name="eth_second_password_prompt">Zur Benutzung dieses Service müssen Sie uns das zweite Passwort angeben. Sie müssen dies nur einmal zur Einrichtung Ihrer Ether-Wallet eingeben.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Geben Sie eine Ether-Adresse ein oder wählen Sie</string>
+    <string name="eth_to_field_helper_no_dropdown">Ether-Adresse eingeben</string>
+    <string name="eth_invalid_address">Ungültige Ether-Adresse</string>
+    <string name="eth_support_contract_not_allowed">Vertragsadressen werden nicht unterstützt.</string>
+    <string name="eth_support_only_eth">Derzeit unterstützen wir nur ETH. - Mit dieser Adresse können Sie keine Tokens empfangen</string>
+    <string name="eth_unconfirmed_wait">Bitte warten Sie, bis Ihre vorherige Transaktion bestätigt ist</string>
+    <string name="eth_transaction_complete">Transaktion abgeschlossen! Ihre Transaktionen sowie Ihr Guthabenstand werden in Kürze aktualisiert. Dies kann einige Minuten in Anspruch nehmen.\n</string>
+
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_time_span_day">Tag</string>
+    <string name="dashboard_time_span_week">Woche</string>
+    <string name="dashboard_time_span_month">Monat</string>
+    <string name="dashboard_time_span_year">Jahr</string>
+    <string name="dashboard_time_span_all_time">Jederzeit</string>
+    <string name="dashboard_bitcoin_price">Bitcoin-Preis</string>
+    <string name="dashboard_ether_price">Ether-Preis</string>
+    <string name="dashboard_charts_error">Beim Laden der Chartdaten ist ein Fehler aufgetreten</string>
+    <string name="dashboard_charts_price_error">Bei Einholung der Preisangaben ist ein Fehler aufgetreten</string>
+
+    <string name="onboarding_ether_title">Jetzt mit Ether-Unterstützung</string>
+    <string name="onboarding_ether_description">Sie fragten, wir haben zugehört. Wir freuen uns bekanntzugeben, dass Sie jetzt mit Ihrer Blockchain-Wallet problemlos Ether senden und empfangen können!</string>
+    <string name="onboarding_ether_cta">Fangen Sie an, Ether zu verwenden</string>
+
+    <string name="metadata_load_failure">Beim Laden der vollständigen Wallet-Funktion ist ein Fehler aufgetreten. Der Service ist möglicherweise zeitweilig nicht verfügbar.</string>
+    <string name="fee_helper_message">Miners erhalten diese Gebühr zur Bearbeitung dieser Transaktion.</string>
 </resources>

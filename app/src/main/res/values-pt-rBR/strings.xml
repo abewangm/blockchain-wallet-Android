@@ -12,7 +12,6 @@
     <string name="please_wait">Por favor, aguarde</string>
 
     <string name="send_bitcoin">Enviar</string>
-    <string name="receive_bitcoin">Receber</string>
 
     <string name="cancel">Cancelar</string>
     <string name="yes">Sim</string>
@@ -206,7 +205,6 @@
     <string name="confirm_password">Confirmar senha</string>
     <string name="check_email_to_auth_login">Verifique seu e-mail para aprovar esta tentativa de acesso.</string>
     <string name="transaction_fee">Taxa de Transação</string>
-    <string name="transaction_occur_when_bitcoin">As transações ocorrem quando você recebe e envia bitcoins.</string>
     <string name="click">Clique</string>
     <string name="to_start_sending_and_receiving_btc">para iniciar o envio e o recebimento de bitcoins.</string>
 
@@ -317,7 +315,6 @@
     <string name="transaction_surge">A rede de mineração Bitcoin está com alto volume de atividade no momento, resultando em taxas recomendadas maiores do que o habitual.</string>
     <string name="unsupported_encryption_version">A versão de carteira %1$s não é suportada.</string>
     <string name="logout">Sair</string>
-    <string name="to_field_helper">Selecione ou digite um endereço bitcoin</string>
 
     <string name="update">Atualização</string>
     <string name="mobile">Dispositivo Móvel</string>
@@ -345,7 +342,6 @@
 
     <string name="two_fa">Verificação em 2 Passos</string>
     <string name="tor_requests">Bloquear solicitações Tor</string>
-    <string name="tor_summary">Gostaria de bloquear IPs conhecidos por serem da rede anônima Tor de acessarem sua carteira? A rede Tor é frequentemente utilizada por hackers tentando acessar carteiras de usuários Blockchain.</string>
     <string name="change_password">Alterar Senha</string>
     <string name="email_notifications">Notificações por e-mail</string>
     <string name="email_notifications_summary">Seja notificado ao receber bitcoin.</string>
@@ -373,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Você saiu ou houve um erro ao decodificar sua carteira. Digite sua senha abaixo para entrar.</string>
     <string name="logged_out_forget_wallet">Se deseja descartar esta carteira e começar de novo, pressione \'Descartar Carteira\'.</string>
-
-    <string name="api_fail">Não é possível conectar-se ao servidor. Por favor, tente novamente mais tarde.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Esta transação bitcoin é grande demais. Sua carteira precisa consolidar muitos pagamentos menores já recebidos. Isto requer uma taxa relativamente alta para ser confirmado relativamente rápido.</string>
     <string name="go_back">Voltar</string>
@@ -425,14 +419,11 @@
     <string name="shortcut_receive_qr_long">Ver código QR para o endereço de entrega</string>
     <string name="shortcut_receive_qr_error">Desculpe, mas houve um erro ao gerar o código QR</string>
     <string name="shortcut_settings_enable">Atalhos no Inicializador</string>
-    <string name="shortcut_settings_summary">Habilite essa opção para revelar um endereço de entrega ao dar um toque longo no ícone do app no inicializador, agilizando ainda mais o recebimento de bitcoin.</string>
 
     <string name="swipe_receive_hint">Deslize para receber</string>
-    <string name="swipe_receive_preference_summary">Habilite essa opção para revelar um endereço de entrega ao deslizar a tela do PIN para a esquerda, agilizando ainda mais o recebimento de bitcoin. Cinco endereços serão carregados consecutivamente, depois dos quais será necessário efetuar login para exibir novos endereços.</string>
     <string name="swipe_receive_no_addresses">Nenhum outro endereço pode ser carregado no momento. Efetue login no app para carregar mais.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Resumo</string>
     <string name="create_a_wallet">Criar uma carteira</string>
     <string name="log_in">Entrar</string>
     <string name="wallets">Carteiras</string>
@@ -442,7 +433,6 @@
     <string name="confirm_upgrade_header">Ei, adicionamos esses recursos para sua carteira Blockchain:</string>
     <string name="verify_email2">Seu endereço de e-mail verificado recebe códigos de login, quando atividade suspeita ou incomum for detectada. Também é usado para lembrar-lhe de seu ID de Carteira e enviar-lhe alertas de pagamento Bitcoin quando você receber fundos.</string>
     <string name="enable_screenshots">Habilitar capturas de tela</string>
-    <string name="enable_screenshots_summary">Você está para habilitar a captura de tela para o aplicativo Blockchain. Algumas telas dentro do aplicativo podem exibir dados sigilosos. Outros aplicativos poderão acessar essas capturas de tela.</string>
 
     <string name="information">Informações</string>
     <string name="transaction_detail_verify">Verificar no Blockchain.info</string>
@@ -474,12 +464,10 @@
     <string name="onboarding_check_inbox_title">Verifique sua caixa de entrada</string>
     <string name="onboarding_check_inbox_summary">Procure por um e-mail da Blockchain e clique no endereço de verificação para concluir a configuração de sua carteira.</string>
     <string name="onboarding_verify_email">Verificar e-mail</string>
-    <string name="onboarding_receive_bitcoin">Receber Bitcoin</string>
     <string name="onboarding_current_price">Preço atual:</string>
     <string name="onboarding_qr_codes">Códigos QR </string>
     <string name="onboarding_scan_address">Fazer varredura de endereço</string>
     <string name="onboarding_buy_content">Trabalhamos com parceiros de troca em todo o mundo, então você pode comprar diretamente de sua carteira.</string>
-    <string name="onboarding_receive_content">Envie o endereço de sua carteira para um amigo para requisitar bitcoin. Um endereço é um conjunto de letras e números aleatórios que mudam para cara transação.</string>
     <string name="onboarding_qr_codes_content">Um endereço também pode ser exibido como um código QR. Faça a varredura do código QR de um amigo para capturar rapidamente o endereço da carteira dele.</string>
 
     <string name="onboarding_buy_bitcoin">Comprar bitcoins</string>
@@ -568,7 +556,6 @@
     <string name="contacts_no_contacts_found">Nenhum contato encontrado</string>
     <string name="contacts_pairing_method_title">Adicionar Contato</string>
     <string name="contacts_title">Contatos</string>
-    <string name="security_centre_backup_message">Para sua segurança, não mantemos senhas em nossos arquivos. Faça o backup de sua carteira para garantir que seus bitcoins estejam seguros, caso você perca sua senha. </string>
     <string name="security_centre_backup_positive_button">Fazer backup</string>
     <string name="security_centre_email_message">Enviamos um e-mail para %1$s. Procure um e-mail da Blockchain e clique no link de verificação para concluir a configuração de sua carteira.</string>
     <string name="security_centre_email_title">Confira seu e-mail</string>
@@ -597,7 +584,6 @@
     <string name="transaction_detail_pending">Pendente (Confirmações de %1$s/%2$s)</string>
     <string name="transaction_detail_description_hint">Para que serve isso?</string>
     <string name="transaction_detail_confirmed">Confirmado</string>
-    <string name="to_field_helper_no_dropdown">Digitar endereço de Bitcoin</string>
     <string name="share_instructions">Toque para copiar este endereço. Compartilhe-o com o remetente por e-mail ou mensagem de texto.</string>
     <string name="security_centre_two_fa_message">Evite o acesso não autorizado a sua carteira. Ative a Verificação de 2 Passos para aumentar a segurança de sua carteira.</string>
     <string name="security_centre_backup_title">Fazer backup dos fundos</string>
@@ -630,7 +616,6 @@
     <string name="sms_notifications_summary">Ative as notificações para receber um SMS quando receber bitcoin.</string>
     <string name="backup_header">Frase de Recuperação</string>
     <string name="backup_explanation">Para sua segurança, a Blockchain não mantém nenhuma senha em registro. A seguinte Frase de Backup com 12 palavras lhe dará acesso aos seus fundos caso você perca a sua senha. Certifique-se de escrevê-la em um papel para mantê-la em um lugar seguro. </string>
-    <string name="backup_complete_message">Você pode usar a sua Frase de Backup para restaurar seus fundos caso perca a sua senha. Qualquer um com acesso à sua Frase de Backup pode acessar seus bitcoins. Portanto, lembre-se de guardá-la off-line, em um lugar seguro.</string>
     <string name="backup_verify_heading">Insira as palavras a seguir da sua Frase de Backup para completar o processo de backup.</string>
     <string name="backup_lost_mnemonic">Perdeu a sua frase de backup com 12 palavras?</string>
     <string name="trade_complete">Negociação Concluída</string>
@@ -663,4 +648,74 @@
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">Normal: %1$s, Prioritário: %2$s</string>
 
+    <string name="receive_bitcoin">Solicitar</string>
+    <string name="overview">Transações</string>
+    <string name="sending">Enviando</string>
+    <string name="receiving">Recebendo</string>
+    <string name="paid">Pago</string>
+    <string name="payment_request">Solicitação de Pagamento</string>
+    <string name="restoring_wallet">Restaurando carteira.</string>
+    <string name="support_leaving_app_warning">Isso fará você sair do app e abrirá o seu navegador. Deseja continuar?</string>
+    <string name="addresses">Endereços Bitcoin</string>
+    <string name="merchant_map">Mapa de Comerciantes de Bitcoin</string>
+    <string name="received_ethereum">Recebeu Ether</string>
+    <string name="transaction_occur_when_bitcoin">As transações ocorrem quando você recebe e envia bitcoins.</string>
+    <string name="transaction_occur_when_eth">As transações ocorrem quando você recebe e envia ether.</string>
+    <string name="to_field_helper">Insira o endereço bitcoin ou selecione</string>
+    <string name="to_field_helper_no_dropdown">Insira o endereço bitcoin</string>
+    <string name="tor_summary">Bloquear endereços IP conhecidos por fazer parte da rede de anonimização Tor. A rede Tor é frequentemente usada por hackers tentando acessar as carteiras dos usuários da Blockchain.</string>
+    <string name="enable_screenshots_summary">Algumas telas dentro do aplicativo podem exibir dados sigilosos. Outros aplicativos poderão acessar essas capturas de tela.</string>
+    <string name="two_fa_summary">Proteja sua carteira contra acesso não autorizado com a ativação da Verificação em 2 Passos.</string>
+    <string name="two_fa_description">Proteja sua carteira contra acesso não autorizado com a ativação da Verificação em 2 Passos. Você pode usar o seu número de celular para proteger sua carteira. Esse código será solicitado quando você tentar acessar sua carteira através do navegador de internet.\n\nPara usar outros métodos de autenticação em seu lugar, por favor, efetue login em nossa carteira web em %1$s</string>
+    <string name="email_request_subject_eth">Solicitação de pagamento ether</string>
+    <string name="email_request_body_eth">Por favor, envie ETH para o endereço Ether %1$s.</string>
+    <string name="api_fail">Impossível conectar ao servidor. Por favor, tente novamente mais tarde.</string>
+    <string name="transaction_detail_verify_etherscan">Confirme em Etherscan.io</string>
+    <string name="security_centre_backup_message">Para sua segurança, não mantemos senhas em nossos arquivos. Faça backup de sua carteira para assegurar que os seus fundos estejam seguros caso perca a sua senha. </string>
+    <string name="backup_complete_message">Você pode usar a sua Frase de Backup para restaurar seus fundos caso perca a sua senha. Qualquer pessoa com acesso à sua Frase de Backup pode acessar seus fundos. Portanto, lembre-se de mantê-la off-line em algum lugar seguro e protegido.</string>
+    <string name="shortcut_settings_summary">Revele um endereço de recebimento ao manter pressionado o ícone do app no inicializador, tornando o recebimento de bitcoins ainda mais rápido.</string>
+
+    <string name="confirm">Confirmar</string>
+    <string name="pending">Pendente</string>
+    <string name="transactions">Transações</string>
+
+    <string name="swipe_receive_preference_summary">Revele um endereço de recebimento ao deslizar para a esquerda na tela de PIN, tornando o recebimento de fundos ainda mais rápido.</string>
+    <string name="swipe_receive_address_info">Cinco endereços serão carregados consecutivamente, depois dos quais será necessário efetuar login para exibir novos endereços.</string>
+    <string name="onboarding_receive_bitcoin">Solicitar Fundos</string>
+    <string name="onboarding_receive_content">Envie o endereço da sua carteira a um amigo para solicitar fundos. Um endereço é um conjunto de letras e números aleatórios que mudam para cara transação.</string>
+    <string name="onboarding_get_eth">Obter Ether</string>
+    <string name="buy_second_password_prompt">Para utilizar esse serviço, precisamos que você insira sua segunda senha. Você precisa inseri-la apenas uma vez para usar a funcionalidade de compra.</string>
+    <string name="what_s_this">O que é isso?</string>
+    <string name="dismiss">Dispensar</string>
+
+    <string name="eth_default_account_label">Minha Carteira Ether</string>
+    <string name="eth_now_supporting">Agora compatível com Ether</string>
+    <string name="eth_second_password_prompt">Para utilizar esse serviço, precisamos que você insira sua segunda senha. Você precisa inseri-la apenas uma vez para configurar a sua carteira Ether.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Insira o endereço ether ou selecione</string>
+    <string name="eth_to_field_helper_no_dropdown">Insira o endereço ether</string>
+    <string name="eth_invalid_address">Endereço Ether inválido</string>
+    <string name="eth_support_contract_not_allowed">Endereços de contratos não são compatíveis.</string>
+    <string name="eth_support_only_eth">No momento, apenas ETH é compatível - você não pode receber tokens nesse endereço</string>
+    <string name="eth_unconfirmed_wait">Favor aguardar até a confirmação da sua transação anterior</string>
+    <string name="eth_transaction_complete">Transação concluída! Suas transações e saldo serão atualizados em breve. Isso pode levar alguns minutos.\n</string>
+
+    <string name="dashboard_title">Painel</string>
+    <string name="dashboard_time_span_day">Dia</string>
+    <string name="dashboard_time_span_week">Semana</string>
+    <string name="dashboard_time_span_month">Mês</string>
+    <string name="dashboard_time_span_year">Ano</string>
+    <string name="dashboard_time_span_all_time">Vitalício</string>
+    <string name="dashboard_bitcoin_price">Preço do bitcoin</string>
+    <string name="dashboard_ether_price">Preço do ether</string>
+    <string name="dashboard_charts_error">Erro ao carregar dados do gráfico</string>
+    <string name="dashboard_charts_price_error">Erro ao recuperar dados de preços</string>
+
+    <string name="onboarding_ether_title">Agora Compatível com Ether</string>
+    <string name="onboarding_ether_description">Vocês pediram, nós ouvimos. Temos a satisfação de anunciar que a sua carteira Blockchain agora permitirá enviar e receber ether sem complicações!</string>
+    <string name="onboarding_ether_cta">Conheça o Ether</string>
+
+    <string name="metadata_load_failure">Erro ao carregar as funcionalidades completas da carteira. O serviço pode estar temporariamente indisponível.</string>
+    <string name="fee_helper_message">Os mineradores recebem essa taxa para processar essa transação.</string>
 </resources>

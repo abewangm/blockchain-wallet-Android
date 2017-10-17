@@ -12,7 +12,6 @@
     <string name="please_wait">请稍候</string>
 
     <string name="send_bitcoin">发送</string>
-    <string name="receive_bitcoin">接收</string>
 
     <string name="cancel">取消</string>
     <string name="yes">是</string>
@@ -206,7 +205,6 @@
     <string name="confirm_password">确认密码</string>
     <string name="check_email_to_auth_login">请检查您的电子邮件以同意该登录尝试。</string>
     <string name="transaction_fee">交易费</string>
-    <string name="transaction_occur_when_bitcoin">接收和发送比特币时会产生交易。</string>
     <string name="click">单击</string>
     <string name="to_start_sending_and_receiving_btc">开始发送和接收比特币。</string>
 
@@ -317,7 +315,6 @@
     <string name="transaction_surge">比特币挖矿网络目前交易量较大，因此，推荐收费也比平常高。</string>
     <string name="unsupported_encryption_version">不支持钱包版本 %1$s。</string>
     <string name="logout">注销</string>
-    <string name="to_field_helper">输入比特币地址或选择</string>
 
     <string name="update">更新</string>
     <string name="mobile">手机号码</string>
@@ -345,7 +342,6 @@
 
     <string name="two_fa">2 步验证</string>
     <string name="tor_requests">阻止 Tor 请求</string>
-    <string name="tor_summary">您是否要阻止已知为 Tor 匿名网络一部分的 IP 地址访问您的钱包？Tor 网络经常被尝试访问 Blockchain 用户钱包的黑客利用。</string>
     <string name="change_password">更改密码</string>
     <string name="email_notifications">电子邮件通知</string>
     <string name="email_notifications_summary">收到比特币时接收通知。</string>
@@ -373,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">您已退出，或者解密您的钱包时出错。在下面输入您的密码以登录。</string>
     <string name="logged_out_forget_wallet">若您想要忘记这个钱包并重新开始，请按\'忘记钱包\'。</string>
-
-    <string name="api_fail">无法连接服务器。请稍后再试。</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">这是一个超大尺寸的比特币交易。您的钱包需要整合您在过去接收的许多更小额的支付。这要求一笔相对高的费用以快速确认。</string>
     <string name="go_back">返回</string>
@@ -425,14 +419,11 @@
     <string name="shortcut_receive_qr_long">查看 QR 码获取接收地址</string>
     <string name="shortcut_receive_qr_error">抱歉，生成 QR 码时出现了错误</string>
     <string name="shortcut_settings_enable">快捷启动</string>
-    <string name="shortcut_settings_summary">启用该选项以在您长按启动程序上的应用图标时显示一个接收地址，从而甚至更加快速地接收比特币。</string>
 
     <string name="swipe_receive_hint">滑动以接收</string>
-    <string name="swipe_receive_preference_summary">启用该选项以在 PIN 码屏幕上向左滑动时显示接收地址，使得比特币的接收甚至更加快速。将连续载入5个地址，而后需要登录以显示新地址。</string>
     <string name="swipe_receive_no_addresses">目前不能载入更多地址。登录应用以载入更多。</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">概览</string>
     <string name="create_a_wallet">创建钱包</string>
     <string name="log_in">登录</string>
     <string name="wallets">钱包</string>
@@ -442,7 +433,6 @@
     <string name="confirm_upgrade_header">嘿，我们为您的 Blockchain wallet 添加了新功能：</string>
     <string name="verify_email2">在检测到可疑或不寻常活动时，系统将使用您经过验证的电子邮件地址发送登录代码，为您提醒钱包登录 ID，以及在您接收资金时发送比特币支付提醒。</string>
     <string name="enable_screenshots">启用截屏</string>
-    <string name="enable_screenshots_summary">您即将为 Blockchain 应用启用截屏功能。应用内的有些屏幕可能会显示敏感信息。其它应用将能够访问这些截图。</string>
 
     <string name="information">信息</string>
     <string name="transaction_detail_verify">在 Blockchain.info 上验证</string>
@@ -474,12 +464,10 @@
     <string name="onboarding_check_inbox_title">检查您的收件箱</string>
     <string name="onboarding_check_inbox_summary">寻找一封来自 Blockchain 的邮件，而后点击验证链接以完成您的钱包设置。</string>
     <string name="onboarding_verify_email">验证邮件</string>
-    <string name="onboarding_receive_bitcoin">接收比特币</string>
     <string name="onboarding_current_price">当前价格：</string>
     <string name="onboarding_qr_codes">二维码</string>
     <string name="onboarding_scan_address">扫描地址</string>
     <string name="onboarding_buy_content">我们与世界各地的兑换合作伙伴合作，您可以从您的钱包直接购买比特币。</string>
-    <string name="onboarding_receive_content">向朋友发送您的钱包地址请求比特币。地址是一串随机字母和数字组成的字符串，每次交易都会变化。</string>
     <string name="onboarding_qr_codes_content">地址也可以显示为二维码。扫描朋友的二维码快速获取他们的钱包地址。</string>
 
     <string name="onboarding_buy_bitcoin">购买比特币</string>
@@ -568,7 +556,6 @@
     <string name="contacts_no_contacts_found">未找到联系人</string>
     <string name="contacts_pairing_method_title">添加联系人</string>
     <string name="contacts_title">联系人</string>
-    <string name="security_centre_backup_message">为了您的安全，我们不会将任何密码存档。备份您的钱包以确保在您选择密码后，您的比特币是安全的。 </string>
     <string name="security_centre_backup_positive_button">备份</string>
     <string name="security_centre_email_message">我们向 %1$s 发送了一封邮件。寻找一封来自 Blockchain 的邮件，而后点击验证链接以完成您的钱包设置。</string>
     <string name="security_centre_email_title">检查您的邮箱</string>
@@ -597,7 +584,6 @@
     <string name="transaction_detail_pending">待定（%1$s/%2$s 确认）</string>
     <string name="transaction_detail_description_hint">这是做什么用的？</string>
     <string name="transaction_detail_confirmed">已确认</string>
-    <string name="to_field_helper_no_dropdown">输入比特币地址</string>
     <string name="share_instructions">点击以复制该地址。通过电子邮件或者短信与发送者分享。</string>
     <string name="security_centre_two_fa_message">防止对您的钱包的未经授权的访问。启用两步认证法以提高钱包的安全性。</string>
     <string name="security_centre_backup_title">备份您的资金</string>
@@ -630,7 +616,6 @@
     <string name="sms_notifications_summary">启用通知，从而使您在任何时候接收到比特币时收到短信。</string>
     <string name="backup_header">备份短语</string>
     <string name="backup_explanation">为了您的安全，Blockchain 不会将任何密码存档。以下12词备份密语能够让您在丢失密码时访问您的资金。务必将它写在一张纸上，并且存放在一个安全可靠的地方。 </string>
-    <string name="backup_complete_message">您可以在丢失密码时使用您的备份密语取回资金。任何能够访问您的备份密语的人都可以访问您的比特币，因此，务必将它离线保存在某个安全可靠的地方。</string>
     <string name="backup_verify_heading">输入以下来自您的备份密语的单词以完成备份流程。</string>
     <string name="backup_lost_mnemonic">丢失了您的12词备份密码？</string>
     <string name="trade_complete">交易完成</string>
@@ -662,4 +647,75 @@
     <string name="fee_options_advanced_warning">仅建议高级用户使用该功能。选择一个自定义费用则表示存在过度支付或者您的交易永远都得不到确认的风险。</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">一般：%1$s，优先级：%2$s</string>
+
+    <string name="receive_bitcoin">请求</string>
+    <string name="overview">交易</string>
+    <string name="sending">正在发送</string>
+    <string name="receiving">正在接收</string>
+    <string name="paid">已付</string>
+    <string name="payment_request">支付请求</string>
+    <string name="restoring_wallet">正在恢复钱包。</string>
+    <string name="support_leaving_app_warning">这会离开应用，将您导向浏览器。继续？</string>
+    <string name="addresses">比特币地址</string>
+    <string name="merchant_map">比特币商户地图</string>
+    <string name="received_ethereum">已接收以太币</string>
+    <string name="transaction_occur_when_bitcoin">接收和发送比特币时会产生交易。</string>
+    <string name="transaction_occur_when_eth">接收和发送以太币时会产生交易。</string>
+    <string name="to_field_helper">输入比特币地址或者进行选择</string>
+    <string name="to_field_helper_no_dropdown">输入比特币地址</string>
+    <string name="tor_summary">阻止已知为Tor匿名网站的一部分的IP地址。Tor网络常被企图访问Blockchain用户的钱包的黑客使用。</string>
+    <string name="enable_screenshots_summary">应用内的有些屏幕会显示敏感数据。其它应用将能够访问这些截图。</string>
+    <string name="two_fa_summary">通过启用两步验证保护您的钱包免遭未经授权的访问。</string>
+    <string name="two_fa_description">通过启用两步验证保护您的钱包免遭未经授权的访问。您可以选择使用手机号码保护您的钱包。当您尝试通过网页浏览器访问您的钱包时会请求提供该代码。\n\n若要使用其它验证方式，请在%1$s登录我们的网络钱包</string>
+    <string name="email_request_subject_eth">以太币支付请求</string>
+    <string name="email_request_body_eth">请向以太地址%1$s发送ETH。</string>
+    <string name="api_fail">无法连接服务器。请稍后再试。</string>
+    <string name="transaction_detail_verify_etherscan">在Etherscan.io上验证</string>
+    <string name="security_centre_backup_message">为了您的安全，我们不会将任何密码存档。备份您的钱包，从而在您丢失密码时确保您的资金的安全。 </string>
+    <string name="backup_complete_message">您可以在丢失密码时使用您的备份密语取回资金。任何能够访问您的“备份密语”的人都可以访问您的资金，因此，请将它离线保存在某个安全可靠的地方。</string>
+    <string name="shortcut_settings_summary">长按启动程序中的应用图标可以显示一个接收地址，这可以使比特币的接收甚至更加快捷。</string>
+
+    <string name="confirm">确认</string>
+    <string name="pending">待定</string>
+    <string name="transactions">交易</string>
+
+    <string name="swipe_receive_preference_summary">在PIN码屏幕上向左滑动可以显示一个接收地址，这可以使资金的接收甚至更加快捷。</string>
+    <string name="swipe_receive_address_info">将连续载入5个地址，而后需要登录以显示新地址。</string>
+    <string name="onboarding_receive_bitcoin">请求资金</string>
+    <string name="onboarding_receive_content">向朋友发送您的钱包以请求资金。地址是一串随机字母和数字组成的字符串，每次交易都会变化。</string>
+    <string name="onboarding_get_eth">获取以太币</string>
+    <string name="buy_second_password_prompt">若要使用该服务，我们需要您输入您的第二个密码。您只需输入这个一次便可以使用购买功能。</string>
+    <string name="what_s_this">这是什么？</string>
+    <string name="dismiss">放弃</string>
+
+    <string name="eth_default_account_label">我的以太币钱包</string>
+    <string name="eth_now_supporting">现在支持以太币</string>
+    <string name="eth_second_password_prompt">若要使用该服务，我们需要您输入您的第二个密码。您只需输入这个一次便可以设置您的以太币钱包。</string>
+    <string name="ether">以太币</string>
+    <string name="bitcoin">比特币</string>
+    <string name="eth_to_field_helper">输入以太币地址或者进行选择</string>
+    <string name="eth_to_field_helper_no_dropdown">输入以太币地址</string>
+    <string name="eth_invalid_address">无效以太币地址</string>
+    <string name="eth_support_contract_not_allowed">合约地址不被支持。</string>
+    <string name="eth_support_only_eth">目前，我们仅支持ETH - 您不能通过这个地址接收令牌</string>
+    <string name="eth_unconfirmed_wait">在您之前的交易得到确认之前，请等待</string>
+    <string name="eth_transaction_complete">交易完成！您的交易和余额很快会更新，这需要几分钟的时间。\n</string>
+
+    <string name="dashboard_title">控制面板</string>
+    <string name="dashboard_time_span_day">天</string>
+    <string name="dashboard_time_span_week">星期</string>
+    <string name="dashboard_time_span_month">月</string>
+    <string name="dashboard_time_span_year">年</string>
+    <string name="dashboard_time_span_all_time">始终</string>
+    <string name="dashboard_bitcoin_price">比特币价格</string>
+    <string name="dashboard_ether_price">以太币价格</string>
+    <string name="dashboard_charts_error">载入图表数据时出错</string>
+    <string name="dashboard_charts_price_error">获取价格数据时出错</string>
+
+    <string name="onboarding_ether_title">现在支持以太币</string>
+    <string name="onboarding_ether_description">您提出了要求，我们聆听了您的要求。我们很高兴地宣布，您的Blockchain钱包现在可以让您无缝发送和接收以太币！</string>
+    <string name="onboarding_ether_cta">开始使用以太币</string>
+
+    <string name="metadata_load_failure">载入全部钱包功能时出错。服务可能暂时不可用。</string>
+    <string name="fee_helper_message">矿工将获得这笔费用以处理该交易。</string>
 </resources>
