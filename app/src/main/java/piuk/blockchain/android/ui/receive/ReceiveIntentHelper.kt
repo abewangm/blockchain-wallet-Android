@@ -13,7 +13,6 @@ import android.webkit.MimeTypeMap
 import com.crashlytics.android.answers.ShareEvent
 import info.blockchain.wallet.util.FormatsUtil
 import org.bitcoinj.uri.BitcoinURI
-import org.bitcoinj.uri.BitcoinURIParseException
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.answers.Logging
 import piuk.blockchain.android.util.AndroidUtils
@@ -46,36 +45,20 @@ class ReceiveIntentHelper(private val context: Context) {
             }
 
             val dataList = ArrayList<SendPaymentCodeData>()
-
             val packageManager = appUtil.packageManager
-
-            val emailIntent = Intent(Intent.ACTION_SENDTO)
-            emailIntent.type = "application/image"
-            emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file))
-
-            when {
-                uri.startsWith("bitcoin") -> emailIntent.data = getFormattedEmailLinkBtc(uri)
-                FormatsUtil.isValidEthereumAddress(uri) -> emailIntent.data = getFormattedEmailLinkEth(uri)
-                else -> throw IllegalArgumentException("Unknown URI $uri")
-            }
-
             val mime = MimeTypeMap.getSingleton()
             val ext = file.name.substring(file.name.lastIndexOf(".") + 1)
             val type = mime.getMimeTypeFromExtension(ext)
 
-            val imageIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                this.type = type
+            val emailIntent = Intent(Intent.ACTION_SENDTO).apply { setupIntentForImage(type, file) }
 
-                if (AndroidUtils.is23orHigher()) {
-                    val uriForFile = FileProvider.getUriForFile(context, "${context.packageName}.fileProvider", file)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    putExtra(Intent.EXTRA_STREAM, uriForFile)
-                } else {
-                    putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file))
-                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                }
+            when {
+                uri.startsWith("bitcoin") -> emailIntent.apply { setupIntentForEmailBtc(uri) }
+                FormatsUtil.isValidEthereumAddress(uri) -> emailIntent.apply { setupIntentForEmailEth(uri) }
+                else -> throw IllegalArgumentException("Unknown URI $uri")
             }
+
+            val imageIntent = Intent().apply { setupIntentForImage(type, file) }
 
             val intentHashMap = HashMap<String, Pair<ResolveInfo, Intent>>()
 
@@ -136,34 +119,6 @@ class ReceiveIntentHelper(private val context: Context) {
         }
     }
 
-    private fun getFormattedEmailLinkBtc(uri: String): Uri? = try {
-        val addressUri = BitcoinURI(uri)
-        val amount = if (addressUri.amount != null) " " + addressUri.amount.toPlainString() else ""
-        val address = if (addressUri.address != null) addressUri.address!!.toString() else context.getString(R.string.email_request_body_fallback)
-        val body = String.format(context.getString(R.string.email_request_body), amount, address)
-
-        val builder = "mailto:?subject=${context.getString(R.string.email_request_subject)}&body=$body\n\n${BitcoinLinkGenerator.getLink(addressUri)}"
-
-        Uri.parse(builder)
-
-    } catch (e: BitcoinURIParseException) {
-        Timber.e(e)
-        null
-    }
-
-    private fun getFormattedEmailLinkEth(uri: String): Uri? = try {
-        val address = uri.removePrefix("ethereum:")
-        val body = String.format(context.getString(R.string.email_request_body_eth), address)
-
-        val builder = "mailto:?subject=${context.getString(R.string.email_request_subject_eth)}&body=$body"
-
-        Uri.parse(builder)
-
-    } catch (e: BitcoinURIParseException) {
-        Timber.e(e)
-        null
-    }
-
     /**
      * Prevents apps being added to the list twice, as it's confusing for users. Full email Intent
      * takes priority.
@@ -176,6 +131,41 @@ class ReceiveIntentHelper(private val context: Context) {
         resolveInfo
                 .filterNot { intentHashMap.containsKey(it.activityInfo.name) }
                 .forEach { intentHashMap.put(it.activityInfo.name, Pair(it, Intent(intent))) }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Intent Extension functions
+    ///////////////////////////////////////////////////////////////////////////
+    private fun Intent.setupIntentForEmailBtc(uri: String) {
+        val addressUri = BitcoinURI(uri)
+        val amount = if (addressUri.amount != null) " " + addressUri.amount.toPlainString() else ""
+        val address = if (addressUri.address != null) addressUri.address!!.toString() else context.getString(R.string.email_request_body_fallback)
+        val body = String.format(context.getString(R.string.email_request_body), amount, address)
+
+        putExtra(Intent.EXTRA_TEXT, "$body\n\n ${BitcoinLinkGenerator.getLink(addressUri)}")
+        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.email_request_subject))
+    }
+
+    private fun Intent.setupIntentForEmailEth(uri: String) {
+        val address = uri.removePrefix("ethereum:")
+        val body = String.format(context.getString(R.string.email_request_body_eth), address)
+
+        putExtra(Intent.EXTRA_TEXT, body)
+        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.email_request_subject_eth))
+    }
+
+    private fun Intent.setupIntentForImage(type: String?, file: File) {
+        action = Intent.ACTION_SEND
+        this.type = type
+
+        if (AndroidUtils.is23orHigher()) {
+            val uriForFile = FileProvider.getUriForFile(context, "${context.packageName}.fileProvider", file)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            putExtra(Intent.EXTRA_STREAM, uriForFile)
+        } else {
+            putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file))
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        }
     }
 
 }
