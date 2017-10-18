@@ -103,7 +103,7 @@ class EthDataManager(
                 .flatMapObservable {
                     val originalSize = ethDataStore.ethAddressResponse?.getTransactions()?.size?: 0
 
-                    Observable.just(originalSize != 0 && it.size == 0)
+                    Observable.just(lastTxHash != null && originalSize != 0 && it.size == 0)
                 }
     }
 
