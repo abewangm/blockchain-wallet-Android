@@ -544,7 +544,7 @@ class SendPresenter @Inject constructor(
 
     private fun selectDefaultSendingAccount() {
         val accountItem = walletAccountHelper.getDefaultAccount()
-        view.updateSendingAddress(accountItem.label!!)
+        view.updateSendingAddress(accountItem.label ?: accountItem.getAddressString())
         pendingTransaction.sendingObject = accountItem
     }
 

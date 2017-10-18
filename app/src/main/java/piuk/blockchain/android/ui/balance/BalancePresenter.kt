@@ -119,6 +119,8 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun onAccountChosen(position: Int) {
+        if (activeAccountAndAddressList.size > position - 1) return
+
         view.setUiState(UiState.LOADING)
         chosenAccount = activeAccountAndAddressList[if (position >= 0) position else 0]
         chosenAccount?.let {
@@ -342,6 +344,22 @@ class BalancePresenter @Inject constructor(
                     }, { Timber.e(it) })
         } else {
             view.startReceiveFragment()
+        }
+    }
+
+    internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currencyState.cryptoCurrency = cryptoCurrency
+
+        when (cryptoCurrency) {
+            CryptoCurrencies.BTC -> {
+                view.showAccountSpinner()
+                onAccountChosen(0)
+            }
+            CryptoCurrencies.ETHER -> {
+                view.hideAccountSpinner()
+                onAccountChosen(activeAccountAndAddressList.lastIndex)
+            }
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 
@@ -638,21 +656,5 @@ class BalancePresenter @Inject constructor(
 
     private fun getFiatCurrency() =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-
-    fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        currencyState.cryptoCurrency = cryptoCurrency
-
-        when (cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-                view.showAccountSpinner()
-                onAccountChosen(0)
-            }
-            CryptoCurrencies.ETHER -> {
-                view.hideAccountSpinner()
-                onAccountChosen(activeAccountAndAddressList.lastIndex)
-            }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
-    }
 
 }
