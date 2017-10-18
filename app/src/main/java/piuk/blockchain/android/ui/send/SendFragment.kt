@@ -919,6 +919,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         toArrow.isEnabled = true
         amountCrypto.isEnabled = true
         amountFiat.isEnabled = true
+        max.isEnabled = true
     }
 
     override fun disableInput() {
@@ -926,6 +927,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         toArrow.isEnabled = false
         amountCrypto.isEnabled = false
         amountFiat.isEnabled = false
+        max.isEnabled = false
     }
 
     companion object {
