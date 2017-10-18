@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.ethereum.EthereumWallet;
+import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -453,9 +454,9 @@ public class MainPresenter extends BasePresenter<MainView> {
             payloadDataManager.generateNodes(secondPassword)
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
                     .andThen(payloadDataManager.getMetadataNodeFactory())
-                    .map(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
-                    .subscribe(ethereumWalletObservable -> {
-                        //no-op
+                    .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
+                    .subscribe(ethereumWallet -> {
+                        onViewReady();
                     }, Throwable::printStackTrace);
         }
     }
