@@ -180,10 +180,11 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             accounts_spinner.adapter = accountsAdapter
         }
 
+        if (accounts.isNotEmpty()) accounts_spinner.setSelection(0, false)
+
         if (accounts.size > 1) {
             accounts_spinner.visible()
         } else if (accounts.isNotEmpty()) {
-            accounts_spinner.setSelection(0, false)
             accounts_spinner.invisible()
         }
         accounts_spinner.setOnTouchListener({ _, event ->

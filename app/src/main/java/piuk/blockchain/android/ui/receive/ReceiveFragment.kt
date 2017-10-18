@@ -127,7 +127,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun setTabSelection(tabIndex: Int) {
-        tabs_receive.getTabAt(tabIndex)?.select()
+        tabs_receive?.getTabAt(tabIndex)?.select()
     }
 
     override fun startContactSelectionActivity() {
@@ -255,11 +255,11 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             divider4.gone()
         }
 
-        tabs_receive.apply {
+        tabs_receive?.apply {
             addTab(tabs_receive.newTab().setText("BITCOIN"))
             addTab(tabs_receive.newTab().setText("ETHER"))
             setOnTabSelectedListener {
-                if (it == 0) presenter.onSelectDefault(defaultAccountPosition) else presenter.onEthSelected()
+                if (it == 0) presenter?.onSelectDefault(defaultAccountPosition) else presenter?.onEthSelected()
             }
         }
     }
