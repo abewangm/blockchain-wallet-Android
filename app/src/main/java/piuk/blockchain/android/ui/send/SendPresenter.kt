@@ -54,6 +54,7 @@ import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
@@ -147,6 +148,7 @@ class SendPresenter @Inject constructor(
 
     private fun resetState() {
         compositeDisposable.clear()
+        pendingTransaction.clear()
         view?.setSendButtonEnabled(true)
         updateTicker()
         absoluteSuggestedFee = BigInteger.ZERO
@@ -465,8 +467,12 @@ class SendPresenter @Inject constructor(
             }
             CryptoCurrencies.ETHER -> {
 
-                val ethAmount = Convert.fromWei(pendingTransaction.bigIntAmount.toString(), Convert.Unit.ETHER)
-                val ethFee = Convert.fromWei(pendingTransaction.bigIntFee.toString(), Convert.Unit.ETHER)
+                var ethAmount = Convert.fromWei(pendingTransaction.bigIntAmount.toString(), Convert.Unit.ETHER)
+                var ethFee = Convert.fromWei(pendingTransaction.bigIntFee.toString(), Convert.Unit.ETHER)
+
+                ethAmount = ethAmount.setScale(8, RoundingMode.HALF_UP).stripTrailingZeros()
+                ethFee = ethFee.setScale(8, RoundingMode.HALF_UP).stripTrailingZeros()
+
                 val ethTotal = ethAmount.add(ethFee)
 
                 details.cryptoAmount = ethAmount.toString()
@@ -1170,30 +1176,23 @@ class SendPresenter @Inject constructor(
         var validated = true
         var errorMessage = R.string.unexpected_error
 
-        //Validate address
         if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
             errorMessage = R.string.invalid_bitcoin_address
             validated = false
-        }
 
-        //Validate amount
-        if (!isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
+        } else if (pendingTransaction.bigIntAmount == null || !isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
             errorMessage = R.string.invalid_amount
             validated = false
-        }
 
-        // Validate sufficient funds
-        if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.spendableOutputs == null) {
+        } else if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.spendableOutputs == null) {
             errorMessage = R.string.no_confirmed_funds
             validated = false
-        }
 
-        if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
+        } else if (maxAvailable == null || maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
             errorMessage = R.string.insufficient_funds
             validated = false
-        }
 
-        if (pendingTransaction.unspentOutputBundle.spendableOutputs.isEmpty()) {
+        } else if (pendingTransaction.unspentOutputBundle.spendableOutputs.isEmpty()) {
             errorMessage = R.string.insufficient_funds
             validated = false
         }
