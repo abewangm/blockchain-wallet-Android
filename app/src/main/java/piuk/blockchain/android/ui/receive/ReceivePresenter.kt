@@ -122,8 +122,9 @@ class ReceivePresenter @Inject internal constructor(
         view.hideBitcoinLayout()
         selectedAccount = null
         // This can be null at this stage for some reason - TODO investigate thoroughly
-        if (ethDataStore.ethAddressResponse?.getAddressResponse()?.account != null) {
-            ethDataStore.ethAddressResponse!!.getAddressResponse()!!.account.let {
+        val account: String? = ethDataStore.ethAddressResponse?.getAddressResponse()?.account
+        if (account != null) {
+            account.let {
                 selectedAddress = it
                 view.updateReceiveAddress(it)
                 generateQrCode(it)
