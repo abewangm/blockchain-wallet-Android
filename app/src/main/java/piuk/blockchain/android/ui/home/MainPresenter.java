@@ -456,7 +456,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                     .andThen(payloadDataManager.getMetadataNodeFactory())
                     .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
                     .subscribe(ethereumWallet -> {
-                        onViewReady();
+                        appUtil.restartApp();
                     }, Throwable::printStackTrace);
         }
     }
