@@ -121,10 +121,15 @@ class ReceivePresenter @Inject internal constructor(
         view.setTabSelection(1)
         view.hideBitcoinLayout()
         selectedAccount = null
-        ethDataStore.ethAddressResponse!!.getAddressResponse()!!.account.let {
-            selectedAddress = it
-            view.updateReceiveAddress(it)
-            generateQrCode(it)
+        // This can be null at this stage for some reason - TODO investigate thoroughly
+        if (ethDataStore.ethAddressResponse?.getAddressResponse()?.account != null) {
+            ethDataStore.ethAddressResponse!!.getAddressResponse()!!.account.let {
+                selectedAddress = it
+                view.updateReceiveAddress(it)
+                generateQrCode(it)
+            }
+        } else {
+            view.finishPage()
         }
     }
 

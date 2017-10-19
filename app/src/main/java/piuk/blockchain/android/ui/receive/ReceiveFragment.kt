@@ -244,7 +244,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 //                        presenter.getSelectedAccountPosition()
 //                )
 //            }
-            
+
             onShareClicked()
         }
 
@@ -354,7 +354,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override fun onResume() {
         super.onResume()
 
-        if(!handlingActivityResult)
+        if (!handlingActivityResult)
             presenter.onResume(defaultAccountPosition)
 
         handlingActivityResult = false
@@ -599,7 +599,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         super.onPause()
     }
 
-    fun finishPage() {
+    override fun finishPage() {
         listener?.onReceiveFragmentClose()
     }
 

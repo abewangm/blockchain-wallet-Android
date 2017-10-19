@@ -44,4 +44,7 @@ interface ReceiveView : View {
     fun showBottomSheet(uri: String)
 
     fun setTabSelection(tabIndex: Int)
+
+    fun finishPage()
+
 }
