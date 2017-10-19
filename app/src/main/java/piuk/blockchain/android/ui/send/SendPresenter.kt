@@ -879,7 +879,7 @@ class SendPresenter @Inject constructor(
 
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
         if (spendAll) {
-            view?.updateCryptoAmount(availableEth.toString())
+            view?.updateCryptoAmount(currencyHelper.getFormattedEthString(availableEth))
             pendingTransaction.bigIntAmount = availableEth.toBigInteger()
         } else {
             pendingTransaction.bigIntAmount =
@@ -893,8 +893,7 @@ class SendPresenter @Inject constructor(
             val fiatBalanceFormatted = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit).format(fiatBalance)
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $fiatBalanceFormatted ${currencyHelper.fiatUnit}")
         } else {
-            val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 18 }
-                    .run { format(availableEth) }
+            val number = currencyHelper.getFormattedEthString(availableEth)
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $number")
         }
 
