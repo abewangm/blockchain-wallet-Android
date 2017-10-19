@@ -938,6 +938,8 @@ class SendPresenter @Inject constructor(
             try {
                 amount = monetaryUtil.getDisplayAmount(amount.toLong())
                 view?.updateCryptoAmount(amount)
+                val fiat = currencyHelper.getFormattedFiatStringFromCrypto(amount.toDouble())
+                view?.updateFiatAmount(fiat)
             } catch (e: Exception) {
                 //ignore
             }
@@ -967,8 +969,8 @@ class SendPresenter @Inject constructor(
         }
 
         when (format) {
-            PrivateKeyFactory.BIP38 -> spendFromWatchOnlyNonBIP38(format, scanData)
-            else -> view?.showBIP38PassphrasePrompt(scanData)//BIP38 needs passphrase
+            PrivateKeyFactory.BIP38 -> view?.showBIP38PassphrasePrompt(scanData)//BIP38 needs passphrase
+            else -> spendFromWatchOnlyNonBIP38(format, scanData)
         }
     }
 
