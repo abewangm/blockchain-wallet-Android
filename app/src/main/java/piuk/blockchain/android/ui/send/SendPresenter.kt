@@ -15,6 +15,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.payment.Payment
 import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PrivateKeyFactory
+import info.blockchain.wallet.util.Tools
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
@@ -221,7 +222,11 @@ class SendPresenter @Inject constructor(
 
         getBtcChangeAddress()!!
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnError { view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE) }
+                .doOnError {
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                }
                 .map { pendingTransaction.changeAddress = it }
                 .flatMap { getBtcKeys() }
                 .flatMap {
@@ -245,6 +250,8 @@ class SendPresenter @Inject constructor(
                     handleSuccessfulPayment(hash, CryptoCurrencies.BTC)
                 }) {
                     Timber.e(it)
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
                     view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
 
                     Logging.logCustom(PaymentSentEvent()
@@ -261,6 +268,11 @@ class SendPresenter @Inject constructor(
                 payloadDataManager.decryptHDWallet(verifiedSecondPassword)
             }
             Observable.just(payloadDataManager.getHDKeysForSigning(account, pendingTransaction.unspentOutputBundle))
+        } else if(pendingTransaction.isTempPrivateKeyScanned) {
+            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
+            var eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.getAddress());
+            Observable.just(mutableListOf(eckey))
+
         } else {
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
             Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
@@ -1004,6 +1016,7 @@ class SendPresenter @Inject constructor(
             tempLegacyAddress.address = key.toAddress(environmentSettings.networkParameters).toString()
             tempLegacyAddress.label = legacyAddress.label
             pendingTransaction.sendingObject.accountObject = tempLegacyAddress
+            pendingTransaction.setTempPrivateKeyScanned(true)
 
             showPaymentReview()
         } else {
