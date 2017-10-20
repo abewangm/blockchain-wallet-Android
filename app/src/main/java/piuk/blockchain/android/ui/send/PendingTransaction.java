@@ -21,6 +21,7 @@ public class PendingTransaction {
     public BigInteger bigIntFee;
     public BigInteger bigIntAmount;
     public int addressToReceiveIndex;
+    public boolean tempPrivateKeyScanned = false;
 
     @JsonIgnore
     public BigInteger getTotal() {
@@ -63,6 +64,15 @@ public class PendingTransaction {
         receivingAddress = null;
         bigIntFee = null;
         bigIntAmount = null;
+        tempPrivateKeyScanned = false;
+    }
+
+    public void setTempPrivateKeyScanned(boolean scanned) {
+        tempPrivateKeyScanned = scanned;
+    }
+
+    public boolean isTempPrivateKeyScanned() {
+        return tempPrivateKeyScanned;
     }
 
     @Override
@@ -73,9 +83,11 @@ public class PendingTransaction {
                 ", receivingObject=" + receivingObject +
                 ", note='" + note + '\'' +
                 ", receivingAddress='" + receivingAddress + '\'' +
+                ", changeAddress='" + changeAddress + '\'' +
                 ", bigIntFee=" + bigIntFee +
                 ", bigIntAmount=" + bigIntAmount +
                 ", addressToReceiveIndex=" + addressToReceiveIndex +
+                ", tempPrivateKeyScanned=" + tempPrivateKeyScanned +
                 '}';
     }
 }
