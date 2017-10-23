@@ -268,14 +268,15 @@ class SendPresenter @Inject constructor(
                 payloadDataManager.decryptHDWallet(verifiedSecondPassword)
             }
             Observable.just(payloadDataManager.getHDKeysForSigning(account, pendingTransaction.unspentOutputBundle))
-        } else if(pendingTransaction.isTempPrivateKeyScanned) {
-            val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
-            var eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.getAddress());
-            Observable.just(mutableListOf(eckey))
-
         } else {
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
-            Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
+
+            if (legacyAddress.tag == PendingTransaction.WATCH_ONLY_SPEND_TAG) {
+                var eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.getAddress());
+                Observable.just(mutableListOf(eckey))
+            } else {
+                Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
+            }
         }
     }
 
@@ -1015,8 +1016,8 @@ class SendPresenter @Inject constructor(
             tempLegacyAddress.setPrivateKeyFromBytes(key.privKeyBytes)
             tempLegacyAddress.address = key.toAddress(environmentSettings.networkParameters).toString()
             tempLegacyAddress.label = legacyAddress.label
+            tempLegacyAddress.tag = PendingTransaction.WATCH_ONLY_SPEND_TAG
             pendingTransaction.sendingObject.accountObject = tempLegacyAddress
-            pendingTransaction.setTempPrivateKeyScanned(true)
 
             showPaymentReview()
         } else {
@@ -1116,8 +1117,6 @@ class SendPresenter @Inject constructor(
 
     internal fun selectSendingAccount(data: Intent?) {
         
-        pendingTransaction.tempPrivateKeyScanned = false;
-
         try {
             val type: Class<*> = Class.forName(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
