@@ -15,6 +15,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.payment.Payment
 import info.blockchain.wallet.util.FormatsUtil
 import info.blockchain.wallet.util.PrivateKeyFactory
+import info.blockchain.wallet.util.Tools
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
@@ -54,6 +55,7 @@ import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
@@ -147,6 +149,7 @@ class SendPresenter @Inject constructor(
 
     private fun resetState() {
         compositeDisposable.clear()
+        pendingTransaction.clear()
         view?.setSendButtonEnabled(true)
         updateTicker()
         absoluteSuggestedFee = BigInteger.ZERO
@@ -219,7 +222,11 @@ class SendPresenter @Inject constructor(
 
         getBtcChangeAddress()!!
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnError { view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE) }
+                .doOnError {
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
+                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                }
                 .map { pendingTransaction.changeAddress = it }
                 .flatMap { getBtcKeys() }
                 .flatMap {
@@ -243,6 +250,8 @@ class SendPresenter @Inject constructor(
                     handleSuccessfulPayment(hash, CryptoCurrencies.BTC)
                 }) {
                     Timber.e(it)
+                    view.dismissProgressDialog()
+                    view.dismissConfirmationDialog()
                     view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
 
                     Logging.logCustom(PaymentSentEvent()
@@ -261,7 +270,13 @@ class SendPresenter @Inject constructor(
             Observable.just(payloadDataManager.getHDKeysForSigning(account, pendingTransaction.unspentOutputBundle))
         } else {
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
-            Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
+
+            if (legacyAddress.tag == PendingTransaction.WATCH_ONLY_SPEND_TAG) {
+                var eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.getAddress());
+                Observable.just(mutableListOf(eckey))
+            } else {
+                Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
+            }
         }
     }
 
@@ -465,8 +480,12 @@ class SendPresenter @Inject constructor(
             }
             CryptoCurrencies.ETHER -> {
 
-                val ethAmount = Convert.fromWei(pendingTransaction.bigIntAmount.toString(), Convert.Unit.ETHER)
-                val ethFee = Convert.fromWei(pendingTransaction.bigIntFee.toString(), Convert.Unit.ETHER)
+                var ethAmount = Convert.fromWei(pendingTransaction.bigIntAmount.toString(), Convert.Unit.ETHER)
+                var ethFee = Convert.fromWei(pendingTransaction.bigIntFee.toString(), Convert.Unit.ETHER)
+
+                ethAmount = ethAmount.setScale(8, RoundingMode.HALF_UP).stripTrailingZeros()
+                ethFee = ethFee.setScale(8, RoundingMode.HALF_UP).stripTrailingZeros()
+
                 val ethTotal = ethAmount.add(ethFee)
 
                 details.cryptoAmount = ethAmount.toString()
@@ -544,14 +563,14 @@ class SendPresenter @Inject constructor(
 
     private fun selectDefaultSendingAccount() {
         val accountItem = walletAccountHelper.getDefaultAccount()
-        view.updateSendingAddress(accountItem.label!!)
+        view.updateSendingAddress(accountItem.label ?: accountItem.getAddressString())
         pendingTransaction.sendingObject = accountItem
     }
 
     internal fun selectSendingBtcAccount(accountPosition: Int) {
         if (accountPosition >= 0) {
             var label = getAddressList()[accountPosition].label
-            if (label == null || label.isEmpty()) {
+            if (label.isNullOrEmpty()) {
                 label = getAddressList()[accountPosition].address
             }
             view.updateSendingAddress(label!!)
@@ -869,10 +888,11 @@ class SendPresenter @Inject constructor(
 
         val addressResponse = combinedEthModel.getAddressResponse()
         maxAvailable = addressResponse!!.balance.minus(wei.toBigInteger())
+        maxAvailable = maxAvailable.max(BigInteger.ZERO)
 
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
         if (spendAll) {
-            view?.updateCryptoAmount(availableEth.toString())
+            view?.updateCryptoAmount(currencyHelper.getFormattedEthString(availableEth))
             pendingTransaction.bigIntAmount = availableEth.toBigInteger()
         } else {
             pendingTransaction.bigIntAmount =
@@ -886,8 +906,7 @@ class SendPresenter @Inject constructor(
             val fiatBalanceFormatted = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit).format(fiatBalance)
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $fiatBalanceFormatted ${currencyHelper.fiatUnit}")
         } else {
-            val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 18 }
-                    .run { format(availableEth) }
+            val number = currencyHelper.getFormattedEthString(availableEth)
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $number")
         }
 
@@ -931,6 +950,8 @@ class SendPresenter @Inject constructor(
             try {
                 amount = monetaryUtil.getDisplayAmount(amount.toLong())
                 view?.updateCryptoAmount(amount)
+                val fiat = currencyHelper.getFormattedFiatStringFromCrypto(amount.toDouble())
+                view?.updateFiatAmount(fiat)
             } catch (e: Exception) {
                 //ignore
             }
@@ -960,8 +981,8 @@ class SendPresenter @Inject constructor(
         }
 
         when (format) {
-            PrivateKeyFactory.BIP38 -> spendFromWatchOnlyNonBIP38(format, scanData)
-            else -> view?.showBIP38PassphrasePrompt(scanData)//BIP38 needs passphrase
+            PrivateKeyFactory.BIP38 -> view?.showBIP38PassphrasePrompt(scanData)//BIP38 needs passphrase
+            else -> spendFromWatchOnlyNonBIP38(format, scanData)
         }
     }
 
@@ -995,6 +1016,7 @@ class SendPresenter @Inject constructor(
             tempLegacyAddress.setPrivateKeyFromBytes(key.privKeyBytes)
             tempLegacyAddress.address = key.toAddress(environmentSettings.networkParameters).toString()
             tempLegacyAddress.label = legacyAddress.label
+            tempLegacyAddress.tag = PendingTransaction.WATCH_ONLY_SPEND_TAG
             pendingTransaction.sendingObject.accountObject = tempLegacyAddress
 
             showPaymentReview()
@@ -1094,6 +1116,7 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun selectSendingAccount(data: Intent?) {
+        
         try {
             val type: Class<*> = Class.forName(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
@@ -1169,30 +1192,23 @@ class SendPresenter @Inject constructor(
         var validated = true
         var errorMessage = R.string.unexpected_error
 
-        //Validate address
         if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidBitcoinAddress(pendingTransaction.receivingAddress)) {
             errorMessage = R.string.invalid_bitcoin_address
             validated = false
-        }
 
-        //Validate amount
-        if (!isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
+        } else if (pendingTransaction.bigIntAmount == null || !isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
             errorMessage = R.string.invalid_amount
             validated = false
-        }
 
-        // Validate sufficient funds
-        if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.spendableOutputs == null) {
+        } else if (pendingTransaction.unspentOutputBundle == null || pendingTransaction.unspentOutputBundle.spendableOutputs == null) {
             errorMessage = R.string.no_confirmed_funds
             validated = false
-        }
 
-        if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
+        } else if (maxAvailable == null || maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
             errorMessage = R.string.insufficient_funds
             validated = false
-        }
 
-        if (pendingTransaction.unspentOutputBundle.spendableOutputs.isEmpty()) {
+        } else if (pendingTransaction.unspentOutputBundle.spendableOutputs.isEmpty()) {
             errorMessage = R.string.insufficient_funds
             validated = false
         }

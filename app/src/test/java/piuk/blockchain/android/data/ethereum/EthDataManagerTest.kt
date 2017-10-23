@@ -158,21 +158,32 @@ class EthDataManagerTest : RxTest() {
     @Throws(Exception::class)
     fun `hasUnconfirmedEthTransactions last tx hash not found`() {
         // Arrange
-        val ethHash = "HASH"
-        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(ethHash)
+        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn("NEIN")
+
         val ethAddress = "ADDRESS"
         whenever(ethDataStore.ethWallet!!.account.address).thenReturn(ethAddress)
+        val ethAddressResponseMap: EthAddressResponseMap = mock()
         whenever(ethAccountApi.getEthAddress(listOf(ethAddress)))
-                .thenReturn(Observable.empty())
+                .thenReturn(Observable.just(ethAddressResponseMap))
+
+        val ethAddressResponse: EthAddressResponse = mock()
+        whenever(ethAddressResponseMap.ethAddressResponseMap)
+                .thenReturn(mutableMapOf(Pair("",ethAddressResponse)))
+
+        val ethTransaction: EthTransaction = mock()
+        whenever(ethTransaction.hash).thenReturn("HASH")
+        whenever(ethAddressResponse.transactions)
+                .thenReturn(listOf(ethTransaction, ethTransaction, ethTransaction))
 
         // Act
         val testObserver = subject.hasUnconfirmedEthTransactions().test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.assertValue(true)
+        testObserver.assertValue(false)
         verify(ethDataStore, atLeastOnce()).ethWallet
-        verifyNoMoreInteractions(ethDataStore)
+        verify(ethAccountApi, atLeastOnce()).getEthAddress(listOf(ethAddress))
+        verifyNoMoreInteractions(ethAccountApi)
     }
 
     @Test
@@ -185,8 +196,6 @@ class EthDataManagerTest : RxTest() {
         val ethAddress = "ADDRESS"
         whenever(ethDataStore.ethWallet!!.account.address).thenReturn(ethAddress)
         val ethAddressResponseMap: EthAddressResponseMap = mock()
-        whenever(ethAccountApi.getEthAddress(listOf(ethAddress)))
-                .thenReturn(Observable.just(ethAddressResponseMap))
         whenever(ethAccountApi.getEthAddress(listOf(ethAddress)))
                 .thenReturn(Observable.just(ethAddressResponseMap))
 

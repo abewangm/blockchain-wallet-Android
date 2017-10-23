@@ -41,7 +41,10 @@ data class EthDisplayable(
     override val timeStamp: Long
         get() = ethTransaction.timeStamp
     override val total: BigInteger
-        get() = ethTransaction.value
+        get() = when (direction) {
+            TransactionSummary.Direction.RECEIVED -> ethTransaction.value
+            else -> ethTransaction.value.plus(fee)
+        }
     override val fee: BigInteger
         get() = ethTransaction.gasUsed.multiply(ethTransaction.gasPrice)
     override val hash: String

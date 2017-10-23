@@ -69,6 +69,7 @@ class BalancePresenter @Inject constructor(
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
         subscribeToEvents()
+        updateCurrencyUi(currencyState.cryptoCurrency)
 
         ethDataManager.fetchEthAddress()
                 .doOnError { Timber.e(it) }
@@ -80,21 +81,7 @@ class BalancePresenter @Inject constructor(
                 }
                 .doOnComplete { setupTransactions() }
                 .subscribe(
-                        {
-                            when (currencyState.cryptoCurrency) {
-                                CryptoCurrencies.BTC -> {
-                                    chosenAccount = activeAccountAndAddressList[0]
-                                    onAccountChosen(0)
-                                }
-                                CryptoCurrencies.ETHER -> {
-                                    chosenAccount = activeAccountAndAddressList[activeAccountAndAddressList.lastIndex]
-                                    onAccountChosen(activeAccountAndAddressList.lastIndex)
-                                }
-                                else -> throw IllegalArgumentException("BCC is not currently supported")
-                            }
-
-                            view.updateSelectedCurrency(currencyState.cryptoCurrency)
-                        },
+                        { updateSelectedCurrency(currencyState.cryptoCurrency) },
                         { Timber.e(it) }
                 )
     }
@@ -119,6 +106,9 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun onAccountChosen(position: Int) {
+        if (position - 1 > activeAccountAndAddressList.size || activeAccountAndAddressList.isEmpty())
+            return
+
         view.setUiState(UiState.LOADING)
         chosenAccount = activeAccountAndAddressList[if (position >= 0) position else 0]
         chosenAccount?.let {
@@ -345,6 +335,18 @@ class BalancePresenter @Inject constructor(
         }
     }
 
+    internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currencyState.cryptoCurrency = cryptoCurrency
+
+        when (cryptoCurrency) {
+            CryptoCurrencies.BTC -> onAccountChosen(0)
+            CryptoCurrencies.ETHER -> onAccountChosen(activeAccountAndAddressList.lastIndex)
+            else -> throw IllegalArgumentException("BCC is not currently supported")
+        }
+
+        updateCurrencyUi(cryptoCurrency)
+    }
+
     @VisibleForTesting
     internal fun getAllDisplayableAccounts(): MutableList<ItemAccount> {
         val mutableList = mutableListOf<ItemAccount>()
@@ -437,6 +439,16 @@ class BalancePresenter @Inject constructor(
                     note
             )
         }
+    }
+
+    private fun updateCurrencyUi(cryptoCurrency: CryptoCurrencies) {
+        when (cryptoCurrency) {
+            CryptoCurrencies.BTC -> view.showAccountSpinner()
+            CryptoCurrencies.ETHER -> view.hideAccountSpinner()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
+        }
+
+        view.updateSelectedCurrency(cryptoCurrency)
     }
 
     private fun setupTransactions() {
@@ -638,21 +650,5 @@ class BalancePresenter @Inject constructor(
 
     private fun getFiatCurrency() =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-
-    fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        currencyState.cryptoCurrency = cryptoCurrency
-
-        when (cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-                view.showAccountSpinner()
-                onAccountChosen(0)
-            }
-            CryptoCurrencies.ETHER -> {
-                view.hideAccountSpinner()
-                onAccountChosen(activeAccountAndAddressList.lastIndex)
-            }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
-    }
 
 }

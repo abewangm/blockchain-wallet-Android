@@ -98,6 +98,16 @@ public class ReceiveCurrencyHelper {
     }
 
     /**
+     * Get correctly formatted ETH currency String, ie with region specific separator
+     *
+     * @param amount The amount of Ether in ETH
+     * @return A region formatted ETH string for the saved unit
+     */
+    public String getFormattedEthString(BigDecimal amount) {
+        return monetaryUtil.getEthFormat().format(amount);
+    }
+
+    /**
      * Get the amount of Bitcoin in BTC
      *
      * @param amount The amount to be converted as a long
@@ -132,10 +142,15 @@ public class ReceiveCurrencyHelper {
         return monetaryUtil.getDenominatedAmount(amount);
     }
 
-    // TODO: 05/09/2017 This seems to be hardcoded for BTC?
     public String getFormattedCryptoStringFromFiat(double fiatAmount) {
+
         double cryptoAmount = fiatAmount / getLastPrice();
-        return getFormattedBtcString(cryptoAmount);
+
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
+            return getFormattedBtcString(cryptoAmount);
+        } else {
+            return getFormattedEthString(BigDecimal.valueOf(cryptoAmount));
+        }
     }
     public String getFormattedFiatStringFromCrypto(double cryptoAmount) {
         double uAmount = getUndenominatedAmount(cryptoAmount);

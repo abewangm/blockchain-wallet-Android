@@ -13,6 +13,7 @@ import java.util.*
 class MonetaryUtil(unit: Int) {
 
     private lateinit var btcFormat: DecimalFormat
+    private lateinit var ethFormat: DecimalFormat
     private lateinit var fiatFormat: DecimalFormat
     private var unit: Int = 0
 
@@ -44,6 +45,11 @@ class MonetaryUtil(unit: Int) {
                 else -> throw IllegalArgumentException("Invalid BTC format $unit")
             }
         }
+
+        ethFormat = (NumberFormat.getInstance(defaultLocale) as DecimalFormat).apply {
+            maximumFractionDigits = 18
+            minimumFractionDigits = 2
+        }
     }
 
     /**
@@ -61,6 +67,13 @@ class MonetaryUtil(unit: Int) {
      * @see ExchangeRateFactory.getCurrencyLabels
      */
     fun getFiatFormat(fiat: String) = fiatFormat.apply { currency = Currency.getInstance(fiat) }
+
+    /**
+     * Returns the current BTC format as a [NumberFormat] object.
+     *
+     * @return A [NumberFormat] object with the correct decimal fractions for the current BTC format
+     */
+    fun getEthFormat() = ethFormat
 
     /**
      * Returns an [Array] clone of the [BTC_UNITS] array.

@@ -60,8 +60,8 @@ class ReceivePresenter @Inject internal constructor(
         } else view.hideContactsIntroduction()
     }
 
-    fun onResume(defaultAccountPosition: Int) {
-        when(currencyState.cryptoCurrency) {
+    internal fun onResume(defaultAccountPosition: Int) {
+        when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onSelectDefault(defaultAccountPosition)
             CryptoCurrencies.ETHER -> onEthSelected()
             else -> throw IllegalArgumentException("BCC is not currently supported")
@@ -121,10 +121,16 @@ class ReceivePresenter @Inject internal constructor(
         view.setTabSelection(1)
         view.hideBitcoinLayout()
         selectedAccount = null
-        ethDataStore.ethAddressResponse!!.getAddressResponse()!!.account.let {
-            selectedAddress = it
-            view.updateReceiveAddress(it)
-            generateQrCode(it)
+        // This can be null at this stage for some reason - TODO investigate thoroughly
+        val account: String? = ethDataStore.ethAddressResponse?.getAddressResponse()?.account
+        if (account != null) {
+            account.let {
+                selectedAddress = it
+                view.updateReceiveAddress(it)
+                generateQrCode(it)
+            }
+        } else {
+            view.finishPage()
         }
     }
 
@@ -150,8 +156,17 @@ class ReceivePresenter @Inject internal constructor(
         generateQrCode(getBitcoinUri(selectedAddress!!, amount))
     }
 
-    internal fun getSelectedAccountPosition(): Int =
-            payloadDataManager.wallet!!.hdWallets[0].accounts.indexOf(selectedAccount)
+    internal fun getSelectedAccountPosition(): Int {
+        return if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) {
+            -1
+        } else {
+            val position = payloadDataManager.accounts.asIterable()
+                    .indexOfFirst { it.xpub == selectedAccount?.xpub }
+            payloadDataManager.getPositionOfAccountInActiveList(
+                    if (position > -1) position else payloadDataManager.defaultAccountIndex
+            )
+        }
+    }
 
     internal fun setWarnWatchOnlySpend(warn: Boolean) {
         prefsUtil.setValue(KEY_WARN_WATCH_ONLY_SPEND, warn)

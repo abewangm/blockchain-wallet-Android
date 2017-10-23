@@ -100,7 +100,11 @@ class EthDataManager(
         return fetchEthAddress().flatMapIterable { it.getTransactions() }
                 .filter{ list -> list.hash == lastTxHash }
                 .toList()
-                .flatMapObservable { Observable.just(it.size == 0) }
+                .flatMapObservable {
+                    val originalSize = ethDataStore.ethAddressResponse?.getTransactions()?.size?: 0
+
+                    Observable.just(lastTxHash != null && originalSize != 0 && it.size == 0)
+                }
     }
 
     /**
