@@ -12,6 +12,8 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 
 public class PendingTransaction {
 
+    public static final int WATCH_ONLY_SPEND_TAG = -5;
+
     public SpendableUnspentOutputs unspentOutputBundle;
     public ItemAccount sendingObject;
     public ItemAccount receivingObject;
@@ -21,7 +23,6 @@ public class PendingTransaction {
     public BigInteger bigIntFee;
     public BigInteger bigIntAmount;
     public int addressToReceiveIndex;
-    public boolean tempPrivateKeyScanned = false;
 
     @JsonIgnore
     public BigInteger getTotal() {
@@ -64,15 +65,6 @@ public class PendingTransaction {
         receivingAddress = null;
         bigIntFee = null;
         bigIntAmount = null;
-        tempPrivateKeyScanned = false;
-    }
-
-    public void setTempPrivateKeyScanned(boolean scanned) {
-        tempPrivateKeyScanned = scanned;
-    }
-
-    public boolean isTempPrivateKeyScanned() {
-        return tempPrivateKeyScanned;
     }
 
     @Override
@@ -87,7 +79,6 @@ public class PendingTransaction {
                 ", bigIntFee=" + bigIntFee +
                 ", bigIntAmount=" + bigIntAmount +
                 ", addressToReceiveIndex=" + addressToReceiveIndex +
-                ", tempPrivateKeyScanned=" + tempPrivateKeyScanned +
                 '}';
     }
 }
