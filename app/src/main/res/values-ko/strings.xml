@@ -12,7 +12,6 @@
     <string name="please_wait">기다리세요</string>
 
     <string name="send_bitcoin">보내기</string>
-    <string name="receive_bitcoin">받기</string>
 
     <string name="cancel">취소</string>
     <string name="yes">네</string>
@@ -157,8 +156,6 @@
     <string name="navigate">길 찾기</string>
     <string name="enable_geo">현 위치를 찾기 위해 GPS 또는 다른 위치 서비스를 사용하세요 그렇게 하기 위해 위치 서비스 설정으로 가려면 \'좋아요\'를 클릭</string>
 
-    <string name="my_addresses">주소들</string>
-    <string name="addresses">주소들</string>
     <string name="create_new">새 것 만들기</string>
     <string name="import_address">주소 가져오기</string>
     <string name="save_name">이름 저장</string>
@@ -169,7 +166,6 @@
 
     <string name="ssl_pinning_invalid">SSL 증명 피닝(pinning) 실패 악성 활동일 가능성이 있습니다. 네트워크 연결과 장치를 점검한 후 계속하세요</string>
 
-    <string name="merchant_map">상인 지도</string>
     <string name="merchant_suggest">상인 제안</string>
     <string name="name">이름</string>
     <string name="location">위치</string>
@@ -208,7 +204,6 @@
     <string name="confirm_password">암호 확인</string>
     <string name="check_email_to_auth_login">이 로그인 시도를 승인 받으려면 이메일을 확인하세요</string>
     <string name="transaction_fee">거래 수수료</string>
-    <string name="transaction_occur_when">비트코인을 받거나 보낼 때 거래가 생깁니다.</string>
     <string name="click">클릭</string>
     <string name="to_start_sending_and_receiving_btc">비트코인 보내기와 받기를 시작하려면</string>
 
@@ -319,7 +314,6 @@
     <string name="transaction_surge">비트코인 채굴 네트워크가 지금 부하가 높은 상태니 보통 때보다 높은 수수료를 권합니다.</string>
     <string name="unsupported_encryption_version">지갑 버전 %1$s은 지원되지 않습니다 not supported.</string>
     <string name="logout">로그아웃</string>
-    <string name="to_field_helper">비트코인 주소를 입력하거나 선택하세요</string>
 
     <string name="update">업데이트</string>
     <string name="mobile">모바일</string>
@@ -347,7 +341,6 @@
 
     <string name="two_fa">2 단계 확인</string>
     <string name="tor_requests">Tor 요청 차단</string>
-    <string name="tor_summary">Tor 익명 네트워크 일부로 알려진 IP 주소들을 차단해서 지갑을 열지 못하게 하겠습니까? 블록체인 사용자 지갑을 열려고 하는 해커들이 Tor 네트워크를 자주 씁니다.</string>
     <string name="change_password">암호 변경</string>
     <string name="email_notifications">이메일 통보</string>
     <string name="email_notifications_summary">비트코인을 받으면 알림 받기</string>
@@ -375,8 +368,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">귀하는 로그아웃 되었거나 지갑 암호 해독에 오류가 있었습니다. 로그인 하려면 아래 암호를 입력하세요.</string>
     <string name="logged_out_forget_wallet">이 지갑은 잊어버리고 새로 시작하려면 \'지갑 잊기\'\를 누르세요.</string>
-
-    <string name="api_fail">서버 연결 불가 나중에 다시 해 보세요.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">너무 큰 비트코인 거래가 있습니다. 귀하 지갑은 이제까지 받아 온 수많은 작은 지불들을 합쳐야 합니다. 이에 대해 확인을 빨리 받으려면 비교적 높은 수수료를 내야 합니다. </string>
     <string name="go_back">뒤로 가기</string>
@@ -426,14 +417,11 @@
     <string name="shortcut_receive_qr_long">받는 주소 QR 코드 보기</string>
     <string name="shortcut_receive_qr_error">미안합니다, QR 코드 생성에 오류가 있었습니다</string>
     <string name="shortcut_settings_enable">런쳐 바로 가기</string>
-    <string name="shortcut_settings_summary">런쳐 앱 아이콘을 길게 눌러 받는 주소가 보이게 해서 비트코인 받기를 더 빠르게 하려면 이 옵션 사용 설정을 하세요</string>
 
     <string name="swipe_receive_hint">스와이프 해서 받기</string>
-    <string name="swipe_receive_preference_summary">비밀 번호 화면에서 왼쪽으로 스와이프 해서 수령 주소를 볼 수 있어 비트코인 받기가 더 빠르게 하려면 이 옵션 사용 설정을 하세요. 다섯 개 주소가 연속적으로 로딩 된 후 새 주소를 보여주기 위해 로그인이 필요합니다.</string>
     <string name="swipe_receive_no_addresses">지금은 주소를 더 로딩 할 수 없음 더 로딩 하려면 앱에 로그인 하세요</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">개요</string>
     <string name="create_a_wallet">지갑 만들기</string>
     <string name="log_in">로그인</string>
     <string name="wallets">지갑들</string>
@@ -443,7 +431,6 @@
     <string name="confirm_upgrade_header">귀하 Blockchain 지갑에 다음 새 기능들을 추가했습니다:</string>
     <string name="verify_email2">확인된 사용자 이메일 주소는 의심스러운 또는 비정상 활동이 탐지 되어 로그인 코드를 보낼 때, 지갑 로그인 아이디를 다시 알려줄 때, 비트코인 입금 알림을 보낼 때 사용됩니다.</string>
     <string name="enable_screenshots">스크린샷 사용 설정</string>
-    <string name="enable_screenshots_summary">귀하는 Blockchain 앱 스크린샷 사용 설정을 하고 있습니다. 앱 내 어떤 화면은 예민한 데이터를 디스플레이 할 수 있습니다. 다른 앱이 이 스크린샷에 접근할 수 있습니다.</string>
 
     <string name="information">정보</string>
     <string name="transaction_detail_verify">Blockchain.info에서 확인하기</string>
@@ -453,7 +440,6 @@
     <string name="contacts_payment_request_send_note">귀하는 왜 %1$s 비트코인을 보내려고 합니까? 이것은 옵션이며 %1$s와 공유될 것입니다.</string>
     <string name="contacts_payment_request_receive_note">왜 귀하는 %1$s가 귀하에게 비트코인 보내기를 원합니까? 이것은 옵션이며 %1$s와 공유될 것입니다.</string>
     <string name="contacts_send_address_message">이렇게 하면 귀하 연락처에 주소가 보내집니다. 계속할까요?</string>
-    <string name="contacts_register_nodes_failure">연락처 서비스에 연결할 수 없었습니다. 모든 기능 사용 설정이 되도록 다시 해 보세요.</string>
     <string name="contacts_too_much_sent">요청 받은 것보다 더 많은 비트코인을 보낸 것 같습니다. 원하면 귀하 연락처에게 일부 되돌려 달라고 할 수 있습니다. 우리는 지불이 완료된 것으로 표시하지 않았습니다.</string>
     <string name="contacts_too_little_sent">요청 받은 것보다 적은 비트코인을 보낸 것 같습니다. 귀하 연락처는 귀하가 보낸 비트코인을 그래도 받겠지만 우리는 지불이 완료된 것으로 표시하지 않았습니다.</string>
     <string name="contacts_second_password_prompt">이 서비스를 쓰려면 귀하의 두 번째 암호를 입력해야 합니다. 연락처 기능 사용을 위한 입력은 한번만 하면 됩니다.</string>
@@ -476,12 +462,10 @@
     <string name="onboarding_check_inbox_title">받은 편지함 확인</string>
     <string name="onboarding_check_inbox_summary">지갑 설정을 끝내기 위해 Blockchain에서 온 메일을 찾아 확인 링크를 클릭</string>
     <string name="onboarding_verify_email">이메일 확인</string>
-    <string name="onboarding_receive_bitcoin">비트코인 받기</string>
     <string name="onboarding_current_price">현 가격:</string>
     <string name="onboarding_qr_codes">QR 코드</string>
     <string name="onboarding_scan_address">스캔 주소</string>
     <string name="onboarding_buy_content">우리는 전 세계 환전 파트너들과 일하고 있으므로 귀하는 직접 지갑에서 비트코인을 살 수 있습니다.</string>
-    <string name="onboarding_receive_content">지갑 주소를 친구에게 보내 비트코인을 요청하세요 주소는 임의 문자와 숫자 조합으로 매 거래마다 바뀝니다.</string>
     <string name="onboarding_qr_codes_content">주소를 QR code로 표시할 수도 있습니다. 친구 QR code를 스캔 해서 친구 지갑 주소를 빨리 캡쳐 하세요.</string>
 
     <string name="onboarding_buy_bitcoin">비트코인 사기</string>
@@ -570,7 +554,6 @@
     <string name="contacts_no_contacts_found">연락처 없음</string>
     <string name="contacts_pairing_method_title">연락처 추가</string>
     <string name="contacts_title">연락처</string>
-    <string name="security_centre_backup_message">귀하 보안을 위해 우리는 암호를 보관하지 않습니다. 암호를 잊더라도 비트코인이 안전하도록 지갑을 백업하세요. </string>
     <string name="security_centre_backup_positive_button">백업</string>
     <string name="security_centre_email_message">%1$s에게 이메일을 보냈습니다. 지갑 설정을 끝내기 위해 Blockchain에서 온 메일을 찾아 확인 링크를 클릭</string>
     <string name="security_centre_email_title">귀하 이메일 확인</string>
@@ -599,7 +582,6 @@
     <string name="transaction_detail_pending">보류 중 (%1$s/%2$s 확인)</string>
     <string name="transaction_detail_description_hint">이건 뭐에요?</string>
     <string name="transaction_detail_confirmed">확인 됨</string>
-    <string name="to_field_helper_no_dropdown">비트코인 주소 입력</string>
     <string name="share_instructions">탭 해서 이 주소 복사 이메일 또는 문자로 보낸 사람과 공유</string>
     <string name="security_centre_two_fa_message">귀하 지갑 불법 접근 방지 지갑 보안을 더 좋게 하기 위해 2 단계 인증 사용 설정</string>
     <string name="security_centre_backup_title">귀하 돈 백업</string>
@@ -632,7 +614,6 @@
     <string name="sms_notifications_summary">비트코인을 받을 때마다 문자를 받는 알림 사용 설정</string>
     <string name="backup_header">백업 구절</string>
     <string name="backup_explanation">보안 목적 때문에 Blockchain은 어떤 암호도 보관하지 않습니다. 귀하가 암호를 잊었을 때 다음 12 단어 백업 구절이 귀하로 하여금 돈에 접근할 수 있게 해줍니다. 종이 쪽지에 따로 적어서 안전한 곳에 보관하세요. </string>
-    <string name="backup_complete_message">암호를 잊더라도 백업 구절을 써서 돈을 회복할 수 있습니다. 귀하 백업 구절을 아는 사람은 귀하 비트코인에 접근할 수 있으므로 백업 구절을 오프라인 안전한 곳에 보관하는 걸 잊지 마세요.</string>
     <string name="backup_verify_heading">백업 구절 다음 단어들을 입력해서 백업 과정을 마치세요</string>
     <string name="backup_lost_mnemonic">12 단어 백업 구절을 잊었나요?</string>
     <string name="trade_complete">거래 완료</string>
@@ -664,4 +645,75 @@
     <string name="fee_options_advanced_warning">이 기능은 고급 사용자만 쓰세요. 맞춤 수수료를 선택하면 초과 지불이 될 수 있고 귀하 거래가 확인되지 않을 수도 있습니다.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">보통: %1$s, 우선: %2$s</string>
+
+    <string name="receive_bitcoin">요청</string>
+    <string name="overview">거래</string>
+    <string name="sending">보내는 중</string>
+    <string name="receiving">받는 중</string>
+    <string name="paid">결제 됨</string>
+    <string name="payment_request">결제 요청</string>
+    <string name="restoring_wallet">지갑 복구 중.</string>
+    <string name="support_leaving_app_warning">이렇게 하면 앱에서 나가 브라우저로 돌아가게 됩니다. 계속합니까?</string>
+    <string name="addresses">비트코인 주소</string>
+    <string name="merchant_map">비트코인 머천트 맵</string>
+    <string name="received_ethereum">에테르 받음</string>
+    <string name="transaction_occur_when_bitcoin">비트코인을 받거나 보낼 때 거래가 생깁니다.</string>
+    <string name="transaction_occur_when_eth">에테르를 받거나 보낼 때 거래가 생깁니다.</string>
+    <string name="to_field_helper">비트코인 주소를 입력하거나 선택하세요</string>
+    <string name="to_field_helper_no_dropdown">비트코인 주소 입력</string>
+    <string name="tor_summary">Tor 익명화 네트워크의 일부로 알려진 IP 주소 차단 Tor 네트워크는 블록체인 사용자 지갑에 접근하려는 해커들이 자주 쓰고 있습니다.</string>
+    <string name="enable_screenshots_summary">앱 안 어떤 화면은 예민한 데이타를 디스플레이 할 수 있습니다. 다른 앱이 이 스크린샷에 접근할 수 있습니다.</string>
+    <string name="two_fa_summary">2-단계 인증이 되게 해서 지갑 보안 성을 높이세요.</string>
+    <string name="two_fa_description">2-단계 인증이 되게 해서 지갑 보안 성을 높이세요. 휴대폰 번호를 지갑 보안에 쓰는 것을 선택할 수 있습니다. 웹 브라우저를 통해 지갑 접근 시 이 코드가 요청됩니다. \n\n대신 다른 인증 방법을 쓰려면, %1$s에서 웹 지갑에 로그인 하세요</string>
+    <string name="email_request_subject_eth">에테르 결제 요청</string>
+    <string name="email_request_body_eth">에테르 주소 %1$s로 ETH를 보내 주세요.</string>
+    <string name="api_fail">서버 연결 안됨 나중에 다시 시도 해주세요.</string>
+    <string name="transaction_detail_verify_etherscan">Etherscan.io에서 확인</string>
+    <string name="security_centre_backup_message">귀하 보안을 위해 우리는 암호를 보관하지 않습니다. 지갑을 백업 해서 암호를 잃어버려도 돈이 안전하게 하세요. </string>
+    <string name="backup_complete_message">암호를 잊더라도 백업 구절을 써서 돈을 회복할 수 있습니다. 백업 구절을 아는 사람은 누구든지 돈을 빼갈 수 있으므로 백업 구절은 꼭 안전한 오프라인 장소에 보관하세요.</string>
+    <string name="shortcut_settings_summary">런처 앱 아이콘을 길게 눌러 수령 주소가 보이고 비트코인 더 빨리 받기</string>
+
+    <string name="confirm">확인</string>
+    <string name="pending">보류</string>
+    <string name="transactions">거래</string>
+
+    <string name="swipe_receive_preference_summary">PIN 화면을 왼쪽으로 스와이프 해서 수령 주소가 보이고 비트코인 더 빨리 받기</string>
+    <string name="swipe_receive_address_info">다섯 개 주소가 연속적으로 로딩 된 후 새 주소를 보여주기 위해 로그인이 필요합니다.</string>
+    <string name="onboarding_receive_bitcoin">돈 요청</string>
+    <string name="onboarding_receive_content">돈을 받기 위해 친구에게 귀하 지갑 주소 보내기 주소는 임의 문자와 숫자 조합으로 매 거래마다 바뀝니다.</string>
+    <string name="onboarding_get_eth">에테르 받기</string>
+    <string name="buy_second_password_prompt">이 서비스를 쓰려면 귀하의 두 번째 암호를 입력해야 합니다. 구매 기능 사용을 위해 한 번만 입력하면 됩니다.</string>
+    <string name="what_s_this">이게 뭐에요?</string>
+    <string name="dismiss">무시하기</string>
+
+    <string name="eth_default_account_label">내 에테르 지갑</string>
+    <string name="eth_now_supporting">이제 에테르 지원함</string>
+    <string name="eth_second_password_prompt">이 서비스를 쓰려면 귀하의 두 번째 암호를 입력해야 합니다. 에테르 지갑 설정을 위해 한 번만 입력하면 됩니다.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">에테르 주소 입력 또는 선택</string>
+    <string name="eth_to_field_helper_no_dropdown">에테르 주소 입력</string>
+    <string name="eth_invalid_address">유효하지 않은 에테르 주소</string>
+    <string name="eth_support_contract_not_allowed">계약 주소 지원 안됨</string>
+    <string name="eth_support_only_eth">지금은 ETH만 지원합니다 - 이 주소로 토큰은 받을 수 없습니다</string>
+    <string name="eth_unconfirmed_wait">이전 거래 확인이 될 때까지 기다리세요</string>
+    <string name="eth_transaction_complete">거래 완료! 귀하 거래와 잔액은 몇 분 후 업데이트 됩니다.\n</string>
+
+    <string name="dashboard_title">대시보드</string>
+    <string name="dashboard_time_span_day">일</string>
+    <string name="dashboard_time_span_week">주</string>
+    <string name="dashboard_time_span_month">달</string>
+    <string name="dashboard_time_span_year">년</string>
+    <string name="dashboard_time_span_all_time">역대 (All Time)</string>
+    <string name="dashboard_bitcoin_price">비트코인 가격</string>
+    <string name="dashboard_ether_price">에테르 가결</string>
+    <string name="dashboard_charts_error">차트 데이타 로딩 오류</string>
+    <string name="dashboard_charts_price_error">가격 데이타 가져오기 오류</string>
+
+    <string name="onboarding_ether_title">이제 에테르 지원함</string>
+    <string name="onboarding_ether_description">귀하 요청을 경청 했습니다. 이제 블록체인 지갑이 에테르 보내기/받기를 깔끔하게 처리할 수 있게 됨을 기쁘게 알려드립니다!</string>
+    <string name="onboarding_ether_cta">에테르로 시작하기</string>
+
+    <string name="metadata_load_failure">전체 지갑 기능 로딩 오류 일시적 서비스 사용 불능 </string>
+    <string name="fee_helper_message">이 수수료는 거래 처리를 위해 채굴자가 받아갑니다.</string>
 </resources>

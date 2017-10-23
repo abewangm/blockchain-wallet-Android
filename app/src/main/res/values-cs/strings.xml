@@ -12,7 +12,6 @@
     <string name="please_wait">Čekejte, prosím</string>
 
     <string name="send_bitcoin">Odeslat</string>
-    <string name="receive_bitcoin">Přijmout</string>
 
     <string name="cancel">Storno</string>
     <string name="yes">Ano</string>
@@ -157,8 +156,6 @@
     <string name="navigate">Navigovat</string>
     <string name="enable_geo">Pro vyhledání aktuální polohy povolte prosím GPS nebo jinou lokalizační službu. Kliknutím na OK přejdete na nastavení lokalizační služby, kde můžete akci provést.</string>
 
-    <string name="my_addresses">Adresy</string>
-    <string name="addresses">Adresy</string>
     <string name="create_new">Vytvořit novou</string>
     <string name="import_address">Importovat adresu</string>
     <string name="save_name">Uložit název</string>
@@ -169,7 +166,6 @@
 
     <string name="ssl_pinning_invalid">Připnutí certifikátu SSL se nezdařilo. Může to znamenat škodlivou aktivitu. Dříve než budete pokračovat, ověřte síťové připojení a zařízení.</string>
 
-    <string name="merchant_map">Mapa prodejců</string>
     <string name="merchant_suggest">Doporučte prodejce</string>
     <string name="name">Název</string>
     <string name="location">Místo</string>
@@ -209,7 +205,6 @@
     <string name="confirm_password">Potvrdit heslo</string>
     <string name="check_email_to_auth_login">Prosím zkontrolujte svůj e-mail a potvrďte tento pokus o přihlášení.</string>
     <string name="transaction_fee">Poplatek za transakci</string>
-    <string name="transaction_occur_when">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
     <string name="click">Kliknutím</string>
     <string name="to_start_sending_and_receiving_btc">spustíte odesílání a příjem bitcoinů.</string>
 
@@ -320,7 +315,6 @@
     <string name="transaction_surge">Bitcoinová těžařská síť je nyní zaneprázdněna z důvodu vysokého počtu aktivit, což znamená, že doporučené poplatky budou vyšší než obvykle.</string>
     <string name="unsupported_encryption_version">Verze peněženky %1$s není podporována.</string>
     <string name="logout">Odhlášení</string>
-    <string name="to_field_helper">Zadejte bitcoinovou adresu nebo vyberte</string>
 
     <string name="update">Aktualizovat</string>
     <string name="mobile">Mobilní</string>
@@ -348,7 +342,6 @@
 
     <string name="two_fa">Dvoufázové ověření</string>
     <string name="tor_requests">Blokovat požadavky Tor</string>
-    <string name="tor_summary">Chcete zablokovat přístup k Vaší peněžence IP adresám, které jsou podle dostupných informací součástí anonymizační sítě Tor? Síť Tor často využívají hackeři, aby získali přístup k peněženkám uživatelů Blockchain.</string>
     <string name="change_password">Změnit heslo</string>
     <string name="email_notifications">E-mailová upozornění</string>
     <string name="email_notifications_summary">Buďte informováni, pokud vám někdo pošle bitcoiny.</string>
@@ -376,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Odhlásili jste se, nebo došlo k chybě dešifrování Vaší peněženky. Přihlaste se zadáním hesla níže.</string>
     <string name="logged_out_forget_wallet">Pokud chcete tuto peněženku zapomenout a začít znovu, stiskněte \'Zapomenout peněženku\'.</string>
-
-    <string name="api_fail">Nelze se připojit k serveru. Zkuste to prosím později.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Toto je příliš velká bitcoinová transakce. Vaše peněženka musí sloučit drobné částky, které jste přijali v minulosti. Je vyžadován relativně vysoký poplatek za účelem rychlého potvrzení.</string>
     <string name="go_back">Přejít zpět</string>
@@ -428,14 +419,11 @@
     <string name="shortcut_receive_qr_long">Zobrazit kód QR pro přijímací adresu</string>
     <string name="shortcut_receive_qr_error">Litujeme, během generování kódu QR nastala chyba</string>
     <string name="shortcut_settings_enable">Zástupci spouštění</string>
-    <string name="shortcut_settings_summary">Povolte tuto možnost, abyste odkryli přijímací adresu, když ve spouštěči dlouze stisknete ikonu aplikace. Díky tomu budete přijímat bitcoiny ještě rychleji.</string>
 
     <string name="swipe_receive_hint">Potažením přijmout</string>
-    <string name="swipe_receive_preference_summary">Povolením této možnosti zjistíte přijímací adresu, pokud přejedete prstem doleva na obrazovce PINu. Díky tomu budete přijímat bitcoiny ještě rychleji. Postupně se načte pět adres, poté bude pro zobrazení nových adres vyžadováno přihlášení.</string>
     <string name="swipe_receive_no_addresses">Nyní nelze načíst další adresy. Přihlaste se do aplikace, abyste načetli další.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Přehled</string>
     <string name="create_a_wallet">Vytvořit peněženku</string>
     <string name="log_in">Přihlásit</string>
     <string name="wallets">Peněženky</string>
@@ -445,7 +433,6 @@
     <string name="confirm_upgrade_header">Do Vaší peněženky Blockchain jsme přidali tyto nové funkce:</string>
     <string name="verify_email2">Vaše ověřená e-mailová adresa se používá pro odesílání přihlašovacích kódů, pokud je zaznamenána podezřelá nebo neobvyklá aktivita, abychom Vám připomněli Vaše přihlašovací ID peněženky, a zasílání upozornění na bitcoinovou platbu v případě připsání prostředků.</string>
     <string name="enable_screenshots">Povolit snímky obrazovky</string>
-    <string name="enable_screenshots_summary">Chystáte se povolit snímky obrazovky pro aplikaci Blockchain. Některé obrazovky v aplikaci mohou zobrazovat důvěrná data. K těmto snímkům obrazovky budou mít přístup další aplikace.</string>
 
     <string name="information">Informace</string>
     <string name="transaction_detail_verify">Ověřit na Blockchain.info</string>
@@ -455,7 +442,6 @@
     <string name="contacts_payment_request_send_note">Proč byste chtěli poslat %1$s bitcoin? Toto je volitelné a bude sdíleno s %1$s.</string>
     <string name="contacts_payment_request_receive_note">Proč byste chtěli od %1$s obdržet bitcoin? Toto je volitelné a bude sdíleno s %1$s.</string>
     <string name="contacts_send_address_message">Tímto bude Vašemu kontaktu odeslána adresa. Pokračovat?</string>
-    <string name="contacts_register_nodes_failure">Vaše připojení ke službě kontaktů se nezdařilo. Chcete-li aktivovat úplnou funkčnost, zkuste to prosím znovu.</string>
     <string name="contacts_too_much_sent">Zdá se, že jste odeslali více bitcoinů, než bylo požadováno. Můžete požádat o vrácení některých z nich od svého kontaktu, budete-li chtít. Ještě jste neoznačili platbu jako dokončenou.</string>
     <string name="contacts_too_little_sent">Zdá se, že jste odeslali méně bitcoinů, než bylo požadováno. Váš kontakt bude stále moci přijmout bitcoiny, které jste odeslali, ale platbu jsme neoznačili jako dokončenou.</string>
     <string name="contacts_second_password_prompt">Abyste mohli tuto službu použít, vyžadujeme od Vás zadání druhého hesla. Pro použití funkce Kontakty stačí zadat toto pouze jednou.</string>
@@ -478,12 +464,10 @@
     <string name="onboarding_check_inbox_title">Zkontrolujte příchozí poštu</string>
     <string name="onboarding_check_inbox_summary">Hledejte e-mail od Blockchain a dokončete nastavení peněženky kliknutím na ověřovací odkaz.</string>
     <string name="onboarding_verify_email">Ověřit e-mail</string>
-    <string name="onboarding_receive_bitcoin">Přijmout bitcoin</string>
     <string name="onboarding_current_price">Aktuální cena:</string>
     <string name="onboarding_qr_codes">QR kódy</string>
     <string name="onboarding_scan_address">Naskenovat adresu</string>
     <string name="onboarding_buy_content">Spolupracujeme s partnerskými směnárnami po celém světě, abyste mohli kupovat bitcoiny přímo ze své peněženky.</string>
-    <string name="onboarding_receive_content">Pošlete adresu peněženku příteli a požádejte o bitcoin. Adresa je řetězec náhodných písmen a číslic, které jsou pro každou transakci jiné.</string>
     <string name="onboarding_qr_codes_content">Adresu lze zobrazit také jako QR kód. Naskenováním QR kódu přítele rychle zjistíte adresu peněženky.</string>
 
     <string name="onboarding_buy_bitcoin">Koupit bitcoin</string>
@@ -572,7 +556,6 @@
     <string name="contacts_no_contacts_found">Nenalezeny žádné kontakty</string>
     <string name="contacts_pairing_method_title">Přidat kontakt</string>
     <string name="contacts_title">Kontakty</string>
-    <string name="security_centre_backup_message">Kvůli vaší bezpečnosti neuchováváme záznam o žádných heslech. Zálohujte svou peněženku, abyste udrželi své bitcoiny v bezpečí, pokud ztratíte své heslo. </string>
     <string name="security_centre_backup_positive_button">Zálohovat</string>
     <string name="security_centre_email_message">Poslali jsem e-mail na %1$s. Hledejte e-mail od Blockchain a dokončete nastavení peněženky tak, že kliknete na ověřovací odkaz.</string>
     <string name="security_centre_email_title">Zkontrolujte svůj e-mail</string>
@@ -601,7 +584,6 @@
     <string name="transaction_detail_pending">Čekající (%1$s/%2$s potvrzení)</string>
     <string name="transaction_detail_description_hint">Na co je tohle?</string>
     <string name="transaction_detail_confirmed">Potvrzeno</string>
-    <string name="to_field_helper_no_dropdown">Zadejte bitcoinovou adresu</string>
     <string name="share_instructions">Chcete-li zkopírovat tuto adresu, pak klepněte. Sdílejte ji s odesílatelem pomocí e-mailu nebo textové zprávy.</string>
     <string name="security_centre_two_fa_message">Zabraňte neoprávněnému přístupu k vaší peněžence. Chcete-li zvýšit zabezpečení peněženky, pak povolte dvoukrokové ověření.</string>
     <string name="security_centre_backup_title">Zálohujte své prostředky</string>
@@ -634,7 +616,6 @@
     <string name="sms_notifications_summary">Chcete-li dostávat SMS, vždy když obdržíte bitcoin, pak povolte oznámení.</string>
     <string name="backup_header">Zálohová fráze</string>
     <string name="backup_explanation">Kvůli vaší bezpečnosti neuchovává Blockchain záznam o žádných heslech. Následující 12slovní zálohová fráze vám poskytne přístup k vaším prostředkům, pokud ztratíte své heslo. Nezapomeňte si ji napsat na papír a uschovejte ji někde na bezpečném místě. </string>
-    <string name="backup_complete_message">Zálohovou frázi můžete použít, pokud ztratíte své heslo. K vašim bitcoinům může přistoupit kdokoliv, kdo má přístup k vaší zálohové frázi. Proto ji uchovávejte offline někde v bezpečí.</string>
     <string name="backup_verify_heading">Chcete-li dokončit proces zálohování, pak zadejte následující slova.</string>
     <string name="backup_lost_mnemonic">Ztratili jste 12slovní zálohovou frázi?</string>
     <string name="trade_complete">Obchod dokončen</string>
@@ -666,4 +647,75 @@
     <string name="fee_options_advanced_warning">Tato funkce je doporučena pouze pro pokročilé uživatele. Volbou vlastního poplatku riskujete, že zaplatíte příliš nebo se vaše transakce nikdy nepotvrdí.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">Běžný: %1$s, Priorita: %2$s</string>
+
+    <string name="receive_bitcoin">Požadavek</string>
+    <string name="overview">Transakce</string>
+    <string name="sending">Odesílání</string>
+    <string name="receiving">Příjem</string>
+    <string name="paid">Zaplaceno</string>
+    <string name="payment_request">Požadavek na platbu</string>
+    <string name="restoring_wallet">Obnovování peněženky.</string>
+    <string name="support_leaving_app_warning">Toto opustí aplikaci a vezme vás do prohlížeče. Pokračovat?</string>
+    <string name="addresses">Adresy bitcoinu</string>
+    <string name="merchant_map">Mapa prodejců bitcoinu</string>
+    <string name="received_ethereum">Přijat ether</string>
+    <string name="transaction_occur_when_bitcoin">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
+    <string name="transaction_occur_when_eth">K transakcím dochází při příjmu a odesílání ether.</string>
+    <string name="to_field_helper">Zadejte adresu bitcoinu nebo vyberte</string>
+    <string name="to_field_helper_no_dropdown">Zadejte adresu bitcoinu</string>
+    <string name="tor_summary">Blokovat adresy IP, o kterých je známo, že jsou součástí anonymizační sítě Tor. Síť Tor používají často hackeři, kteří se pokouší přistoupit k peněženkám uživatelů Blockchain.</string>
+    <string name="enable_screenshots_summary">Některé obrazovky v aplikaci mohou zobrazovat důvěrná data. K těmto snímkům obrazovky budou mít přístup další aplikace.</string>
+    <string name="two_fa_summary">Ochraňte svoji peněženku před neoprávněným přístupem aktivací dvoufázového ověření.</string>
+    <string name="two_fa_description">Ochraňte svoji peněženku před neoprávněným přístupem aktivací dvoufázového ověření. Svoji peněženku můžete zabezpečit pomocí čísla mobilního telefonu. Tento kód bude požadován, když se pokusíte přistoupit k peněžence přes webový prohlížeč.\n\nChcete-li místo toho používat jiné metody ověřování, pak se prosím přihlaste do naší webové peněženky na %1$s</string>
+    <string name="email_request_subject_eth">Požadavek na platbu ether</string>
+    <string name="email_request_body_eth">Pošlete prosím ETH na adresu ether %1$s.</string>
+    <string name="api_fail">Nelze se připojit k serveru. Zkuste to prosím znovu.</string>
+    <string name="transaction_detail_verify_etherscan">Ověřit na Etherscan.io</string>
+    <string name="security_centre_backup_message">Kvůli vaší bezpečnosti neuchováváme záznam o žádných heslech. Zálohujte svou peněženku, abyste zajistili bezpečnost svých prostředků, pokud ztratíte své heslo. </string>
+    <string name="backup_complete_message">Zálohovou frázi můžete použít, pokud ztratíte své heslo. K vašim prostředkům může přistoupit kdokoliv s přístupem k vaší zálohové frázi, proto ji uchovávejte bezpečně a zabezpečeně někde offline.</string>
+    <string name="shortcut_settings_summary">Odkrýt adresu pro příjem, když dlouze stisknete ikonu aplikaci ve spouštěči, což ještě více urychlí příjem bitcoinu.</string>
+
+    <string name="confirm">Potvrdit</string>
+    <string name="pending">Ve zpracování</string>
+    <string name="transactions">Transakce</string>
+
+    <string name="swipe_receive_preference_summary">Odkrýt adresu pro příjem, když na obrazovce PIN potáhnete prstem doleva, což ještě více urychlí příjem bitcoinu.</string>
+    <string name="swipe_receive_address_info">Postupně se načte pět adres, poté bude pro zobrazení nových adres vyžadováno přihlášení.</string>
+    <string name="onboarding_receive_bitcoin">Požádat o prostředky</string>
+    <string name="onboarding_receive_content">Chcete-li požádat o prostředky, pak pošlete adresu své peněženky kamarádovi. Adresa je řetězec náhodných písmen a číslic, které jsou pro každou transakci jiné.</string>
+    <string name="onboarding_get_eth">Získat ether</string>
+    <string name="buy_second_password_prompt">Abyste mohli tuto službu použít, vyžadujeme od Vás zadání druhého hesla. Toto byste měli udělat pouze jednou, abyste mohli používat funkci nákupu.</string>
+    <string name="what_s_this">Co je to?</string>
+    <string name="dismiss">Zavřít</string>
+
+    <string name="eth_default_account_label">Má peněženka ether</string>
+    <string name="eth_now_supporting">Nyní podporujeme ether</string>
+    <string name="eth_second_password_prompt">Abyste mohli tuto službu použít, vyžadujeme od Vás zadání druhého hesla. Toto byste měli udělat pouze jednou, abyste nastavili peněženku ether.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Zadejte adresu ether nebo vyberte</string>
+    <string name="eth_to_field_helper_no_dropdown">Zadejte adresu ether</string>
+    <string name="eth_invalid_address">Neplatná adresa ether</string>
+    <string name="eth_support_contract_not_allowed">Smluvní adresy nejsou podporovány.</string>
+    <string name="eth_support_only_eth">V současné době podporujeme pouze ETH − na tuto adresu nemůžete přijímat tokeny</string>
+    <string name="eth_unconfirmed_wait">Počkejte prosím, než se potvrdí vaše předchozí transakce</string>
+    <string name="eth_transaction_complete">Transakce dokončena! Vaše transakce a zůstatek se brzy aktualizují. Toto může trvat několik minut.\n</string>
+
+    <string name="dashboard_title">Řídicí panel</string>
+    <string name="dashboard_time_span_day">Den</string>
+    <string name="dashboard_time_span_week">Týden</string>
+    <string name="dashboard_time_span_month">Měsíc</string>
+    <string name="dashboard_time_span_year">Rok</string>
+    <string name="dashboard_time_span_all_time">Celá doba</string>
+    <string name="dashboard_bitcoin_price">Cena bitcoinu</string>
+    <string name="dashboard_ether_price">Cena ether</string>
+    <string name="dashboard_charts_error">Chyba při načítání dat grafu</string>
+    <string name="dashboard_charts_price_error">Chyba při načítání cenových dat</string>
+
+    <string name="onboarding_ether_title">Nyní podporujeme ether</string>
+    <string name="onboarding_ether_description">Ptali jste se, poslouchali jsme. S radostí oznamujeme, že Vaše peněženka Blockchain Vám nyní umožňuje snadno odesílat a přijímat ether!</string>
+    <string name="onboarding_ether_cta">Začněte s ether</string>
+
+    <string name="metadata_load_failure">Chyba při načítání plné funkčnosti peněženky. Služba možná není dočasně dostupná.</string>
+    <string name="fee_helper_message">Těžaři obdrží tento poplatek za zpracování této transakce.</string>
 </resources>

@@ -53,13 +53,13 @@
 
         <LinearLayout style="@style/CustomDialogButtonContainer">
 
-            <android.support.v7.widget.AppCompatButton
+            <Button
                 android:id="@+id/confirm_cancel"
                 style="@style/CustomDialogButton"
                 android:text="@string/cancel"
                 android:textColor="@color/primary_gray_dark" />
 
-            <android.support.v7.widget.AppCompatButton
+            <Button
                 android:id="@+id/confirm_continue"
                 style="@style/CustomDialogButton"
                 android:text="@string/CONTINUE"

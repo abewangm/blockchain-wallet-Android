@@ -1,140 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Temporarily commented out to clear Lint errors -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:ignore="UselessLeaf">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:orientation="vertical">
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:background="@color/white"-->
+            <!--android:orientation="vertical">-->
 
-            <include layout="@layout/toolbar_general" />
+            <!--<include layout="@layout/toolbar_general" />-->
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp">
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="48dp"-->
+                <!--android:gravity="center_vertical"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:paddingLeft="16dp"-->
+                <!--android:paddingRight="16dp">-->
 
-                <TextView
-                    fontPath="fonts/Montserrat-Light.ttf"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/name"
-                    android:textColor="@color/primary_gray_dark" />
+                <!--<TextView-->
+                    <!--fontPath="fonts/Montserrat-Light.ttf"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/name"-->
+                    <!--android:textColor="@color/primary_gray_dark" />-->
 
-                <EditText
-                    android:id="@+id/merchant_name"
-                    fontPath="fonts/Montserrat-Regular.ttf"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@color/white"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:inputType="textCapWords"
-                    android:maxLines="1"
-                    android:paddingLeft="16dp"
-                    android:text=""
-                    android:textColor="@color/black"
-                    android:textCursorDrawable="@null" />
+                <!--<EditText-->
+                    <!--android:id="@+id/merchant_name"-->
+                    <!--fontPath="fonts/Montserrat-Regular.ttf"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:background="@color/white"-->
+                    <!--android:focusable="true"-->
+                    <!--android:focusableInTouchMode="true"-->
+                    <!--android:inputType="textCapWords"-->
+                    <!--android:maxLines="1"-->
+                    <!--android:paddingLeft="16dp"-->
+                    <!--android:text=""-->
+                    <!--android:textColor="@color/black"-->
+                    <!--android:textCursorDrawable="@null" />-->
 
-            </LinearLayout>
+            <!--</LinearLayout>-->
 
-            <include layout="@layout/divider_grey" />
+            <!--<include layout="@layout/divider_grey" />-->
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingLeft="16dp">
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="48dp"-->
+                <!--android:gravity="center_vertical"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:paddingLeft="16dp">-->
 
-                <TextView
-                    fontPath="fonts/Montserrat-Light.ttf"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="16dp"
-                    android:text="@string/business_category"
-                    android:textColor="@color/primary_gray_dark" />
+                <!--<TextView-->
+                    <!--fontPath="fonts/Montserrat-Light.ttf"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginRight="16dp"-->
+                    <!--android:text="@string/business_category"-->
+                    <!--android:textColor="@color/primary_gray_dark" />-->
 
-                <Spinner
-                    android:id="@+id/merchant_category_spinner"
-                    fontPath="fonts/Montserrat-Regular.ttf"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:divider="@null"
-                    android:dropDownSelector="?attr/selectableItemBackground" />
+                <!--<Spinner-->
+                    <!--android:id="@+id/merchant_category_spinner"-->
+                    <!--fontPath="fonts/Montserrat-Regular.ttf"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="48dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:background="?attr/selectableItemBackground"-->
+                    <!--android:divider="@null"-->
+                    <!--android:dropDownSelector="?attr/selectableItemBackground" />-->
 
-            </LinearLayout>
+            <!--</LinearLayout>-->
 
-            <include layout="@layout/divider_grey" />
+            <!--<include layout="@layout/divider_grey" />-->
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="58dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp">
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="58dp"-->
+                <!--android:gravity="center_vertical"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:paddingLeft="16dp"-->
+                <!--android:paddingRight="16dp">-->
 
-                <TextView
-                    fontPath="fonts/Montserrat-Light.ttf"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="3"
-                    android:text="@string/location"
-                    android:textColor="@color/primary_gray_dark" />
+                <!--<TextView-->
+                    <!--fontPath="fonts/Montserrat-Light.ttf"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="3"-->
+                    <!--android:text="@string/location"-->
+                    <!--android:textColor="@color/primary_gray_dark" />-->
 
-                <TextView
-                    android:id="@+id/manual_entry_action"
-                    fontPath="fonts/Montserrat-Regular.ttf"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="3"
-                    android:background="@drawable/selector_white"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:onClick="manualClicked"
-                    android:text="@string/manual_entry"
-                    android:textColor="@color/black"
-                    android:textSize="12sp" />
+                <!--<TextView-->
+                    <!--android:id="@+id/manual_entry_action"-->
+                    <!--fontPath="fonts/Montserrat-Regular.ttf"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="3"-->
+                    <!--android:background="@drawable/selector_white"-->
+                    <!--android:clickable="true"-->
+                    <!--android:gravity="center"-->
+                    <!--android:onClick="manualClicked"-->
+                    <!--android:text="@string/manual_entry"-->
+                    <!--android:textColor="@color/black"-->
+                    <!--android:textSize="12sp" />-->
 
-                <TextView
-                    android:id="@+id/current_location_action"
-                    fontPath="fonts/Montserrat-Regular.ttf"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="4"
-                    android:background="@drawable/selector_white"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:onClick="autoClicked"
-                    android:text="@string/use_my_current_location"
-                    android:textColor="@color/primary_blue_accent"
-                    android:textSize="12sp" />
-            </LinearLayout>
+                <!--<TextView-->
+                    <!--android:id="@+id/current_location_action"-->
+                    <!--fontPath="fonts/Montserrat-Regular.ttf"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="4"-->
+                    <!--android:background="@drawable/selector_white"-->
+                    <!--android:clickable="true"-->
+                    <!--android:gravity="center"-->
+                    <!--android:onClick="autoClicked"-->
+                    <!--android:text="@string/use_my_current_location"-->
+                    <!--android:textColor="@color/primary_blue_accent"-->
+                    <!--android:textSize="12sp" />-->
+            <!--</LinearLayout>-->
 
-            <include layout="@layout/divider_grey" />
+            <!--<include layout="@layout/divider_grey" />-->
 
-            <include layout="@layout/activity_suggest_merchant_map_include" />
+            <!--<include layout="@layout/activity_suggest_merchant_map_include" />-->
 
-            <include layout="@layout/activity_suggest_merchant_details_include" />
+            <!--<include layout="@layout/activity_suggest_merchant_details_include" />-->
 
-        </LinearLayout>
+        <!--</LinearLayout>-->
 
-        <TextView
-            android:id="@+id/command_save"
-            style="@style/MegaButtonAccentBlue"
-            android:layout_alignParentBottom="true"
-            android:text="@string/save" />
+        <!--<TextView-->
+            <!--android:id="@+id/command_save"-->
+            <!--style="@style/MegaButtonAccentBlue"-->
+            <!--android:layout_alignParentBottom="true"-->
+            <!--android:text="@string/save" />-->
 
     </RelativeLayout>
 </layout>

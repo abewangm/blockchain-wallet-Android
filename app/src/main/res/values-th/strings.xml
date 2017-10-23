@@ -12,7 +12,6 @@
     <string name="please_wait">โปรดรอ</string>
 
     <string name="send_bitcoin">ส่ง</string>
-    <string name="receive_bitcoin">รับ</string>
 
     <string name="cancel">ยกเลิก</string>
     <string name="yes">ใช่</string>
@@ -157,8 +156,6 @@
     <string name="navigate">นำทาง</string>
     <string name="enable_geo">เปิดใช้งาน GPS หรือบริการระบุตำแหน่งอื่น ๆ เพื่อค้นหาตำแหน่งปัจจุบัน คลิก ตกลง เพื่อไปยังการตั้งค่าบริการระบุตำแหน่งเพื่อทำเช่นนั้น</string>
 
-    <string name="my_addresses">ที่อยู่</string>
-    <string name="addresses">ที่อยู่</string>
     <string name="create_new">สร้างใหม่</string>
     <string name="import_address">นำเข้าที่อยู่</string>
     <string name="save_name">บันทึกชื่อ</string>
@@ -169,7 +166,6 @@
 
     <string name="ssl_pinning_invalid">การปักหมุดใบอนุญาต SSL ล้มเหลว นี่อาจแสดงให้เห็นว่ามีกิจกรรมที่เป็นอันตรายเกิดขึ้น โปรดยืนยันการเชื่อมต่อเครือข่ายและอุปกรณ์ของคุณก่อนดำเนินการต่อ</string>
 
-    <string name="merchant_map">แผนที่ผู้ค้า</string>
     <string name="merchant_suggest">แนะนำผู้ค้า</string>
     <string name="name">ชื่อ</string>
     <string name="location">ตำแหน่ง</string>
@@ -209,7 +205,6 @@
     <string name="confirm_password">ยืนยันรหัสผ่าน</string>
     <string name="check_email_to_auth_login">โปรดตรวจสอบอีเมลของคุณเพื่ออนุมัติความพยายามในการล็อกอินครั้งนี้</string>
     <string name="transaction_fee">ค่าธรรมเนียมธุรกรรม</string>
-    <string name="transaction_occur_when">ธุรกรรมจะเกิดขึ้นเมื่อคุณได้รับหรือส่ง bitcoin</string>
     <string name="click">คลิก</string>
     <string name="to_start_sending_and_receiving_btc">เพื่อเริ่มส่งและรับ bitcoin</string>
 
@@ -320,7 +315,6 @@
     <string name="transaction_surge">เครือข่ายการทำเหมือง Bitcoin กำลังประสบปัญหาเนื่องจากปริมาณกิจกรรมที่สูงซึ่งส่งผลให้ค่าธรรมเนียมที่แนะนำสูงกว่าปกติ</string>
     <string name="unsupported_encryption_version">ไม่รองรับเวอร์ชันกระเป๋าเงิน %1$s</string>
     <string name="logout">ออกจากระบบ</string>
-    <string name="to_field_helper">กรอกที่อยู่ Bitcoin หรือเลือก</string>
 
     <string name="update">อัปเดต</string>
     <string name="mobile">มือถือ</string>
@@ -348,7 +342,6 @@
 
     <string name="two_fa">การยืนยัน 2 ขั้นตอน</string>
     <string name="tor_requests">บล็อกการร้องขอของ Tor</string>
-    <string name="tor_summary">คุณต้องการบล็อกที่อยู่ IP ซึ่งรู้ว่าเป็นส่วนหนึ่งของเครือข่ายที่ไม่เปิดเผย Tor จากการเข้าถึงกระเป๋าเงินของคุณหรือไม่? เครือข่าย Tor มักจะถูกใช้งานโดยแฮกเกอร์ซึ่งพยายามที่จะเข้าถึงกระเป๋าเงินของผู้ใช้ Blockchain</string>
     <string name="change_password">เปลี่ยนรหัสผ่าน</string>
     <string name="email_notifications">การแจ้งเตือนอีเมล</string>
     <string name="email_notifications_summary">รับการแจ้งเตือนเมื่อคุณได้รับบิตคอยน์</string>
@@ -376,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">คุณได้ออกจากระบบหรือมีข้อผิดพลาดในการถอดรหัสกระเป๋าเงินของคุณ กรอกรหัสผ่านของคุณด้านล่างเพื่อล็อกอิน</string>
     <string name="logged_out_forget_wallet">หากคุณต้องการลืมกระเป๋าเงินนี้และเริ่มใหม่ กด \'ลืมกระเป๋าเงิน\'</string>
-
-    <string name="api_fail">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ โปรดลองอีกครั้งในภายหลัง</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">ธุรกรรมนี้เป็นธุรกรรม bitcoin ที่ขนาดใหญ่เกินไป กระเป๋าเงินของคุณจำเป็นต้องรวบรวมการชำระเงินเล็ก ๆ ซึ่งคุณเคยได้รับในอดีต การดำเนินการเช่นนี้ต้องการค่าธรรมเนียมที่สูงเพื่อให้ได้รับการยืนยันอย่างรวดเร็ว </string>
     <string name="go_back">กลับ</string>
@@ -429,14 +420,11 @@
     <string name="shortcut_receive_qr_long">ชมรหัส QR สำหรับที่อยู่การรับ</string>
     <string name="shortcut_receive_qr_error">ขออภัย มีข้อผิดพลาดในการสร้างรหัส QR</string>
     <string name="shortcut_settings_enable">ทางลัดตัวเปิด</string>
-    <string name="shortcut_settings_summary">เปิดตัวเลือกนี้เพื่อชมที่อยู่การรับเมื่อคุณกดไอคอนแอปนาน ๆ ในตัวเปิด ซึ่งจะทำให้การรับ bitcoin รวดเร็วยิ่งขึ้น</string>
 
     <string name="swipe_receive_hint">ปัดนิ้วเพื่อรับ</string>
-    <string name="swipe_receive_preference_summary">เปิดการใช้งานตัวเลือกนี้เพื่อเปิดเผยที่อยู่สำหรับที่อยู่สำหรับการรับเมื่อคุณปัดนิ้วไปทางซ้ายบนหน้าจอ PIN ทำให้การรับ bitcoin รวดเร็วยิ่งขึ้น ห้าที่อยู่ซึ่งจะได้รับการโหลดอย่างต่อเนื่องติดต่อกัน หลังจากนั้นจะจำเป็นต้องล็อกอินเพื่อแสดงที่อยู่ใหม่</string>
     <string name="swipe_receive_no_addresses">ไม่สามารถโหลดที่อยู่มากกว่านี้ได้ในตอนนี้ ล็อกอินไปยังแอปเพื่อโหลดเพิ่ม</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">ภาพรวม</string>
     <string name="create_a_wallet">สร้างกระเป๋าเงิน</string>
     <string name="log_in">ล็อกอิน</string>
     <string name="wallets">กระเป๋าเงิน</string>
@@ -446,7 +434,6 @@
     <string name="confirm_upgrade_header">เฮ้ เราได้เพิ่มฟีเจอร์ใหม่เหล่านี้ไปยังกระเป๋าเงิน Blockchain ของคุณ:</string>
     <string name="verify_email2">จะมีการใช้ที่อยู่อีเมลของคุณที่ได้รับการยืนยันเพื่อการส่งรหัสล็อกอินเมื่อตรวจพบกิจกรรมที่น่าสงสัยหรือผิดปกติ หรือเพื่อแจ้งเตือนคุณเกี่ยวกับ ID ล็อกอินกระเป๋าเงินของคุณ และเพื่อส่งการแจ้งเตือนการชำระเงิน bitcoin เมื่อคุณได้รับเงิน</string>
     <string name="enable_screenshots">เปิดใช้งานภาพถ่ายหน้าจอ</string>
-    <string name="enable_screenshots_summary">คุณกำลังจะเปิดใช้งานภาพถ่ายหน้าจอสำหรับแอป Blockchain บางหน้าจอภายในแอปสามารถแสดงข้อมูลที่ละเอียดอ่อน แอปอื่น ๆ จะสามารถเข้าถึงภาพถ่ายหน้าจอเหล่านี้ได้</string>
 
     <string name="information">ข้อมูล</string>
     <string name="transaction_detail_verify">ยืนยันบน Blockchain.info</string>
@@ -456,7 +443,6 @@
     <string name="contacts_payment_request_send_note">ทำไมคุณถึงต้องการส่ง %1$s bitcoin? สิ่งนี้เป็นสิ่งที่ไม่จำเป็นและจะได้รับการแบ่งปันกับ %1$s</string>
     <string name="contacts_payment_request_receive_note">ทำไมคุณถึงต้องการให้ %1$s ส่ง bitcoin ให้คุณ? สิ่งนี้เป็นสิ่งที่ไม่จำเป็นและจะได้รับการแบ่งปันกับ %1$s</string>
     <string name="contacts_send_address_message">มันจะส่งที่อยู่ไปยังผู้ติดต่อของคุณ ดำเนินการต่อ?</string>
-    <string name="contacts_register_nodes_failure">เราไม่สามารถเชื่อมต่อคุณไปยังบริการผู้ติดต่อได้ โปรดลองอีกครั้งเพื่อเปิดการใช้งานแบบเต็ม</string>
     <string name="contacts_too_much_sent">ดูเหมือนว่าคุณส่ง bitcoin มากกว่าที่ได้รับการร้องขอ คุณสามารถร้องขอบางส่วนกลับมาจากผู้ติดต่อของคุณได้หากคุณต้องการ เราได้ทำเครื่องหมายว่าการชำระเงินนี้เสร็จสิ้น</string>
     <string name="contacts_too_little_sent">ดูเหมือนว่าคุณส่ง bitcoin น้อยกว่าที่ได้รับการร้องขอ ผู้ติดต่อของคุณจะยังคงได้รับ bitcoin ที่คุณส่ง แต่เราจะไม่ทำเครื่องหมายว่าการชำระเงินนี้เสร็จสิ้น</string>
     <string name="contacts_second_password_prompt">เพื่อใช้บริการนี้ เราต้องการให้คุณกรอกรหัสผ่านที่สองของคุณ คุณควรจำเป็นต้องกรอกสิ่งนี้เพียงครั้งเดียวเพื่อใช้การใช้งานผู้ติดต่อ</string>
@@ -479,12 +465,10 @@
     <string name="onboarding_check_inbox_title">ตรวจสอบกล่องข้อความของคุณ</string>
     <string name="onboarding_check_inbox_summary">มองหาอีเมลจาก Blockchain และคลิกลิงก์ยืนยันเพื่อทำการตั้งค่ากระเป๋าเงินของคุณให้เสร็จสิ้น</string>
     <string name="onboarding_verify_email">ยืนยันอีเมล</string>
-    <string name="onboarding_receive_bitcoin">รับ Bitcoin</string>
     <string name="onboarding_current_price">ราคาปัจจุบัน:</string>
     <string name="onboarding_qr_codes">รหัส QR</string>
     <string name="onboarding_scan_address">สแกนที่อยู่</string>
     <string name="onboarding_buy_content">เราทำงานกับพันธมิตรการแลกเปลี่ยนทั่วทั้งโลก ดังนั้นคุณสามารถซื้อ bitcoin โดยตรงจากกระเป๋าเงินของคุณ</string>
-    <string name="onboarding_receive_content">ส่งที่อยู่กระเป๋าเงินให้เพื่อนเพื่อร้องขอ bitcoin ที่อยู่่คือสตริงของตัวอักษรและหมายเลขแบบสุ่มซึ่งเปลี่ยนแปลงสำหรับแต่ละธุรกรรม</string>
     <string name="onboarding_qr_codes_content">สามารถแสดงที่อยู่ในรูปแบบรหัส QR ค้นหารหัส QR ของเพื่อนเพื่อรับที่อยู่กระเป๋าเงินของพวกเขา</string>
 
     <string name="onboarding_buy_bitcoin">ซื้อ Bitcoin</string>
@@ -573,7 +557,6 @@
     <string name="contacts_no_contacts_found">ไม่พบผู้ติดต่อ</string>
     <string name="contacts_pairing_method_title">เพิ่มผู้ติดต่อ</string>
     <string name="contacts_title">ผู้ติดต่อ</string>
-    <string name="security_centre_backup_message">เพื่อความปลอดภัยของคุณ เราจะไม่เก็บรหัสผ่านใด ๆ ในไฟล์  สำรองข้อมูลกระเป๋าเงินของคุณเพื่อยืนยันว่า bitcoin จะปลอดภัยในกรณีที่คุณทำรหัสผ่านของคุณหาย </string>
     <string name="security_centre_backup_positive_button">สำรอง</string>
     <string name="security_centre_email_message">เราส่งอีเมลไปยัง %1$s แล้ว มองหาอีเมลจาก Blockchain และคลิกลิงก์ยืนยันเพื่อทำการตั้งค่ากระเป๋าเงินของคุณให้เสร็จสิ้น</string>
     <string name="security_centre_email_title">ตรวจสอบอีเมลของคุณ</string>
@@ -602,7 +585,6 @@
     <string name="transaction_detail_pending">รอดำเนินการ (%1$s/%2$s การยืนยัน)</string>
     <string name="transaction_detail_description_hint">มันมีไว้เพื่ออะไร?</string>
     <string name="transaction_detail_confirmed">ยืนยันแล้ว</string>
-    <string name="to_field_helper_no_dropdown">กรอกที่อยู่ Bitcoin</string>
     <string name="share_instructions">แตะเพื่อคัดลอกที่อยู่นี้ แชร์มันกับผู้ส่งผ่านอีเมลหรือข้อความ</string>
     <string name="security_centre_two_fa_message">ป้องกันการเข้าถึงกระเป๋าเงินของคุณโดยไม่ได้รับอนุญาต  เปิดใช้งานการยืนยัน 2 ขั้นตอนเพื่อเพิ่มความปลอดภัยให้กับกระเป๋าเงินของคุณ</string>
     <string name="security_centre_backup_title">สำรองข้อมูลเงินทุนของคุณ</string>
@@ -634,7 +616,6 @@
     <string name="sms_notifications_summary">เปิดการแจ้งเตือนเพื่อรับ SMS เมื่อใดก็ตามที่คุณได้รับ bitcoin</string>
     <string name="backup_header">วลีสำรอง</string>
     <string name="backup_explanation">เพื่อความปลอดภัยของคุณ Blockchain จะไม่เก็บรหัสผ่านใด ๆ ในไฟล์ วลีสำรอง 12 คำต่อไปนี้จะมอบการเข้าถึงให้กับคุณไปยังเงินทุนในกรณีที่คุณทำรหัสผ่านสูญหาย โปรดมั่นใจว่าคุณได้เขียนมันไว้ในกระดาษและเก็บมันไว้ในสถานที่ที่มั่นคงและปลอดภัย </string>
-    <string name="backup_complete_message">คุณสามารถใช้วลีสำรองเพื่อกู้คืนเงินทุนของคุณได้หากคุณทำรหัสผ่านของคุณหาย ผู้ใดก็ตามที่สามารถเข้าถึงวลีสำรองของคุณจะสามารถเข้าถึง bitcoin ของคุณได้ ดังนั้นโปรดอย่าลืมที่จะเก็บมันไว้ทางออฟไลน์ในสถานที่ที่มั่งคงและปลอดภัย</string>
     <string name="backup_verify_heading">กรอกคำต่อไปนี้จากวลีสำรองของคุณเพื่อดำเนินกระบวนการสำรองข้อมูลให้เสร็จสิ้น</string>
     <string name="backup_lost_mnemonic">ทำวลีสำรอง 12 คำสูญหาย?</string>
     <string name="trade_complete">การเทรดเสร็จสมบูรณ์</string>
@@ -666,5 +647,76 @@
     <string name="fee_options_advanced_warning">แนะนำฟีเจอร์นี้สำหรับผู้ใช้ขั้นสูงเท่านั้น ในการเลือกค่าธรรมเนียมแบบกำหนดเอง คุณมีความเสี่ยงในการจ่ายเงินมากเกินไป หรือมิฉะนั้นธุรกรรมของคุณอาจไม่ได้รับการยืนยันเลยก็เป็นได้</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">ปกติ: %1$s, ความสำคัญ: %2$s</string>
+
+    <string name="receive_bitcoin">ร้องขอ</string>
+    <string name="overview">ธุรกรรม</string>
+    <string name="sending">กำลังส่ง</string>
+    <string name="receiving">กำลังรับ</string>
+    <string name="paid">จ่ายแล้ว</string>
+    <string name="payment_request">คำร้องขอการชำระเงิน</string>
+    <string name="restoring_wallet">กำลังกู้คืนกระเป๋าเงิน</string>
+    <string name="support_leaving_app_warning">การทำเช่นนี้จะเป็นการออกจากแอปและนำคุณไปยังเบราว์เซอร์ของคุณ ดำเนินการต่อ?</string>
+    <string name="addresses">ที่อยู่ Bitcoin </string>
+    <string name="merchant_map">แอปผู้ค้า Bitcoin </string>
+    <string name="received_ethereum">Ether ที่ได้รับ</string>
+    <string name="transaction_occur_when_bitcoin">ธุรกรรมจะเกิดขึ้นเมื่อคุณได้รับและส่ง bitcoin</string>
+    <string name="transaction_occur_when_eth">ธุรกรรมจะเกิดขึ้นเมื่อคุณได้รับหรือส่ง ether</string>
+    <string name="to_field_helper">กรอกที่อยู่ bitcoin หรือเลือก</string>
+    <string name="to_field_helper_no_dropdown">กรอกที่อยู่ bitcoin</string>
+    <string name="tor_summary">บล็อกที่อยู่ IP ซึ่งทราบว่าเป็นส่วนหนึ่งของเครือข่ายนิรนาม Tor เครือข่าย Tor มักได้รับการใช้งานโดยแฮกเกอร์ที่พยายามจะเข้าถึงกระเป๋าเงิน Blockchain ของผู้ใช้</string>
+    <string name="enable_screenshots_summary">บางหน้าจอภายในแอปพลิเคชันอาจแสดงข้อมูลที่ละเอียดอ่อน แอปอื่น ๆ จะสามารถเข้าถึงภาพถ่ายหน้าจอเหล่านี้ได้</string>
+    <string name="two_fa_summary">ปกป้องกระเป๋าเงินของคุณจากการเข้าถึงที่ไม่ได้รับอนุญาตโดยเปิดใช้งานการยืนยัน 2 ขั้นตอน</string>
+    <string name="two_fa_description">ปกป้องกระเป๋าเงินของคุณจากการเข้าถึงที่ไม่ได้รับอนุญาตโดยเปิดใช้งานการยืนยัน 2 ขั้นตอน คุณสามารถเลือกใช้หมายเลขโทรศัพท์มือถือของคุณเพื่อทำให้กระเป๋าเงินของคุณปลอดภัย จะมีการร้องขอรหัสนี้เมื่อคุณพยายามเข้าถึงกระเป๋าเงินของคุณผ่านทางเบราว์เซอร์เว็บ\n\nเพื่อใช้วิธีการให้สิทธิ์อื่นแทน โปรดล็อกอินไปยังกระเป๋าเงินเว็บของเราที่ %1$s</string>
+    <string name="email_request_subject_eth">คำร้องขอการชำระเงิน Ether</string>
+    <string name="email_request_body_eth">โปรดส่ง ETH ไปยังที่อยู่ Ether %1$s</string>
+    <string name="api_fail">ไม่สามารถเชื่อมต่อไปยังเซิร์ฟเวอร์ โปรดลองอีกครั้งภายหลัง</string>
+    <string name="transaction_detail_verify_etherscan">ยืนยันความถูกต้องบน Etherscan.io</string>
+    <string name="security_centre_backup_message">เพื่อความปลอดภัยของคุณ เราจะไม่เก็บรหัสผ่านใด ๆ ในไฟล์ ทำการสำรองข้อมูลกระเป๋าเงินของคุณเพื่อยืนยันว่าเงินทุนของคุณจะปลอดภัยในกรณีที่คุณทำรหัสผ่านของคุณสูญหาย </string>
+    <string name="backup_complete_message">คุณสามารถใช้วลีสำรองเพื่อกู้คืนเงินทุนของคุณได้หากคุณทำรหัสผ่านของคุณหาย ผู้ใดก็ตามที่สามารถเข้าถึงวลีสำรองของคุณจะสามารถเข้าถึงเงินทุนของคุณได้ ดังนั้นโปรดจำไว้ว่าต้องเก็บมันไว้ทางออฟไลน์ในบางแห่งที่มั่นคงและปลอดภัย</string>
+    <string name="shortcut_settings_summary">เปิดเผยที่อยู่การรับเมื่อคุณกดค้างในไอคอนแอปในตัวเปิด และทำให้รับ bitcoin ได้เร็วยิ่งขึ้น</string>
+
+    <string name="confirm">ยืนยัน</string>
+    <string name="pending">ระหว่างดำเนินการ</string>
+    <string name="transactions">ธุรกรรม</string>
+
+    <string name="swipe_receive_preference_summary">เปิดเผยที่อยู่การรับเมื่อคุณปัดไปทางซ้ายบนหน้าจอ PIN และทำให้รับ bitcoin ได้เร็วยิ่งขึ้น</string>
+    <string name="swipe_receive_address_info">ห้าที่อยู่ซึ่งจะได้รับการโหลดอย่างต่อเนื่องติดต่อกัน หลังจากนั้นจะจำเป็นต้องล็อกอินเพื่อแสดงที่อยู่ใหม่</string>
+    <string name="onboarding_receive_bitcoin">ร้องขอเงินทุน</string>
+    <string name="onboarding_receive_content">ส่งที่อยู่กระเป๋าเงินของคุณให้กับเพื่อนเพื่อร้องขอเงินทุน ที่อยู่คือสตริงของตัวอักษรและหมายเลขแบบสุ่มซึ่งเปลี่ยนแปลงสำหรับแต่ละธุรกรรม</string>
+    <string name="onboarding_get_eth">รับ Ether</string>
+    <string name="buy_second_password_prompt">เพื่อใช้บริการนี้ เราต้องการให้คุณกรอกรหัสผ่านที่สองของคุณ คุณควรต้องกรอกสิ่งนี้เพียงครั้งเดียวเพื่อใช้ความสามารถในการซื้อ</string>
+    <string name="what_s_this">มันคืออะไร?</string>
+    <string name="dismiss">ยกเลิก</string>
+
+    <string name="eth_default_account_label">กระเป๋าเงิน Ether ของฉัน</string>
+    <string name="eth_now_supporting">รองรับ Ether แล้วในตอนนี้</string>
+    <string name="eth_second_password_prompt">เพื่อใช้บริการนี้ เราต้องการให้คุณกรอกรหัสผ่านที่สองของคุณ คุณควรต้องกรอกสิ่งนี้เพียงครั้งเดียวเพื่อตั้งค่ากระเป๋าเงิน Ether ของคุณ</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">กรอกที่อยู่ ether หรือเลือก</string>
+    <string name="eth_to_field_helper_no_dropdown">กรอกที่อยู่ ether</string>
+    <string name="eth_invalid_address">ที่อยู่ Ether ไม่ถูกต้อง</string>
+    <string name="eth_support_contract_not_allowed">ไม่รองรับที่อยู่สัญญา</string>
+    <string name="eth_support_only_eth">ในตอนนี้เรารองรับเพียง ETH เท่านั้น - คุณจะไม่สามารถรับโทเคนไปยังที่อยู่นี้ได้</string>
+    <string name="eth_unconfirmed_wait">โปรดรอจนกระทั่งธุรกรรมก่อนหน้าของคุณได้รับการยืนยัน</string>
+    <string name="eth_transaction_complete">ธุรกรรมเสร็จสิ้นแล้ว! ธุรกรรมและยอดคงเหลือของคุณจะอัปเดตในเร็ว ๆ นี้ มันอาจใช้เวลาสองสามนาที\n</string>
+
+    <string name="dashboard_title">แดชบอร์ด</string>
+    <string name="dashboard_time_span_day">วัน</string>
+    <string name="dashboard_time_span_week">อาทิตย์</string>
+    <string name="dashboard_time_span_month">เดือน</string>
+    <string name="dashboard_time_span_year">ปี</string>
+    <string name="dashboard_time_span_all_time">ตลอดเวลา</string>
+    <string name="dashboard_bitcoin_price">ราคา Bitcoin </string>
+    <string name="dashboard_ether_price">ราคา Ether </string>
+    <string name="dashboard_charts_error">ข้อผิดพลาดในการโหลดข้อมูลแผนภูมิ</string>
+    <string name="dashboard_charts_price_error">ข้อผิดพลาดในการรับข้อมูลราคา</string>
+
+    <string name="onboarding_ether_title">รองรับ Ether แล้วในตอนนี้</string>
+    <string name="onboarding_ether_description">คุณร้องขอและเรารับฟัง เราตื่นเต้นที่จะประกาศว่าในตอนนี้กระเป๋าเงิน Blockchain ของคุณจะอนุญาตให้คุณส่งและรับ ether ได้อย่างราบรื่น!</string>
+    <string name="onboarding_ether_cta">เริ่มต้นกับ Ether</string>
+
+    <string name="metadata_load_failure">ข้อผิดพลาดในการโหลดความสามารถในการใช้กระเป๋าเงินอย่างเต็มรูปแบบ อาจไม่สามารถใช้บริการได้ชั่วคราว</string>
+    <string name="fee_helper_message">ผู้ทำเหมืองจะได้รับค่าธรรมเนียมนี้ในการประมวลผลธุรกรรมนี้</string>
 
 </resources>

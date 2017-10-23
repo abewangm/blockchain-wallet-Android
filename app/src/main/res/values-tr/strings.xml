@@ -12,7 +12,6 @@
     <string name="please_wait">Lütfen bekleyin</string>
 
     <string name="send_bitcoin">Gönder</string>
-    <string name="receive_bitcoin">Al</string>
 
     <string name="cancel">İptal</string>
     <string name="yes">Evet</string>
@@ -157,8 +156,6 @@
     <string name="navigate">Gezin</string>
     <string name="enable_geo">Mevcut konumu bulmak için GPS veya başka bir konum bulma hizmetini etkinleştirin. Bunu yapabilmeniz için konum hizmetleri ayarlarına gitmek için TAMAM\'a tıklayın.</string>
 
-    <string name="my_addresses">Adresler</string>
-    <string name="addresses">Adresler</string>
     <string name="create_new">Yeni Oluştur</string>
     <string name="import_address">Adres Al</string>
     <string name="save_name">Ad kaydedildi</string>
@@ -169,7 +166,6 @@
 
     <string name="ssl_pinning_invalid">SSL sertifikası sabitleme başarısız oldu. Bu, kötü amaçlı aktiviteye işaret edebilir. Lütfen devam etmeden önce ağ bağlantınızı ve cihazınızı doğrulayın.</string>
 
-    <string name="merchant_map">Tacir Haritası</string>
     <string name="merchant_suggest">Tacir Öner</string>
     <string name="name">Ad</string>
     <string name="location">Konum</string>
@@ -209,7 +205,6 @@
     <string name="confirm_password">Şifreyi Onayla</string>
     <string name="check_email_to_auth_login">Bu oturum açma denemesini onaylamak için lütfen e-postanızı kontrol edin.</string>
     <string name="transaction_fee">İşlem Ücreti</string>
-    <string name="transaction_occur_when">İşlemler, bitcoin aldığınızda ve gönderdiğinizde oluşur.</string>
     <string name="click">Tıklayarak</string>
     <string name="to_start_sending_and_receiving_btc">bitcoin göndermeye ve almaya başlayın.</string>
 
@@ -320,7 +315,6 @@
     <string name="transaction_surge">Bitcoin madencilik ağı şu an yüksek miktarda etkinlik yaşamaktadır ve bu da önerilen ücretlerin normalden daha fazla olmasına neden olmaktadır.</string>
     <string name="unsupported_encryption_version">%1$s cüzdan sürümü desteklenmiyor.</string>
     <string name="logout">Çıkış</string>
-    <string name="to_field_helper">Bitcoin adresini girin veya seçin</string>
 
     <string name="update">Güncelle</string>
     <string name="mobile">Mobil</string>
@@ -348,7 +342,6 @@
 
     <string name="two_fa">2-aşamalı Doğrulama</string>
     <string name="tor_requests">Tor Taleplerini Engelle</string>
-    <string name="tor_summary">Tor anonimleştirme ağına ait olduğu bilinen IP adreslerinin cüzdanınıza erişimini engellemek ister misiniz? Tor ağı, Blochchain kullanıcı cüzdanlarına erişmek için korsanlar tarafından sıkça kullanılır.</string>
     <string name="change_password">Şifre Değiştir</string>
     <string name="email_notifications">E-posta Bildirimleri</string>
     <string name="email_notifications_summary">Bitcoin aldığınzda bildirim alın.</string>
@@ -376,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Oturum kapattınız veya cüzdanınızın şifresini çözmede bir sorun yaşandı. Oturum açmak için aşağıya şifrenizi girin.</string>
     <string name="logged_out_forget_wallet">Bu cüzdanı unutmak ve baştan başlamak için, lütfen \'Cüzdanı Unut\' seçeneğini tıklayın.</string>
-
-    <string name="api_fail">Sunucuya bağlanamadı. Lütfen daha sonra tekrar deneyin.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Büyük boyuta bir bitcoin işlemi. Cüzdanınız geçmişte almış olduğunuz birçok daha küçük ödemeyi birleştirmek zorundadır. Bu da hızlıca onaylanması için nispeten daha yüksek bir ücret gerektirir.</string>
     <string name="go_back">Geri git</string>
@@ -428,14 +419,11 @@
     <string name="shortcut_receive_qr_long">Alıcı adresi için QR kodunu görüntüle</string>
     <string name="shortcut_receive_qr_error">Üzgünüz, QR kodu oluşturulurken bir hata oluştu</string>
     <string name="shortcut_settings_enable">Başlatıcı Kısayolları</string>
-    <string name="shortcut_settings_summary">Başlatıcıda uygulama simgesine uzun basarak bitcoin almayı daha da hızlandırmak için bir alıcı adresi göstermek için bu seçeneği etkinleştirin.</string>
 
     <string name="swipe_receive_hint">Almak için kaydırın</string>
-    <string name="swipe_receive_preference_summary">Bitcoin almayı daha da hızlandırmak için PIN ekranına sola dokunduğunuzda alıcı adresi almak için bu seçeneği etkinleştirin. Yeni adresleri göstermek için oturum açmanın gerekli olacağı beş adres sıralı şekilde yüklenecektir.</string>
     <string name="swipe_receive_no_addresses">Şu an daha fazla adres yüklenemiyor. Daha fazla yüklemek için uygulamada oturum açın.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Genel bakış</string>
     <string name="create_a_wallet">Bir cüzdan oluştur</string>
     <string name="log_in">Oturum Aç</string>
     <string name="wallets">Cüzdanlar</string>
@@ -445,7 +433,6 @@
     <string name="confirm_upgrade_header">Selam, Blockchain cüzdana bu yeni özellikleri ekledik:</string>
     <string name="verify_email2">Doğrulanmış e-posta adresiniz, şüpheli veya sıradışı etkinlikler belirlendiği zaman oturum açma kodları göndermek, cüzdan oturum açma kimliğinizi size hatırlatmak ve para aldığınız zaman size bitcoin ödeme uyarıları göndermek için kullanılır.</string>
     <string name="enable_screenshots">Ekran Görüntülerini Etkinleştir</string>
-    <string name="enable_screenshots_summary">Blockchain uygulaması için ekran görüntülerini etkinleştirmek üzeresiniz. Uygulama içindeki bazı ekranlar hassas veriler görüntüleyebilir. Diğer uygulamalar bu ekran görüntülerine erişim sağlayacak.</string>
 
     <string name="information">Bilgi</string>
     <string name="transaction_detail_verify">Blockchain.info üzerinde doğrulayın</string>
@@ -455,7 +442,6 @@
     <string name="contacts_payment_request_send_note">%1$s bitcoin göndermek istediğinizden emin misiniz? Bu, isteğe bağlıdır ve %1$s ile paylaşılacaktır.</string>
     <string name="contacts_payment_request_receive_note">%1$s size neden bitcoin göndermeli? Bu, isteğe bağlıdır ve %1$s ile paylaşılacaktır.</string>
     <string name="contacts_send_address_message">Bu, kişinize bir adres gönderecektir. Devam etsin mi?</string>
-    <string name="contacts_register_nodes_failure">Kişiler hizmetine sizi bağlayamadık. Lütfen tam işlevselliği etkinleştirmek için yeniden deneyin.</string>
     <string name="contacts_too_much_sent">Öyle görünüyor ki talep edilenden daha fazla bitcoin gönderdiniz. İsterseniz kişinizden birazını geri isteyebilirsiniz. Ödemeyi tamamlanmış olarak işaretlemedik.</string>
     <string name="contacts_too_little_sent">Öyle görünüyor ki talep edilenden daha az bitcoin gönderdiniz. Kişiniz, göndermiş olduğunuz bitcoin tutarını yine de alacak ancak ödemeyi tamamlanmış olarak işaretlemedik.</string>
     <string name="contacts_second_password_prompt">Bu hizmeti kullanmak için ikinci şifrenizi girmenizi rica ediyoruz. Kişiler işlevini kullanmak için bunu sadece bir kez girmeniz gerekecek.</string>
@@ -478,12 +464,10 @@
     <string name="onboarding_check_inbox_title">Gelen Kutunuzu Kontrol Edin</string>
     <string name="onboarding_check_inbox_summary">Blockchain tarafından gönderilmiş bir e-posta arayın ve cüzdan kurulumunuzu tamamlamak için doğrulama bağlantısına tıklayın.</string>
     <string name="onboarding_verify_email">E-postayı doğrula</string>
-    <string name="onboarding_receive_bitcoin">Bitcoin al</string>
     <string name="onboarding_current_price">Mevcut Fiyat:</string>
     <string name="onboarding_qr_codes">QR Kodları</string>
     <string name="onboarding_scan_address">Adresleri Tara</string>
     <string name="onboarding_buy_content">Doğrudan cüzdanınızdan bitcoin alabilmeniz için dünya çapında dönüştürme ortaklarıyla çalışmaktayız.</string>
-    <string name="onboarding_receive_content">Bitcoin istemek için cüzdan adresinizi bir arkadaşınıza gönderin. Bir adres her işlem için değişen rastgele harf ve numaralardan oluşan bir dizidir.</string>
     <string name="onboarding_qr_codes_content">Bir adres ayrıca QR kodu olarak da gösterilebilir. Bir arkadaşınızın cüzdan adresini hızlıca almak için arkadaşınızın QR kodunu tarayın.</string>
 
     <string name="onboarding_buy_bitcoin">Bitcoin Al</string>
@@ -572,7 +556,6 @@
     <string name="contacts_no_contacts_found">Kişi bulunamadı</string>
     <string name="contacts_pairing_method_title">Kişi Ekle</string>
     <string name="contacts_title">Kişiler</string>
-    <string name="security_centre_backup_message">Güvenliğiniz için hiçbir şifreyi kayıt altına almamaktayız. Şifrenizi unutmanız durumunda bitcoinlerinizin güvenli olduğunu temin etmek için cüzdanınızı yedekleyin. </string>
     <string name="security_centre_backup_positive_button">Yedekle</string>
     <string name="security_centre_email_message">%1$s adlı kişiye bir e-posta gönderdik. Blockchain tarafından gönderilmiş bir e-posta arayın ve cüzdan kurulumunuzu tamamlamak için doğrulama bağlantısına tıklayın.</string>
     <string name="security_centre_email_title">E-postanızı kontrol edin</string>
@@ -601,7 +584,6 @@
     <string name="transaction_detail_pending">Beklemede (%1$s/%2$s Onaylar)</string>
     <string name="transaction_detail_description_hint">Bu niçindir?</string>
     <string name="transaction_detail_confirmed">Onaylandı</string>
-    <string name="to_field_helper_no_dropdown">Bitcoin adresi gir</string>
     <string name="share_instructions">Bu adresi kopyalamak için dokunun. Göndericiyle e-posta veya metin mesajıyla paylaşın.</string>
     <string name="security_centre_two_fa_message">Cüzdanınıza yetkisiz erişimleri engelleyin. Cüzdanınızın güvenliğini artırmak için 2-Aşamalı Doğrulamayı etkinleştirin.</string>
     <string name="security_centre_backup_title">Paranızı yedekleyin</string>
@@ -634,7 +616,6 @@
     <string name="sms_notifications_summary">Bitcoin aldığınızda bir SMS almak için bildirimleri etkinleştirin.</string>
     <string name="backup_header">Yedekleme İfadesi</string>
     <string name="backup_explanation">Güvenliğiniz için Blockchain hiçbir şifreyi kayıt altına almamaktadır. Bu 12 sözcüklü Yedekleme İfadesi şifrenizi unutmanız durumunda paranıza erişmenizi sağlar. Bir kağıda yazdığınızdan ve güvenli ve emniyetli bir yerde tuttuğunuzdan emin olun. </string>
-    <string name="backup_complete_message">Şifrenizi unutmanız durumunda paranızı kurtarmak için Yedekleme İfadenizi kullanabilirsiniz. Yedekleme İfadenize erişebilen herkes bitcoinlerinize de erişebilir, bu yüzden çevrimdışı güvenli ve özel bir yerde tuttuğunuzdan emin olun.</string>
     <string name="backup_verify_heading">Yedekleme işlemini tamamlamak için Yedekleme İfadenizdeki şu 12 sözcüğü girin.</string>
     <string name="backup_lost_mnemonic">12 sözcüklü yedekleme ifadenizi kaybettiniz mi?</string>
     <string name="trade_complete">İşlem Tamamlandı</string>
@@ -666,5 +647,76 @@
     <string name="fee_options_advanced_warning">Bu özellik sadece ileri kullanıcılar için önerilir Özel bir ücret seçerek aşırı ödeme veya işleminizin asla onaylanmama riski yaşarsınız.</string>
     <string name="fee_options_sat_byte_hint">sat/b </string>
     <string name="fee_options_sat_byte_inline_hint">Normal: %1$s, Öncelik: %2$s</string>
+
+    <string name="receive_bitcoin">Talep</string>
+    <string name="overview">İşlemler</string>
+    <string name="sending">Gönderiliyor</string>
+    <string name="receiving">Alınıyor</string>
+    <string name="paid">Ödendi</string>
+    <string name="payment_request">Ödeme Talebi</string>
+    <string name="restoring_wallet">Cüzdan kurtarılıyor.</string>
+    <string name="support_leaving_app_warning">Bu işlem uygulamadan çıkacak ve sizi web tarayıcısına götürecektir. Devam?</string>
+    <string name="addresses">Bitcoin Adresleri</string>
+    <string name="merchant_map">Bitcoin Satıcı Haritası</string>
+    <string name="received_ethereum">Ether Alındı</string>
+    <string name="transaction_occur_when_bitcoin">İşlemler, bitcoin aldığınızda ve gönderdiğinizde oluşur.</string>
+    <string name="transaction_occur_when_eth">İşlemler, ether aldığınızda ve gönderdiğinizde oluşur.</string>
+    <string name="to_field_helper">Bitcoin adresi girin veya seçin</string>
+    <string name="to_field_helper_no_dropdown">Bitcoin adresi girin</string>
+    <string name="tor_summary">Tor anonimleştirme ağına ait olduğu bilinen IP adreslerini engelleyin. Tor ağı, Blochchain kullanıcı cüzdanlarına erişmek için korsanlar tarafından sıkça kullanılır.</string>
+    <string name="enable_screenshots_summary">Uygulama içindeki bazı görüntüler hassas veriler görüntüleyebilir. Diğer uygulamalar bu ekran görüntülerine erişim sağlayacak.</string>
+    <string name="two_fa_summary">2-Aşamalı Doğrulamayı etkinleştirerek cüzdanınızı yetkisiz erişime karşı koruyun.</string>
+    <string name="two_fa_description">2-Aşamalı Doğrulamayı etkinleştirerek cüzdanınızı yetkisiz erişime karşı koruyun. Cüzdanınızı güvende tutmak için cep telefonu numaranızı kullanabilirsiniz. Bu kod, cüzdanınıza web tarayıcısı üzerinden erişmeye çalıştığınızda istenilecektir.\n\nBunun yerine başka kimlik doğrulama yöntemlerini kullanmak isterseniz lütfen %1$s üzerinden web cüzdanınıza giriş yapın.</string>
+    <string name="email_request_subject_eth">Ether ödeme talebi</string>
+    <string name="email_request_body_eth">Lütfen ETH %1$s Ether adresine gönderilsin.</string>
+    <string name="api_fail">Sunucuya bağlanamadı. Lütfen daha sonra tekrar deneyin.</string>
+    <string name="transaction_detail_verify_etherscan">Etherscan.io adresinden doğrulayın.</string>
+    <string name="security_centre_backup_message">Güvenliğiniz için hiçbir şifreyi kayıt altına almamaktayız. Şifrenizi kaybetmeniz durumunda paranızın güvende olduğundan emin olmak için cüzdanınızı yedekleyin. </string>
+    <string name="backup_complete_message">Şifrenizi unutmanız durumunda paranızı kurtarmak için Yedekleme İfadenizi kullanabilirsiniz. Yedekleme İfadenizee erişebilen herkes bitcoininize erişebilmektedir ve bu yüzden bunu çevrimdışı güvenli ve emniyetli bir yerde tuttuğunuzdan emin olun.</string>
+    <string name="shortcut_settings_summary">Başlatıcıdaki uygulama simgesine uzun bastığınızda bitcoin alımını daha da hızlandırmak için bir alıcı adresi gösterin.</string>
+
+    <string name="confirm">Onayla</string>
+    <string name="pending">Bekleyen</string>
+    <string name="transactions">İşlemler</string>
+
+    <string name="swipe_receive_preference_summary">Ekrandaki PIN kodu ekranında sola kaydırarak bitcoin alımını daha da hızlandırmak için bir alıcı adresi gösterin.</string>
+    <string name="swipe_receive_address_info">Yeni adresleri göstermek için oturum açmanın gerekli olacağı beş adres sıralı şekilde yüklenecektir.</string>
+    <string name="onboarding_receive_bitcoin">Para Talep Edin</string>
+    <string name="onboarding_receive_content">Para talep etmek için cüzdan adresinizi bir arkadaşınıza gönderin. Bir adres her işlem için değişen rastgele harf ve numaralardan oluşan bir dizidir.</string>
+    <string name="onboarding_get_eth">Ether Alın</string>
+    <string name="buy_second_password_prompt">Bu hizmeti kullanmak için ikinci şifrenizi girmenizi rica ediyoruz. Bunu Al işlevini kullanabilmeniz için sadece bir kez girmeniz gerekecektir.</string>
+    <string name="what_s_this">Bu nedir?</string>
+    <string name="dismiss">Yoksay</string>
+
+    <string name="eth_default_account_label">Ether Cüzdanım</string>
+    <string name="eth_now_supporting">Şimdi Ether destekleniyor</string>
+    <string name="eth_second_password_prompt">Bu hizmeti kullanmak için ikinci şifrenizi girmenizi rica ediyoruz. Bunu Ether cüzdanınızı oluşturmak için sadece bir kez girmeniz gerekecektir.</string>
+    <string name="ether">ETHER </string>
+    <string name="bitcoin">BITCOIN </string>
+    <string name="eth_to_field_helper">Ether adresi girin veya seçin</string>
+    <string name="eth_to_field_helper_no_dropdown">Ether adresi girin</string>
+    <string name="eth_invalid_address">Geçersiz Ether adresi</string>
+    <string name="eth_support_contract_not_allowed">Sözleşme adresleri desteklenmiyor.</string>
+    <string name="eth_support_only_eth">Şu anda sadece ETH desteklenmektedir- bu adrese token alamazsınız</string>
+    <string name="eth_unconfirmed_wait">Lütfen önceki işleminiz onaylanana kadar bekleyin</string>
+    <string name="eth_transaction_complete">İşlem tamamlandı! İşlemleriniz ve bakiyeniz birazdan güncellenecektir, bu birkaç dakika sürebilir.\n</string>
+
+    <string name="dashboard_title">Pano</string>
+    <string name="dashboard_time_span_day">Gün</string>
+    <string name="dashboard_time_span_week">Hafta</string>
+    <string name="dashboard_time_span_month">Ay</string>
+    <string name="dashboard_time_span_year">Yıl</string>
+    <string name="dashboard_time_span_all_time">Tüm Zamanlar</string>
+    <string name="dashboard_bitcoin_price">Bitcoin fiyatı</string>
+    <string name="dashboard_ether_price">Ether fiyatı</string>
+    <string name="dashboard_charts_error">Grafik verileri yüklenirken hata oluştu</string>
+    <string name="dashboard_charts_price_error">Fiyat verileri alınırken hata oluştu</string>
+
+    <string name="onboarding_ether_title">Şimdi Ether Destekleniyor</string>
+    <string name="onboarding_ether_description">Siz istediniz, biz dinledik. Blockchain cüzdanınızın artık sorunsuz bir şekilde ether gönderip alabileceğini bildirmekten dolayı heyecanlıyız!</string>
+    <string name="onboarding_ether_cta">Ether\'e Başlayın</string>
+
+    <string name="metadata_load_failure">Tam cüzdan işlevi yüklenirken hata oluştur. Hizmet geçici bir süreliğine kullanılmıyor olabilir.</string>
+    <string name="fee_helper_message">Madenciler bu işlemi gerçekleştirmek için bu ücreti alır.</string>
 
 </resources>

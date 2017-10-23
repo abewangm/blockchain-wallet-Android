@@ -1,19 +1,22 @@
 package piuk.blockchain.android.ui.chooser
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.argumentCaptor
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.contacts.data.Contact
 import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.data.access.AccessState
-import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.contacts.ContactsDataManager
+import piuk.blockchain.android.data.contacts.models.PaymentRequestType
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.util.StringUtils
 import java.util.*
-
 
 class AccountChooserPresenterTest {
 
@@ -23,6 +26,7 @@ class AccountChooserPresenterTest {
     private var mockStringUtils: StringUtils = mock()
     private var mockContactsManager: ContactsDataManager = mock()
     private var mockAccessState: AccessState = mock()
+    private var mockCurrencyState: CurrencyState = mock()
 
     @Before
     @Throws(Exception::class)
@@ -31,7 +35,8 @@ class AccountChooserPresenterTest {
                 mockWalletAccountHelper,
                 mockStringUtils,
                 mockContactsManager,
-                mockAccessState
+                mockAccessState,
+                mockCurrencyState
         )
         subject.initView(mockActivity)
     }
@@ -96,15 +101,15 @@ class AccountChooserPresenterTest {
         val itemAccount0 = ItemAccount("", "", null, null, null, null)
         val itemAccount1 = ItemAccount("", "", null, null, null, null)
         val itemAccount2 = ItemAccount("", "", null, null, null, null)
-        whenever(mockWalletAccountHelper.getHdAccounts(any()))
+        whenever(mockWalletAccountHelper.getHdAccounts())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses(any()))
+        whenever(mockWalletAccountHelper.getLegacyAddresses())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockWalletAccountHelper).getHdAccounts(any())
-        verify(mockWalletAccountHelper).getLegacyAddresses(any())
+        verify(mockWalletAccountHelper).getHdAccounts()
+        verify(mockWalletAccountHelper).getLegacyAddresses()
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 2 headers, 3 accounts, 3 legacy addresses
@@ -113,7 +118,7 @@ class AccountChooserPresenterTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeSend_contactsEnabled() {
+    fun `onViewReadyRequestTypeSend contactsEnabled`() {
         // Arrange
         whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
         whenever(mockActivity.isContactsEnabled).thenReturn(true)
@@ -127,16 +132,16 @@ class AccountChooserPresenterTest {
         val itemAccount0 = ItemAccount()
         val itemAccount1 = ItemAccount()
         val itemAccount2 = ItemAccount()
-        whenever(mockWalletAccountHelper.getHdAccounts(any()))
+        whenever(mockWalletAccountHelper.getHdAccounts())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses(any()))
+        whenever(mockWalletAccountHelper.getLegacyAddresses())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
         subject.onViewReady()
         // Assert
         verify(mockContactsManager).getContactList()
-        verify(mockWalletAccountHelper).getHdAccounts(any())
-        verify(mockWalletAccountHelper).getLegacyAddresses(any())
+        verify(mockWalletAccountHelper).getHdAccounts()
+        verify(mockWalletAccountHelper).getLegacyAddresses()
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
@@ -145,31 +150,26 @@ class AccountChooserPresenterTest {
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeSend_contactsDisabled() {
+    fun `onViewReadyRequestTypeSend contactsDisabled`() {
         // Arrange
         whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
         whenever(mockActivity.isContactsEnabled).thenReturn(false)
         val itemAccount0 = ItemAccount()
         val itemAccount1 = ItemAccount()
         val itemAccount2 = ItemAccount()
-        whenever(mockWalletAccountHelper.getHdAccounts(any()))
+        whenever(mockWalletAccountHelper.getHdAccounts())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses(any()))
+        whenever(mockWalletAccountHelper.getLegacyAddresses())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockWalletAccountHelper).getHdAccounts(any())
-        verify(mockWalletAccountHelper).getLegacyAddresses(any())
+        verify(mockWalletAccountHelper).getHdAccounts()
+        verify(mockWalletAccountHelper).getLegacyAddresses()
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
         captor.firstValue.size shouldEqual 8
     }
+
 }
-
-
-
-
-
-

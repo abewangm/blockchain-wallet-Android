@@ -24,6 +24,7 @@ import piuk.blockchain.android.ui.launcher.LauncherActivity;
 
 import static piuk.blockchain.android.util.PersistentPrefs.KEY_OVERLAY_TRUSTED;
 
+@SuppressWarnings("WeakerAccess")
 public class AppUtil {
 
     private static final String REGEX_UUID = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
@@ -32,12 +33,10 @@ public class AppUtil {
     @Inject Lazy<PayloadManager> payloadManager;
     private Context context;
     private AlertDialog alertDialog;
-    private String receiveQRFileName;
 
     public AppUtil(Context context) {
         Injector.getInstance().getAppComponent().inject(this);
         this.context = context;
-        receiveQRFileName = context.getExternalCacheDir() + File.separator + "qr.png";
     }
 
     public void clearCredentials() {
@@ -61,15 +60,19 @@ public class AppUtil {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("verified", true);
         context.startActivity(intent);
-        prefs.logIn();
+        AccessState.getInstance().logIn();
     }
 
     public String getReceiveQRFilename() {
-        return receiveQRFileName;
+        // getExternalCacheDir can return null if permission for write storage not granted
+        // or if running on an emulator
+        return context.getExternalCacheDir() + File.separator + "qr.png";
     }
 
     public void deleteQR() {
-        File file = new File(receiveQRFileName);
+        // getExternalCacheDir can return null if permission for write storage not granted
+        // or if running on an emulator
+        File file = new File(context.getExternalCacheDir() + File.separator + "qr.png");
         if (file.exists()) {
             file.delete();
         }

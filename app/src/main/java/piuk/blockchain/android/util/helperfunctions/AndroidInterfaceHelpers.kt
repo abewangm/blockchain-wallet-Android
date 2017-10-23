@@ -1,5 +1,6 @@
 package piuk.blockchain.android.util.helperfunctions
 
+import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.view.View
 import android.widget.AdapterView
@@ -7,7 +8,7 @@ import android.widget.AdapterView
 /**
  * Allow us to use a functional interface in place of implementing members that we might not need to.
  */
-inline fun OnItemSelectedListener(
+inline fun onItemSelectedListener(
         crossinline function: (position: Int) -> Unit
 ): AdapterView.OnItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
@@ -25,7 +26,7 @@ inline fun OnItemSelectedListener(
 /**
  * Allow us to use a functional interface in place of implementing members that we might not need to.
  */
-inline fun OnPageChangeListener(
+inline fun onPageChangeListener(
         crossinline function: (position: Int, positionOffset: Float) -> Unit
 ): ViewPager.OnPageChangeListener = object : ViewPager.OnPageChangeListener {
 
@@ -41,4 +42,27 @@ inline fun OnPageChangeListener(
     override fun onPageScrollStateChanged(state: Int) {
         // No-op
     }
+}
+
+/**
+ * Technically an extension function, but allows us to use a functional interface instead of
+ * having to implement all methods and returns the only thing we're interested in, which in this
+ * case is the actual position.
+ */
+fun TabLayout.setOnTabSelectedListener(function: (position: Int) -> Unit) {
+    addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        override fun onTabReselected(p0: TabLayout.Tab?) {
+            // No-op
+        }
+
+        override fun onTabUnselected(p0: TabLayout.Tab?) {
+            // No-op
+        }
+
+        override fun onTabSelected(p0: TabLayout.Tab?) {
+            // Pass the currently selected tab position
+            function(selectedTabPosition)
+        }
+    })
+
 }

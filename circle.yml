@@ -1,50 +1,93 @@
-machine:
-  environment:
-    ANDROID_HOME: /usr/local/android-sdk-linux
-    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
-    _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
-  java:
-    version: oraclejdk8
+version: 2
+jobs:
+  build:
+    resource_class: large
+    docker:
+      - image: circleci/android:api-26-alpha
+    environment:
+      _JAVA_OPTIONS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+    steps:
+      - checkout
+      - run:
+          name: Decode API Keys and Secrets
+          command: |
+            echo $FIREBASE_API_JSON  | base64 --decode > app/google-services.json
+            echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
+
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+            - gradle-
+
+      - restore_cache:
+          key: android-cache-
+
+      - run:
+          name: Start Gradle Daemon
+          command: nohup ./gradlew
+
+      - run:
+          name: Build Tests
+          command: ./scripts/ci_assemble.sh
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+
+      - save_cache:
+          key: android-cache-{{ epoch }}
+          paths:
+            - ~/.android/build-cache
+            - ~/.android/cache
+
+      - run:
+          name: Run Tests
+          command: ./scripts/ci_unit_tests.sh
+
+      - store_artifacts:
+          path: app/build/reports
+          destination: Test Reports
+      - store_artifacts:
+          path: build/test-results
+          destination: Test Result XML
+      - store_test_results:
+          path: build/test-results
+
+  checks:
+    resource_class: large
+    docker:
+      - image: circleci/android:api-26-alpha
+    steps:
+      - checkout
+      - run:
+          name: Decode API Keys and Secrets
+          command: |
+            echo $FIREBASE_API_JSON  | base64 --decode > app/google-services.json
+            echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
+
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+            - gradle-
+
+      - run:
+          name: Run Checks
+          command: ./scripts/ci_quality.sh
+
+      - store_artifacts:
+          path: app/build/reports
+          destination: Test Reports
+      - store_test_results:
+          path: build/test-results
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - checks
 
 notify:
   webhooks:
     - url: https://coveralls.io/webhook?repo_token=$COVERALLS_REPO_TOKEN
-
-general:
-   artifacts:
-     - $CIRCLE_TEST_REPORTS
-
-dependencies:
-  pre:
-    # Decode Firebase API key
-    - echo $FIREBASE_API_JSON | base64 --decode > app/google-services.json
-    # Decode secrets; Maps key, Fabric key, URLs etc
-    - echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
-    # Install platform tools including sdkmanager
-    - echo y | android -s update sdk -u -a -t "tools"
-    # Android SDK Platform 26
-    - if [ ! -d "/usr/local/android-sdk-linux/platforms/android-26" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-26"; fi
-    # Android SDK Build-tools, revision 26.0.1
-    - if [ ! -d "/usr/local/android-sdk-linux/build-tools/26.0.1" ]; then echo y | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;26.0.1"; fi
-    - ./gradlew app:dependencies --console=plain
-
-  cache_directories:
-    # Android SDK
-    - /usr/local/android-sdk-linux/tools
-    - /usr/local/android-sdk-linux/platform-tools
-    - /usr/local/android-sdk-linux/build-tools
-    - /usr/local/android-sdk-linux/licenses
-    - /usr/local/android-sdk-linux/extras/android/m2repository
-    - /usr/local/android-sdk-linux/extras/google/m2repository
-
-    # Gradle caches
-    - /home/ubuntu/.gradle/caches/
-    - /home/ubuntu/.gradle/wrapper/
-
-test:
-  override:
-    - ./gradlew assembleEnvProdMinApi21Debug testEnvProdMinApi21DebugUnitTest testEnvProdMinApi21DebugUnitTestCoverage coveralls --no-daemon -Dpre-dex=false -Porg.gradle.parallel=false -Pcom.android.build.threadPoolSize=1 --stacktrace --console=plain
-  post:
-    # Move unit test XML to correct directory
-    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;

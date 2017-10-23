@@ -252,6 +252,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
                 .show();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void setUiState(@UiState.UiStateDef int uiState) {
         switch (uiState) {

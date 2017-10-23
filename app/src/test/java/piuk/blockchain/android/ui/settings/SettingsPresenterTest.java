@@ -4,27 +4,24 @@ import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.settings.SettingsManager;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import piuk.blockchain.android.BlockchainTestApplication;
-import piuk.blockchain.android.BuildConfig;
+import piuk.blockchain.android.R;
+import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -35,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,9 +40,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-@Config(sdk = 23, constants = BuildConfig.class, application = BlockchainTestApplication.class)
-@RunWith(RobolectricTestRunner.class)
-public class SettingsPresenterTest {
+public class SettingsPresenterTest extends RxTest {
 
     private SettingsPresenter subject;
     @Mock private SettingsView activity;
@@ -56,9 +52,11 @@ public class SettingsPresenterTest {
     @Mock private StringUtils stringUtils;
     @Mock private PrefsUtil prefsUtil;
     @Mock private AccessState accessState;
+    @Mock private SwipeToReceiveHelper swipeToReceiveHelper;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
+        super.setUp();
         MockitoAnnotations.initMocks(this);
 
         subject = new SettingsPresenter(fingerprintHelper,
@@ -68,7 +66,8 @@ public class SettingsPresenterTest {
                 payloadDataManager,
                 stringUtils,
                 prefsUtil,
-                accessState);
+                accessState,
+                swipeToReceiveHelper);
         subject.initView(activity);
     }
 
@@ -407,6 +406,7 @@ public class SettingsPresenterTest {
         // Arrange
         String verificationCode = "VERIFICATION_CODE";
         when(settingsDataManager.verifySms(anyString())).thenReturn(Observable.error(new Throwable()));
+        subject.settings = mock(Settings.class);
         // Act
         subject.verifySms(verificationCode);
         // Assert
@@ -416,7 +416,6 @@ public class SettingsPresenterTest {
         verify(activity).hideProgressDialog();
         //noinspection WrongConstant
         verify(activity).showWarningDialog(anyInt());
-        verifyNoMoreInteractions(activity);
     }
 
     @Test
@@ -425,7 +424,7 @@ public class SettingsPresenterTest {
         Settings mockSettings = mock(Settings.class);
         when(mockSettings.isBlockTorIps()).thenReturn(true);
         when(settingsDataManager.updateTor(true)).thenReturn(Observable.just(mockSettings));
-        subject.settings = new Settings();
+        subject.settings = mock(Settings.class);
         // Act
         subject.updateTor(true);
         // Assert
@@ -437,13 +436,13 @@ public class SettingsPresenterTest {
     public void updateTorFailed() throws Exception {
         // Arrange
         when(settingsDataManager.updateTor(true)).thenReturn(Observable.error(new Throwable()));
+        subject.settings = mock(Settings.class);
         // Act
         subject.updateTor(true);
         // Assert
         verify(settingsDataManager).updateTor(true);
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verifyNoMoreInteractions(activity);
     }
 
     @Test
@@ -452,7 +451,7 @@ public class SettingsPresenterTest {
         Settings mockSettings = mock(Settings.class);
         int authType = SettingsManager.AUTH_TYPE_YUBI_KEY;
         when(settingsDataManager.updateTwoFactor(authType)).thenReturn(Observable.just(mockSettings));
-        subject.settings = new Settings();
+        subject.settings = mock(Settings.class);
         // Act
         subject.updateTwoFa(authType);
         // Assert
@@ -464,13 +463,13 @@ public class SettingsPresenterTest {
         // Arrange
         int authType = SettingsManager.AUTH_TYPE_YUBI_KEY;
         when(settingsDataManager.updateTwoFactor(authType)).thenReturn(Observable.error(new Throwable()));
+        subject.settings = mock(Settings.class);
         // Act
         subject.updateTwoFa(authType);
         // Assert
         verify(settingsDataManager).updateTwoFactor(authType);
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
-        verifyNoMoreInteractions(activity);
     }
 
     @Test
@@ -633,6 +632,50 @@ public class SettingsPresenterTest {
         verify(activity).hideProgressDialog();
         //noinspection WrongConstant
         verify(activity, times(2)).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+    }
+
+    @Test
+    public void storeSwipeToReceiveAddressesSuccessful() throws Exception {
+        // Arrange
+
+        // Act
+        subject.storeSwipeToReceiveAddresses();
+        getTestScheduler().triggerActions();
+        // Assert
+        verify(swipeToReceiveHelper).updateAndStoreBitcoinAddresses();
+        verify(swipeToReceiveHelper).storeEthAddress();
+        verifyNoMoreInteractions(swipeToReceiveHelper);
+        verify(activity).showProgressDialog(R.string.please_wait);
+        verify(activity).hideProgressDialog();
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void storeSwipeToReceiveAddressesFailed() throws Exception {
+        // Arrange
+        doThrow(NullPointerException.class).when(swipeToReceiveHelper).updateAndStoreBitcoinAddresses();
+        // Act
+        subject.storeSwipeToReceiveAddresses();
+        getTestScheduler().triggerActions();
+        // Assert
+        verify(swipeToReceiveHelper).updateAndStoreBitcoinAddresses();
+        verifyNoMoreInteractions(swipeToReceiveHelper);
+        verify(activity).showProgressDialog(anyInt());
+        verify(activity).hideProgressDialog();
+        verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
+        verifyNoMoreInteractions(activity);
+    }
+
+    @Test
+    public void clearSwipeToReceiveData() throws Exception {
+        // Arrange
+
+        // Act
+        subject.clearSwipeToReceiveData();
+        // Assert
+        verify(prefsUtil).removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ACCOUNT_NAME);
+        verify(prefsUtil).removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ADDRESSES);
+        verify(prefsUtil).removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ETH_ADDRESS);
     }
 
 }

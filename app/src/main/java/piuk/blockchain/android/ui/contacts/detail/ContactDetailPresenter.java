@@ -29,6 +29,7 @@ import piuk.blockchain.android.data.contacts.models.ContactTransactionModel;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BasePresenter;
@@ -52,6 +53,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
     private RxBus rxBus;
     private TransactionListDataManager transactionListDataManager;
     private AccessState accessState;
+    private CurrencyState currencyState;
     private ExchangeRateFactory exchangeRateFactory;
     private MonetaryUtil monetaryUtil;
 
@@ -62,7 +64,8 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
                            RxBus rxBus,
                            TransactionListDataManager transactionListDataManager,
                            AccessState accessState,
-                           ExchangeRateFactory exchangeRateFactory) {
+                           ExchangeRateFactory exchangeRateFactory,
+                           CurrencyState currencyState) {
 
         this.contactsDataManager = contactsDataManager;
         this.payloadDataManager = payloadDataManager;
@@ -71,6 +74,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
         this.transactionListDataManager = transactionListDataManager;
         this.accessState = accessState;
         this.exchangeRateFactory = exchangeRateFactory;
+        this.currencyState = currencyState;
 
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
@@ -287,7 +291,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
 
 
     void onBtcFormatChanged(boolean isBtc) {
-        accessState.setIsBtc(isBtc);
+        currencyState.setDisplayingCryptoCurrency(isBtc);
     }
 
     private void subscribeToNotifications() {
@@ -372,12 +376,12 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
 
         }
 
-        getView().onTransactionsUpdated(displayList, accessState.isBtc());
+        getView().onTransactionsUpdated(displayList, currencyState.isDisplayingCryptoCurrency());
     }
 
     private String getBalanceString(long btcBalance) {
         String strFiat = getFiatCurrency();
-        double fiatBalance = exchangeRateFactory.getLastPrice(strFiat) * (btcBalance / 1e8);
+        double fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8);
         return monetaryUtil.getFiatFormat(strFiat).format(fiatBalance) + strFiat;
     }
 
@@ -396,4 +400,7 @@ public class ContactDetailPresenter extends BasePresenter<ContactDetailView> {
         rxBus.unregister(NotificationPayload.class, notificationObservable);
     }
 
+    public double getEthExchangeRate() {
+        return exchangeRateFactory.getLastEthPrice(getFiatCurrency());
+    }
 }

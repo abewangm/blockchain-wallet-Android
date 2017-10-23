@@ -14,18 +14,18 @@ import piuk.blockchain.android.R;
 
 class ShareReceiveIntentAdapter extends RecyclerView.Adapter<ShareReceiveIntentAdapter.ViewHolder> {
 
-    private final List<ReceivePresenter.SendPaymentCodeData> mData;
+    private final List<SendPaymentCodeData> paymentCodeData;
     private OnItemClickedListener itemClickedListener;
-    private Context mContext;
+    private Context context;
 
-    ShareReceiveIntentAdapter(List<ReceivePresenter.SendPaymentCodeData> repoDataArrayList) {
-        mData = repoDataArrayList;
+    ShareReceiveIntentAdapter(List<SendPaymentCodeData> repoDataArrayList) {
+        paymentCodeData = repoDataArrayList;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
-        LayoutInflater inflater = LayoutInflater.from(mContext);
+        context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
         View row = inflater.inflate(R.layout.receive_share_row, parent, false);
 
         return new ViewHolder(row);
@@ -33,20 +33,20 @@ class ShareReceiveIntentAdapter extends RecyclerView.Adapter<ShareReceiveIntentA
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ReceivePresenter.SendPaymentCodeData data = mData.get(position);
+        SendPaymentCodeData data = paymentCodeData.get(position);
 
-        holder.mTitleTextView.setText(data.getTitle());
-        holder.mImageView.setImageDrawable(data.getLogo());
+        holder.titleTextView.setText(data.getTitle());
+        holder.imageView.setImageDrawable(data.getLogo());
 
-        holder.mRootView.setOnClickListener(view -> {
+        holder.rootView.setOnClickListener(view -> {
             if (itemClickedListener != null) itemClickedListener.onItemClicked();
-            mContext.startActivity(data.getIntent());
+            context.startActivity(data.getIntent());
         });
     }
 
     @Override
     public int getItemCount() {
-        return mData != null ? mData.size() : 0;
+        return paymentCodeData != null ? paymentCodeData.size() : 0;
     }
 
     void setItemClickedListener(OnItemClickedListener itemClickedListener) {
@@ -55,15 +55,15 @@ class ShareReceiveIntentAdapter extends RecyclerView.Adapter<ShareReceiveIntentA
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView mImageView;
-        TextView mTitleTextView;
-        View mRootView;
+        ImageView imageView;
+        TextView titleTextView;
+        View rootView;
 
         ViewHolder(View itemView) {
             super(itemView);
-            mRootView = itemView;
-            mImageView = (ImageView) itemView.findViewById(R.id.share_app_image);
-            mTitleTextView = (TextView) itemView.findViewById(R.id.share_app_title);
+            rootView = itemView;
+            imageView = itemView.findViewById(R.id.share_app_image);
+            titleTextView = itemView.findViewById(R.id.share_app_title);
         }
     }
 

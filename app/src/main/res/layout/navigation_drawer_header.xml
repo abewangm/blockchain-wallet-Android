@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navigationHeader"
     android:layout_width="match_parent"
     android:layout_height="152dp"
     android:background="@color/primary_navy_medium">
 
-    <TextView
-        android:id="@+id/textview_current_price"
-        fontPath="fonts/Montserrat-Regular.ttf"
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_marginLeft="36dp"
-        android:gravity="left"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        tools:ignore="MissingPrefix"
-        tools:text="1 BTC = $1015" />
+        android:paddingLeft="32dp"
+        android:paddingRight="32dp"
+        app:srcCompat="@drawable/vector_logo_white" />
 
 </RelativeLayout>

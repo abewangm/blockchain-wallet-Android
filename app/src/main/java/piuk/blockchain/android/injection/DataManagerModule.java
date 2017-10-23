@@ -4,24 +4,31 @@ import android.content.Context;
 
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.ethereum.EthAccountApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
+import info.blockchain.wallet.prices.PriceApi;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import dagger.Module;
 import dagger.Provides;
 import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
+import piuk.blockchain.android.data.charts.ChartsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsService;
 import piuk.blockchain.android.data.contacts.datastore.ContactsMapStore;
-import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.ethereum.EthDataManager;
+import piuk.blockchain.android.data.ethereum.EthDataStore;
 import piuk.blockchain.android.data.exchange.BuyConditions;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeService;
@@ -31,7 +38,6 @@ import piuk.blockchain.android.data.payload.PayloadService;
 import piuk.blockchain.android.data.payments.PaymentService;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
@@ -79,19 +85,26 @@ public class DataManagerModule {
     protected WalletAccountHelper provideWalletAccountHelper(PayloadManager payloadManager,
                                                              PrefsUtil prefsUtil,
                                                              StringUtils stringUtils,
-                                                             ExchangeRateFactory exchangeRateFactory) {
-        return new WalletAccountHelper(payloadManager, stringUtils, prefsUtil, exchangeRateFactory);
+                                                             ExchangeRateFactory exchangeRateFactory,
+                                                             CurrencyState currencyState,
+                                                             EthDataStore ethDataStore) {
+        return new WalletAccountHelper(payloadManager,
+                stringUtils,
+                prefsUtil,
+                exchangeRateFactory,
+                currencyState,
+                ethDataStore);
     }
 
     @Provides
     @PresenterScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
-                                                                           TransactionListStore transactionListStore,
-                                                                           RxBus rxBus) {
+                                                                           EthDataManager ethDataManager,
+                                                                           TransactionListStore transactionListStore) {
         return new TransactionListDataManager(
                 payloadManager,
-                transactionListStore,
-                rxBus);
+                ethDataManager,
+                transactionListStore);
     }
 
     @Provides
@@ -127,9 +140,19 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
+    protected EthDataManager provideEthDataManager(PayloadManager payloadManager,
+                                                   EthDataStore ethDataStore,
+                                                   RxBus rxBus) {
+        return new EthDataManager(payloadManager, new EthAccountApi(), ethDataStore, rxBus);
+    }
+
+    @Provides
+    @PresenterScope
     protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
-                                                               PrefsUtil prefsUtil) {
-        return new SwipeToReceiveHelper(payloadDataManager, prefsUtil);
+                                                               PrefsUtil prefsUtil,
+                                                               EthDataManager ethDataManager,
+                                                               StringUtils stringUtils) {
+        return new SwipeToReceiveHelper(payloadDataManager, prefsUtil, ethDataManager, stringUtils);
     }
 
     @Provides
@@ -191,6 +214,12 @@ public class DataManagerModule {
                 contactsMapStore,
                 pendingTransactionListStore,
                 rxBus);
+    }
+
+    @Provides
+    @PresenterScope
+    protected ChartsDataManager provideChartsDataManager(RxBus rxBus) {
+        return new ChartsDataManager(new PriceApi(), rxBus);
     }
 
 }

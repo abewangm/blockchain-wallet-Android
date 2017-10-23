@@ -490,8 +490,6 @@ public class PasswordRequiredPresenterTest extends RxTest {
         subject.submitTwoFactorCode(responseObject, sessionId, password, code);
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull(), eq(false));
-        // TODO: 12/04/2017 There's a bug in Mockito here were it asserts that this was called twice.
-        // Check this with Mockito 2.8.0 when it makes it onto bintray
         verify(activity, atLeastOnce()).dismissProgressDialog();
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR));
         verify(authDataManager).submitTwoFactorCode(sessionId, guid, code);
@@ -513,8 +511,6 @@ public class PasswordRequiredPresenterTest extends RxTest {
         subject.submitTwoFactorCode(responseObject, sessionId, password, code);
         // Assert
         verify(activity).showProgressDialog(anyInt(), isNull(), eq(false));
-        // TODO: 12/04/2017 There's a bug in Mockito here were it asserts that this was called twice.
-        // Check this with Mockito 2.8.0 when it makes it onto bintray
         verify(activity, atLeastOnce()).dismissProgressDialog();
         verify(activity).goToPinPage();
         verify(authDataManager).submitTwoFactorCode(sessionId, guid, code);

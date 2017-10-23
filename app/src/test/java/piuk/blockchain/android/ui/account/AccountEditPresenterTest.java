@@ -211,7 +211,7 @@ public class AccountEditPresenterTest {
         when(payloadDataManager.getAddressBalance(anyString())).thenReturn(BigInteger.TEN);
         Fee mockFee = mock(Fee.class);
         when(mockFee.getFee()).thenReturn(100.0d);
-        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(100L);
+        when(dynamicFeeCache.getBtcFeeOptions().getRegularFee()).thenReturn(100L);
         when(sendDataManager.estimatedFee(anyInt(), anyInt(), any(BigInteger.class)))
                 .thenReturn(BigInteger.TEN);
         // Act
@@ -233,7 +233,7 @@ public class AccountEditPresenterTest {
         legacyAddress.setLabel("");
         subject.legacyAddress = legacyAddress;
         Pair<BigInteger, BigInteger> sweepableCoins = Pair.of(BigInteger.ONE, BigInteger.TEN);
-        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(100L);
+        when(dynamicFeeCache.getBtcFeeOptions().getRegularFee()).thenReturn(100L);
         when(payloadDataManager.getDefaultAccount()).thenReturn(mock(Account.class));
         when(payloadDataManager.getNextReceiveAddress(any(Account.class)))
                 .thenReturn(Observable.just("address"));
@@ -246,7 +246,7 @@ public class AccountEditPresenterTest {
         when(spendableUnspentOutputs.getConsumedAmount()).thenReturn(BigInteger.TEN);
         when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
                 .thenReturn(spendableUnspentOutputs);
-        when(exchangeRateFactory.getLastPrice(anyString())).thenReturn(100.0d);
+        when(exchangeRateFactory.getLastBtcPrice(anyString())).thenReturn(100.0d);
         when(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD");
         when(sendDataManager.estimateSize(anyInt(), anyInt())).thenReturn(1337);
@@ -266,7 +266,7 @@ public class AccountEditPresenterTest {
         legacyAddress.setLabel("");
         subject.legacyAddress = legacyAddress;
         Pair<BigInteger, BigInteger> sweepableCoins = Pair.of(BigInteger.ZERO, BigInteger.TEN);
-        when(dynamicFeeCache.getFeeOptions().getRegularFee()).thenReturn(100L);
+        when(dynamicFeeCache.getBtcFeeOptions().getRegularFee()).thenReturn(100L);
         when(payloadDataManager.getDefaultAccount()).thenReturn(mock(Account.class));
         when(payloadDataManager.getNextReceiveAddress(any(Account.class)))
                 .thenReturn(Observable.just("address"));

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatDialogFragment;
 
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.ui.base.View;
+import piuk.blockchain.android.ui.customviews.ToastCustom;
 
 interface MainView extends View {
 
@@ -26,9 +27,7 @@ interface MainView extends View {
 
     void clearAllDynamicShortcuts();
 
-    void showMetadataNodeRegistrationFailure();
-
-    void updateCurrentPrice(String price);
+    void showMetadataNodeFailure();
 
     void setBuySellEnabled(boolean enabled);
 
@@ -39,5 +38,9 @@ interface MainView extends View {
     void showCustomPrompt(AppCompatDialogFragment alertFragment);
 
     Context getActivityContext();
+
+    void showSecondPasswordDialog();
+
+    void showToast(@StringRes int message, @ToastCustom.ToastType String toastType);
 
 }

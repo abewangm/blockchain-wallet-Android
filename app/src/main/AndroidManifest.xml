@@ -54,7 +54,7 @@
             android:name=".ui.home.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/AppTheme.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
@@ -130,7 +130,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
-            android:name=".ui.pairing_code.PairingCodeActivity"
+            android:name=".ui.pairingcode.PairingCodeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service

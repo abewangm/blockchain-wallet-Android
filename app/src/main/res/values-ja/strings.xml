@@ -12,7 +12,6 @@
     <string name="please_wait">お待ちください</string>
 
     <string name="send_bitcoin">送信</string>
-    <string name="receive_bitcoin">受信</string>
 
     <string name="cancel">キャンセル</string>
     <string name="yes">はい</string>
@@ -157,8 +156,6 @@
     <string name="navigate">案内</string>
     <string name="enable_geo">現在の位置を見つけるにはGPSかその他の位置特定サービを有効にしてください。OKをクリックしてサービス設定を表示</string>
 
-    <string name="my_addresses">アドレス</string>
-    <string name="addresses">アドレス</string>
     <string name="create_new">新規作成</string>
     <string name="import_address">アドレスのインポート</string>
     <string name="save_name">名前を保存</string>
@@ -169,7 +166,6 @@
 
     <string name="ssl_pinning_invalid">SSL証明書のピニングに失敗しました。悪意のあるアクティビティが行われている可能性があります。続行する前にネットワーク接続とデバイスを確認してください。</string>
 
-    <string name="merchant_map">商人マップ</string>
     <string name="merchant_suggest">商人を提案</string>
     <string name="name">名称</string>
     <string name="location">場所</string>
@@ -209,7 +205,6 @@
     <string name="confirm_password">パスワードの確認</string>
     <string name="check_email_to_auth_login">メールを確認してこのログイン試行を許可してください。</string>
     <string name="transaction_fee">取引手数料</string>
-    <string name="transaction_occur_when">ビットコインを送受信する際に取引が発生します。</string>
     <string name="click">クリック</string>
     <string name="to_start_sending_and_receiving_btc">してビットコインの送受信を開始。</string>
 
@@ -320,7 +315,6 @@
     <string name="transaction_surge">ビットコイン採掘ネットワークは現在アクティビティが集中しており、推奨手数料が通常より高額になっています。</string>
     <string name="unsupported_encryption_version">財布バージョン%1$sに対応していません %1$s。</string>
     <string name="logout">ログアウト</string>
-    <string name="to_field_helper">ビットコインアドレスを入力するか選択</string>
 
     <string name="update">更新</string>
     <string name="mobile">モバイル</string>
@@ -348,7 +342,6 @@
 
     <string name="two_fa">2段階認証</string>
     <string name="tor_requests">Torリクエストをブロック</string>
-    <string name="tor_summary">Tor匿名ネットワークの一部として認識されているIPアドレスのあなたの財布へのアクセスをブロックしますか？Torネットワークはブロックチェーンユーザーの財布への不正アクセスに頻繁に利用されることが知られています。</string>
     <string name="change_password">パスワードを変更</string>
     <string name="email_notifications">メール通知</string>
     <string name="email_notifications_summary">ビットコインを受信する際に通知を受ける。</string>
@@ -376,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">財布の復号化にエラーが発生し、ログアウトされました。以下にパスワードを入力してログインしてください。</string>
     <string name="logged_out_forget_wallet">この財布を忘れて最初から始めたい場合は\'財布を忘れる\'をクリックしてください。</string>
-
-    <string name="api_fail">サーバーに接続できません。後で再試行してください。</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">このビットコイン取引は大きすぎます。あなたの財布は過去に受信した多くの少額支払いを統合する必要があります。迅速に確認されるためには比較的高額な手数料が必要です。</string>
     <string name="go_back">戻る</string>
@@ -428,14 +419,11 @@
     <string name="shortcut_receive_qr_long">受信アドレスのQRコードを表示する</string>
     <string name="shortcut_receive_qr_error">申し訳ありませんがQRコードの生成中にエラーが発生しました</string>
     <string name="shortcut_settings_enable">ラウンチャーショートカット</string>
-    <string name="shortcut_settings_summary">ランチャーのアプリアイコンを長押ししてこのオプションを有効にすると、ビットコインをさらに速く受信することができる受信アドレスが表示されます。</string>
 
     <string name="swipe_receive_hint">スワイプして受信</string>
-    <string name="swipe_receive_preference_summary">このオプションを有効にするとPIN画面で左にスワイプするだけで受信アドレスが表示され、ビットコインの受信がさらに高速になります。5つのアドレスが連続してロードされ、その後新規アドレスを表示するにはログインが必要となります。</string>
     <string name="swipe_receive_no_addresses">現在さらにアドレスを読み込むことはできません。アプリにログインするとさらに読み込むことができます。</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">概要</string>
     <string name="create_a_wallet">ウォレットを作成</string>
     <string name="log_in">ログイン</string>
     <string name="wallets">ウォレット</string>
@@ -445,7 +433,6 @@
     <string name="confirm_upgrade_header">Blockchainウォレットに次の機能が追加されました:</string>
     <string name="verify_email2">認証されたメールアドレスは、不審もしくは通常と異なるアクティビティが検出された際、ウォレットログインIDのリマインダーとして、そして資金を受信した際にビットコイン決済通知の送信のためのログインコード送信に使用されます。</string>
     <string name="enable_screenshots">スクリーンショットを有効にする</string>
-    <string name="enable_screenshots_summary">Blockchainアプリのスクリーンショットを有効にしようとしています。アプリケーション内のいくつかの画面には機密データが含まれる可能性があります。その他のアプリケーションがこれらのスクリーンショットにアクセスできます。</string>
 
     <string name="information">情報</string>
     <string name="transaction_detail_verify">Blockchain.infoで認証</string>
@@ -455,7 +442,6 @@
     <string name="contacts_payment_request_send_note">%1$sビットコインを送信する理由は何ですか？これは任意であり、%1$sと共有されます。</string>
     <string name="contacts_payment_request_receive_note">%1$sにビットコインを送信させたい理由は何ですか？これは任意であり、%1$sと共有されます。</string>
     <string name="contacts_send_address_message">これをすることであなたの連絡先にアドレスが送信されます。続行しますか？</string>
-    <string name="contacts_register_nodes_failure">連絡先サービスに接続できませんでした。完全な機能を有効にするには再試行してください。</string>
     <string name="contacts_too_much_sent">リクエストされている以上のビットコインを送信したようです。ご希望の場合は連絡先の相手に返金をリクエストできます。決済が完了とマークされていません。</string>
     <string name="contacts_too_little_sent">リクエストされている額よりも少ないビットコインを送信したようです。連絡先の相手はビットコインを受け取りますが、決済が完了とマークされません。</string>
     <string name="contacts_second_password_prompt">このサービスを使用するには2番目のパスワードが必要です。連絡先機能を使用するため、これは一回のみ入力が必要です。</string>
@@ -478,12 +464,10 @@
     <string name="onboarding_check_inbox_title">受信箱を確認してください</string>
     <string name="onboarding_check_inbox_summary">Blockchainからのメールを確認して認証リンクをクリックし、ウォレットのセットアップを完了してください。</string>
     <string name="onboarding_verify_email">メール認証</string>
-    <string name="onboarding_receive_bitcoin">ビットコインを受信</string>
     <string name="onboarding_current_price">現在の価格:</string>
     <string name="onboarding_qr_codes">QRコード</string>
     <string name="onboarding_scan_address">アドレスをスキャン</string>
     <string name="onboarding_buy_content">当社は世界中の両替業者と提携しており、ウォレットから直接ビットコインを購入いただけます。</string>
-    <string name="onboarding_receive_content">ビットコインをリクエストするにはウォレットアドレスを友達に送信してください。アドレスは各取引によって変更される無作為の英数字の羅列です。</string>
     <string name="onboarding_qr_codes_content">アドレスはQRコードとしても表示できます。友達のQRコードをスキャンすると瞬時にウォレットアドレスが取得できます。</string>
 
     <string name="onboarding_buy_bitcoin">ビットコインを買う</string>
@@ -572,7 +556,6 @@
     <string name="contacts_no_contacts_found">連絡先が見つかりませんでした</string>
     <string name="contacts_pairing_method_title">連絡先を追加</string>
     <string name="contacts_title">連絡先</string>
-    <string name="security_centre_backup_message">安全のため当社はパスワードを保管しておりません。パスワード紛失に備えウォレットをバックアップしてビットコインの安全性を確保しましょう。 </string>
     <string name="security_centre_backup_positive_button">バックアップ</string>
     <string name="security_centre_email_message">%1$sにメールが送信されました。Blockchainからのメールを確認して認証リンクをクリックし、ウォレットのセットアップを完了してください。</string>
     <string name="security_centre_email_title">メールを確認してください</string>
@@ -601,7 +584,6 @@
     <string name="transaction_detail_pending">保留中(%1$s/%2$sの確認)</string>
     <string name="transaction_detail_description_hint">これは何ですか？</string>
     <string name="transaction_detail_confirmed">確認済み</string>
-    <string name="to_field_helper_no_dropdown">ビットコインアドレスを入力してください</string>
     <string name="share_instructions">タップしてこのアドレスをコピー。メールもしくはテキストで送信者と共有</string>
     <string name="security_centre_two_fa_message">ウォレットへの不正アクセスを防ぎます。2段階認証を有効にしてウォレットの安全性を向上させます。</string>
     <string name="security_centre_backup_title">資金をバックアップする</string>
@@ -634,7 +616,6 @@
     <string name="sms_notifications_summary">通知を有効にしてビットコインを受け取る際に毎回SMSを受け取る。</string>
     <string name="backup_header">バックアップフレーズ</string>
     <string name="backup_explanation">安全のため、Blockchainはパスワードを保管しておりません。次の12の単語から成るバックアップフレーズを使用するとパスワードを忘れた場合でも資金にアクセスできるようになります。メモ帳などに書き残し、安全な場所に厳重に保管してください。 </string>
-    <string name="backup_complete_message">バックアップフレーズを使用するとパスワードを忘れた場合でも資金を復元できるようになります。バックアップフレーズを使用すると誰でもビットコインにアクセスすることができます。オフラインの安全な場所に厳重に保管してください。</string>
     <string name="backup_verify_heading">バックアップフレーズから次の単語を入力し、バックアップ処理を完了してください。</string>
     <string name="backup_lost_mnemonic">12の単語から成るバックアップフレーズを紛失しましたか？</string>
     <string name="trade_complete">取引完了</string>
@@ -667,4 +648,74 @@
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">標準: %1$s, 優先: %2$s</string>
 
+    <string name="receive_bitcoin">リクエスト</string>
+    <string name="overview">取引</string>
+    <string name="sending">送信中</string>
+    <string name="receiving">受信中</string>
+    <string name="paid">支払い済み</string>
+    <string name="payment_request">決済リクエスト</string>
+    <string name="restoring_wallet">ウォレットを復元しています。</string>
+    <string name="support_leaving_app_warning">これによりアプリからブラウザに移動します。続行しますか？</string>
+    <string name="addresses">ビットコインアドレス</string>
+    <string name="merchant_map">ビットコイン商人マップ</string>
+    <string name="received_ethereum">受信したEther</string>
+    <string name="transaction_occur_when_bitcoin">ビットコインを送受信する際に取引が発生します。</string>
+    <string name="transaction_occur_when_eth">Etherの送受信時に取引が発生します。</string>
+    <string name="to_field_helper">ビットコインアドレスを入力するか選択してください</string>
+    <string name="to_field_helper_no_dropdown">ビットコインアドレスを入力</string>
+    <string name="tor_summary">Tor匿名ネットワークを使用していることが知られているIPアドレスをブロックします。Torネットワークは頻繁にブロックチェーンユーザーのウォレットに不正侵入しようとすることで知られています。</string>
+    <string name="enable_screenshots_summary">アプリケーション内のいくつかの画面は機密データを表示することがあります。その他のアプリケーションがこれらのスクリーンショットにアクセスできます。</string>
+    <string name="two_fa_summary">2段階認証を有効にしてウォレットを不正アクセスから保護しましょう。</string>
+    <string name="two_fa_description">2段階認証を有効にしてウォレットを不正アクセスから保護しましょう。財布を保護するために携帯電話番号を使用することができます。ウェブブラウザ経由でウォレットにアクセスする際にこのコードが必要になります。\n\nその他の認証方法を使用するには%1$sよりウェブウォレットにログインしてください。</string>
+    <string name="email_request_subject_eth">Ether決済リクエスト</string>
+    <string name="email_request_body_eth">ETHをEtherアドレス%1$sに送信してください。</string>
+    <string name="api_fail">サーバーに接続できませんでした。後で再試行してください。</string>
+    <string name="transaction_detail_verify_etherscan">Etherscan.ioで認証</string>
+    <string name="security_centre_backup_message">安全のため当社はパスワードを保管しておりません。ウォレットをバックアップしてパスワードを失くした際も資金の安全性を確保しましょう。 </string>
+    <string name="backup_complete_message">バックアップフレーズを使用するとパスワードを忘れた場合でも資金を復元できるようになります。バックアップフレーズを所持している人なら誰でも資金にアクセスできるようになります。オフラインの安全な場所に保管するようにしてください。</string>
+    <string name="shortcut_settings_summary">ランチャーのアプリアイコンを長押しして受信アドレスを表示するとビットコインの受信がさらに速くなります。</string>
+
+    <string name="confirm">確認</string>
+    <string name="pending">保留中</string>
+    <string name="transactions">取引</string>
+
+    <string name="swipe_receive_preference_summary">PIN画面で左にスワイプして受信アドレスを表示すると資金の受信がさらに速くなります。</string>
+    <string name="swipe_receive_address_info">5つのアドレスが連続してロードされ、その後新規アドレスを表示するにはログインが必要となります。</string>
+    <string name="onboarding_receive_bitcoin">資金をリクエスト</string>
+    <string name="onboarding_receive_content">友達にウォレットアドレスを送信して資金をリクエストアドレスは各取引によって変更される無作為の英数字の羅列です。</string>
+    <string name="onboarding_get_eth">Etherを取得</string>
+    <string name="buy_second_password_prompt">このサービスを使用するには2番目のパスワードが必要です。購入機能を使用するために一度だけ入力が必要です。</string>
+    <string name="what_s_this">これは何ですか？</string>
+    <string name="dismiss">無視する</string>
+
+    <string name="eth_default_account_label">マイEtherウォレット</string>
+    <string name="eth_now_supporting">Etherの対応を開始しました</string>
+    <string name="eth_second_password_prompt">このサービスを使用するには2番目のパスワードが必要です。Etherウォレットを設定するために一度だけ入力が必要です。</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">ビットコイン</string>
+    <string name="eth_to_field_helper">Etherアドレスを入力するか選択してください。</string>
+    <string name="eth_to_field_helper_no_dropdown">Etherアドレスを入力</string>
+    <string name="eth_invalid_address">無効なEtherアドレス</string>
+    <string name="eth_support_contract_not_allowed">契約アドレスに対応していません。</string>
+    <string name="eth_support_only_eth">現在ETHにのみ対応しております。このアドレスでトークンを受信できません</string>
+    <string name="eth_unconfirmed_wait">前回の取引が確認されるまでお待ちください</string>
+    <string name="eth_transaction_complete">取引が完了しました！取引と残高はまもなく更新されます。これには数分かかることがあります。\n</string>
+
+    <string name="dashboard_title">ダッシュボード</string>
+    <string name="dashboard_time_span_day">日</string>
+    <string name="dashboard_time_span_week">週</string>
+    <string name="dashboard_time_span_month">月</string>
+    <string name="dashboard_time_span_year">年</string>
+    <string name="dashboard_time_span_all_time">すべて</string>
+    <string name="dashboard_bitcoin_price">ビットコイン価格</string>
+    <string name="dashboard_ether_price">Ether価格</string>
+    <string name="dashboard_charts_error">チャートデータの読み込みにエラーが発生しました</string>
+    <string name="dashboard_charts_price_error">価格データ取得にエラーが発生しました</string>
+
+    <string name="onboarding_ether_title">Etherの対応を開始しました</string>
+    <string name="onboarding_ether_description">皆さまのご要望にお応えしました。BlockchainウォレットでEtherを便利かつスムーズに送受信できるようになりました！</string>
+    <string name="onboarding_ether_cta">Etherの取引を開始する</string>
+
+    <string name="metadata_load_failure">完全なウォレット機能の読み込みにエラーが発生しました。サービスが一時的に利用できなくなることがあります。</string>
+    <string name="fee_helper_message">この手数料は本取引の処理のために採掘者に支払われます。</string>
 </resources>

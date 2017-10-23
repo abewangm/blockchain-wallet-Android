@@ -12,7 +12,6 @@
     <string name="please_wait">Veuillez patienter</string>
 
     <string name="send_bitcoin">Envoyer</string>
-    <string name="receive_bitcoin">Recevoir</string>
 
     <string name="cancel">Annuler</string>
     <string name="yes">Oui</string>
@@ -157,8 +156,6 @@
     <string name="navigate">Naviguer</string>
     <string name="enable_geo">Permettre au GPS ou à tout autre service de localisation de trouver l\'emplacement actuel. Cliquez pour cela sur OK pour aller dans les paramètres des services de localisation.</string>
 
-    <string name="my_addresses">Adresses</string>
-    <string name="addresses">Adresses</string>
     <string name="create_new">Créer une nouvelle adresse</string>
     <string name="import_address">Importer l\’adresse</string>
     <string name="save_name">Enregistrer le nom</string>
@@ -169,7 +166,6 @@
 
     <string name="ssl_pinning_invalid">L\’épinglage du certificat SSL a échoué. Ceci pourrait indiquer une activité malveillante. Veuillez vérifier votre connexion réseau et le périphérique avant de continuer.</string>
 
-    <string name="merchant_map">Carte des marchands</string>
     <string name="merchant_suggest">Suggérer un marchand</string>
     <string name="name">Nom</string>
     <string name="location">Localisation</string>
@@ -209,7 +205,6 @@
     <string name="confirm_password">Confirmer le mot de passe</string>
     <string name="check_email_to_auth_login">Veuillez consulter votre boîte de réception e-mail pour approuver cette tentative de connexion.</string>
     <string name="transaction_fee">Frais de transaction</string>
-    <string name="transaction_occur_when">Les transactions se produisent lorsque vous recevez et envoyez des bitcoins.</string>
     <string name="click">Cliquez</string>
     <string name="to_start_sending_and_receiving_btc">pour commencer à envoyer et recevoir des bitcoins.</string>
 
@@ -320,7 +315,6 @@
     <string name="transaction_surge">Le réseau de minage Bitcoin connaît actuellement un fort volume d\'activité. En conséquence, les frais de transactions que nous vous recommandons d\'appliquer sont plus élevés que d\'habitude.</string>
     <string name="unsupported_encryption_version">Version %1$s du portefeuille non prise en charge.</string>
     <string name="logout">Déconnexion</string>
-    <string name="to_field_helper">Saisissez l\’adresse Bitcoin ou sélectionnez</string>
 
     <string name="update">Mettre à jour</string>
     <string name="mobile">Téléphone portable</string>
@@ -348,7 +342,6 @@
 
     <string name="two_fa">Validation en 2 étapes</string>
     <string name="tor_requests">Bloquer les requêtes de Tor</string>
-    <string name="tor_summary">Souhaitez-vous bloquer les adresses IP connues pour faire partie du réseau anonyme Tor pour les empêcher d\'accéder à votre portefeuille ? Le réseau Tor est fréquemment utilisé par des hackers qui tentent d\'accéder aux portefeuilles des utilisateurs de Blockchain.</string>
     <string name="change_password">Changer le mot de passe</string>
     <string name="email_notifications">Notifications par e-mail</string>
     <string name="email_notifications_summary">Soyez notifié quand vous recevez des bitcoin.</string>
@@ -376,8 +369,6 @@
 
     <!-- PASSWORD REENTRY ACTIVITY --><string name="logged_out_enter_password">Vous vous êtes déconnecté ou bien il s\'est produit une erreur lors du décodage de votre portefeuille. Pour vous connecter, saisissez votre mot de passe ci-dessous. </string>
     <string name="logged_out_forget_wallet">Si vous souhaitez oublier ce portefeuille et recommencer, appuyez sur \'Oublier le portefeuille\'.</string>
-
-    <string name="api_fail">Impossible de se connecter au serveur. Veuillez réessayer plus tard.</string>
 
     <!-- FEE WARNING --><string name="large_tx_warning">Cette transaction de bitcoin est trop grande. Votre portefeuille doit consolider tous les petits paiements que vous avez reçus dans le passé. Pour pouvoir être confirmés rapidement, ils nécessitent des frais de transaction relativement élevés.</string>
     <string name="go_back">Retour</string>
@@ -428,14 +419,11 @@
     <string name="shortcut_receive_qr_long">Voir le code QR pour recevoir l\'adresse</string>
     <string name="shortcut_receive_qr_error">Désolé, une erreur est survenue lors de la génération du code QR</string>
     <string name="shortcut_settings_enable">Raccourcis du lanceur</string>
-    <string name="shortcut_settings_summary">Activez cette option pour révéler une adresse de destinataire lorsque vous appuyez longuement sur l\'icône de l\'application sur le lanceur, ainsi vous recevrez le bitcoin plus rapidement.</string>
 
     <string name="swipe_receive_hint">Faire glisser pour recevoir</string>
-    <string name="swipe_receive_preference_summary">Activez cette option si vous souhaitez voir l\'adresse du destinataire lorsque vous faites glisser votre doigt à gauche de l\'écran du PIN. Cela vous permet des recevoir des bitcoin encore plus rapidement. Cinq adresses seront chargées consécutivement, après quoi vous devrez vous connecter pour afficher les nouvelles adresses.</string>
     <string name="swipe_receive_no_addresses">Aucune adresse supplémentaire ne peut être chargée actuellement. Connectez-vous à l\'appli pour charger plus d\'adresses.</string>
 
     <string name="current_price_btc">1 BTC = %1$s</string>
-    <string name="overview">Vue d\'ensemble</string>
     <string name="create_a_wallet">Créer un portefeuille</string>
     <string name="log_in">Se connecter</string>
     <string name="wallets">Portefeuilles</string>
@@ -445,7 +433,6 @@
     <string name="confirm_upgrade_header">Hey, nous\avons ajouté ces nouvelles fonctionnalités à votre portefeuille Blockchain :</string>
     <string name="verify_email2">Votre adresse e-mail vérifiée est utilisée pour vous envoyer des codes de connexion lorsque des activités suspectes ou inhabituelles sont détectées, pour vous rappeler votre identifiant de connexion au portefeuille et pour vous envoyer des notifications de paiements lorsque vous recevez des fonds en bitcoin.</string>
     <string name="enable_screenshots">Activer les captures d\'écran</string>
-    <string name="enable_screenshots_summary">Vous\ êtes sur le point d\'activer les captures d\'écran pour l\'application Blockchain. Certains écrans de l\'application peuvent afficher des données sensibles. D\'autres applications pourront accéder à ces captures d\'écran.</string>
 
     <string name="information">Informations</string>
     <string name="transaction_detail_verify">Vérifier sur Blockchain.info</string>
@@ -455,7 +442,6 @@
     <string name="contacts_payment_request_send_note">Pourquoi souhaiteriez-vous envoyer %1$s de bitcoin ? Ceci est facultatif et sera partagé avec %1$s.</string>
     <string name="contacts_payment_request_receive_note">Pourquoi voudriez-vous que %1$s vous envoie des bitcoin ? Ceci est facultatif et sera partagé avec %1$s.</string>
     <string name="contacts_send_address_message">Cela enverra une adresse à votre contact. Commencer ?</string>
-    <string name="contacts_register_nodes_failure">Nous ne pouvons\pas vous connecter au service des contacts. Veuillez réessayez pour activer les fonctionnalités complètes.</string>
     <string name="contacts_too_much_sent">On dirait que vous avez envoyé plus de bitcoin que prévu. Vous pouvez demander d\'en retourner quelques uns à partir de votre contact si vous le souhaitez. Nous n\'avons pas marqué le paiement comme complet.</string>
     <string name="contacts_too_little_sent">On dirait que vous avez envoyé moins de bitcoin que prévu. Votre contact recevra toujours les bitcoin que vous avez envoyés, mais nous n\'avons pas marqué le paiement comme complet.</string>
     <string name="contacts_second_password_prompt">Pour utiliser ce service, nous vous prions d\'entrer votre deuxième mot de passe. Vous devriez seulement entrer ceci une fois pour utiliser la fonctionnalité Contacts.</string>
@@ -478,12 +464,10 @@
     <string name="onboarding_check_inbox_title">Vérifiez votre boîte de réception</string>
     <string name="onboarding_check_inbox_summary">Recherchez un email à partir de Blockchain et cliquez sur le lien de vérification pour compléter la configuration de votre portefeuille.</string>
     <string name="onboarding_verify_email">Vérifier email</string>
-    <string name="onboarding_receive_bitcoin">Recevoir des Bitcoin</string>
     <string name="onboarding_current_price">Prix actuel:</string>
     <string name="onboarding_qr_codes">Codes QR</string>
     <string name="onboarding_scan_address">Adresse du scanner</string>
     <string name="onboarding_buy_content">Nous travaillons avec des partenaires d\'échange partout dans le monde, afin que vous puissiez acheter des Bitcoin directement à partir de votre portefeuille</string>
-    <string name="onboarding_receive_content">Envoyez votre adresse de portefeuille à un ami pour demander des bitcoin. Une adresse est une chaîne de lettres et de chiffres aléatoires qui changent pour chaque transaction.</string>
     <string name="onboarding_qr_codes_content">Une adresse peut également être affichée comme un code QR. Scannez le code QR d\'un ami pour capturer rapidement son adresse de portefeuille.</string>
 
     <string name="onboarding_buy_bitcoin">Achetez des Bitcoin</string>
@@ -572,7 +556,6 @@
     <string name="contacts_no_contacts_found">Contacts introuvables</string>
     <string name="contacts_pairing_method_title">Ajouter un contact</string>
     <string name="contacts_title">Contacts</string>
-    <string name="security_centre_backup_message">Pour votre sécurité, nous ne conservons aucun mot de passe sur fichier. Sauvegardez votre portefeuille pour sécuriser vos bitcoins au cas où vous perdriez votre mot de passe. </string>
     <string name="security_centre_backup_positive_button">Sauvegarde</string>
     <string name="security_centre_email_message">Nous avons envoyé un e-mail à %1$s. Recherchez un e-mail à partir de Blockchain et cliquez sur le lien de vérification pour compléter la configuration de votre portefeuille.</string>
     <string name="security_centre_email_title">Vérifiez votre boîte de réception</string>
@@ -601,7 +584,6 @@
     <string name="transaction_detail_pending">En attente (confirmations %1$s/%2$s)</string>
     <string name="transaction_detail_description_hint">À quoi ça sert ?</string>
     <string name="transaction_detail_confirmed">Confirmé</string>
-    <string name="to_field_helper_no_dropdown">Saisir l\'adresse Bitcoin</string>
     <string name="share_instructions">Toucher pour copier cette adresse. Partagez-la avec l\'expéditeur par e-mail ou SMS.</string>
     <string name="security_centre_two_fa_message">Empêche tout accès non autorisé à votre portefeuille. Activez l\'authentification à 2 facteurs pour renforcer la sécurité du portefeuille.</string>
     <string name="security_centre_backup_title">Sauvegardez vos fonds</string>
@@ -634,7 +616,6 @@
     <string name="sms_notifications_summary">Activer les notifications pour recevoir un SMS quand vous recevez des bitcoins.</string>
     <string name="backup_header">Phrase de récupération</string>
     <string name="backup_explanation">Pour votre sécurité, Blockchain ne conserve aucun mot de passe dans ses fichiers. La Phrase de Récupération à 12 mots suivante vous donnera accès à vos fonds si vous perdez votre mot de passe. Veillez à la noter par écrit et à la conserver en lieu sûr. </string>
-    <string name="backup_complete_message">Vous pouvez utiliser votre Phrase de Récupération pour restaurer vos fonds si vous perdez votre mot de passe. Toute personne ayant connaissance de votre Phrase de Récupération peut accéder à vos bitcoins, souvenez-vous donc de la conserver hors-ligne dans un endroit sûr.</string>
     <string name="backup_verify_heading">Entrez les mots suivants de votre Phrase de Récupération pour terminer le processus de sauvegarde.</string>
     <string name="backup_lost_mnemonic">Vous avez perdu votre phrase de récupération à 12 mots ?</string>
     <string name="trade_complete">Transaction Terminée</string>
@@ -666,4 +647,75 @@
     <string name="fee_options_advanced_warning">Ce fonctionnalité n\'est recommandée que pour les utilisateurs avancés. En choisissant des frais personnalisés, vous risquez de payer votre transaction trop chère ou de ne pas la voir se confirmer.</string>
     <string name="fee_options_sat_byte_hint">sat/b</string>
     <string name="fee_options_sat_byte_inline_hint">Normal : %1$s, Priorité : %2$s</string>
+
+    <string name="receive_bitcoin">Demande</string>
+    <string name="overview">Transactions</string>
+    <string name="sending">Envoi en cours</string>
+    <string name="receiving">Réception en cours</string>
+    <string name="paid">Payé</string>
+    <string name="payment_request">Demande de paiement</string>
+    <string name="restoring_wallet">Récupération du portefeuille.</string>
+    <string name="support_leaving_app_warning">Cette action quittera l\'application et vous redirigera vers votre navigateur. Continuer ?</string>
+    <string name="addresses">Adresses Bitcoin</string>
+    <string name="merchant_map">Carte du vendeur Bitcoin</string>
+    <string name="received_ethereum">Ether reçus</string>
+    <string name="transaction_occur_when_bitcoin">Les transactions se produisent lorsque vous recevez et envoyez des bitcoins.</string>
+    <string name="transaction_occur_when_eth">Les transactions se produisent lorsque vous recevez et envoyez des ethers.</string>
+    <string name="to_field_helper">Saisissez l\'adresse bitcoin ou sélectionnez</string>
+    <string name="to_field_helper_no_dropdown">Saisissez l\'adresse bitcoin</string>
+    <string name="tor_summary">Bloquez les adresses IP connues comme faisant partie du réseau Internet anonyme Tor. Le réseau Tor est souvent utilisé par les pirates pour tenter d\'accéder aux portefeuilles Blockchain des utilisateurs.</string>
+    <string name="enable_screenshots_summary">Certains écrans dans l\'application peuvent afficher des données sensibles. D\'autres applications pourront accéder à ces captures d\'écran.</string>
+    <string name="two_fa_summary">Protégez votre portefeuille contre tout accès non autorisé en activant la validation en 2 étapes.</string>
+    <string name="two_fa_description">Protégez votre portefeuille contre tout accès non autorisé en activant la validation en 2 étapes. Vous pouvez choisir d\’utiliser votre numéro de téléphone portable pour sécuriser votre portefeuille. Ce code vous sera demandé lorsque vous essayerez d\'accéder à votre portefeuille à travers votre navigateur Internet.\n\nPour utiliser d'autres méthodes d'authentification, veuillez vous connecter à notre portefeuille en ligne à l'adresse %1$s</string>
+    <string name="email_request_subject_eth">Demande de paiement en ether</string>
+    <string name="email_request_body_eth">Veuillez envoyer des ETH à l\'adresse Ether %1$s.</string>
+    <string name="api_fail">Impossible de se connecter au serveur. Veuillez réessayer plus tard.</string>
+    <string name="transaction_detail_verify_etherscan">Veuillez vérifier sur Etherscan.io</string>
+    <string name="security_centre_backup_message">Pour votre sécurité, nous ne conservons aucun mot de passe sur fichier. Sauvegardez votre portefeuille pour vous assurer que vos fonds sont en sécurité en cas de perte de votre mot de passe. </string>
+    <string name="backup_complete_message">Vous pouvez utiliser votre Phrase de Récupération pour restaurer vos fonds si vous perdez votre mot de passe. Toute personne ayant accès à votre Phrase de Récupération pourra accéder à vos fonds, n\'oubliez donc pas de la conserver hors ligne dans un lieu sûr et sécurisé.</string>
+    <string name="shortcut_settings_summary">Révèle une adresse de réception lorsque vous appuyez de manière prolongée sur l\'icône de l\'appli dans le lanceur, ce qui rend la réception de bitcoin encore plus rapide.</string>
+
+    <string name="confirm">Confirmer</string>
+    <string name="pending">En attente</string>
+    <string name="transactions">Transactions</string>
+
+    <string name="swipe_receive_preference_summary">Révèle une adresse de réception lorsque vous faites glisser l\'écran vers la gauche sur l\'écran de code PIN, ce qui rend la réception de fonds encore plus rapide.</string>
+    <string name="swipe_receive_address_info">Cinq adresses seront chargées consécutivement, après quoi vous devrez vous connecter pour afficher les nouvelles adresses.</string>
+    <string name="onboarding_receive_bitcoin">Demander des fonds</string>
+    <string name="onboarding_receive_content">Envoie votre adresse de portefeuille à un ami pour demander des fonds. Une adresse est une chaîne de lettres et de chiffres aléatoires qui changent pour chaque transaction.</string>
+    <string name="onboarding_get_eth">Recevoir des Ether</string>
+    <string name="buy_second_password_prompt">Pour utiliser ce service, nous vous prions d\'entrer votre deuxième mot de passe. Vous ne devriez avoir à le saisir qu'une fois pour utiliser la fonction Acheter.</string>
+    <string name="what_s_this">Qu\'est-ce que c\'est ?</string>
+    <string name="dismiss">Passer</string>
+
+    <string name="eth_default_account_label">Mon portefeuille Ether</string>
+    <string name="eth_now_supporting">Nouveauté : prise en charge des Ether</string>
+    <string name="eth_second_password_prompt">Pour utiliser ce service, nous vous prions d\'entrer votre deuxième mot de passe. Vous ne devriez avoir à le saisir qu\'une fois pour configurer votre portefeuille Ether.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Saisissez l\'adresse Ether ou sélectionnez-la</string>
+    <string name="eth_to_field_helper_no_dropdown">Saisissez l\'adresse Ether</string>
+    <string name="eth_invalid_address">Adresse Ether erronée</string>
+    <string name="eth_support_contract_not_allowed">Les adresses de contrat ne sont pas prises en charge.</string>
+    <string name="eth_support_only_eth">Pour l\'instant, nous ne prenons en charge que les Ether - vous ne pouvez pas recevoir de jetons à cette adresse</string>
+    <string name="eth_unconfirmed_wait">Veuillez patienter jusqu\'à la confirmation de votre dernière transaction</string>
+    <string name="eth_transaction_complete">Transaction effectuée ! Vos transactions et votre solde seront bientôt actualisés, cela peut prendre quelques minutes.\n</string>
+
+    <string name="dashboard_title">Tableau de bord</string>
+    <string name="dashboard_time_span_day">Jour</string>
+    <string name="dashboard_time_span_week">Semaine</string>
+    <string name="dashboard_time_span_month">Mois</string>
+    <string name="dashboard_time_span_year">Année</string>
+    <string name="dashboard_time_span_all_time">Période totale</string>
+    <string name="dashboard_bitcoin_price">Prix Bitcoin</string>
+    <string name="dashboard_ether_price">Prix Ether</string>
+    <string name="dashboard_charts_error">Erreur lors du chargement des données graphiques</string>
+    <string name="dashboard_charts_price_error">Erreur lors de la récupération des données de prix</string>
+
+    <string name="onboarding_ether_title">Nouveauté : prise en charge des ether</string>
+    <string name="onboarding_ether_description">Vous avez demandé, nous avons écouté. Nous sommes heureux de vous annoncer que votre portefeuille blockchain vous permettra maintenant de recevoir et d\'envoyer des ether de manière transparente !</string>
+    <string name="onboarding_ether_cta">Découvrir Ether</string>
+
+    <string name="metadata_load_failure">Erreur lors du chargement de toutes les fonctions du portefeuille. Le service pourra être momentanément indisponible.</string>
+    <string name="fee_helper_message">Les mineurs reçoivent ces commissions pour traiter la transaction.</string>
 </resources>

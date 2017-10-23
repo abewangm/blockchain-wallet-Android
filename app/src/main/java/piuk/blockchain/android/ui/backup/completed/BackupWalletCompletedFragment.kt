@@ -33,14 +33,14 @@ class BackupWalletCompletedFragment : BaseFragment<BackupWalletCompletedView, Ba
             inflater: LayoutInflater?,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ) = container!!.inflate(R.layout.fragment_backup_complete)
+    ) = container?.inflate(R.layout.fragment_backup_complete)
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         button_backup_again.setOnClickListener { onBackupAgainRequested() }
 
-        if (arguments?.getBoolean(KEY_CHECK_TRANSFER) ?: false) {
+        if (arguments?.getBoolean(KEY_CHECK_TRANSFER) == true) {
             presenter.checkTransferableFunds()
         }
 

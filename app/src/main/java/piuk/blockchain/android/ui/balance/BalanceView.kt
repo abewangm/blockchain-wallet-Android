@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.balance
 
 import android.support.annotation.StringRes
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.base.View
@@ -19,7 +20,7 @@ interface BalanceView : View {
 
     fun onTotalBalanceUpdated(balance: String)
 
-    fun onExchangeRateUpdated(exchangeRate: Double, isBtc: Boolean)
+    fun onExchangeRateUpdated(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean)
 
     fun showProgressDialog()
 
@@ -29,7 +30,7 @@ interface BalanceView : View {
 
     fun onAccountsUpdated(
             accounts: List<ItemAccount>,
-            lastPrice: Double,
+            lastBtcPrice: Double,
             fiat: String,
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean
@@ -71,6 +72,9 @@ interface BalanceView : View {
 
     fun startReceiveFragment()
 
-    fun onLoadOnboardingPages(pages: List<OnboardingPagerContent>)
+    fun updateSelectedCurrency(cryptoCurrencies: CryptoCurrencies)
 
+    fun hideAccountSpinner()
+
+    fun showAccountSpinner()
 }

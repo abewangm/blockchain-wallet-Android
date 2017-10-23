@@ -15,7 +15,6 @@ interface PersistentPrefs {
     String KEY_EMAIL = "email";
     String KEY_EMAIL_VERIFIED = "code_verified";
     String KEY_EMAIL_VERIFY_ASK_LATER = "email_verify_ask_later";
-    String KEY_BALANCE_DISPLAY_STATE = "balance_display_state";
     String KEY_SCHEME_URL = "scheme_url";
     String KEY_METADATA_URI = "metadata_uri";
     String KEY_CONTACTS_NOTIFICATION = "contacts_notification";
@@ -39,9 +38,12 @@ interface PersistentPrefs {
     String KEY_ONBOARDING_COMPLETE = "onboarding_complete";
     String KEY_OVERLAY_TRUSTED = "overlay_trusted";
     String KEY_CONTACTS_INTRODUCTION_COMPLETE = "contacts_intro_complete";
+    String KEY_CURRENCY_CRYPTO_STATE = "KEY_CURRENCY_CRYPTO_STATE";
 
     String KEY_LATEST_ANNOUNCEMENT_DISMISSED = "latest_announcement_dismissed";
     String KEY_LATEST_ANNOUNCEMENT_SEEN = "latest_announcement_seen";
+
+    String KEY_WARN_ADVANCED_FEE = "pref_warn_advanced_fee";
 
     String getValue(String name, String value);
 
@@ -68,5 +70,4 @@ interface PersistentPrefs {
     void logOut();
 
     void logIn();
-
 }

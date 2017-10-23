@@ -13,8 +13,8 @@
     <string name="please_wait">Please wait</string>
 
     <string name="send_bitcoin">Send</string>
-    <string name="receive_bitcoin">Receive</string>
-    <string name="overview">Overview</string>
+    <string name="receive_bitcoin">Request</string>
+    <string name="overview">Transactions</string>
 
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
@@ -185,8 +185,7 @@
     <string name="navigate">Navigate</string>
     <string name="enable_geo">Enable either GPS or any other location service to find current location. Click OK to go to location services settings to let you do so.</string>
 
-    <string name="my_addresses">Addresses</string>
-    <string name="addresses">Addresses</string>
+    <string name="addresses">Bitcoin Addresses</string>
     <string name="create_new">Create New</string>
     <string name="import_address">Import Address</string>
     <string name="wallets">Wallets</string>
@@ -198,7 +197,7 @@
 
     <string name="ssl_pinning_invalid">Secure connection to the host has failed. This might indicate malicious activity. Please verify your network connection and device before continuing.</string>
 
-    <string name="merchant_map">Merchant Map</string>
+    <string name="merchant_map">Bitcoin Merchant Map</string>
     <string name="merchant_suggest">Suggest Merchant</string>
     <string name="name">Name</string>
     <string name="location">Location</string>
@@ -209,6 +208,7 @@
     <string name="address_lookup_fail">Could not retrieve address. Please enter address manually.</string>
 
     <string name="received_bitcoin">Received Bitcoin</string>
+    <string name="received_ethereum">Received Ether</string>
 
     <string-array name="mnemonic_word_requests">
         <item>first word</item>
@@ -234,7 +234,8 @@
     <string name="check_email_to_auth_login">Please check your email to approve this login attempt.</string>
     <string name="transaction_fee">Transaction Fee</string>
     <string name="your_transactions">No Transactions</string>
-    <string name="transaction_occur_when">Transactions occur when you receive and send bitcoin.</string>
+    <string name="transaction_occur_when_bitcoin">Transactions occur when you receive and send bitcoin.</string>
+    <string name="transaction_occur_when_eth">Transactions occur when you receive and send ether.</string>
     <string name="click">Click</string>
     <string name="to_start_sending_and_receiving_btc">to start sending and receiving bitcoin.</string>
 
@@ -385,8 +386,8 @@
     <string name="transaction_surge">The Bitcoin mining network is currently experiencing a high volume of activity, resulting in recommended fees that are higher than usual.</string>
     <string name="unsupported_encryption_version">Wallet version %1$s not supported.</string>
     <string name="logout">Logout</string>
-    <string name="to_field_helper">Enter Bitcoin address or select</string>
-    <string name="to_field_helper_no_dropdown">Enter Bitcoin address</string>
+    <string name="to_field_helper">Enter bitcoin address or select</string>
+    <string name="to_field_helper_no_dropdown">Enter bitcoin address</string>
 
     <!-- SETTINGS -->
     <string name="update">Update</string>
@@ -460,7 +461,9 @@
 
     <!-- SHARE RECEIVE ADDRESS -->
     <string name="email_request_subject">Bitcoin payment request</string>
+    <string name="email_request_subject_eth">Ether payment request</string>
     <string name="email_request_body">Please send%1$s BTC to the Bitcoin address %2$s.</string>
+    <string name="email_request_body_eth">Please send ETH to the Ether address %1$s.</string>
     <string name="email_request_body_fallback">attached</string>
     <string name="share_instructions">Tap to copy this address. Share it with the sender via email or text.</string>
 
@@ -507,6 +510,7 @@
     <string name="transaction_detail_coinbase">No Inputs (Newly Generated Coins)</string>
     <string name="transaction_detail_double_spend">May be at risk for a double spend.</string>
     <string name="transaction_detail_verify">Verify on Blockchain.info</string>
+    <string name="transaction_detail_verify_etherscan">Verify on Etherscan.io</string>
     <string name="transaction_detail_share_chooser">Share transaction details</string>
     <string name="transaction_detail_contact_note">Note</string>
 
@@ -518,7 +522,7 @@
     <string name="security_centre_add_email_message">Add and verify your email address to receive alerts, prevent suspicious activity, and recover your Wallet ID if forgotten.</string>
     <string name="security_centre_add_email_positive_button">Add</string>
     <string name="security_centre_backup_title">Backup your funds</string>
-    <string name="security_centre_backup_message">For your security, we do not keep any passwords on file. Backup your wallet to ensure your bitcoins are safe in case you lose your password. </string>
+    <string name="security_centre_backup_message">For your security, we do not keep any passwords on file. Backup your wallet to ensure your funds are safe in case you lose your password. </string>
     <string name="security_centre_backup_positive_button">Backup</string>
     <string name="security_centre_two_fa_message">Prevent unauthorized access to your wallet. Enable 2-Step Verification to increase wallet security.</string>
 
@@ -528,7 +532,7 @@
     <string name="backup_button_start">Start backup</string>
     <string name="backup_write_down_words">It is important to make sure you write down your words exactly as they appear here and in this order.</string>
     <string name="backup_header_complete">Backup Complete</string>
-    <string name="backup_complete_message">You can use your Backup Phrase to restore your funds if you lose your password. Anyone with access to your Backup Phrase can access your bitcoin so remember to keep it offline somewhere safe and secure.</string>
+    <string name="backup_complete_message">You can use your Backup Phrase to restore your funds if you lose your password. Anyone with access to your Backup Phrase can access your funds so remember to keep it offline somewhere safe and secure.</string>
     <string name="backup_again">Backup again</string>
     <string name="backup_confirmed">Backup confirmed</string>
     <string name="backup_last">Last backup: %1$s</string>
@@ -639,7 +643,6 @@
     <string name="contacts_broadcasting_payment">We\'re just informing your contact that you\'ve sent them some bitcoin, please wait.</string>
     <string name="contacts_payment_sent_success">Payment sent! We\'ve notified your contact to let them know that you\'ve completed the transaction.</string>
     <string name="contacts_payment_sent_failed_message">There was an error notifying your contact that you have sent them a payment. Please check your connection and try again.</string>
-    <string name="contacts_register_nodes_failure">We couldn\'t connect you to the contacts service. Please retry to enable full functionality.</string>
     <string name="contacts_too_much_sent">Looks like you sent more bitcoin than was requested. You can request some back from your contact if you wish. We have not marked the payment as complete.</string>
     <string name="contacts_too_little_sent">Looks like you sent less bitcoin than was requested. Your contact will still receive the bitcoin you sent, but we have not marked the payment as complete.</string>
     <string name="contacts_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to use the Contacts functionality.</string>
@@ -709,7 +712,7 @@
 
     <!-- SWIPE TO RECEIVE -->
     <string name="swipe_receive_hint">Swipe to receive</string>
-    <string name="swipe_receive_preference_summary">Reveal a receive address when you swipe left on the PIN screen, making receiving bitcoin even faster.</string>
+    <string name="swipe_receive_preference_summary">Reveal a receive address when you swipe left on the PIN screen, making receiving funds even faster.</string>
     <string name="swipe_receive_address_info">Five addresses will be loaded consecutively, after which logging in is required to show new addresses.</string>
     <string name="swipe_receive_no_addresses">No more addresses can be loaded right now. Log in to the app to load more.</string>
 
@@ -721,17 +724,18 @@
     <string name="onboarding_check_inbox_title">Check Your Inbox</string>
     <string name="onboarding_check_inbox_summary">Look for an email from Blockchain and click the verification link to complete your wallet setup.</string>
     <string name="onboarding_verify_email">Verify email</string>
-    <string name="onboarding_receive_bitcoin">Receive Bitcoin</string>
+    <string name="onboarding_receive_bitcoin">Request Funds</string>
     <string name="onboarding_current_price">Current Price:</string>
     <string name="onboarding_qr_codes">QR Codes</string>
     <string name="onboarding_scan_address">Scan Address</string>
     <string name="onboarding_buy_content">We work with exchange partners all over the world, so you can buy bitcoin directly from your wallet.</string>
-    <string name="onboarding_receive_content">Send your wallet address to a friend to request bitcoin. An address is a string of random letters and numbers that change for each transaction.</string>
+    <string name="onboarding_receive_content">Send your wallet address to a friend to request funds. An address is a string of random letters and numbers that change for each transaction.</string>
     <string name="onboarding_qr_codes_content">An address can also be shown as a QR code. Scan a friend’s QR code to quickly capture their wallet address.</string>
 
     <!-- BUY BITCOIN -->
     <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
     <string name="onboarding_get_bitcoin">Get Bitcoin</string>
+    <string name="onboarding_get_eth">Get Ether</string>
     <string name="onboarding_complete_title">That\'s it for now!</string>
     <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
     <string name="onboarding_start_over">Start Over</string>
@@ -772,5 +776,39 @@
 
     <string name="what_s_this">What\'s this?</string>
     <string name="dismiss">Dismiss</string>
+    
+    <!-- ETHEREUM BALANCE -->
+    <string name="eth_default_account_label">My Ether Wallet</string>
+    <string name="eth_now_supporting">Now supporting Ether</string>
+    <string name="eth_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to set up your Ether wallet.</string>
+    <string name="ether">ETHER</string>
+    <string name="bitcoin">BITCOIN</string>
+    <string name="eth_to_field_helper">Enter ether address or select</string>
+    <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
+    <string name="eth_invalid_address">Invalid Ether address</string>
+    <string name="eth_support_contract_not_allowed">Contract addresses are not supported.</string>
+    <string name="eth_support_only_eth">At the moment we only support ETH - you cannot receive tokens to this address</string>
+    <string name="eth_unconfirmed_wait">Please wait until your previous transaction confirms</string>
+    <string name="eth_transaction_complete">Transaction complete! Your transactions and balance will update soon, this can take a few minutes.\n</string>
+
+    <!-- DASHBOARD -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_time_span_day">Day</string>
+    <string name="dashboard_time_span_week">Week</string>
+    <string name="dashboard_time_span_month">Month</string>
+    <string name="dashboard_time_span_year">Year</string>
+    <string name="dashboard_time_span_all_time">All Time</string>
+    <string name="dashboard_bitcoin_price">Bitcoin price</string>
+    <string name="dashboard_ether_price">Ether price</string>
+    <string name="dashboard_charts_error">Error loading chart data</string>
+    <string name="dashboard_charts_price_error">Error fetching price data</string>
+
+    <!-- ETHEREUM ONBOARDING -->
+    <string name="onboarding_ether_title">Now Supporting Ether</string>
+    <string name="onboarding_ether_description">You asked, we listened. We\'re excited to announce that your Blockchain wallet will now allow you to seamlessly send and receive ether!</string>
+    <string name="onboarding_ether_cta">Get Started with Ether</string>
+
+    <!-- KV STORE -->
+    <string name="metadata_load_failure">Error loading full wallet functionality. Service might temporarily be unavailable.</string>
 
 </resources>

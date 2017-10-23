@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.observers.TestObserver;
+import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import piuk.blockchain.android.RxTest;
-import piuk.blockchain.android.data.payments.PaymentService;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -88,7 +88,6 @@ public class PaymentServiceTest extends RxTest {
         verifyNoMoreInteractions(payment);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void submitPaymentFailure() throws Exception {
         // Arrange
@@ -106,7 +105,7 @@ public class PaymentServiceTest extends RxTest {
         when(payment.makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
                 .thenReturn(mockTx);
         Call<ResponseBody> mockCall = mock(Call.class);
-        Response response = Response.error(500, mock(ResponseBody.class));
+        Response response = Response.error(500, ResponseBody.create(MediaType.parse("application/json"), "{}"));
         when(mockCall.execute()).thenReturn(response);
         when(payment.publishTransaction(mockTx)).thenReturn(mockCall);
         // Act

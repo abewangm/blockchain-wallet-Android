@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.util.encoders.Hex;
@@ -130,23 +129,30 @@ public class ExchangeService {
 
     void reloadExchangeData() {
         MetadataNodeFactory metadataNodeFactory = payloadManager.getMetadataNodeFactory();
-        DeterministicKey metadataNode = metadataNodeFactory.getMetadataNode();
 
-        if (metadataNode != null) {
-            Observable<Metadata> exchangeDataStream = getMetadata(metadataNode);
-            exchangeDataStream.subscribeWith(metadataSubject);
+        if (metadataNodeFactory != null) {
+            DeterministicKey metadataNode = metadataNodeFactory.getMetadataNode();
+
+            if (metadataNode != null) {
+                Observable<Metadata> exchangeDataStream = getMetadata(metadataNode);
+                exchangeDataStream.subscribeWith(metadataSubject);
+            } else {
+                Timber.e("MetadataNode not generated yet. Wallet possibly double encrypted.");
+            }
         } else {
-            Timber.e("MetadataNode not generated yet. Wallet possibly double encrypted.");
+            //PayloadManager likely to have been cleared at this point.
+            //TODO This avoids high velocity crash. A proper analyses why this happens would be beneficial.
+            Timber.e("ExchangeService.reloadExchangeData - MetadataNodeFactory is null.");
         }
     }
 
     private Observable<Metadata> getMetadata(DeterministicKey metadataHDNode) {
-        return Observable.fromCallable(() -> {
-            return new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build();
-        }).compose(RxUtil.applySchedulersToObservable());
+        return Observable.fromCallable(() ->
+                new Metadata.Builder(metadataHDNode, METADATA_TYPE_EXCHANGE).build()
+        ).compose(RxUtil.applySchedulersToObservable());
     }
 
-    public Observable<Boolean> hasCoinifyAccount() {
+    Observable<Boolean> hasCoinifyAccount() {
         return getExchangeData()
                 .flatMap(metadata -> Observable
                         .fromCallable(() -> {

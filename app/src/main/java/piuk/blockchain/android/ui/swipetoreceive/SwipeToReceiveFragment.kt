@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.swipetoreceive
 
-
 import android.content.*
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -11,18 +10,20 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_swipe_to_receive.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
-import piuk.blockchain.android.util.OSUtil
 import piuk.blockchain.android.util.extensions.*
 import javax.inject.Inject
 
 class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(), SwipeToReceiveView {
 
     @Inject lateinit var swipeToReceivePresenter: SwipeToReceivePresenter
+    override val cryptoCurrency: CryptoCurrencies
+        get() = arguments.getSerializable(ARGUMENT_CRYPTOCURRENCY) as CryptoCurrencies
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -37,30 +38,23 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-
-        // Listen for updates to stored addresses
-        startWebSocketService()
-
-        return container!!.inflate(R.layout.fragment_swipe_to_receive)
-    }
-
-    override fun createPresenter() = swipeToReceivePresenter
-
-    override fun getMvpView() = this
+    override fun onCreateView(
+            inflater: LayoutInflater?,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ) = container?.inflate(R.layout.fragment_swipe_to_receive)
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         imageview_qr.setOnClickListener { showClipboardWarning() }
+        textview_address.setOnClickListener { showClipboardWarning() }
 
         onViewReady()
     }
 
     override fun displayReceiveAddress(address: String) {
-        edittext_address.setText(address)
+        textview_address.text = address
 
         // Register address as the one we're interested in via broadcast
         val intent = Intent(WebSocketService.ACTION_INTENT).apply { putExtra("address", address) }
@@ -72,11 +66,11 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     }
 
     override fun displayReceiveAccount(accountName: String) {
-        edittext_account?.text = accountName
+        textview_account?.text = accountName
     }
 
     override fun setUiState(uiState: Int) {
-        when(uiState) {
+        when (uiState) {
             UiState.LOADING -> displayLoading()
             UiState.CONTENT -> showContent()
             UiState.FAILURE -> showNoAddressesAvailable()
@@ -92,6 +86,10 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
         super.onStop()
         LocalBroadcastManager.getInstance(context).unregisterReceiver(broadcastReceiver)
     }
+
+    override fun createPresenter() = swipeToReceivePresenter
+
+    override fun getMvpView() = this
 
     private fun showContent() {
         progress_bar.gone()
@@ -115,25 +113,25 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes, { _, _ ->
                     val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Send address", edittext_address.text.toString())
-                    activity.toast(R.string.copied_to_clipboard)
+                    val clip = ClipData.newPlainText("Send address", textview_address.text)
+                    toast(R.string.copied_to_clipboard)
                     clipboard.primaryClip = clip
                 })
                 .setNegativeButton(R.string.no, null)
                 .show()
     }
 
-    private fun startWebSocketService() {
-        val intent = Intent(context, WebSocketService::class.java)
+    companion object {
 
-        if (!OSUtil(activity).isServiceRunning(WebSocketService::class.java)) {
-            activity.startService(intent)
-        } else {
-            // Restarting this here ensures re-subscription after app restart - the service may remain
-            // running, but the subscription to the WebSocket won't be restarted unless onCreate called
-            activity.stopService(intent)
-            activity.startService(intent)
-        }
+        private const val ARGUMENT_CRYPTOCURRENCY = "ARGUMENT_CRYPTOCURRENCY"
+
+        @JvmStatic
+        fun newInstance(cryptoCurrency: CryptoCurrencies): SwipeToReceiveFragment =
+                SwipeToReceiveFragment().apply {
+                    arguments = Bundle().apply {
+                        putSerializable(ARGUMENT_CRYPTOCURRENCY, cryptoCurrency)
+                    }
+                }
     }
 
 }

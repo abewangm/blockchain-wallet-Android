@@ -9,26 +9,42 @@
         android:background="@color/white"
         android:orientation="vertical">
 
-        <android.support.v7.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/button_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?selectableItemBackgroundBorderless"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_settings"
             android:padding="16dp"
+            android:tint="@color/primary_navy_medium"
             android:visibility="invisible"
             app:srcCompat="@drawable/vector_settings"
-            android:tint="@color/primary_navy_medium"
             tools:visibility="visible" />
 
         <ImageView
             android:id="@+id/icon"
             android:layout_width="120dp"
             android:layout_height="match_parent"
-            android:layout_above="@+id/viewpager"
+            android:layout_above="@+id/indicator"
             android:layout_below="@+id/button_settings"
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
             app:srcCompat="@drawable/vector_icon_blue" />
+
+        <me.relex.circleindicator.CircleIndicator
+            android:id="@+id/indicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/viewpager"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:alpha="0"
+            app:ci_animator="@anim/viewpager_indicator"
+            app:ci_drawable="@drawable/selecteditem_dot"
+            app:ci_drawable_unselected="@drawable/nonselecteditem_dot"
+            app:ci_height="8dp"
+            app:ci_width="8dp" />
 
         <piuk.blockchain.android.ui.customviews.NonSwipeableViewPager
             android:id="@+id/viewpager"
