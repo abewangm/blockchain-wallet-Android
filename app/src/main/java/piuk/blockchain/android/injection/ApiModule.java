@@ -15,6 +15,9 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import info.blockchain.wallet.shapeshift.ShapeShiftApi;
+import info.blockchain.wallet.shapeshift.ShapeShiftEndpoints;
+import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
 import okhttp3.CertificatePinner;
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
@@ -144,4 +147,17 @@ public class ApiModule {
         return new SSLVerifyUtil(rxBus, new ConnectionApi(retrofit));
     }
 
+    @Provides
+    @Singleton
+    @Named("shapeshift")
+    protected Retrofit provideRetrofitShapeShiftInstance(OkHttpClient okHttpClient,
+                                                       JacksonConverterFactory converterFactory,
+                                                       RxJava2CallAdapterFactory rxJavaCallFactory) {
+        return new Retrofit.Builder()
+                .baseUrl(ShapeShiftUrls.SHAPESHIFT_URL)
+                .client(okHttpClient)
+                .addConverterFactory(converterFactory)
+                .addCallAdapterFactory(rxJavaCallFactory)
+                .build();
+    }
 }

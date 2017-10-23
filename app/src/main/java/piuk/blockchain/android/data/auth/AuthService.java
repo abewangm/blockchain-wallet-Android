@@ -11,6 +11,7 @@ import okhttp3.ResponseBody;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.util.annotations.WebRequest;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class AuthService {
 
@@ -131,6 +132,7 @@ public class AuthService {
      */
     @WebRequest
     Observable<WalletOptions> getWalletOptions() {
+        Timber.d("vos getWalletOptions");
         return walletApi.getWalletOptions();
     }
 
