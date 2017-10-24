@@ -19,6 +19,7 @@ import javax.inject.Inject
 @Suppress("UNUSED_PARAMETER")
 class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresenter>(), PairingCodeView {
 
+    @Suppress("MemberVisibilityCanPrivate")
     @Inject lateinit var pairingCodePresenter: PairingCodePresenter
 
     init {
