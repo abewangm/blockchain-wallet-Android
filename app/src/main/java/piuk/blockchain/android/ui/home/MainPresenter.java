@@ -159,7 +159,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     /*
-    WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
+    // TODO: 24/10/2017  WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
      */
     private void doWalletOptionsChecks() {
 
@@ -169,7 +169,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                         getView().showCustomPrompt(getWarningPrompt(message));
                 })
                 .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
-                .doOnNext(showShapeshift -> handleAndroidFlags(true))
+                .doOnNext(showShapeshift -> handleAndroidFlags(true))// TODO: 24/10/2017 HARDCODED TO TRUE FOR TESTING ON PRODUCTION
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(ignored -> {
                     //no-op

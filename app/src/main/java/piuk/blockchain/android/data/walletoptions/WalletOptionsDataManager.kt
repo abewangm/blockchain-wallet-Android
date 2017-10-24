@@ -42,8 +42,8 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
 
                 if (isNotEmpty()) {
 
-                    val lcid = Locale.getDefault().language + "-" + Locale.getDefault().country
-                    val language = Locale.getDefault().language
+                    val lcid = authDataManager.locale.language + "-" + authDataManager.locale.country
+                    val language = authDataManager.locale.language
 
                     if (containsKey(language)) {
                         result = get(language) ?: ""
@@ -71,11 +71,17 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
 
     fun isShapeshiftAllowed(options: WalletOptions, settings: Settings): Boolean {
 
-        return options.androidFlags.getOrDefault(SHOW_SHAPESHIFT, false)
+        val isShapeShiftAllowed = options.androidFlags.let { it.getOrDefault(SHOW_SHAPESHIFT, false) }
+        val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it.contains(settings.countryCode) }
+        val whitelistedState = options.shapeshift.statesWhitelist.let { it.contains(settings.state) }
+        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it.contains("US") }
+        val isUS = settings.countryCode.equals("US")
+
+        return isShapeShiftAllowed
                 &&
-                !options.shapeshift.countriesBlacklist.contains(settings.countryCode)
-                //||
-                //options.shapeshift.statesWhitelist TODO Where do we get State ???
+                !blacklistedCountry
+                &&
+                (!isUS || (!isUSABlacklisted && whitelistedState))
     }
 
     companion object {

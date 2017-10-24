@@ -23,4 +23,8 @@ public class WalletOptionsState {
             instance = new WalletOptionsState(walletOptionsSubject, walletSettingsSubject);
         return instance;
     }
+
+    public void destroy() {
+        instance = null;
+    }
 }

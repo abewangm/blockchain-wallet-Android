@@ -2,6 +2,8 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
+import java.util.Locale;
+
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthAccountApi;

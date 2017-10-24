@@ -912,13 +912,13 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void showShapeshift() {
         Menu menu = binding.navigationView.getMenu();
-        menu.findItem(R.id.nav_buy).setVisible(true);// TODO: 24/10/2017 shapeshift
+        menu.findItem(R.id.nav_exchange).setVisible(true);
     }
 
     @Override
     public void hideShapeshift() {
         Menu menu = binding.navigationView.getMenu();
-        menu.findItem(R.id.nav_buy).setVisible(false);// TODO: 24/10/2017 shapeshift
+        menu.findItem(R.id.nav_exchange).setVisible(false);
     }
 
     @Override
