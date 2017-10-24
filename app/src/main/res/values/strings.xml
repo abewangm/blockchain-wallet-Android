@@ -815,5 +815,8 @@
     <string name="shapeshift_exchange">Exchange</string>
     <string name="shapeshift_loading_orders">Loading order history</string>
     <string name="shapeshift_loading_orders_failed">Loading orders failed</string>
+    <string name="shapeshift_use_minimum">Use minimum</string>
+    <string name="shapeshift_use_maximum">Use maximum</string>
+    <string name="shapeshift_arrow_unicode" translatable="false">→</string>
 
 </resources>

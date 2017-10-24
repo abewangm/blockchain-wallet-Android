@@ -332,4 +332,18 @@
         <item name="fontPath">fonts/Montserrat-Regular.ttf</item>
     </style>
 
+    <style name="ExchangeTextViewButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/primary_blue_accent</item>
+        <item name="android:textSize">14sp</item>
+        <item name="fontPath">fonts/Montserrat-Regular.ttf</item>
+    </style>
+
 </resources>

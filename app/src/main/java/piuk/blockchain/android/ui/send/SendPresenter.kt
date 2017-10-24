@@ -56,7 +56,6 @@ import java.io.UnsupportedEncodingException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
-import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -118,7 +117,7 @@ class SendPresenter @Inject constructor(
         updateCurrencyUnits()
     }
 
-    fun onResume() {
+    internal fun onResume() {
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onBitcoinChosen()
             CryptoCurrencies.ETHER -> onEtherChosen()
