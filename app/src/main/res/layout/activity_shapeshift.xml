@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar_general" />
+
+    <!-- LOADING LAYOUT -->
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/shapeshift_loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/shapeshift_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            style="@style/ContactsHeader"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="@string/shapeshift_loading_orders"
+            android:textColor="@color/primary_gray_dark"
+            app:layout_constraintBottom_toTopOf="@+id/shapeshift_progress_bar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            tools:ignore="MissingPrefix" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</LinearLayout>
