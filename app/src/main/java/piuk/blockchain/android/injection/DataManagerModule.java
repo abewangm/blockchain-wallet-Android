@@ -2,6 +2,8 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
+import java.util.Locale;
+
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthAccountApi;
@@ -43,6 +45,8 @@ import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsState;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
@@ -222,4 +226,12 @@ public class DataManagerModule {
         return new ChartsDataManager(new PriceApi(), rxBus);
     }
 
+    @Provides
+    @PresenterScope
+    protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager, SettingsDataManager settingsDataManager) {
+        return new WalletOptionsDataManager(authDataManager, WalletOptionsState.getInstance(
+                ReplaySubject.create(1),
+                ReplaySubject.create(1)),
+                settingsDataManager);
+    }
 }

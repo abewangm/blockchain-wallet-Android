@@ -3,11 +3,11 @@ package piuk.blockchain.android.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.ethereum.EthereumWallet;
-import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -45,6 +45,7 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -80,9 +81,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private PromptManager promptManager;
     private EthDataManager ethDataManager;
     private CurrencyState currencyState;
-    private AuthDataManager authDataManager;
-
-    ReplaySubject<WalletOptions> walletOptionsSource = ReplaySubject.create(1);
+    private WalletOptionsDataManager walletOptionsDataManager;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -104,7 +103,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                   EthDataManager ethDataManager,
                   SwipeToReceiveHelper swipeToReceiveHelper,
                   CurrencyState currencyState,
-                  AuthDataManager authDataManager) {
+                  WalletOptionsDataManager walletOptionsDataManager) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -126,7 +125,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.osUtil = new OSUtil(applicationContext);
         this.swipeToReceiveHelper = swipeToReceiveHelper;
         this.currencyState = currencyState;
-        this.authDataManager = authDataManager;
+        this.walletOptionsDataManager = walletOptionsDataManager;
     }
 
     private void initPrompts(Context context) {
@@ -148,8 +147,6 @@ public class MainPresenter extends BasePresenter<MainView> {
             getView().kickToLauncherPage();
         } else {
 
-            initReplaySubjects();
-
             startWebSocketService();
             logEvents();
 
@@ -157,49 +154,34 @@ public class MainPresenter extends BasePresenter<MainView> {
 
             initMetadataElements();
 
-            initReplaySubjects();
-
             doWalletOptionsChecks();
         }
     }
 
-    /**
-     * ReplaySubjects will re-emit items it observed.
-     * It is safe to assumed that walletOptions and
-     * the user's country code won't change during an active session.
-     */
-    private void initReplaySubjects() {
-        Observable<WalletOptions> walletOptionsStream = authDataManager.getWalletOptions();
-        walletOptionsStream.subscribeWith(walletOptionsSource);
-    }
-
     /*
-    Only used for mobile_notice at the moment.
-    WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
+    // TODO: 24/10/2017  WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
      */
     private void doWalletOptionsChecks() {
-        walletOptionsSource
+
+        walletOptionsDataManager.getMobileNotice()
+                .doOnNext(message -> {
+                    if (message != null && !message.isEmpty())
+                        getView().showCustomPrompt(getWarningPrompt(message));
+                })
+                .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
+                .doOnNext(showShapeshift -> handleAndroidFlags(true))// TODO: 24/10/2017 HARDCODED TO TRUE FOR TESTING ON PRODUCTION
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(walletOptions -> {
+                .subscribe(ignored -> {
+                    //no-op
+                }, throwable -> Timber.e(throwable));
+    }
 
-                    Map<String, String> mobileNotice = walletOptions.getMobileNotice();
-
-                    if (mobileNotice != null && mobileNotice.size() > 0) {
-
-                        String lcid = Locale.getDefault().getLanguage()+"-"+Locale.getDefault().getCountry();
-                        String language = Locale.getDefault().getLanguage();
-
-                        if(mobileNotice.containsKey(language)) {
-                            getView().showCustomPrompt(getWarningPrompt(mobileNotice.get(language)));
-                        } else if(mobileNotice.containsKey(lcid)){
-                            //Regional
-                            getView().showCustomPrompt(getWarningPrompt(mobileNotice.get(lcid)));
-                        } else {
-                            //Default
-                            getView().showCustomPrompt(getWarningPrompt(mobileNotice.get("en")));
-                        }
-                    }
-                });
+    private void handleAndroidFlags(boolean showShapeshift) {
+        if(showShapeshift) {
+            getView().showShapeshift();
+        } else {
+            getView().hideShapeshift();
+        }
     }
 
     private SecurityPromptDialog getWarningPrompt(String message) {
