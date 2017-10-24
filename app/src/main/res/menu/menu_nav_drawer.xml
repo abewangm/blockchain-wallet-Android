@@ -7,6 +7,11 @@
       android:title="@string/onboarding_buy_bitcoin" />
 
     <item
+        android:id="@+id/nav_exchange"
+        android:icon="@drawable/vector_exchange"
+        android:title="@string/shapeshift_exchange" />
+
+    <item
         android:id="@+id/nav_backup"
         android:icon="@drawable/vector_lock"
         android:title="@string/backup_wallet" />
