@@ -1,6 +1,9 @@
-package piuk.blockchain.android.ui.exchange
+package piuk.blockchain.android.ui.exchange.overview
 
+import io.reactivex.Observable
+import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.ui.base.BasePresenter
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ShapeShiftPresenter @Inject constructor(
@@ -8,12 +11,20 @@ class ShapeShiftPresenter @Inject constructor(
 ) : BasePresenter<ShapeShiftView>() {
 
     override fun onViewReady() {
-        // TODO: Load shapeshift data
-
         // 1. Show loading on subscribe
         // 2. If no trades found, show empty, redirect to new trade
         // 3. If trades found, map and display data + link for new trade
         // 4. Display error state + retry if necessary
+
+        // TODO: Load shapeshift data
+        Observable.timer(1500, TimeUnit.MILLISECONDS)
+                .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
+                .doOnComplete { view.onStateUpdated(ShapeShiftState.Empty) }
+                .subscribe { IgnorableDefaultObserver<Any>() }
+    }
+
+    internal fun onRetryPressed() {
+        onViewReady()
     }
 
 }

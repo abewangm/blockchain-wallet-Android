@@ -1,12 +1,18 @@
-package piuk.blockchain.android.ui.exchange
+package piuk.blockchain.android.ui.exchange.overview
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
+import kotlinx.android.synthetic.main.activity_shapeshift.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
+import piuk.blockchain.android.ui.exchange.newexchange.NewExchangeActivity
+import piuk.blockchain.android.ui.exchange.overview.adapter.TradesAdapter
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 import javax.inject.Inject
 
@@ -23,6 +29,13 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_shapeshift)
         setupToolbar(toolbar_general, R.string.shapeshift_exchange)
+
+        shapeshift_retry_button.setOnClickListener { presenter.onRetryPressed() }
+
+        shapeshift_recycler_view.adapter = TradesAdapter(this)
+        shapeshift_recycler_view.layoutManager = LinearLayoutManager(this)
+
+        onViewReady()
     }
 
     override fun onStateUpdated(shapeshiftState: ShapeShiftState) = when (shapeshiftState) {
@@ -39,19 +52,26 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     override fun getView() = this
 
     private fun onEmptyLayout() {
-        // TODO: No trades, take user directly to new trade
+        onLoading()
+        NewExchangeActivity.start(this)
     }
 
     private fun onError() {
-        // TODO: Show error
+        shapeshift_loading_layout.gone()
+        shapeshift_error_layout.visible()
+        shapeshift_recycler_view.gone()
     }
 
     private fun onLoading() {
-        // TODO: Show loading
+        shapeshift_loading_layout.visible()
+        shapeshift_error_layout.gone()
+        shapeshift_recycler_view.gone()
     }
 
     private fun onData(data: ShapeShiftState.Data) {
-        // TODO: Update UI accordingly
+        shapeshift_loading_layout.gone()
+        shapeshift_error_layout.gone()
+        shapeshift_recycler_view.visible()
     }
 
     companion object {
