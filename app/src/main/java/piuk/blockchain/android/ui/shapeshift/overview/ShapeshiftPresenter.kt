@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.exchange.overview
+package piuk.blockchain.android.ui.shapeshift.overview
 
 import io.reactivex.Observable
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver

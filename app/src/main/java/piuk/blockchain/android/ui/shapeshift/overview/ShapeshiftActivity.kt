@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.exchange.overview
+package piuk.blockchain.android.ui.shapeshift.overview
 
 import android.content.Context
 import android.content.Intent
@@ -9,8 +9,8 @@ import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
-import piuk.blockchain.android.ui.exchange.newexchange.NewExchangeActivity
-import piuk.blockchain.android.ui.exchange.overview.adapter.TradesAdapter
+import piuk.blockchain.android.ui.shapeshift.newexchange.NewExchangeActivity
+import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesAdapter
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume

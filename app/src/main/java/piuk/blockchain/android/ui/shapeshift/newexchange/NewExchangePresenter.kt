@@ -1,21 +1,30 @@
-package piuk.blockchain.android.ui.exchange.newexchange
+package piuk.blockchain.android.ui.shapeshift.newexchange
 
+import info.blockchain.wallet.shapeshift.data.MarketInfo
+import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.ethereum.EthDataStore
 import piuk.blockchain.android.data.payload.PayloadDataManager
+import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.shapeshift.CoinPairings
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.DecimalFormat
 import java.util.*
 import javax.inject.Inject
+
 
 class NewExchangePresenter @Inject constructor(
         private val payloadDataManager: PayloadDataManager,
@@ -23,25 +32,53 @@ class NewExchangePresenter @Inject constructor(
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState,
-        walletAccountHelper: WalletAccountHelper
+        private val shapeShiftDataManager: ShapeShiftDataManager,
+        private val walletAccountHelper: WalletAccountHelper,
+        private val stringUtils: StringUtils
 ) : BasePresenter<NewExchangeView>() {
 
+    private val btcAccounts = walletAccountHelper.getHdAccounts()
     private val monetaryUtil by unsafeLazy {
         MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     }
     private val currencyHelper by unsafeLazy {
         ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory, currencyState)
     }
-    private val accountList = walletAccountHelper.getAccountItems()
 
     override fun onViewReady() {
         val selectedCurrency = currencyState.cryptoCurrency
-        view.showFrom(selectedCurrency)
-        when (selectedCurrency) {
-            CryptoCurrencies.BTC -> onSelectDefaultBtc()
-            CryptoCurrencies.ETHER -> onEthSelected()
+        view.updateUi(
+                selectedCurrency,
+                btcAccounts.size > 1,
+                if (selectedCurrency == CryptoCurrencies.BTC) getBtcLabel() else getEthLabel(),
+                if (selectedCurrency == CryptoCurrencies.ETHER) getBtcLabel() else getEthLabel()
+        )
+
+        val observable = when (selectedCurrency) {
+            CryptoCurrencies.BTC -> shapeShiftDataManager.getRate(CoinPairings.BTC_TO_ETH)
+            CryptoCurrencies.ETHER -> shapeShiftDataManager.getRate(CoinPairings.ETH_TO_BTC)
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
+
+        observable
+                .doOnSubscribe { view.showProgressDialog(R.string.shapeshift_getting_information) }
+                .doOnTerminate { view.dismissProgressDialog() }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { marketInfo: MarketInfo ->
+                            // Update rates etc
+                            Timber.d("marketInfo loaded")
+                        },
+                        {
+                            Timber.e(it)
+                            view.showToast(R.string.shapeshift_getting_information_failed, ToastCustom.TYPE_ERROR)
+                            view.finishPage()
+                        }
+                )
+    }
+
+    internal fun onSwitchCurrencyClicked() {
+        currencyState.toggleCryptoCurrency().run { onViewReady() }
     }
 
     internal fun onContinuePressed() {
@@ -57,21 +94,28 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onFromChooserClicked() {
-        // TODO:
+        view.launchAccountChooserActivityFrom()
     }
 
     internal fun onToChooserClicked() {
-        // TODO:
+        view.launchAccountChooserActivityTo()
     }
 
-    private fun onSelectDefaultBtc() {
-        compositeDisposable.clear()
+    private fun getBtcLabel(): String {
+        return if (btcAccounts.size > 1) {
+            payloadDataManager.defaultAccount.label
+        } else {
+            stringUtils.getString(R.string.shapeshift_btc)
+        }
     }
 
-    private fun onEthSelected() {
-        compositeDisposable.clear()
-    }
+    private fun getEthLabel() = stringUtils.getString(R.string.shapeshift_eth)
 
+    private fun getAccountList() = walletAccountHelper.getAccountItems()
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Formatting stuff, to be checked and deleted if possible
+    ///////////////////////////////////////////////////////////////////////////
     /**
      * Returns BTC amount from satoshis.
      *

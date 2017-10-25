@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.exchange.overview.adapter
+package piuk.blockchain.android.ui.shapeshift.overview.adapter
 
 import android.app.Activity
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager

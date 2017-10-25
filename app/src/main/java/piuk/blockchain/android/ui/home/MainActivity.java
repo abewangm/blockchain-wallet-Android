@@ -78,7 +78,7 @@ import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.dashboard.DashboardFragment;
-import piuk.blockchain.android.ui.exchange.overview.ShapeShiftActivity;
+import piuk.blockchain.android.ui.shapeshift.overview.ShapeShiftActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;

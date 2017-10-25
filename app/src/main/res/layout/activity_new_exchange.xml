@@ -41,17 +41,17 @@
             android:id="@+id/imageview_from_dropdown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="4dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:src="@drawable/ic_arrow_drop_down_grey600_24dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textview_from_address"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textview_from_address"
+            app:layout_constraintVertical_bias="1.0"
             app:layout_gravity="center_vertical|right"
             tools:ignore="RtlHardcoded" />
-
 
         <!-- TO LAYOUT -->
         <TextView
@@ -81,14 +81,15 @@
             android:id="@+id/imageview_to_dropdown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="4dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:src="@drawable/ic_arrow_drop_down_grey600_24dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textview_to_address"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageview_from_dropdown"
+            app:layout_constraintTop_toTopOf="@+id/textview_to_address"
+            app:layout_constraintVertical_bias="1.0"
             app:layout_gravity="center_vertical|right"
             tools:ignore="RtlHardcoded" />
 
@@ -113,6 +114,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textview_to_address" />
 
+        <!-- CONVERSIONS -->
         <TextView
             android:id="@+id/textview_unit_from"
             style="@style/ExchangeBitcoinTitle"
@@ -288,6 +290,19 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageview_switch_currency"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginRight="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:theme="@style/PlainTheme"
+            app:layout_constraintBottom_toBottomOf="@+id/divider1"
+            app:layout_constraintEnd_toEndOf="@+id/divider1"
+            app:layout_constraintTop_toTopOf="@+id/divider1"
+            app:srcCompat="@drawable/vector_switch_currency"
+            tools:ignore="RtlHardcoded" />
 
     </android.support.constraint.ConstraintLayout>
 </LinearLayout>
