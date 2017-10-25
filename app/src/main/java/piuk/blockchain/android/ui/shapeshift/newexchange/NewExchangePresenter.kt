@@ -20,7 +20,6 @@ import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.text.DecimalFormat
 import java.util.*
 import javax.inject.Inject
@@ -44,6 +43,7 @@ class NewExchangePresenter @Inject constructor(
     private val currencyHelper by unsafeLazy {
         ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory, currencyState)
     }
+    private var marketInfo: MarketInfo? = null
 
     override fun onViewReady() {
         val selectedCurrency = currencyState.cryptoCurrency
@@ -65,9 +65,8 @@ class NewExchangePresenter @Inject constructor(
                 .doOnTerminate { view.dismissProgressDialog() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
-                        { marketInfo: MarketInfo ->
-                            // Update rates etc
-                            Timber.d("marketInfo loaded")
+                        {
+                            marketInfo = it
                         },
                         {
                             Timber.e(it)
@@ -86,11 +85,12 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onMaxPressed() {
-        // TODO:
+        // TODO: Calculate max available crypto, calculate if greater or lesser than [MarketInfo#max]
     }
 
     internal fun onMinPressed() {
-        // TODO:
+        val minimum = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
+        // TODO: Some other stuff
     }
 
     internal fun onFromChooserClicked() {
@@ -99,6 +99,22 @@ class NewExchangePresenter @Inject constructor(
 
     internal fun onToChooserClicked() {
         view.launchAccountChooserActivityTo()
+    }
+
+    internal fun onFromCryptoValueChanged(value: String) {
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> TODO()
+            CryptoCurrencies.ETHER -> TODO()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
+        }
+    }
+
+    internal fun onToCryptoValueChanged(value: String) {
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> TODO()
+            CryptoCurrencies.ETHER -> TODO()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
+        }
     }
 
     private fun getBtcLabel(): String {
@@ -137,31 +153,12 @@ class NewExchangePresenter @Inject constructor(
         return Character.toString(format.decimalFormatSymbols.decimalSeparator)
     }
 
-    /**
-     * Returns amount of satoshis from btc amount. This could be btc, mbtc or bits.
-     *
-     * @return satoshis
-     */
-    private fun getSatoshisFromText(text: String?): BigInteger {
-        if (text.isNullOrEmpty()) return BigInteger.ZERO
-
-        val amountToSend = stripSeparator(text!!)
-
-        val amount = try {
-            amountToSend.toDouble()
-        } catch (nfe: NumberFormatException) {
-            0.0
-        }
-
-        return BigDecimal.valueOf(monetaryUtil.getUndenominatedAmount(amount))
-                .multiply(BigDecimal.valueOf(100000000))
-                .toBigInteger()
-    }
-
     private fun stripSeparator(text: String): String {
         return text.trim { it <= ' ' }
                 .replace(" ", "")
                 .replace(getDefaultDecimalSeparator(), ".")
     }
+
+    private fun String.toBigDecimal(value: String) = BigDecimal(stripSeparator(value))
 
 }

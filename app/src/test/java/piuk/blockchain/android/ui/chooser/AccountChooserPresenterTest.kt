@@ -9,10 +9,8 @@ import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
-import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.ContactsDataManager
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
-import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.util.StringUtils
@@ -25,8 +23,6 @@ class AccountChooserPresenterTest {
     private var mockWalletAccountHelper: WalletAccountHelper = mock()
     private var mockStringUtils: StringUtils = mock()
     private var mockContactsManager: ContactsDataManager = mock()
-    private var mockAccessState: AccessState = mock()
-    private var mockCurrencyState: CurrencyState = mock()
 
     @Before
     @Throws(Exception::class)
@@ -34,9 +30,7 @@ class AccountChooserPresenterTest {
         subject = AccountChooserPresenter(
                 mockWalletAccountHelper,
                 mockStringUtils,
-                mockContactsManager,
-                mockAccessState,
-                mockCurrencyState
+                mockContactsManager
         )
         subject.initView(mockActivity)
     }

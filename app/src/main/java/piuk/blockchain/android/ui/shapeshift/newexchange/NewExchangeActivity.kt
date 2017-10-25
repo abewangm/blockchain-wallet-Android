@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.StringRes
+import com.jakewharton.rxbinding2.widget.RxTextView
 import kotlinx.android.synthetic.main.activity_new_exchange.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
@@ -41,8 +42,12 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         textview_use_max.setOnClickListener { presenter.onMaxPressed() }
         textview_use_min.setOnClickListener { presenter.onMinPressed() }
         imageview_from_dropdown.setOnClickListener { presenter.onFromChooserClicked() }
+        textview_from_address.setOnClickListener { presenter.onFromChooserClicked() }
         imageview_to_dropdown.setOnClickListener { presenter.onToChooserClicked() }
+        textview_to_address.setOnClickListener { presenter.onToChooserClicked() }
         imageview_switch_currency.setOnClickListener { presenter.onSwitchCurrencyClicked() }
+
+        setupListeners()
 
         onViewReady()
     }
@@ -79,14 +84,14 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         AccountChooserActivity.startForResult(
                 this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.SEND,
+                PaymentRequestType.REQUEST,
                 getString(R.string.from)
         )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        // TODO:
+        // TODO: Deserialize objects here, update UI
     }
 
     override fun showProgressDialog(@StringRes message: Int) {
@@ -105,9 +110,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         }
     }
 
-    override fun showToast(message: Int, toastType: String) {
-        toast(message, toastType)
-    }
+    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
     override fun finishPage() = finish()
 
@@ -116,6 +119,33 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     override fun createPresenter() = newExchangePresenter
 
     override fun getView() = this
+
+    override fun updateFromCryptoText(text: String) {
+        edittext_from_crypto.setText(text)
+    }
+
+    override fun updateToCryptoText(text: String) {
+        edittext_to_crypto.setText(text)
+    }
+
+    override fun updateFromFiatText(text: String) {
+        edittext_from_fiat.setText(text)
+    }
+
+    override fun updateToFiatText(text: String) {
+        edittext_to_fiat.setText(text)
+    }
+
+    private fun setupListeners() {
+        RxTextView.textChanges(edittext_from_crypto)
+                .doOnNext { presenter.onFromCryptoValueChanged(it.toString()) }
+                .subscribe()
+
+        RxTextView.textChanges(edittext_to_crypto)
+                .doOnNext { presenter.onToCryptoValueChanged(it.toString()) }
+                .subscribe()
+
+    }
 
     private fun showFromBtc(displayDropDown: Boolean) {
         // Units

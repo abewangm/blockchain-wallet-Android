@@ -26,4 +26,12 @@ interface NewExchangeView : View {
 
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 
+    fun updateFromCryptoText(text: String)
+
+    fun updateToCryptoText(text: String)
+
+    fun updateFromFiatText(text: String)
+
+    fun updateToFiatText(text: String)
+
 }
