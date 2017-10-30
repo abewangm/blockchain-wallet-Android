@@ -20,6 +20,7 @@ import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.*
 import javax.inject.Inject
@@ -102,19 +103,67 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onFromCryptoValueChanged(value: String) {
+        val sanitisedValue = if (value.isNotEmpty()) value else "0"
+        val amount = BigDecimal(sanitisedValue)
+        val toAmount = amount.divide(BigDecimal.valueOf(marketInfo!!.rate), 8, RoundingMode.HALF_UP)
+                .stripTrailingZeros()
+
+        view.updateToCryptoText(toAmount.toPlainString())
+
+        val currencyCode = currencyHelper.fiatUnit
+
+        val lastBtcRate = exchangeRateFactory.getLastBtcPrice(currencyCode)
+        val lastEthRate = exchangeRateFactory.getLastEthPrice(currencyCode)
+
+        Timber.d("onFromCryptoValueChanged")
+
         when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> TODO()
-            CryptoCurrencies.ETHER -> TODO()
+            CryptoCurrencies.BTC -> {
+//                view.updateFromCryptoText(amount.multiply(BigDecimal.valueOf(lastBtcRate)).toPlainString())
+//                view.updateToCryptoText(toAmount.multiply(BigDecimal.valueOf(lastEthRate)).toPlainString())
+            }
+            CryptoCurrencies.ETHER -> {
+//                view.updateFromCryptoText(amount.multiply(BigDecimal.valueOf(lastEthRate)).toPlainString())
+//                view.updateToCryptoText(toAmount.multiply(BigDecimal.valueOf(lastBtcRate)).toPlainString())
+            }
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 
     internal fun onToCryptoValueChanged(value: String) {
+        val sanitisedValue = if (value.isNotEmpty()) value else "0"
+        val amount = BigDecimal(sanitisedValue)
+        val toAmount = amount.multiply(BigDecimal.valueOf(marketInfo!!.rate))
+                .stripTrailingZeros()
+
+        view.updateFromCryptoText(toAmount.toPlainString())
+
+        val currencyCode = currencyHelper.fiatUnit
+
+        val lastBtcRate = exchangeRateFactory.getLastBtcPrice(currencyCode)
+        val lastEthRate = exchangeRateFactory.getLastEthPrice(currencyCode)
+
+        Timber.d("onToCryptoValueChanged")
+
         when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> TODO()
-            CryptoCurrencies.ETHER -> TODO()
+            CryptoCurrencies.BTC -> {
+//                view.updateToCryptoText(toAmount.multiply(BigDecimal.valueOf(lastBtcRate)).toPlainString())
+//                view.updateFromCryptoText(amount.multiply(BigDecimal.valueOf(lastEthRate)).toPlainString())
+            }
+            CryptoCurrencies.ETHER -> {
+//                view.updateToCryptoText(toAmount.multiply(BigDecimal.valueOf(lastEthRate)).toPlainString())
+//                view.updateFromCryptoText(amount.multiply(BigDecimal.valueOf(lastBtcRate)).toPlainString())
+            }
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
+    }
+
+    internal fun onFromFiatValueChanged(value: String) {
+        // TODO:
+    }
+
+    internal fun onToFiatValueChanged(value: String) {
+        // TODO:
     }
 
     private fun getBtcLabel(): String {
@@ -127,6 +176,8 @@ class NewExchangePresenter @Inject constructor(
 
     private fun getEthLabel() = stringUtils.getString(R.string.shapeshift_eth)
 
+    // Changes depending on chosen account type - this is horrible and needs to be passed
+    // to the method instead of having an outside dependency on some stored state
     private fun getAccountList() = walletAccountHelper.getAccountItems()
 
     ///////////////////////////////////////////////////////////////////////////

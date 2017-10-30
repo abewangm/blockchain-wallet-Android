@@ -54,6 +54,8 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     private fun onEmptyLayout() {
         onLoading()
         NewExchangeActivity.start(this)
+        // Remove self from back stack
+        finish()
     }
 
     private fun onError() {

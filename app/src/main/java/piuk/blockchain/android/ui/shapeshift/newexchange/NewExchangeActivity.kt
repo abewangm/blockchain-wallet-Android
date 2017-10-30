@@ -4,12 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.StringRes
+import android.widget.EditText
 import com.jakewharton.rxbinding2.widget.RxTextView
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_new_exchange.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
@@ -18,6 +21,7 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
+import timber.log.Timber
 import javax.inject.Inject
 
 class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(), NewExchangeView {
@@ -27,6 +31,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     private val btcSymbol = CryptoCurrencies.BTC.symbol.toUpperCase()
     private val ethSymbol = CryptoCurrencies.ETHER.symbol.toUpperCase()
+    private val compositeDisposable = CompositeDisposable()
     private var progressDialog: MaterialProgressDialog? = null
 
     init {
@@ -136,15 +141,45 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         edittext_to_fiat.setText(text)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.clear()
+    }
+
     private fun setupListeners() {
-        RxTextView.textChanges(edittext_from_crypto)
-                .doOnNext { presenter.onFromCryptoValueChanged(it.toString()) }
-                .subscribe()
+        mapOf(
+                edittext_to_crypto to presenter::onToCryptoValueChanged,
+                edittext_from_crypto to presenter::onFromCryptoValueChanged,
+                edittext_to_fiat to presenter::onToFiatValueChanged,
+                edittext_from_fiat to presenter::onFromCryptoValueChanged
+        ).map {
+            it.key.setOnClickListener { clearAllEditTexts() }
+            return@map getTextWatcherObservable(it.key, it.value)
+        }.map {
+            // Resume if any formatting errors occur
+            it.onErrorResumeNext(it).subscribe()
+            // Dispose subscriptions onDestroy as strong reference held to View
+        }.forEach { compositeDisposable.addAll(it) }
+    }
 
-        RxTextView.textChanges(edittext_to_crypto)
-                .doOnNext { presenter.onToCryptoValueChanged(it.toString()) }
-                .subscribe()
+    private fun getTextWatcherObservable(editText: EditText, presenterFunction: (String) -> Unit) =
+            RxTextView.textChanges(editText)
+                    // Logging
+                    .doOnError { Timber.e(it) }
+                    // Skip first event emitted when subscribing
+                    .skip(1)
+                    // Convert to String
+                    .map { it.toString() }
+                    // Ignore elements emitted by non-user events (ie presenter updates)
+                    .doOnNext { if (currentFocus == editText) presenterFunction(it) }
+                    // Scheduling
+                    .compose(RxUtil.applySchedulersToObservable())
 
+    private fun clearAllEditTexts() {
+        edittext_from_crypto.text.clear()
+        edittext_to_crypto.text.clear()
+        edittext_to_fiat.text.clear()
+        edittext_from_fiat.text.clear()
     }
 
     private fun showFromBtc(displayDropDown: Boolean) {

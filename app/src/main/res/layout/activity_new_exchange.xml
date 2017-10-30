@@ -144,7 +144,7 @@
             app:layout_constraintEnd_toStartOf="@+id/textview_arrow_symbol"
             app:layout_constraintStart_toStartOf="@+id/textview_to_address"
             app:layout_constraintTop_toTopOf="@+id/textview_unit_from"
-            tools:ignore="MissingPrefix,RtlHardcoded" />
+            tools:ignore="HardcodedText,MissingPrefix,RtlHardcoded" />
 
         <TextView
             android:id="@+id/textview_arrow_symbol"
@@ -164,6 +164,7 @@
             android:id="@+id/textview_unit_to"
             style="@style/ExchangeBitcoinTitle"
             android:layout_marginLeft="16dp"
+            android:layout_marginRight="8dp"
             app:layout_constraintBottom_toBottomOf="@+id/textview_arrow_symbol"
             app:layout_constraintEnd_toStartOf="@+id/edittext_to_crypto"
             app:layout_constraintHorizontal_bias="0.5"
@@ -191,7 +192,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/textview_unit_to"
             app:layout_constraintTop_toTopOf="@+id/textview_unit_to"
-            tools:ignore="MissingPrefix,RtlHardcoded" />
+            tools:ignore="HardcodedText,MissingPrefix,RtlHardcoded" />
 
         <include
             android:id="@+id/divider3"
@@ -214,7 +215,7 @@
             android:layout_marginTop="16dp"
             android:background="@null"
             android:gravity="left"
-            android:hint="$0.00"
+            android:hint="0.00"
             android:inputType="numberDecimal"
             android:maxLines="1"
             android:textColor="@color/black"
@@ -222,7 +223,7 @@
             app:layout_constraintEnd_toStartOf="@+id/textview_arrow_symbol"
             app:layout_constraintStart_toStartOf="@+id/textview_to_address"
             app:layout_constraintTop_toBottomOf="@+id/edittext_from_crypto"
-            tools:ignore="MissingPrefix,RtlHardcoded" />
+            tools:ignore="HardcodedText,MissingPrefix,RtlHardcoded" />
 
         <EditText
             android:id="@+id/edittext_to_fiat"
@@ -233,7 +234,7 @@
             android:layout_marginTop="16dp"
             android:background="@null"
             android:gravity="right"
-            android:hint="$0.00"
+            android:hint="0.00"
             android:inputType="numberDecimal"
             android:maxLines="1"
             android:textColor="@color/black"
@@ -242,7 +243,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/textview_unit_to"
             app:layout_constraintTop_toBottomOf="@+id/edittext_to_crypto"
-            tools:ignore="MissingPrefix,RtlHardcoded" />
+            tools:ignore="HardcodedText,MissingPrefix,RtlHardcoded" />
 
         <include
             android:id="@+id/divider3"

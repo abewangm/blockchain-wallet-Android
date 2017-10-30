@@ -38,5 +38,5 @@ class ShapeShiftDataManager(private val shapeShiftApi: ShapeShiftApi, rxBus: RxB
  */
 enum class CoinPairings(val pairCode: String) {
     BTC_TO_ETH(ShapeShiftPairs.BTC_ETH),
-    ETH_TO_BTC(ShapeShiftPairs.BTC_ETH)
+    ETH_TO_BTC(ShapeShiftPairs.ETH_BTC)
 }
