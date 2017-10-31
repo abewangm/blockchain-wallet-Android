@@ -6,32 +6,43 @@ import android.os.Bundle
 import android.support.annotation.StringRes
 import android.widget.EditText
 import com.jakewharton.rxbinding2.widget.RxTextView
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_new_exchange.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
-import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
+import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
+import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import java.util.*
 import javax.inject.Inject
 
-class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(), NewExchangeView {
+class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(), NewExchangeView,
+        NumericKeyboardCallback {
 
     @Suppress("MemberVisibilityCanPrivate")
     @Inject lateinit var newExchangePresenter: NewExchangePresenter
 
+    override val locale: Locale
+        get() = Locale.getDefault()
     private val btcSymbol = CryptoCurrencies.BTC.symbol.toUpperCase()
     private val ethSymbol = CryptoCurrencies.ETHER.symbol.toUpperCase()
     private val compositeDisposable = CompositeDisposable()
+    private val editTexts by unsafeLazy {
+        listOf(edittext_from_crypto, edittext_to_crypto, edittext_to_fiat, edittext_from_fiat)
+    }
+
     private var progressDialog: MaterialProgressDialog? = null
 
     init {
@@ -61,11 +72,15 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
             fromCurrency: CryptoCurrencies,
             displayDropDown: Boolean,
             fromLabel: String,
-            toLabel: String
+            toLabel: String,
+            fiatHint: String
     ) {
         // Titles
         textview_to_address.text = toLabel
         textview_from_address.text = fromLabel
+        // Hints
+        edittext_to_fiat.hint = fiatHint
+        edittext_from_fiat.hint = fiatHint
 
         when (fromCurrency) {
             CryptoCurrencies.BTC -> showFromBtc(displayDropDown)
@@ -141,6 +156,16 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         edittext_to_fiat.setText(text)
     }
 
+    override fun clearEditTexts() {
+        editTexts.forEach { it.text.clear() }
+    }
+
+    override fun onKeypadClose() = Unit
+
+    override fun onKeypadOpen() = Unit
+
+    override fun onKeypadOpenCompleted() = Unit
+
     override fun onDestroy() {
         super.onDestroy()
         compositeDisposable.clear()
@@ -151,15 +176,19 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                 edittext_to_crypto to presenter::onToCryptoValueChanged,
                 edittext_from_crypto to presenter::onFromCryptoValueChanged,
                 edittext_to_fiat to presenter::onToFiatValueChanged,
-                edittext_from_fiat to presenter::onFromCryptoValueChanged
+                edittext_from_fiat to presenter::onFromFiatValueChanged
         ).map {
-            it.key.setOnClickListener { clearAllEditTexts() }
+            it.key.setOnClickListener { clearEditTexts() }
             return@map getTextWatcherObservable(it.key, it.value)
         }.map {
             // Resume if any formatting errors occur
             it.onErrorResumeNext(it).subscribe()
             // Dispose subscriptions onDestroy as strong reference held to View
         }.forEach { compositeDisposable.addAll(it) }
+    }
+
+    private fun setupKeypad() {
+        editTexts.forEach {  }
     }
 
     private fun getTextWatcherObservable(editText: EditText, presenterFunction: (String) -> Unit) =
@@ -173,14 +202,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                     // Ignore elements emitted by non-user events (ie presenter updates)
                     .doOnNext { if (currentFocus == editText) presenterFunction(it) }
                     // Scheduling
-                    .compose(RxUtil.applySchedulersToObservable())
-
-    private fun clearAllEditTexts() {
-        edittext_from_crypto.text.clear()
-        edittext_to_crypto.text.clear()
-        edittext_to_fiat.text.clear()
-        edittext_from_fiat.text.clear()
-    }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.computation())
 
     private fun showFromBtc(displayDropDown: Boolean) {
         // Units

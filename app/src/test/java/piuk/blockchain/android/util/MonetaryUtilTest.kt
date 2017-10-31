@@ -6,6 +6,7 @@ import org.amshove.kluent.`should equal`
 import org.junit.Test
 import java.math.BigInteger
 import java.text.NumberFormat
+import java.util.*
 
 class MonetaryUtilTest {
 
@@ -296,6 +297,28 @@ class MonetaryUtilTest {
         val result = subject.getDisplayAmountWithFormatting(10_000_000_000.0)
         // Assert
         result `should equal` "100.0"
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getFiatDisplayString GBP in UK`() {
+        // Arrange
+
+        // Act
+        val result = subject.getFiatDisplayString(1.2345, "GBP", Locale.UK)
+        // Assert
+        result `should equal` "£1.23"
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getCurrencySymbol GBP in UK`() {
+        // Arrange
+
+        // Act
+        val result = subject.getCurrencySymbol("GBP", Locale.UK)
+        // Assert
+        result `should equal` "£"
     }
 
 }

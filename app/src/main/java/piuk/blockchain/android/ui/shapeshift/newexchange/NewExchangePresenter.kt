@@ -52,7 +52,8 @@ class NewExchangePresenter @Inject constructor(
                 selectedCurrency,
                 btcAccounts.size > 1,
                 if (selectedCurrency == CryptoCurrencies.BTC) getBtcLabel() else getEthLabel(),
-                if (selectedCurrency == CryptoCurrencies.ETHER) getBtcLabel() else getEthLabel()
+                if (selectedCurrency == CryptoCurrencies.ETHER) getBtcLabel() else getEthLabel(),
+                monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
         )
 
         val observable = when (selectedCurrency) {
@@ -78,7 +79,9 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onSwitchCurrencyClicked() {
-        currencyState.toggleCryptoCurrency().run { onViewReady() }
+        currencyState.toggleCryptoCurrency()
+                .run { view.clearEditTexts() }
+                .run { onViewReady() }
     }
 
     internal fun onContinuePressed() {
@@ -105,36 +108,50 @@ class NewExchangePresenter @Inject constructor(
     internal fun onFromCryptoValueChanged(value: String) {
         val sanitisedValue = if (value.isNotEmpty()) value else "0"
         val amount = BigDecimal(sanitisedValue)
-        val toAmount = amount.divide(BigDecimal.valueOf(marketInfo!!.rate), 8, RoundingMode.HALF_UP)
+        val toAmount = amount.multiply(BigDecimal.valueOf(marketInfo?.rate ?: 1.0))
                 .stripTrailingZeros()
 
         view.updateToCryptoText(toAmount.toPlainString())
 
         val currencyCode = currencyHelper.fiatUnit
-
         val lastBtcRate = exchangeRateFactory.getLastBtcPrice(currencyCode)
         val lastEthRate = exchangeRateFactory.getLastEthPrice(currencyCode)
 
-        Timber.d("onFromCryptoValueChanged")
+        val fromRate: Double
+        val toRate: Double
 
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
-//                view.updateFromCryptoText(amount.multiply(BigDecimal.valueOf(lastBtcRate)).toPlainString())
-//                view.updateToCryptoText(toAmount.multiply(BigDecimal.valueOf(lastEthRate)).toPlainString())
+                fromRate = lastBtcRate
+                toRate = lastEthRate
             }
             CryptoCurrencies.ETHER -> {
-//                view.updateFromCryptoText(amount.multiply(BigDecimal.valueOf(lastEthRate)).toPlainString())
-//                view.updateToCryptoText(toAmount.multiply(BigDecimal.valueOf(lastBtcRate)).toPlainString())
+                fromRate = lastEthRate
+                toRate = lastBtcRate
             }
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
+
+        view.updateToFiatText(monetaryUtil.getFiatDisplayString(
+                toAmount.multiply(BigDecimal.valueOf(toRate)).toDouble(),
+                currencyHelper.fiatUnit,
+                view.locale
+        ))
+        view.updateFromFiatText(monetaryUtil.getFiatDisplayString(
+                amount.multiply(BigDecimal.valueOf(fromRate)).toDouble(),
+                currencyHelper.fiatUnit,
+                view.locale
+        ))
     }
 
     internal fun onToCryptoValueChanged(value: String) {
         val sanitisedValue = if (value.isNotEmpty()) value else "0"
         val amount = BigDecimal(sanitisedValue)
-        val toAmount = amount.multiply(BigDecimal.valueOf(marketInfo!!.rate))
-                .stripTrailingZeros()
+        val toAmount = amount.divide(
+                BigDecimal.valueOf(marketInfo?.rate ?: 1.0),
+                8,
+                RoundingMode.HALF_UP
+        ).stripTrailingZeros()
 
         view.updateFromCryptoText(toAmount.toPlainString())
 
@@ -143,19 +160,31 @@ class NewExchangePresenter @Inject constructor(
         val lastBtcRate = exchangeRateFactory.getLastBtcPrice(currencyCode)
         val lastEthRate = exchangeRateFactory.getLastEthPrice(currencyCode)
 
-        Timber.d("onToCryptoValueChanged")
+        val fromRate: Double
+        val toRate: Double
 
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
-//                view.updateToCryptoText(toAmount.multiply(BigDecimal.valueOf(lastBtcRate)).toPlainString())
-//                view.updateFromCryptoText(amount.multiply(BigDecimal.valueOf(lastEthRate)).toPlainString())
+                fromRate = lastEthRate
+                toRate = lastBtcRate
             }
             CryptoCurrencies.ETHER -> {
-//                view.updateToCryptoText(toAmount.multiply(BigDecimal.valueOf(lastEthRate)).toPlainString())
-//                view.updateFromCryptoText(amount.multiply(BigDecimal.valueOf(lastBtcRate)).toPlainString())
+                fromRate = lastBtcRate
+                toRate = lastEthRate
             }
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
+
+        view.updateToFiatText(monetaryUtil.getFiatDisplayString(
+                toAmount.multiply(BigDecimal.valueOf(toRate)).toDouble(),
+                currencyHelper.fiatUnit,
+                view.locale
+        ))
+        view.updateFromFiatText(monetaryUtil.getFiatDisplayString(
+                amount.multiply(BigDecimal.valueOf(fromRate)).toDouble(),
+                currencyHelper.fiatUnit,
+                view.locale
+        ))
     }
 
     internal fun onFromFiatValueChanged(value: String) {
