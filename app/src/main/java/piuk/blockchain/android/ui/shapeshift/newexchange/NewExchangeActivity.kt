@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.StringRes
+import android.support.design.widget.CoordinatorLayout
+import android.view.View
 import android.widget.EditText
 import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -25,6 +27,7 @@ import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import java.text.DecimalFormatSymbols
 import java.util.*
 import javax.inject.Inject
 
@@ -39,6 +42,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     private val btcSymbol = CryptoCurrencies.BTC.symbol.toUpperCase()
     private val ethSymbol = CryptoCurrencies.ETHER.symbol.toUpperCase()
     private val compositeDisposable = CompositeDisposable()
+    private val defaultDecimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator.toString()
     private val editTexts by unsafeLazy {
         listOf(edittext_from_crypto, edittext_to_crypto, edittext_to_fiat, edittext_from_fiat)
     }
@@ -64,6 +68,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         imageview_switch_currency.setOnClickListener { presenter.onSwitchCurrencyClicked() }
 
         setupListeners()
+        setupKeypad()
 
         onViewReady()
     }
@@ -81,6 +86,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         // Hints
         edittext_to_fiat.hint = fiatHint
         edittext_from_fiat.hint = fiatHint
+        edittext_from_crypto.hint = "0.00"
+        edittext_to_crypto.hint = "0.00"
 
         when (fromCurrency) {
             CryptoCurrencies.BTC -> showFromBtc(displayDropDown)
@@ -160,15 +167,52 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         editTexts.forEach { it.text.clear() }
     }
 
-    override fun onKeypadClose() = Unit
+    override fun onKeypadClose() {
+        val height = resources.getDimension(R.dimen.action_bar_height).toInt()
+        // Resize activity to default
+        shapeshift_scrollview.apply {
+            setPadding(0, 0, 0, 0)
+            layoutParams = CoordinatorLayout.LayoutParams(
+                    CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                    CoordinatorLayout.LayoutParams.MATCH_PARENT
+            ).apply { setMargins(0, height, 0, height) }
+
+            postDelayed({ smoothScrollTo(0, 0) }, 100)
+        }
+    }
 
     override fun onKeypadOpen() = Unit
 
-    override fun onKeypadOpenCompleted() = Unit
+    override fun onKeypadOpenCompleted() {
+        // Resize activity around view
+        val height = resources.getDimension(R.dimen.action_bar_height).toInt()
+        shapeshift_scrollview.apply {
+            setPadding(0, 0, 0, shapeshift_keyboard.height)
+            layoutParams = CoordinatorLayout.LayoutParams(
+                    CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                    CoordinatorLayout.LayoutParams.MATCH_PARENT
+            ).apply { setMargins(0, height, 0, 0) }
+
+            scrollTo(0, bottom)
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         compositeDisposable.clear()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        closeKeyPad()
+    }
+
+    override fun onBackPressed() {
+        if (isKeyboardVisible()) {
+            closeKeyPad()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     private fun setupListeners() {
@@ -188,7 +232,11 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     }
 
     private fun setupKeypad() {
-        editTexts.forEach {  }
+        editTexts.forEach { shapeshift_keyboard.enableOnView(it) }
+        shapeshift_keyboard.apply {
+            setDecimalSeparator(defaultDecimalSeparator)
+            setCallback(this@NewExchangeActivity)
+        }
     }
 
     private fun getTextWatcherObservable(editText: EditText, presenterFunction: (String) -> Unit) =
@@ -221,6 +269,12 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         // Visibility
         if (displayDropDown) imageview_to_dropdown.visible()
         imageview_from_dropdown.gone()
+    }
+
+    private fun isKeyboardVisible(): Boolean = shapeshift_keyboard.isVisible
+
+    private fun closeKeyPad() {
+        shapeshift_keyboard.setNumpadVisibility(View.GONE)
     }
 
     companion object {
