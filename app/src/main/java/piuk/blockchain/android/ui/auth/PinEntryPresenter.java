@@ -20,6 +20,7 @@ import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 
 import org.spongycastle.crypto.InvalidCipherTextException;
 
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -257,7 +258,8 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                             if (throwable instanceof InvalidCredentialsException) {
                                 getView().goToPasswordRequiredActivity();
 
-                            } else if (throwable instanceof ServerConnectionException) {
+                            } else if (throwable instanceof ServerConnectionException
+                                    || throwable instanceof SocketTimeoutException) {
                                 getView().showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
                                 mAppUtil.restartApp();
 
@@ -287,8 +289,9 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                                 getView().showAccountLockedDialog();
 
                             } else {
+                                Logging.INSTANCE.logException(throwable);
                                 getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                                mAppUtil.clearCredentialsAndRestart();
+                                mAppUtil.restartApp();
                             }
 
                         }));
@@ -314,7 +317,8 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                             getView().restartPageAndClearTop();
                         }, throwable -> {
 
-                            if (throwable instanceof ServerConnectionException) {
+                            if (throwable instanceof ServerConnectionException
+                                    || throwable instanceof SocketTimeoutException) {
                                 getView().showToast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR);
                             } else if (throwable instanceof PayloadException) {
                                 //This shouldn't happen - Payload retrieved from server couldn't be parsed
@@ -330,6 +334,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                                 getView().showAccountLockedDialog();
 
                             } else {
+                                Logging.INSTANCE.logException(throwable);
                                 showErrorToast(R.string.invalid_password);
                                 getView().showValidationDialog();
                             }
