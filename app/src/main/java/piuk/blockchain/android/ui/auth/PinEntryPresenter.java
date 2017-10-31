@@ -289,8 +289,9 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                                 getView().showAccountLockedDialog();
 
                             } else {
+                                Logging.INSTANCE.logException(throwable);
                                 getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                                mAppUtil.clearCredentialsAndRestart();
+                                mAppUtil.restartApp();
                             }
 
                         }));
@@ -333,6 +334,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                                 getView().showAccountLockedDialog();
 
                             } else {
+                                Logging.INSTANCE.logException(throwable);
                                 showErrorToast(R.string.invalid_password);
                                 getView().showValidationDialog();
                             }

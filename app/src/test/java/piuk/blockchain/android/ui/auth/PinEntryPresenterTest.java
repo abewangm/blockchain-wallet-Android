@@ -401,7 +401,7 @@ public class PinEntryPresenterTest {
         verify(prefsUtil).setValue(anyString(), anyInt());
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
-        verify(appUtil).clearCredentialsAndRestart();
+        verify(appUtil).restartApp();
     }
 
     @Test
