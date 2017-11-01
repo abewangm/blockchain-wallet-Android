@@ -21,13 +21,8 @@ import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.text.DecimalFormat
 import java.util.*
 import javax.inject.Inject
-
-// For type safety in methods
-typealias ToAmount = String
-typealias FromAmount = String
 
 class NewExchangePresenter @Inject constructor(
         private val payloadDataManager: PayloadDataManager,
@@ -54,8 +49,8 @@ class NewExchangePresenter @Inject constructor(
         view.updateUi(
                 selectedCurrency,
                 btcAccounts.size > 1,
-                if (selectedCurrency == CryptoCurrencies.BTC) getBtcLabel() else getEthLabel(),
-                if (selectedCurrency == CryptoCurrencies.ETHER) getBtcLabel() else getEthLabel(),
+                if (selectedCurrency == CryptoCurrencies.BTC) getDefaultBtcLabel() else getEthLabel(),
+                if (selectedCurrency == CryptoCurrencies.ETHER) getDefaultBtcLabel() else getEthLabel(),
                 monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
         )
 
@@ -88,18 +83,26 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onContinuePressed() {
-        // TODO:
+        // TODO: Set up parcelable object if all fields are valid
     }
 
     internal fun onMaxPressed() {
-        // TODO: Calculate max available crypto, calculate if greater or lesser than [MarketInfo#max]
-        val maximum = BigDecimal.valueOf(marketInfo?.maxLimit ?: 0.0)
+        with(getMaximum()) {
+            // TODO: Calculate max available crypto, calculate if greater or lesser than max from API
+            view.updateFromCryptoText(this.toPlainString())
+            // This fixes focus issues but is a bit of a hack as this method is potentially called twice
+            onFromCryptoValueChanged(this.toPlainString())
+        }
     }
 
     internal fun onMinPressed() {
-        val minimum = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
-        // TODO: Some other stuff
+        with(getMinimum()) {
+            view.updateFromCryptoText(this.toPlainString())
+            // This fixes focus issues but is a bit of a hack as this method is potentially called twice
+            onFromCryptoValueChanged(this.toPlainString())
+        }
     }
+
 
     internal fun onFromChooserClicked() {
         view.launchAccountChooserActivityFrom()
@@ -110,62 +113,45 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onFromCryptoValueChanged(value: String) {
-        val sanitisedValue = if (value.isNotEmpty()) value else "0"
-        val fromAmount = BigDecimal(sanitisedValue)
+        val fromAmount = BigDecimal(value.sanitise())
         // Multiply by conversion rate
-        val convertedAmount = fromAmount.multiply(BigDecimal.valueOf(marketInfo?.rate ?: 1.0))
+        val convertedAmount = fromAmount.multiply(getMarketRate())
         // Final amount is converted amount lesser miner's fees
         val toAmount = compareAmountsToZero(convertedAmount, BigDecimal::minus)
 
-        view.updateToCryptoText(toAmount.toPlainString())
+        view.updateToCryptoText(toAmount.toStrippedString())
         handleFiatUpdatesFromCrypto(toAmount, fromAmount)
     }
 
     internal fun onToCryptoValueChanged(value: String) {
-        val sanitisedValue = if (value.isNotEmpty()) value else "0"
-        val toAmount = BigDecimal(sanitisedValue)
-        // Multiply by conversion rate
+        val toAmount = BigDecimal(value.sanitise())
+        // Divide by conversion rate
         val convertedAmount = toAmount.divide(
-                BigDecimal.valueOf(marketInfo?.rate ?: 1.0),
-                8,
+                getMarketRate(),
+                18,
                 RoundingMode.HALF_UP
-        ).stripTrailingZeros()
+        )
         // Final amount is converted amount plus miner's fees
         val fromAmount = compareAmountsToZero(convertedAmount, BigDecimal::plus)
 
-        view.updateFromCryptoText(fromAmount.toPlainString())
+        view.updateFromCryptoText(fromAmount.toStrippedString())
         handleFiatUpdatesFromCrypto(toAmount, fromAmount)
     }
 
     internal fun onFromFiatValueChanged(value: String) {
-        val sanitisedValue = if (value.isNotEmpty()) value else "0"
-        val fromAmount = BigDecimal(sanitisedValue)
+        val fromAmount = BigDecimal(value.sanitise())
         // Work out amount of crypto
-        val currencyCode = currencyHelper.fiatUnit
-        val fromExchangeRate = when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> exchangeRateFactory.getLastBtcPrice(currencyCode)
-            CryptoCurrencies.ETHER -> exchangeRateFactory.getLastEthPrice(currencyCode)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
-        val fromCrypto = fromAmount.divide(
-                BigDecimal.valueOf(fromExchangeRate),
-                18,
-                RoundingMode.HALF_UP
-        )
-        // Convert to to_crypto
-        val toCrypto = fromCrypto.multiply(BigDecimal.valueOf(marketInfo?.rate ?: 1.0))
+        val (fromExchangeRate, toExchangeRate) = getExchangeRates()
+        val fromCrypto = fromAmount.divide(toExchangeRate, 18, RoundingMode.HALF_UP)
+        // Convert to toCrypto
+        val toCrypto = fromCrypto.multiply(getMarketRate())
         // Subtract fee
         val toCryptoMinusFee = compareAmountsToZero(toCrypto, BigDecimal::minus)
-        // Convert that to to_fiat
-        val toExchangeRate = when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> exchangeRateFactory.getLastEthPrice(currencyCode)
-            CryptoCurrencies.ETHER -> exchangeRateFactory.getLastBtcPrice(currencyCode)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
-        val toFiat = toCryptoMinusFee.multiply(BigDecimal.valueOf(toExchangeRate))
+        // Convert that to toFiat
+        val toFiat = toCryptoMinusFee.multiply(fromExchangeRate)
         // Update UI
-        view.updateFromCryptoText(fromCrypto.stripTrailingZeros().toPlainString())
-        view.updateToCryptoText(toCryptoMinusFee.stripTrailingZeros().toPlainString())
+        view.updateFromCryptoText(fromCrypto.toStrippedString())
+        view.updateToCryptoText(toCryptoMinusFee.toStrippedString())
         view.updateToFiatText(
                 monetaryUtil.getFiatDisplayString(
                         toFiat.toDouble(),
@@ -176,38 +162,19 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onToFiatValueChanged(value: String) {
-        val sanitisedValue = if (value.isNotEmpty()) value else "0"
-        val toAmount = BigDecimal(sanitisedValue)
+        val toAmount = BigDecimal(value.sanitise())
         // Work out amount of crypto
-        val currencyCode = currencyHelper.fiatUnit
-        val toExchangeRate = when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> exchangeRateFactory.getLastEthPrice(currencyCode)
-            CryptoCurrencies.ETHER -> exchangeRateFactory.getLastBtcPrice(currencyCode)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
-        val toCrypto = toAmount.divide(
-                BigDecimal.valueOf(toExchangeRate),
-                18,
-                RoundingMode.HALF_UP
-        )
-        // Convert to from_crypto
-        val fromCrypto = toCrypto.divide(
-                BigDecimal.valueOf(marketInfo?.rate ?: 1.0),
-                18,
-                RoundingMode.HALF_UP
-        ).stripTrailingZeros()
+        val (fromExchangeRate, toExchangeRate) = getExchangeRates()
+        val toCrypto = toAmount.divide(fromExchangeRate, 18, RoundingMode.HALF_UP)
+        // Convert to fromCrypto
+        val fromCrypto = toCrypto.divide(getMarketRate(), 18, RoundingMode.HALF_UP)
         // Add fee
         val fromCryptoPlusFee = compareAmountsToZero(fromCrypto, BigDecimal::plus)
-        // Convert that to from_fiat
-        val fromExchangeRate = when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> exchangeRateFactory.getLastBtcPrice(currencyCode)
-            CryptoCurrencies.ETHER -> exchangeRateFactory.getLastEthPrice(currencyCode)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
-        val fromFiat = fromCryptoPlusFee.multiply(BigDecimal.valueOf(fromExchangeRate))
+        // Convert that to fromFiat
+        val fromFiat = fromCryptoPlusFee.multiply(toExchangeRate)
         // Update UI
-        view.updateToCryptoText(toCrypto.stripTrailingZeros().toPlainString())
-        view.updateFromCryptoText(fromCryptoPlusFee.stripTrailingZeros().toPlainString())
+        view.updateToCryptoText(toCrypto.toStrippedString())
+        view.updateFromCryptoText(fromCryptoPlusFee.toStrippedString())
         view.updateFromFiatText(
                 monetaryUtil.getFiatDisplayString(
                         fromFiat.toDouble(),
@@ -217,46 +184,48 @@ class NewExchangePresenter @Inject constructor(
         )
     }
 
-    private fun handleFiatUpdatesFromCrypto(toAmount: BigDecimal, fromAmount: BigDecimal) {
+    private fun getExchangeRates(): ExchangeRates {
         val currencyCode = currencyHelper.fiatUnit
-        val lastBtcRate = exchangeRateFactory.getLastBtcPrice(currencyCode)
-        val lastEthRate = exchangeRateFactory.getLastEthPrice(currencyCode)
-
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> updateFiatViews(toAmount, fromAmount, lastEthRate, lastBtcRate)
-            CryptoCurrencies.ETHER -> updateFiatViews(toAmount, fromAmount, lastBtcRate, lastEthRate)
+        return when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> {
+                val to = exchangeRateFactory.getLastEthPrice(currencyCode)
+                val from = exchangeRateFactory.getLastBtcPrice(currencyCode)
+                ExchangeRates(BigDecimal.valueOf(to), BigDecimal.valueOf(from))
+            }
+            CryptoCurrencies.ETHER -> {
+                val to = exchangeRateFactory.getLastBtcPrice(currencyCode)
+                val from = exchangeRateFactory.getLastEthPrice(currencyCode)
+                ExchangeRates(BigDecimal.valueOf(to), BigDecimal.valueOf(from))
+            }
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
+    }
+
+    private fun handleFiatUpdatesFromCrypto(toAmount: BigDecimal, fromAmount: BigDecimal) {
+        val (toRate, fromRate) = getExchangeRates()
+        updateFiatViews(toAmount, fromAmount, toRate, fromRate)
     }
 
     private fun updateFiatViews(
             toAmount: BigDecimal,
             fromAmount: BigDecimal,
-            toRate: Double,
-            fromRate: Double
+            toRate: BigDecimal,
+            fromRate: BigDecimal
     ) {
         view.updateToFiatText(
                 monetaryUtil.getFiatDisplayString(
-                        toAmount.multiply(BigDecimal.valueOf(toRate)).toDouble(),
+                        toAmount.multiply(toRate).toDouble(),
                         currencyHelper.fiatUnit,
                         view.locale
                 )
         )
         view.updateFromFiatText(
                 monetaryUtil.getFiatDisplayString(
-                        fromAmount.multiply(BigDecimal.valueOf(fromRate)).toDouble(),
+                        fromAmount.multiply(fromRate).toDouble(),
                         currencyHelper.fiatUnit,
                         view.locale
                 )
         )
-    }
-
-    private fun getBtcLabel(): String {
-        return if (btcAccounts.size > 1) {
-            payloadDataManager.defaultAccount.label
-        } else {
-            stringUtils.getString(R.string.shapeshift_btc)
-        }
     }
 
     private fun compareAmountsToZero(
@@ -268,11 +237,25 @@ class NewExchangePresenter @Inject constructor(
         val amountToReturn = amount.operator(fee).stripTrailingZeros()
 
         return when {
-            amountToReturn <= BigDecimal.ZERO -> BigDecimal.ZERO
             amount <= BigDecimal.ZERO -> BigDecimal.ZERO
+            amountToReturn <= BigDecimal.ZERO -> BigDecimal.ZERO
             else -> amountToReturn
         }
     }
+
+    private fun getDefaultBtcLabel(): String {
+        return if (btcAccounts.size > 1) {
+            payloadDataManager.defaultAccount.label
+        } else {
+            stringUtils.getString(R.string.shapeshift_btc)
+        }
+    }
+
+    private fun getMarketRate() = BigDecimal.valueOf(marketInfo?.rate ?: 1.0)
+
+    private fun getMaximum() = BigDecimal.valueOf(marketInfo?.maxLimit ?: 0.0)
+
+    private fun getMinimum() = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
 
     private fun getEthLabel() = stringUtils.getString(R.string.shapeshift_eth)
 
@@ -284,22 +267,10 @@ class NewExchangePresenter @Inject constructor(
     // Formatting stuff, to be checked and deleted if possible
     ///////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Gets device's specified locale decimal separator
-     *
-     * @return decimal separator
-     */
-    private fun getDefaultDecimalSeparator(): String {
-        val format = DecimalFormat.getInstance(Locale.getDefault()) as DecimalFormat
-        return Character.toString(format.decimalFormatSymbols.decimalSeparator)
-    }
+    private fun String.sanitise() = if (isNotEmpty()) this else "0"
 
-    private fun stripSeparator(text: String): String {
-        return text.trim { it <= ' ' }
-                .replace(" ", "")
-                .replace(getDefaultDecimalSeparator(), ".")
-    }
+    private fun BigDecimal.toStrippedString() = stripTrailingZeros().toPlainString()
 
-    private fun String.toBigDecimal(value: String) = BigDecimal(stripSeparator(value))
+    data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
 
 }
