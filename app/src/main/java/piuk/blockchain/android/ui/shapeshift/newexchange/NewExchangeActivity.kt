@@ -250,8 +250,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                     // Ignore elements emitted by non-user events (ie presenter updates)
                     .doOnNext { if (currentFocus == editText) presenterFunction(it) }
                     // Scheduling
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
 
     private fun showFromBtc(displayDropDown: Boolean) {
         // Units
