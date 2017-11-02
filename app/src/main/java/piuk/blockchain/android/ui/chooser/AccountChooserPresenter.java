@@ -10,11 +10,9 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsPredicates;
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType;
-import piuk.blockchain.android.data.contacts.ContactsDataManager;
-import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
@@ -26,23 +24,17 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
     private WalletAccountHelper walletAccountHelper;
     private StringUtils stringUtils;
     private ContactsDataManager contactsDataManager;
-    private AccessState accessState;
-    private CurrencyState currencyState;
 
     private List<ItemAccount> itemAccounts = new ArrayList<>();
 
     @Inject
     AccountChooserPresenter(WalletAccountHelper walletAccountHelper,
                             StringUtils stringUtils,
-                            ContactsDataManager contactsDataManager,
-                            AccessState accessState,
-                            CurrencyState currencyState) {
+                            ContactsDataManager contactsDataManager) {
 
         this.walletAccountHelper = walletAccountHelper;
         this.stringUtils = stringUtils;
         this.contactsDataManager = contactsDataManager;
-        this.accessState = accessState;
-        this.currencyState = currencyState;
     }
 
     @Override

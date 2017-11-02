@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.exchange
+package piuk.blockchain.android.ui.shapeshift.overview
 
 import piuk.blockchain.android.ui.base.View
 

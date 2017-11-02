@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.chooser;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -124,6 +125,18 @@ public class AccountChooserActivity extends BaseMvpActivity<AccountChooserView, 
         starter.putExtra(EXTRA_REQUEST_CODE, requestCode);
         starter.putExtra(EXTRA_ACTIVITY_TITLE, title);
         fragment.startActivityForResult(starter, requestCode);
+    }
+
+    public static void startForResult(Activity activity,
+                                      int requestCode,
+                                      PaymentRequestType paymentRequestType,
+                                      String title) {
+
+        Intent starter = new Intent(activity, AccountChooserActivity.class);
+        starter.putExtra(EXTRA_REQUEST_TYPE, paymentRequestType);
+        starter.putExtra(EXTRA_REQUEST_CODE, requestCode);
+        starter.putExtra(EXTRA_ACTIVITY_TITLE, title);
+        activity.startActivityForResult(starter, requestCode);
     }
 
     @Override

@@ -2,14 +2,13 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
-import java.util.Locale;
-
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthAccountApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.prices.PriceApi;
+import info.blockchain.wallet.shapeshift.ShapeShiftApi;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import dagger.Module;
@@ -43,6 +42,7 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager;
 import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
@@ -228,10 +228,19 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager, SettingsDataManager settingsDataManager) {
+    protected ShapeShiftDataManager provideShapeShiftDataManager(RxBus rxBus) {
+        return new ShapeShiftDataManager(new ShapeShiftApi(), rxBus);
+    }
+
+
+    @Provides
+    @PresenterScope
+    protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager,
+                                                                       SettingsDataManager settingsDataManager) {
         return new WalletOptionsDataManager(authDataManager, WalletOptionsState.getInstance(
                 ReplaySubject.create(1),
                 ReplaySubject.create(1)),
                 settingsDataManager);
     }
+
 }

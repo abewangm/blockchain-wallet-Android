@@ -605,7 +605,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     private fun setCustomKeypad() {
         custom_keyboard.apply {
-            setCallback(mvpView)
+            setCallback(this@ReceiveFragment)
             setDecimalSeparator(defaultDecimalSeparator)
             // Enable custom keypad and disables default keyboard from popping up
             enableOnView(amount_container.amountCrypto)
