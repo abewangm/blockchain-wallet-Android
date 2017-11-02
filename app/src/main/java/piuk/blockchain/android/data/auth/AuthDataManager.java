@@ -10,6 +10,7 @@ import info.blockchain.wallet.exceptions.ServerConnectionException;
 import org.spongycastle.util.encoders.Hex;
 
 import java.security.SecureRandom;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
@@ -255,5 +256,9 @@ public class AuthDataManager {
     public Observable<ResponseBody> getPairingEncryptionPassword(String guid) {
         return rxPinning.call(() -> authService.getPairingEncryptionPassword(guid))
                 .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    public Locale getLocale() {
+        return Locale.getDefault();
     }
 }

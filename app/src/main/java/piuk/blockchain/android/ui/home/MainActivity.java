@@ -910,6 +910,18 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
+    public void showShapeshift() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_exchange).setVisible(true);
+    }
+
+    @Override
+    public void hideShapeshift() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_exchange).setVisible(false);
+    }
+
+    @Override
     public void onSendFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
     }
