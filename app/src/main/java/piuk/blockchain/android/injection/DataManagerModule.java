@@ -235,7 +235,8 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager, SettingsDataManager settingsDataManager) {
+    protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager,
+                                                                       SettingsDataManager settingsDataManager) {
         return new WalletOptionsDataManager(authDataManager, WalletOptionsState.getInstance(
                 ReplaySubject.create(1),
                 ReplaySubject.create(1)),

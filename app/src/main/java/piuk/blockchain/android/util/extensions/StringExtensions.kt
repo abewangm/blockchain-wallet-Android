@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.json.JSONException
 
 /**
- * Converts a deserialized object from a [String] without needing the KCLass passed to it.
+ * Converts a deserialized object from a [String] without needing the KClass passed to it.
  *
  * @throws JSONException
  */

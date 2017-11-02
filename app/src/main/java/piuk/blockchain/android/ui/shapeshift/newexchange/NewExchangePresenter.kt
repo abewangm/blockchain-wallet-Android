@@ -187,16 +187,14 @@ class NewExchangePresenter @Inject constructor(
     private fun getExchangeRates(): ExchangeRates {
         val currencyCode = currencyHelper.fiatUnit
         return when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> {
-                val to = exchangeRateFactory.getLastEthPrice(currencyCode)
-                val from = exchangeRateFactory.getLastBtcPrice(currencyCode)
-                ExchangeRates(BigDecimal.valueOf(to), BigDecimal.valueOf(from))
-            }
-            CryptoCurrencies.ETHER -> {
-                val to = exchangeRateFactory.getLastBtcPrice(currencyCode)
-                val from = exchangeRateFactory.getLastEthPrice(currencyCode)
-                ExchangeRates(BigDecimal.valueOf(to), BigDecimal.valueOf(from))
-            }
+            CryptoCurrencies.BTC -> ExchangeRates(
+                    BigDecimal.valueOf(exchangeRateFactory.getLastEthPrice(currencyCode)),
+                    BigDecimal.valueOf(exchangeRateFactory.getLastBtcPrice(currencyCode))
+            )
+            CryptoCurrencies.ETHER -> ExchangeRates(
+                    BigDecimal.valueOf(exchangeRateFactory.getLastBtcPrice(currencyCode)),
+                    BigDecimal.valueOf(exchangeRateFactory.getLastEthPrice(currencyCode))
+            )
             else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
@@ -271,6 +269,6 @@ class NewExchangePresenter @Inject constructor(
 
     private fun BigDecimal.toStrippedString() = stripTrailingZeros().toPlainString()
 
-    data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
+    private data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
 
 }
