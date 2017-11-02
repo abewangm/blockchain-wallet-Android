@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.answers
 
+import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.*
 import piuk.blockchain.android.BuildConfig
 
@@ -36,6 +37,10 @@ object Logging {
 
     fun logPurchase(purchaseEvent: PurchaseEvent) {
         if (shouldLog) Answers.getInstance().logPurchase(purchaseEvent)
+    }
+
+    fun logException(throwable: Throwable) {
+        if (shouldLog) Crashlytics.logException(throwable)
     }
 
 }

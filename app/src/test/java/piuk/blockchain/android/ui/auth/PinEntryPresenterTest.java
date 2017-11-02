@@ -25,6 +25,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
+import java.net.SocketTimeoutException;
+
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
@@ -337,6 +339,25 @@ public class PinEntryPresenterTest {
     }
 
     @Test
+    public void padClickedVerifyPinValidateCalledReturnsTimeout() throws Exception {
+        // Arrange
+        subject.mUserEnteredPin = "133";
+        when(prefsUtil.getValue(PrefsUtil.KEY_PIN_IDENTIFIER, ""))
+                .thenReturn("1234567890");
+        when(authDataManager.validatePin(anyString()))
+                .thenReturn(Observable.error(new SocketTimeoutException()));
+        // Act
+        subject.onPadClicked("7");
+        // Assert
+        verify(activity).setTitleVisibility(View.INVISIBLE);
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(authDataManager).validatePin(anyString());
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+        verify(activity).restartPageAndClearTop();
+    }
+
+    @Test
     public void padClickedVerifyPinValidateCalledReturnsInvalidCipherText() throws Exception {
         // Arrange
         subject.mUserEnteredPin = "133";
@@ -380,7 +401,7 @@ public class PinEntryPresenterTest {
         verify(prefsUtil).setValue(anyString(), anyInt());
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
-        verify(appUtil).clearCredentialsAndRestart();
+        verify(appUtil).restartApp();
     }
 
     @Test
@@ -504,6 +525,23 @@ public class PinEntryPresenterTest {
         String password = "1234567890";
         when(payloadManager.initializeAndDecrypt(anyString(), anyString(), eq(password)))
                 .thenReturn(Completable.error(new ServerConnectionException()));
+        when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
+        // Act
+        subject.validatePassword(password);
+        // Assert
+        verify(activity).showProgressDialog(anyInt(), isNull());
+        verify(payloadManager).initializeAndDecrypt(anyString(), anyString(), eq(password));
+        verify(activity).dismissProgressDialog();
+        //noinspection WrongConstant
+        verify(activity).showToast(anyInt(), anyString());
+    }
+
+    @Test
+    public void validatePasswordThrowsSocketTimeoutException() throws Exception {
+        // Arrange
+        String password = "1234567890";
+        when(payloadManager.initializeAndDecrypt(anyString(), anyString(), eq(password)))
+                .thenReturn(Completable.error(new SocketTimeoutException()));
         when(prefsUtil.getValue(anyString(), anyString())).thenReturn("prefs string");
         // Act
         subject.validatePassword(password);
