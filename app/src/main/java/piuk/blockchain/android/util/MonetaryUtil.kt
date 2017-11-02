@@ -220,7 +220,7 @@ class MonetaryUtil(unit: Int) {
      * @return The formatted currency [String]
      */
     fun getFiatDisplayString(amount: Double, currencyCode: String, locale: Locale): String {
-        val numberFormat = NumberFormat.getCurrencyInstance()
+        val numberFormat = NumberFormat.getCurrencyInstance(locale)
         val decimalFormatSymbols = (numberFormat as DecimalFormat).decimalFormatSymbols
         numberFormat.decimalFormatSymbols = decimalFormatSymbols.apply {
             this.currencySymbol = getCurrencySymbol(currencyCode, locale)
