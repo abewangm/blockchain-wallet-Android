@@ -70,8 +70,8 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.createwallet.CreateWalletActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.directory.MapActivity" />
         <!-- TODO: Remove me once a solid decision has been made -->
         <!--<activity android:name=".ui.directory.SuggestMerchantActivity" />-->
@@ -124,14 +124,19 @@
         <activity
             android:name=".ui.onboarding.OnboardingActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-
         <activity
             android:name=".ui.buy.BuyActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-
         <activity
             android:name=".ui.pairingcode.PairingCodeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.shapeshift.overview.ShapeShiftActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.shapeshift.newexchange.NewExchangeActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="adjustPan" />
 
         <service
             android:name=".data.websocket.WebSocketService"

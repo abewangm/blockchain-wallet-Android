@@ -78,6 +78,7 @@ import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.dashboard.DashboardFragment;
+import piuk.blockchain.android.ui.shapeshift.overview.ShapeShiftActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
@@ -414,6 +415,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         switch (menuItem.getItemId()) {
             case R.id.nav_backup:
                 startActivityForResult(new Intent(this, BackupWalletActivity.class), REQUEST_BACKUP);
+                break;
+            case R.id.nav_exchange:
+                ShapeShiftActivity.start(this);
                 break;
             case R.id.nav_addresses:
                 startActivityForResult(new Intent(this, AccountActivity.class), ACCOUNT_EDIT);
@@ -903,6 +907,18 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void showShapeshift() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_exchange).setVisible(true);
+    }
+
+    @Override
+    public void hideShapeshift() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_exchange).setVisible(false);
     }
 
     @Override
