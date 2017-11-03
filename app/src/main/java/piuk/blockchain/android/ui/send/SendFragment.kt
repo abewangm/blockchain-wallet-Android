@@ -21,7 +21,10 @@ import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.RxTextView
@@ -539,7 +542,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         spinnerPriority.adapter = adapter
 
         spinnerPriority.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 when (position) {
                     0, 1 -> {
                         buttonContinue.isEnabled = true

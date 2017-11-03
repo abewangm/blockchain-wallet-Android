@@ -977,6 +977,7 @@ class SendPresenter @Inject constructor(
 
         if (format == null) {
             view?.showSnackbar(R.string.privkey_error, Snackbar.LENGTH_LONG)
+            return
         }
 
         when (format) {

@@ -32,7 +32,8 @@ class ItemAccount {
         return when (accountObject) {
             is Account -> (accountObject as Account).xpub
             is LegacyAddress -> (accountObject as LegacyAddress).address
-            else -> (accountObject as EthereumAccount).address
+            is EthereumAccount -> (accountObject as EthereumAccount).address
+            else -> throw IllegalArgumentException("accountObject's type is invalid, most likely null")
         }
     }
 
