@@ -1153,8 +1153,7 @@ class SendPresenter @Inject constructor(
 
     private fun updateTicker() {
         exchangeRateFactory.updateTickers()
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .compose(RxUtil.applySchedulersToCompletable())
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
                     //no-op
                 }, { it.printStackTrace() })
