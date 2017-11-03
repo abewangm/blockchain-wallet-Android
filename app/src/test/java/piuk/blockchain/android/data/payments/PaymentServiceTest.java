@@ -243,7 +243,7 @@ public class PaymentServiceTest extends RxTest {
         Pair<BigInteger, BigInteger> mockSweepableCoins = mock(Pair.class);
         when(payment.getSweepableCoins(mockUnspent, mockFee)).thenReturn(mockSweepableCoins);
         // Act
-        Pair<BigInteger, BigInteger> result = subject.getSweepableCoins(mockUnspent, mockFee);
+        Pair<BigInteger, BigInteger> result = subject.getMaximumAvailable(mockUnspent, mockFee);
         // Assert
         assertEquals(mockSweepableCoins, result);
         verify(payment).getSweepableCoins(mockUnspent, mockFee);
