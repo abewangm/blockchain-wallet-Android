@@ -64,11 +64,14 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericKeyboardCallback {
+
+    override val locale: Locale = Locale.getDefault()
 
     @Inject lateinit var sendPresenter: SendPresenter
 
@@ -141,8 +144,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     override fun onResume() {
         super.onResume()
 
-        if(!handlingActivityResult)
-            presenter.onResume()
+        if (!handlingActivityResult) presenter.onResume()
 
         handlingActivityResult = false
 
