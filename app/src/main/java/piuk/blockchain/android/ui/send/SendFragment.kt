@@ -22,7 +22,10 @@ import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.RxTextView
@@ -62,11 +65,14 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericKeyboardCallback {
+
+    override val locale: Locale = Locale.getDefault()
 
     @Inject lateinit var sendPresenter: SendPresenter
 
@@ -139,8 +145,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     override fun onResume() {
         super.onResume()
 
-        if(!handlingActivityResult)
-            presenter.onResume()
+        if (!handlingActivityResult) presenter.onResume()
 
         handlingActivityResult = false
 
@@ -548,7 +553,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         spinnerPriority.adapter = adapter
 
         spinnerPriority.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 when (position) {
                     0, 1 -> {
                         buttonContinue.isEnabled = true

@@ -14,6 +14,7 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import java.util.*
 
 @Mockable
 class WalletAccountHelper(
@@ -54,19 +55,21 @@ class WalletAccountHelper(
      *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getHdAccounts() = payloadManager.payload.hdWallets[0].accounts
-            // Skip archived account
-            .filterNot { it.isArchived }
-            .map {
-                ItemAccount(
-                        it.label,
-                        getAccountBalance(it, btcExchangeRate, fiatUnit, btcUnit),
-                        null,
-                        getAccountAbsoluteBalance(it),
-                        it,
-                        it.xpub
-                )
-            }
+    fun getHdAccounts(): List<ItemAccount> {
+        val list = payloadManager.payload?.hdWallets?.get(0)?.accounts ?: Collections.emptyList<Account>()
+        // Skip archived account
+        return list.filterNot { it.isArchived }
+                .map {
+                    ItemAccount(
+                            it.label,
+                            getAccountBalance(it, btcExchangeRate, fiatUnit, btcUnit),
+                            null,
+                            getAccountAbsoluteBalance(it),
+                            it,
+                            it.xpub
+                    )
+                }
+    }
 
     /**
      * Returns a list of [ItemAccount] objects containing only [LegacyAddress] objects.

@@ -3,20 +3,18 @@ package piuk.blockchain.android.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.ethereum.EthereumWallet;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.prices.data.PriceDatum;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
 import java.math.BigInteger;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -24,11 +22,10 @@ import javax.inject.Inject;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
@@ -122,10 +119,10 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.environmentSettings = environmentSettings;
         this.promptManager = promptManager;
         this.ethDataManager = ethDataManager;
-        this.osUtil = new OSUtil(applicationContext);
         this.swipeToReceiveHelper = swipeToReceiveHelper;
         this.currencyState = currencyState;
         this.walletOptionsDataManager = walletOptionsDataManager;
+        osUtil = new OSUtil(applicationContext);
     }
 
     private void initPrompts(Context context) {
@@ -162,11 +159,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     // TODO: 24/10/2017  WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
      */
     private void doWalletOptionsChecks() {
-
         walletOptionsDataManager.getMobileNotice()
                 .doOnNext(message -> {
-                    if (message != null && !message.isEmpty())
-                        getView().showCustomPrompt(getWarningPrompt(message));
+                    if (!message.isEmpty()) getView().showCustomPrompt(getWarningPrompt(message));
                 })
                 .flatMap(ignored -> walletOptionsDataManager.fetchReplayProtectionStatus())
                 .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
@@ -183,8 +178,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                 });
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void handleAndroidFlags(boolean showShapeshift) {
-        if(showShapeshift) {
+        if (showShapeshift) {
             getView().showShapeshift();
         } else {
             getView().hideShapeshift();
@@ -192,7 +188,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private SecurityPromptDialog getWarningPrompt(String message) {
-        SecurityPromptDialog prompt =  SecurityPromptDialog.newInstance(
+        SecurityPromptDialog prompt = SecurityPromptDialog.newInstance(
                 R.string.warning,
                 message,
                 R.drawable.vector_warning,
@@ -230,19 +226,20 @@ public class MainPresenter extends BasePresenter<MainView> {
                             }
                         }
                 )
-                .subscribe(() -> {
+                .subscribe(o -> {
                     if (getView().isBuySellPermitted()) {
                         initBuyService();
                     } else {
                         getView().setBuySellEnabled(false);
                     }
-                    initContactsService();
+//                    initContactsService();
                 }, throwable -> {
                     //noinspection StatementWithEmptyBody
                     if (throwable instanceof InvalidCredentialsException) {
                         // Wallet double encrypted and needs to be decrypted to set up ether wallet, contacts etc
                         getView().showSecondPasswordDialog();
                     } else {
+                        Logging.INSTANCE.logException(throwable);
                         getView().showMetadataNodeFailure();
                     }
                 });
@@ -274,16 +271,16 @@ public class MainPresenter extends BasePresenter<MainView> {
                 });
     }
 
-    private Completable feesCompletable() {
+    private Observable<Map<String, PriceDatum>> feesCompletable() {
         return feeDataManager.getBtcFeeOptions()
                 .doOnNext(btcFeeOptions -> dynamicFeeCache.setBtcFeeOptions(btcFeeOptions))
                 .flatMap(ignored -> feeDataManager.getEthFeeOptions())
                 .doOnNext(ethFeeOptions -> dynamicFeeCache.setEthFeeOptions(ethFeeOptions))
                 .compose(RxUtil.applySchedulersToObservable())
-                .flatMapCompletable(feeOptions -> exchangeRateFactory.updateTickers());
+                .flatMap(feeOptions -> exchangeRateFactory.updateTickers());
     }
 
-    void checkForMessages() {
+    private void checkForMessages() {
         getCompositeDisposable().add(contactsDataManager.fetchContacts()
                 .andThen(contactsDataManager.getContactList())
                 .toList()
@@ -314,6 +311,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         return payloadManager;
     }
 
+    // Usage commented out for now, until Contacts is back again
+    @SuppressWarnings("unused")
     private void subscribeToNotifications() {
         notificationObservable = rxBus.register(NotificationPayload.class);
 
@@ -337,9 +336,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         getCompositeDisposable().add(
                 exchangeRateFactory.updateTickers()
                         .subscribe(
-                                () -> {
-                                    // No-op
-                                },
+                                o -> { /* No-op */ },
                                 Throwable::printStackTrace));
     }
 
@@ -375,6 +372,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         return environmentSettings.getExplorerUrl();
     }
 
+    // Usage commented out for now
+    @SuppressWarnings("unused")
     private void initContactsService() {
         String uri = null;
         boolean fromNotification = false;
@@ -409,17 +408,19 @@ public class MainPresenter extends BasePresenter<MainView> {
         getCompositeDisposable().add(
                 buyDataManager.getCanBuy()
                         .subscribe(isEnabled -> {
-                                    getView().setBuySellEnabled(isEnabled);
-                                    if (isEnabled) {
-                                        buyDataManager.watchPendingTrades()
-                                                .compose(RxUtil.applySchedulersToObservable())
-                                                .subscribe(getView()::onTradeCompleted, Throwable::printStackTrace);
+                            getView().setBuySellEnabled(isEnabled);
+                            if (isEnabled) {
+                                buyDataManager.watchPendingTrades()
+                                        .compose(RxUtil.applySchedulersToObservable())
+                                        .subscribe(getView()::onTradeCompleted, Throwable::printStackTrace);
 
-                                        buyDataManager.getWebViewLoginDetails()
-                                                .subscribe(getView()::setWebViewLoginDetails, Throwable::printStackTrace);
-                                    }
-                                },
-                                Timber::e));
+                                buyDataManager.getWebViewLoginDetails()
+                                        .subscribe(getView()::setWebViewLoginDetails, Throwable::printStackTrace);
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            getView().setBuySellEnabled(false);
+                        }));
     }
 
     private void dismissAnnouncementIfOnboardingCompleted() {
@@ -446,13 +447,13 @@ public class MainPresenter extends BasePresenter<MainView> {
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
                     .andThen(payloadDataManager.getMetadataNodeFactory())
                     .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
-                    .subscribe(ethereumWallet -> {
-                        appUtil.restartApp();
-                    }, Throwable::printStackTrace);
+                    .subscribe(
+                            ethereumWallet -> appUtil.restartApp(),
+                            Throwable::printStackTrace);
         }
     }
 
-    public CryptoCurrencies getCurrentCryptoCurrency() {
+    CryptoCurrencies getCurrentCryptoCurrency() {
         return currencyState.getCryptoCurrency();
     }
 }

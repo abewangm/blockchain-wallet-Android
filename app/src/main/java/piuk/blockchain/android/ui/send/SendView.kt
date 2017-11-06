@@ -6,8 +6,11 @@ import android.support.annotation.StringRes
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.View
+import java.util.*
 
 interface SendView : View {
+
+    val locale: Locale
 
     //Update field
     fun updateSendingAddress(label: String)

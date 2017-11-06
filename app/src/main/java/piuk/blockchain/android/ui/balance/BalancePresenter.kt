@@ -7,6 +7,7 @@ import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.payload.data.LegacyAddress
+import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -498,7 +499,7 @@ class BalancePresenter @Inject constructor(
         }
     }
 
-    private fun getUpdateTickerObservable(): Observable<Boolean> {
+    private fun getUpdateTickerObservable(): Observable<Map<String, PriceDatum>> {
         // Remove ETH from list of accounts
         val displayableAccounts = mutableListOf<ItemAccount>().apply {
             addAll(activeAccountAndAddressList)
@@ -519,7 +520,7 @@ class BalancePresenter @Inject constructor(
                             exchangeRateFactory.getLastEthPrice(getFiatCurrency()),
                             currencyState.isDisplayingCryptoCurrency
                     )
-                }.toObservable()
+                }
     }
 
     private fun getFacilitatedTransactionsObservable() = if (view.isContactsEnabled) {
