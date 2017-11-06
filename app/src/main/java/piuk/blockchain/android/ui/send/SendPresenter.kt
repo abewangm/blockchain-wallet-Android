@@ -459,7 +459,7 @@ class SendPresenter @Inject constructor(
 
         details.cryptoUnit = currencyHelper.cryptoUnit
         details.fiatUnit = currencyHelper.fiatUnit
-        details.fiatSymbol = exchangeRateFactory.getSymbol(currencyHelper.fiatUnit)
+        details.fiatSymbol = monetaryUtil.getCurrencySymbol(currencyHelper.fiatUnit, view.locale)
 
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
@@ -805,10 +805,11 @@ class SendPresenter @Inject constructor(
                             val amountToSend = currencyHelper.getSatoshisFromText(amountToSendText, getDefaultDecimalSeparator())
 
                             // Future use. There might be some unconfirmed funds. Not displaying a warning currently (to line up with iOS and Web wallet)
-                            if (coins.notice != null)
+                            if (coins.notice != null) {
                                 view.updateWarning(coins.notice)
-                            else
+                            } else {
                                 view.clearWarning()
+                            }
 
                             updateFee(getSuggestedAbsoluteFee(coins, amountToSend, feePerKb))
 
@@ -879,6 +880,8 @@ class SendPresenter @Inject constructor(
             amountToSendText: String?
     ) {
 
+        val amountToSendSanitised = if (amountToSendText.isNullOrEmpty()) "0" else amountToSendText
+
         val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
 
@@ -895,7 +898,7 @@ class SendPresenter @Inject constructor(
             pendingTransaction.bigIntAmount = availableEth.toBigInteger()
         } else {
             pendingTransaction.bigIntAmount =
-                    currencyHelper.getWeiFromText(amountToSendText, getDefaultDecimalSeparator())
+                    currencyHelper.getWeiFromText(amountToSendSanitised, getDefaultDecimalSeparator())
         }
 
         //Format for display
@@ -1026,8 +1029,13 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onSendingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
+        var label = legacyAddress.label
+        if (label.isNullOrEmpty()) {
+            label = legacyAddress.address
+        }
+
         pendingTransaction.sendingObject = ItemAccount(
-                legacyAddress.label,
+                label,
                 null,
                 null,
                 null,
@@ -1035,17 +1043,18 @@ class SendPresenter @Inject constructor(
                 legacyAddress.address
         )
 
-        var label = legacyAddress.label
-        if (label.isNullOrEmpty()) {
-            label = legacyAddress.address
-        }
         view.updateSendingAddress(label)
         calculateSpendableAmounts(false, "0")
     }
 
     private fun onSendingBtcAccountSelected(account: Account) {
+        var label = account.label
+        if (label.isNullOrEmpty()) {
+            label = account.xpub
+        }
+
         pendingTransaction.sendingObject = ItemAccount(
-                account.label,
+                label,
                 null,
                 null,
                 null,
@@ -1053,18 +1062,18 @@ class SendPresenter @Inject constructor(
                 null
         )
 
-        var label = account.label
-        if (label.isNullOrEmpty()) {
-            label = account.xpub
-        }
-
         view.updateSendingAddress(label)
         calculateSpendableAmounts(false, "0")
     }
 
     private fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
+        var label = legacyAddress.label
+        if (label.isNullOrEmpty()) {
+            label = legacyAddress.address
+        }
+
         pendingTransaction.receivingObject = ItemAccount(
-                legacyAddress.label,
+                label,
                 null,
                 null,
                 null,
@@ -1073,10 +1082,6 @@ class SendPresenter @Inject constructor(
         )
         pendingTransaction.receivingAddress = legacyAddress.address
 
-        var label = legacyAddress.label
-        if (label.isNullOrEmpty()) {
-            label = legacyAddress.address
-        }
         view.updateReceivingAddress(label)
 
         if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
@@ -1092,8 +1097,13 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onReceivingAccountSelected(account: Account) {
+        var label = account.label
+        if (label.isNullOrEmpty()) {
+            label = account.xpub
+        }
+
         pendingTransaction.receivingObject = ItemAccount(
-                account.label,
+                label,
                 null,
                 null,
                 null,
@@ -1101,10 +1111,6 @@ class SendPresenter @Inject constructor(
                 null
         )
 
-        var label = account.label
-        if (label.isNullOrEmpty()) {
-            label = account.xpub
-        }
         view.updateReceivingAddress(label)
 
         payloadDataManager.getNextReceiveAddress(account)
@@ -1116,7 +1122,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun selectSendingAccount(data: Intent?) {
-        
         try {
             val type: Class<*> = Class.forName(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)

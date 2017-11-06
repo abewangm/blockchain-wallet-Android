@@ -24,6 +24,7 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -160,8 +161,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private void doWalletOptionsChecks() {
         walletOptionsDataManager.getMobileNotice()
                 .doOnNext(message -> {
-                    if (message != null && !message.isEmpty())
-                        getView().showCustomPrompt(getWarningPrompt(message));
+                    if (!message.isEmpty()) getView().showCustomPrompt(getWarningPrompt(message));
                 })
                 .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
                 // TODO: 24/10/2017 HARDCODED TO FALSE AS SHAPESHIFT HAS BEEN MERGED INTO DEVELOP
@@ -172,8 +172,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                 }, Timber::e);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void handleAndroidFlags(boolean showShapeshift) {
-        if(showShapeshift) {
+        if (showShapeshift) {
             getView().showShapeshift();
         } else {
             getView().hideShapeshift();
@@ -181,7 +182,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private SecurityPromptDialog getWarningPrompt(String message) {
-        SecurityPromptDialog prompt =  SecurityPromptDialog.newInstance(
+        SecurityPromptDialog prompt = SecurityPromptDialog.newInstance(
                 R.string.warning,
                 message,
                 R.drawable.vector_warning,
@@ -225,13 +226,14 @@ public class MainPresenter extends BasePresenter<MainView> {
                     } else {
                         getView().setBuySellEnabled(false);
                     }
-                    initContactsService();
+//                    initContactsService();
                 }, throwable -> {
                     //noinspection StatementWithEmptyBody
                     if (throwable instanceof InvalidCredentialsException) {
                         // Wallet double encrypted and needs to be decrypted to set up ether wallet, contacts etc
                         getView().showSecondPasswordDialog();
                     } else {
+                        Logging.INSTANCE.logException(throwable);
                         getView().showMetadataNodeFailure();
                     }
                 });
@@ -303,6 +305,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         return payloadManager;
     }
 
+    // Usage commented out for now, until Contacts is back again
+    @SuppressWarnings("unused")
     private void subscribeToNotifications() {
         notificationObservable = rxBus.register(NotificationPayload.class);
 
@@ -326,9 +330,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         getCompositeDisposable().add(
                 exchangeRateFactory.updateTickers()
                         .subscribe(
-                                o -> {
-                                    // No-op
-                                },
+                                o -> { /* No-op */ },
                                 Throwable::printStackTrace));
     }
 
@@ -364,6 +366,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         return environmentSettings.getExplorerUrl();
     }
 
+    // Usage commented out for now
+    @SuppressWarnings("unused")
     private void initContactsService() {
         String uri = null;
         boolean fromNotification = false;
@@ -398,17 +402,19 @@ public class MainPresenter extends BasePresenter<MainView> {
         getCompositeDisposable().add(
                 buyDataManager.getCanBuy()
                         .subscribe(isEnabled -> {
-                                    getView().setBuySellEnabled(isEnabled);
-                                    if (isEnabled) {
-                                        buyDataManager.watchPendingTrades()
-                                                .compose(RxUtil.applySchedulersToObservable())
-                                                .subscribe(getView()::onTradeCompleted, Throwable::printStackTrace);
+                            getView().setBuySellEnabled(isEnabled);
+                            if (isEnabled) {
+                                buyDataManager.watchPendingTrades()
+                                        .compose(RxUtil.applySchedulersToObservable())
+                                        .subscribe(getView()::onTradeCompleted, Throwable::printStackTrace);
 
-                                        buyDataManager.getWebViewLoginDetails()
-                                                .subscribe(getView()::setWebViewLoginDetails, Throwable::printStackTrace);
-                                    }
-                                },
-                                Timber::e));
+                                buyDataManager.getWebViewLoginDetails()
+                                        .subscribe(getView()::setWebViewLoginDetails, Throwable::printStackTrace);
+                            }
+                        }, throwable -> {
+                            Timber.e(throwable);
+                            getView().setBuySellEnabled(false);
+                        }));
     }
 
     private void dismissAnnouncementIfOnboardingCompleted() {
@@ -435,9 +441,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
                     .andThen(payloadDataManager.getMetadataNodeFactory())
                     .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
-                    .subscribe(ethereumWallet -> {
-                        appUtil.restartApp();
-                    }, Throwable::printStackTrace);
+                    .subscribe(
+                            ethereumWallet -> appUtil.restartApp(),
+                            Throwable::printStackTrace);
         }
     }
 
