@@ -146,22 +146,17 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                 accountModel.setArchiveVisibility(View.VISIBLE);
             }
 
-            if (payloadDataManager.getWallet().isUpgraded()) {
-                // Subtract fee
-                long balanceAfterFee = payloadDataManager.getAddressBalance(
-                        legacyAddress.getAddress()).longValue() -
-                        sendDataManager.estimatedFee(1, 1,
-                                BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000))
-                                .longValue();
+            // Subtract fee
+            long balanceAfterFee = payloadDataManager.getAddressBalance(
+                    legacyAddress.getAddress()).longValue() -
+                    sendDataManager.estimatedFee(1, 1,
+                            BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000))
+                            .longValue();
 
-                if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
-                    accountModel.setTransferFundsVisibility(View.VISIBLE);
-                } else {
-                    // No need to show 'transfer' if funds are less than dust amount
-                    accountModel.setTransferFundsVisibility(View.GONE);
-                }
+            if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
+                accountModel.setTransferFundsVisibility(View.VISIBLE);
             } else {
-                // No transfer option for V2
+                // No need to show 'transfer' if funds are less than dust amount
                 accountModel.setTransferFundsVisibility(View.GONE);
             }
         }
