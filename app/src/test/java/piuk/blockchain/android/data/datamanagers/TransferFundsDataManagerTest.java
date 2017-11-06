@@ -25,6 +25,7 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
@@ -41,12 +42,13 @@ public class TransferFundsDataManagerTest extends RxTest {
     @Mock private SendDataManager sendDataManager;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private PayloadDataManager payloadDataManager;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private DynamicFeeCache dynamicFeeCache;
+    @Mock private WalletOptionsDataManager walletOptionsDataManager;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-        subject = new TransferFundsDataManager(payloadDataManager, sendDataManager, dynamicFeeCache);
+        subject = new TransferFundsDataManager(payloadDataManager, sendDataManager, dynamicFeeCache, walletOptionsDataManager);
     }
 
     @Test
@@ -64,9 +66,9 @@ public class TransferFundsDataManagerTest extends RxTest {
         when(sendDataManager.getUnspentOutputs(anyString())).thenReturn(Observable.just(unspentOutputs));
         SpendableUnspentOutputs spendableUnspentOutputs = new SpendableUnspentOutputs();
         spendableUnspentOutputs.setAbsoluteFee(BigInteger.TEN);
-        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
+        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class), any(Boolean.class)))
                 .thenReturn(spendableUnspentOutputs);
-        when(sendDataManager.getSweepableCoins(unspentOutputs, BigInteger.valueOf(1_000L)))
+        when(sendDataManager.getMaximumAvailable(unspentOutputs, BigInteger.valueOf(1_000L), false))
                 .thenReturn(Pair.of(BigInteger.valueOf(1_000_000L), BigInteger.TEN));
         // Act
         TestObserver<Triple<List<PendingTransaction>, Long, Long>> testObserver =
@@ -85,7 +87,8 @@ public class TransferFundsDataManagerTest extends RxTest {
                 anyString(),
                 anyString(),
                 any(BigInteger.class),
-                any(BigInteger.class))).thenReturn(Observable.just("hash"));
+                any(BigInteger.class),
+                any(Boolean.class))).thenReturn(Observable.just("hash"));
 
         PendingTransaction transaction1 = new PendingTransaction();
         transaction1.sendingObject = new ItemAccount("", "", null, null, null);
@@ -121,7 +124,8 @@ public class TransferFundsDataManagerTest extends RxTest {
                 anyString(),
                 anyString(),
                 any(BigInteger.class),
-                any(BigInteger.class))).thenReturn(Observable.error(new Throwable()));
+                any(BigInteger.class),
+                any(Boolean.class))).thenReturn(Observable.error(new Throwable()));
 
         PendingTransaction transaction1 = new PendingTransaction();
         transaction1.sendingObject = new ItemAccount("", "", null, null, null);

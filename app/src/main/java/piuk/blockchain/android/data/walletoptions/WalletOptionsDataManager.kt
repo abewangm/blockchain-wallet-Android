@@ -7,8 +7,10 @@ import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.ReplaySubject
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
+import piuk.blockchain.android.util.annotations.Mockable
 import java.util.*
 
+@Mockable
 class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
                                private val walletOptionsState: WalletOptionsState,
                                private val settingsDataManager: SettingsDataManager) {
@@ -24,6 +26,34 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
 
         val walletSettingsStream = settingsDataManager.settings
         walletSettingsStream.subscribeWith<ReplaySubject<Settings>>(walletOptionsState.walletSettingsSource)
+    }
+
+    /**
+     * Replay protection status retrieved from wallet-options.json.
+     * If replay protection is needed, input coins will be mixed with non-replayable inputs
+     * to ensure transaction is not replayable.
+     */
+    fun fetchReplayProtectionStatus(): Observable<Boolean> {
+        initReplaySubjects()
+
+        return walletOptionsState.walletOptionsSource.flatMap { options ->
+
+            var result = false
+
+            options.androidFlags.apply {
+
+                if (isNotEmpty()) {
+                    result = get(REPLAY_PROTECTION) ?: false
+                }
+            }
+            return@flatMap Observable.just(result)
+        }
+    }
+
+    fun shouldAddReplayProtection() = walletOptionsState.replayProtectionStatus
+
+    fun setReplayProtectionStatus(status: Boolean) {
+        walletOptionsState.replayProtectionStatus = status
     }
 
     /**
@@ -69,12 +99,12 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
                 }))
     }
 
-    fun isShapeshiftAllowed(options: WalletOptions, settings: Settings): Boolean {
+    private fun isShapeshiftAllowed(options: WalletOptions, settings: Settings): Boolean {
 
-        val isShapeShiftAllowed = options.androidFlags.let { it.getOrDefault(SHOW_SHAPESHIFT, false) }
-        val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it.contains(settings.countryCode) }
-        val whitelistedState = options.shapeshift.statesWhitelist.let { it.contains(settings.state) }
-        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it.contains("US") }
+        val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT)?: false }
+        val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode)?: false }
+        val whitelistedState = options.shapeshift.statesWhitelist.let { it?.contains(settings.state)?: true }
+        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it?.contains("US")?: false }
         val isUS = settings.countryCode.equals("US")
 
         return isShapeShiftAllowed
@@ -86,5 +116,7 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
 
     companion object {
         private val SHOW_SHAPESHIFT = "showShapeshift"
+        private val REPLAY_PROTECTION = "replayProtection"
     }
+
 }

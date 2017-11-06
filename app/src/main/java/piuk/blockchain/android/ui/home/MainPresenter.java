@@ -163,13 +163,19 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .doOnNext(message -> {
                     if (!message.isEmpty()) getView().showCustomPrompt(getWarningPrompt(message));
                 })
+                .flatMap(ignored -> walletOptionsDataManager.fetchReplayProtectionStatus())
+                .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
                 .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
-                // TODO: 24/10/2017 HARDCODED TO FALSE AS SHAPESHIFT HAS BEEN MERGED INTO DEVELOP
-                .doOnNext(showShapeshift -> handleAndroidFlags(false))
+                .doOnNext(showShapeshift -> handleAndroidFlags(showShapeshift))
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(ignored -> {
                     //no-op
-                }, Timber::e);
+                }, throwable -> {
+                    //Couldn't retrieve wallet options. Not safe to continue
+                    Timber.e(throwable);
+                    getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                    appUtil.restartApp();
+                });
     }
 
     @SuppressWarnings("SameParameterValue")

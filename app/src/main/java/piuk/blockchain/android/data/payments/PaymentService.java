@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.payments;
 
 import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.api.data.DustServiceInput;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
@@ -51,15 +52,63 @@ public class PaymentService {
             HashMap<String, BigInteger> receivers = new HashMap<>();
             receivers.put(toAddress, bigIntAmount);
 
-            Transaction tx = payment.makeTransaction(
+            Transaction tx = payment.makeSimpleTransaction(
                     unspentOutputBundle.getSpendableOutputs(),
                     receivers,
                     bigIntFee,
                     changeAddress);
 
-            payment.signTransaction(tx, keys);
+            payment.signSimpleTransaction(tx, keys);
 
-            Response<ResponseBody> exe = payment.publishTransaction(tx).execute();
+            Response<ResponseBody> exe = payment.publishSimpleTransaction(tx).execute();
+
+            if (exe.isSuccessful()) {
+                if (!observableOnSubscribe.isDisposed()) {
+                    observableOnSubscribe.onNext(tx.getHashAsString());
+                    observableOnSubscribe.onComplete();
+                }
+            } else {
+                if (!observableOnSubscribe.isDisposed()) {
+                    observableOnSubscribe.onError(new Throwable(exe.code() + ": " + exe.errorBody().string()));
+                }
+            }
+        });
+    }
+
+    /**
+     * Submits a payment to a specified address and returns the transaction hash if successful
+     *
+     * @param unspentOutputBundle UTXO object
+     * @param keys                A List of elliptic curve keys
+     * @param toAddress           The address to send the funds to
+     * @param changeAddress       A change address
+     * @param bigIntFee           The specified fee amount
+     * @param bigIntAmount        The actual transaction amount
+     * @return An {@link Observable<String>} where the String is the transaction hash
+     */
+    @WebRequest
+    Observable<String> publishTransactionWithDust(SpendableUnspentOutputs unspentOutputBundle,
+                                      List<ECKey> keys,
+                                      String toAddress,
+                                      String changeAddress,
+                                      BigInteger bigIntFee,
+                                      BigInteger bigIntAmount,
+                                      DustServiceInput dust) {
+
+        return Observable.create(observableOnSubscribe -> {
+            HashMap<String, BigInteger> receivers = new HashMap<>();
+            receivers.put(toAddress, bigIntAmount);
+
+            Transaction tx = payment.makeNonReplayableTransaction(
+                    unspentOutputBundle.getSpendableOutputs(),
+                    receivers,
+                    bigIntFee,
+                    changeAddress,
+                    dust);
+
+            payment.signNonReplayableTransaction(tx, keys);
+
+            Response<ResponseBody> exe = payment.publishTransactionWithSecret(tx, dust.getLockSecret()).execute();
 
             if (exe.isSuccessful()) {
                 if (!observableOnSubscribe.isDisposed()) {
@@ -111,8 +160,9 @@ public class PaymentService {
      */
     SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
                                               BigInteger paymentAmount,
-                                              BigInteger feePerKb) throws UnsupportedEncodingException {
-        return payment.getSpendableCoins(unspentCoins, paymentAmount, feePerKb);
+                                              BigInteger feePerKb,
+                                              boolean addReplayProtection) throws UnsupportedEncodingException {
+        return payment.getSpendableCoins(unspentCoins, paymentAmount, feePerKb, addReplayProtection);
     }
 
     /**
@@ -125,9 +175,10 @@ public class PaymentService {
      * @return A {@link Pair} object, where left = the sweepable amount as a {@link BigInteger},
      * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
      */
-    Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs unspentCoins,
-                                                   BigInteger feePerKb) {
-        return payment.getSweepableCoins(unspentCoins, feePerKb);
+    Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs unspentCoins,
+                                                     BigInteger feePerKb,
+                                                     boolean addReplayProtection) {
+        return payment.getMaximumAvailable(unspentCoins, feePerKb, addReplayProtection);
     }
 
     /**

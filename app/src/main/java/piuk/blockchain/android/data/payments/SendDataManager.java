@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.payments;
 
 import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,11 +21,13 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 public class SendDataManager {
 
     private PaymentService paymentService;
+    private WalletApi walletApi;
     private RxPinning rxPinning;
 
-    public SendDataManager(PaymentService paymentService, RxBus rxBus) {
+    public SendDataManager(PaymentService paymentService, RxBus rxBus, WalletApi walletApi) {
         this.paymentService = paymentService;
-        rxPinning = new RxPinning(rxBus);
+        this.rxPinning = new RxPinning(rxBus);
+        this.walletApi = walletApi;
     }
 
     /**
@@ -43,16 +46,44 @@ public class SendDataManager {
                                             String toAddress,
                                             String changeAddress,
                                             BigInteger bigIntFee,
-                                            BigInteger bigIntAmount) {
+                                            BigInteger bigIntAmount,
+                                            boolean addReplayProtection) {
 
-        return rxPinning.call(() -> paymentService.submitPayment(
-                unspentOutputBundle,
-                keys,
-                toAddress,
-                changeAddress,
-                bigIntFee,
-                bigIntAmount))
-                .compose(RxUtil.applySchedulersToObservable());
+        if(addReplayProtection && !unspentOutputBundle.isReplayProtected()) {
+            return rxPinning.call(() -> publishTransactionWithDust(unspentOutputBundle,
+                    keys,
+                    toAddress,
+                    changeAddress,
+                    bigIntFee,
+                    bigIntAmount))
+                    .compose(RxUtil.applySchedulersToObservable());
+        } else {
+            return rxPinning.call(() -> paymentService.submitPayment(
+                    unspentOutputBundle,
+                    keys,
+                    toAddress,
+                    changeAddress,
+                    bigIntFee,
+                    bigIntAmount))
+                    .compose(RxUtil.applySchedulersToObservable());
+        }
+    }
+
+    private Observable<String> publishTransactionWithDust(SpendableUnspentOutputs unspentOutputBundle,
+                                              List<ECKey> keys,
+                                              String toAddress,
+                                              String changeAddress,
+                                              BigInteger bigIntFee,
+                                              BigInteger bigIntAmount) {
+        return walletApi.getDust()
+                .flatMap(dustServiceInput -> paymentService.publishTransactionWithDust(
+                        unspentOutputBundle,
+                        keys,
+                        toAddress,
+                        changeAddress,
+                        bigIntFee,
+                        bigIntAmount,
+                        dustServiceInput));
     }
 
     /**
@@ -96,9 +127,10 @@ public class SendDataManager {
      */
     public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
                                                      BigInteger paymentAmount,
-                                                     BigInteger feePerKb)
+                                                     BigInteger feePerKb,
+                                                     boolean addReplayProtection)
         throws UnsupportedEncodingException {
-        return paymentService.getSpendableCoins(unspentCoins, paymentAmount, feePerKb);
+        return paymentService.getSpendableCoins(unspentCoins, paymentAmount, feePerKb, addReplayProtection);
     }
 
     /**
@@ -111,9 +143,10 @@ public class SendDataManager {
      * @return A {@link Pair} object, where left = the sweepable amount as a {@link BigInteger},
      * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
      */
-    public Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs unspentCoins,
-                                                          BigInteger feePerKb) {
-        return paymentService.getSweepableCoins(unspentCoins, feePerKb);
+    public Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs unspentCoins,
+                                                            BigInteger feePerKb,
+                                                            boolean addReplayProtection) {
+        return paymentService.getMaximumAvailable(unspentCoins, feePerKb, addReplayProtection);
     }
 
     /**

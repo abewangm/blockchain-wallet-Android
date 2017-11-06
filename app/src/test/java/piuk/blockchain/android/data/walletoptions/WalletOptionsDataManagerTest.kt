@@ -77,6 +77,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         // Assert
         assertEquals(message, testObserver.values().get(0))
         testObserver.assertComplete()
+        Locale.setDefault(Locale.ENGLISH)
     }
 
     @Test
@@ -99,6 +100,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         // Assert
         assertEquals(message, testObserver.values().get(0))
         testObserver.assertComplete()
+        Locale.setDefault(Locale.ENGLISH)
     }
 
     @Test

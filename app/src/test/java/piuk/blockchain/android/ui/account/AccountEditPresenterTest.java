@@ -34,12 +34,17 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
+import piuk.blockchain.android.data.settings.SettingsDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsState;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
@@ -76,6 +81,7 @@ public class AccountEditPresenterTest {
     @Mock private SendDataManager sendDataManager;
     @Mock private PrivateKeyFactory privateKeyFactory;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private DynamicFeeCache dynamicFeeCache;
+    @Mock private WalletOptionsDataManager walletOptionsDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -88,7 +94,8 @@ public class AccountEditPresenterTest {
                 sendDataManager,
                 privateKeyFactory,
                 swipeToReceiveHelper,
-                dynamicFeeCache);
+                dynamicFeeCache,
+                walletOptionsDataManager);
         subject.initView(activity);
         subject.setAccountModel(accountEditModel);
     }
@@ -175,12 +182,12 @@ public class AccountEditPresenterTest {
                 .thenReturn(Observable.just("address"));
         when(sendDataManager.getUnspentOutputs(legacyAddress.getAddress()))
                 .thenReturn(Observable.just(mock(UnspentOutputs.class)));
-        when(sendDataManager.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
+        when(sendDataManager.getMaximumAvailable(any(UnspentOutputs.class), any(BigInteger.class), any(Boolean.class)))
                 .thenReturn(sweepableCoins);
         SpendableUnspentOutputs spendableUnspentOutputs = mock(SpendableUnspentOutputs.class);
         when(spendableUnspentOutputs.getAbsoluteFee()).thenReturn(BigInteger.TEN);
         when(spendableUnspentOutputs.getConsumedAmount()).thenReturn(BigInteger.TEN);
-        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
+        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class), any(Boolean.class)))
                 .thenReturn(spendableUnspentOutputs);
         when(exchangeRateFactory.getLastBtcPrice(anyString())).thenReturn(100.0d);
         when(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
@@ -208,9 +215,9 @@ public class AccountEditPresenterTest {
                 .thenReturn(Observable.just("address"));
         when(sendDataManager.getUnspentOutputs(legacyAddress.getAddress()))
                 .thenReturn(Observable.just(mock(UnspentOutputs.class)));
-        when(sendDataManager.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
+        when(sendDataManager.getMaximumAvailable(any(UnspentOutputs.class), any(BigInteger.class), any(Boolean.class)))
                 .thenReturn(sweepableCoins);
-        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
+        when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class), any(Boolean.class)))
                 .thenReturn(mock(SpendableUnspentOutputs.class));
         // Act
         subject.onClickTransferFunds();
@@ -269,7 +276,8 @@ public class AccountEditPresenterTest {
                 isNull(),
                 isNull(),
                 any(BigInteger.class),
-                any(BigInteger.class))).thenReturn(Observable.just("hash"));
+                any(BigInteger.class),
+                any(Boolean.class))).thenReturn(Observable.just("hash"));
         when(payloadDataManager.syncPayloadWithServer()).thenReturn(Completable.complete());
         subject.pendingTransaction = pendingTransaction;
         // Act
@@ -303,7 +311,8 @@ public class AccountEditPresenterTest {
                 isNull(),
                 isNull(),
                 any(BigInteger.class),
-                any(BigInteger.class))).thenReturn(Observable.error(new Throwable()));
+                any(BigInteger.class),
+                any(Boolean.class))).thenReturn(Observable.error(new Throwable()));
         subject.pendingTransaction = pendingTransaction;
         // Act
         subject.submitPayment();
