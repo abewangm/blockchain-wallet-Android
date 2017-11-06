@@ -103,7 +103,7 @@ class DashboardPresenter @Inject constructor(
 
     private fun updatePrices() {
         exchangeRateFactory.updateTickers()
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         { updateCryptoPrice() },
                         { Timber.e(it) }
@@ -112,8 +112,11 @@ class DashboardPresenter @Inject constructor(
 
     private fun updateCryptoPrice() {
         view.updateCryptoCurrencyPrice(
-                if (cryptoCurrency == CryptoCurrencies.BTC)
-                    getBtcString() else getEthString()
+                if (cryptoCurrency == CryptoCurrencies.BTC) {
+                    getBtcString()
+                } else {
+                    getEthString()
+                }
         )
     }
 

@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.dashboard
 
 import com.nhaarman.mockito_kotlin.*
+import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.any
@@ -302,7 +303,8 @@ class DashboardPresenterTest {
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
         whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.BTC, "USD"))
                 .thenReturn(Observable.just(mock(ChartDatumDto::class)))
-        whenever(exchangeRateFactory.updateTickers()).thenReturn(Completable.complete())
+        whenever(exchangeRateFactory.updateTickers())
+                .thenReturn(Observable.just(mapOf("" to mock(PriceDatum::class))))
         val combinedEthModel: CombinedEthModel = mock()
         whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())

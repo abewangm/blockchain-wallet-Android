@@ -977,6 +977,7 @@ class SendPresenter @Inject constructor(
 
         if (format == null) {
             view?.showSnackbar(R.string.privkey_error, Snackbar.LENGTH_LONG)
+            return
         }
 
         when (format) {
@@ -1153,8 +1154,7 @@ class SendPresenter @Inject constructor(
 
     private fun updateTicker() {
         exchangeRateFactory.updateTickers()
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .compose(RxUtil.applySchedulersToCompletable())
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
                     //no-op
                 }, { it.printStackTrace() })

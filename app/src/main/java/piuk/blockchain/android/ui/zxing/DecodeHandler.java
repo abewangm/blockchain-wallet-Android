@@ -16,11 +16,6 @@
 
 package piuk.blockchain.android.ui.zxing;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
-
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.MultiFormatReader;
@@ -29,9 +24,15 @@ import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
+
 import java.util.Map;
 
 import piuk.blockchain.android.R;
+import timber.log.Timber;
 
 final class DecodeHandler extends Handler {
 
@@ -55,7 +56,15 @@ final class DecodeHandler extends Handler {
             return;
         }
         if (message.what == R.id.decode) {
-            decode((byte[]) message.obj, message.arg1, message.arg2);
+            try {
+                decode((byte[]) message.obj, message.arg1, message.arg2);
+            } catch (IllegalArgumentException e) {
+                // Fix for https://github.com/journeyapps/zxing-android-embedded/issues/314
+                Timber.e(e);
+                // Quit process
+                running = false;
+                Looper.myLooper().quit();
+            }
 
         } else if (message.what == R.id.quit) {
             running = false;
