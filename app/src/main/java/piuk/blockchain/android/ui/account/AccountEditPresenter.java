@@ -37,6 +37,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
@@ -63,6 +64,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
     private PrivateKeyFactory privateKeyFactory;
     private SwipeToReceiveHelper swipeToReceiveHelper;
     private DynamicFeeCache dynamicFeeCache;
+    private WalletOptionsDataManager walletOptionsDataManager;
 
     // Visible for data binding
     public AccountEditModel accountModel;
@@ -82,7 +84,8 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                          SendDataManager sendDataManager,
                          PrivateKeyFactory privateKeyFactory,
                          SwipeToReceiveHelper swipeToReceiveHelper,
-                         DynamicFeeCache dynamicFeeCache) {
+                         DynamicFeeCache dynamicFeeCache,
+                         WalletOptionsDataManager walletOptionsDataManager) {
 
         this.prefsUtil = prefsUtil;
         this.stringUtils = stringUtils;
@@ -92,6 +95,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         this.privateKeyFactory = privateKeyFactory;
         this.swipeToReceiveHelper = swipeToReceiveHelper;
         this.dynamicFeeCache = dynamicFeeCache;
+        this.walletOptionsDataManager = walletOptionsDataManager;
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
 
@@ -362,7 +366,8 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                         pendingTransaction.receivingAddress,
                         changeAddress,
                         pendingTransaction.bigIntFee,
-                        pendingTransaction.bigIntAmount)
+                        pendingTransaction.bigIntAmount,
+                        walletOptionsDataManager.shouldAddReplayProtection())
                         .doAfterTerminate(() -> getView().dismissProgressDialog())
                         .subscribe(hash -> {
                             legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
@@ -723,14 +728,14 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                             BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000);
 
                     Pair<BigInteger, BigInteger> sweepableCoins =
-                            sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);
+                            sendDataManager.getMaximumAvailable(unspentOutputs, suggestedFeePerKb, walletOptionsDataManager.shouldAddReplayProtection());
                     BigInteger sweepAmount = sweepableCoins.getLeft();
 
                     // To default account
                     Account defaultAccount = payloadDataManager.getDefaultAccount();
                     pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress, legacyAddress.getAddress());
                     pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount, null);
-                    pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
+                    pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb, walletOptionsDataManager.shouldAddReplayProtection());
                     pendingTransaction.bigIntAmount = sweepAmount;
                     pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();
 

@@ -10,6 +10,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.support.annotation.ColorRes
+import android.support.annotation.Nullable
 import android.support.annotation.StringRes
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
@@ -488,12 +489,20 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         ToastCustom.makeText(activity, getString(message), ToastCustom.LENGTH_SHORT, toastType)
     }
 
-    override fun showSnackbar(@StringRes message: Int, duration: Int) {
+    override fun showSnackbar(message: Int, duration: Int) {
+        showSnackbar(getString(message), null, duration)
+    }
+
+    override fun showSnackbar(message: String, @Nullable extraInfo: String?, duration: Int) {
         val snackbar = Snackbar.make(activity.findViewById(R.id.coordinator_layout), message, duration)
                 .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
 
-        if (duration == Snackbar.LENGTH_INDEFINITE) {
-            snackbar.setAction(R.string.ok_cap, {})
+        if (extraInfo != null) {
+            snackbar.setAction(R.string.more, { showSnackbar(extraInfo, null, Snackbar.LENGTH_INDEFINITE)})
+        } else {
+            if (duration == Snackbar.LENGTH_INDEFINITE) {
+                snackbar.setAction(R.string.ok_cap, {})
+            }
         }
 
         snackbar.show()

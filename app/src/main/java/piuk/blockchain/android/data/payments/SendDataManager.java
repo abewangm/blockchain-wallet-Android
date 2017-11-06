@@ -24,9 +24,10 @@ public class SendDataManager {
     private WalletApi walletApi;
     private RxPinning rxPinning;
 
-    public SendDataManager(PaymentService paymentService, RxBus rxBus) {
+    public SendDataManager(PaymentService paymentService, RxBus rxBus, WalletApi walletApi) {
         this.paymentService = paymentService;
-        rxPinning = new RxPinning(rxBus);
+        this.rxPinning = new RxPinning(rxBus);
+        this.walletApi = walletApi;
     }
 
     /**
@@ -142,9 +143,9 @@ public class SendDataManager {
      * @return A {@link Pair} object, where left = the sweepable amount as a {@link BigInteger},
      * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
      */
-    public Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs unspentCoins,
-                                                          BigInteger feePerKb,
-                                                          boolean addReplayProtection) {
+    public Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs unspentCoins,
+                                                            BigInteger feePerKb,
+                                                            boolean addReplayProtection) {
         return paymentService.getMaximumAvailable(unspentCoins, feePerKb, addReplayProtection);
     }
 

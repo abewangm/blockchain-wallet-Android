@@ -168,12 +168,19 @@ public class MainPresenter extends BasePresenter<MainView> {
                     if (message != null && !message.isEmpty())
                         getView().showCustomPrompt(getWarningPrompt(message));
                 })
+                .flatMap(ignored -> walletOptionsDataManager.fetchReplayProtectionStatus())
+                .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
                 .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
-                .doOnNext(showShapeshift -> handleAndroidFlags(true))// TODO: 24/10/2017 HARDCODED TO TRUE FOR TESTING ON PRODUCTION
+                .doOnNext(showShapeshift -> handleAndroidFlags(showShapeshift))
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(ignored -> {
                     //no-op
-                }, throwable -> Timber.e(throwable));
+                }, throwable -> {
+                    //Couldn't retrieve wallet options. Not safe to continue
+                    Timber.e(throwable);
+                    getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+                    appUtil.restartApp();
+                });
     }
 
     private void handleAndroidFlags(boolean showShapeshift) {

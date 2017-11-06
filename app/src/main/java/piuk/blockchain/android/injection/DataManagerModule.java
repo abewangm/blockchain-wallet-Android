@@ -115,8 +115,9 @@ public class DataManagerModule {
     @PresenterScope
     protected TransferFundsDataManager provideTransferFundsDataManager(PayloadDataManager payloadDataManager,
                                                                        SendDataManager sendDataManager,
-                                                                       DynamicFeeCache dynamicFeeCache) {
-        return new TransferFundsDataManager(payloadDataManager, sendDataManager, dynamicFeeCache);
+                                                                       DynamicFeeCache dynamicFeeCache,
+                                                                       WalletOptionsDataManager walletOptionsDataManager) {
+        return new TransferFundsDataManager(payloadDataManager, sendDataManager, dynamicFeeCache, walletOptionsDataManager);
     }
 
     @Provides
@@ -162,7 +163,7 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected SendDataManager provideSendDataManager(RxBus rxBus) {
-        return new SendDataManager(new PaymentService(new Payment()), rxBus);
+        return new SendDataManager(new PaymentService(new Payment()), rxBus, new WalletApi());
     }
 
     @Provides

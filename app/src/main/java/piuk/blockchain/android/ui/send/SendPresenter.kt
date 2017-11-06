@@ -42,6 +42,7 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.data.transactions.BtcDisplayable
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -74,7 +75,8 @@ class SendPresenter @Inject constructor(
         private val feeDataManager: FeeDataManager,
         private val privateKeyFactory: PrivateKeyFactory,
         private val environmentSettings: EnvironmentSettings,
-        private val transactionListDataManager: TransactionListDataManager
+        private val transactionListDataManager: TransactionListDataManager,
+        private val walletOptionsDataManager: WalletOptionsDataManager
 ) : BasePresenter<SendView>() {
 
     private val locale: Locale by unsafeLazy { Locale.getDefault() }
@@ -234,7 +236,8 @@ class SendPresenter @Inject constructor(
                             pendingTransaction.receivingAddress,
                             pendingTransaction.changeAddress,
                             pendingTransaction.bigIntFee,
-                            pendingTransaction.bigIntAmount)
+                            pendingTransaction.bigIntAmount,
+                            walletOptionsDataManager.shouldAddReplayProtection())
                 }
                 .subscribe({ hash ->
                     Logging.logCustom(PaymentSentEvent()
@@ -251,7 +254,9 @@ class SendPresenter @Inject constructor(
                     Timber.e(it)
                     view.dismissProgressDialog()
                     view.dismissConfirmationDialog()
-                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                    view.showSnackbar(stringUtils.getString(R.string.transaction_failed),
+                            it.message,
+                            Snackbar.LENGTH_INDEFINITE)
 
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(false)
@@ -699,7 +704,10 @@ class SendPresenter @Inject constructor(
             amountToSend: BigInteger,
             feePerKb: BigInteger
     ): BigInteger {
-        val spendableCoins = sendDataManager.getSpendableCoins(coins, amountToSend, feePerKb)
+        val spendableCoins = sendDataManager.getSpendableCoins(coins,
+                amountToSend,
+                feePerKb,
+                walletOptionsDataManager.shouldAddReplayProtection())
         return spendableCoins.absoluteFee
     }
 
@@ -836,7 +844,7 @@ class SendPresenter @Inject constructor(
         var amount = amountToSend
 
         //Calculate sweepable amount to display max available
-        val sweepBundle = sendDataManager.getSweepableCoins(coins, feePerKb)
+        val sweepBundle = sendDataManager.getMaximumAvailable(coins, feePerKb, walletOptionsDataManager.shouldAddReplayProtection())
         val sweepableAmount = sweepBundle.left
 
         updateMaxAvailable(sweepableAmount)
@@ -851,7 +859,8 @@ class SendPresenter @Inject constructor(
 
         val unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
                 amount,
-                feePerKb)
+                feePerKb,
+                walletOptionsDataManager.shouldAddReplayProtection())
 
         pendingTransaction.bigIntAmount = amount
         pendingTransaction.unspentOutputBundle = unspentOutputBundle
