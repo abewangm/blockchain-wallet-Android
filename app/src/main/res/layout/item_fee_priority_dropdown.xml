@@ -26,6 +26,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/title"
+            android:gravity="right"
             android:textColor="@color/primary_gray_medium"
             android:textSize="12sp"
             tools:text="Approx 0-60 mins" />

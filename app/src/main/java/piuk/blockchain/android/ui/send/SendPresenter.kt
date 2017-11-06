@@ -805,10 +805,11 @@ class SendPresenter @Inject constructor(
                             val amountToSend = currencyHelper.getSatoshisFromText(amountToSendText, getDefaultDecimalSeparator())
 
                             // Future use. There might be some unconfirmed funds. Not displaying a warning currently (to line up with iOS and Web wallet)
-                            if (coins.notice != null)
+                            if (coins.notice != null) {
                                 view.updateWarning(coins.notice)
-                            else
+                            } else {
                                 view.clearWarning()
+                            }
 
                             updateFee(getSuggestedAbsoluteFee(coins, amountToSend, feePerKb))
 
@@ -879,6 +880,8 @@ class SendPresenter @Inject constructor(
             amountToSendText: String?
     ) {
 
+        val amountToSendSanitised = if (amountToSendText.isNullOrEmpty()) "0" else amountToSendText
+
         val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
 
@@ -895,7 +898,7 @@ class SendPresenter @Inject constructor(
             pendingTransaction.bigIntAmount = availableEth.toBigInteger()
         } else {
             pendingTransaction.bigIntAmount =
-                    currencyHelper.getWeiFromText(amountToSendText, getDefaultDecimalSeparator())
+                    currencyHelper.getWeiFromText(amountToSendSanitised, getDefaultDecimalSeparator())
         }
 
         //Format for display
