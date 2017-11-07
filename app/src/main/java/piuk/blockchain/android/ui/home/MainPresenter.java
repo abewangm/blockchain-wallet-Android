@@ -166,7 +166,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .flatMap(ignored -> walletOptionsDataManager.fetchReplayProtectionStatus())
                 .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
                 .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
-                .doOnNext(showShapeshift -> handleAndroidFlags(showShapeshift))
+                .doOnNext(this::handleAndroidFlags)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(ignored -> {
                     //no-op

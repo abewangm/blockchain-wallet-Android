@@ -21,39 +21,44 @@
     </FrameLayout>
 
     <!-- Main content -->
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/title"
-            style="@style/Base.DialogWindowTitle.AppCompat"
-            fontPath="fonts/Montserrat-Regular.ttf"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            tools:ignore="MissingPrefix"
-            tools:text="@string/security_centre_email_title" />
+            android:orientation="vertical"
+            android:padding="24dp">
 
-        <TextView
-            android:id="@+id/message"
-            style="@style/Base.TextAppearance.AppCompat.Small"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:text="@string/security_centre_email_message" />
+            <TextView
+                android:id="@+id/title"
+                style="@style/Base.DialogWindowTitle.AppCompat"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                tools:ignore="MissingPrefix"
+                tools:text="@string/security_centre_email_title" />
 
-        <CheckBox
-            android:id="@+id/checkbox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="-6dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/dont_ask_again"
-            android:visibility="gone" />
+            <TextView
+                android:id="@+id/message"
+                style="@style/Base.TextAppearance.AppCompat.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="@string/security_centre_email_message" />
 
-    </LinearLayout>
+            <CheckBox
+                android:id="@+id/checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-6dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/dont_ask_again"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </ScrollView>
 
     <!-- Button Layout -->
     <LinearLayout style="@style/CustomDialogButtonContainer">
@@ -65,6 +70,7 @@
             android:text="@string/not_now"
             android:textColor="@color/primary_gray_dark"
             android:visibility="gone"
+            tools:ignore="RtlHardcoded"
             tools:visibility="visible" />
 
         <Button
@@ -72,6 +78,7 @@
             style="@style/CustomDialogButton"
             android:layout_gravity="right"
             android:textColor="@color/primary_blue_accent"
+            tools:ignore="RtlHardcoded"
             tools:text="@android:string/ok" />
 
     </LinearLayout>

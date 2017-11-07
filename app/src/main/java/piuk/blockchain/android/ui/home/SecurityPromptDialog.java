@@ -90,12 +90,12 @@ public class SecurityPromptDialog extends AppCompatDialogFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mIcon = (ImageView) view.findViewById(R.id.icon);
-        mTitle = (TextView) view.findViewById(R.id.title);
-        mMessage = (TextView) view.findViewById(R.id.message);
-        mPositiveButton = (Button) view.findViewById(R.id.button_positive);
-        mNegativeButton = (Button) view.findViewById(R.id.button_negative);
-        mCheckBox = (CheckBox) view.findViewById(R.id.checkbox);
+        mIcon = view.findViewById(R.id.icon);
+        mTitle = view.findViewById(R.id.title);
+        mMessage = view.findViewById(R.id.message);
+        mPositiveButton = view.findViewById(R.id.button_positive);
+        mNegativeButton = view.findViewById(R.id.button_negative);
+        mCheckBox = view.findViewById(R.id.checkbox);
 
         mPositiveButton.setOnClickListener(v -> {
             if (mPositiveButtonListener != null) mPositiveButtonListener.onClick(mPositiveButton);
