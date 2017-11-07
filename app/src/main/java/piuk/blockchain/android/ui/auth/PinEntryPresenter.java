@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.auth;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -26,19 +27,24 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
+import piuk.blockchain.android.ui.home.SecurityPromptDialog;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.DialogButtonCallback;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
 
@@ -54,6 +60,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
     private StringUtils mStringUtils;
     private FingerprintHelper mFingerprintHelper;
     private AccessState mAccessState;
+    private WalletOptionsDataManager walletOptionsDataManager;
 
     @VisibleForTesting boolean mCanShowFingerprintDialog = true;
     @VisibleForTesting boolean mValidatingPinForResult = false;
@@ -68,7 +75,8 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                       PayloadDataManager mPayloadDataManager,
                       StringUtils mStringUtils,
                       FingerprintHelper mFingerprintHelper,
-                      AccessState mAccessState) {
+                      AccessState mAccessState,
+                      WalletOptionsDataManager walletOptionsDataManager) {
 
         this.mAuthDataManager = mAuthDataManager;
         this.mAppUtil = mAppUtil;
@@ -77,6 +85,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
         this.mStringUtils = mStringUtils;
         this.mFingerprintHelper = mFingerprintHelper;
         this.mAccessState = mAccessState;
+        this.walletOptionsDataManager = walletOptionsDataManager;
     }
 
     @Override
@@ -465,5 +474,31 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
     @NonNull
     public AppUtil getAppUtil() {
         return mAppUtil;
+    }
+
+    public void logout(Context context) {
+        mAccessState.logout(context);
+    }
+
+    public void fetchInfoMessage() {
+        walletOptionsDataManager.fetchInfoMessage()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(message -> {
+                    if (!message.isEmpty()) getView().showCustomPrompt(getWarningPrompt(message));
+                }, throwable -> {
+                    Timber.e(throwable);
+                });
+    }
+
+    private SecurityPromptDialog getWarningPrompt(String message) {
+        SecurityPromptDialog prompt = SecurityPromptDialog.newInstance(
+                R.string.information,
+                message,
+                R.drawable.vector_help,
+                R.string.ok_cap,
+                false,
+                false);
+        prompt.setPositiveButtonListener(view -> prompt.dismiss());
+        return prompt;
     }
 }
