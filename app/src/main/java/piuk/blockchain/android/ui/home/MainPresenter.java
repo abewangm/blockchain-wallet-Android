@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthereumWallet;
+import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -235,7 +236,7 @@ public class MainPresenter extends BasePresenter<MainView> {
 //                    initContactsService();
                 }, throwable -> {
                     //noinspection StatementWithEmptyBody
-                    if (throwable instanceof InvalidCredentialsException) {
+                    if (throwable instanceof InvalidCredentialsException || throwable instanceof HDWalletException) {
                         // Wallet double encrypted and needs to be decrypted to set up ether wallet, contacts etc
                         getView().showSecondPasswordDialog();
                     } else {
