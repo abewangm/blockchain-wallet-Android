@@ -132,7 +132,6 @@ public class AuthService {
      */
     @WebRequest
     Observable<WalletOptions> getWalletOptions() {
-        Timber.d("vos getWalletOptions");
         return walletApi.getWalletOptions();
     }
 

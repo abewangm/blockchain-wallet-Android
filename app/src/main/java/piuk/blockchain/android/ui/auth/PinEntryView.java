@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.auth;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.widget.ImageView;
 
 import piuk.blockchain.android.ui.base.View;
@@ -50,4 +51,5 @@ interface PinEntryView extends View {
 
     void showAccountLockedDialog();
 
+    void showCustomPrompt(AppCompatDialogFragment alertFragment);
 }
