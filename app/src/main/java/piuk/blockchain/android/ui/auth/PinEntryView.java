@@ -52,4 +52,6 @@ interface PinEntryView extends View {
     void showAccountLockedDialog();
 
     void showCustomPrompt(AppCompatDialogFragment alertFragment);
+
+    void forceUpgrade();
 }

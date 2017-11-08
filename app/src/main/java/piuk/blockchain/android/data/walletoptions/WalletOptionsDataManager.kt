@@ -11,9 +11,11 @@ import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
 
 @Mockable
-class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
-                               private val walletOptionsState: WalletOptionsState,
-                               private val settingsDataManager: SettingsDataManager) {
+class WalletOptionsDataManager(
+        private val authDataManager: AuthDataManager,
+        private val walletOptionsState: WalletOptionsState,
+        private val settingsDataManager: SettingsDataManager
+) {
 
     /**
      * ReplaySubjects will re-emit items it observed.
@@ -63,7 +65,6 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
     /**
      * Mobile notice retrieved from wallet-options.json based on wallet setting
      * This notice will be shown on each session.
-     * @param mobileNotice
      */
     fun getMobileNotice(): Observable<String> {
         initReplaySubjects()
@@ -83,29 +84,26 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
         initReplaySubjects()
 
         return Observable.zip(walletOptionsState.walletOptionsSource, walletOptionsState.walletSettingsSource,
-                BiFunction({
-                    options, settings -> isShapeshiftAllowed(options, settings)
+                BiFunction({ options, settings ->
+                    isShapeshiftAllowed(options, settings)
                 }))
     }
 
     private fun isShapeshiftAllowed(options: WalletOptions, settings: Settings): Boolean {
 
-        val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT)?: false }
-        val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode)?: false }
-        val whitelistedState = options.shapeshift.statesWhitelist.let { it?.contains(settings.state)?: true }
-        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it?.contains("US")?: false }
-        val isUS = settings.countryCode.equals("US")
+        val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT) ?: false }
+        val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode) ?: false }
+        val whitelistedState = options.shapeshift.statesWhitelist.let { it?.contains(settings.state) ?: true }
+        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it?.contains("US") ?: false }
+        val isUS = settings.countryCode == "US"
 
         return isShapeShiftAllowed
-                &&
-                !blacklistedCountry
-                &&
-                (!isUS || (!isUSABlacklisted && whitelistedState))
+                && !blacklistedCountry
+                && (!isUS || (!isUSABlacklisted && whitelistedState))
     }
 
     /**
      * Mobile info retrieved from wallet-options.json based on wallet setting
-     * @param mobileNotice
      */
     fun fetchInfoMessage(): Observable<String> {
         initReplaySubjects()
@@ -121,6 +119,38 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
         }
     }
 
+    /**
+     * Checks to see if the client app needs to be force updated according to the wallet.options
+     * JSON file. If the client is on an unsupported Android SDK, the check is bypassed to prevent
+     * locking users out forever. Otherwise, an app version code ([piuk.blockchain.android.BuildConfig.VERSION_CODE])
+     * less than the supplied minVersionCode will return true, and the client should be forcibly
+     * upgraded.
+     *
+     * @param versionCode The version code of the current app
+     * @param sdk The device's Android SDK version
+     * @return A [Boolean] value contained within an [Observable]
+     */
+    fun checkForceUpgrade(versionCode: Int, sdk: Int): Observable<Boolean> {
+        initReplaySubjects()
+
+        return walletOptionsState.walletOptionsSource.flatMap {
+            val androidUpgradeMap = it.androidUpgrade ?: mapOf()
+            var forceUpgrade = false
+            val minSdk = androidUpgradeMap["minSdk"] ?: 0
+            val minVersionCode = androidUpgradeMap["minVersionCode"] ?: 0
+            if (sdk < minSdk) {
+                // Can safely ignore force upgrade
+            } else {
+                if (versionCode < minVersionCode) {
+                    // Force the client to update
+                    forceUpgrade = true
+                }
+            }
+
+            return@flatMap Observable.just(forceUpgrade)
+        }
+    }
+
     fun getLocalisedMessage(map: Map<String, String>): String {
 
         var result = ""
@@ -130,14 +160,12 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
             val lcid = authDataManager.locale.language + "-" + authDataManager.locale.country
             val language = authDataManager.locale.language
 
-            if (map.containsKey(language)) {
-                result = map.get(language) ?: ""
-            } else if (map.containsKey(lcid)) {
-                //Regional
-                result = map.get(lcid) ?: ""
-            } else {
-                //Default
-                result = map.get("en") ?: ""
+            result = when {
+                map.containsKey(language) -> map[language] ?: ""
+            //Regional
+                map.containsKey(lcid) -> map[lcid] ?: ""
+            //Default
+                else -> map["en"] ?: ""
             }
         }
 

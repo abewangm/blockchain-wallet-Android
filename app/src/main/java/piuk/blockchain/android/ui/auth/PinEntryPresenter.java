@@ -27,7 +27,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.Logging;
@@ -472,22 +471,29 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
     }
 
     @NonNull
-    public AppUtil getAppUtil() {
+    AppUtil getAppUtil() {
         return mAppUtil;
     }
 
-    public void logout(Context context) {
+    void logout(Context context) {
         mAccessState.logout(context);
     }
 
-    public void fetchInfoMessage() {
+    void fetchInfoMessage() {
         walletOptionsDataManager.fetchInfoMessage()
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(message -> {
                     if (!message.isEmpty()) getView().showCustomPrompt(getWarningPrompt(message));
-                }, throwable -> {
-                    Timber.e(throwable);
-                });
+                }, Timber::e);
+    }
+
+    void checkForceUpgradeStatus(int versionCode, int sdkVersion) {
+        walletOptionsDataManager.checkForceUpgrade(versionCode, sdkVersion)
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        forceUpgrade -> {
+                            if (forceUpgrade) getView().forceUpgrade();
+                        }, Timber::e);
     }
 
     private SecurityPromptDialog getWarningPrompt(String message) {
