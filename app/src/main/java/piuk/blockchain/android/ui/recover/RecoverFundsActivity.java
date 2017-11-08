@@ -105,6 +105,11 @@ public class RecoverFundsActivity extends BaseMvpActivity<RecoverFundsView, Reco
     }
 
     @Override
+    protected boolean enforceFlagSecure() {
+        return true;
+    }
+
+    @Override
     protected RecoverFundsPresenter createPresenter() {
         return recoverFundsPresenter;
     }

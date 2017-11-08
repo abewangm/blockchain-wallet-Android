@@ -64,6 +64,8 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
         progress_bar.gone()
     }
 
+    override fun enforceFlagSecure() = true
+
     override fun createPresenter() = pairingCodePresenter
 
     override fun getView(): PairingCodeView = this

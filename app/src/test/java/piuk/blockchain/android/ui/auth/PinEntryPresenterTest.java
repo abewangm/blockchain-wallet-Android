@@ -54,6 +54,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static piuk.blockchain.android.ui.auth.PinEntryFragment.KEY_VALIDATING_PIN_FOR_RESULT;
@@ -878,6 +879,35 @@ public class PinEntryPresenterTest {
         subject.fetchInfoMessage();
         // Assert
         verifyZeroInteractions(activity);
+    }
+
+    @Test
+    public void checkForceUpgradeStatus_false() throws Exception {
+        // Arrange
+        int versionCode = 281;
+        int sdk = 21;
+        when(walletOptionsDataManager.checkForceUpgrade(versionCode, sdk))
+                .thenReturn(Observable.just(false));
+        // Act
+        subject.checkForceUpgradeStatus(versionCode, sdk);
+        // Assert
+        verify(walletOptionsDataManager).checkForceUpgrade(versionCode, sdk);
+        verifyZeroInteractions(activity);
+    }
+
+    @Test
+    public void checkForceUpgradeStatus_true() throws Exception {
+        // Arrange
+        int versionCode = 281;
+        int sdk = 21;
+        when(walletOptionsDataManager.checkForceUpgrade(versionCode, sdk))
+                .thenReturn(Observable.just(true));
+        // Act
+        subject.checkForceUpgradeStatus(versionCode, sdk);
+        // Assert
+        verify(walletOptionsDataManager).checkForceUpgrade(versionCode, sdk);
+        verify(activity).forceUpgrade();
+        verifyNoMoreInteractions(activity);
     }
 
 }

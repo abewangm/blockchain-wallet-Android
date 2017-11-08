@@ -178,6 +178,11 @@ public class ManualPairingActivity extends BaseMvpActivity<ManualPairingView, Ma
     }
 
     @Override
+    protected boolean enforceFlagSecure() {
+        return true;
+    }
+
+    @Override
     protected ManualPairingPresenter createPresenter() {
         return manualPairingPresenter;
     }

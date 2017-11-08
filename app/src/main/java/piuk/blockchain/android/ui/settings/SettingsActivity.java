@@ -25,6 +25,11 @@ public class SettingsActivity extends BaseAuthActivity {
         setupToolbar();
     }
 
+    @Override
+    protected boolean enforceFlagSecure() {
+        return true;
+    }
+
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar_general);
         setupToolbar(toolbar, R.string.action_settings);
