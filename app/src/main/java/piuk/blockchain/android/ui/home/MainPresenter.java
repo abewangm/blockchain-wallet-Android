@@ -160,11 +160,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     // TODO: 24/10/2017  WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
      */
     private void doWalletOptionsChecks() {
-        walletOptionsDataManager.getMobileNotice()
-                .doOnNext(message -> {
-                    if (!message.isEmpty()) getView().showCustomPrompt(getWarningPrompt(message));
-                })
-                .flatMap(ignored -> walletOptionsDataManager.fetchReplayProtectionStatus())
+        walletOptionsDataManager.fetchReplayProtectionStatus()
                 .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
                 //TODO - Shapeshift WIP
 //                .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
@@ -180,7 +176,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                 });
     }
 
-    @SuppressWarnings("SameParameterValue")
+    @SuppressWarnings("SameParameterValue,unused")
     private void setShapeShiftVisibility(boolean showShapeshift) {
         if (showShapeshift) {
             getView().showShapeshift();
@@ -189,6 +185,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         }
     }
 
+    // Could be used in the future
+    @SuppressWarnings("unused")
     private SecurityPromptDialog getWarningPrompt(String message) {
         SecurityPromptDialog prompt = SecurityPromptDialog.newInstance(
                 R.string.warning,
