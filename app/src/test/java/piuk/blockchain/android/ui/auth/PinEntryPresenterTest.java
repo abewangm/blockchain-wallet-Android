@@ -34,6 +34,7 @@ import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.util.AppUtil;
@@ -71,6 +72,7 @@ public class PinEntryPresenterTest {
     @Mock private StringUtils stringUtils;
     @Mock private FingerprintHelper fingerprintHelper;
     @Mock private AccessState accessState;
+    @Mock private WalletOptionsDataManager walletOptionsDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -87,7 +89,8 @@ public class PinEntryPresenterTest {
                 payloadManager,
                 stringUtils,
                 fingerprintHelper,
-                accessState);
+                accessState,
+                walletOptionsDataManager);
         subject.initView(activity);
     }
 
@@ -853,6 +856,28 @@ public class PinEntryPresenterTest {
         AppUtil util = subject.getAppUtil();
         // Assert
         assertEquals(util, appUtil);
+    }
+
+    @Test
+    public void fetchInfoMessage() throws Exception {
+        // Arrange
+        when(walletOptionsDataManager.fetchInfoMessage()).thenReturn(Observable.just("Some generic message"));
+
+        // Act
+        subject.fetchInfoMessage();
+        // Assert
+        verify(activity).showCustomPrompt(any());
+    }
+
+    @Test
+    public void fetchInfoMessage_none() throws Exception {
+        // Arrange
+        when(walletOptionsDataManager.fetchInfoMessage()).thenReturn(Observable.just(""));
+
+        // Act
+        subject.fetchInfoMessage();
+        // Assert
+        verifyZeroInteractions(activity);
     }
 
 }
