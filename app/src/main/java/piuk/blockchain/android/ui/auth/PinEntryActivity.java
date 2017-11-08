@@ -169,6 +169,11 @@ public class PinEntryActivity extends BaseAuthActivity implements
         // No-op
     }
 
+    @Override
+    protected boolean enforceFlagSecure() {
+        return true;
+    }
+
     private void startWebSocketService() {
         Intent intent = new Intent(this, WebSocketService.class);
 

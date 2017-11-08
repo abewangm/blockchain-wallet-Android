@@ -45,7 +45,7 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/recovery_passphrase"
                         android:imeOptions="actionGo"
-                        android:inputType="textShortMessage"
+                        android:inputType="textNoSuggestions"
                         android:maxLines="1"
                         android:scrollHorizontally="true" />
 

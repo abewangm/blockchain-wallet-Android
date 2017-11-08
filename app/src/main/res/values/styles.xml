@@ -178,7 +178,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">42dp</item>
         <item name="android:gravity">center</item>
-        <item name="android:inputType">text</item>
+        <item name="android:inputType">textNoSuggestions</item>
         <item name="android:maxLines">1</item>
         <item name="android:layout_marginBottom">8dp</item>
         <item name="android:textColor">@color/primary_gray_dark</item>

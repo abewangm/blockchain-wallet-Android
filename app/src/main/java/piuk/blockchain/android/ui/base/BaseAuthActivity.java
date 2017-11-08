@@ -13,7 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
 
-import piuk.blockchain.android.data.access.AccessState;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
@@ -24,6 +23,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectionEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
@@ -141,11 +141,23 @@ public class BaseAuthActivity extends AppCompatActivity {
         stopLogoutTimer();
         ApplicationLifeCycle.getInstance().onActivityResumed();
 
-        if (mPrefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false)) {
+        if (mPrefsUtil.getValue(PrefsUtil.KEY_SCREENSHOTS_ENABLED, false) && !enforceFlagSecure()) {
             enableScreenshots();
         } else {
             disallowScreenshots();
         }
+    }
+
+    /**
+     * Allows us to enable screenshots on all pages, unless this is overridden in an Activity and
+     * returns true. Some pages are fine to be screenshot, but this lets us keep it permanently
+     * disabled on some more sensitive pages.
+     *
+     * @return False by default. If false, screenshots & screen recording will be allowed on the
+     * page if the user so chooses.
+     */
+    protected boolean enforceFlagSecure() {
+        return false;
     }
 
     @CallSuper
