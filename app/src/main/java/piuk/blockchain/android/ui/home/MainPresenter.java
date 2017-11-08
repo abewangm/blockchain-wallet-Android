@@ -165,6 +165,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                 })
                 .flatMap(ignored -> walletOptionsDataManager.fetchReplayProtectionStatus())
                 .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
+                //TODO - Shapeshift WIP
 //                .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
 //                .doOnNext(this::setShapeShiftVisibility)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -174,7 +175,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                     //Couldn't retrieve wallet options. Not safe to continue
                     Timber.e(throwable);
                     getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                    appUtil.restartApp();
+                    accessState.logout(applicationContext);
                 });
     }
 
