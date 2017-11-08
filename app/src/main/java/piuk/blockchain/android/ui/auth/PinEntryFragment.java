@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -84,6 +85,7 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
             binding.titleBox.setText(R.string.create_pin);
         } else {
             binding.titleBox.setText(R.string.pin_entry);
+            getPresenter().fetchInfoMessage();
         }
 
         pinBoxArray = new ImageView[PIN_LENGTH];
@@ -428,6 +430,13 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
                 // Reset PIN buttons to blank
                 pinBox.setImageResource(R.drawable.rounded_view_blue_white_border);
             }
+        }
+    }
+
+    @Override
+    public void showCustomPrompt(AppCompatDialogFragment alertFragments) {
+        if (!getActivity().isFinishing()) {
+            alertFragments.show(getFragmentManager(), alertFragments.getTag());
         }
     }
 

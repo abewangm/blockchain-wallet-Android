@@ -4,11 +4,11 @@ import info.blockchain.wallet.api.data.Settings
 import info.blockchain.wallet.api.data.WalletOptions
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.ReplaySubject
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
-import java.util.*
 
 @Mockable
 class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
@@ -22,10 +22,14 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
      */
     private fun initReplaySubjects() {
         val walletOptionsStream = authDataManager.walletOptions
-        walletOptionsStream.subscribeWith<ReplaySubject<WalletOptions>>(walletOptionsState.walletOptionsSource)
+        walletOptionsStream
+                .subscribeOn(Schedulers.io())
+                .subscribeWith<ReplaySubject<WalletOptions>>(walletOptionsState.walletOptionsSource)
 
         val walletSettingsStream = settingsDataManager.settings
-        walletSettingsStream.subscribeWith<ReplaySubject<Settings>>(walletOptionsState.walletSettingsSource)
+        walletSettingsStream
+                .subscribeOn(Schedulers.io())
+                .subscribeWith<ReplaySubject<Settings>>(walletOptionsState.walletSettingsSource)
     }
 
     /**
@@ -69,22 +73,7 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
             var result = ""
 
             options.mobileNotice.apply {
-
-                if (isNotEmpty()) {
-
-                    val lcid = authDataManager.locale.language + "-" + authDataManager.locale.country
-                    val language = authDataManager.locale.language
-
-                    if (containsKey(language)) {
-                        result = get(language) ?: ""
-                    } else if (containsKey(lcid)) {
-                        //Regional
-                        result = get(lcid) ?: ""
-                    } else {
-                        //Default
-                        result = get("en") ?: ""
-                    }
-                }
+                result = getLocalisedMessage(this)
             }
             return@flatMap Observable.just(result)
         }
@@ -112,6 +101,47 @@ class WalletOptionsDataManager(private val authDataManager: AuthDataManager,
                 !blacklistedCountry
                 &&
                 (!isUS || (!isUSABlacklisted && whitelistedState))
+    }
+
+    /**
+     * Mobile info retrieved from wallet-options.json based on wallet setting
+     * @param mobileNotice
+     */
+    fun fetchInfoMessage(): Observable<String> {
+        initReplaySubjects()
+
+        return walletOptionsState.walletOptionsSource.flatMap { options ->
+
+            var result = ""
+
+            options.mobileInfo.apply {
+                result = getLocalisedMessage(this)
+            }
+            return@flatMap Observable.just(result)
+        }
+    }
+
+    fun getLocalisedMessage(map: Map<String, String>): String {
+
+        var result = ""
+
+        if (map.isNotEmpty()) {
+
+            val lcid = authDataManager.locale.language + "-" + authDataManager.locale.country
+            val language = authDataManager.locale.language
+
+            if (map.containsKey(language)) {
+                result = map.get(language) ?: ""
+            } else if (map.containsKey(lcid)) {
+                //Regional
+                result = map.get(lcid) ?: ""
+            } else {
+                //Default
+                result = map.get("en") ?: ""
+            }
+        }
+
+        return result
     }
 
     companion object {
