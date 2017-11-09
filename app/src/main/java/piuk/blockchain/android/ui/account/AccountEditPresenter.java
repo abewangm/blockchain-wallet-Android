@@ -64,7 +64,6 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
     private PrivateKeyFactory privateKeyFactory;
     private SwipeToReceiveHelper swipeToReceiveHelper;
     private DynamicFeeCache dynamicFeeCache;
-    private WalletOptionsDataManager walletOptionsDataManager;
 
     // Visible for data binding
     public AccountEditModel accountModel;
@@ -84,8 +83,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                          SendDataManager sendDataManager,
                          PrivateKeyFactory privateKeyFactory,
                          SwipeToReceiveHelper swipeToReceiveHelper,
-                         DynamicFeeCache dynamicFeeCache,
-                         WalletOptionsDataManager walletOptionsDataManager) {
+                         DynamicFeeCache dynamicFeeCache) {
 
         this.prefsUtil = prefsUtil;
         this.stringUtils = stringUtils;
@@ -95,7 +93,6 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         this.privateKeyFactory = privateKeyFactory;
         this.swipeToReceiveHelper = swipeToReceiveHelper;
         this.dynamicFeeCache = dynamicFeeCache;
-        this.walletOptionsDataManager = walletOptionsDataManager;
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
 
@@ -356,8 +353,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                         pendingTransaction.receivingAddress,
                         changeAddress,
                         pendingTransaction.bigIntFee,
-                        pendingTransaction.bigIntAmount,
-                        walletOptionsDataManager.shouldAddReplayProtection())
+                        pendingTransaction.bigIntAmount)
                         .doAfterTerminate(() -> getView().dismissProgressDialog())
                         .subscribe(hash -> {
                             legacyAddress.setTag(LegacyAddress.ARCHIVED_ADDRESS);
@@ -718,7 +714,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                             BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000);
 
                     Pair<BigInteger, BigInteger> sweepableCoins =
-                            sendDataManager.getMaximumAvailable(unspentOutputs, suggestedFeePerKb, walletOptionsDataManager.shouldAddReplayProtection());
+                            sendDataManager.getMaximumAvailable(unspentOutputs, suggestedFeePerKb);
                     BigInteger sweepAmount = sweepableCoins.getLeft();
 
                     String label = legacyAddress.getLabel();
@@ -730,7 +726,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                     Account defaultAccount = payloadDataManager.getDefaultAccount();
                     pendingTransaction.sendingObject = new ItemAccount(label, sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress, legacyAddress.getAddress());
                     pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount, null);
-                    pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb, walletOptionsDataManager.shouldAddReplayProtection());
+                    pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
                     pendingTransaction.bigIntAmount = sweepAmount;
                     pendingTransaction.bigIntFee = pendingTransaction.unspentOutputBundle.getAbsoluteFee();
 

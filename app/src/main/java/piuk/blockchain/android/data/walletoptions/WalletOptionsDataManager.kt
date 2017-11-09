@@ -34,34 +34,6 @@ class WalletOptionsDataManager(
                 .subscribeWith<ReplaySubject<Settings>>(walletOptionsState.walletSettingsSource)
     }
 
-    /**
-     * Replay protection status retrieved from wallet-options.json.
-     * If replay protection is needed, input coins will be mixed with non-replayable inputs
-     * to ensure transaction is not replayable.
-     */
-    fun fetchReplayProtectionStatus(): Observable<Boolean> {
-        initReplaySubjects()
-
-        return walletOptionsState.walletOptionsSource.flatMap { options ->
-
-            var result = false
-
-            options.androidFlags.apply {
-
-                if (isNotEmpty()) {
-                    result = get(REPLAY_PROTECTION) ?: false
-                }
-            }
-            return@flatMap Observable.just(result)
-        }
-    }
-
-    fun shouldAddReplayProtection() = walletOptionsState.isReplayProtectionActive
-
-    fun setReplayProtectionStatus(status: Boolean) {
-        walletOptionsState.isReplayProtectionActive = status
-    }
-
     fun showShapeshift(): Observable<Boolean> {
         initReplaySubjects()
 
@@ -156,7 +128,6 @@ class WalletOptionsDataManager(
 
     companion object {
         private val SHOW_SHAPESHIFT = "showShapeshift"
-        private val REPLAY_PROTECTION = "replayProtection"
     }
 
 }

@@ -75,8 +75,7 @@ class SendPresenter @Inject constructor(
         private val feeDataManager: FeeDataManager,
         private val privateKeyFactory: PrivateKeyFactory,
         private val environmentSettings: EnvironmentSettings,
-        private val transactionListDataManager: TransactionListDataManager,
-        private val walletOptionsDataManager: WalletOptionsDataManager
+        private val transactionListDataManager: TransactionListDataManager
 ) : BasePresenter<SendView>() {
 
     private val locale: Locale by unsafeLazy { Locale.getDefault() }
@@ -236,8 +235,7 @@ class SendPresenter @Inject constructor(
                             pendingTransaction.receivingAddress,
                             pendingTransaction.changeAddress,
                             pendingTransaction.bigIntFee,
-                            pendingTransaction.bigIntAmount,
-                            walletOptionsDataManager.shouldAddReplayProtection())
+                            pendingTransaction.bigIntAmount)
                 }
                 .subscribe({ hash ->
                     Logging.logCustom(PaymentSentEvent()
@@ -706,8 +704,7 @@ class SendPresenter @Inject constructor(
     ): BigInteger {
         val spendableCoins = sendDataManager.getSpendableCoins(coins,
                 amountToSend,
-                feePerKb,
-                walletOptionsDataManager.shouldAddReplayProtection())
+                feePerKb)
         return spendableCoins.absoluteFee
     }
 
@@ -845,7 +842,7 @@ class SendPresenter @Inject constructor(
         var amount = amountToSend
 
         //Calculate sweepable amount to display max available
-        val sweepBundle = sendDataManager.getMaximumAvailable(coins, feePerKb, walletOptionsDataManager.shouldAddReplayProtection())
+        val sweepBundle = sendDataManager.getMaximumAvailable(coins, feePerKb)
         val sweepableAmount = sweepBundle.left
 
         updateMaxAvailable(sweepableAmount)
@@ -860,8 +857,7 @@ class SendPresenter @Inject constructor(
 
         val unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
                 amount,
-                feePerKb,
-                walletOptionsDataManager.shouldAddReplayProtection())
+                feePerKb)
 
         pendingTransaction.bigIntAmount = amount
         pendingTransaction.unspentOutputBundle = unspentOutputBundle

@@ -160,20 +160,21 @@ public class MainPresenter extends BasePresenter<MainView> {
     // TODO: 24/10/2017  WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
      */
     private void doWalletOptionsChecks() {
-        walletOptionsDataManager.fetchReplayProtectionStatus()
-                .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
-                //TODO - Shapeshift WIP
-//                .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
-//                .doOnNext(this::setShapeShiftVisibility)
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(ignored -> {
-                    //no-op
-                }, throwable -> {
-                    //Couldn't retrieve wallet options. Not safe to continue
-                    Timber.e(throwable);
-                    getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
-                    accessState.logout(applicationContext);
-                });
+        //// TODO: 09/11/2017 This will cause merge conflicts
+//        walletOptionsDataManager.fetchReplayProtectionStatus()
+//                .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
+//                //TODO - Shapeshift WIP
+////                .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
+////                .doOnNext(this::setShapeShiftVisibility)
+//                .compose(RxUtil.addObservableToCompositeDisposable(this))
+//                .subscribe(ignored -> {
+//                    //no-op
+//                }, throwable -> {
+//                    //Couldn't retrieve wallet options. Not safe to continue
+//                    Timber.e(throwable);
+//                    getView().showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
+//                    accessState.logout(applicationContext);
+//                });
     }
 
     @SuppressWarnings("SameParameterValue,unused")
