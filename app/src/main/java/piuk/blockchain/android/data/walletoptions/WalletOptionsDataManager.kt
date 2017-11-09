@@ -62,24 +62,6 @@ class WalletOptionsDataManager(
         walletOptionsState.isReplayProtectionActive = status
     }
 
-    /**
-     * Mobile notice retrieved from wallet-options.json based on wallet setting
-     * This notice will be shown on each session.
-     */
-    fun getMobileNotice(): Observable<String> {
-        initReplaySubjects()
-
-        return walletOptionsState.walletOptionsSource.flatMap { options ->
-
-            var result = ""
-
-            options.mobileNotice.apply {
-                result = getLocalisedMessage(this)
-            }
-            return@flatMap Observable.just(result)
-        }
-    }
-
     fun showShapeshift(): Observable<Boolean> {
         initReplaySubjects()
 
