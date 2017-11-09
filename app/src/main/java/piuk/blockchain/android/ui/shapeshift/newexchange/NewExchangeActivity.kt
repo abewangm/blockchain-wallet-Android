@@ -3,6 +3,8 @@ package piuk.blockchain.android.ui.shapeshift.newexchange
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.animation.SpringAnimation
+import android.support.animation.SpringForce
 import android.support.annotation.StringRes
 import android.support.design.widget.CoordinatorLayout
 import android.view.View
@@ -21,15 +23,14 @@ import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
-import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.toast
-import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.text.DecimalFormatSymbols
 import java.util.*
 import javax.inject.Inject
+
 
 class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(), NewExchangeView,
         NumericKeyboardCallback {
@@ -65,7 +66,17 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         textview_from_address.setOnClickListener { presenter.onFromChooserClicked() }
         imageview_to_dropdown.setOnClickListener { presenter.onToChooserClicked() }
         textview_to_address.setOnClickListener { presenter.onToChooserClicked() }
-        imageview_switch_currency.setOnClickListener { presenter.onSwitchCurrencyClicked() }
+
+        imageview_switch_currency.setOnClickListener {
+            imageview_switch_currency.createSpringAnimation(
+                    SpringAnimation.ROTATION,
+                    imageview_switch_currency.rotation + ROTATION,
+                    SpringForce.STIFFNESS_LOW,
+                    SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY
+            ).start()
+
+            presenter.onSwitchCurrencyClicked()
+        }
 
         setupListeners()
         setupKeypad()
@@ -175,7 +186,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
             layoutParams = CoordinatorLayout.LayoutParams(
                     CoordinatorLayout.LayoutParams.MATCH_PARENT,
                     CoordinatorLayout.LayoutParams.MATCH_PARENT
-            ).apply { setMargins(0, height, 0, height) }
+            ).apply { setMargins(0, height, 0, 0) }
 
             postDelayed({ smoothScrollTo(0, 0) }, 100)
         }
@@ -232,7 +243,10 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     }
 
     private fun setupKeypad() {
-        editTexts.forEach { shapeshift_keyboard.enableOnView(it) }
+        editTexts.forEach {
+            it.disableSoftKeyboard()
+            shapeshift_keyboard.enableOnView(it)
+        }
         shapeshift_keyboard.apply {
             setDecimalSeparator(defaultDecimalSeparator)
             setCallback(this@NewExchangeActivity)
@@ -278,6 +292,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     }
 
     companion object {
+
+        private val ROTATION = 180f
 
         @JvmStatic
         fun start(context: Context) {

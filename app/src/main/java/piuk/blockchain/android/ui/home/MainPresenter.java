@@ -164,7 +164,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
                 //TODO - Shapeshift WIP
 //                .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
-//                .doOnNext(this::setShapeShiftVisibility)
+                .map(ignored -> true)
+                .doOnNext(this::setShapeShiftVisibility)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(ignored -> {
                     //no-op
@@ -176,7 +177,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                 });
     }
 
-    @SuppressWarnings("SameParameterValue,unused")
+    @SuppressWarnings("SameParameterValue")
     private void setShapeShiftVisibility(boolean showShapeshift) {
         if (showShapeshift) {
             getView().showShapeshift();
