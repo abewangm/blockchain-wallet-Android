@@ -13,7 +13,6 @@ import org.mockito.Mockito
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
-import java.util.*
 import kotlin.test.assertEquals
 
 class WalletOptionsDataManagerTest : RxTest() {
@@ -36,71 +35,6 @@ class WalletOptionsDataManagerTest : RxTest() {
                 ReplaySubject.create(1),
                 ReplaySubject.create(1))
         subject = WalletOptionsDataManager(mockAuthDataManager, walletOptionsState, mockSettingsDataManager)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `getMobileNotice EN`() {
-
-        val message = "English notice"
-
-        // Arrange
-        val walletOptions: WalletOptions = mock()
-        val map = hashMapOf("en" to message, "de" to "German notice")
-        whenever(walletOptions.mobileNotice).thenReturn(map)
-        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(walletOptions))
-        whenever(mockAuthDataManager.locale).thenReturn(Locale.ENGLISH)
-        // Act
-        val testObserver = subject.getMobileNotice().test()
-        // Assert
-        assertEquals(message, testObserver.values()[0])
-        testObserver.assertComplete()
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `getMobileNotice german`() {
-
-        val message = "German notice"
-
-        // Arrange
-        val walletOptions: WalletOptions = mock()
-        val map = hashMapOf("en" to "english notice", "de" to message)
-        whenever(walletOptions.mobileNotice).thenReturn(map)
-        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(walletOptions))
-        whenever(mockAuthDataManager.locale).thenReturn(Locale.GERMAN)
-
-        Locale.setDefault(Locale.GERMAN)
-
-        // Act
-        val testObserver = subject.getMobileNotice().test()
-        // Assert
-        assertEquals(message, testObserver.values()[0])
-        testObserver.assertComplete()
-        Locale.setDefault(Locale.ENGLISH)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `getMobileNotice default`() {
-
-        val message = "English notice"
-
-        // Arrange
-        val walletOptions: WalletOptions = mock()
-        val map = hashMapOf("en" to message)
-        whenever(walletOptions.mobileNotice).thenReturn(map)
-        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(walletOptions))
-        whenever(mockAuthDataManager.locale).thenReturn(Locale.GERMAN)
-
-        Locale.setDefault(Locale.JAPAN)
-
-        // Act
-        val testObserver = subject.getMobileNotice().test()
-        // Assert
-        assertEquals(message, testObserver.values()[0])
-        testObserver.assertComplete()
-        Locale.setDefault(Locale.ENGLISH)
     }
 
     @Test
