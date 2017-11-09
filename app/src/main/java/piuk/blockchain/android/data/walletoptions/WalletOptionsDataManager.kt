@@ -56,10 +56,10 @@ class WalletOptionsDataManager(
         }
     }
 
-    fun shouldAddReplayProtection() = walletOptionsState.replayProtectionStatus
+    fun shouldAddReplayProtection() = walletOptionsState.isReplayProtectionActive
 
     fun setReplayProtectionStatus(status: Boolean) {
-        walletOptionsState.replayProtectionStatus = status
+        walletOptionsState.isReplayProtectionActive = status
     }
 
     /**

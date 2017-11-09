@@ -11,7 +11,7 @@ public class WalletOptionsState {
     ReplaySubject<WalletOptions> walletOptionsSource;
     ReplaySubject<Settings> walletSettingsSource;
 
-    boolean replayProtectionStatus = false;
+    private boolean replayProtectionActive = false;
 
     private WalletOptionsState(ReplaySubject<WalletOptions> walletOptionsSource,
                                      ReplaySubject<Settings> walletSettingsSource) {
@@ -26,12 +26,12 @@ public class WalletOptionsState {
         return instance;
     }
 
-    public void setReplayProtectionStatus(boolean replayProtectionStatus) {
-        this.replayProtectionStatus = replayProtectionStatus;
+    public void setReplayProtectionActive(boolean replayProtectionActive) {
+        this.replayProtectionActive = replayProtectionActive;
     }
 
-    public boolean isReplayProtectionStatus() {
-        return replayProtectionStatus;
+    public boolean isReplayProtectionActive() {
+        return replayProtectionActive;
     }
 
     public void destroy() {
