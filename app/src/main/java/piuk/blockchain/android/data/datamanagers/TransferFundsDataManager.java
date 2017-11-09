@@ -30,16 +30,13 @@ public class TransferFundsDataManager {
     private PayloadDataManager payloadDataManager;
     private SendDataManager sendDataManager;
     private DynamicFeeCache dynamicFeeCache;
-    private WalletOptionsDataManager walletOptionsDataManager;
 
     public TransferFundsDataManager(PayloadDataManager payloadDataManager,
                                     SendDataManager sendDataManager,
-                                    DynamicFeeCache dynamicFeeCache,
-                                    WalletOptionsDataManager walletOptionsDataManager) {
+                                    DynamicFeeCache dynamicFeeCache) {
         this.payloadDataManager = payloadDataManager;
         this.sendDataManager = sendDataManager;
         this.dynamicFeeCache = dynamicFeeCache;
-        this.walletOptionsDataManager = walletOptionsDataManager;
     }
 
     /**
@@ -73,7 +70,7 @@ public class TransferFundsDataManager {
                             sendDataManager.getUnspentOutputs(legacyAddress.getAddress())
                                     .blockingFirst();
                     Pair<BigInteger, BigInteger> sweepableCoins =
-                            sendDataManager.getMaximumAvailable(unspentOutputs, suggestedFeePerKb, walletOptionsDataManager.shouldAddReplayProtection());
+                            sendDataManager.getMaximumAvailable(unspentOutputs, suggestedFeePerKb);
                     BigInteger sweepAmount = sweepableCoins.getLeft();
 
                     // Don't sweep if there are still unconfirmed funds in address
@@ -81,7 +78,7 @@ public class TransferFundsDataManager {
 
                         PendingTransaction pendingSpend = new PendingTransaction();
                         pendingSpend.unspentOutputBundle = sendDataManager
-                                .getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb, walletOptionsDataManager.shouldAddReplayProtection());
+                                .getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
                         pendingSpend.sendingObject = new ItemAccount(
                                 legacyAddress.getLabel(),
                                 "",
@@ -150,8 +147,7 @@ public class TransferFundsDataManager {
                         receivingAddress,
                         changeAddress,
                         pendingTransaction.bigIntFee,
-                        pendingTransaction.bigIntAmount,
-                        walletOptionsDataManager.shouldAddReplayProtection())
+                        pendingTransaction.bigIntAmount)
                         .blockingSubscribe(s -> {
                             if (!subscriber.isDisposed()) {
                                 subscriber.onNext(s);

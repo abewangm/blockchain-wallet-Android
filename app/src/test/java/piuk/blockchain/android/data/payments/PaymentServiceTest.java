@@ -225,12 +225,12 @@ public class PaymentServiceTest extends RxTest {
         BigInteger mockPayment = mock(BigInteger.class);
         BigInteger mockFee = mock(BigInteger.class);
         SpendableUnspentOutputs mockOutputs = mock(SpendableUnspentOutputs.class);
-        when(payment.getSpendableCoins(mockUnspent, mockPayment, mockFee, false)).thenReturn(mockOutputs);
+        when(payment.getSpendableCoins(mockUnspent, mockPayment, mockFee)).thenReturn(mockOutputs);
         // Act
-        SpendableUnspentOutputs result = subject.getSpendableCoins(mockUnspent, mockPayment, mockFee, false);
+        SpendableUnspentOutputs result = subject.getSpendableCoins(mockUnspent, mockPayment, mockFee);
         // Assert
         assertEquals(mockOutputs, result);
-        verify(payment).getSpendableCoins(mockUnspent, mockPayment, mockFee, false);
+        verify(payment).getSpendableCoins(mockUnspent, mockPayment, mockFee);
         verifyNoMoreInteractions(payment);
     }
 
@@ -241,12 +241,12 @@ public class PaymentServiceTest extends RxTest {
         UnspentOutputs mockUnspent = mock(UnspentOutputs.class);
         BigInteger mockFee = mock(BigInteger.class);
         Pair<BigInteger, BigInteger> mockSweepableCoins = mock(Pair.class);
-        when(payment.getMaximumAvailable(mockUnspent, mockFee, false)).thenReturn(mockSweepableCoins);
+        when(payment.getMaximumAvailable(mockUnspent, mockFee)).thenReturn(mockSweepableCoins);
         // Act
-        Pair<BigInteger, BigInteger> result = subject.getMaximumAvailable(mockUnspent, mockFee, false);
+        Pair<BigInteger, BigInteger> result = subject.getMaximumAvailable(mockUnspent, mockFee);
         // Assert
         assertEquals(mockSweepableCoins, result);
-        verify(payment).getMaximumAvailable(mockUnspent, mockFee, false);
+        verify(payment).getMaximumAvailable(mockUnspent, mockFee);
         verifyNoMoreInteractions(payment);
     }
 
