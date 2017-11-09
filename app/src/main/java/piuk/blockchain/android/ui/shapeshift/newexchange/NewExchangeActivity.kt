@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.shapeshift.newexchange
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.support.design.widget.CoordinatorLayout
 import android.view.View
 import android.widget.EditText
 import com.jakewharton.rxbinding2.widget.RxTextView
+import info.blockchain.wallet.payload.data.Account
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -63,9 +65,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         textview_use_max.setOnClickListener { presenter.onMaxPressed() }
         textview_use_min.setOnClickListener { presenter.onMinPressed() }
         imageview_from_dropdown.setOnClickListener { presenter.onFromChooserClicked() }
-        textview_from_address.setOnClickListener { presenter.onFromChooserClicked() }
         imageview_to_dropdown.setOnClickListener { presenter.onToChooserClicked() }
-        textview_to_address.setOnClickListener { presenter.onToChooserClicked() }
 
         imageview_switch_currency.setOnClickListener {
             imageview_switch_currency.createSpringAnimation(
@@ -108,28 +108,38 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     }
 
     override fun launchAccountChooserActivityTo() {
-        // TODO: Test me
         AccountChooserActivity.startForResult(
                 this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.REQUEST,
+                PaymentRequestType.SHAPE_SHIFT,
                 getString(R.string.to)
         )
     }
 
     override fun launchAccountChooserActivityFrom() {
-        // TODO: Test me
         AccountChooserActivity.startForResult(
                 this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.REQUEST,
+                PaymentRequestType.SHAPE_SHIFT,
                 getString(R.string.from)
         )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        // TODO: Deserialize objects here, update UI
+        if (resultCode == Activity.RESULT_OK && data != null) {
+
+            val account = data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM)
+                    .toKotlinObject<Account>()
+
+            when (requestCode) {
+                AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
+                    presenter.onFromAccountChanged(account)
+                AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
+                    presenter.onToAccountChanged(account)
+                else -> throw IllegalArgumentException("Unknown request code $requestCode")
+            }
+        }
     }
 
     override fun showProgressDialog(@StringRes message: Int) {

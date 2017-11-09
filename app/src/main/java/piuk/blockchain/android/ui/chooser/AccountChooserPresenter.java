@@ -17,6 +17,7 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.util.StringUtils;
+import timber.log.Timber;
 
 
 public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
@@ -49,6 +50,8 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
             loadReceiveAccountsAndContacts();
         } else if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
             loadReceiveAccountsOnly();
+        } else if (paymentRequestType.equals(PaymentRequestType.SHAPE_SHIFT)) {
+            loadHdAccountsOnly();
         } else {
             loadContactsOnly();
         }
@@ -61,7 +64,7 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
                         .flatMap(accounts -> parseImportedList())
                         .subscribe(
                                 items -> getView().updateUi(itemAccounts),
-                                Throwable::printStackTrace));
+                                Timber::e));
     }
 
     private void loadReceiveAccountsOnly() {
@@ -70,7 +73,15 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
                         .flatMap(accounts -> parseImportedList())
                         .subscribe(
                                 list -> getView().updateUi(itemAccounts),
-                                Throwable::printStackTrace));
+                                Timber::e));
+    }
+
+    private void loadHdAccountsOnly() {
+        getCompositeDisposable().add(
+                parseAccountList()
+                        .subscribe(
+                                list -> getView().updateUi(itemAccounts),
+                                Timber::e));
     }
 
     private void loadContactsOnly() {
@@ -84,7 +95,7 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
                                         getView().showNoContacts();
                                     }
                                 },
-                                Throwable::printStackTrace));
+                                Timber::e));
     }
 
     @SuppressWarnings({"ConstantConditions", "Convert2streamapi"})

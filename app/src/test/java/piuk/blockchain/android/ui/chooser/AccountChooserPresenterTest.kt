@@ -1,9 +1,6 @@
 package piuk.blockchain.android.ui.chooser
 
-import com.nhaarman.mockito_kotlin.argumentCaptor
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.verify
-import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.contacts.data.Contact
 import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
@@ -108,6 +105,27 @@ class AccountChooserPresenterTest {
         verify(mockActivity).updateUi(captor.capture())
         // Value includes 2 headers, 3 accounts, 3 legacy addresses
         captor.firstValue.size shouldEqual 8
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun onViewReadyRequestTypeShapeShift() {
+        // Arrange
+        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SHAPE_SHIFT)
+        val itemAccount0 = ItemAccount("", "", null, null, null, null)
+        val itemAccount1 = ItemAccount("", "", null, null, null, null)
+        val itemAccount2 = ItemAccount("", "", null, null, null, null)
+        whenever(mockWalletAccountHelper.getHdAccounts())
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        // Act
+        subject.onViewReady()
+        // Assert
+        verify(mockWalletAccountHelper).getHdAccounts()
+        verifyNoMoreInteractions(mockWalletAccountHelper)
+        val captor = argumentCaptor<List<ItemAccount>>()
+        verify(mockActivity).updateUi(captor.capture())
+        // Value includes 1 header, 3 accounts
+        captor.firstValue.size shouldEqual 4
     }
 
     @Test

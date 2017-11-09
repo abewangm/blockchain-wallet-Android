@@ -27,7 +27,7 @@ android {
         archivesBaseName = "blockchain-$versionName"
         // Flag to hide or show the Contacts feature
         buildConfigBoolean "CONTACTS_ENABLED", false
-        manifestPlaceholders = [ FABRIC_API_KEY : buildProperties.secrets['fabricApiKey'].string ]
+        manifestPlaceholders = [FABRIC_API_KEY: buildProperties.secrets['fabricApiKey'].string]
     }
     buildTypes {
         release {
@@ -36,13 +36,13 @@ android {
             zipAlignEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            manifestPlaceholders = [ GOOGLE_MAPS_KEY : buildProperties.secrets['mapsReleaseKey'].string ]
+            manifestPlaceholders = [GOOGLE_MAPS_KEY: buildProperties.secrets['mapsReleaseKey'].string]
             multiDexEnabled false
             buildConfigBoolean "DOGFOOD", false
             buildConfigBoolean "USE_CRASHLYTICS", true
         }
         debug {
-            manifestPlaceholders = [ GOOGLE_MAPS_KEY : buildProperties.secrets['mapsDebugKey'].string ]
+            manifestPlaceholders = [GOOGLE_MAPS_KEY: buildProperties.secrets['mapsDebugKey'].string]
             multiDexEnabled true
             buildConfigBoolean "DOGFOOD", false
             buildConfigBoolean "USE_CRASHLYTICS", false
@@ -152,6 +152,10 @@ android {
 
 allOpen {
     annotation("piuk.blockchain.android.util.annotations.Mockable")
+}
+
+androidExtensions {
+    experimental = true
 }
 
 afterEvaluate {

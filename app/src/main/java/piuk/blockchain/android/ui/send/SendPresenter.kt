@@ -276,7 +276,7 @@ class SendPresenter @Inject constructor(
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
 
             if (legacyAddress.tag == PendingTransaction.WATCH_ONLY_SPEND_TAG) {
-                var eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.getAddress());
+                val eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.address)
                 Observable.just(mutableListOf(eckey))
             } else {
                 Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))

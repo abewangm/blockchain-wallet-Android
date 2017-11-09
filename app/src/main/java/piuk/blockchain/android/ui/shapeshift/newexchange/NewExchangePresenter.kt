@@ -1,11 +1,20 @@
 package piuk.blockchain.android.ui.shapeshift.newexchange
 
+import info.blockchain.api.data.UnspentOutputs
+import info.blockchain.wallet.api.data.FeeOptions
+import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.shapeshift.data.MarketInfo
+import io.reactivex.Observable
+import org.web3j.utils.Convert
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.cache.DynamicFeeCache
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
-import piuk.blockchain.android.data.ethereum.EthDataStore
+import piuk.blockchain.android.data.datamanagers.FeeDataManager
+import piuk.blockchain.android.data.ethereum.EthDataManager
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.payload.PayloadDataManager
+import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.CoinPairings
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
@@ -13,6 +22,7 @@ import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
+import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
@@ -20,21 +30,26 @@ import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.math.RoundingMode
 import java.util.*
 import javax.inject.Inject
 
 class NewExchangePresenter @Inject constructor(
         private val payloadDataManager: PayloadDataManager,
-        private val ethDataStore: EthDataStore,
+        private val ethDataManager: EthDataManager,
         private val prefsUtil: PrefsUtil,
+        private val sendDataManager: SendDataManager,
+        private val dynamicFeeCache: DynamicFeeCache,
+        private val feeDataManager: FeeDataManager,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState,
         private val shapeShiftDataManager: ShapeShiftDataManager,
-        private val walletAccountHelper: WalletAccountHelper,
-        private val stringUtils: StringUtils
+        private val stringUtils: StringUtils,
+        walletAccountHelper: WalletAccountHelper
 ) : BasePresenter<NewExchangeView>() {
 
+    private val ethLabel = stringUtils.getString(R.string.shapeshift_eth)
     private val btcAccounts = walletAccountHelper.getHdAccounts()
     private val monetaryUtil by unsafeLazy {
         MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -43,30 +58,45 @@ class NewExchangePresenter @Inject constructor(
         ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory, currencyState)
     }
     private var marketInfo: MarketInfo? = null
+    private var shapeShiftData: ShapeShiftData? = null
+    private var account: Account? = null
+    private var feeOptions: FeeOptions? = null
 
     override fun onViewReady() {
         val selectedCurrency = currencyState.cryptoCurrency
         view.updateUi(
                 selectedCurrency,
                 btcAccounts.size > 1,
-                if (selectedCurrency == CryptoCurrencies.BTC) getDefaultBtcLabel() else getEthLabel(),
-                if (selectedCurrency == CryptoCurrencies.ETHER) getDefaultBtcLabel() else getEthLabel(),
+                if (selectedCurrency == CryptoCurrencies.BTC) getDefaultBtcLabel() else ethLabel,
+                if (selectedCurrency == CryptoCurrencies.ETHER) getDefaultBtcLabel() else ethLabel,
                 monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
         )
 
-        val observable = when (selectedCurrency) {
-            CryptoCurrencies.BTC -> shapeShiftDataManager.getRate(CoinPairings.BTC_TO_ETH)
-            CryptoCurrencies.ETHER -> shapeShiftDataManager.getRate(CoinPairings.ETH_TO_BTC)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
+        val shapeShiftObservable = getMarketInfoObservable(selectedCurrency)
+        val feesObservable = getFeesObservable(selectedCurrency)
 
-        observable
+        shapeShiftObservable
+                .doOnNext {
+                    marketInfo = it
+                    shapeShiftData = ShapeShiftData(
+                            selectedCurrency,
+                            if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO,
+                            it.rate,
+                            BigDecimal.ZERO,
+                            BigDecimal.valueOf(it.minerFee),
+                            "",
+                            ""
+                    )
+                }
+                .flatMap { feesObservable }
                 .doOnSubscribe { view.showProgressDialog(R.string.shapeshift_getting_information) }
                 .doOnTerminate { view.dismissProgressDialog() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         {
-                            marketInfo = it
+                            account = payloadDataManager.defaultAccount
                         },
                         {
                             Timber.e(it)
@@ -87,15 +117,15 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onMaxPressed() {
-        with(getMaximum()) {
-            // TODO: Calculate max available crypto, calculate if greater or lesser than max from API
-            view.updateFromCryptoText(this.toPlainString())
-            // This fixes focus issues but is a bit of a hack as this method is potentially called twice
-            onFromCryptoValueChanged(this.toPlainString())
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> updateMaxBtcAmount()
+            CryptoCurrencies.ETHER -> updateMaxEthAmount()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
         }
     }
 
     internal fun onMinPressed() {
+        // TODO: Calculate if min is more than user has available to spend
         with(getMinimum()) {
             view.updateFromCryptoText(this.toPlainString())
             // This fixes focus issues but is a bit of a hack as this method is potentially called twice
@@ -103,6 +133,40 @@ class NewExchangePresenter @Inject constructor(
         }
     }
 
+    private fun updateMaxBtcAmount() {
+
+    }
+
+    private fun updateMaxEthAmount() {
+        ethDataManager.fetchEthAddress()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnError { view.showToast(R.string.shapeshift_getting_fees_failed, ToastCustom.TYPE_ERROR) }
+                .subscribe { calculateUnspentEth(it) }
+    }
+
+    private fun calculateUnspentEth(combinedEthModel: CombinedEthModel) {
+        val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
+        val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
+
+        val addressResponse = combinedEthModel.getAddressResponse()
+        var maxAvailable = addressResponse?.balance?.minus(wei.toBigInteger()) ?: BigInteger.ZERO
+        maxAvailable = maxAvailable.max(BigInteger.ZERO)
+
+        val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
+        val maximum = if (availableEth > getMaximum()) getMaximum() else availableEth
+
+        view.updateFromCryptoText(maximum.toPlainString())
+        // This fixes focus issues but is a bit of a hack as this method is potentially called twice
+        onFromCryptoValueChanged(maximum.toPlainString())
+    }
+
+    private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
+        return if (payloadDataManager.getAddressBalance(address).toLong() > 0) {
+            sendDataManager.getUnspentOutputs(address)
+        } else {
+            Observable.error(Throwable("No funds - skipping call to unspent API"))
+        }
+    }
 
     internal fun onFromChooserClicked() {
         view.launchAccountChooserActivityFrom()
@@ -126,11 +190,7 @@ class NewExchangePresenter @Inject constructor(
     internal fun onToCryptoValueChanged(value: String) {
         val toAmount = BigDecimal(value.sanitise())
         // Divide by conversion rate
-        val convertedAmount = toAmount.divide(
-                getMarketRate(),
-                18,
-                RoundingMode.HALF_UP
-        )
+        val convertedAmount = toAmount.divide(getMarketRate(), 18, RoundingMode.HALF_UP)
         // Final amount is converted amount plus miner's fees
         val fromAmount = compareAmountsToZero(convertedAmount, BigDecimal::plus)
 
@@ -181,6 +241,30 @@ class NewExchangePresenter @Inject constructor(
                         currencyHelper.fiatUnit,
                         view.locale
                 )
+        )
+    }
+
+    // Here we can safely assume BTC is the "from" type
+    internal fun onFromAccountChanged(account: Account) {
+        this.account = account
+        view.updateUi(
+                currencyState.cryptoCurrency,
+                btcAccounts.size > 1,
+                account.label,
+                ethLabel,
+                monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
+        )
+    }
+
+    // Here we can safely assume ETH is the "from" type
+    internal fun onToAccountChanged(account: Account) {
+        this.account = account
+        view.updateUi(
+                currencyState.cryptoCurrency,
+                btcAccounts.size > 1,
+                ethLabel,
+                account.label,
+                monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
         )
     }
 
@@ -255,15 +339,29 @@ class NewExchangePresenter @Inject constructor(
 
     private fun getMinimum() = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
 
-    private fun getEthLabel() = stringUtils.getString(R.string.shapeshift_eth)
-
-    // Changes depending on chosen account type - this is horrible and needs to be passed
-    // to the method instead of having an outside dependency on some stored state
-    private fun getAccountList() = walletAccountHelper.getAccountItems()
-
     ///////////////////////////////////////////////////////////////////////////
-    // Formatting stuff, to be checked and deleted if possible
+    // Observables
     ///////////////////////////////////////////////////////////////////////////
+
+    //region Observables
+    private fun getFeesObservable(selectedCurrency: CryptoCurrencies) = when (selectedCurrency) {
+        CryptoCurrencies.BTC -> feeDataManager.btcFeeOptions
+                .doOnSubscribe { feeOptions = dynamicFeeCache.btcFeeOptions!! }
+                .doOnNext { dynamicFeeCache.btcFeeOptions = it }
+
+        CryptoCurrencies.ETHER -> feeDataManager.ethFeeOptions
+                .doOnSubscribe { feeOptions = dynamicFeeCache.ethFeeOptions!! }
+                .doOnNext { dynamicFeeCache.ethFeeOptions = it }
+
+        else -> throw IllegalArgumentException("BCC is not currently supported")
+    }
+
+    private fun getMarketInfoObservable(selectedCurrency: CryptoCurrencies) = when (selectedCurrency) {
+        CryptoCurrencies.BTC -> shapeShiftDataManager.getRate(CoinPairings.BTC_TO_ETH)
+        CryptoCurrencies.ETHER -> shapeShiftDataManager.getRate(CoinPairings.ETH_TO_BTC)
+        else -> throw IllegalArgumentException("BCC is not currently supported")
+    }
+    //endregion
 
     private fun String.sanitise() = if (isNotEmpty()) this else "0"
 

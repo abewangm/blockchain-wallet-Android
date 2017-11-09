@@ -39,9 +39,6 @@ class DisplayableDelegate<in T>(
         private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
-    private val CONFIRMATIONS_BTC = 3
-    private val CONFIRMATIONS_ETH = 12
-
     private val prefsUtil = PrefsUtil(activity)
     private val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     private val dateUtil = DateUtil(activity)
@@ -266,6 +263,13 @@ class DisplayableDelegate<in T>(
         init {
             contactNameLayout.gone()
         }
+    }
+
+    companion object {
+
+        private const val CONFIRMATIONS_BTC = 3
+        private const val CONFIRMATIONS_ETH = 12
+
     }
 
 }
