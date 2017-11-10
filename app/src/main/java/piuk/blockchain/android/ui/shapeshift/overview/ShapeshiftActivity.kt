@@ -71,6 +71,7 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     }
 
     private fun onData(data: ShapeShiftState.Data) {
+        // TODO: Render data to list
         shapeshift_loading_layout.gone()
         shapeshift_error_layout.gone()
         shapeshift_recycler_view.visible()

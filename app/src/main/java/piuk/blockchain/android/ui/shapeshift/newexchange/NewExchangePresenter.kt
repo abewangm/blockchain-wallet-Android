@@ -134,7 +134,28 @@ class NewExchangePresenter @Inject constructor(
     }
 
     private fun updateMaxBtcAmount() {
+        getUnspentApiResponse(account!!.xpub)
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { coins ->
+                            val sweepBundle = sendDataManager.getMaximumAvailable(
+                                    coins,
+                                    BigInteger.valueOf(feeOptions!!.regularFee * 1000),
+                                    false
+                            )
+                            val sweepableAmount = BigDecimal(sweepBundle.left)
+                                    .divide(BigDecimal.valueOf(1e8))
+                            val maximum = if (sweepableAmount > getMaximum()) getMaximum() else sweepableAmount
 
+                            view.updateFromCryptoText(maximum.toPlainString())
+                            // This fixes focus issues but is a bit of a hack as this method is potentially called twice
+                            onFromCryptoValueChanged(maximum.toPlainString())
+                        },
+                        { throwable ->
+                            Timber.e(throwable)
+                            // No unspent outputs
+                            // TODO:
+                        })
     }
 
     private fun updateMaxEthAmount() {
@@ -149,8 +170,7 @@ class NewExchangePresenter @Inject constructor(
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
 
         val addressResponse = combinedEthModel.getAddressResponse()
-        var maxAvailable = addressResponse?.balance?.minus(wei.toBigInteger()) ?: BigInteger.ZERO
-        maxAvailable = maxAvailable.max(BigInteger.ZERO)
+        val maxAvailable = addressResponse!!.balance!!.minus(wei.toBigInteger()).max(BigInteger.ZERO)
 
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
         val maximum = if (availableEth > getMaximum()) getMaximum() else availableEth

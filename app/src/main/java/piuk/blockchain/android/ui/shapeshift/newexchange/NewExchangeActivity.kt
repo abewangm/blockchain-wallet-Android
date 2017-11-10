@@ -129,8 +129,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
 
-            val account = data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM)
-                    .toKotlinObject<Account>()
+            val account: Account = data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM)
+                    .toKotlinObject()
 
             when (requestCode) {
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
@@ -153,7 +153,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     override fun dismissProgressDialog() {
         progressDialog?.apply {
-            dismiss()
+            if (!isFinishing) dismiss()
             progressDialog = null
         }
     }
