@@ -115,9 +115,8 @@ public class DataManagerModule {
     @PresenterScope
     protected TransferFundsDataManager provideTransferFundsDataManager(PayloadDataManager payloadDataManager,
                                                                        SendDataManager sendDataManager,
-                                                                       DynamicFeeCache dynamicFeeCache,
-                                                                       WalletOptionsDataManager walletOptionsDataManager) {
-        return new TransferFundsDataManager(payloadDataManager, sendDataManager, dynamicFeeCache, walletOptionsDataManager);
+                                                                       DynamicFeeCache dynamicFeeCache) {
+        return new TransferFundsDataManager(payloadDataManager, sendDataManager, dynamicFeeCache);
     }
 
     @Provides

@@ -160,11 +160,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     // TODO: 24/10/2017  WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
      */
     private void doWalletOptionsChecks() {
-        walletOptionsDataManager.fetchReplayProtectionStatus()
-                .doOnNext(addReplayProtection -> walletOptionsDataManager.setReplayProtectionStatus(addReplayProtection))
-                //TODO - Shapeshift WIP
-//                .flatMap(ignored -> walletOptionsDataManager.showShapeshift())
-                .map(ignored -> true)
+//        walletOptionsDataManager.showShapeshift()
+                // TODO: 10/11/2017 This is broken
+                Observable.just(true)
                 .doOnNext(this::setShapeShiftVisibility)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(ignored -> {

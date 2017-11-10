@@ -26,7 +26,6 @@ class SendDataManagerTest : RxTest() {
     private val mockPaymentService: PaymentService = mock()
     private val mockRxBus: RxBus = mock()
     private val mockWalletApi: WalletApi = mock()
-    private val mockWalletDataManager : WalletOptionsDataManager = mock()
 
     @Before
     @Throws(Exception::class)
@@ -34,7 +33,6 @@ class SendDataManagerTest : RxTest() {
         super.setUp()
 
         subject = SendDataManager(mockPaymentService, mockRxBus, mockWalletApi)
-        whenever(mockWalletDataManager.shouldAddReplayProtection()).thenReturn(false)
     }
 
     @Test
@@ -60,8 +58,7 @@ class SendDataManagerTest : RxTest() {
                 toAddress,
                 changeAddress,
                 mockFee,
-                mockAmount,
-                mockWalletDataManager.shouldAddReplayProtection()).test()
+                mockAmount).test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
@@ -121,13 +118,13 @@ class SendDataManagerTest : RxTest() {
         val mockPayment: BigInteger = mock()
         val mockFee: BigInteger = mock()
         val mockOutputs: SpendableUnspentOutputs = mock()
-        whenever(mockPaymentService.getSpendableCoins(mockUnspent, mockPayment, mockFee, mockWalletDataManager.shouldAddReplayProtection()))
+        whenever(mockPaymentService.getSpendableCoins(mockUnspent, mockPayment, mockFee))
                 .thenReturn(mockOutputs)
         // Act
-        val result = subject.getSpendableCoins(mockUnspent, mockPayment, mockFee, mockWalletDataManager.shouldAddReplayProtection())
+        val result = subject.getSpendableCoins(mockUnspent, mockPayment, mockFee)
         // Assert
         result shouldEqual mockOutputs
-        verify(mockPaymentService).getSpendableCoins(mockUnspent, mockPayment, mockFee, mockWalletDataManager.shouldAddReplayProtection())
+        verify(mockPaymentService).getSpendableCoins(mockUnspent, mockPayment, mockFee)
         verifyNoMoreInteractions(mockPaymentService)
     }
 
@@ -138,13 +135,13 @@ class SendDataManagerTest : RxTest() {
         val mockUnspent: UnspentOutputs = mock()
         val mockFee: BigInteger = mock()
         val mockSweepableCoins: Pair<BigInteger, BigInteger> = mock()
-        whenever(mockPaymentService.getMaximumAvailable(mockUnspent, mockFee, mockWalletDataManager.shouldAddReplayProtection()))
+        whenever(mockPaymentService.getMaximumAvailable(mockUnspent, mockFee))
                 .thenReturn(mockSweepableCoins)
         // Act
-        val result = subject.getMaximumAvailable(mockUnspent, mockFee, mockWalletDataManager.shouldAddReplayProtection())
+        val result = subject.getMaximumAvailable(mockUnspent, mockFee)
         // Assert
         result shouldEqual mockSweepableCoins
-        verify(mockPaymentService).getMaximumAvailable(mockUnspent, mockFee, mockWalletDataManager.shouldAddReplayProtection())
+        verify(mockPaymentService).getMaximumAvailable(mockUnspent, mockFee)
         verifyNoMoreInteractions(mockPaymentService)
     }
 

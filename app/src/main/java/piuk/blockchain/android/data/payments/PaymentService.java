@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.payments;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.DustServiceInput;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
@@ -76,54 +75,6 @@ public class PaymentService {
     }
 
     /**
-     * Submits a payment to a specified address and returns the transaction hash if successful
-     *
-     * @param unspentOutputBundle UTXO object
-     * @param keys                A List of elliptic curve keys
-     * @param toAddress           The address to send the funds to
-     * @param changeAddress       A change address
-     * @param bigIntFee           The specified fee amount
-     * @param bigIntAmount        The actual transaction amount
-     * @return An {@link Observable<String>} where the String is the transaction hash
-     */
-    @WebRequest
-    Observable<String> publishTransactionWithDust(SpendableUnspentOutputs unspentOutputBundle,
-                                      List<ECKey> keys,
-                                      String toAddress,
-                                      String changeAddress,
-                                      BigInteger bigIntFee,
-                                      BigInteger bigIntAmount,
-                                      DustServiceInput dust) {
-
-        return Observable.create(observableOnSubscribe -> {
-            HashMap<String, BigInteger> receivers = new HashMap<>();
-            receivers.put(toAddress, bigIntAmount);
-
-            Transaction tx = payment.makeNonReplayableTransaction(
-                    unspentOutputBundle.getSpendableOutputs(),
-                    receivers,
-                    bigIntFee,
-                    changeAddress,
-                    dust);
-
-            payment.signNonReplayableTransaction(tx, keys);
-
-            Response<ResponseBody> exe = payment.publishTransactionWithSecret(tx, dust.getLockSecret()).execute();
-
-            if (exe.isSuccessful()) {
-                if (!observableOnSubscribe.isDisposed()) {
-                    observableOnSubscribe.onNext(tx.getHashAsString());
-                    observableOnSubscribe.onComplete();
-                }
-            } else {
-                if (!observableOnSubscribe.isDisposed()) {
-                    observableOnSubscribe.onError(new Throwable(exe.code() + ": " + exe.errorBody().string()));
-                }
-            }
-        });
-    }
-
-    /**
      * Returns an {@link UnspentOutputs} object containing all the unspent outputs for a given
      * address.
      *
@@ -160,9 +111,8 @@ public class PaymentService {
      */
     SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
                                               BigInteger paymentAmount,
-                                              BigInteger feePerKb,
-                                              boolean addReplayProtection) throws UnsupportedEncodingException {
-        return payment.getSpendableCoins(unspentCoins, paymentAmount, feePerKb, addReplayProtection);
+                                              BigInteger feePerKb) throws UnsupportedEncodingException {
+        return payment.getSpendableCoins(unspentCoins, paymentAmount, feePerKb);
     }
 
     /**
@@ -176,9 +126,8 @@ public class PaymentService {
      * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
      */
     Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs unspentCoins,
-                                                     BigInteger feePerKb,
-                                                     boolean addReplayProtection) {
-        return payment.getMaximumAvailable(unspentCoins, feePerKb, addReplayProtection);
+                                                     BigInteger feePerKb) {
+        return payment.getMaximumAvailable(unspentCoins, feePerKb);
     }
 
     /**

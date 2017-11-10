@@ -46,44 +46,16 @@ public class SendDataManager {
                                             String toAddress,
                                             String changeAddress,
                                             BigInteger bigIntFee,
-                                            BigInteger bigIntAmount,
-                                            boolean addReplayProtection) {
+                                            BigInteger bigIntAmount) {
 
-        if(addReplayProtection && !unspentOutputBundle.isReplayProtected()) {
-            return rxPinning.call(() -> publishTransactionWithDust(unspentOutputBundle,
-                    keys,
-                    toAddress,
-                    changeAddress,
-                    bigIntFee,
-                    bigIntAmount))
-                    .compose(RxUtil.applySchedulersToObservable());
-        } else {
-            return rxPinning.call(() -> paymentService.submitPayment(
-                    unspentOutputBundle,
-                    keys,
-                    toAddress,
-                    changeAddress,
-                    bigIntFee,
-                    bigIntAmount))
-                    .compose(RxUtil.applySchedulersToObservable());
-        }
-    }
-
-    private Observable<String> publishTransactionWithDust(SpendableUnspentOutputs unspentOutputBundle,
-                                              List<ECKey> keys,
-                                              String toAddress,
-                                              String changeAddress,
-                                              BigInteger bigIntFee,
-                                              BigInteger bigIntAmount) {
-        return walletApi.getDust()
-                .flatMap(dustServiceInput -> paymentService.publishTransactionWithDust(
-                        unspentOutputBundle,
-                        keys,
-                        toAddress,
-                        changeAddress,
-                        bigIntFee,
-                        bigIntAmount,
-                        dustServiceInput));
+        return rxPinning.call(() -> paymentService.submitPayment(
+                unspentOutputBundle,
+                keys,
+                toAddress,
+                changeAddress,
+                bigIntFee,
+                bigIntAmount))
+                .compose(RxUtil.applySchedulersToObservable());
     }
 
     /**
@@ -127,10 +99,9 @@ public class SendDataManager {
      */
     public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
                                                      BigInteger paymentAmount,
-                                                     BigInteger feePerKb,
-                                                     boolean addReplayProtection)
-        throws UnsupportedEncodingException {
-        return paymentService.getSpendableCoins(unspentCoins, paymentAmount, feePerKb, addReplayProtection);
+                                                     BigInteger feePerKb)
+            throws UnsupportedEncodingException {
+        return paymentService.getSpendableCoins(unspentCoins, paymentAmount, feePerKb);
     }
 
     /**
@@ -144,9 +115,8 @@ public class SendDataManager {
      * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
      */
     public Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs unspentCoins,
-                                                            BigInteger feePerKb,
-                                                            boolean addReplayProtection) {
-        return paymentService.getMaximumAvailable(unspentCoins, feePerKb, addReplayProtection);
+                                                            BigInteger feePerKb) {
+        return paymentService.getMaximumAvailable(unspentCoins, feePerKb);
     }
 
     /**

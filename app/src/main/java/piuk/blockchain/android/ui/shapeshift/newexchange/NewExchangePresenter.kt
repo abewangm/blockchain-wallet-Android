@@ -133,61 +133,6 @@ class NewExchangePresenter @Inject constructor(
         }
     }
 
-    private fun updateMaxBtcAmount() {
-        getUnspentApiResponse(account!!.xpub)
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(
-                        { coins ->
-                            val sweepBundle = sendDataManager.getMaximumAvailable(
-                                    coins,
-                                    BigInteger.valueOf(feeOptions!!.regularFee * 1000),
-                                    false
-                            )
-                            val sweepableAmount = BigDecimal(sweepBundle.left)
-                                    .divide(BigDecimal.valueOf(1e8))
-                            val maximum = if (sweepableAmount > getMaximum()) getMaximum() else sweepableAmount
-
-                            view.updateFromCryptoText(maximum.toPlainString())
-                            // This fixes focus issues but is a bit of a hack as this method is potentially called twice
-                            onFromCryptoValueChanged(maximum.toPlainString())
-                        },
-                        { throwable ->
-                            Timber.e(throwable)
-                            // No unspent outputs
-                            // TODO:
-                        })
-    }
-
-    private fun updateMaxEthAmount() {
-        ethDataManager.fetchEthAddress()
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnError { view.showToast(R.string.shapeshift_getting_fees_failed, ToastCustom.TYPE_ERROR) }
-                .subscribe { calculateUnspentEth(it) }
-    }
-
-    private fun calculateUnspentEth(combinedEthModel: CombinedEthModel) {
-        val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
-        val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
-
-        val addressResponse = combinedEthModel.getAddressResponse()
-        val maxAvailable = addressResponse!!.balance!!.minus(wei.toBigInteger()).max(BigInteger.ZERO)
-
-        val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
-        val maximum = if (availableEth > getMaximum()) getMaximum() else availableEth
-
-        view.updateFromCryptoText(maximum.toPlainString())
-        // This fixes focus issues but is a bit of a hack as this method is potentially called twice
-        onFromCryptoValueChanged(maximum.toPlainString())
-    }
-
-    private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
-        return if (payloadDataManager.getAddressBalance(address).toLong() > 0) {
-            sendDataManager.getUnspentOutputs(address)
-        } else {
-            Observable.error(Throwable("No funds - skipping call to unspent API"))
-        }
-    }
-
     internal fun onFromChooserClicked() {
         view.launchAccountChooserActivityFrom()
     }
@@ -303,6 +248,60 @@ class NewExchangePresenter @Inject constructor(
         }
     }
 
+    private fun updateMaxBtcAmount() {
+        getUnspentApiResponse(account!!.xpub)
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { coins ->
+                            val sweepBundle = sendDataManager.getMaximumAvailable(
+                                    coins,
+                                    BigInteger.valueOf(feeOptions!!.regularFee * 1000)
+                            )
+                            val sweepableAmount = BigDecimal(sweepBundle.left)
+                                    .divide(BigDecimal.valueOf(1e8))
+                            val maximum = if (sweepableAmount > getMaximum()) getMaximum() else sweepableAmount
+
+                            view.updateFromCryptoText(maximum.toPlainString())
+                            // This fixes focus issues but is a bit of a hack as this method is potentially called twice
+                            onFromCryptoValueChanged(maximum.toPlainString())
+                        },
+                        { throwable ->
+                            Timber.e(throwable)
+                            // No unspent outputs
+                            // TODO:
+                        })
+    }
+
+    private fun updateMaxEthAmount() {
+        ethDataManager.fetchEthAddress()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnError { view.showToast(R.string.shapeshift_getting_fees_failed, ToastCustom.TYPE_ERROR) }
+                .subscribe { calculateUnspentEth(it) }
+    }
+
+    private fun calculateUnspentEth(combinedEthModel: CombinedEthModel) {
+        val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
+        val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
+
+        val addressResponse = combinedEthModel.getAddressResponse()
+        val maxAvailable = addressResponse!!.balance!!.minus(wei.toBigInteger()).max(BigInteger.ZERO)
+
+        val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
+        val maximum = if (availableEth > getMaximum()) getMaximum() else availableEth
+
+        view.updateFromCryptoText(maximum.toPlainString())
+        // This fixes focus issues but is a bit of a hack as this method is potentially called twice
+        onFromCryptoValueChanged(maximum.toPlainString())
+    }
+
+    private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
+        return if (payloadDataManager.getAddressBalance(address).toLong() > 0) {
+            sendDataManager.getUnspentOutputs(address)
+        } else {
+            Observable.error(Throwable("No funds - skipping call to unspent API"))
+        }
+    }
+
     private fun handleFiatUpdatesFromCrypto(toAmount: BigDecimal, fromAmount: BigDecimal) {
         val (toRate, fromRate) = getExchangeRates()
         updateFiatViews(toAmount, fromAmount, toRate, fromRate)
@@ -358,10 +357,6 @@ class NewExchangePresenter @Inject constructor(
     private fun getMaximum() = BigDecimal.valueOf(marketInfo?.maxLimit ?: 0.0)
 
     private fun getMinimum() = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Observables
-    ///////////////////////////////////////////////////////////////////////////
 
     //region Observables
     private fun getFeesObservable(selectedCurrency: CryptoCurrencies) = when (selectedCurrency) {
