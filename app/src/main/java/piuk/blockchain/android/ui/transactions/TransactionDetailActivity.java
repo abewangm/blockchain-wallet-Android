@@ -36,7 +36,6 @@ import piuk.blockchain.android.databinding.ActivityTransactionDetailsBinding;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
-import piuk.blockchain.android.ui.receive.RecipientAdapter;
 import piuk.blockchain.android.util.ViewUtils;
 
 public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetailView, TransactionDetailPresenter>
@@ -148,16 +147,20 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
     }
 
     @Override
-    public void setToAddresses(@NotNull List<? extends RecipientModel> addresses) {
+    public void setToAddresses(@NotNull List<? extends TransactionDetailModel> addresses) {
         if (addresses.size() == 1) {
             binding.toAddress.setText(addresses.get(0).getAddress());
+
+            if (addresses.get(0).hasAddressDecodeError()) {
+                binding.toAddress.setTextColor(ResourcesCompat.getColor(getResources(), R.color.product_red_medium, getTheme()));
+            }
         } else {
-            binding.spinner.setVisibility(View.VISIBLE);
-            RecipientAdapter adapter = new RecipientAdapter(new ArrayList<>(addresses));
+            binding.toSpinner.setVisibility(View.VISIBLE);
+            TransactionDetailAdapter adapter = new TransactionDetailAdapter(new ArrayList<>(addresses));
             binding.toAddress.setText(String.format(Locale.getDefault(), "%1s Recipients", addresses.size()));
-            binding.toAddress.setOnClickListener(v -> binding.spinner.performClick());
-            binding.spinner.setAdapter(adapter);
-            binding.spinner.setOnItemSelectedListener(null);
+            binding.toAddress.setOnClickListener(v -> binding.toSpinner.performClick());
+            binding.toSpinner.setAdapter(adapter);
+            binding.toSpinner.setOnItemSelectedListener(null);
         }
     }
 
@@ -172,8 +175,21 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
     }
 
     @Override
-    public void setFromAddress(String address) {
-        binding.fromAddress.setText(address);
+    public void setFromAddress(@NotNull List<? extends TransactionDetailModel> addresses) {
+        if (addresses.size() == 1) {
+            binding.fromAddress.setText(addresses.get(0).getAddress());
+
+            if (addresses.get(0).hasAddressDecodeError()) {
+                binding.fromAddress.setTextColor(ResourcesCompat.getColor(getResources(), R.color.product_red_medium, getTheme()));
+            }
+        } else {
+            binding.fromSpinner.setVisibility(View.VISIBLE);
+            TransactionDetailAdapter adapter = new TransactionDetailAdapter(new ArrayList<>(addresses));
+            binding.fromAddress.setText(String.format(Locale.getDefault(), "%1s Senders", addresses.size()));
+            binding.fromAddress.setOnClickListener(v -> binding.fromSpinner.performClick());
+            binding.fromSpinner.setAdapter(adapter);
+            binding.fromSpinner.setOnItemSelectedListener(null);
+        }
     }
 
     @Override

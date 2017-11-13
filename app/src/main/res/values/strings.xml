@@ -829,4 +829,7 @@
     <!-- FORCE UPGRADE -->
     <string name="force_upgrade_message">The version of the app you are using is no longer supported. Please update the app and try again.</string>
 
+    <!-- TRANSACTIONS -->
+    <string name="tx_decode_error">Unable to decode address</string>
+
 </resources>
