@@ -3,8 +3,12 @@ package piuk.blockchain.android.ui.shapeshift.newexchange
 import info.blockchain.api.data.UnspentOutputs
 import info.blockchain.wallet.api.data.FeeOptions
 import info.blockchain.wallet.payload.data.Account
+import info.blockchain.wallet.shapeshift.ShapeShiftPairs
 import info.blockchain.wallet.shapeshift.data.MarketInfo
+import info.blockchain.wallet.shapeshift.data.Quote
+import info.blockchain.wallet.shapeshift.data.QuoteRequest
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.cache.DynamicFeeCache
@@ -33,6 +37,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class NewExchangePresenter @Inject constructor(
@@ -49,6 +54,11 @@ class NewExchangePresenter @Inject constructor(
         walletAccountHelper: WalletAccountHelper
 ) : BasePresenter<NewExchangeView>() {
 
+    val toCryptoSubject: PublishSubject<String> = PublishSubject.create<String>()
+    val fromCryptoSubject: PublishSubject<String> = PublishSubject.create<String>()
+    val toFiatSubject: PublishSubject<String> = PublishSubject.create<String>()
+    val fromFiatSubject: PublishSubject<String> = PublishSubject.create<String>()
+
     private val ethLabel = stringUtils.getString(R.string.shapeshift_eth)
     private val btcAccounts = walletAccountHelper.getHdAccounts()
     private val monetaryUtil by unsafeLazy {
@@ -59,6 +69,7 @@ class NewExchangePresenter @Inject constructor(
     }
     private var marketInfo: MarketInfo? = null
     private var shapeShiftData: ShapeShiftData? = null
+    private var latestQuote: Quote? = null
     private var account: Account? = null
     private var feeOptions: FeeOptions? = null
 
@@ -104,6 +115,23 @@ class NewExchangePresenter @Inject constructor(
                             view.finishPage()
                         }
                 )
+
+        fromCryptoSubject.applyDefaults()
+                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
+                .doOnNext { onFromCryptoValueChanged(it.depositAmount.toString()) }
+                .subscribe()
+        toCryptoSubject.applyDefaults()
+                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
+                .doOnNext { onToCryptoValueChanged(it.depositAmount.toString()) }
+                .subscribe()
+        fromFiatSubject.applyDefaults()
+                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
+                .doOnNext { onFromFiatValueChanged(it.depositAmount.toString()) }
+                .subscribe()
+        toFiatSubject.applyDefaults()
+                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
+                .doOnNext { onToFiatValueChanged(it.depositAmount.toString()) }
+                .subscribe()
     }
 
     internal fun onSwitchCurrencyClicked() {
@@ -134,14 +162,39 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onFromChooserClicked() {
-        view.launchAccountChooserActivityFrom()
+        if (currencyState.cryptoCurrency == CryptoCurrencies.BTC) view.launchAccountChooserActivityFrom()
     }
 
     internal fun onToChooserClicked() {
-        view.launchAccountChooserActivityTo()
+        if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) view.launchAccountChooserActivityTo()
     }
 
-    internal fun onFromCryptoValueChanged(value: String) {
+    private fun getQuoteRequest(amount: BigDecimal, selectedCurrency: CryptoCurrencies): Observable<Quote> {
+        val quoteRequest = QuoteRequest().apply {
+            this.amount = amount.toDouble()
+            pair = if (selectedCurrency == CryptoCurrencies.BTC) ShapeShiftPairs.BTC_ETH else ShapeShiftPairs.ETH_BTC
+            apiKey = view.shapeShiftApiKey
+        }
+
+        return shapeShiftDataManager.getQuote(quoteRequest)
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnNext {
+                    shapeShiftData = ShapeShiftData(
+                            selectedCurrency,
+                            if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO,
+                            it.quotedRate,
+                            BigDecimal.ZERO,
+                            BigDecimal.valueOf(it.minerFee),
+                            "",
+                            ""
+                    )
+                }
+    }
+
+    // TODO: On each input, get shapeShiftDataManager.getQuote()
+    private fun onFromCryptoValueChanged(value: String) {
         val fromAmount = BigDecimal(value.sanitise())
         // Multiply by conversion rate
         val convertedAmount = fromAmount.multiply(getMarketRate())
@@ -152,7 +205,7 @@ class NewExchangePresenter @Inject constructor(
         handleFiatUpdatesFromCrypto(toAmount, fromAmount)
     }
 
-    internal fun onToCryptoValueChanged(value: String) {
+    private fun onToCryptoValueChanged(value: String) {
         val toAmount = BigDecimal(value.sanitise())
         // Divide by conversion rate
         val convertedAmount = toAmount.divide(getMarketRate(), 18, RoundingMode.HALF_UP)
@@ -163,7 +216,7 @@ class NewExchangePresenter @Inject constructor(
         handleFiatUpdatesFromCrypto(toAmount, fromAmount)
     }
 
-    internal fun onFromFiatValueChanged(value: String) {
+    private fun onFromFiatValueChanged(value: String) {
         val fromAmount = BigDecimal(value.sanitise())
         // Work out amount of crypto
         val (fromExchangeRate, toExchangeRate) = getExchangeRates()
@@ -186,7 +239,7 @@ class NewExchangePresenter @Inject constructor(
         )
     }
 
-    internal fun onToFiatValueChanged(value: String) {
+    private fun onToFiatValueChanged(value: String) {
         val toAmount = BigDecimal(value.sanitise())
         // Work out amount of crypto
         val (fromExchangeRate, toExchangeRate) = getExchangeRates()
@@ -268,7 +321,7 @@ class NewExchangePresenter @Inject constructor(
                         { throwable ->
                             Timber.e(throwable)
                             // No unspent outputs
-                            // TODO:
+                            // TODO: Handle error state
                         })
     }
 
@@ -375,6 +428,11 @@ class NewExchangePresenter @Inject constructor(
         CryptoCurrencies.BTC -> shapeShiftDataManager.getRate(CoinPairings.BTC_TO_ETH)
         CryptoCurrencies.ETHER -> shapeShiftDataManager.getRate(CoinPairings.ETH_TO_BTC)
         else -> throw IllegalArgumentException("BCC is not currently supported")
+    }
+
+    private fun <T> PublishSubject<T>.applyDefaults(): Observable<T> {
+        return this.debounce(300, TimeUnit.MILLISECONDS)
+                .compose(RxUtil.applySchedulersToObservable())
     }
     //endregion
 

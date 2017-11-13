@@ -1,14 +1,16 @@
 package piuk.blockchain.android.ui.shapeshift.newexchange
 
 import android.support.annotation.StringRes
+
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import java.util.*
-
 interface NewExchangeView : View {
 
     val locale: Locale
+
+    val shapeShiftApiKey: String
 
     fun updateUi(
             fromCurrency: CryptoCurrencies,

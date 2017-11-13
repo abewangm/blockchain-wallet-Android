@@ -15,8 +15,10 @@ import info.blockchain.wallet.payload.data.Account
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_new_exchange.*
 import kotlinx.android.synthetic.main.toolbar_general.*
+import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
@@ -37,11 +39,13 @@ import javax.inject.Inject
 class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(), NewExchangeView,
         NumericKeyboardCallback {
 
-    @Suppress("MemberVisibilityCanPrivate")
+    @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var newExchangePresenter: NewExchangePresenter
 
     override val locale: Locale
         get() = Locale.getDefault()
+    override val shapeShiftApiKey: String
+        get() = BuildConfig.SHAPE_SHIFT_API_KEY
     private val btcSymbol = CryptoCurrencies.BTC.symbol.toUpperCase()
     private val ethSymbol = CryptoCurrencies.ETHER.symbol.toUpperCase()
     private val compositeDisposable = CompositeDisposable()
@@ -65,7 +69,9 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         textview_use_max.setOnClickListener { presenter.onMaxPressed() }
         textview_use_min.setOnClickListener { presenter.onMinPressed() }
         imageview_from_dropdown.setOnClickListener { presenter.onFromChooserClicked() }
+        textview_from_address.setOnClickListener { presenter.onFromChooserClicked() }
         imageview_to_dropdown.setOnClickListener { presenter.onToChooserClicked() }
+        textview_to_address.setOnClickListener { presenter.onToChooserClicked() }
 
         imageview_switch_currency.setOnClickListener {
             imageview_switch_currency.createSpringAnimation(
@@ -238,10 +244,10 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     private fun setupListeners() {
         mapOf(
-                edittext_to_crypto to presenter::onToCryptoValueChanged,
-                edittext_from_crypto to presenter::onFromCryptoValueChanged,
-                edittext_to_fiat to presenter::onToFiatValueChanged,
-                edittext_from_fiat to presenter::onFromFiatValueChanged
+                edittext_to_crypto to presenter.toCryptoSubject,
+                edittext_from_crypto to presenter.fromCryptoSubject,
+                edittext_to_fiat to presenter.toFiatSubject,
+                edittext_from_fiat to presenter.fromFiatSubject
         ).map {
             it.key.setOnClickListener { clearEditTexts() }
             return@map getTextWatcherObservable(it.key, it.value)
@@ -263,7 +269,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         }
     }
 
-    private fun getTextWatcherObservable(editText: EditText, presenterFunction: (String) -> Unit) =
+    private fun getTextWatcherObservable(editText: EditText, publishSubject: PublishSubject<String>) =
             RxTextView.textChanges(editText)
                     // Logging
                     .doOnError { Timber.e(it) }
@@ -272,7 +278,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                     // Convert to String
                     .map { it.toString() }
                     // Ignore elements emitted by non-user events (ie presenter updates)
-                    .doOnNext { if (currentFocus == editText) presenterFunction(it) }
+                    .doOnNext { if (currentFocus == editText) publishSubject.onNext(it) }
                     // Scheduling
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -291,8 +297,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         textview_unit_from.text = ethSymbol
         textview_unit_to.text = btcSymbol
         // Visibility
-        if (displayDropDown) imageview_to_dropdown.visible()
         imageview_from_dropdown.gone()
+        if (displayDropDown) imageview_to_dropdown.visible()
     }
 
     private fun isKeyboardVisible(): Boolean = shapeshift_keyboard.isVisible

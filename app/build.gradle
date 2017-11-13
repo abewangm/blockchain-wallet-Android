@@ -27,6 +27,7 @@ android {
         archivesBaseName = "blockchain-$versionName"
         // Flag to hide or show the Contacts feature
         buildConfigBoolean "CONTACTS_ENABLED", false
+        buildConfigProperty "SHAPE_SHIFT_API_KEY", buildProperties.secrets['shapeShiftApiKey']
         manifestPlaceholders = [FABRIC_API_KEY: buildProperties.secrets['fabricApiKey'].string]
     }
     buildTypes {
