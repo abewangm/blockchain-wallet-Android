@@ -7,6 +7,8 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthLatestBlock
 import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.ethereum.data.EthTxDetails
+import info.blockchain.wallet.exceptions.HDWalletException
+import info.blockchain.wallet.exceptions.InvalidCredentialsException
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -224,9 +226,14 @@ class EthDataManager(
         var ethWallet = EthereumWallet.load(metadataNode)
 
         if (ethWallet == null || ethWallet.account == null || !ethWallet.account.isCorrect) {
-            val masterKey = payloadManager.payload.hdWallets[0].masterKey
-            ethWallet = EthereumWallet(masterKey, defaultLabel)
-            ethWallet.save()
+            try {
+                val masterKey = payloadManager.payload.hdWallets[0].masterKey
+                ethWallet = EthereumWallet(masterKey, defaultLabel)
+                ethWallet.save()
+            }catch (e : HDWalletException) {
+                //Wallet private key unavailable. First decrypt with second password.
+                throw InvalidCredentialsException(e.message)
+            }
         }
 
         return ethWallet
