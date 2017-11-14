@@ -117,56 +117,52 @@ class NewExchangePresenter @Inject constructor(
                 )
 
         fromCryptoSubject.applyDefaults()
-                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
-                .doOnNext { onFromCryptoValueChanged(it.depositAmount.toString()) }
+                // Validate amounts
+                .doOnNext { checkAmountValid(it) }
+                // Update from Fiat as it's not dependent on web results
+                .doOnNext {
+                    view.updateFromFiatText(
+                            monetaryUtil.getFiatDisplayString(
+                                    it.multiply(getExchangeRates().fromRate).toDouble(),
+                                    currencyHelper.fiatUnit,
+                                    view.locale
+                            )
+                    )
+                }
+                // Update results dependent on Shapeshift
+                .flatMap { amount ->
+                    getQuoteRequest(amount, currencyState.cryptoCurrency)
+                            .doOnNext { onFromCryptoValueChanged(amount, BigDecimal.valueOf(it.quotedRate)) }
+                }
+                .doOnError(Timber::e)
                 .subscribe()
-        toCryptoSubject.applyDefaults()
-                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
-                .doOnNext { onToCryptoValueChanged(it.depositAmount.toString()) }
-                .subscribe()
-        fromFiatSubject.applyDefaults()
-                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
-                .doOnNext { onFromFiatValueChanged(it.depositAmount.toString()) }
-                .subscribe()
-        toFiatSubject.applyDefaults()
-                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
-                .doOnNext { onToFiatValueChanged(it.depositAmount.toString()) }
-                .subscribe()
+
+//        toCryptoSubject.applyDefaults()
+//                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
+//                .doOnNext { onToCryptoValueChanged(it.depositAmount.toString()) }
+//                .subscribe()
+//        fromFiatSubject.applyDefaults()
+//                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
+//                .doOnNext { onFromFiatValueChanged(it.depositAmount.toString()) }
+//                .subscribe()
+//        toFiatSubject.applyDefaults()
+//                .flatMap { getQuoteRequest(BigDecimal(it.sanitise()), currencyState.cryptoCurrency) }
+//                .doOnNext { onToFiatValueChanged(it.depositAmount.toString()) }
+//                .subscribe()
     }
 
-    internal fun onSwitchCurrencyClicked() {
-        currencyState.toggleCryptoCurrency()
-                .run { view.clearEditTexts() }
-                .run { onViewReady() }
-    }
-
-    internal fun onContinuePressed() {
-        // TODO: Set up parcelable object if all fields are valid
-    }
-
-    internal fun onMaxPressed() {
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> updateMaxBtcAmount()
-            CryptoCurrencies.ETHER -> updateMaxEthAmount()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+    private fun checkAmountValid(it: BigDecimal) = when {
+        it > getMaximum() -> {
+            view.showAmountError(R.string.shapeshift_error_amount_too_large)
+            view.setButtonEnabled(false)
         }
-    }
-
-    internal fun onMinPressed() {
-        // TODO: Calculate if min is more than user has available to spend
-        with(getMinimum()) {
-            view.updateFromCryptoText(this.toPlainString())
-            // This fixes focus issues but is a bit of a hack as this method is potentially called twice
-            onFromCryptoValueChanged(this.toPlainString())
+        it < getMinimum() -> {
+            view.showAmountError(R.string.shapeshift_error_amount_too_small)
+            view.setButtonEnabled(false)
         }
-    }
-
-    internal fun onFromChooserClicked() {
-        if (currencyState.cryptoCurrency == CryptoCurrencies.BTC) view.launchAccountChooserActivityFrom()
-    }
-
-    internal fun onToChooserClicked() {
-        if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) view.launchAccountChooserActivityTo()
+        else -> {
+            view.setButtonEnabled(true)
+        }
     }
 
     private fun getQuoteRequest(amount: BigDecimal, selectedCurrency: CryptoCurrencies): Observable<Quote> {
@@ -176,7 +172,13 @@ class NewExchangePresenter @Inject constructor(
             apiKey = view.shapeShiftApiKey
         }
 
-        return shapeShiftDataManager.getQuote(quoteRequest)
+        // API returns a 200: { "error": "..." } if the amount is zero, so just return dummy object
+        if (quoteRequest.amount == 0.0) {
+            return Observable.just(Quote().apply {
+                quotedRate = 0.0
+                minerFee = 0.0
+            })
+        } else return shapeShiftDataManager.getQuote(quoteRequest)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnNext {
                     shapeShiftData = ShapeShiftData(
@@ -190,19 +192,23 @@ class NewExchangePresenter @Inject constructor(
                             "",
                             ""
                     )
-                }
+                }.doOnTerminate { view.showQuoteInProgress(false) }
     }
 
-    // TODO: On each input, get shapeShiftDataManager.getQuote()
-    private fun onFromCryptoValueChanged(value: String) {
-        val fromAmount = BigDecimal(value.sanitise())
+    private fun onFromCryptoValueChanged(fromAmount: BigDecimal, marketRate: BigDecimal) {
         // Multiply by conversion rate
-        val convertedAmount = fromAmount.multiply(getMarketRate())
+        val convertedAmount = fromAmount.multiply(marketRate)
         // Final amount is converted amount lesser miner's fees
         val toAmount = compareAmountsToZero(convertedAmount, BigDecimal::minus)
 
         view.updateToCryptoText(toAmount.toStrippedString())
-        handleFiatUpdatesFromCrypto(toAmount, fromAmount)
+        view.updateToFiatText(
+                monetaryUtil.getFiatDisplayString(
+                        fromAmount.multiply(getExchangeRates().fromRate).toDouble(),
+                        currencyHelper.fiatUnit,
+                        view.locale
+                )
+        )
     }
 
     private fun onToCryptoValueChanged(value: String) {
@@ -262,6 +268,41 @@ class NewExchangePresenter @Inject constructor(
         )
     }
 
+    internal fun onSwitchCurrencyClicked() {
+        currencyState.toggleCryptoCurrency()
+                .run { view.clearEditTexts() }
+                .run { onViewReady() }
+    }
+
+    internal fun onContinuePressed() {
+        // TODO: Set up parcelable object if all fields are valid
+    }
+
+    internal fun onMaxPressed() {
+        when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> updateMaxBtcAmount()
+            CryptoCurrencies.ETHER -> updateMaxEthAmount()
+            else -> throw IllegalArgumentException("BCC is not currently supported")
+        }
+    }
+
+    internal fun onMinPressed() {
+        // TODO: Calculate if min is more than user has available to spend
+        with(getMinimum()) {
+            //            view.updateFromCryptoText(this.toPlainString())
+            // This fixes focus issues but is a bit of a hack as this method is potentially called twice
+//            onFromCryptoValueChanged(this.toPlainString())
+        }
+    }
+
+    internal fun onFromChooserClicked() {
+        if (currencyState.cryptoCurrency == CryptoCurrencies.BTC) view.launchAccountChooserActivityFrom()
+    }
+
+    internal fun onToChooserClicked() {
+        if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) view.launchAccountChooserActivityTo()
+    }
+
     // Here we can safely assume BTC is the "from" type
     internal fun onFromAccountChanged(account: Account) {
         this.account = account
@@ -316,7 +357,7 @@ class NewExchangePresenter @Inject constructor(
 
                             view.updateFromCryptoText(maximum.toPlainString())
                             // This fixes focus issues but is a bit of a hack as this method is potentially called twice
-                            onFromCryptoValueChanged(maximum.toPlainString())
+//                            onFromCryptoValueChanged(maximum.toPlainString())
                         },
                         { throwable ->
                             Timber.e(throwable)
@@ -344,7 +385,7 @@ class NewExchangePresenter @Inject constructor(
 
         view.updateFromCryptoText(maximum.toPlainString())
         // This fixes focus issues but is a bit of a hack as this method is potentially called twice
-        onFromCryptoValueChanged(maximum.toPlainString())
+//        onFromCryptoValueChanged(maximum.toPlainString())
     }
 
     private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
@@ -430,8 +471,15 @@ class NewExchangePresenter @Inject constructor(
         else -> throw IllegalArgumentException("BCC is not currently supported")
     }
 
-    private fun <T> PublishSubject<T>.applyDefaults(): Observable<T> {
-        return this.debounce(300, TimeUnit.MILLISECONDS)
+    private fun PublishSubject<String>.applyDefaults(): Observable<BigDecimal> {
+        return this.doOnNext {
+            view.clearError()
+            view.setButtonEnabled(false)
+            view.showQuoteInProgress(true)
+        }.debounce(300, TimeUnit.MILLISECONDS)
+                .onErrorReturn { "" }
+                .map { BigDecimal(it.sanitise()) }
+                .onErrorReturn { BigDecimal.ZERO }
                 .compose(RxUtil.applySchedulersToObservable())
     }
     //endregion

@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.support.animation.SpringAnimation
 import android.support.animation.SpringForce
 import android.support.annotation.StringRes
+import android.support.constraint.ConstraintSet
 import android.support.design.widget.CoordinatorLayout
+import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.EditText
 import com.jakewharton.rxbinding2.widget.RxTextView
@@ -194,6 +196,30 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         editTexts.forEach { it.text.clear() }
     }
 
+    override fun showAmountError(errorMessage: Int) {
+        textview_error.setText(errorMessage)
+        textview_error.visible()
+        edittext_from_crypto.setTextColor(
+                ContextCompat.getColor(this, R.color.product_red_medium)
+        )
+    }
+
+    override fun clearError() {
+        textview_error.invisible()
+        edittext_from_crypto.setTextColor(
+                ContextCompat.getColor(this, R.color.black)
+        )
+    }
+
+    override fun setButtonEnabled(enabled: Boolean) {
+        button_continue.isEnabled = enabled
+    }
+
+    override fun showQuoteInProgress(inProgress: Boolean) = when {
+        inProgress -> shapeshift_quote_progress_bar.visible()
+        else -> shapeshift_quote_progress_bar.invisible()
+    }
+
     override fun onKeypadClose() {
         val height = resources.getDimension(R.dimen.action_bar_height).toInt()
         // Resize activity to default
@@ -206,6 +232,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
             postDelayed({ smoothScrollTo(0, 0) }, 100)
         }
+
+        cloneAndApplyConstraint(100f)
     }
 
     override fun onKeypadOpen() = Unit
@@ -222,6 +250,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
             scrollTo(0, bottom)
         }
+
+        cloneAndApplyConstraint(0f)
     }
 
     override fun onDestroy() {
@@ -305,6 +335,14 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     private fun closeKeyPad() {
         shapeshift_keyboard.setNumpadVisibility(View.GONE)
+    }
+
+    private fun cloneAndApplyConstraint(bias: Float) {
+        ConstraintSet().apply {
+            clone(shapeshift_constraint_layout)
+            setVerticalBias(R.id.button_continue, bias)
+            applyTo(shapeshift_constraint_layout)
+        }
     }
 
     companion object {

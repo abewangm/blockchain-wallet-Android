@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
+import com.tspoon.traceur.Traceur;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
@@ -21,8 +22,6 @@ import info.blockchain.wallet.api.Environment;
 
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 
-import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.currency.CurrencyState;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -31,10 +30,12 @@ import javax.inject.Named;
 import dagger.Lazy;
 import io.fabric.sdk.android.Fabric;
 import io.reactivex.plugins.RxJavaPlugins;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.AppLaunchEvent;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -87,6 +88,9 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     public void onCreate() {
         super.onCreate();
+        // STOPSHIP: 14/11/2017 This affects performance and shouldn't be shipped
+        Traceur.enableLogging();
+
         if (BuildConfig.USE_CRASHLYTICS) {
             // Init crash reporting
             Fabric.with(this, new Crashlytics(), new Answers());

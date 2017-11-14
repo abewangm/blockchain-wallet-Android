@@ -6,6 +6,7 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import java.util.*
+
 interface NewExchangeView : View {
 
     val locale: Locale
@@ -41,5 +42,13 @@ interface NewExchangeView : View {
     fun updateToFiatText(text: String)
 
     fun clearEditTexts()
+
+    fun showAmountError(@StringRes errorMessage: Int)
+
+    fun clearError()
+
+    fun setButtonEnabled(enabled: Boolean)
+
+    fun showQuoteInProgress(inProgress: Boolean)
 
 }
