@@ -196,8 +196,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         editTexts.forEach { it.text.clear() }
     }
 
-    override fun showAmountError(errorMessage: Int) {
-        textview_error.setText(errorMessage)
+    override fun showAmountError(errorMessage: String) {
+        textview_error.text = errorMessage
         textview_error.visible()
         edittext_from_crypto.setTextColor(
                 ContextCompat.getColor(this, R.color.product_red_medium)

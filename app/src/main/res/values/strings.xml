@@ -824,8 +824,6 @@
     <string name="shapeshift_eth">Ether</string>
     <string name="shapeshift_switch_currency_description">Invert currency pair</string>
     <string name="shapeshift_getting_fees_failed">Error fetching fees</string>
-    <string name="shapeshift_error_amount_too_large">Amount over the limit</string>
-    <string name="shapeshift_error_amount_too_small">Below the minimum limit</string>
 
     <string name="more">More</string>
 

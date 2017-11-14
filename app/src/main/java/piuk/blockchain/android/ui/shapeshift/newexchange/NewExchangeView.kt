@@ -43,7 +43,7 @@ interface NewExchangeView : View {
 
     fun clearEditTexts()
 
-    fun showAmountError(@StringRes errorMessage: Int)
+    fun showAmountError(@StringRes errorMessage: String)
 
     fun clearError()
 

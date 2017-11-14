@@ -10,6 +10,7 @@ import io.reactivex.Observable
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.stores.Either
 
 class ShapeShiftDataManager(private val shapeShiftApi: ShapeShiftApi, rxBus: RxBus) {
 
@@ -19,13 +20,26 @@ class ShapeShiftDataManager(private val shapeShiftApi: ShapeShiftApi, rxBus: RxB
             rxPinning.call<MarketInfo> { shapeShiftApi.getRate(coinPairings.pairCode) }
                     .compose(RxUtil.applySchedulersToObservable())
 
-    fun getQuote(quoteRequest: QuoteRequest): Observable<Quote> =
-            rxPinning.call<Quote> { shapeShiftApi.getQuote(quoteRequest).map { it.wrapper } }
-                    .compose(RxUtil.applySchedulersToObservable())
+    fun getQuote(quoteRequest: QuoteRequest): Observable<Either<String, Quote>> =
+            rxPinning.call<Either<String, Quote>> {
+                shapeShiftApi.getQuote(quoteRequest)
+                        .map {
+                            when {
+                                it.error != null -> Either.Left<String>(it.error)
+                                else -> Either.Right<Quote>(it.wrapper)
+                            }
+                        }
+            }.compose(RxUtil.applySchedulersToObservable())
 
-    fun getApproximateQuote(request: QuoteRequest): Observable<Quote> =
-            rxPinning.call<Quote> { shapeShiftApi.getApproximateQuote(request).map { it.wrapper } }
-                    .compose(RxUtil.applySchedulersToObservable())
+    fun getApproximateQuote(request: QuoteRequest): Observable<Either<String, Quote>> =
+            rxPinning.call<Either<String, Quote>> {
+                shapeShiftApi.getApproximateQuote(request).map {
+                    when {
+                        it.error != null -> Either.Left<String>(it.error)
+                        else -> Either.Right<Quote>(it.wrapper)
+                    }
+                }
+            }.compose(RxUtil.applySchedulersToObservable())
 
     fun getTradeStatus(address: String): Observable<TradeStatusResponse> =
             rxPinning.call<TradeStatusResponse> { shapeShiftApi.getTradeStatus(address) }
