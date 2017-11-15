@@ -2,7 +2,7 @@
 
 buildscript {
     ext {
-        pluginVersion = '3.0.0'
+        pluginVersion = '3.1.0-alpha03'
         supportVersion = '26.1.0'
         googleServicesVersion = '11.4.2'
         rxJavaVersion = '2.1.5'
@@ -19,7 +19,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.0-alpha03'
+        classpath "com.android.tools.build:gradle:$pluginVersion"
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1'
         classpath 'com.google.gms:google-services:3.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
