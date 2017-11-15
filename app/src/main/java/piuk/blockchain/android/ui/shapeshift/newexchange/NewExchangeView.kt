@@ -5,6 +5,7 @@ import android.support.annotation.StringRes
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
 import java.util.*
 
 interface NewExchangeView : View {
@@ -43,12 +44,14 @@ interface NewExchangeView : View {
 
     fun clearEditTexts()
 
-    fun showAmountError(@StringRes errorMessage: String)
+    fun showAmountError(errorMessage: String)
 
     fun clearError()
 
     fun setButtonEnabled(enabled: Boolean)
 
     fun showQuoteInProgress(inProgress: Boolean)
+
+    fun launchConfirmationPage(shapeShiftData: ShapeShiftData)
 
 }

@@ -1,6 +1,7 @@
-package piuk.blockchain.android.ui.receive;
+package piuk.blockchain.android.ui.transactions;
 
 import android.annotation.SuppressLint;
+import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +12,12 @@ import android.widget.TextView;
 import java.util.List;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.ui.transactions.RecipientModel;
 
-public class RecipientAdapter extends BaseAdapter implements SpinnerAdapter {
+public class TransactionDetailAdapter extends BaseAdapter implements SpinnerAdapter {
 
-    private List<RecipientModel> mRecipients;
+    private List<TransactionDetailModel> mRecipients;
 
-    public RecipientAdapter(List<RecipientModel> recipients) {
+    public TransactionDetailAdapter(List<TransactionDetailModel> recipients) {
         mRecipients = recipients;
     }
 
@@ -59,12 +59,17 @@ public class RecipientAdapter extends BaseAdapter implements SpinnerAdapter {
             viewholder = (ViewHolder) convertView.getTag();
         }
 
-        RecipientModel recipient = (RecipientModel) getItem(position);
+        TransactionDetailModel recipient = (TransactionDetailModel) getItem(position);
         viewholder.address.setText(recipient.getAddress());
         viewholder.amount.setText(
                 (recipient.getValue()
                         + " "
                         + recipient.getDisplayUnits()));
+
+        if (recipient.hasAddressDecodeError()) {
+            viewholder.address.setTextColor(ResourcesCompat.getColor(parent.getContext().getResources(),
+                    R.color.product_red_medium, parent.getContext().getTheme()));
+        }
 
         return convertView;
     }

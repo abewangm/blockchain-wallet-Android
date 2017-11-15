@@ -29,6 +29,8 @@ import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
+import piuk.blockchain.android.ui.shapeshift.confirmation.ShapeShiftConfirmationActivity
+import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
@@ -218,6 +220,10 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     override fun showQuoteInProgress(inProgress: Boolean) = when {
         inProgress -> shapeshift_quote_progress_bar.visible()
         else -> shapeshift_quote_progress_bar.invisible()
+    }
+
+    override fun launchConfirmationPage(shapeShiftData: ShapeShiftData) {
+        ShapeShiftConfirmationActivity.start(this, shapeShiftData)
     }
 
     override fun onKeypadClose() {

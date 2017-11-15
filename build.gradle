@@ -2,7 +2,7 @@
 
 buildscript {
     ext {
-        pluginVersion = '3.0.0'
+        pluginVersion = '3.1.0-alpha03'
         supportVersion = '26.1.0'
         googleServicesVersion = '11.6.0'
         rxJavaVersion = '2.1.5'

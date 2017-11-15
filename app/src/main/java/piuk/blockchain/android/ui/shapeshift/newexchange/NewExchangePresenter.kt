@@ -37,6 +37,8 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -55,10 +57,10 @@ class NewExchangePresenter @Inject constructor(
         walletAccountHelper: WalletAccountHelper
 ) : BasePresenter<NewExchangeView>() {
 
-    val toCryptoSubject: PublishSubject<String> = PublishSubject.create<String>()
-    val fromCryptoSubject: PublishSubject<String> = PublishSubject.create<String>()
-    val toFiatSubject: PublishSubject<String> = PublishSubject.create<String>()
-    val fromFiatSubject: PublishSubject<String> = PublishSubject.create<String>()
+    internal val toCryptoSubject: PublishSubject<String> = PublishSubject.create<String>()
+    internal val fromCryptoSubject: PublishSubject<String> = PublishSubject.create<String>()
+    internal val toFiatSubject: PublishSubject<String> = PublishSubject.create<String>()
+    internal val fromFiatSubject: PublishSubject<String> = PublishSubject.create<String>()
 
     private val ethLabel = stringUtils.getString(R.string.shapeshift_eth)
     private val btcAccounts = walletAccountHelper.getHdAccounts()
@@ -67,6 +69,12 @@ class NewExchangePresenter @Inject constructor(
     }
     private val currencyHelper by unsafeLazy {
         ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory, currencyState)
+    }
+    private val cryptoFormat by unsafeLazy {
+        (NumberFormat.getInstance(view.locale) as DecimalFormat).apply {
+            minimumFractionDigits = 1
+            maximumFractionDigits = 8
+        }
     }
     private var marketInfo: MarketInfo? = null
     private var shapeShiftData: ShapeShiftData? = null
@@ -118,7 +126,7 @@ class NewExchangePresenter @Inject constructor(
                 )
 
         fromCryptoSubject.applyDefaults()
-                // Update from Fiat as it's not dependent on web results
+                // Update to Fiat as it's not dependent on web results
                 .doOnNext { updateFromFiat(it) }
                 // Update results dependent on Shapeshift
                 .flatMap { amount ->
@@ -128,13 +136,13 @@ class NewExchangePresenter @Inject constructor(
                 .subscribe()
 
         fromFiatSubject.applyDefaults()
-                // Convert to from crypto amount
+                // Convert to fromCrypto amount
                 .map {
                     val (_, toExchangeRate) = getExchangeRates()
                     return@map it.divide(toExchangeRate, 18, RoundingMode.HALF_UP)
                 }
                 // Update from amount view
-                .doOnNext { view.updateFromCryptoText(it.toPlainString()) }
+                .doOnNext { view.updateFromCryptoText(cryptoFormat.format(it)) }
                 // Update results dependent on Shapeshift
                 .flatMap { amount ->
                     getQuoteFromRequest(amount, currencyState.cryptoCurrency)
@@ -153,39 +161,19 @@ class NewExchangePresenter @Inject constructor(
                 .subscribe()
 
         toFiatSubject.applyDefaults()
-                // Convert to from crypto amount
+                // Convert to toCrypto amount
                 .map {
                     val (fromExchangeRate, _) = getExchangeRates()
                     return@map it.divide(fromExchangeRate, 18, RoundingMode.HALF_UP)
                 }
                 // Update from amount view
-                .doOnNext { view.updateToCryptoText(it.toPlainString()) }
+                .doOnNext { view.updateToCryptoText(cryptoFormat.format(it)) }
                 // Update results dependent on Shapeshift
                 .flatMap { amount ->
                     getQuoteToRequest(amount, currencyState.cryptoCurrency)
                             .doOnNext { updateFromFields(it.depositAmount) }
                 }
                 .subscribe()
-    }
-
-    private fun getQuoteFromRequest(fromAmount: BigDecimal, selectedCurrency: CryptoCurrencies): Observable<Quote> {
-        val quoteRequest = QuoteRequest().apply {
-            depositAmount = fromAmount.setScale(8, RoundingMode.HALF_UP).toDouble()
-            pair = if (selectedCurrency == CryptoCurrencies.BTC) ShapeShiftPairs.BTC_ETH else ShapeShiftPairs.ETH_BTC
-            apiKey = view.shapeShiftApiKey
-        }
-
-        return getQuoteObservable(quoteRequest, selectedCurrency)
-    }
-
-    private fun getQuoteToRequest(toAmount: BigDecimal, selectedCurrency: CryptoCurrencies): Observable<Quote> {
-        val quoteRequest = QuoteRequest().apply {
-            withdrawalAmount = toAmount.setScale(8, RoundingMode.HALF_UP).toDouble()
-            pair = if (selectedCurrency == CryptoCurrencies.BTC) ShapeShiftPairs.BTC_ETH else ShapeShiftPairs.ETH_BTC
-            apiKey = view.shapeShiftApiKey
-        }
-
-        return getQuoteObservable(quoteRequest, selectedCurrency)
     }
 
     internal fun onSwitchCurrencyClicked() {
@@ -195,11 +183,14 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onContinuePressed() {
-        check(marketInfo != null && latestQuote != null) { "Market Info or Quote is null" }
+        check(shapeShiftData != null) { "ShapeShiftData is somehow null" }
         // TODO: Set up parcelable object if all fields are valid
+        // Check if amount is greater than user can spend
+        view.launchConfirmationPage(shapeShiftData!!)
     }
 
     internal fun onMaxPressed() {
+        view.showQuoteInProgress(true)
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> updateMaxBtcAmount()
             CryptoCurrencies.ETHER -> updateMaxEthAmount()
@@ -208,9 +199,9 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onMinPressed() {
-        // TODO: Calculate if min is more than user has available to spend
+        view.showQuoteInProgress(true)
         with(getMinimum()) {
-            view.updateFromCryptoText(this.toPlainString())
+            view.updateFromCryptoText(cryptoFormat.format(this))
         }
     }
 
@@ -265,21 +256,20 @@ class NewExchangePresenter @Inject constructor(
         getUnspentApiResponse(account!!.xpub)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
-                        { coins ->
+                        {
                             val sweepBundle = sendDataManager.getMaximumAvailable(
-                                    coins,
+                                    it,
                                     BigInteger.valueOf(feeOptions!!.regularFee * 1000)
                             )
                             val sweepableAmount = BigDecimal(sweepBundle.left)
                                     .divide(BigDecimal.valueOf(1e8))
                             val maximum = if (sweepableAmount > getMaximum()) getMaximum() else sweepableAmount
 
-                            view.updateFromCryptoText(maximum.toPlainString())
+                            view.updateFromCryptoText(cryptoFormat.format(maximum))
                         },
-                        { throwable ->
-                            Timber.e(throwable)
-                            // No unspent outputs
-                            // TODO: Handle error state
+                        {
+                            Timber.e(it)
+                            view.showToast(R.string.shapeshift_fetching_unspent_outputs_failed, ToastCustom.TYPE_ERROR)
                         })
     }
 
@@ -287,7 +277,13 @@ class NewExchangePresenter @Inject constructor(
         ethDataManager.fetchEthAddress()
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnError { view.showToast(R.string.shapeshift_getting_fees_failed, ToastCustom.TYPE_ERROR) }
-                .subscribe { calculateUnspentEth(it) }
+                .subscribe(
+                        { calculateUnspentEth(it) },
+                        {
+                            Timber.e(it)
+                            view.showToast(R.string.shapeshift_fetching_eth_account_failed, ToastCustom.TYPE_ERROR)
+                        }
+                )
     }
 
     private fun calculateUnspentEth(combinedEthModel: CombinedEthModel) {
@@ -300,7 +296,7 @@ class NewExchangePresenter @Inject constructor(
         val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
         val maximum = if (availableEth > getMaximum()) getMaximum() else availableEth
 
-        view.updateFromCryptoText(maximum.toPlainString())
+        view.updateFromCryptoText(cryptoFormat.format(maximum))
     }
 
     private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
@@ -315,6 +311,11 @@ class NewExchangePresenter @Inject constructor(
         payloadDataManager.defaultAccount.label
     } else {
         stringUtils.getString(R.string.shapeshift_btc)
+    }
+
+    private fun getShapeShiftPair(selectedCurrency: CryptoCurrencies) = when (selectedCurrency) {
+        CryptoCurrencies.BTC -> ShapeShiftPairs.BTC_ETH
+        else -> ShapeShiftPairs.ETH_BTC
     }
 
     private fun getMaximum() = BigDecimal.valueOf(marketInfo?.maxLimit ?: 0.0)
@@ -344,30 +345,44 @@ class NewExchangePresenter @Inject constructor(
 
     private fun updateToFields(toAmount: Double) {
         val amount = toAmount.toBigDecimal().max(BigDecimal.ZERO)
-        view.updateToCryptoText(amount.toStrippedString())
-        view.updateToFiatText(
-                monetaryUtil.getFiatDisplayString(
-                        amount.multiply(getExchangeRates().toRate).toDouble(),
-                        currencyHelper.fiatUnit,
-                        view.locale
-                )
-        )
+        view.updateToCryptoText(cryptoFormat.format(amount))
+        updateToFiat(amount)
     }
 
     private fun updateFromFields(fromAmount: Double) {
         val amount = fromAmount.toBigDecimal().max(BigDecimal.ZERO)
-        view.updateFromCryptoText(amount.toStrippedString())
-        view.updateFromFiatText(
-                monetaryUtil.getFiatDisplayString(
-                        amount.multiply(getExchangeRates().fromRate).toDouble(),
-                        currencyHelper.fiatUnit,
-                        view.locale
-                )
-        )
+        view.updateFromCryptoText(cryptoFormat.format(amount))
+        updateFromFiat(amount)
     }
     //endregion
 
     //region Observables
+    private fun getQuoteFromRequest(
+            fromAmount: BigDecimal,
+            selectedCurrency: CryptoCurrencies
+    ): Observable<Quote> {
+        val quoteRequest = QuoteRequest().apply {
+            depositAmount = fromAmount.setScale(8, RoundingMode.HALF_UP).toDouble()
+            pair = getShapeShiftPair(selectedCurrency)
+            apiKey = view.shapeShiftApiKey
+        }
+
+        return getQuoteObservable(quoteRequest, selectedCurrency)
+    }
+
+    private fun getQuoteToRequest(
+            toAmount: BigDecimal,
+            selectedCurrency: CryptoCurrencies
+    ): Observable<Quote> {
+        val quoteRequest = QuoteRequest().apply {
+            withdrawalAmount = toAmount.setScale(8, RoundingMode.HALF_UP).toDouble()
+            pair = getShapeShiftPair(selectedCurrency)
+            apiKey = view.shapeShiftApiKey
+        }
+
+        return getQuoteObservable(quoteRequest, selectedCurrency)
+    }
+
     private fun getFeesObservable(selectedCurrency: CryptoCurrencies) = when (selectedCurrency) {
         CryptoCurrencies.BTC -> feeDataManager.btcFeeOptions
                 .doOnSubscribe { feeOptions = dynamicFeeCache.btcFeeOptions!! }
@@ -391,15 +406,17 @@ class NewExchangePresenter @Inject constructor(
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .map {
                         when (it) {
+                            is Either.Right<Quote> -> return@map it.value
                             is Either.Left<String> -> {
-                                // Show error in UI
+                                // Show error in UI, fallback to initial quote rates
                                 view.showAmountError(it.value)
                                 return@map Quote().apply {
-                                    quotedRate = 1.0
-                                    minerFee = 0.0
+                                    quotedRate = marketInfo?.rate ?: 1.0
+                                    minerFee = marketInfo?.minerFee ?: 0.0
+                                    withdrawalAmount = quoteRequest.withdrawalAmount
+                                    depositAmount = quoteRequest.depositAmount
                                 }
                             }
-                            is Either.Right<Quote> -> return@map it.value
                         }
                     }
                     .doOnNext {
@@ -407,35 +424,35 @@ class NewExchangePresenter @Inject constructor(
                         shapeShiftData = ShapeShiftData(
                                 selectedCurrency,
                                 if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
-                                BigDecimal.ZERO,
-                                BigDecimal.ZERO,
+                                it.depositAmount.toBigDecimal(),
+                                it.withdrawalAmount.toBigDecimal(),
                                 it.quotedRate,
+                                // TODO: Add fee for sending coins to exchange
                                 BigDecimal.ZERO,
-                                BigDecimal.valueOf(it.minerFee),
+                                it.minerFee.toBigDecimal(),
                                 "",
                                 ""
                         )
                     }.doOnTerminate { view.showQuoteInProgress(false) }
 
-    private fun PublishSubject<String>.applyDefaults(): Observable<BigDecimal> {
-        return this.doOnNext {
-            view.clearError()
-            view.setButtonEnabled(false)
-            view.showQuoteInProgress(true)
-        }.debounce(500, TimeUnit.MILLISECONDS)
-                .onErrorReturn { "" }
-                .map { BigDecimal(it.sanitise()) }
-                .onErrorReturn { BigDecimal.ZERO }
-                .compose(RxUtil.applySchedulersToObservable())
-    }
+    private fun PublishSubject<String>.applyDefaults(): Observable<BigDecimal> = this.doOnNext {
+        view.clearError()
+        view.setButtonEnabled(false)
+        view.showQuoteInProgress(true)
+    }.debounce(500, TimeUnit.MILLISECONDS)
+            // Here we kill any quotes in flight already, as they take up to ten seconds to fulfill
+            .doOnNext { compositeDisposable.clear() }
+            .onErrorReturn { "" }
+            .map { BigDecimal(it.sanitise()) }
+            .onErrorReturn { BigDecimal.ZERO }
+            .compose(RxUtil.applySchedulersToObservable())
     //endregion
 
     private fun String.sanitise() = if (isNotEmpty()) this else "0"
 
     private fun Double.toBigDecimal() = BigDecimal.valueOf(this)
 
-    private fun BigDecimal.toStrippedString() = stripTrailingZeros().toPlainString()
+    private fun String.toBigDecimal() = BigDecimal(this)
 
     private data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
-
 }

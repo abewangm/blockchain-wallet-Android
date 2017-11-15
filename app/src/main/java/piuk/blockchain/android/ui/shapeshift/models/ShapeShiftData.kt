@@ -12,7 +12,7 @@ data class ShapeShiftData(
         var fromCurrency: CryptoCurrencies,
         var toCurrency: CryptoCurrencies,
         var depositAmount: BigDecimal,
-        var receiveAmount: BigDecimal,
+        var withdrawalAmount: BigDecimal,
         var exchangeRate: Double,
         var transactionFee: BigDecimal,
         var networkFee: BigDecimal,
