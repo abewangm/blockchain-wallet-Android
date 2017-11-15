@@ -801,6 +801,7 @@
     <string name="shapeshift_getting_fees_failed">Error fetching fees</string>
     <string name="shapeshift_fetching_unspent_outputs_failed">Error fetching unspent outputs</string>
     <string name="shapeshift_fetching_eth_account_failed">Error fetching remaining Ether</string>
+    <string name="shapeshift_deriving_address_failed">Error deriving address</string>
 
     <string name="more">More</string>
 

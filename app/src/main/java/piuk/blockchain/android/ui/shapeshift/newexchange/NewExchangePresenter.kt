@@ -93,7 +93,7 @@ class NewExchangePresenter @Inject constructor(
         )
 
         val shapeShiftObservable = getMarketInfoObservable(selectedCurrency)
-        val feesObservable = getFeesObservable(selectedCurrency)
+        val feesObservable = fetchFeesObservable(selectedCurrency)
 
         shapeShiftObservable
                 .doOnNext {
@@ -184,10 +184,26 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onContinuePressed() {
-        check(shapeShiftData != null) { "ShapeShiftData is somehow null" }
-        // TODO: Set up parcelable object if all fields are valid
-        // Check if amount is greater than user can spend
-        view.launchConfirmationPage(shapeShiftData!!)
+        check(shapeShiftData != null) { "ShapeShiftData is null, presenter state invalid" }
+        if (shapeShiftData?.withdrawalAmount == BigDecimal.ZERO) {
+            view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
+            return
+        }
+
+        // TODO: Check if amount is greater than user can spend in observable
+
+        // Get the receive address and change address
+        getAddressPair(currencyState.cryptoCurrency)
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
+                .doOnTerminate { view.dismissProgressDialog() }
+                .doOnNext { (receiveAddress, changeAddress) ->
+                    shapeShiftData!!.receiveAddress = receiveAddress
+                    shapeShiftData!!.changeAddress = changeAddress
+                    view.launchConfirmationPage(shapeShiftData!!)
+                }.subscribe(
+                { /* Nothing to see here, exception handled further up */ },
+                { Timber.e(it) }
+        )
     }
 
     internal fun onMaxPressed() {
@@ -390,7 +406,7 @@ class NewExchangePresenter @Inject constructor(
         return getQuoteObservable(quoteRequest, selectedCurrency)
     }
 
-    private fun getFeesObservable(selectedCurrency: CryptoCurrencies) = when (selectedCurrency) {
+    private fun fetchFeesObservable(selectedCurrency: CryptoCurrencies) = when (selectedCurrency) {
         CryptoCurrencies.BTC -> feeDataManager.btcFeeOptions
                 .doOnSubscribe { feeOptions = dynamicFeeCache.btcFeeOptions!! }
                 .doOnNext { dynamicFeeCache.btcFeeOptions = it }
@@ -451,6 +467,7 @@ class NewExchangePresenter @Inject constructor(
                                 }
                     }.doOnTerminate { view.showQuoteInProgress(false) }
 
+    //region Fees Observables
     private fun getFeeForPayment(
             amountToSend: BigDecimal,
             selectedCurrency: CryptoCurrencies
@@ -487,6 +504,33 @@ class NewExchangePresenter @Inject constructor(
                         feePerKb
                 ).absoluteFee
             }
+    //endregion
+
+    //region Address Pair Observables
+    private fun getAddressPair(selectedCurrency: CryptoCurrencies): Observable<Addresses> =
+            when (selectedCurrency) {
+                CryptoCurrencies.BTC -> getBtcChangeAddress()
+                        .flatMap { changeAddress ->
+                            getEthAddress()
+                                    .map { Addresses(it, changeAddress) }
+                        }
+                CryptoCurrencies.ETHER -> getEthAddress()
+                        .flatMap { changeAddress ->
+                            getBtcReceiveAddress()
+                                    .map { Addresses(it, changeAddress) }
+                        }
+                else -> throw IllegalArgumentException("BCC not yet supported")
+            }.doOnError { view.showToast(R.string.shapeshift_deriving_address_failed, ToastCustom.TYPE_ERROR) }
+
+    private fun getEthAddress(): Observable<String> =
+            Observable.just(ethDataManager.getEthWallet()!!.account.address)
+
+    private fun getBtcChangeAddress(): Observable<String> =
+            payloadDataManager.getNextChangeAddress(account!!)
+
+    private fun getBtcReceiveAddress(): Observable<String> =
+            payloadDataManager.getNextReceiveAddress(account!!)
+    //endregion
 
     private fun PublishSubject<String>.applyDefaults(): Observable<BigDecimal> = this.doOnNext {
         view.clearError()
@@ -505,5 +549,7 @@ class NewExchangePresenter @Inject constructor(
     private fun Double.toBigDecimal() = BigDecimal.valueOf(this)
 
     private data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
+
+    private data class Addresses(val receiveAddress: String, val changeAddress: String)
 
 }
