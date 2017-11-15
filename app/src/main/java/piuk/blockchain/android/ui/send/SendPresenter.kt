@@ -854,9 +854,11 @@ class SendPresenter @Inject constructor(
             ))
         }
 
-        val unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
+        val unspentOutputBundle = sendDataManager.getSpendableCoins(
+                coins,
                 amount,
-                feePerKb)
+                feePerKb
+        )
 
         pendingTransaction.bigIntAmount = amount
         pendingTransaction.unspentOutputBundle = unspentOutputBundle

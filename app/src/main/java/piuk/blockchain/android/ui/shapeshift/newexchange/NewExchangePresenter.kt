@@ -99,12 +99,13 @@ class NewExchangePresenter @Inject constructor(
                 .doOnNext {
                     marketInfo = it
                     shapeShiftData = ShapeShiftData(
+                            "",
                             selectedCurrency,
                             if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
                             BigDecimal.ZERO,
                             BigDecimal.ZERO,
                             it.rate,
-                            BigDecimal.ZERO,
+                            BigInteger.ZERO,
                             BigDecimal.valueOf(it.minerFee),
                             "",
                             ""
@@ -202,6 +203,8 @@ class NewExchangePresenter @Inject constructor(
         view.showQuoteInProgress(true)
         with(getMinimum()) {
             view.updateFromCryptoText(cryptoFormat.format(this))
+            // This is a bit of a hack to bypass focus issues
+            fromCryptoSubject.onNext(cryptoFormat.format(this))
         }
     }
 
@@ -266,6 +269,8 @@ class NewExchangePresenter @Inject constructor(
                             val maximum = if (sweepableAmount > getMaximum()) getMaximum() else sweepableAmount
 
                             view.updateFromCryptoText(cryptoFormat.format(maximum))
+                            // This is a bit of a hack to bypass focus issues
+                            fromCryptoSubject.onNext(cryptoFormat.format(maximum))
                         },
                         {
                             Timber.e(it)
@@ -297,6 +302,8 @@ class NewExchangePresenter @Inject constructor(
         val maximum = if (availableEth > getMaximum()) getMaximum() else availableEth
 
         view.updateFromCryptoText(cryptoFormat.format(maximum))
+        // This is a bit of a hack to bypass focus issues
+        fromCryptoSubject.onNext(cryptoFormat.format(maximum))
     }
 
     private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
@@ -402,6 +409,7 @@ class NewExchangePresenter @Inject constructor(
     }
 
     private fun getQuoteObservable(quoteRequest: QuoteRequest, selectedCurrency: CryptoCurrencies) =
+            // Get quote for Quote Request
             shapeShiftDataManager.getQuote(quoteRequest)
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .map {
@@ -411,6 +419,7 @@ class NewExchangePresenter @Inject constructor(
                                 // Show error in UI, fallback to initial quote rates
                                 view.showAmountError(it.value)
                                 return@map Quote().apply {
+                                    orderId = ""
                                     quotedRate = marketInfo?.rate ?: 1.0
                                     minerFee = marketInfo?.minerFee ?: 0.0
                                     withdrawalAmount = quoteRequest.withdrawalAmount
@@ -419,21 +428,65 @@ class NewExchangePresenter @Inject constructor(
                             }
                         }
                     }
-                    .doOnNext {
-                        latestQuote = it
-                        shapeShiftData = ShapeShiftData(
-                                selectedCurrency,
-                                if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
-                                it.depositAmount.toBigDecimal(),
-                                it.withdrawalAmount.toBigDecimal(),
-                                it.quotedRate,
-                                // TODO: Add fee for sending coins to exchange
-                                BigDecimal.ZERO,
-                                it.minerFee.toBigDecimal(),
-                                "",
-                                ""
-                        )
+                    .flatMap { quote ->
+                        // Get fee for the proposed payment amount
+                        getFeeForPayment(quote.withdrawalAmount.toBigDecimal(), selectedCurrency)
+                                .map {
+                                    latestQuote = quote
+                                    // Update ShapeShift Data
+                                    shapeShiftData = ShapeShiftData(
+                                            orderId = quote.orderId,
+                                            fromCurrency = selectedCurrency,
+                                            toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
+                                            depositAmount = quote.depositAmount.toBigDecimal(),
+                                            withdrawalAmount = quote.withdrawalAmount.toBigDecimal(),
+                                            exchangeRate = quote.quotedRate,
+                                            transactionFee = it,
+                                            networkFee = quote.minerFee.toBigDecimal(),
+                                            receiveAddress = "",
+                                            changeAddress = ""
+                                    )
+
+                                    return@map quote
+                                }
                     }.doOnTerminate { view.showQuoteInProgress(false) }
+
+    private fun getFeeForPayment(
+            amountToSend: BigDecimal,
+            selectedCurrency: CryptoCurrencies
+    ): Observable<BigInteger> = when (selectedCurrency) {
+        CryptoCurrencies.BTC -> getFeeForBtcPaymentObservable(
+                amountToSend.toBigInteger(),
+                BigInteger.valueOf(feeOptions!!.regularFee)
+        )
+        CryptoCurrencies.ETHER -> getFeeForEthPaymentObservable()
+        else -> throw IllegalArgumentException("BCC not yet supported")
+    }.doOnError { view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR) }
+
+    /**
+     * Returns the ETH fee in Wei
+     */
+    private fun getFeeForEthPaymentObservable(): Observable<BigInteger> {
+        val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
+        val feeInGwei = Convert.toWei(gwei, Convert.Unit.GWEI)
+        return Observable.just(feeInGwei.toBigInteger())
+    }
+
+    /**
+     * Returns the BTC fee in Satoshis
+     */
+    private fun getFeeForBtcPaymentObservable(
+            amountToSend: BigInteger,
+            feePerKb: BigInteger
+    ): Observable<BigInteger> = getUnspentApiResponse(account!!.xpub)
+            .compose(RxUtil.addObservableToCompositeDisposable(this))
+            .map {
+                sendDataManager.getSpendableCoins(
+                        it,
+                        amountToSend,
+                        feePerKb
+                ).absoluteFee
+            }
 
     private fun PublishSubject<String>.applyDefaults(): Observable<BigDecimal> = this.doOnNext {
         view.clearError()
@@ -442,7 +495,6 @@ class NewExchangePresenter @Inject constructor(
     }.debounce(500, TimeUnit.MILLISECONDS)
             // Here we kill any quotes in flight already, as they take up to ten seconds to fulfill
             .doOnNext { compositeDisposable.clear() }
-            .onErrorReturn { "" }
             .map { BigDecimal(it.sanitise()) }
             .onErrorReturn { BigDecimal.ZERO }
             .compose(RxUtil.applySchedulersToObservable())
@@ -452,7 +504,6 @@ class NewExchangePresenter @Inject constructor(
 
     private fun Double.toBigDecimal() = BigDecimal.valueOf(this)
 
-    private fun String.toBigDecimal() = BigDecimal(this)
-
     private data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
+
 }
