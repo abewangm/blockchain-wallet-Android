@@ -33,11 +33,6 @@
         android:title="@string/pairing_code_log_in" />
 
     <item
-        android:id="@+id/nav_map"
-        android:icon="@drawable/vector_merchant"
-        android:title="@string/merchant_map" />
-
-    <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/vector_settings"
         android:title="@string/action_settings" />

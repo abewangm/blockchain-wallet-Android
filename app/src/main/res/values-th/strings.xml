@@ -136,26 +136,6 @@
     <string name="change_pin_code">เปลี่ยน PIN</string>
     <string name="enter_current_pin">โปรดกรอก PIN ปัจจุบัน</string>
 
-    <string name="suggest_merchant">แนะนำผู้ค้า</string>
-    <string name="business_category">หมวดหมู่</string>
-    <string name="street_address">ที่อยู่</string>
-    <string name="description">คำอธิบาย</string>
-    <string name="city">เมือง</string>
-    <string name="postal">รหัสไปรษณีย์</string>
-    <string name="telephone">โทรศัพท์</string>
-    <string name="web">เว็บ</string>
-    <string name="merchant_cat_hint">เลือกหมวดหมู่…</string>
-    <string name="merchant_cat1">คาเฟ่</string>
-    <string name="merchant_cat2">บาร์/เครื่องดื่ม</string>
-    <string name="merchant_cat3">อาหาร</string>
-    <string name="merchant_cat4">ชอปปิง/จับจ่ายใช้สอย</string>
-    <string name="merchant_cat5">ATM</string>
-    <string name="ok_writing_merchant">ขอบพระคุณสำหรับคำแนะนำของคุณ</string>
-    <string name="error_writing_merchant">ข้อผิดพลาดในการเขียนฐานข้อมูล โปรดลองอีกครั้ง</string>
-    <string name="call">โทร</string>
-    <string name="navigate">นำทาง</string>
-    <string name="enable_geo">เปิดใช้งาน GPS หรือบริการระบุตำแหน่งอื่น ๆ เพื่อค้นหาตำแหน่งปัจจุบัน คลิก ตกลง เพื่อไปยังการตั้งค่าบริการระบุตำแหน่งเพื่อทำเช่นนั้น</string>
-
     <string name="create_new">สร้างใหม่</string>
     <string name="import_address">นำเข้าที่อยู่</string>
     <string name="save_name">บันทึกชื่อ</string>
@@ -166,14 +146,10 @@
 
     <string name="ssl_pinning_invalid">การปักหมุดใบอนุญาต SSL ล้มเหลว นี่อาจแสดงให้เห็นว่ามีกิจกรรมที่เป็นอันตรายเกิดขึ้น โปรดยืนยันการเชื่อมต่อเครือข่ายและอุปกรณ์ของคุณก่อนดำเนินการต่อ</string>
 
-    <string name="merchant_suggest">แนะนำผู้ค้า</string>
+    <string name="description">คำอธิบาย</string>
     <string name="name">ชื่อ</string>
-    <string name="location">ตำแหน่ง</string>
-    <string name="manual_entry">กรอกด้วยตนเอง</string>
-    <string name="use_my_current_location">ใช้ตำแหน่งปัจจุบันของฉัน</string>
     <string name="save">บันทึก</string>
     <string name="next">ถัดไป</string>
-    <string name="address_lookup_fail">ไม่สามารถรับที่อยู่ได้ โปรดกรอกที่อยู่ด้วยตนเอง</string>
 
     <string name="backup_write_down_words">เป็นสิ่งสำคัญที่ต้องตรวจสอบให้แน่ใจว่าคุณได้เขียนคำของคุณลงไปอย่างแม่นยำตามที่แสดงอยู่ที่นี่และในลำดับเดียวกันนี้</string>
     <string name="backup_of">จาก</string>

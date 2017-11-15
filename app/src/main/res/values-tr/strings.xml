@@ -136,26 +136,6 @@
     <string name="change_pin_code">PIN Değiştir</string>
     <string name="enter_current_pin">Lütfen mevcut PIN girin.</string>
 
-    <string name="suggest_merchant">Tacir öner</string>
-    <string name="business_category">Kategori</string>
-    <string name="street_address">Sokak adresi</string>
-    <string name="description">Açıklama</string>
-    <string name="city">Şehir</string>
-    <string name="postal">Posta kodu</string>
-    <string name="telephone">Telefon</string>
-    <string name="web">Web</string>
-    <string name="merchant_cat_hint">Bir kategori seç…</string>
-    <string name="merchant_cat1">Kafe</string>
-    <string name="merchant_cat2">Barlar/İçki</string>
-    <string name="merchant_cat3">Yemek ve Yiyecek</string>
-    <string name="merchant_cat4">Alışveriş/Ödeme</string>
-    <string name="merchant_cat5">Bankamatik</string>
-    <string name="ok_writing_merchant">Öneriniz için teşekkürler.</string>
-    <string name="error_writing_merchant">Veritabanına yazarken hata oluştu. Lütfen tekrar deneyin.</string>
-    <string name="call">Arama</string>
-    <string name="navigate">Gezin</string>
-    <string name="enable_geo">Mevcut konumu bulmak için GPS veya başka bir konum bulma hizmetini etkinleştirin. Bunu yapabilmeniz için konum hizmetleri ayarlarına gitmek için TAMAM\'a tıklayın.</string>
-
     <string name="create_new">Yeni Oluştur</string>
     <string name="import_address">Adres Al</string>
     <string name="save_name">Ad kaydedildi</string>
@@ -166,14 +146,10 @@
 
     <string name="ssl_pinning_invalid">SSL sertifikası sabitleme başarısız oldu. Bu, kötü amaçlı aktiviteye işaret edebilir. Lütfen devam etmeden önce ağ bağlantınızı ve cihazınızı doğrulayın.</string>
 
-    <string name="merchant_suggest">Tacir Öner</string>
+    <string name="description">Açıklama</string>
     <string name="name">Ad</string>
-    <string name="location">Konum</string>
-    <string name="manual_entry">MANÜEL GİRİŞ</string>
-    <string name="use_my_current_location">MEVCUT KONUMUMU KULLAN</string>
     <string name="save">Kaydet</string>
     <string name="next">Sonraki</string>
-    <string name="address_lookup_fail">Adres alınamadı. Lütfen adresi manüel olarak girin.</string>
 
     <string name="backup_write_down_words">Lütfen sözcükleri tam olarak burada yazıldıkları şekil ve sırada yazdığınızdan emin olun.</string>
     <string name="backup_of">girişi</string>

@@ -136,26 +136,6 @@
     <string name="change_pin_code">Změnit PIN</string>
     <string name="enter_current_pin">Zadejte prosím aktuální PIN.</string>
 
-    <string name="suggest_merchant">Doporučte prodejce</string>
-    <string name="business_category">Kategorie</string>
-    <string name="street_address">Adresa</string>
-    <string name="description">Popis</string>
-    <string name="city">Město</string>
-    <string name="postal">PSČ</string>
-    <string name="telephone">Telefon</string>
-    <string name="web">Web</string>
-    <string name="merchant_cat_hint">Vyberte kategorii…</string>
-    <string name="merchant_cat1">Kavárna</string>
-    <string name="merchant_cat2">Bary / Nápoje</string>
-    <string name="merchant_cat3">Jídlo a stravování</string>
-    <string name="merchant_cat4">Nákupy</string>
-    <string name="merchant_cat5">Bankomat</string>
-    <string name="ok_writing_merchant">Děkujeme Vám za návrh.</string>
-    <string name="error_writing_merchant">Chyba zápisu do databáze. Zkuste to prosím znovu.</string>
-    <string name="call">Volat</string>
-    <string name="navigate">Navigovat</string>
-    <string name="enable_geo">Pro vyhledání aktuální polohy povolte prosím GPS nebo jinou lokalizační službu. Kliknutím na OK přejdete na nastavení lokalizační služby, kde můžete akci provést.</string>
-
     <string name="create_new">Vytvořit novou</string>
     <string name="import_address">Importovat adresu</string>
     <string name="save_name">Uložit název</string>
@@ -166,14 +146,10 @@
 
     <string name="ssl_pinning_invalid">Připnutí certifikátu SSL se nezdařilo. Může to znamenat škodlivou aktivitu. Dříve než budete pokračovat, ověřte síťové připojení a zařízení.</string>
 
-    <string name="merchant_suggest">Doporučte prodejce</string>
+    <string name="description">Popis</string>
     <string name="name">Název</string>
-    <string name="location">Místo</string>
-    <string name="manual_entry">RUČNÍ ZADÁNÍ</string>
-    <string name="use_my_current_location">POUŽÍT MOJI AKTUÁLNÍ POLOHU</string>
     <string name="save">Uložit</string>
     <string name="next">Další</string>
-    <string name="address_lookup_fail">Adresu se nepodařilo načíst. Prosím zadejte adresu ručně.</string>
 
     <string name="backup_write_down_words">Je důležité, abyste si slova zapsali přesně tak, jak jsou zobrazena zde a v tomto pořadí.</string>
     <string name="backup_of">/</string>
@@ -657,7 +633,6 @@
     <string name="restoring_wallet">Obnovování peněženky.</string>
     <string name="support_leaving_app_warning">Toto opustí aplikaci a vezme vás do prohlížeče. Pokračovat?</string>
     <string name="addresses">Adresy bitcoinu</string>
-    <string name="merchant_map">Mapa prodejců bitcoinu</string>
     <string name="received_ethereum">Přijat ether</string>
     <string name="transaction_occur_when_bitcoin">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
     <string name="transaction_occur_when_eth">K transakcím dochází při příjmu a odesílání ether.</string>
