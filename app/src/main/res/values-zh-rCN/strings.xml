@@ -165,26 +165,6 @@
     <string name="change_pin_code">更改PIN</string>
     <string name="enter_current_pin">请输入当前PIN.</string>
 
-    <string name="suggest_merchant">推荐商家</string>
-    <string name="business_category">类别</string>
-    <string name="street_address">街道地址</string>
-    <string name="description">描述</string>
-    <string name="city">城市</string>
-    <string name="postal">邮编</string>
-    <string name="telephone">电话</string>
-    <string name="web">网页</string>
-    <string name="merchant_cat_hint">选择一个类别…</string>
-    <string name="merchant_cat1">咖啡店</string>
-    <string name="merchant_cat2">酒吧/饮品店</string>
-    <string name="merchant_cat3">食品和餐饮店</string>
-    <string name="merchant_cat4">购物/消费</string>
-    <string name="merchant_cat5">自动取款机</string>
-    <string name="ok_writing_merchant">感谢您的建议</string>
-    <string name="error_writing_merchant">写入数据库时出错。请重试</string>
-    <string name="call">致电</string>
-    <string name="navigate">导航</string>
-    <string name="enable_geo">启用GPS或其他定位服务以获取正确位置。点击“OK”前往定位服务进行设置。</string>
-
     <string name="my_addresses">地址</string>
     <string name="addresses">地址</string>
     <string name="create_new">新建地址</string>
@@ -198,15 +178,10 @@
 
     <string name="ssl_pinning_invalid">与主机安全连接失败。这可能表示恶意活动。请在继续前检查您的网络连接和设备。</string>
 
-    <string name="merchant_map">商家地图</string>
-    <string name="merchant_suggest">推荐商家</string>
+    <string name="description">描述</string>
     <string name="name">名称</string>
-    <string name="location">位置</string>
-    <string name="manual_entry">手动输入</string>
-    <string name="use_my_current_location">使用我的当前地址</string>
     <string name="save">保存</string>
     <string name="next">下一步</string>
-    <string name="address_lookup_fail">无法检索到地址。请手动输入地址。</string>
 
     <string name="received_bitcoin">接收到的比特币</string>
 

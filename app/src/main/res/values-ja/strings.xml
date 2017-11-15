@@ -136,26 +136,6 @@
     <string name="change_pin_code">PINを変更</string>
     <string name="enter_current_pin">現在のPINを入力してください。</string>
 
-    <string name="suggest_merchant">商人を提案</string>
-    <string name="business_category">カテゴリ</string>
-    <string name="street_address">所在地住所</string>
-    <string name="description">説明</string>
-    <string name="city">市</string>
-    <string name="postal">郵便番号</string>
-    <string name="telephone">電話番号</string>
-    <string name="web">ウェブ</string>
-    <string name="merchant_cat_hint">カテゴリを選択…</string>
-    <string name="merchant_cat1">カフェ</string>
-    <string name="merchant_cat2">バー／酒場</string>
-    <string name="merchant_cat3">フードやレストラン</string>
-    <string name="merchant_cat4">ショッピング／消費</string>
-    <string name="merchant_cat5">ATM</string>
-    <string name="ok_writing_merchant">ご提案いただきありがとうございます。</string>
-    <string name="error_writing_merchant">データベースへの書き込みエラー。再試行してください。</string>
-    <string name="call">問い合わせ</string>
-    <string name="navigate">案内</string>
-    <string name="enable_geo">現在の位置を見つけるにはGPSかその他の位置特定サービを有効にしてください。OKをクリックしてサービス設定を表示</string>
-
     <string name="create_new">新規作成</string>
     <string name="import_address">アドレスのインポート</string>
     <string name="save_name">名前を保存</string>
@@ -166,14 +146,10 @@
 
     <string name="ssl_pinning_invalid">SSL証明書のピニングに失敗しました。悪意のあるアクティビティが行われている可能性があります。続行する前にネットワーク接続とデバイスを確認してください。</string>
 
-    <string name="merchant_suggest">商人を提案</string>
+    <string name="description">説明</string>
     <string name="name">名称</string>
-    <string name="location">場所</string>
-    <string name="manual_entry">手動入力</string>
-    <string name="use_my_current_location">現在の位置情報を使用</string>
     <string name="save">保存</string>
     <string name="next">次へ</string>
-    <string name="address_lookup_fail">アドレスの取得ができませんでした。手動でアドレスを入力してください。</string>
 
     <string name="backup_write_down_words">画面の通り、語句が表示されている順番で書き留めることが重要です。</string>
     <string name="backup_of">の</string>
