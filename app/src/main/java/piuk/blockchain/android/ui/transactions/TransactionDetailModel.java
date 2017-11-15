@@ -1,12 +1,13 @@
 package piuk.blockchain.android.ui.transactions;
 
-public class RecipientModel {
+public class TransactionDetailModel {
 
     private String address;
     private String value;
     private String displayUnits;
+    private boolean addressDecodeError;
 
-    RecipientModel(String address, String value, String displayUnits) {
+    TransactionDetailModel(String address, String value, String displayUnits) {
         this.address = address;
         this.value = value;
         this.displayUnits = displayUnits;
@@ -26,5 +27,13 @@ public class RecipientModel {
 
     public String getDisplayUnits() {
         return displayUnits;
+    }
+
+    public boolean hasAddressDecodeError() {
+        return addressDecodeError;
+    }
+
+    public void setAddressDecodeError(boolean addressDecodeError) {
+        this.addressDecodeError = addressDecodeError;
     }
 }

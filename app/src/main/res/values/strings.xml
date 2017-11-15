@@ -165,26 +165,6 @@
     <string name="change_pin_code">Change PIN</string>
     <string name="enter_current_pin">Please enter current PIN.</string>
 
-    <string name="suggest_merchant">Suggest merchant</string>
-    <string name="business_category">Category</string>
-    <string name="street_address">Street address</string>
-    <string name="description">Description</string>
-    <string name="city">City</string>
-    <string name="postal">Postal code</string>
-    <string name="telephone">Telephone</string>
-    <string name="web">Web</string>
-    <string name="merchant_cat_hint">Choose a category…</string>
-    <string name="merchant_cat1">Café</string>
-    <string name="merchant_cat2">Bars/Drinking</string>
-    <string name="merchant_cat3">Food and Dining</string>
-    <string name="merchant_cat4">Shopping/Spending</string>
-    <string name="merchant_cat5">ATM</string>
-    <string name="ok_writing_merchant">Thank you for your suggestion.</string>
-    <string name="error_writing_merchant">Error writing to database. Please try again.</string>
-    <string name="call">Call</string>
-    <string name="navigate">Navigate</string>
-    <string name="enable_geo">Enable either GPS or any other location service to find current location. Click OK to go to location services settings to let you do so.</string>
-
     <string name="addresses">Bitcoin Addresses</string>
     <string name="create_new">Create New</string>
     <string name="import_address">Import Address</string>
@@ -197,15 +177,10 @@
 
     <string name="ssl_pinning_invalid">Secure connection to the host has failed. This might indicate malicious activity. Please verify your network connection and device before continuing.</string>
 
-    <string name="merchant_map">Bitcoin Merchant Map</string>
-    <string name="merchant_suggest">Suggest Merchant</string>
+    <string name="description">Description</string>
     <string name="name">Name</string>
-    <string name="location">Location</string>
-    <string name="manual_entry">MANUAL ENTRY</string>
-    <string name="use_my_current_location">USE MY CURRENT LOCATION</string>
     <string name="save">Save</string>
     <string name="next">Next</string>
-    <string name="address_lookup_fail">Could not retrieve address. Please enter address manually.</string>
 
     <string name="received_bitcoin">Received Bitcoin</string>
     <string name="received_ethereum">Received Ether</string>
@@ -829,5 +804,8 @@
 
     <!-- FORCE UPGRADE -->
     <string name="force_upgrade_message">The version of the app you are using is no longer supported. Please update the app and try again.</string>
+
+    <!-- TRANSACTIONS -->
+    <string name="tx_decode_error">Unable to decode address</string>
 
 </resources>

@@ -37,13 +37,11 @@ android {
             zipAlignEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            manifestPlaceholders = [GOOGLE_MAPS_KEY: buildProperties.secrets['mapsReleaseKey'].string]
             multiDexEnabled false
             buildConfigBoolean "DOGFOOD", false
             buildConfigBoolean "USE_CRASHLYTICS", true
         }
         debug {
-            manifestPlaceholders = [GOOGLE_MAPS_KEY: buildProperties.secrets['mapsDebugKey'].string]
             multiDexEnabled true
             buildConfigBoolean "DOGFOOD", false
             buildConfigBoolean "USE_CRASHLYTICS", false

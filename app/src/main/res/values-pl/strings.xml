@@ -136,26 +136,6 @@
     <string name="change_pin_code">Zmień PIN</string>
     <string name="enter_current_pin">Proszę podać aktualny PIN</string>
 
-    <string name="suggest_merchant">Zasugeruj kupca</string>
-    <string name="business_category">Kategoria</string>
-    <string name="street_address">Ulica</string>
-    <string name="description">Opis</string>
-    <string name="city">Miasto</string>
-    <string name="postal">Kod pocztowy</string>
-    <string name="telephone">Telefon</string>
-    <string name="web">Sieć</string>
-    <string name="merchant_cat_hint">Wybierz kategorię…</string>
-    <string name="merchant_cat1">Kawiarnie</string>
-    <string name="merchant_cat2">Bary/Drinki</string>
-    <string name="merchant_cat3">Jedzenie i restauracje</string>
-    <string name="merchant_cat4">Centra handlowe</string>
-    <string name="merchant_cat5">Bankomat</string>
-    <string name="ok_writing_merchant">Dziękujemy za Twoją sugestię.</string>
-    <string name="error_writing_merchant">Błąd w zapisywaniu do bazy danych. Proszę spróbować ponownie.</string>
-    <string name="call">Zadzwoń</string>
-    <string name="navigate">Prowadź</string>
-    <string name="enable_geo">Pozwól urządzeniom GPS i innym urządzeniom lokalizacyjnym na znajdowanie obecnej lokalizacji. Kliknij OK, by przejść do ustawień usług lokalizacji, abyś mógł to zrobić.</string>
-
     <string name="create_new">Stwórz nowy</string>
     <string name="import_address">Importuj adres</string>
     <string name="save_name">Nazwa zapisu</string>
@@ -166,14 +146,10 @@
 
     <string name="ssl_pinning_invalid">Przypinanie certyfikatu SSL nieudane. Może to oznaczać działanie złośliwe. Proszę potwierdzić, że Twoje połączenie sieciowe i urządzenie działają poprawnie, zanim będziesz kontynuować</string>
 
-    <string name="merchant_suggest">Zasugeruj kupca</string>
+    <string name="description">Opis</string>
     <string name="name">Nazwa</string>
-    <string name="location">Lokalizacja</string>
-    <string name="manual_entry">WPIS RĘCZNY</string>
-    <string name="use_my_current_location">UŻYJ MOJEJ OBECNEJ LOKALIZACJI</string>
     <string name="save">Zapisz</string>
     <string name="next">Dalej</string>
-    <string name="address_lookup_fail">Nie udało się zdobyć adresu. Proszę wpisać adres ręcznie.</string>
 
     <string name="backup_write_down_words">To ważne, aby zapisać sobie te słowa dokładnie tak jak się tutaj pojawiają i w tej samej kolejności.</string>
     <string name="backup_of">z</string>

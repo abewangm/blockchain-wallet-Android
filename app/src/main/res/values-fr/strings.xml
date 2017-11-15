@@ -136,26 +136,6 @@
     <string name="change_pin_code">Modifier le code PIN</string>
     <string name="enter_current_pin">Veuillez entrer votre code PIN actuel.</string>
 
-    <string name="suggest_merchant">Suggérer un marchand</string>
-    <string name="business_category">Catégorie</string>
-    <string name="street_address">Adresse postale</string>
-    <string name="description">Description</string>
-    <string name="city">Ville</string>
-    <string name="postal">Code postal</string>
-    <string name="telephone">Téléphone</string>
-    <string name="web">Web</string>
-    <string name="merchant_cat_hint">Choisir une catégorie…</string>
-    <string name="merchant_cat1">Café</string>
-    <string name="merchant_cat2">Bars/Boissons</string>
-    <string name="merchant_cat3">Alimentation et Restaurants</string>
-    <string name="merchant_cat4">Shopping/Dépenses</string>
-    <string name="merchant_cat5">Distributeurs automatiques</string>
-    <string name="ok_writing_merchant">Merci pour votre suggestion.</string>
-    <string name="error_writing_merchant">Erreur d\'écriture dans la base de données. Veuillez réessayer</string>
-    <string name="call">Appel</string>
-    <string name="navigate">Naviguer</string>
-    <string name="enable_geo">Permettre au GPS ou à tout autre service de localisation de trouver l\'emplacement actuel. Cliquez pour cela sur OK pour aller dans les paramètres des services de localisation.</string>
-
     <string name="create_new">Créer une nouvelle adresse</string>
     <string name="import_address">Importer l\’adresse</string>
     <string name="save_name">Enregistrer le nom</string>
@@ -166,14 +146,10 @@
 
     <string name="ssl_pinning_invalid">L\’épinglage du certificat SSL a échoué. Ceci pourrait indiquer une activité malveillante. Veuillez vérifier votre connexion réseau et le périphérique avant de continuer.</string>
 
-    <string name="merchant_suggest">Suggérer un marchand</string>
+    <string name="description">Description</string>
     <string name="name">Nom</string>
-    <string name="location">Localisation</string>
-    <string name="manual_entry">SAISIE MANUELLE</string>
-    <string name="use_my_current_location">UTILISER MA POSITION ACTUELLE</string>
     <string name="save">Sauvegarder</string>
     <string name="next">Suivant</string>
-    <string name="address_lookup_fail">L\’adresse n’a pas pu être récupérée. Veuillez entrer l\'adresse manuellement.</string>
 
     <string name="backup_write_down_words">Il est important de veiller à écrire les mots exactement comme ils apparaissent ici et dans cet ordre.</string>
     <string name="backup_of">de</string>
