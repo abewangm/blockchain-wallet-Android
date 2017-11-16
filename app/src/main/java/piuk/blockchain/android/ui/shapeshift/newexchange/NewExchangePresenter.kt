@@ -96,29 +96,13 @@ class NewExchangePresenter @Inject constructor(
         val feesObservable = fetchFeesObservable(selectedCurrency)
 
         shapeShiftObservable
-                .doOnNext {
-                    marketInfo = it
-                    shapeShiftData = ShapeShiftData(
-                            "",
-                            selectedCurrency,
-                            if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
-                            BigDecimal.ZERO,
-                            BigDecimal.ZERO,
-                            it.rate,
-                            BigInteger.ZERO,
-                            BigDecimal.valueOf(it.minerFee),
-                            "",
-                            ""
-                    )
-                }
+                .doOnNext { marketInfo = it }
                 .flatMap { feesObservable }
                 .doOnSubscribe { view.showProgressDialog(R.string.shapeshift_getting_information) }
                 .doOnTerminate { view.dismissProgressDialog() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
-                        {
-                            account = payloadDataManager.defaultAccount
-                        },
+                        { account = payloadDataManager.defaultAccount },
                         {
                             Timber.e(it)
                             view.showToast(R.string.shapeshift_getting_information_failed, ToastCustom.TYPE_ERROR)
@@ -179,6 +163,7 @@ class NewExchangePresenter @Inject constructor(
 
     internal fun onSwitchCurrencyClicked() {
         currencyState.toggleCryptoCurrency()
+                .run { compositeDisposable.clear() }
                 .run { view.clearEditTexts() }
                 .run { onViewReady() }
     }
@@ -190,20 +175,30 @@ class NewExchangePresenter @Inject constructor(
             return
         }
 
+        val selectedCurrency = currencyState.cryptoCurrency
+
         // TODO: Check if amount is greater than user can spend in observable
 
-        // Get the receive address and change address
-        getAddressPair(currencyState.cryptoCurrency)
+        val quoteRequest = QuoteRequest().apply {
+            depositAmount = shapeShiftData!!.depositAmount.toDouble()
+            withdrawalAmount = shapeShiftData!!.withdrawalAmount.toDouble()
+            withdrawal = shapeShiftData!!.receiveAddress
+            pair = getShapeShiftPair(selectedCurrency)
+            returnAddress = shapeShiftData!!.changeAddress
+            apiKey = view.shapeShiftApiKey
+        }
+        // Update quote with final data
+        getQuoteObservable(quoteRequest, selectedCurrency)
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnTerminate { view.dismissProgressDialog() }
-                .doOnNext { (receiveAddress, changeAddress) ->
-                    shapeShiftData!!.receiveAddress = receiveAddress
-                    shapeShiftData!!.changeAddress = changeAddress
-                    view.launchConfirmationPage(shapeShiftData!!)
-                }.subscribe(
-                { /* Nothing to see here, exception handled further up */ },
-                { Timber.e(it) }
-        )
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { view.launchConfirmationPage(shapeShiftData!!) },
+                        {
+                            Timber.e(it)
+                            view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
+                        }
+                )
     }
 
     internal fun onMaxPressed() {
@@ -247,6 +242,7 @@ class NewExchangePresenter @Inject constructor(
     // Here we can safely assume ETH is the "from" type
     internal fun onToAccountChanged(account: Account) {
         this.account = account
+        view.clearEditTexts()
         view.updateUi(
                 currencyState.cryptoCurrency,
                 btcAccounts.size > 1,
@@ -278,7 +274,7 @@ class NewExchangePresenter @Inject constructor(
                         {
                             val sweepBundle = sendDataManager.getMaximumAvailable(
                                     it,
-                                    BigInteger.valueOf(feeOptions!!.regularFee * 1000)
+                                    BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
                             )
                             val sweepableAmount = BigDecimal(sweepBundle.left)
                                     .divide(BigDecimal.valueOf(1e8))
@@ -440,6 +436,7 @@ class NewExchangePresenter @Inject constructor(
                                     minerFee = marketInfo?.minerFee ?: 0.0
                                     withdrawalAmount = quoteRequest.withdrawalAmount
                                     depositAmount = quoteRequest.depositAmount
+                                    expiration = 0L
                                 }
                             }
                         }
@@ -447,25 +444,35 @@ class NewExchangePresenter @Inject constructor(
                     .flatMap { quote ->
                         // Get fee for the proposed payment amount
                         getFeeForPayment(quote.withdrawalAmount.toBigDecimal(), selectedCurrency)
-                                .map {
-                                    latestQuote = quote
-                                    // Update ShapeShift Data
-                                    shapeShiftData = ShapeShiftData(
-                                            orderId = quote.orderId,
-                                            fromCurrency = selectedCurrency,
-                                            toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
-                                            depositAmount = quote.depositAmount.toBigDecimal(),
-                                            withdrawalAmount = quote.withdrawalAmount.toBigDecimal(),
-                                            exchangeRate = quote.quotedRate,
-                                            transactionFee = it,
-                                            networkFee = quote.minerFee.toBigDecimal(),
-                                            receiveAddress = "",
-                                            changeAddress = ""
-                                    )
+                                .flatMap { fee ->
+                                    // Get receive/change address pair
+                                    getAddressPair(selectedCurrency)
+                                            .map { addresses ->
+                                                latestQuote = quote
+                                                // Update ShapeShift Data
+                                                shapeShiftData = ShapeShiftData(
+                                                        orderId = quote.orderId,
+                                                        fromCurrency = selectedCurrency,
+                                                        toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
+                                                        depositAmount = quote.depositAmount.toBigDecimal(),
+                                                        withdrawalAmount = quote.withdrawalAmount.toBigDecimal(),
+                                                        exchangeRate = quote.quotedRate,
+                                                        transactionFee = fee,
+                                                        networkFee = quote.minerFee.toBigDecimal(),
+                                                        receiveAddress = addresses.receiveAddress,
+                                                        changeAddress = addresses.changeAddress,
+                                                        xPub = account!!.xpub,
+                                                        expiration = quote.expiration
+                                                )
 
-                                    return@map quote
+                                                return@map quote
+                                            }
                                 }
-                    }.doOnTerminate { view.showQuoteInProgress(false) }
+                    }
+                    .doOnTerminate {
+                        view.showQuoteInProgress(false)
+                        view.setButtonEnabled(true)
+                    }
 
     //region Fees Observables
     private fun getFeeForPayment(
@@ -473,12 +480,13 @@ class NewExchangePresenter @Inject constructor(
             selectedCurrency: CryptoCurrencies
     ): Observable<BigInteger> = when (selectedCurrency) {
         CryptoCurrencies.BTC -> getFeeForBtcPaymentObservable(
-                amountToSend.toBigInteger(),
-                BigInteger.valueOf(feeOptions!!.regularFee)
+                amountToSend,
+                BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
         )
         CryptoCurrencies.ETHER -> getFeeForEthPaymentObservable()
         else -> throw IllegalArgumentException("BCC not yet supported")
     }.doOnError { view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR) }
+            .onErrorReturn { BigInteger.ZERO }
 
     /**
      * Returns the ETH fee in Wei
@@ -493,14 +501,15 @@ class NewExchangePresenter @Inject constructor(
      * Returns the BTC fee in Satoshis
      */
     private fun getFeeForBtcPaymentObservable(
-            amountToSend: BigInteger,
+            amountToSend: BigDecimal,
             feePerKb: BigInteger
     ): Observable<BigInteger> = getUnspentApiResponse(account!!.xpub)
             .compose(RxUtil.addObservableToCompositeDisposable(this))
             .map {
-                sendDataManager.getSpendableCoins(
+                val satoshis = amountToSend.multiply(BigDecimal.valueOf(100000000))
+                return@map sendDataManager.getSpendableCoins(
                         it,
-                        amountToSend,
+                        satoshis.toBigInteger(),
                         feePerKb
                 ).absoluteFee
             }

@@ -2,11 +2,26 @@ package piuk.blockchain.android.ui.shapeshift.confirmation
 
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
+import android.os.Bundle
+import android.os.PersistableBundle
+import piuk.blockchain.android.R
+import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
+import timber.log.Timber
 
-class ShapeShiftConfirmationActivity : AppCompatActivity() {
+class ShapeShiftConfirmationActivity : BaseAuthActivity() {
 
+    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onCreate(savedInstanceState, persistentState)
+        setContentView(R.layout.activity_confirmation_shapeshift)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val shapeShiftData = intent.getParcelableExtra<ShapeShiftData>(EXTRA_SHAPESHIFT_DATA)
+        Timber.d("DATAAAAA $shapeShiftData.toString()")
+    }
 
 
 

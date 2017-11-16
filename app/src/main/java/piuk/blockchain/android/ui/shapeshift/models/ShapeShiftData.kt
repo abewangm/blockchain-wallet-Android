@@ -20,5 +20,7 @@ data class ShapeShiftData(
         var transactionFee: BigInteger,
         var networkFee: BigDecimal,
         var receiveAddress: String,
-        var changeAddress: String
+        var changeAddress: String,
+        var xPub: String,
+        var expiration: Long
 ) : Parcelable
