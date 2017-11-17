@@ -59,8 +59,6 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     private val editTexts by unsafeLazy {
         listOf(edittext_from_crypto, edittext_to_crypto, edittext_to_fiat, edittext_from_fiat)
     }
-    private val fromPair by unsafeLazy { listOf(edittext_from_crypto, edittext_from_fiat) }
-    private val toPair by unsafeLazy { listOf(edittext_to_crypto, edittext_to_fiat) }
 
     private var progressDialog: MaterialProgressDialog? = null
 
@@ -243,6 +241,11 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         ShapeShiftConfirmationActivity.start(this, shapeShiftData)
     }
 
+    override fun removeAllFocus() {
+        closeKeyPad()
+        editTexts.forEach { it.clearFocus() }
+    }
+
     override fun onKeypadClose() {
         val height = resources.getDimension(R.dimen.action_bar_height).toInt()
         // Resize activity to default
@@ -337,13 +340,6 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                     // Scheduling
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
-
-    private fun shouldUpdate(currentFocus: View, editText: EditText): Boolean = when {
-        currentFocus == editText -> true
-        fromPair.contains(currentFocus) && fromPair.contains(editText) -> false
-        toPair.contains(currentFocus) && toPair.contains(editText) -> false
-        else -> true
-    }
 
     private fun showFromBtc() {
         textview_unit_from.text = btcSymbol

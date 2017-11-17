@@ -21,6 +21,8 @@ interface NewExchangeView : View {
             fiatHint: String
     )
 
+    fun removeAllFocus()
+
     fun launchAccountChooserActivityTo()
 
     fun launchAccountChooserActivityFrom()

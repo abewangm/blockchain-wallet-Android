@@ -196,23 +196,25 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onMaxPressed() {
+        view.removeAllFocus()
         view.showQuoteInProgress(true)
         getMaxCurrencyObservable().subscribe(
                 {
-                    view.updateFromCryptoText(cryptoFormat.format(it))
-                    // This is a bit of a hack to bypass focus issues
                     fromCryptoSubject.onNext(cryptoFormat.format(it))
+                    // This is a bit of a hack to bypass focus issues
+                    view.updateFromCryptoText(cryptoFormat.format(it))
                 },
                 { Timber.e(it) }
         )
     }
 
     internal fun onMinPressed() {
+        view.removeAllFocus()
         view.showQuoteInProgress(true)
         with(getMinimum()) {
-            view.updateFromCryptoText(cryptoFormat.format(this))
-            // This is a bit of a hack to bypass focus issues
             fromCryptoSubject.onNext(cryptoFormat.format(this))
+            // This is a bit of a hack to bypass focus issues
+            view.updateFromCryptoText(cryptoFormat.format(this))
         }
     }
 
