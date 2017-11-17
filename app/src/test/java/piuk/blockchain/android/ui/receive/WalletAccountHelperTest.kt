@@ -13,11 +13,13 @@ import org.junit.Test
 import org.mockito.Mockito
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
-import piuk.blockchain.android.data.ethereum.EthDataStore
+import piuk.blockchain.android.data.ethereum.EthDataManager
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
+import java.math.BigInteger
 
 class WalletAccountHelperTest {
 
@@ -27,7 +29,7 @@ class WalletAccountHelperTest {
     private val prefsUtil: PrefsUtil = mock()
     private val exchangeRateFactory: ExchangeRateFactory = mock()
     private val currencyState: CurrencyState = mock()
-    private val ethDataStore: EthDataStore = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+    private val ethDataManager: EthDataManager = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
 
     @Before
     fun setUp() {
@@ -37,7 +39,7 @@ class WalletAccountHelperTest {
                 prefsUtil,
                 exchangeRateFactory,
                 currencyState,
-                ethDataStore
+                ethDataManager
         )
     }
 
@@ -109,12 +111,15 @@ class WalletAccountHelperTest {
     fun `getAccountItems when currency is ETH should return one account`() {
         // Arrange
         val ethAccount: EthereumAccount = mock()
+        val combinedEthModel: CombinedEthModel = mock()
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
-        whenever(ethDataStore.ethWallet?.account).thenReturn(ethAccount)
+        whenever(ethDataManager.getEthWallet()?.account).thenReturn(ethAccount)
+        whenever(ethDataManager.getEthResponseModel()).thenReturn(combinedEthModel)
+        whenever(combinedEthModel.getTotalBalance()).thenReturn(BigInteger.valueOf(1234567890L))
         // Act
         val result = subject.getAccountItems()
         // Assert
-        verify(ethDataStore, atLeastOnce()).ethWallet
+        verify(ethDataManager, atLeastOnce()).getEthWallet()
         result.size `should be` 1
         result[0].accountObject `should equal` ethAccount
     }
@@ -175,12 +180,16 @@ class WalletAccountHelperTest {
     fun `getDefaultAccount should return ETH account`() {
         // Arrange
         val ethAccount: EthereumAccount = mock()
+        val combinedEthModel: CombinedEthModel = mock()
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
-        whenever(ethDataStore.ethWallet?.account).thenReturn(ethAccount)
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
+        whenever(ethDataManager.getEthWallet()?.account).thenReturn(ethAccount)
+        whenever(ethDataManager.getEthResponseModel()).thenReturn(combinedEthModel)
+        whenever(combinedEthModel.getTotalBalance()).thenReturn(BigInteger.valueOf(1234567890L))
         // Act
         val result = subject.getDefaultAccount()
         // Assert
-        verify(ethDataStore, atLeastOnce()).ethWallet
+        verify(ethDataManager, atLeastOnce()).getEthWallet()
         result.accountObject `should equal` ethAccount
     }
 

@@ -3,10 +3,11 @@ package piuk.blockchain.android.ui.receive
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
+import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
-import piuk.blockchain.android.data.ethereum.EthDataStore
+import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -14,6 +15,7 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import java.math.RoundingMode
 import java.util.*
 
 @Mockable
@@ -23,7 +25,7 @@ class WalletAccountHelper(
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState,
-        private val ethDataStore: EthDataStore
+        private val ethDataManager: EthDataManager
 ) {
     private val btcUnitType: Int by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC) }
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(btcUnitType) }
@@ -37,17 +39,15 @@ class WalletAccountHelper(
      *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getAccountItems(): List<ItemAccount> {
-        return when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> mutableListOf<ItemAccount>().apply {
-                // V3
-                addAll(getHdAccounts())
-                // V2l
-                addAll(getLegacyAddresses())
-            }.toList()
+    fun getAccountItems(): List<ItemAccount> = when (currencyState.cryptoCurrency) {
+        CryptoCurrencies.BTC -> mutableListOf<ItemAccount>().apply {
+            // V3
+            addAll(getHdAccounts())
+            // V2l
+            addAll(getLegacyAddresses())
+        }.toList()
 
-            else -> getEthAccount().toList()
-        }
+        else -> getEthAccount().toList()
     }
 
     /**
@@ -119,11 +119,9 @@ class WalletAccountHelper(
         )
     } ?: emptyList()
 
-    fun getDefaultAccount(): ItemAccount {
-        return when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> getDefaultBtcAccount()
-            else -> getDefaultEthAccount()
-        }
+    fun getDefaultAccount(): ItemAccount = when (currencyState.cryptoCurrency) {
+        CryptoCurrencies.BTC -> getDefaultBtcAccount()
+        else -> getDefaultEthAccount()
     }
 
     fun getEthAccount() = mutableListOf<ItemAccount>().apply {
@@ -195,14 +193,18 @@ class WalletAccountHelper(
     }
 
     private fun getDefaultEthAccount(): ItemAccount {
-        val ethAccount = ethDataStore.ethWallet?.account
+        val ethModel = ethDataManager.getEthResponseModel()
+        val ethAccount = ethDataManager.getEthWallet()!!.account
+        var amount = Convert.fromWei(ethModel?.getTotalBalance().toString(), Convert.Unit.ETHER)
+        amount = amount.setScale(8, RoundingMode.HALF_DOWN)
         return ItemAccount(
                 ethAccount?.label,
-                "0 ETH",
+                "($amount ETH)",
                 null,
                 0,
                 ethAccount,
-                ethAccount?.address)
+                ethAccount?.address
+        )
     }
 
 }

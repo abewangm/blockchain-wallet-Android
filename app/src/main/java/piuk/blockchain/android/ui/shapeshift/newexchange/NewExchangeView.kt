@@ -16,7 +16,6 @@ interface NewExchangeView : View {
 
     fun updateUi(
             fromCurrency: CryptoCurrencies,
-            displayDropDown: Boolean,
             fromLabel: String,
             toLabel: String,
             fiatHint: String

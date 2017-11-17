@@ -12,7 +12,9 @@ import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.EditText
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.jakewharton.rxbinding2.widget.RxTextView
+import info.blockchain.wallet.ethereum.EthereumAccount
 import info.blockchain.wallet.payload.data.Account
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -96,7 +98,6 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     override fun updateUi(
             fromCurrency: CryptoCurrencies,
-            displayDropDown: Boolean,
             fromLabel: String,
             toLabel: String,
             fiatHint: String
@@ -111,8 +112,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         edittext_to_crypto.hint = "0.00"
 
         when (fromCurrency) {
-            CryptoCurrencies.BTC -> showFromBtc(displayDropDown)
-            CryptoCurrencies.ETHER -> showFromEth(displayDropDown)
+            CryptoCurrencies.BTC -> showFromBtc()
+            CryptoCurrencies.ETHER -> showFromEth()
             CryptoCurrencies.BCC -> throw IllegalArgumentException("BCC not supported")
         }
     }
@@ -139,16 +140,30 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
 
-            val account: Account = data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM)
-                    .toKotlinObject()
-
-            when (requestCode) {
-                AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
-                    presenter.onFromAccountChanged(account)
-                AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
-                    presenter.onToAccountChanged(account)
-                else -> throw IllegalArgumentException("Unknown request code $requestCode")
+            val clazz = Class.forName(data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
+            val any = ObjectMapper().readValue(data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), clazz)
+            when (any) {
+                is Account -> {
+                    when (requestCode) {
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
+                            presenter.onFromAccountChanged(any)
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
+                            presenter.onToAccountChanged(any)
+                        else -> throw IllegalArgumentException("Unknown request code $requestCode")
+                    }
+                }
+                is EthereumAccount -> {
+                    when (requestCode) {
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
+                            presenter.onFromEthSelected()
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
+                            presenter.onToEthSelected()
+                        else -> throw IllegalArgumentException("Unknown request code $requestCode")
+                    }
+                }
+                else -> throw IllegalArgumentException("Unsupported class type $clazz")
             }
+
         }
     }
 
@@ -201,16 +216,16 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     override fun showAmountError(errorMessage: String) {
         textview_error.text = errorMessage
         textview_error.visible()
-        edittext_from_crypto.setTextColor(
-                ContextCompat.getColor(this, R.color.product_red_medium)
-        )
+        editTexts.forEach {
+            it.setTextColor(ContextCompat.getColor(this, R.color.product_red_medium))
+        }
     }
 
     override fun clearError() {
         textview_error.invisible()
-        edittext_from_crypto.setTextColor(
-                ContextCompat.getColor(this, R.color.black)
-        )
+        editTexts.forEach {
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+        }
     }
 
     override fun setButtonEnabled(enabled: Boolean) {
@@ -319,22 +334,14 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
 
-    private fun showFromBtc(displayDropDown: Boolean) {
-        // Units
+    private fun showFromBtc() {
         textview_unit_from.text = btcSymbol
         textview_unit_to.text = ethSymbol
-        // Visibility
-        imageview_to_dropdown.gone()
-        if (displayDropDown) imageview_from_dropdown.visible()
     }
 
-    private fun showFromEth(displayDropDown: Boolean) {
-        // Units
+    private fun showFromEth() {
         textview_unit_from.text = ethSymbol
         textview_unit_to.text = btcSymbol
-        // Visibility
-        imageview_from_dropdown.gone()
-        if (displayDropDown) imageview_to_dropdown.visible()
     }
 
     private fun isKeyboardVisible(): Boolean = shapeshift_keyboard.isVisible

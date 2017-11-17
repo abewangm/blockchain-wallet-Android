@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.ethereum.EthereumAccount;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
@@ -21,6 +22,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
     private static final int VIEW_TYPE_CONTACT = 1;
     private static final int VIEW_TYPE_ACCOUNT = 2;
     private static final int VIEW_TYPE_LEGACY = 3;
+    private static final int VIEW_TYPE_ETHEREUM = 4;
 
     private List<ItemAccount> items;
     private AccountClickListener clickListener;
@@ -43,6 +45,9 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
             case VIEW_TYPE_LEGACY:
                 View account = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row, parent, false);
                 return new AccountViewHolder(account);
+            case VIEW_TYPE_ETHEREUM:
+                View ethereum = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row, parent, false);
+                return new EthereumViewHolder(ethereum);
         }
         return null;
     }
@@ -83,6 +88,12 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
                 }
                 holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.getAccountObject()));
                 break;
+            case VIEW_TYPE_ETHEREUM:
+                EthereumViewHolder ethereumViewHolder = ((EthereumViewHolder) holder);
+                ethereumViewHolder.label.setText(itemAccount.getLabel());
+                ethereumViewHolder.balance.setText(itemAccount.getDisplayBalance());
+                holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.getAccountObject()));
+                break;
         }
     }
 
@@ -101,6 +112,8 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
             return VIEW_TYPE_ACCOUNT;
         } else if (object.getAccountObject() instanceof LegacyAddress) {
             return VIEW_TYPE_LEGACY;
+        } else if (object.getAccountObject() instanceof EthereumAccount) {
+            return VIEW_TYPE_ETHEREUM;
         } else {
             return VIEW_TYPE_HEADER;
         }
@@ -143,6 +156,25 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
             tag = itemView.findViewById(R.id.my_account_row_tag);
             balance = itemView.findViewById(R.id.my_account_row_amount);
             address = itemView.findViewById(R.id.my_account_row_address);
+        }
+    }
+
+    private static class EthereumViewHolder extends RecyclerView.ViewHolder {
+
+        TextView label;
+        TextView tag;
+        TextView balance;
+        TextView address;
+
+        EthereumViewHolder(View itemView) {
+            super(itemView);
+            label = itemView.findViewById(R.id.my_account_row_label);
+            tag = itemView.findViewById(R.id.my_account_row_tag);
+            balance = itemView.findViewById(R.id.my_account_row_amount);
+            address = itemView.findViewById(R.id.my_account_row_address);
+
+            tag.setVisibility(View.GONE);
+            address.setVisibility(View.GONE);
         }
     }
 

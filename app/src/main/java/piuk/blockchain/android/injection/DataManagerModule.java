@@ -91,13 +91,13 @@ public class DataManagerModule {
                                                              StringUtils stringUtils,
                                                              ExchangeRateFactory exchangeRateFactory,
                                                              CurrencyState currencyState,
-                                                             EthDataStore ethDataStore) {
+                                                             EthDataManager ethDataManager) {
         return new WalletAccountHelper(payloadManager,
                 stringUtils,
                 prefsUtil,
                 exchangeRateFactory,
                 currencyState,
-                ethDataStore);
+                ethDataManager);
     }
 
     @Provides

@@ -1,8 +1,12 @@
 package piuk.blockchain.android.ui.chooser
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.argumentCaptor
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
+import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.contacts.data.Contact
 import io.reactivex.Observable
+import org.amshove.kluent.mock
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
@@ -117,15 +121,19 @@ class AccountChooserPresenterTest {
         val itemAccount2 = ItemAccount("", "", null, null, null, null)
         whenever(mockWalletAccountHelper.getHdAccounts())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        val itemAccount3 = ItemAccount("", "", null, null, null, null)
+        whenever(mockWalletAccountHelper.getEthAccount())
+                .thenReturn(Arrays.asList(itemAccount3))
         // Act
         subject.onViewReady()
         // Assert
         verify(mockWalletAccountHelper).getHdAccounts()
+        verify(mockWalletAccountHelper).getEthAccount()
         verifyNoMoreInteractions(mockWalletAccountHelper)
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(mockActivity).updateUi(captor.capture())
-        // Value includes 1 header, 3 accounts
-        captor.firstValue.size shouldEqual 4
+        // Value includes 2 headers, 3 accounts, 1 eth account
+        captor.firstValue.size shouldEqual 6
     }
 
     @Test

@@ -14,7 +14,6 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
-import com.tspoon.traceur.Traceur;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
@@ -88,9 +87,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Override
     public void onCreate() {
         super.onCreate();
-        // STOPSHIP: 14/11/2017 This affects performance and shouldn't be shipped
-        Traceur.enableLogging();
-
         if (BuildConfig.USE_CRASHLYTICS) {
             // Init crash reporting
             Fabric.with(this, new Crashlytics(), new Answers());

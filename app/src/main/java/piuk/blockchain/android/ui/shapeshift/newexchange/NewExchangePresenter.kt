@@ -16,7 +16,6 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.FeeDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
-import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -86,9 +85,8 @@ class NewExchangePresenter @Inject constructor(
         val selectedCurrency = currencyState.cryptoCurrency
         view.updateUi(
                 selectedCurrency,
-                btcAccounts.size > 1,
-                if (selectedCurrency == CryptoCurrencies.BTC) getDefaultBtcLabel() else ethLabel,
-                if (selectedCurrency == CryptoCurrencies.ETHER) getDefaultBtcLabel() else ethLabel,
+                if (selectedCurrency == CryptoCurrencies.BTC) getBtcLabel() else ethLabel,
+                if (selectedCurrency == CryptoCurrencies.ETHER) getBtcLabel() else ethLabel,
                 monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
         )
 
@@ -102,7 +100,8 @@ class NewExchangePresenter @Inject constructor(
                 .doOnTerminate { view.dismissProgressDialog() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
-                        { account = payloadDataManager.defaultAccount },
+                        // Only set account the first time
+                        { if (account == null) account = payloadDataManager.defaultAccount },
                         {
                             Timber.e(it)
                             view.showToast(R.string.shapeshift_getting_information_failed, ToastCustom.TYPE_ERROR)
@@ -165,7 +164,11 @@ class NewExchangePresenter @Inject constructor(
         currencyState.toggleCryptoCurrency()
                 .run { compositeDisposable.clear() }
                 .run { view.clearEditTexts() }
-                .run { onViewReady() }
+                .run {
+                    // This is a bit hacky and should be abstracted out when more currencies are
+                    // available, hence the null checks in onViewReady().
+                    onViewReady()
+                }
     }
 
     internal fun onContinuePressed() {
@@ -178,6 +181,18 @@ class NewExchangePresenter @Inject constructor(
         val selectedCurrency = currencyState.cryptoCurrency
 
         // TODO: Check if amount is greater than user can spend in observable
+        getMaxCurrencyObservable()
+                .doOnNext {
+                    // Need to add fee here
+                    // Need to format fee to BigDecimal rather than Sat/Wei
+                    if (it > shapeShiftData!!.depositAmount) {
+                        // Show warning, throw exception
+
+                    } else {
+                        // Continue with chain
+                    }
+                }
+
 
         val quoteRequest = QuoteRequest().apply {
             depositAmount = shapeShiftData!!.depositAmount.toDouble()
@@ -203,11 +218,14 @@ class NewExchangePresenter @Inject constructor(
 
     internal fun onMaxPressed() {
         view.showQuoteInProgress(true)
-        when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> updateMaxBtcAmount()
-            CryptoCurrencies.ETHER -> updateMaxEthAmount()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
+        getMaxCurrencyObservable().subscribe(
+                {
+                    view.updateFromCryptoText(cryptoFormat.format(it))
+                    // This is a bit of a hack to bypass focus issues
+                    fromCryptoSubject.onNext(cryptoFormat.format(it))
+                },
+                { Timber.e(it) }
+        )
     }
 
     internal fun onMinPressed() {
@@ -220,36 +238,39 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onFromChooserClicked() {
-        if (currencyState.cryptoCurrency == CryptoCurrencies.BTC) view.launchAccountChooserActivityFrom()
+        view.launchAccountChooserActivityFrom()
     }
 
     internal fun onToChooserClicked() {
-        if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) view.launchAccountChooserActivityTo()
+        view.launchAccountChooserActivityTo()
+    }
+
+    internal fun onFromEthSelected() {
+        currencyState.cryptoCurrency = CryptoCurrencies.ETHER
+        view.clearEditTexts()
+        updateUi(ethLabel, account!!.label)
+    }
+
+    internal fun onToEthSelected() {
+        currencyState.cryptoCurrency = CryptoCurrencies.BTC
+        view.clearEditTexts()
+        updateUi(account!!.label, ethLabel)
     }
 
     // Here we can safely assume BTC is the "from" type
     internal fun onFromAccountChanged(account: Account) {
+        currencyState.cryptoCurrency = CryptoCurrencies.BTC
         this.account = account
-        view.updateUi(
-                currencyState.cryptoCurrency,
-                btcAccounts.size > 1,
-                account.label,
-                ethLabel,
-                monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
-        )
+        view.clearEditTexts()
+        updateUi(account.label, ethLabel)
     }
 
     // Here we can safely assume ETH is the "from" type
     internal fun onToAccountChanged(account: Account) {
+        currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         this.account = account
         view.clearEditTexts()
-        view.updateUi(
-                currencyState.cryptoCurrency,
-                btcAccounts.size > 1,
-                ethLabel,
-                account.label,
-                monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
-        )
+        updateUi(ethLabel, account.label)
     }
 
     private fun getExchangeRates(): ExchangeRates {
@@ -267,57 +288,6 @@ class NewExchangePresenter @Inject constructor(
         }
     }
 
-    private fun updateMaxBtcAmount() {
-        getUnspentApiResponse(account!!.xpub)
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(
-                        {
-                            val sweepBundle = sendDataManager.getMaximumAvailable(
-                                    it,
-                                    BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
-                            )
-                            val sweepableAmount = BigDecimal(sweepBundle.left)
-                                    .divide(BigDecimal.valueOf(1e8))
-                            val maximum = if (sweepableAmount > getMaximum()) getMaximum() else sweepableAmount
-
-                            view.updateFromCryptoText(cryptoFormat.format(maximum))
-                            // This is a bit of a hack to bypass focus issues
-                            fromCryptoSubject.onNext(cryptoFormat.format(maximum))
-                        },
-                        {
-                            Timber.e(it)
-                            view.showToast(R.string.shapeshift_fetching_unspent_outputs_failed, ToastCustom.TYPE_ERROR)
-                        })
-    }
-
-    private fun updateMaxEthAmount() {
-        ethDataManager.fetchEthAddress()
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnError { view.showToast(R.string.shapeshift_getting_fees_failed, ToastCustom.TYPE_ERROR) }
-                .subscribe(
-                        { calculateUnspentEth(it) },
-                        {
-                            Timber.e(it)
-                            view.showToast(R.string.shapeshift_fetching_eth_account_failed, ToastCustom.TYPE_ERROR)
-                        }
-                )
-    }
-
-    private fun calculateUnspentEth(combinedEthModel: CombinedEthModel) {
-        val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
-        val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
-
-        val addressResponse = combinedEthModel.getAddressResponse()
-        val maxAvailable = addressResponse!!.balance!!.minus(wei.toBigInteger()).max(BigInteger.ZERO)
-
-        val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
-        val maximum = if (availableEth > getMaximum()) getMaximum() else availableEth
-
-        view.updateFromCryptoText(cryptoFormat.format(maximum))
-        // This is a bit of a hack to bypass focus issues
-        fromCryptoSubject.onNext(cryptoFormat.format(maximum))
-    }
-
     private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
         return if (payloadDataManager.getAddressBalance(address).toLong() > 0) {
             sendDataManager.getUnspentOutputs(address)
@@ -326,8 +296,12 @@ class NewExchangePresenter @Inject constructor(
         }
     }
 
-    private fun getDefaultBtcLabel() = if (btcAccounts.size > 1) {
-        payloadDataManager.defaultAccount.label
+    private fun getBtcLabel() = if (btcAccounts.size > 1) {
+        if (account != null) {
+            account!!.label
+        } else {
+            payloadDataManager.defaultAccount.label
+        }
     } else {
         stringUtils.getString(R.string.shapeshift_btc)
     }
@@ -342,6 +316,15 @@ class NewExchangePresenter @Inject constructor(
     private fun getMinimum() = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
 
     //region Field Updates
+    private fun updateUi(fromLabel: String, toLabel: String) {
+        view.updateUi(
+                currencyState.cryptoCurrency,
+                fromLabel,
+                toLabel,
+                monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
+        )
+    }
+
     private fun updateFromFiat(amount: BigDecimal) {
         view.updateFromFiatText(
                 monetaryUtil.getFiatDisplayString(
@@ -539,6 +522,41 @@ class NewExchangePresenter @Inject constructor(
 
     private fun getBtcReceiveAddress(): Observable<String> =
             payloadDataManager.getNextReceiveAddress(account!!)
+    //endregion
+
+    //region Max Amounts Observables
+    private fun getMaxCurrencyObservable(): Observable<BigDecimal> =
+            when (currencyState.cryptoCurrency) {
+                CryptoCurrencies.BTC -> getBtcMaxObservable()
+                CryptoCurrencies.ETHER -> getEthMaxObservable()
+                else -> throw IllegalArgumentException("BCC is not currently supported")
+            }
+
+    private fun getEthMaxObservable(): Observable<BigDecimal> = ethDataManager.fetchEthAddress()
+            .compose(RxUtil.addObservableToCompositeDisposable(this))
+            .doOnError { view.showToast(R.string.shapeshift_fetching_eth_account_failed, ToastCustom.TYPE_ERROR) }
+            .map {
+                val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
+                val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
+
+                val addressResponse = it.getAddressResponse()
+                val maxAvailable = addressResponse!!.balance!!.minus(wei.toBigInteger()).max(BigInteger.ZERO)
+
+                val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
+                return@map if (availableEth > getMaximum()) getMaximum() else availableEth
+            }
+
+    private fun getBtcMaxObservable(): Observable<BigDecimal> = getUnspentApiResponse(account!!.xpub)
+            .compose(RxUtil.addObservableToCompositeDisposable(this))
+            .doOnError { view.showToast(R.string.shapeshift_fetching_unspent_outputs_failed, ToastCustom.TYPE_ERROR) }
+            .map {
+                val sweepBundle = sendDataManager.getMaximumAvailable(
+                        it,
+                        BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
+                )
+                val sweepableAmount = BigDecimal(sweepBundle.left).divide(BigDecimal.valueOf(1e8))
+                return@map if (sweepableAmount > getMaximum()) getMaximum() else sweepableAmount
+            }
     //endregion
 
     private fun PublishSubject<String>.applyDefaults(): Observable<BigDecimal> = this.doOnNext {
