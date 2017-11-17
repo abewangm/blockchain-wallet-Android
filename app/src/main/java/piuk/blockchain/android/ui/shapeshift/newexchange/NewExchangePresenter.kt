@@ -38,6 +38,7 @@ import java.math.BigInteger
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
+import java.text.ParseException
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -180,40 +181,18 @@ class NewExchangePresenter @Inject constructor(
 
         val selectedCurrency = currencyState.cryptoCurrency
 
-        // TODO: Check if amount is greater than user can spend in observable
         getMaxCurrencyObservable()
-                .doOnNext {
-                    // Need to add fee here
-                    // Need to format fee to BigDecimal rather than Sat/Wei
-                    if (it > shapeShiftData!!.depositAmount) {
-                        // Show warning, throw exception
-
-                    } else {
-                        // Continue with chain
-                    }
-                }
-
-
-        val quoteRequest = QuoteRequest().apply {
-            depositAmount = shapeShiftData!!.depositAmount.toDouble()
-            withdrawalAmount = shapeShiftData!!.withdrawalAmount.toDouble()
-            withdrawal = shapeShiftData!!.receiveAddress
-            pair = getShapeShiftPair(selectedCurrency)
-            returnAddress = shapeShiftData!!.changeAddress
-            apiKey = view.shapeShiftApiKey
-        }
-        // Update quote with final data
-        getQuoteObservable(quoteRequest, selectedCurrency)
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnTerminate { view.dismissProgressDialog() }
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(
-                        { view.launchConfirmationPage(shapeShiftData!!) },
-                        {
-                            Timber.e(it)
-                            view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
-                        }
-                )
+                .doOnNext {
+                    val amount = it.setScale(8, RoundingMode.HALF_DOWN)
+                    if (amount > shapeShiftData!!.depositAmount) {
+                        // Show warning, throw exception
+                        view.showAmountError(stringUtils.getString(R.string.insufficient_funds))
+                    } else {
+                        sendFinalRequest(selectedCurrency)
+                    }
+                }.subscribe()
     }
 
     internal fun onMaxPressed() {
@@ -237,13 +216,9 @@ class NewExchangePresenter @Inject constructor(
         }
     }
 
-    internal fun onFromChooserClicked() {
-        view.launchAccountChooserActivityFrom()
-    }
+    internal fun onFromChooserClicked() = view.launchAccountChooserActivityFrom()
 
-    internal fun onToChooserClicked() {
-        view.launchAccountChooserActivityTo()
-    }
+    internal fun onToChooserClicked() = view.launchAccountChooserActivityTo()
 
     internal fun onFromEthSelected() {
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
@@ -359,12 +334,39 @@ class NewExchangePresenter @Inject constructor(
     //endregion
 
     //region Observables
+    /**
+     * Sends a complete [QuoteRequest] object to ShapeShift and sends all of the required fields
+     * serialized to the next Activity.
+     */
+    private fun sendFinalRequest(selectedCurrency: CryptoCurrencies) {
+        val quoteRequest = QuoteRequest().apply {
+            depositAmount = shapeShiftData!!.depositAmount.toDouble()
+            withdrawalAmount = shapeShiftData!!.withdrawalAmount.toDouble()
+            withdrawal = shapeShiftData!!.receiveAddress
+            pair = getShapeShiftPair(selectedCurrency)
+            returnAddress = shapeShiftData!!.changeAddress
+            apiKey = view.shapeShiftApiKey
+        }
+        // Update quote with final data
+        getQuoteObservable(quoteRequest, selectedCurrency)
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
+                .doOnTerminate { view.dismissProgressDialog() }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        { view.launchConfirmationPage(shapeShiftData!!) },
+                        {
+                            Timber.e(it)
+                            view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
+                        }
+                )
+    }
+
     private fun getQuoteFromRequest(
             fromAmount: BigDecimal,
             selectedCurrency: CryptoCurrencies
     ): Observable<Quote> {
         val quoteRequest = QuoteRequest().apply {
-            depositAmount = fromAmount.setScale(8, RoundingMode.HALF_UP).toDouble()
+            depositAmount = fromAmount.setScale(8, RoundingMode.HALF_DOWN).toDouble()
             pair = getShapeShiftPair(selectedCurrency)
             apiKey = view.shapeShiftApiKey
         }
@@ -377,7 +379,7 @@ class NewExchangePresenter @Inject constructor(
             selectedCurrency: CryptoCurrencies
     ): Observable<Quote> {
         val quoteRequest = QuoteRequest().apply {
-            withdrawalAmount = toAmount.setScale(8, RoundingMode.HALF_UP).toDouble()
+            withdrawalAmount = toAmount.setScale(8, RoundingMode.HALF_DOWN).toDouble()
             pair = getShapeShiftPair(selectedCurrency)
             apiKey = view.shapeShiftApiKey
         }
@@ -566,7 +568,8 @@ class NewExchangePresenter @Inject constructor(
     }.debounce(500, TimeUnit.MILLISECONDS)
             // Here we kill any quotes in flight already, as they take up to ten seconds to fulfill
             .doOnNext { compositeDisposable.clear() }
-            .map { BigDecimal(it.sanitise()) }
+            .map { it.sanitise().parse(view.locale) }
+            .doOnError(Timber::e)
             .onErrorReturn { BigDecimal.ZERO }
             .compose(RxUtil.applySchedulersToObservable())
     //endregion
@@ -574,6 +577,15 @@ class NewExchangePresenter @Inject constructor(
     private fun String.sanitise() = if (isNotEmpty()) this else "0"
 
     private fun Double.toBigDecimal() = BigDecimal.valueOf(this)
+
+    @Throws(ParseException::class)
+    private fun String.parse(locale: Locale): BigDecimal {
+        val format = NumberFormat.getNumberInstance(locale)
+        if (format is DecimalFormat) {
+            format.isParseBigDecimal = true
+        }
+        return format.parse(this.replace("[^\\d.,]".toRegex(), "")) as BigDecimal
+    }
 
     private data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
 
