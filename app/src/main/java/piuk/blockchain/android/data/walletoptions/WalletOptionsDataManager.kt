@@ -22,20 +22,26 @@ class WalletOptionsDataManager(
      * It is safe to assumed that walletOptions and
      * the user's country code won't change during an active session.
      */
-    private fun initReplaySubjects() {
+    private fun initWalletOptionsReplaySubjects() {
         val walletOptionsStream = authDataManager.walletOptions
         walletOptionsStream
                 .subscribeOn(Schedulers.io())
-                .subscribeWith<ReplaySubject<WalletOptions>>(walletOptionsState.walletOptionsSource)
+                .subscribeWith(walletOptionsState.walletOptionsSource)
+    }
+
+    private fun initSettingsReplaySubjects(guid: String, sharedKey: String) {
+
+        settingsDataManager.initSettings(guid, sharedKey)
 
         val walletSettingsStream = settingsDataManager.settings
         walletSettingsStream
                 .subscribeOn(Schedulers.io())
-                .subscribeWith<ReplaySubject<Settings>>(walletOptionsState.walletSettingsSource)
+                .subscribeWith(walletOptionsState.walletSettingsSource)
     }
 
-    fun showShapeshift(): Observable<Boolean> {
-        initReplaySubjects()
+    fun showShapeshift(guid: String, sharedKey: String): Observable<Boolean> {
+        initWalletOptionsReplaySubjects()
+        initSettingsReplaySubjects(guid, sharedKey)
 
         return Observable.zip(walletOptionsState.walletOptionsSource, walletOptionsState.walletSettingsSource,
                 BiFunction({ options, settings ->
@@ -60,7 +66,7 @@ class WalletOptionsDataManager(
      * Mobile info retrieved from wallet-options.json based on wallet setting
      */
     fun fetchInfoMessage(): Observable<String> {
-        initReplaySubjects()
+        initWalletOptionsReplaySubjects()
 
         return walletOptionsState.walletOptionsSource.flatMap { options ->
 
@@ -85,7 +91,7 @@ class WalletOptionsDataManager(
      * @return A [Boolean] value contained within an [Observable]
      */
     fun checkForceUpgrade(versionCode: Int, sdk: Int): Observable<Boolean> {
-        initReplaySubjects()
+        initWalletOptionsReplaySubjects()
 
         return walletOptionsState.walletOptionsSource.flatMap {
             val androidUpgradeMap = it.androidUpgrade ?: mapOf()

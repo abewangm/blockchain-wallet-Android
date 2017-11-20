@@ -60,7 +60,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         //State code - none
 
         // Act
-        val testObserver = subject.showShapeshift().test()
+        val testObserver = subject.showShapeshift("", "").test()
         // Assert
         assertEquals(showShapeshiftFlag, testObserver.values()[0])
         testObserver.assertComplete()
@@ -89,7 +89,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         //State code - none
 
         // Act
-        val testObserver = subject.showShapeshift().test()
+        val testObserver = subject.showShapeshift("", "").test()
         // Assert
         assertEquals(showShapeshiftFlag, testObserver.values()[0])
         testObserver.assertComplete()
@@ -120,7 +120,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         //State code - none
 
         // Act
-        val testObserver = subject.showShapeshift().test()
+        val testObserver = subject.showShapeshift("", "").test()
         // Assert
         assertEquals(false, testObserver.values()[0])
         testObserver.assertComplete()
@@ -152,7 +152,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         whenever(settings.state).thenReturn("CA")
 
         // Act
-        val testObserver = subject.showShapeshift().test()
+        val testObserver = subject.showShapeshift("", "").test()
         // Assert
         assertEquals(false, testObserver.values()[0])
         testObserver.assertComplete()
@@ -183,7 +183,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         whenever(settings.state).thenReturn("AR")
 
         // Act
-        val testObserver = subject.showShapeshift().test()
+        val testObserver = subject.showShapeshift("", "").test()
         // Assert
         assertEquals(true, testObserver.values()[0])
         testObserver.assertComplete()
@@ -214,7 +214,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         whenever(settings.state).thenReturn("AR")
 
         // Act
-        val testObserver = subject.showShapeshift().test()
+        val testObserver = subject.showShapeshift("","").test()
         // Assert
         assertEquals(false, testObserver.values()[0])
         testObserver.assertComplete()
