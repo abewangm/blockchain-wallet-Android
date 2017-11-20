@@ -1,7 +1,6 @@
 package piuk.blockchain.android.data.payments;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,13 +20,11 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 public class SendDataManager {
 
     private PaymentService paymentService;
-    private WalletApi walletApi;
     private RxPinning rxPinning;
 
-    public SendDataManager(PaymentService paymentService, RxBus rxBus, WalletApi walletApi) {
+    public SendDataManager(PaymentService paymentService, RxBus rxBus) {
         this.paymentService = paymentService;
-        this.rxPinning = new RxPinning(rxBus);
-        this.walletApi = walletApi;
+        rxPinning = new RxPinning(rxBus);
     }
 
     /**

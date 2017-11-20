@@ -178,11 +178,12 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     @SuppressWarnings("SameParameterValue")
     private void setShapeShiftVisibility(boolean showShapeshift) {
-        if (showShapeshift) {
+        // STOPSHIP: 20/11/2017
+//        if (showShapeshift) {
             getView().showShapeshift();
-        } else {
-            getView().hideShapeshift();
-        }
+//        } else {
+//            getView().hideShapeshift();
+//        }
     }
 
     // Could be used in the future

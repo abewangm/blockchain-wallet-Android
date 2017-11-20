@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_confirmation_shapeshift.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
+import piuk.blockchain.android.ui.account.SecondPasswordHandler
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
@@ -24,7 +25,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationView, ShapeShiftConfirmationPresenter>(),
-        ShapeShiftConfirmationView {
+        ShapeShiftConfirmationView,
+        SecondPasswordHandler.ResultListener {
 
     @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var confirmationPresenter: ShapeShiftConfirmationPresenter
@@ -106,6 +108,26 @@ class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationVie
 
     override fun updateExchangeRate(exchangeRate: String) {
         textview_rate_value.text = exchangeRate
+    }
+
+    override fun updateTransactionFee(displayString: String) {
+        textview_transaction_fee_amount.text = displayString
+    }
+
+    override fun updateNetworkFee(displayString: String) {
+        textview_network_fee_amount.text = displayString
+    }
+
+    override fun showSecondPasswordDialog() {
+        SecondPasswordHandler(this).validate(this)
+    }
+
+    override fun onNoSecondPassword() {
+        // This should never be hit
+    }
+
+    override fun onSecondPasswordValidated(validatedSecondPassword: String?) {
+        presenter.onSecondPasswordVerified(validatedSecondPassword!!)
     }
 
     override fun showToast(message: Int, toastType: String) = toast(message, toastType)

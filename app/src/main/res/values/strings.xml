@@ -815,6 +815,7 @@
     <string name="shapeshift_deposit_title">%1$s to deposit</string>
     <string name="shapeshift_receive_title">%1$s to be received</string>
     <string name="shapeshift_exchange_rate_formatted">1 %1$s = %2$s %3$s</string>
+    <string name="shapeshift_quote_expired_error">Quote expired</string>
 
     <string name="more">More</string>
 

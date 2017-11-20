@@ -173,9 +173,18 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onContinuePressed() {
+        // State check
         check(shapeShiftData != null) { "ShapeShiftData is null, presenter state invalid" }
+        // Check user isn't submitting an empty page
         if (shapeShiftData?.withdrawalAmount == BigDecimal.ZERO) {
             view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
+            return
+        }
+
+        // It's possible that the fee observable can return zero but not kill the chain with an
+        // error, hence checking here
+        if (shapeShiftData?.networkFee == BigDecimal.ZERO) {
+            view.showToast(R.string.shapeshift_getting_fees_failed, ToastCustom.TYPE_ERROR)
             return
         }
 
@@ -450,7 +459,9 @@ class NewExchangePresenter @Inject constructor(
                                                         receiveAddress = addresses.receiveAddress,
                                                         changeAddress = addresses.changeAddress,
                                                         xPub = account!!.xpub,
-                                                        expiration = quote.expiration
+                                                        expiration = quote.expiration,
+                                                        gasLimit = BigInteger.valueOf(feeOptions?.gasLimit ?: 0L),
+                                                        feePerKb = BigInteger.valueOf(feeOptions?.priorityFee ?: 0 * 1000)
                                                 )
 
                                                 return@map quote

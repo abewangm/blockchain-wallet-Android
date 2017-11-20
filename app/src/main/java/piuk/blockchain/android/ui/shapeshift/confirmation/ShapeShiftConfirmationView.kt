@@ -26,4 +26,10 @@ interface ShapeShiftConfirmationView : View {
 
     fun updateExchangeRate(exchangeRate: String)
 
+    fun updateTransactionFee(displayString: String)
+
+    fun updateNetworkFee(displayString: String)
+
+    fun showSecondPasswordDialog()
+
 }

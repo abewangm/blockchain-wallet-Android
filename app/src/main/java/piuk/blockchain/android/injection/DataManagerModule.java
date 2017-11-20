@@ -162,7 +162,7 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected SendDataManager provideSendDataManager(RxBus rxBus) {
-        return new SendDataManager(new PaymentService(new Payment()), rxBus, new WalletApi());
+        return new SendDataManager(new PaymentService(new Payment()), rxBus);
     }
 
     @Provides
