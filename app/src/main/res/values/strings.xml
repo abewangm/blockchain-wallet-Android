@@ -751,7 +751,7 @@
 
     <string name="what_s_this">What\'s this?</string>
     <string name="dismiss">Dismiss</string>
-    
+
     <!-- ETHEREUM BALANCE -->
     <string name="eth_default_account_label">My Ether Wallet</string>
     <string name="eth_now_supporting">Now supporting Ether</string>
@@ -786,10 +786,12 @@
     <!-- KV STORE -->
     <string name="metadata_load_failure">Error loading full wallet functionality. Service might temporarily be unavailable.</string>
 
-    <!-- SHAPESHIFT -->
+    <!-- SHAPESHIFT HISTORY -->
     <string name="shapeshift_exchange">Exchange</string>
     <string name="shapeshift_loading_orders">Loading order history</string>
     <string name="shapeshift_loading_orders_failed">Loading orders failed</string>
+
+    <!-- SHAPESHIFT NEW TRADE -->
     <string name="shapeshift_use_minimum">Use minimum</string>
     <string name="shapeshift_use_maximum">Use maximum</string>
     <string name="shapeshift_arrow_unicode" translatable="false">→</string>
@@ -802,6 +804,17 @@
     <string name="shapeshift_fetching_unspent_outputs_failed">Error fetching unspent outputs</string>
     <string name="shapeshift_fetching_eth_account_failed">Error fetching remaining Ether</string>
     <string name="shapeshift_deriving_address_failed">Error deriving address</string>
+
+    <!-- SHAPESHIFT CONFIRMATION -->
+    <string name="shapeshift_confirmation_agree">Agree to ShapeShift&#160;</string>
+    <string name="shapeshift_confirmation_terms">terms and conditions</string>
+    <string name="shapeshift_network_fee">Network Transaction Fee</string>
+    <string name="shapeshift_transaction_fee">Transaction Fee</string>
+    <string name="shapeshift_exchange_rate">Exchange Rate</string>
+    <string name="shapeshift_time_remaining">Quote expires in %1$s</string>
+    <string name="shapeshift_deposit_title">%1$s to deposit</string>
+    <string name="shapeshift_receive_title">%1$s to be received</string>
+    <string name="shapeshift_exchange_rate_formatted">1 %1$s = %2$s %3$s</string>
 
     <string name="more">More</string>
 

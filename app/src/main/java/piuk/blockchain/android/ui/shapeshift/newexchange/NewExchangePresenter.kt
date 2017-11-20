@@ -183,12 +183,14 @@ class NewExchangePresenter @Inject constructor(
 
         getMaxCurrencyObservable()
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
-                .doOnTerminate { view.dismissProgressDialog() }
                 .doOnNext {
                     val amount = it.setScale(8, RoundingMode.HALF_DOWN)
-                    if (amount > shapeShiftData!!.depositAmount) {
-                        // Show warning, throw exception
+                    if (amount < shapeShiftData!!.depositAmount) {
+                        view.dismissProgressDialog()
+                        // Show warning, inform user
                         view.showAmountError(stringUtils.getString(R.string.insufficient_funds))
+
+                        Timber.d("Attempted to send ${shapeShiftData!!.depositAmount} but max available was $amount")
                     } else {
                         sendFinalRequest(selectedCurrency)
                     }
@@ -261,7 +263,7 @@ class NewExchangePresenter @Inject constructor(
                     BigDecimal.valueOf(exchangeRateFactory.getLastBtcPrice(currencyCode)),
                     BigDecimal.valueOf(exchangeRateFactory.getLastEthPrice(currencyCode))
             )
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -351,7 +353,6 @@ class NewExchangePresenter @Inject constructor(
         }
         // Update quote with final data
         getQuoteObservable(quoteRequest, selectedCurrency)
-                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnTerminate { view.dismissProgressDialog() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
@@ -398,13 +399,13 @@ class NewExchangePresenter @Inject constructor(
                 .doOnSubscribe { feeOptions = dynamicFeeCache.ethFeeOptions!! }
                 .doOnNext { dynamicFeeCache.ethFeeOptions = it }
 
-        else -> throw IllegalArgumentException("BCC is not currently supported")
+        else -> throw IllegalArgumentException("BCH is not currently supported")
     }
 
     private fun getMarketInfoObservable(selectedCurrency: CryptoCurrencies) = when (selectedCurrency) {
         CryptoCurrencies.BTC -> shapeShiftDataManager.getRate(CoinPairings.BTC_TO_ETH)
         CryptoCurrencies.ETHER -> shapeShiftDataManager.getRate(CoinPairings.ETH_TO_BTC)
-        else -> throw IllegalArgumentException("BCC is not currently supported")
+        else -> throw IllegalArgumentException("BCH is not currently supported")
     }
 
     private fun getQuoteObservable(quoteRequest: QuoteRequest, selectedCurrency: CryptoCurrencies) =
@@ -443,7 +444,7 @@ class NewExchangePresenter @Inject constructor(
                                                         toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
                                                         depositAmount = quote.depositAmount.toBigDecimal(),
                                                         withdrawalAmount = quote.withdrawalAmount.toBigDecimal(),
-                                                        exchangeRate = quote.quotedRate,
+                                                        exchangeRate = quote.quotedRate.toBigDecimal(),
                                                         transactionFee = fee,
                                                         networkFee = quote.minerFee.toBigDecimal(),
                                                         receiveAddress = addresses.receiveAddress,
@@ -471,7 +472,7 @@ class NewExchangePresenter @Inject constructor(
                 BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
         )
         CryptoCurrencies.ETHER -> getFeeForEthPaymentObservable()
-        else -> throw IllegalArgumentException("BCC not yet supported")
+        else -> throw IllegalArgumentException("BCH not yet supported")
     }.doOnError { view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR) }
             .onErrorReturn { BigInteger.ZERO }
 
@@ -515,7 +516,7 @@ class NewExchangePresenter @Inject constructor(
                             getBtcReceiveAddress()
                                     .map { Addresses(it, changeAddress) }
                         }
-                else -> throw IllegalArgumentException("BCC not yet supported")
+                else -> throw IllegalArgumentException("BCH not yet supported")
             }.doOnError { view.showToast(R.string.shapeshift_deriving_address_failed, ToastCustom.TYPE_ERROR) }
 
     private fun getEthAddress(): Observable<String> =
@@ -533,7 +534,7 @@ class NewExchangePresenter @Inject constructor(
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> getBtcMaxObservable()
                 CryptoCurrencies.ETHER -> getEthMaxObservable()
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
 
     private fun getEthMaxObservable(): Observable<BigDecimal> = ethDataManager.fetchEthAddress()

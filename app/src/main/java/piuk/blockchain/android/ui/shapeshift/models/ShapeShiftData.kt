@@ -15,7 +15,7 @@ data class ShapeShiftData(
         var toCurrency: CryptoCurrencies,
         var depositAmount: BigDecimal,
         var withdrawalAmount: BigDecimal,
-        var exchangeRate: Double,
+        var exchangeRate: BigDecimal,
         // Fee in Wei or Satoshis
         var transactionFee: BigInteger,
         var networkFee: BigDecimal,

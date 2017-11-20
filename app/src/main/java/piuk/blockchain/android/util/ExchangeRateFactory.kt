@@ -128,7 +128,7 @@ class ExchangeRateFactory private constructor() {
                 prefsKey = PREF_LAST_KNOWN_ETH_PRICE
                 tickerData = ethTickerData
             }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
         var currency = currencyName
         if (currency.isEmpty()) {
@@ -144,7 +144,7 @@ class ExchangeRateFactory private constructor() {
             val tickerItem = when (cryptoCurrency) {
                 CryptoCurrencies.BTC -> getTickerItem(currency, btcTickerData)
                 CryptoCurrencies.ETHER -> getTickerItem(currency, ethTickerData)
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
 
             lastPrice = when (tickerItem) {

@@ -1,42 +1,143 @@
 package piuk.blockchain.android.ui.shapeshift.confirmation
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.os.PersistableBundle
+import android.support.annotation.StringRes
+import android.support.v4.content.ContextCompat
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import kotlinx.android.synthetic.main.activity_confirmation_shapeshift.*
+import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
-import piuk.blockchain.android.ui.base.BaseAuthActivity
+import piuk.blockchain.android.injection.Injector
+import piuk.blockchain.android.ui.base.BaseMvpActivity
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
+import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.helperfunctions.consume
+import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import javax.inject.Inject
 
-class ShapeShiftConfirmationActivity : BaseAuthActivity() {
+class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationView, ShapeShiftConfirmationPresenter>(),
+        ShapeShiftConfirmationView {
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    @Suppress("MemberVisibilityCanPrivate", "unused")
+    @Inject lateinit var confirmationPresenter: ShapeShiftConfirmationPresenter
+
+    override val shapeShiftData: ShapeShiftData by unsafeLazy {
+        intent.getParcelableExtra<ShapeShiftData>(ShapeShiftConfirmationActivity.EXTRA_SHAPESHIFT_DATA)
+    }
+
+    private var progressDialog: MaterialProgressDialog? = null
+
+    init {
+        Injector.getInstance().presenterComponent.inject(this)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirmation_shapeshift)
+        setupToolbar(toolbar_general, R.string.confirm)
+
+        checkbox_terms.setOnClickListener { presenter.onAcceptTermsClicked() }
+        textView_terms_conditions.setOnClickListener { openShapeShiftTerms() }
+        button_confirm.setOnClickListener { presenter.onConfirmClicked() }
+
+        val stringFirstPart = getString(R.string.shapeshift_confirmation_agree)
+        val stringSecondPart = getString(R.string.shapeshift_confirmation_terms)
+        val terms = SpannableString(stringFirstPart + stringSecondPart)
+        textView_terms_conditions.text = terms.apply {
+            setSpan(
+                    ForegroundColorSpan(
+                            ContextCompat.getColor(
+                                    this@ShapeShiftConfirmationActivity,
+                                    R.color.primary_blue_accent
+                            )
+                    ),
+                    stringFirstPart.length,
+                    terms.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        onViewReady()
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onSupportNavigateUp() = consume { onBackPressed() }
 
-        val shapeShiftData = intent.getParcelableExtra<ShapeShiftData>(EXTRA_SHAPESHIFT_DATA)
-        Timber.d("DATAAAAA $shapeShiftData.toString()")
+    override fun showProgressDialog(@StringRes message: Int) {
+        dismissProgressDialog()
+        progressDialog = MaterialProgressDialog(this).apply {
+            setCancelable(false)
+            setMessage(message)
+            if (!isFinishing) show()
+        }
     }
 
+    override fun dismissProgressDialog() {
+        progressDialog?.apply {
+            if (!isFinishing) dismiss()
+            progressDialog = null
+        }
+    }
 
+    override fun setButtonState(enabled: Boolean) {
+        button_confirm.isEnabled = enabled
+    }
+
+    override fun updateCounter(timeRemaining: String) {
+        textview_time_remaining.text = getString(R.string.shapeshift_time_remaining, timeRemaining)
+    }
+
+    override fun updateDeposit(label: String, amount: String) {
+        textview_deposit_title.text = label
+        textview_deposit_amount.text = amount
+    }
+
+    override fun updateReceive(label: String, amount: String) {
+        textview_receive_title.text = label
+        textview_receive_amount.text = amount
+    }
+
+    override fun updateExchangeRate(exchangeRate: String) {
+        textview_rate_value.text = exchangeRate
+    }
+
+    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
+
+    override fun finishPage() = finish()
+
+    override fun createPresenter() = confirmationPresenter
+
+    override fun getView() = this
+
+    private fun openShapeShiftTerms() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(SHAPESHIFT_TERMS_LINK)))
+        } catch (e: ActivityNotFoundException) {
+            Timber.e(e)
+        }
+    }
 
     companion object {
 
-        private const val EXTRA_SHAPESHIFT_DATA = "piuk.blockchain.android.EXTRA_SHAPESHIFT_DATA"
+        private const val SHAPESHIFT_TERMS_LINK = "https://info.shapeshift.io/sites/default/files/ShapeShift_Terms_Conditions%20v1.1.pdf"
+        internal const val EXTRA_SHAPESHIFT_DATA = "piuk.blockchain.android.EXTRA_SHAPESHIFT_DATA"
 
         @JvmStatic
         fun start(context: Context, shapeShiftData: ShapeShiftData) {
             val intent = Intent(context, ShapeShiftConfirmationActivity::class.java).apply {
-                putExtra(EXTRA_SHAPESHIFT_DATA,  shapeShiftData)
+                putExtra(EXTRA_SHAPESHIFT_DATA, shapeShiftData)
             }
 
             context.startActivity(intent)
         }
 
     }
+
 }

@@ -64,13 +64,13 @@ class DisplayableDelegate<in T>(
         val balance = when (tx.cryptoCurrency) {
             CryptoCurrencies.BTC -> BigDecimal(tx.total).divide(BigDecimal.valueOf(1e8))
             CryptoCurrencies.ETHER -> BigDecimal(tx.total).divide(BigDecimal.valueOf(1e18))
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         val fiatBalance = when (tx.cryptoCurrency) {
             CryptoCurrencies.BTC -> balance.multiply(BigDecimal(btcExchangeRate))
             CryptoCurrencies.ETHER -> balance.multiply(BigDecimal(ethExchangeRate))
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         viewHolder.result.setTextColor(Color.WHITE)

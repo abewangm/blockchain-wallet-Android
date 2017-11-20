@@ -48,10 +48,9 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var newExchangePresenter: NewExchangePresenter
 
-    override val locale: Locale
-        get() = Locale.getDefault()
-    override val shapeShiftApiKey: String
-        get() = BuildConfig.SHAPE_SHIFT_API_KEY
+    override val locale: Locale = Locale.getDefault()
+    override val shapeShiftApiKey: String = BuildConfig.SHAPE_SHIFT_API_KEY
+
     private val btcSymbol = CryptoCurrencies.BTC.symbol.toUpperCase()
     private val ethSymbol = CryptoCurrencies.ETHER.symbol.toUpperCase()
     private val compositeDisposable = CompositeDisposable()
@@ -114,7 +113,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         when (fromCurrency) {
             CryptoCurrencies.BTC -> showFromBtc()
             CryptoCurrencies.ETHER -> showFromEth()
-            CryptoCurrencies.BCC -> throw IllegalArgumentException("BCC not supported")
+            CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not supported")
         }
     }
 

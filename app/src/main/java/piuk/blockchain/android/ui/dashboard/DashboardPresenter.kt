@@ -92,7 +92,7 @@ class DashboardPresenter @Inject constructor(
         return when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> 0
             CryptoCurrencies.ETHER -> 1
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
