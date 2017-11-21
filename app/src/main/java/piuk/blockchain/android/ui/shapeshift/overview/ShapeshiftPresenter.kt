@@ -1,13 +1,15 @@
 package piuk.blockchain.android.ui.shapeshift.overview
 
-import io.reactivex.Observable
-import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
+import info.blockchain.wallet.shapeshift.data.Trade
+import piuk.blockchain.android.data.payload.PayloadDataManager
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
-import java.util.concurrent.TimeUnit
+import timber.log.Timber
 import javax.inject.Inject
 
 class ShapeShiftPresenter @Inject constructor(
-        // TODO: Pass dependencies here
+        private val shapeShiftDataManager: ShapeShiftDataManager,
+        private val payloadDataManager: PayloadDataManager
 ) : BasePresenter<ShapeShiftView>() {
 
     override fun onViewReady() {
@@ -17,10 +19,24 @@ class ShapeShiftPresenter @Inject constructor(
         // 4. Display error state + retry if necessary
 
         // TODO: Load shapeshift data
-        Observable.timer(1500, TimeUnit.MILLISECONDS)
+        // TODO: Handle second password scenario
+        shapeShiftDataManager.initialiseTrades(payloadDataManager.wallet.hdWallets[0].masterKey)
+                .doOnError(Timber::e)
+                .flatMap { shapeShiftDataManager.getTradesList() }
                 .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
+                // TODO: Remove me
                 .doOnComplete { view.onStateUpdated(ShapeShiftState.Empty) }
-                .subscribe { IgnorableDefaultObserver<Any>() }
+                // TODO: Render data here
+                .doOnNext { Timber.d(it.toString()) }
+                .subscribe(
+                        {
+                            // Ignorable
+                        },
+                        {
+                            Timber.e(it)
+                            view.onStateUpdated(ShapeShiftState.Error)
+                        }
+                )
     }
 
     internal fun onRetryPressed() {
@@ -31,10 +47,7 @@ class ShapeShiftPresenter @Inject constructor(
 
 sealed class ShapeShiftState {
 
-    class Data(
-            // TODO: Pass necessary data here
-    ) : ShapeShiftState()
-
+    class Data(val trades: List<Trade>) : ShapeShiftState()
     object Empty : ShapeShiftState()
     object Error : ShapeShiftState()
     object Loading : ShapeShiftState()

@@ -232,7 +232,6 @@ public class DataManagerModule {
         return new ShapeShiftDataManager(new ShapeShiftApi(), rxBus);
     }
 
-
     @Provides
     @PresenterScope
     protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager,
