@@ -7,6 +7,7 @@ import info.blockchain.wallet.payment.SpendableUnspentOutputs
 import info.blockchain.wallet.shapeshift.data.Quote
 import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.util.FormatsUtil
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.bitcoinj.core.ECKey
@@ -105,10 +106,9 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         onConfirmClicked()
     }
 
-    private fun updateMetadata() {
+    private fun updateMetadata(completedTxHash: String): Completable {
         val trade = Trade().apply {
-            hashIn = ""
-            hashOut = ""
+            hashIn = completedTxHash
             timestamp = System.currentTimeMillis() / 1000
             status = Trade.STATUS.RECEIVED
             quote = Quote().apply {
@@ -120,17 +120,8 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             }
         }
 
-        shapeShiftDataManager.updateTradesList(trade)
+        return shapeShiftDataManager.updateTradesList(trade)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .subscribe(
-                        {
-                            // TODO:
-                        },
-                        {
-                            // TODO:
-                            Timber.e(it)
-                        }
-                )
     }
 
     private fun sendBtcTransaction(
