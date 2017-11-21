@@ -173,9 +173,18 @@ class NewExchangePresenter @Inject constructor(
     }
 
     internal fun onContinuePressed() {
+        // State check
         check(shapeShiftData != null) { "ShapeShiftData is null, presenter state invalid" }
+        // Check user isn't submitting an empty page
         if (shapeShiftData?.withdrawalAmount == BigDecimal.ZERO) {
             view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
+            return
+        }
+
+        // It's possible that the fee observable can return zero but not kill the chain with an
+        // error, hence checking here
+        if (shapeShiftData?.networkFee == BigDecimal.ZERO) {
+            view.showToast(R.string.shapeshift_getting_fees_failed, ToastCustom.TYPE_ERROR)
             return
         }
 
@@ -346,9 +355,9 @@ class NewExchangePresenter @Inject constructor(
         val quoteRequest = QuoteRequest().apply {
             depositAmount = shapeShiftData!!.depositAmount.toDouble()
             withdrawalAmount = shapeShiftData!!.withdrawalAmount.toDouble()
-            withdrawal = shapeShiftData!!.receiveAddress
+            withdrawal = shapeShiftData!!.withdrawalAddress
             pair = getShapeShiftPair(selectedCurrency)
-            returnAddress = shapeShiftData!!.changeAddress
+            returnAddress = shapeShiftData!!.returnAddress
             apiKey = view.shapeShiftApiKey
         }
         // Update quote with final data
@@ -443,14 +452,17 @@ class NewExchangePresenter @Inject constructor(
                                                         fromCurrency = selectedCurrency,
                                                         toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
                                                         depositAmount = quote.depositAmount.toBigDecimal(),
+                                                        depositAddress = quote.deposit ?: "",
                                                         withdrawalAmount = quote.withdrawalAmount.toBigDecimal(),
+                                                        withdrawalAddress = addresses.withdrawalAddress,
                                                         exchangeRate = quote.quotedRate.toBigDecimal(),
                                                         transactionFee = fee,
                                                         networkFee = quote.minerFee.toBigDecimal(),
-                                                        receiveAddress = addresses.receiveAddress,
-                                                        changeAddress = addresses.changeAddress,
+                                                        returnAddress = addresses.returnAddress,
                                                         xPub = account!!.xpub,
-                                                        expiration = quote.expiration
+                                                        expiration = quote.expiration,
+                                                        gasLimit = BigInteger.valueOf(feeOptions?.gasLimit ?: 0L),
+                                                        feePerKb = BigInteger.valueOf(feeOptions?.priorityFee ?: 0 * 1000)
                                                 )
 
                                                 return@map quote
@@ -506,24 +518,21 @@ class NewExchangePresenter @Inject constructor(
     //region Address Pair Observables
     private fun getAddressPair(selectedCurrency: CryptoCurrencies): Observable<Addresses> =
             when (selectedCurrency) {
-                CryptoCurrencies.BTC -> getBtcChangeAddress()
-                        .flatMap { changeAddress ->
+                CryptoCurrencies.BTC -> getBtcReceiveAddress()
+                        .flatMap { returnAddress ->
                             getEthAddress()
-                                    .map { Addresses(it, changeAddress) }
+                                    .map { Addresses(it, returnAddress) }
                         }
                 CryptoCurrencies.ETHER -> getEthAddress()
-                        .flatMap { changeAddress ->
+                        .flatMap { returnAddress ->
                             getBtcReceiveAddress()
-                                    .map { Addresses(it, changeAddress) }
+                                    .map { Addresses(it, returnAddress) }
                         }
                 else -> throw IllegalArgumentException("BCH not yet supported")
             }.doOnError { view.showToast(R.string.shapeshift_deriving_address_failed, ToastCustom.TYPE_ERROR) }
 
     private fun getEthAddress(): Observable<String> =
             Observable.just(ethDataManager.getEthWallet()!!.account.address)
-
-    private fun getBtcChangeAddress(): Observable<String> =
-            payloadDataManager.getNextChangeAddress(account!!)
 
     private fun getBtcReceiveAddress(): Observable<String> =
             payloadDataManager.getNextReceiveAddress(account!!)
@@ -592,6 +601,6 @@ class NewExchangePresenter @Inject constructor(
 
     private data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
 
-    private data class Addresses(val receiveAddress: String, val changeAddress: String)
+    private data class Addresses(val withdrawalAddress: String, val returnAddress: String)
 
 }

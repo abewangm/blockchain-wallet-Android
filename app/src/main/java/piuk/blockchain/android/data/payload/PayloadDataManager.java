@@ -560,6 +560,15 @@ public class PayloadDataManager {
         return getWallet().getHdWallets().get(0).getAccount(accountPosition);
     }
 
+    public Account getAccountForXPub(String xPub) {
+        for (Account account : getAccounts()) {
+            if (account.getXpub().equals(xPub)) {
+                return account;
+            }
+        }
+        throw new NullPointerException("Account not found for XPub");
+    }
+
     /**
      * Returns the transaction notes for a given transaction hash. May return null if not found.
      *

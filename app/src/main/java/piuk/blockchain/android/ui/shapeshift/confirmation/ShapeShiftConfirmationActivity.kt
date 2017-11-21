@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.shapeshift.confirmation
 
+import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -12,8 +13,10 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import kotlinx.android.synthetic.main.activity_confirmation_shapeshift.*
 import kotlinx.android.synthetic.main.toolbar_general.*
+import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
+import piuk.blockchain.android.ui.account.SecondPasswordHandler
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
@@ -24,11 +27,13 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationView, ShapeShiftConfirmationPresenter>(),
-        ShapeShiftConfirmationView {
+        ShapeShiftConfirmationView,
+        SecondPasswordHandler.ResultListener {
 
     @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var confirmationPresenter: ShapeShiftConfirmationPresenter
 
+    override val shapeShiftApiKey: String = BuildConfig.SHAPE_SHIFT_API_KEY
     override val shapeShiftData: ShapeShiftData by unsafeLazy {
         intent.getParcelableExtra<ShapeShiftData>(ShapeShiftConfirmationActivity.EXTRA_SHAPESHIFT_DATA)
     }
@@ -106,6 +111,41 @@ class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationVie
 
     override fun updateExchangeRate(exchangeRate: String) {
         textview_rate_value.text = exchangeRate
+    }
+
+    override fun updateTransactionFee(displayString: String) {
+        textview_transaction_fee_amount.text = displayString
+    }
+
+    override fun updateNetworkFee(displayString: String) {
+        textview_network_fee_amount.text = displayString
+    }
+
+    override fun showSecondPasswordDialog() {
+        SecondPasswordHandler(this).validate(this)
+    }
+
+    override fun showTimeExpiring() {
+        textview_time_remaining.setTextColor(
+                ContextCompat.getColor(this, R.color.product_red_medium)
+        )
+    }
+
+    override fun showQuoteExpiredDialog() {
+        AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.shapeshift_quote_expired_error_message)
+                .setPositiveButton(android.R.string.ok) { _, _ -> finishPage() }
+                .setCancelable(false)
+                .show()
+    }
+
+    override fun onNoSecondPassword() {
+        // This should never be hit
+    }
+
+    override fun onSecondPasswordValidated(validatedSecondPassword: String?) {
+        presenter.onSecondPasswordVerified(validatedSecondPassword!!)
     }
 
     override fun showToast(message: Int, toastType: String) = toast(message, toastType)

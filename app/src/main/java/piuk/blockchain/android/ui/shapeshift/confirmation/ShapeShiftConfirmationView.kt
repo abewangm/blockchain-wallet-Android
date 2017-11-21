@@ -8,6 +8,8 @@ interface ShapeShiftConfirmationView : View {
 
     val shapeShiftData: ShapeShiftData
 
+    val shapeShiftApiKey: String
+
     fun showToast(message: Int, toastType: String)
 
     fun finishPage()
@@ -25,5 +27,15 @@ interface ShapeShiftConfirmationView : View {
     fun updateReceive(label: String, amount: String)
 
     fun updateExchangeRate(exchangeRate: String)
+
+    fun updateTransactionFee(displayString: String)
+
+    fun updateNetworkFee(displayString: String)
+
+    fun showSecondPasswordDialog()
+
+    fun showTimeExpiring()
+
+    fun showQuoteExpiredDialog()
 
 }

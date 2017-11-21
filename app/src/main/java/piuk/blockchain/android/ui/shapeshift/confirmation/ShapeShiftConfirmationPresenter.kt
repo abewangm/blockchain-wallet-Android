@@ -1,26 +1,54 @@
 package piuk.blockchain.android.ui.shapeshift.confirmation
 
+import info.blockchain.api.data.UnspentOutputs
+import info.blockchain.wallet.ethereum.EthereumAccount
+import info.blockchain.wallet.payload.data.Account
+import info.blockchain.wallet.payment.SpendableUnspentOutputs
+import info.blockchain.wallet.shapeshift.data.Quote
+import info.blockchain.wallet.shapeshift.data.Trade
+import info.blockchain.wallet.util.FormatsUtil
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import org.bitcoinj.core.ECKey
+import org.web3j.protocol.core.methods.request.RawTransaction
+import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
+import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.StringUtils
+import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import timber.log.Timber
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ShapeShiftConfirmationPresenter @Inject constructor(
+        private val shapeShiftDataManager: ShapeShiftDataManager,
         private val payloadDataManager: PayloadDataManager,
+        private val sendDataManager: SendDataManager,
         private val ethDataManager: EthDataManager,
         private val stringUtils: StringUtils
 ) : BasePresenter<ShapeShiftConfirmationView>() {
 
+    private val decimalFormat by unsafeLazy {
+        DecimalFormat().apply {
+            minimumIntegerDigits = 1
+            minimumFractionDigits = 1
+            maximumFractionDigits = 8
+        }
+    }
     private var termsAccepted = false
+    private var verifiedSecondPassword: String? = null
 
     override fun onViewReady() {
         with(view.shapeShiftData) {
@@ -28,6 +56,8 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             updateDeposit(fromCurrency, depositAmount)
             updateReceive(toCurrency, withdrawalAmount)
             updateExchangeRate(exchangeRate, fromCurrency, toCurrency)
+            updateTransactionFee(fromCurrency, transactionFee)
+            updateNetworkFee(toCurrency, networkFee)
 
             // Include countdown
             startCountdown(expiration)
@@ -43,10 +73,173 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         if (!termsAccepted) {
             // Show warning
         } else {
-            // Do some things
+            if (payloadDataManager.isDoubleEncrypted && verifiedSecondPassword == null) {
+                // Show password dialog
+                view.showSecondPasswordDialog()
+                return
+            }
+
+            with(view.shapeShiftData) {
+                when (fromCurrency) {
+                    CryptoCurrencies.BTC -> sendBtcTransaction(
+                            xPub,
+                            withdrawalAddress,
+                            returnAddress,
+                            withdrawalAmount,
+                            networkFee,
+                            feePerKb
+                    )
+                    CryptoCurrencies.ETHER -> sendEthTransaction(
+                            networkFee,
+                            withdrawalAddress,
+                            withdrawalAmount,
+                            gasLimit
+                    )
+                    CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not yet supported")
+                }
+            }
+        }
+    }
+
+    internal fun onSecondPasswordVerified(secondPassword: String) {
+        verifiedSecondPassword = secondPassword
+        onConfirmClicked()
+    }
+
+    private fun updateMetadata(completedTxHash: String): Completable {
+        val trade = Trade().apply {
+            hashIn = completedTxHash
+            timestamp = System.currentTimeMillis() / 1000
+            status = Trade.STATUS.RECEIVED
+            quote = Quote().apply {
+                val shapeShiftData = view.shapeShiftData
+                orderId = shapeShiftData.orderId
+                quotedRate = shapeShiftData.exchangeRate.toDouble()
+                deposit = shapeShiftData.depositAddress
+                minerFee = shapeShiftData.networkFee.toDouble()
+            }
         }
 
+        return shapeShiftDataManager.updateTradesList(trade)
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
     }
+
+    private fun sendBtcTransaction(
+            xPub: String,
+            withdrawalAddress: String,
+            changeAddress: String,
+            withdrawalAmount: BigDecimal,
+            networkFee: BigDecimal,
+            feePerKb: BigInteger
+    ) {
+        require(FormatsUtil.isValidBitcoinAddress(withdrawalAddress)) { "Attempting to send BTC to a non-BTC address" }
+
+        val account = payloadDataManager.getAccountForXPub(xPub)
+        val satoshis = withdrawalAmount.multiply(BigDecimal.valueOf(BTC_DEC)).toBigInteger()
+
+        if (payloadDataManager.isDoubleEncrypted) {
+            payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+        }
+
+        getUnspentApiResponse(xPub)
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
+                .compose(RxUtil.applySchedulersToObservable<UnspentOutputs>())
+                .map { sendDataManager.getSpendableCoins(it, satoshis, feePerKb) }
+                .flatMap { unspent ->
+                    getBitcoinKeys(account, unspent)
+                            .flatMap {
+                                sendDataManager.submitPayment(
+                                        unspent,
+                                        it,
+                                        withdrawalAddress,
+                                        changeAddress,
+                                        networkFee.toBigInteger(),
+                                        satoshis
+                                )
+                            }
+                }
+                .doOnTerminate { view.dismissProgressDialog() }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(
+                        {
+                            // TODO: Handle successful payment, launch next page?
+                            // TODO: Construct Trade object, store in metadata
+                            view.showToast(R.string.success, ToastCustom.TYPE_OK)
+                        },
+                        {
+                            Timber.e(it)
+                            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
+                        }
+                )
+    }
+
+    private fun sendEthTransaction(
+            networkFee: BigDecimal,
+            withdrawalAddress: String,
+            withdrawalAmount: BigDecimal,
+            gasLimit: BigInteger
+    ) {
+        createEthTransaction(networkFee, withdrawalAddress, withdrawalAmount, gasLimit)
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnError { view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR) }
+                .doOnTerminate { view.dismissProgressDialog() }
+                .flatMap {
+                    if (payloadDataManager.isDoubleEncrypted) {
+                        payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+                    }
+
+                    val ecKey = EthereumAccount.deriveECKey(
+                            payloadDataManager.wallet.hdWallets[0].masterKey,
+                            0
+                    )
+                    return@flatMap ethDataManager.signEthTransaction(it, ecKey)
+                }
+                .flatMap { ethDataManager.pushEthTx(it) }
+                .flatMap { ethDataManager.setLastTxHashObservable(it) }
+                .subscribe(
+                        {
+                            // TODO: Handle successful payment, launch next page?
+                            // TODO: Construct Trade object, store in metadata
+                            view.showToast(R.string.success, ToastCustom.TYPE_OK)
+                        },
+                        {
+                            Timber.e(it)
+                            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
+                        })
+    }
+
+    private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
+        return if (payloadDataManager.getAddressBalance(address).toLong() > 0) {
+            sendDataManager.getUnspentOutputs(address)
+        } else {
+            Observable.error(Throwable("No funds - skipping call to unspent API"))
+        }
+    }
+
+    private fun createEthTransaction(
+            networkFee: BigDecimal,
+            withdrawalAddress: String,
+            withdrawalAmount: BigDecimal,
+            gasLimit: BigInteger
+    ): Observable<RawTransaction> {
+        require(FormatsUtil.isValidEthereumAddress(withdrawalAddress)) { "Attempting to send ETH to a non-ETH address" }
+
+        return Observable.just(ethDataManager.getEthResponseModel()!!.getNonce())
+                .map {
+                    ethDataManager.createEthTransaction(
+                            nonce = it,
+                            to = withdrawalAddress,
+                            gasPrice = networkFee.toBigInteger(),
+                            gasLimit = gasLimit,
+                            weiValue = Convert.toWei(withdrawalAmount, Convert.Unit.ETHER).toBigInteger()
+                    )
+                }
+    }
+
+    //region View Updates
+    private fun getBitcoinKeys(account: Account, unspent: SpendableUnspentOutputs): Observable<MutableList<ECKey>> =
+            Observable.just(payloadDataManager.getHDKeysForSigning(account, unspent))
 
     private fun updateDeposit(fromCurrency: CryptoCurrencies, depositAmount: BigDecimal) {
         val label = stringUtils.getFormattedString(R.string.shapeshift_deposit_title, fromCurrency.unit)
@@ -78,10 +271,30 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         view.updateExchangeRate(formattedString)
     }
 
+    private fun updateTransactionFee(fromCurrency: CryptoCurrencies, transactionFee: BigInteger) {
+        val amount = when (fromCurrency) {
+            CryptoCurrencies.BTC -> BigDecimal(transactionFee).divide(BigDecimal.valueOf(BTC_DEC), 8, RoundingMode.HALF_DOWN)
+            CryptoCurrencies.ETHER -> Convert.fromWei(BigDecimal(transactionFee), Convert.Unit.ETHER)
+            CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not yet supported")
+        }
+
+        val displayString = "${decimalFormat.format(amount)} ${fromCurrency.symbol}"
+
+        view.updateTransactionFee(displayString)
+    }
+
+    private fun updateNetworkFee(toCurrency: CryptoCurrencies, networkFee: BigDecimal) {
+        val displayString = "${decimalFormat.format(networkFee)} ${toCurrency.symbol}"
+
+        view.updateNetworkFee(displayString)
+    }
+    //endregion
+
     private fun startCountdown(endTime: Long) {
         var remaining = (endTime - System.currentTimeMillis()) / 1000
         if (remaining <= 0) {
             // Finish page with error
+            view.showQuoteExpiredDialog()
         } else {
             Observable.interval(1, TimeUnit.SECONDS)
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -96,10 +309,17 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                         )
                         view.updateCounter(readableTime)
                     }
+                    .doOnNext { if (it < 5 * 60) view.showTimeExpiring() }
                     .takeUntil { it <= 0 }
-                    .doOnComplete { /** Show countdown finished */ }
+                    .doOnComplete { view.showQuoteExpiredDialog() }
                     .subscribe()
         }
+    }
+
+    companion object {
+
+        private const val BTC_DEC = 1e8
+
     }
 
 }

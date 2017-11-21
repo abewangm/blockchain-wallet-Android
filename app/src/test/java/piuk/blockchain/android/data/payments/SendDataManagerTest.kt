@@ -5,7 +5,6 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
 import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.api.data.UnspentOutputs
-import info.blockchain.wallet.api.WalletApi
 import info.blockchain.wallet.payment.SpendableUnspentOutputs
 import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
@@ -17,7 +16,6 @@ import org.junit.Ignore
 import org.junit.Test
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import java.math.BigInteger
 
 class SendDataManagerTest : RxTest() {
@@ -25,14 +23,13 @@ class SendDataManagerTest : RxTest() {
     private lateinit var subject: SendDataManager
     private val mockPaymentService: PaymentService = mock()
     private val mockRxBus: RxBus = mock()
-    private val mockWalletApi: WalletApi = mock()
 
     @Before
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
 
-        subject = SendDataManager(mockPaymentService, mockRxBus, mockWalletApi)
+        subject = SendDataManager(mockPaymentService, mockRxBus)
     }
 
     @Test

@@ -13,14 +13,26 @@ data class ShapeShiftData(
         val orderId: String,
         var fromCurrency: CryptoCurrencies,
         var toCurrency: CryptoCurrencies,
+        // The amount you're sending to ShapeShift
         var depositAmount: BigDecimal,
+        // The address you're sending the funds to
+        var depositAddress: String,
+        // The amount you'll get back from ShapeShift
         var withdrawalAmount: BigDecimal,
+        // The address to which you want to receive funds
+        var withdrawalAddress: String,
+        // The offered exchange rate
         var exchangeRate: BigDecimal,
-        // Fee in Wei or Satoshis
+        // The fee to send funds to ShapeShift, in Wei or Satoshis
         var transactionFee: BigInteger,
+        // The mining fee that ShapeShift takes from your new funds, *NOT* in Wei or Satoshis as this is returned from the server
         var networkFee: BigDecimal,
-        var receiveAddress: String,
-        var changeAddress: String,
+        // An address for if the trade fails or if there's change
+        var returnAddress: String,
         var xPub: String,
-        var expiration: Long
+        // Epoch time, in seconds
+        var expiration: Long,
+        // Fee information
+        var gasLimit: BigInteger,
+        var feePerKb: BigInteger
 ) : Parcelable
