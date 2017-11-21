@@ -13,7 +13,6 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import kotlinx.android.synthetic.main.activity_confirmation_shapeshift.*
 import kotlinx.android.synthetic.main.toolbar_general.*
-import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.SecondPasswordHandler
@@ -33,7 +32,6 @@ class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationVie
     @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var confirmationPresenter: ShapeShiftConfirmationPresenter
 
-    override val shapeShiftApiKey: String = BuildConfig.SHAPE_SHIFT_API_KEY
     override val shapeShiftData: ShapeShiftData by unsafeLazy {
         intent.getParcelableExtra<ShapeShiftData>(ShapeShiftConfirmationActivity.EXTRA_SHAPESHIFT_DATA)
     }

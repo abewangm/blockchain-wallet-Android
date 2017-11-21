@@ -4,9 +4,11 @@ import info.blockchain.wallet.shapeshift.data.Trade
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import javax.inject.Inject
 
+@Mockable
 class ShapeShiftPresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager,
         private val payloadDataManager: PayloadDataManager
@@ -27,7 +29,7 @@ class ShapeShiftPresenter @Inject constructor(
                 // TODO: Remove me
                 .doOnComplete { view.onStateUpdated(ShapeShiftState.Empty) }
                 // TODO: Render data here
-                .doOnNext { Timber.d(it.toString()) }
+                .doOnNext { it.forEach { Timber.d(it.toJson()) } }
                 .subscribe(
                         {
                             // Ignorable

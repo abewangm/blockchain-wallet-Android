@@ -8,8 +8,6 @@ interface ShapeShiftConfirmationView : View {
 
     val shapeShiftData: ShapeShiftData
 
-    val shapeShiftApiKey: String
-
     fun showToast(message: Int, toastType: String)
 
     fun finishPage()

@@ -23,6 +23,7 @@ import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.StringUtils
+import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.math.BigDecimal
@@ -32,6 +33,7 @@ import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+@Mockable
 class ShapeShiftConfirmationPresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager,
         private val payloadDataManager: PayloadDataManager,
@@ -83,16 +85,16 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 when (fromCurrency) {
                     CryptoCurrencies.BTC -> sendBtcTransaction(
                             xPub,
-                            withdrawalAddress,
+                            depositAddress,
                             returnAddress,
-                            withdrawalAmount,
-                            networkFee,
+                            depositAmount,
+                            transactionFee,
                             feePerKb
                     )
                     CryptoCurrencies.ETHER -> sendEthTransaction(
-                            networkFee,
-                            withdrawalAddress,
-                            withdrawalAmount,
+                            transactionFee,
+                            depositAddress,
+                            depositAmount,
                             gasLimit
                     )
                     CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not yet supported")
@@ -109,7 +111,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private fun updateMetadata(completedTxHash: String): Completable {
         val trade = Trade().apply {
             hashIn = completedTxHash
-            timestamp = System.currentTimeMillis() / 1000
+            timestamp = System.currentTimeMillis()
             status = Trade.STATUS.RECEIVED
             quote = Quote().apply {
                 val shapeShiftData = view.shapeShiftData
@@ -126,16 +128,16 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
 
     private fun sendBtcTransaction(
             xPub: String,
-            withdrawalAddress: String,
-            changeAddress: String,
-            withdrawalAmount: BigDecimal,
-            networkFee: BigDecimal,
+            depositAddress: String,
+            returnAddress: String,
+            depositAmount: BigDecimal,
+            transactionFee: BigInteger,
             feePerKb: BigInteger
     ) {
-        require(FormatsUtil.isValidBitcoinAddress(withdrawalAddress)) { "Attempting to send BTC to a non-BTC address" }
+        require(FormatsUtil.isValidBitcoinAddress(depositAddress)) { "Attempting to send BTC to a non-BTC address" }
 
         val account = payloadDataManager.getAccountForXPub(xPub)
-        val satoshis = withdrawalAmount.multiply(BigDecimal.valueOf(BTC_DEC)).toBigInteger()
+        val satoshis = depositAmount.multiply(BigDecimal.valueOf(BTC_DEC)).toBigInteger()
 
         if (payloadDataManager.isDoubleEncrypted) {
             payloadDataManager.decryptHDWallet(verifiedSecondPassword)
@@ -143,7 +145,6 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
 
         getUnspentApiResponse(xPub)
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
-                .compose(RxUtil.applySchedulersToObservable<UnspentOutputs>())
                 .map { sendDataManager.getSpendableCoins(it, satoshis, feePerKb) }
                 .flatMap { unspent ->
                     getBitcoinKeys(account, unspent)
@@ -151,19 +152,19 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                                 sendDataManager.submitPayment(
                                         unspent,
                                         it,
-                                        withdrawalAddress,
-                                        changeAddress,
-                                        networkFee.toBigInteger(),
+                                        depositAddress,
+                                        returnAddress,
+                                        transactionFee,
                                         satoshis
                                 )
                             }
                 }
+                .flatMapCompletable { updateMetadata(it) }
                 .doOnTerminate { view.dismissProgressDialog() }
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         {
                             // TODO: Handle successful payment, launch next page?
-                            // TODO: Construct Trade object, store in metadata
                             view.showToast(R.string.success, ToastCustom.TYPE_OK)
                         },
                         {
@@ -174,12 +175,12 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     }
 
     private fun sendEthTransaction(
-            networkFee: BigDecimal,
-            withdrawalAddress: String,
-            withdrawalAmount: BigDecimal,
+            transactionFee: BigInteger,
+            depositAddress: String,
+            depositAmount: BigDecimal,
             gasLimit: BigInteger
     ) {
-        createEthTransaction(networkFee, withdrawalAddress, withdrawalAmount, gasLimit)
+        createEthTransaction(transactionFee, depositAddress, depositAmount, gasLimit)
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnError { view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR) }
@@ -197,10 +198,10 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 }
                 .flatMap { ethDataManager.pushEthTx(it) }
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
+                .flatMapCompletable { updateMetadata(it) }
                 .subscribe(
                         {
                             // TODO: Handle successful payment, launch next page?
-                            // TODO: Construct Trade object, store in metadata
                             view.showToast(R.string.success, ToastCustom.TYPE_OK)
                         },
                         {
@@ -212,13 +213,14 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
         return if (payloadDataManager.getAddressBalance(address).toLong() > 0) {
             sendDataManager.getUnspentOutputs(address)
+                    .compose(RxUtil.applySchedulersToObservable())
         } else {
             Observable.error(Throwable("No funds - skipping call to unspent API"))
         }
     }
 
     private fun createEthTransaction(
-            networkFee: BigDecimal,
+            transactionFee: BigInteger,
             withdrawalAddress: String,
             withdrawalAmount: BigDecimal,
             gasLimit: BigInteger
@@ -230,7 +232,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                     ethDataManager.createEthTransaction(
                             nonce = it,
                             to = withdrawalAddress,
-                            gasPrice = networkFee.toBigInteger(),
+                            gasPrice = transactionFee,
                             gasLimit = gasLimit,
                             weiValue = Convert.toWei(withdrawalAmount, Convert.Unit.ETHER).toBigInteger()
                     )
