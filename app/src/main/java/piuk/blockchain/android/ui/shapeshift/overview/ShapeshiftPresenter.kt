@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.shapeshift.overview
 
 import info.blockchain.wallet.shapeshift.data.Trade
 import piuk.blockchain.android.data.payload.PayloadDataManager
+import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import timber.log.Timber
@@ -13,24 +14,19 @@ class ShapeShiftPresenter @Inject constructor(
 ) : BasePresenter<ShapeShiftView>() {
 
     override fun onViewReady() {
-        // 1. Show loading on subscribe
-        // 2. If no trades found, show empty, redirect to new trade
-        // 3. If trades found, map and display data + link for new trade
-        // 4. Display error state + retry if necessary
 
-        // TODO: Load shapeshift data
-        // TODO: Handle second password scenario
-        shapeShiftDataManager.initialiseTrades(payloadDataManager.wallet.hdWallets[0].masterKey)
-                .doOnError(Timber::e)
-                .flatMap { shapeShiftDataManager.getTradesList() }
+        payloadDataManager.metadataNodeFactory
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
-                // TODO: Remove me
-                .doOnComplete { view.onStateUpdated(ShapeShiftState.Empty) }
-                // TODO: Render data here
-                .doOnNext { Timber.d(it.toString()) }
+                .doOnError { view.onStateUpdated(ShapeShiftState.Error) }
+                .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
                 .subscribe(
                         {
-                            // Ignorable
+                            if (it.trades.isEmpty()) {
+                                view.onStateUpdated(ShapeShiftState.Empty)
+                            } else {
+                                view.onStateUpdated(ShapeShiftState.Data(it.trades))
+                            }
                         },
                         {
                             Timber.e(it)
@@ -42,7 +38,6 @@ class ShapeShiftPresenter @Inject constructor(
     internal fun onRetryPressed() {
         onViewReady()
     }
-
 }
 
 sealed class ShapeShiftState {

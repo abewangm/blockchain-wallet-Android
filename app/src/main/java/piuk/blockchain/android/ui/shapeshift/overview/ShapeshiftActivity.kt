@@ -11,15 +11,19 @@ import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.shapeshift.newexchange.NewExchangeActivity
 import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesAdapter
+import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesListClickListener
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
+import timber.log.Timber
 import javax.inject.Inject
 
-class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(), ShapeShiftView {
+class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(), ShapeShiftView, TradesListClickListener {
 
     @Suppress("MemberVisibilityCanPrivate")
     @Inject lateinit var shapeshiftPresenter: ShapeShiftPresenter
+
+    private var tradesAdapter: TradesAdapter? = null
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -32,7 +36,16 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
 
         shapeshift_retry_button.setOnClickListener { presenter.onRetryPressed() }
 
-        shapeshift_recycler_view.adapter = TradesAdapter(this)
+        //TODO("Exchange rates. Crypto/FIAT")
+        tradesAdapter = TradesAdapter(
+                this,
+                100.00,
+                100.00,
+                true,
+                this
+        )
+
+        shapeshift_recycler_view.adapter = tradesAdapter
         shapeshift_recycler_view.layoutManager = LinearLayoutManager(this)
 
         onViewReady()
@@ -71,10 +84,21 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     }
 
     private fun onData(data: ShapeShiftState.Data) {
-        // TODO: Render data to list
+        //TODO("Pass trade data")
+//        tradesAdapter?.items = data?.trades
+        Timber.d("vos onData: "+shapeshift_recycler_view.adapter.itemCount)
+
         shapeshift_loading_layout.gone()
         shapeshift_error_layout.gone()
         shapeshift_recycler_view.visible()
+    }
+
+    override fun onTradeClicked(correctedPosition: Int, absolutePosition: Int) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onValueClicked(isBtc: Boolean) {
+        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     companion object {
