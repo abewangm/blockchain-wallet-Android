@@ -161,9 +161,10 @@ public class MainPresenter extends BasePresenter<MainView> {
      */
     private void doWalletOptionsChecks() {
 
-        walletOptionsDataManager.showShapeshift(
-                payloadDataManager.getWallet().getGuid(),
-                payloadDataManager.getWallet().getSharedKey())
+//        walletOptionsDataManager.showShapeshift(
+//                payloadDataManager.getWallet().getGuid(),
+//                payloadDataManager.getWallet().getSharedKey())
+        Observable.just(true)
                 .doOnNext(this::setShapeShiftVisibility)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(ignored -> {

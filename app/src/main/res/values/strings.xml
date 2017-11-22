@@ -804,6 +804,7 @@
     <string name="shapeshift_fetching_unspent_outputs_failed">Error fetching unspent outputs</string>
     <string name="shapeshift_fetching_eth_account_failed">Error fetching remaining Ether</string>
     <string name="shapeshift_deriving_address_failed">Error deriving address</string>
+    <string name="shapeshift_new_exchange">New Exchange</string>
 
     <!-- SHAPESHIFT CONFIRMATION -->
     <string name="shapeshift_confirmation_agree">Agree to ShapeShift&#160;</string>

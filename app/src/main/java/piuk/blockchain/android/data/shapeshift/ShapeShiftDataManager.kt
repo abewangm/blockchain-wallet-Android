@@ -4,10 +4,14 @@ import info.blockchain.wallet.shapeshift.ShapeShiftApi
 import info.blockchain.wallet.shapeshift.ShapeShiftPairs
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
 import info.blockchain.wallet.shapeshift.data.*
-import info.blockchain.wallet.util.MetadataUtil
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
+import info.blockchain.wallet.payload.PayloadManager
+import info.blockchain.wallet.shapeshift.data.MarketInfo
+import info.blockchain.wallet.shapeshift.data.Quote
+import info.blockchain.wallet.shapeshift.data.QuoteRequest
+import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -20,8 +24,8 @@ import piuk.blockchain.android.util.annotations.WebRequest
 class ShapeShiftDataManager(
         private val shapeShiftApi: ShapeShiftApi,
         private val shapeShiftDataStore: ShapeShiftDataStore,
-        rxBus: RxBus
-) {
+        private val payloadManager: PayloadManager,
+        rxBus: RxBus) {
 
     private val rxPinning = RxPinning(rxBus)
 
@@ -31,11 +35,14 @@ class ShapeShiftDataManager(
      * @param masterKey The wallet's master key [info.blockchain.wallet.bip44.HDWallet.getMasterKey]
      * @return A [Completable] object
      */
-    fun initialiseTrades(masterKey: DeterministicKey): Observable<ShapeShiftTrades> =
-            rxPinning.call<ShapeShiftTrades> {
-                Observable.fromCallable { fetchOrCreateMetadataNode(masterKey) }
-                        .compose(RxUtil.applySchedulersToObservable())
-            }
+    fun initShapeshiftTradeData(metadataNode: DeterministicKey
+    ): Observable<ShapeShiftTrades> = rxPinning.call<ShapeShiftTrades> {
+
+        Observable.fromCallable { fetchOrCreateShapeShiftTradeData(metadataNode) }
+                .doOnNext { shapeShiftDataStore.tradeData = it }
+                .compose(RxUtil.applySchedulersToObservable())
+
+    }
 
     fun getTradesList(): Observable<List<Trade>> {
         shapeShiftDataStore.tradeData?.run { return Observable.just(trades) }
@@ -119,28 +126,28 @@ class ShapeShiftDataManager(
             }.compose(RxUtil.applySchedulersToObservable())
 
     /**
-     * TODO: This is currently untestable, metadata needs a complete rethink as to how it works.
-     *
      * Fetches the current trade metadata from the web, or else creates a new metadata entry
      * containing an empty list of [Trade] objects.
      *
-     * @param masterKey The wallet master key, from [info.blockchain.wallet.bip44.HDWallet.getMasterKey]
+     * @param metadataHDNode
      * @return A [ShapeShiftTrades] object wrapping trades functionality
      * @throws Exception Can throw various exceptions if the key is incorrect, the server is down
      * etc
      */
     @WebRequest
     @Throws(Exception::class)
-    private fun fetchOrCreateMetadataNode(masterKey: DeterministicKey): ShapeShiftTrades {
-        shapeShiftDataStore.tradeData = ShapeShiftTrades.load(MetadataUtil.deriveMetadataNode(masterKey))
+    private fun fetchOrCreateShapeShiftTradeData(metadataHDNode: DeterministicKey): ShapeShiftTrades {
 
-        if (shapeShiftDataStore.tradeData == null) {
-            shapeShiftDataStore.tradeData = ShapeShiftTrades(masterKey).apply { save() }
+        var shapeShiftData = ShapeShiftTrades.load(metadataHDNode)
+
+        if (shapeShiftData == null) {
+            val masterKey = payloadManager.payload.hdWallets[0].masterKey
+            shapeShiftData = ShapeShiftTrades(masterKey)
+            shapeShiftData.save()
         }
 
-        return shapeShiftDataStore.tradeData!!
+        return shapeShiftData
     }
-
 }
 
 /**
