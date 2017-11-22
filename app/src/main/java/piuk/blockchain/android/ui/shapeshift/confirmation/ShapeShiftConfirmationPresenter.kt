@@ -112,7 +112,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         val trade = Trade().apply {
             hashIn = completedTxHash
             timestamp = System.currentTimeMillis()
-            status = Trade.STATUS.RECEIVED
+            status = Trade.STATUS.NO_DEPOSITS
             quote = Quote().apply {
                 val shapeShiftData = view.shapeShiftData
                 orderId = shapeShiftData.orderId
@@ -161,16 +161,11 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 }
                 .flatMapCompletable { updateMetadata(it) }
                 .doOnTerminate { view.dismissProgressDialog() }
+                .doOnError(Timber::e)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
-                        {
-                            // TODO: Handle successful payment, launch next page?
-                            view.showToast(R.string.success, ToastCustom.TYPE_OK)
-                        },
-                        {
-                            Timber.e(it)
-                            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
-                        }
+                        { view.launchProgressPage(depositAddress) },
+                        { view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR) }
                 )
     }
 
@@ -181,10 +176,10 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             gasLimit: BigInteger
     ) {
         createEthTransaction(transactionFee, depositAddress, depositAmount, gasLimit)
-                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnError { view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR) }
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnTerminate { view.dismissProgressDialog() }
+                .doOnError(Timber::e)
                 .flatMap {
                     if (payloadDataManager.isDoubleEncrypted) {
                         payloadDataManager.decryptHDWallet(verifiedSecondPassword)
@@ -200,14 +195,9 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
                 .flatMapCompletable { updateMetadata(it) }
                 .subscribe(
-                        {
-                            // TODO: Handle successful payment, launch next page?
-                            view.showToast(R.string.success, ToastCustom.TYPE_OK)
-                        },
-                        {
-                            Timber.e(it)
-                            view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
-                        })
+                        { view.launchProgressPage(depositAddress) },
+                        { view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR) }
+                )
     }
 
     private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {

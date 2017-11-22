@@ -25,12 +25,12 @@
                 android:layout_marginEnd="32dp"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="32dp"
+                android:text="@string/shapeshift_in_progress_explanation"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="MissingPrefix"
-                tools:text="Thanks for placing your trade! Exchange trades can take up to two hours, and you can keep track of your trade’s progress in the Order History section." />
+                tools:ignore="MissingPrefix" />
 
             <ImageView
                 android:id="@+id/imageview_progress"
@@ -38,12 +38,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:contentDescription="Progress icon"
-                app:layout_constraintDimensionRatio="1:1"
+                android:minHeight="120dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textview_sending_message"
-                app:layout_constraintWidth_default="percent"
-                app:layout_constraintWidth_percent="0.5"
                 app:srcCompat="@drawable/shapeshift_progress_airplane"
                 tools:ignore="HardcodedText" />
 
@@ -52,7 +50,7 @@
                 fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="24dp"
                 android:gravity="center"
                 android:textColor="@color/primary_navy_medium"
                 android:textSize="14sp"

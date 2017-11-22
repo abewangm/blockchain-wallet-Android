@@ -18,6 +18,7 @@ import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.SecondPasswordHandler
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
+import piuk.blockchain.android.ui.shapeshift.inprogress.TradeInProgressActivity
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.consume
@@ -138,8 +139,12 @@ class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationVie
                 .show()
     }
 
+    override fun launchProgressPage(depositAddress: String) {
+        TradeInProgressActivity.start(this, depositAddress)
+    }
+
     override fun onNoSecondPassword() {
-        // This should never be hit
+        throw IllegalStateException("No Second Password callback triggered, but this shouldn't be possible")
     }
 
     override fun onSecondPasswordValidated(validatedSecondPassword: String?) {
@@ -165,12 +170,14 @@ class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationVie
     companion object {
 
         private const val SHAPESHIFT_TERMS_LINK = "https://info.shapeshift.io/sites/default/files/ShapeShift_Terms_Conditions%20v1.1.pdf"
-        internal const val EXTRA_SHAPESHIFT_DATA = "piuk.blockchain.android.EXTRA_SHAPESHIFT_DATA"
+        private const val EXTRA_SHAPESHIFT_DATA = "piuk.blockchain.android.EXTRA_SHAPESHIFT_DATA"
 
         @JvmStatic
         fun start(context: Context, shapeShiftData: ShapeShiftData) {
             val intent = Intent(context, ShapeShiftConfirmationActivity::class.java).apply {
                 putExtra(EXTRA_SHAPESHIFT_DATA, shapeShiftData)
+                // Do not store this in the back stack
+                flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             }
 
             context.startActivity(intent)

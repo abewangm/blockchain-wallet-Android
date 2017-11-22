@@ -36,4 +36,6 @@ interface ShapeShiftConfirmationView : View {
 
     fun showQuoteExpiredDialog()
 
+    fun launchProgressPage(depositAddress: String)
+
 }
