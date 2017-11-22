@@ -30,7 +30,7 @@ data class ShapeShiftData(
         // An address for if the trade fails or if there's change
         var returnAddress: String,
         var xPub: String,
-        // Epoch time, in seconds
+        // Epoch time, in milliseconds
         var expiration: Long,
         // Fee information
         var gasLimit: BigInteger,

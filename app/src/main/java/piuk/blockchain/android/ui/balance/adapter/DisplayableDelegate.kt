@@ -134,9 +134,8 @@ class DisplayableDelegate<in T>(
         this.transactionDisplayMap = transactionDisplayMap
     }
 
-    private fun getResolvedColor(viewHolder: RecyclerView.ViewHolder, @ColorRes color: Int): Int {
-        return ContextCompat.getColor(viewHolder.getContext(), color)
-    }
+    private fun getResolvedColor(viewHolder: RecyclerView.ViewHolder, @ColorRes color: Int): Int =
+            ContextCompat.getColor(viewHolder.getContext(), color)
 
     private fun displayTransferred(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.MOVED)

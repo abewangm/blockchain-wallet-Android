@@ -1,6 +1,5 @@
 package piuk.blockchain.android.data.shapeshift
 
-import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.shapeshift.ShapeShiftApi
 import info.blockchain.wallet.shapeshift.ShapeShiftPairs
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
@@ -12,18 +11,19 @@ import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore
 import piuk.blockchain.android.data.stores.Either
+import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
 
+@Mockable
 class ShapeShiftDataManager(
         private val shapeShiftApi: ShapeShiftApi,
+        private val shapeShiftDataStore: ShapeShiftDataStore,
         rxBus: RxBus
 ) {
 
     private val rxPinning = RxPinning(rxBus)
-    @Suppress("MemberVisibilityCanPrivate")
-    @VisibleForTesting
-    internal var shapeShiftTrades: ShapeShiftTrades? = null
 
     /**
      * Must be called to initialize the ShapeShift trade metadata information.
@@ -38,17 +38,52 @@ class ShapeShiftDataManager(
             }
 
     fun getTradesList(): Observable<List<Trade>> {
-        shapeShiftTrades?.run { return Observable.just(trades) }
+        shapeShiftDataStore.tradeData?.run { return Observable.just(trades) }
 
         throw IllegalStateException("ShapeShiftTrades not initialized")
     }
 
-    fun updateTradesList(trade: Trade): Completable {
-        shapeShiftTrades?.run {
+    fun findTrade(withdrawalAddress: String): Observable<Trade> {
+        shapeShiftDataStore.tradeData?.run {
+            val foundTrade = trades.find { it.quote.withdrawal == withdrawalAddress }
+            return if (foundTrade == null) {
+                Observable.error(Throwable("Trade not found"))
+            } else {
+                Observable.just(foundTrade)
+            }
+        }
+
+        throw IllegalStateException("ShapeShiftTrades not initialized")
+    }
+
+    fun addTradeToList(trade: Trade): Completable {
+        shapeShiftDataStore.tradeData?.run {
             trades.add(trade)
             return rxPinning.call { Completable.fromCallable { save() } }
+                    // Reset state on failure
                     .doOnError { trades.remove(trade) }
                     .compose(RxUtil.applySchedulersToCompletable())
+        }
+
+        throw IllegalStateException("ShapeShiftTrades not initialized")
+    }
+
+    fun updateTrade(trade: Trade): Completable {
+        shapeShiftDataStore.tradeData?.run {
+            val foundTrade = trades.find { it.quote.orderId == trade.quote.orderId }
+            return if (foundTrade == null) {
+                Completable.error(Throwable("Trade not found"))
+            } else {
+                trades.remove(foundTrade)
+                trades.add(trade)
+                rxPinning.call { Completable.fromCallable { save() } }
+                        // Reset state on failure
+                        .doOnError {
+                            trades.remove(trade)
+                            trades.add(foundTrade)
+                        }
+                        .compose(RxUtil.applySchedulersToCompletable())
+            }
         }
 
         throw IllegalStateException("ShapeShiftTrades not initialized")
@@ -97,13 +132,13 @@ class ShapeShiftDataManager(
     @WebRequest
     @Throws(Exception::class)
     private fun fetchOrCreateMetadataNode(masterKey: DeterministicKey): ShapeShiftTrades {
-        shapeShiftTrades = ShapeShiftTrades.load(MetadataUtil.deriveMetadataNode(masterKey))
+        shapeShiftDataStore.tradeData = ShapeShiftTrades.load(MetadataUtil.deriveMetadataNode(masterKey))
 
-        if (shapeShiftTrades == null) {
-            shapeShiftTrades = ShapeShiftTrades(masterKey).apply { save() }
+        if (shapeShiftDataStore.tradeData == null) {
+            shapeShiftDataStore.tradeData = ShapeShiftTrades(masterKey).apply { save() }
         }
 
-        return shapeShiftTrades!!
+        return shapeShiftDataStore.tradeData!!
     }
 
 }

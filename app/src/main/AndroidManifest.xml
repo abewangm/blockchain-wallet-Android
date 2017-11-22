@@ -134,6 +134,9 @@
         <activity
             android:name=".ui.shapeshift.confirmation.ShapeShiftConfirmationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.shapeshift.inprogress.TradeInProgressActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service
             android:name=".data.websocket.WebSocketService"
