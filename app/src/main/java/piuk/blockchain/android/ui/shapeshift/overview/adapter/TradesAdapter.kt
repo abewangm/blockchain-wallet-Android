@@ -18,8 +18,8 @@ class TradesAdapter(
 
     init {
         // Add all necessary AdapterDelegate objects here
-        delegatesManager.addAdapterDelegate(TradesHeaderDelegate())
-//        delegatesManager.addAdapterDelegate(tradesDelegate)
+        delegatesManager.addAdapterDelegate(TradesHeaderDelegate(listClickListener))
+        delegatesManager.addAdapterDelegate(tradesDelegate)
         setHasStableIds(true)
     }
 
@@ -36,6 +36,12 @@ class TradesAdapter(
      * layouts.
      */
     override fun getItemId(position: Int): Long = items[position].hashCode().toLong()
+
+    fun updateTradeList(trades: List<Any>) {
+        var mutableList = trades.toMutableList()
+        mutableList.add(0, "")
+        items = mutableList
+    }
 
     /**
      * Notifies the adapter that the View format (ie, whether or not to show BTC) has been changed.
@@ -61,5 +67,7 @@ interface TradesListClickListener {
     fun onTradeClicked(correctedPosition: Int, absolutePosition: Int)
 
     fun onValueClicked(isBtc: Boolean)
+
+    fun onNewExchangeClicked()
 
 }

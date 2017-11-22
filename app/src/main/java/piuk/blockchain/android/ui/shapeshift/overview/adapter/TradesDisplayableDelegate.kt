@@ -1,17 +1,16 @@
 package piuk.blockchain.android.ui.shapeshift.overview.adapter
 
 import android.app.Activity
-import android.graphics.Color
 import android.support.annotation.ColorRes
-import android.support.annotation.DrawableRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.text.Spannable
 import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import android.widget.TextView
-import info.blockchain.wallet.multiaddress.TransactionSummary
+import info.blockchain.wallet.shapeshift.data.Trade
 import kotlinx.android.synthetic.main.item_shapeshift_trade.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
@@ -22,7 +21,7 @@ import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.inflate
-import java.math.BigDecimal
+import timber.log.Timber
 import java.text.DecimalFormat
 
 class TradesDisplayableDelegate<in T>(
@@ -38,7 +37,7 @@ class TradesDisplayableDelegate<in T>(
     private val dateUtil = DateUtil(activity)
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
-            items[position] is Displayable
+            items[position] is Trade
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
             TradeViewHolder(parent.inflate(R.layout.item_shapeshift_trade))
@@ -51,47 +50,41 @@ class TradesDisplayableDelegate<in T>(
     ) {
 
         val viewHolder = holder as TradeViewHolder
-        val tx = items[position] as Displayable
+        val trade = items[position] as Trade
+
+
+        if(trade.timestamp > 0) {
+            viewHolder.timeSince.text = dateUtil.formatted(trade.timestamp / 1000)
+        } else {
+            //Existing Web issue - no available date to set
+            viewHolder.timeSince.text = ""
+        }
+        viewHolder.direction.text = trade.status.toString()
 
         val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        val balance = when (tx.cryptoCurrency) {
-            CryptoCurrencies.BTC -> BigDecimal(tx.total).divide(BigDecimal.valueOf(1e8))
-            CryptoCurrencies.ETHER -> BigDecimal(tx.total).divide(BigDecimal.valueOf(1e18))
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
 
-        val fiatBalance = when (tx.cryptoCurrency) {
-            CryptoCurrencies.BTC -> balance.multiply(BigDecimal(btcExchangeRate))
-            CryptoCurrencies.ETHER -> balance.multiply(BigDecimal(ethExchangeRate))
-            else -> throw IllegalArgumentException("BCC is not currently supported")
-        }
+        //trade.quote.pair could have worked but isn't being saved in kv-store
+        //htf do we know the crypto currency
 
-        viewHolder.result.setTextColor(Color.WHITE)
-        viewHolder.timeSince.text = dateUtil.formatted(tx.timeStamp)
+//        viewHolder.result.text = getDisplaySpannable(
+//                getCryptoAmount(trade.quote.pair),
+//                0.01,
+//                100.0,
+//                fiatString
+//        )
 
-        when (tx.direction) {
-            TransactionSummary.Direction.TRANSFERRED -> displayTransferred(viewHolder, tx)
-            TransactionSummary.Direction.RECEIVED -> displayReceived(viewHolder, tx)
-            TransactionSummary.Direction.SENT -> displaySent(viewHolder, tx)
-            else -> throw IllegalStateException("Tx direction isn't SENT, RECEIVED or TRANSFERRED")
-        }
+        displayTradeColour(viewHolder, trade)
 
-        viewHolder.result.text = getDisplaySpannable(
-                tx.cryptoCurrency,
-                tx.total.toDouble(),
-                fiatBalance.toDouble(),
-                fiatString
-        )
-
-        viewHolder.result.setOnClickListener {
-            showCrypto = !showCrypto
-            listClickListener.onValueClicked(showCrypto)
-        }
-
-        viewHolder.itemView.setOnClickListener {
+        viewHolder.result.setOnClickListener { listClickListener.onValueClicked(!showCrypto) }
+        viewHolder.layout.setOnClickListener {
             listClickListener.onTradeClicked(
-                    getRealTxPosition(viewHolder.adapterPosition, items), position)
+                    getRealTradePosition(viewHolder.adapterPosition, items), position
+            )
         }
+    }
+
+    fun getCryptoAmount(pair: String): CryptoCurrencies {
+        return CryptoCurrencies.valueOf(pair.split("_").get(1))
     }
 
     fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
@@ -108,55 +101,30 @@ class TradesDisplayableDelegate<in T>(
         return ContextCompat.getColor(viewHolder.getContext(), color)
     }
 
-    private fun displayTransferred(viewHolder: TradeViewHolder, tx: Displayable) {
-        viewHolder.direction.setText(R.string.MOVED)
-        viewHolder.result.setBackgroundResource(getColorForConfirmations(
-                tx,
-                R.drawable.rounded_view_transferred_50,
-                R.drawable.rounded_view_transferred
-        ))
+    private fun displayTradeColour(viewHolder: TradeViewHolder, trade: Trade) {
 
-        viewHolder.direction.setTextColor(
-                getResolvedColor(viewHolder, getColorForConfirmations(
-                        tx,
-                        R.color.product_gray_transferred_50,
-                        R.color.product_gray_transferred
-                ))
-        )
-    }
-
-    private fun displayReceived(viewHolder: TradeViewHolder, tx: Displayable) {
-        viewHolder.direction.setText(R.string.RECEIVED)
-        viewHolder.result.setBackgroundResource(getColorForConfirmations(
-                tx,
-                R.drawable.rounded_view_green_50,
-                R.drawable.rounded_view_green
-        ))
-
-        viewHolder.direction.setTextColor(
-                getResolvedColor(viewHolder, getColorForConfirmations(
-                        tx,
-                        R.color.product_green_received_50,
-                        R.color.product_green_received
-                ))
-        )
-    }
-
-    private fun displaySent(viewHolder: TradeViewHolder, tx: Displayable) {
-        viewHolder.direction.setText(R.string.SENT)
-        viewHolder.result.setBackgroundResource(getColorForConfirmations(
-                tx,
-                R.drawable.rounded_view_red_50,
-                R.drawable.rounded_view_red
-        ))
-
-        viewHolder.direction.setTextColor(
-                getResolvedColor(viewHolder, getColorForConfirmations(
-                        tx,
-                        R.color.product_red_sent_50,
-                        R.color.product_red_sent
-                ))
-        )
+        when (trade.status) {
+            Trade.STATUS.COMPLETE -> {
+                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_complete)
+                viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
+            }
+            Trade.STATUS.FAILED -> {
+                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
+                viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
+            }
+            Trade.STATUS.NO_DEPOSITS -> {
+                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
+                viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
+            }
+            Trade.STATUS.RECEIVED -> {
+                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
+                viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
+            }
+            Trade.STATUS.RESOLVED -> {
+                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_green)
+                viewHolder.direction.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
+            }
+        }
     }
 
     private fun getDisplaySpannable(
@@ -203,16 +171,7 @@ class TradesDisplayableDelegate<in T>(
     private fun getDisplayUnits(): String =
             monetaryUtil.getBtcUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)]
 
-    private fun getColorForConfirmations(
-            tx: Displayable,
-            @DrawableRes colorLight: Int,
-            @DrawableRes colorDark: Int
-    ) = if (tx.confirmations < getRequiredConfirmations(tx)) colorLight else colorDark
-
-    private fun getRequiredConfirmations(tx: Displayable) =
-            if (tx.cryptoCurrency == CryptoCurrencies.BTC) CONFIRMATIONS_BTC else CONFIRMATIONS_ETH
-
-    private fun getRealTxPosition(position: Int, items: List<T>): Int {
+    private fun getRealTradePosition(position: Int, items: List<T>): Int {
         val diff = items.size - items.count { it is Displayable }
         return position - diff
     }
@@ -224,13 +183,6 @@ class TradesDisplayableDelegate<in T>(
         internal var result: TextView = itemView.result
         internal var timeSince: TextView = itemView.date
         internal var direction: TextView = itemView.direction
+        internal var layout: RelativeLayout = itemView.trade_row
     }
-
-    companion object {
-
-        private const val CONFIRMATIONS_BTC = 3
-        private const val CONFIRMATIONS_ETH = 12
-
-    }
-
 }

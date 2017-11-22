@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import info.blockchain.wallet.shapeshift.data.Trade
 import kotlinx.android.synthetic.main.activity_shapeshift.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
@@ -44,6 +45,7 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
                 true,
                 this
         )
+        tradesAdapter?.updateTradeList(emptyList())
 
         shapeshift_recycler_view.adapter = tradesAdapter
         shapeshift_recycler_view.layoutManager = LinearLayoutManager(this)
@@ -84,9 +86,8 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     }
 
     private fun onData(data: ShapeShiftState.Data) {
-        //TODO("Pass trade data")
-//        tradesAdapter?.items = data?.trades
-        Timber.d("vos onData: "+shapeshift_recycler_view.adapter.itemCount)
+        tradesAdapter?.updateTradeList(data?.trades)
+        Timber.d("vos onData: " + shapeshift_recycler_view.adapter.itemCount)
 
         shapeshift_loading_layout.gone()
         shapeshift_error_layout.gone()
@@ -99,6 +100,10 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
 
     override fun onValueClicked(isBtc: Boolean) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onNewExchangeClicked() {
+        NewExchangeActivity.start(this)
     }
 
     companion object {
