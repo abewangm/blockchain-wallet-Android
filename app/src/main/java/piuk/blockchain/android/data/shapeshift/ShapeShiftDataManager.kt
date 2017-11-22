@@ -43,12 +43,47 @@ class ShapeShiftDataManager(
         throw IllegalStateException("ShapeShiftTrades not initialized")
     }
 
-    fun updateTradesList(trade: Trade): Completable {
+    fun findTrade(withdrawalAddress: String): Observable<Trade> {
+        shapeShiftDataStore.tradeData?.run {
+            val foundTrade = trades.find { it.quote.withdrawal == withdrawalAddress }
+            return if (foundTrade == null) {
+                Observable.error(Throwable("Trade not found"))
+            } else {
+                Observable.just(foundTrade)
+            }
+        }
+
+        throw IllegalStateException("ShapeShiftTrades not initialized")
+    }
+
+    fun addTradeToList(trade: Trade): Completable {
         shapeShiftDataStore.tradeData?.run {
             trades.add(trade)
             return rxPinning.call { Completable.fromCallable { save() } }
+                    // Reset state on failure
                     .doOnError { trades.remove(trade) }
                     .compose(RxUtil.applySchedulersToCompletable())
+        }
+
+        throw IllegalStateException("ShapeShiftTrades not initialized")
+    }
+
+    fun updateTrade(trade: Trade): Completable {
+        shapeShiftDataStore.tradeData?.run {
+            val foundTrade = trades.find { it.quote.orderId == trade.quote.orderId }
+            return if (foundTrade == null) {
+                Completable.error(Throwable("Trade not found"))
+            } else {
+                trades.remove(foundTrade)
+                trades.add(trade)
+                rxPinning.call { Completable.fromCallable { save() } }
+                        // Reset state on failure
+                        .doOnError {
+                            trades.remove(trade)
+                            trades.add(foundTrade)
+                        }
+                        .compose(RxUtil.applySchedulersToCompletable())
+            }
         }
 
         throw IllegalStateException("ShapeShiftTrades not initialized")

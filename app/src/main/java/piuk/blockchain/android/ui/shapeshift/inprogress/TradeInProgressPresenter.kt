@@ -32,7 +32,10 @@ class TradeInProgressPresenter @Inject constructor(
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         {
-                            // TODO: Update Metadata Entries when exchange is complete
+                            // Doesn't particularly matter if completion is interrupted here
+                            with(it) {
+                                updateMetadata(withdraw, transaction, status)
+                            }
                         },
                         {
                             Timber.e(it)
@@ -40,6 +43,27 @@ class TradeInProgressPresenter @Inject constructor(
                         {
                             Timber.d("On Complete")
                         }
+                )
+    }
+
+    private fun updateMetadata(
+            withdrawalAddress: String,
+            hashOut: String?,
+            status: Trade.STATUS
+    ) {
+
+        shapeShiftDataManager.findTrade(withdrawalAddress)
+                .map {
+                    it.apply {
+                        this.status = status
+                        this.hashOut = hashOut
+                    }
+                }
+                .flatMapCompletable { shapeShiftDataManager.updateTrade(it) }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { Timber.d("Update metadata entry complete") },
+                        { Timber.e(it) }
                 )
     }
 

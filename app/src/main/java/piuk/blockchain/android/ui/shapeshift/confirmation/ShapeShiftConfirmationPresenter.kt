@@ -122,7 +122,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             }
         }
 
-        return shapeShiftDataManager.updateTradesList(trade)
+        return shapeShiftDataManager.addTradeToList(trade)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
     }
 
