@@ -462,6 +462,7 @@ class NewExchangePresenter @Inject constructor(
                                                         xPub = account!!.xpub,
                                                         expiration = quote.expiration,
                                                         gasLimit = BigInteger.valueOf(feeOptions?.gasLimit ?: 0L),
+                                                        gasPrice = BigInteger.valueOf(feeOptions?.regularFee ?: 0L),
                                                         feePerKb = BigInteger.valueOf(feeOptions?.priorityFee ?: 0 * 1000)
                                                 )
 

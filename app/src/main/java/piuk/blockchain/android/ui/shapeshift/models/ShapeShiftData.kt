@@ -29,10 +29,12 @@ data class ShapeShiftData(
         var networkFee: BigDecimal,
         // An address for if the trade fails or if there's change
         var returnAddress: String,
+        // xPub for finding account
         var xPub: String,
         // Epoch time, in milliseconds
         var expiration: Long,
         // Fee information
         var gasLimit: BigInteger,
+        var gasPrice: BigInteger,
         var feePerKb: BigInteger
 ) : Parcelable

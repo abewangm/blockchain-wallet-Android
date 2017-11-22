@@ -53,6 +53,9 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private var verifiedSecondPassword: String? = null
 
     override fun onViewReady() {
+        // TODO: Remove me
+        Timber.d(view.shapeShiftData.toString())
+        
         with(view.shapeShiftData) {
             // Render data
             updateDeposit(fromCurrency, depositAmount)
@@ -92,7 +95,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                             feePerKb
                     )
                     CryptoCurrencies.ETHER -> sendEthTransaction(
-                            transactionFee,
+                            gasPrice,
                             depositAddress,
                             depositAmount,
                             gasLimit
@@ -170,12 +173,12 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     }
 
     private fun sendEthTransaction(
-            transactionFee: BigInteger,
+            gasPrice: BigInteger,
             depositAddress: String,
             depositAmount: BigDecimal,
             gasLimit: BigInteger
     ) {
-        createEthTransaction(transactionFee, depositAddress, depositAmount, gasLimit)
+        createEthTransaction(gasPrice, depositAddress, depositAmount, gasLimit)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnTerminate { view.dismissProgressDialog() }
@@ -210,7 +213,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     }
 
     private fun createEthTransaction(
-            transactionFee: BigInteger,
+            gasPrice: BigInteger,
             withdrawalAddress: String,
             withdrawalAmount: BigDecimal,
             gasLimit: BigInteger
@@ -222,7 +225,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                     ethDataManager.createEthTransaction(
                             nonce = it,
                             to = withdrawalAddress,
-                            gasPrice = transactionFee,
+                            gasPrice = gasPrice,
                             gasLimit = gasLimit,
                             weiValue = Convert.toWei(withdrawalAmount, Convert.Unit.ETHER).toBigInteger()
                     )
