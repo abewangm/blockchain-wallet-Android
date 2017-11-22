@@ -5,9 +5,11 @@ import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import javax.inject.Inject
 
+@Mockable
 class ShapeShiftPresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager,
         private val payloadDataManager: PayloadDataManager

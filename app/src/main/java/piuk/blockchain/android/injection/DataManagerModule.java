@@ -43,7 +43,7 @@ import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager;
-import piuk.blockchain.android.data.shapeshift.ShapeShiftDataStore;
+import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore;
 import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
