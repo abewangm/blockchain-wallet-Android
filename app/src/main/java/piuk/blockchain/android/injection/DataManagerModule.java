@@ -229,9 +229,11 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected ShapeShiftDataManager provideShapeShiftDataManager(ShapeShiftDataStore shapeShiftDataStore,
-                                                                 RxBus rxBus) {
-        return new ShapeShiftDataManager(new ShapeShiftApi(), shapeShiftDataStore, rxBus);
+    protected ShapeShiftDataManager provideShapeShiftDataManager(
+            ShapeShiftDataStore shapeShiftDataStore,
+            PayloadManager payloadManager,
+            RxBus rxBus) {
+        return new ShapeShiftDataManager(new ShapeShiftApi(), shapeShiftDataStore, payloadManager, rxBus);
     }
 
     @Provides
