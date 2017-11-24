@@ -55,7 +55,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     override fun onViewReady() {
         // TODO: Remove me
         Timber.d(view.shapeShiftData.toString())
-        
+
         with(view.shapeShiftData) {
             // Render data
             updateDeposit(fromCurrency, depositAmount)
@@ -117,11 +117,18 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             timestamp = System.currentTimeMillis()
             status = Trade.STATUS.NO_DEPOSITS
             quote = Quote().apply {
+                // See https://github.com/blockchain/my-wallet-v3/blob/master/src/shift/trade.js#L132
                 val shapeShiftData = view.shapeShiftData
+                // toPartialJSON
                 orderId = shapeShiftData.orderId
-                quotedRate = shapeShiftData.exchangeRate.toDouble()
+                quotedRate = shapeShiftData.exchangeRate
                 deposit = shapeShiftData.depositAddress
-                minerFee = shapeShiftData.networkFee.toDouble()
+                minerFee = shapeShiftData.networkFee
+                // toJSON
+                pair = """${shapeShiftData.fromCurrency.symbol.toLowerCase()}_${shapeShiftData.toCurrency.symbol.toLowerCase()}"""
+                depositAmount = shapeShiftData.depositAmount
+                withdrawal = shapeShiftData.withdrawalAddress
+                withdrawalAmount = shapeShiftData.withdrawalAmount
             }
         }
 
