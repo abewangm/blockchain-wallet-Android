@@ -1,9 +1,12 @@
 package piuk.blockchain.android.ui.shapeshift.overview.adapter
 
 import android.app.Activity
+import info.blockchain.wallet.shapeshift.data.Trade
+import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
+import java.math.BigDecimal
 import kotlin.properties.Delegates
 
 class TradesAdapter(
@@ -38,8 +41,9 @@ class TradesAdapter(
     override fun getItemId(position: Int): Long = items[position].hashCode().toLong()
 
     fun updateTradeList(trades: List<Any>) {
+
         var mutableList = trades.toMutableList()
-        mutableList.add(0, "")
+        mutableList.add(0, "")//Header delegate
         items = mutableList
     }
 
@@ -58,6 +62,15 @@ class TradesAdapter(
      */
     fun onPriceUpdated(lastBtcPrice: Double, lastEthPrice: Double) {
         tradesDelegate.onPriceUpdated(lastBtcPrice, lastEthPrice)
+        notifyDataSetChanged()
+    }
+
+    fun updateTrade(trade: Trade, tradeResponse: TradeStatusResponse) {
+
+        val matchingTrade = items.filterIsInstance(Trade::class.java).find { it.quote.deposit == tradeResponse.address }
+        matchingTrade?.quote?.withdrawalAmount = trade.quote.withdrawalAmount?: tradeResponse.incomingCoin?: BigDecimal.ZERO
+        matchingTrade?.quote?.pair = trade.acquiredCoinType?: tradeResponse.outgoingType?: ""
+
         notifyDataSetChanged()
     }
 }
