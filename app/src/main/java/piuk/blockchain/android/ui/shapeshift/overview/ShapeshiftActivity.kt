@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import info.blockchain.wallet.shapeshift.data.Trade
+import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import kotlinx.android.synthetic.main.activity_shapeshift.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
@@ -16,7 +17,6 @@ import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesListClickLis
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
-import timber.log.Timber
 import javax.inject.Inject
 
 class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(), ShapeShiftView, TradesListClickListener {
@@ -37,20 +37,39 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
 
         shapeshift_retry_button.setOnClickListener { presenter.onRetryPressed() }
 
-        //TODO("Exchange rates. Crypto/FIAT")
+        onViewReady()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.onResume()
+    }
+
+    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean) {
         tradesAdapter = TradesAdapter(
                 this,
-                100.00,
-                100.00,
-                true,
+                btcExchangeRate,
+                ethExchangeRate,
+                isBtc,
                 this
         )
-        tradesAdapter?.updateTradeList(emptyList())
 
         shapeshift_recycler_view.adapter = tradesAdapter
         shapeshift_recycler_view.layoutManager = LinearLayoutManager(this)
 
-        onViewReady()
+        tradesAdapter?.updateTradeList(emptyList())
+    }
+
+    override fun onExchangeRateUpdated(
+            btcExchangeRate: Double,
+            ethExchangeRate: Double,
+            isBtc: Boolean
+    ) {
+        if (tradesAdapter == null) {
+            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc)
+        } else {
+            tradesAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
+        }
     }
 
     override fun onStateUpdated(shapeshiftState: ShapeShiftState) = when (shapeshiftState) {
@@ -58,6 +77,10 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
         is ShapeShiftState.Empty -> onEmptyLayout()
         is ShapeShiftState.Error -> onError()
         is ShapeShiftState.Loading -> onLoading()
+    }
+
+    override fun onTradeUpdate(trade: Trade, tradeResponse: TradeStatusResponse) {
+        tradesAdapter?.updateTrade(trade, tradeResponse)
     }
 
     override fun onSupportNavigateUp() = consume { onBackPressed() }
@@ -86,20 +109,25 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     }
 
     private fun onData(data: ShapeShiftState.Data) {
+
         tradesAdapter?.updateTradeList(data?.trades)
-        Timber.d("vos onData: " + shapeshift_recycler_view.adapter.itemCount)
 
         shapeshift_loading_layout.gone()
         shapeshift_error_layout.gone()
         shapeshift_recycler_view.visible()
     }
 
+    override fun onViewTypeChanged(isBtc: Boolean, btcFormat: Int) {
+        tradesAdapter?.onViewFormatUpdated(isBtc, btcFormat)
+    }
+
     override fun onTradeClicked(correctedPosition: Int, absolutePosition: Int) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//        TradeInProgressActivity.start(this,
+//                presenter.getTradeFromIndex(correctedPosition).depositAddress)
     }
 
     override fun onValueClicked(isBtc: Boolean) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        presenter.setViewType(isBtc)
     }
 
     override fun onNewExchangeClicked() {

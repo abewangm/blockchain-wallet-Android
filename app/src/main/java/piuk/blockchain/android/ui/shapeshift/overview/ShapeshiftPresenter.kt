@@ -4,11 +4,16 @@ import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.annotations.Mockable
+import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -16,8 +21,13 @@ import javax.inject.Inject
 @Mockable
 class ShapeShiftPresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager,
-        private val payloadDataManager: PayloadDataManager
-) : BasePresenter<ShapeShiftView>() {
+        private val payloadDataManager: PayloadDataManager,
+        private val prefsUtil: PrefsUtil,
+        private val exchangeRateFactory: ExchangeRateFactory,
+        private val currencyState: CurrencyState
+        ) : BasePresenter<ShapeShiftView>() {
+
+    private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
     override fun onViewReady() {
 
@@ -42,6 +52,18 @@ class ShapeShiftPresenter @Inject constructor(
                 )
     }
 
+    internal fun onResume() {
+        // Here we check the Fiat and Btc formats and let the UI handle any potential updates
+        val btcUnitType = getBtcUnitType()
+        monetaryUtil.updateUnit(btcUnitType)
+        view.onExchangeRateUpdated(
+                getLastBtcPrice(getFiatCurrency()),
+                getLastEthPrice(getFiatCurrency()),
+                currencyState.isDisplayingCryptoCurrency
+        )
+        view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
+    }
+
     private fun pollForStatus(trades: List<Trade>) {
 
         Observable.fromIterable(trades)
@@ -57,14 +79,34 @@ class ShapeShiftPresenter @Inject constructor(
     }
 
     private fun createPollObservable(trade: Trade) =
-        Observable.interval(2, TimeUnit.SECONDS, Schedulers.io())
+        Observable.interval(5, TimeUnit.SECONDS, Schedulers.io())
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .flatMap { shapeShiftDataManager.getTradeStatus(trade.quote.deposit) }
                 .doOnNext { handleState(trade, it) }
                 .takeUntil { isInFinalState(it.status) }
 
-    private fun handleState(trade: Trade, tradeStatus: TradeStatusResponse) {
-        Timber.d("vos handleState tradeStatus: " + tradeStatus.toJson())
-        Timber.d("vos handleState trade: " + trade.toJson())
+    /**
+     * Update kv-store if need. Handle UI update
+     */
+    private fun handleState(trade: Trade, tradeResponse: TradeStatusResponse) {
+
+        if(trade.status != tradeResponse.status) {
+            trade.status = tradeResponse.status
+            trade.hashOut = tradeResponse.transaction
+
+            updateMetadata(trade)
+        }
+
+        view.onTradeUpdate(trade, tradeResponse)
+    }
+
+    fun updateMetadata(trade: Trade) {
+        shapeShiftDataManager.updateTrade(trade)
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { Timber.d("Update metadata entry complete") },
+                        { Timber.e(it) }
+                )
     }
 
     internal fun onRetryPressed() {
@@ -76,6 +118,23 @@ class ShapeShiftPresenter @Inject constructor(
         Trade.STATUS.COMPLETE, Trade.STATUS.FAILED, Trade.STATUS.RESOLVED -> true
         else -> true
     }
+
+    internal fun setViewType(isBtc: Boolean) {
+        currencyState.isDisplayingCryptoCurrency = isBtc
+        view.onViewTypeChanged(isBtc, getBtcUnitType())
+    }
+
+    private fun getLastBtcPrice(fiat: String) = exchangeRateFactory.getLastBtcPrice(fiat)
+
+    private fun getLastEthPrice(fiat: String) = exchangeRateFactory.getLastEthPrice(fiat)
+
+    private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
+
+    private fun getBtcUnitType() =
+            prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+
+    private fun getFiatCurrency() =
+            prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 }
 
 sealed class ShapeShiftState {
