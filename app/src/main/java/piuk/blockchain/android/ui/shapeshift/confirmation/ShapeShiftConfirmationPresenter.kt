@@ -53,9 +53,6 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private var verifiedSecondPassword: String? = null
 
     override fun onViewReady() {
-        // TODO: Remove me
-        Timber.d(view.shapeShiftData.toString())
-
         with(view.shapeShiftData) {
             // Render data
             updateDeposit(fromCurrency, depositAmount)
@@ -111,6 +108,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         onConfirmClicked()
     }
 
+    //region Observables
     private fun updateMetadata(completedTxHash: String): Completable {
         val trade = Trade().apply {
             hashIn = completedTxHash
@@ -239,10 +237,11 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 }
     }
 
-    //region View Updates
     private fun getBitcoinKeys(account: Account, unspent: SpendableUnspentOutputs): Observable<MutableList<ECKey>> =
             Observable.just(payloadDataManager.getHDKeysForSigning(account, unspent))
+    //endregion
 
+    //region View Updates
     private fun updateDeposit(fromCurrency: CryptoCurrencies, depositAmount: BigDecimal) {
         val label = stringUtils.getFormattedString(R.string.shapeshift_deposit_title, fromCurrency.unit)
         val amount = "${depositAmount.toPlainString()} ${fromCurrency.symbol.toUpperCase()}"

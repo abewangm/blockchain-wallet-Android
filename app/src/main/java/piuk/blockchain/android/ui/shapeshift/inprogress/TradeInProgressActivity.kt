@@ -15,7 +15,8 @@ import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.shapeshift.overview.ShapeShiftActivity
 import javax.inject.Inject
 
-class TradeInProgressActivity : BaseMvpActivity<TradeInProgressView, TradeInProgressPresenter>(), TradeInProgressView {
+class TradeInProgressActivity : BaseMvpActivity<TradeInProgressView, TradeInProgressPresenter>(),
+        TradeInProgressView {
 
     @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var tradeInProgressPresenter: TradeInProgressPresenter

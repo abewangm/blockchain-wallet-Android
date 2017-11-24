@@ -823,10 +823,16 @@
     <string name="shapeshift_in_progress_explanation">Thanks for placing your trade! Exchange trades can take up to two hours, and you can keep track of your trade\'s progress in the Order History section.</string>
     <string name="shapeshift_failed_explanation">This trade has failed. Any funds broadcast from your wallet, will be returned minus the transaction fee. Please return to the exchange tab to start a new trade</string>
     <string name="shapeshift_sending_title">Sending Funds</string>
-    <string name="shapeshift_in_progress_title">Exchange in Progress</string>
+    <string name="shapeshift_in_progress_title">In Progress</string>
     <string name="shapeshift_complete_title">Complete</string>
     <string name="shapeshift_failed_title">Failed</string>
     <string name="shapeshift_step_number">Step %1$s of 3</string>
+
+    <!-- SHAPESHIFT ORDER DETAIL -->
+    <string name="shapeshift_order_id_title">Order ID</string>
+    <string name="shapeshift_trade_not_found">Trade not found</string>
+    <string name="shapeshift_in_progress_summary">Exchange in Progress</string>
+    <string name="shapeshift_failed_summary">Exchange Failed</string>
 
     <string name="more">More</string>
 
