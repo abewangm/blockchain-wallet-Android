@@ -34,7 +34,7 @@ class TradeInProgressPresenter @Inject constructor(
                         {
                             // Doesn't particularly matter if completion is interrupted here
                             with(it) {
-                                updateMetadata(withdraw, transaction, status)
+                                updateMetadata(address, transaction, status)
                             }
                         },
                         {
@@ -47,12 +47,12 @@ class TradeInProgressPresenter @Inject constructor(
     }
 
     private fun updateMetadata(
-            withdrawalAddress: String,
+            address: String,
             hashOut: String?,
             status: Trade.STATUS
     ) {
 
-        shapeShiftDataManager.findTrade(withdrawalAddress)
+        shapeShiftDataManager.findTrade(address)
                 .map {
                     it.apply {
                         this.status = status

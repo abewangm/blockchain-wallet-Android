@@ -50,9 +50,9 @@ class ShapeShiftDataManager(
         throw IllegalStateException("ShapeShiftTrades not initialized")
     }
 
-    fun findTrade(withdrawalAddress: String): Observable<Trade> {
+    fun findTrade(address: String): Observable<Trade> {
         shapeShiftDataStore.tradeData?.run {
-            val foundTrade = trades.find { it.quote.withdrawal == withdrawalAddress }
+            val foundTrade = trades.find { it.quote.deposit == address }
             return if (foundTrade == null) {
                 Observable.error(Throwable("Trade not found"))
             } else {

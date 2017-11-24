@@ -53,6 +53,9 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private var verifiedSecondPassword: String? = null
 
     override fun onViewReady() {
+        // TODO: Remove me
+        Timber.d(view.shapeShiftData.toString())
+
         with(view.shapeShiftData) {
             // Render data
             updateDeposit(fromCurrency, depositAmount)
@@ -92,7 +95,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                             feePerKb
                     )
                     CryptoCurrencies.ETHER -> sendEthTransaction(
-                            transactionFee,
+                            gasPrice,
                             depositAddress,
                             depositAmount,
                             gasLimit
@@ -114,11 +117,18 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             timestamp = System.currentTimeMillis()
             status = Trade.STATUS.NO_DEPOSITS
             quote = Quote().apply {
+                // See https://github.com/blockchain/my-wallet-v3/blob/master/src/shift/trade.js#L132
                 val shapeShiftData = view.shapeShiftData
+                // toPartialJSON
                 orderId = shapeShiftData.orderId
-                quotedRate = shapeShiftData.exchangeRate.toDouble()
+                quotedRate = shapeShiftData.exchangeRate
                 deposit = shapeShiftData.depositAddress
-                minerFee = shapeShiftData.networkFee.toDouble()
+                minerFee = shapeShiftData.networkFee
+                // toJSON
+                pair = """${shapeShiftData.fromCurrency.symbol.toLowerCase()}_${shapeShiftData.toCurrency.symbol.toLowerCase()}"""
+                depositAmount = shapeShiftData.depositAmount
+                withdrawal = shapeShiftData.withdrawalAddress
+                withdrawalAmount = shapeShiftData.withdrawalAmount
             }
         }
 
@@ -170,12 +180,12 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     }
 
     private fun sendEthTransaction(
-            transactionFee: BigInteger,
+            gasPrice: BigInteger,
             depositAddress: String,
             depositAmount: BigDecimal,
             gasLimit: BigInteger
     ) {
-        createEthTransaction(transactionFee, depositAddress, depositAmount, gasLimit)
+        createEthTransaction(gasPrice, depositAddress, depositAmount, gasLimit)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnTerminate { view.dismissProgressDialog() }
@@ -210,7 +220,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     }
 
     private fun createEthTransaction(
-            transactionFee: BigInteger,
+            gasPrice: BigInteger,
             withdrawalAddress: String,
             withdrawalAmount: BigDecimal,
             gasLimit: BigInteger
@@ -222,7 +232,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                     ethDataManager.createEthTransaction(
                             nonce = it,
                             to = withdrawalAddress,
-                            gasPrice = transactionFee,
+                            gasPrice = gasPrice,
                             gasLimit = gasLimit,
                             weiValue = Convert.toWei(withdrawalAmount, Convert.Unit.ETHER).toBigInteger()
                     )

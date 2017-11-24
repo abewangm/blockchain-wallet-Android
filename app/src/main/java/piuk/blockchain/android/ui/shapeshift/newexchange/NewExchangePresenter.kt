@@ -333,14 +333,14 @@ class NewExchangePresenter @Inject constructor(
         )
     }
 
-    private fun updateToFields(toAmount: Double) {
-        val amount = toAmount.toBigDecimal().max(BigDecimal.ZERO)
+    private fun updateToFields(toAmount: BigDecimal) {
+        val amount = toAmount.max(BigDecimal.ZERO)
         view.updateToCryptoText(cryptoFormat.format(amount))
         updateToFiat(amount)
     }
 
-    private fun updateFromFields(fromAmount: Double) {
-        val amount = fromAmount.toBigDecimal().max(BigDecimal.ZERO)
+    private fun updateFromFields(fromAmount: BigDecimal) {
+        val amount = fromAmount.max(BigDecimal.ZERO)
         view.updateFromCryptoText(cryptoFormat.format(amount))
         updateFromFiat(amount)
     }
@@ -429,10 +429,10 @@ class NewExchangePresenter @Inject constructor(
                                 view.showAmountError(it.value)
                                 return@map Quote().apply {
                                     orderId = ""
-                                    quotedRate = marketInfo?.rate ?: 1.0
-                                    minerFee = marketInfo?.minerFee ?: 0.0
-                                    withdrawalAmount = quoteRequest.withdrawalAmount
-                                    depositAmount = quoteRequest.depositAmount
+                                    quotedRate = (marketInfo?.rate ?: 1.0).toBigDecimal()
+                                    minerFee = (marketInfo?.minerFee ?: 0.0).toBigDecimal()
+                                    withdrawalAmount = quoteRequest.withdrawalAmount.toBigDecimal()
+                                    depositAmount = quoteRequest.depositAmount.toBigDecimal()
                                     expiration = 0L
                                 }
                             }
@@ -440,7 +440,7 @@ class NewExchangePresenter @Inject constructor(
                     }
                     .flatMap { quote ->
                         // Get fee for the proposed payment amount
-                        getFeeForPayment(quote.withdrawalAmount.toBigDecimal(), selectedCurrency)
+                        getFeeForPayment(quote.withdrawalAmount, selectedCurrency)
                                 .flatMap { fee ->
                                     // Get receive/change address pair
                                     getAddressPair(selectedCurrency)
@@ -451,17 +451,18 @@ class NewExchangePresenter @Inject constructor(
                                                         orderId = quote.orderId,
                                                         fromCurrency = selectedCurrency,
                                                         toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
-                                                        depositAmount = quote.depositAmount.toBigDecimal(),
+                                                        depositAmount = quote.depositAmount,
                                                         depositAddress = quote.deposit ?: "",
-                                                        withdrawalAmount = quote.withdrawalAmount.toBigDecimal(),
+                                                        withdrawalAmount = quote.withdrawalAmount,
                                                         withdrawalAddress = addresses.withdrawalAddress,
-                                                        exchangeRate = quote.quotedRate.toBigDecimal(),
+                                                        exchangeRate = quote.quotedRate,
                                                         transactionFee = fee,
-                                                        networkFee = quote.minerFee.toBigDecimal(),
+                                                        networkFee = quote.minerFee,
                                                         returnAddress = addresses.returnAddress,
                                                         xPub = account!!.xpub,
                                                         expiration = quote.expiration,
                                                         gasLimit = BigInteger.valueOf(feeOptions?.gasLimit ?: 0L),
+                                                        gasPrice = BigInteger.valueOf(feeOptions?.regularFee ?: 0L),
                                                         feePerKb = BigInteger.valueOf(feeOptions?.priorityFee ?: 0 * 1000)
                                                 )
 
