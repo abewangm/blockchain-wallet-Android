@@ -4,17 +4,19 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
-import kotlinx.android.synthetic.main.item_shapeshift_row_header.view.*
+import kotlinx.android.synthetic.main.item_shapeshift_row_new_exchange.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.extensions.inflate
 
-class TradesHeaderDelegate<in T>() : AdapterDelegate<T> {
+class TradesNewExchangeDelegate<in T>(
+        private val listClickListener: TradesListClickListener
+) : AdapterDelegate<T> {
 
-    override fun isForViewType(items: List<T>, position: Int): Boolean = items[position] is ShapeshiftHeaderDisplayable
+    override fun isForViewType(items: List<T>, position: Int): Boolean = items[position] is ShapeshiftNewExchangeDisplayable
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
-            HeaderViewHolder(parent.inflate(R.layout.item_shapeshift_row_header))
+            HeaderViewHolder(parent.inflate(R.layout.item_shapeshift_row_new_exchange))
 
     override fun onBindViewHolder(
             items: List<T>,
@@ -24,9 +26,7 @@ class TradesHeaderDelegate<in T>() : AdapterDelegate<T> {
 
         val viewHolder = holder as HeaderViewHolder
 
-        viewHolder.layout.setOnClickListener {
-            //no-op
-        }
+        viewHolder.layout.setOnClickListener { listClickListener.onNewExchangeClicked() }
     }
 
     private class HeaderViewHolder internal constructor(

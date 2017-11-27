@@ -117,50 +117,47 @@ class TradesDisplayableDelegate<in T>(
         }
     }
 
-    //TODO This needs cleaning up.
     private fun getDisplaySpannable(
             cryptoCurrency: String,
             cryptoAmount: BigDecimal
     ): Spannable {
         val spannable: Spannable
+
+        var displayAmount = ""
+        var unit = ""
+
         if (showCrypto) {
-            val amount = when(cryptoCurrency.toUpperCase()){
-                CryptoCurrencies.BTC.symbol -> "${monetaryUtil.getBtcFormat().format(cryptoAmount)} ${getDisplayUnits()}"
-                CryptoCurrencies.ETHER.symbol -> "${monetaryUtil.getEthFormat().format(cryptoAmount)} ${getDisplayUnits()}"
-                else -> "${cryptoAmount} ${getDisplayUnits()}"//Coin type not specified
+
+            val cryptoAmount = when(cryptoCurrency.toUpperCase()){
+                CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
+                CryptoCurrencies.BTC.symbol -> monetaryUtil.getBtcFormat().format(cryptoAmount)
+                else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
-
-            spannable = Spannable.Factory.getInstance().newSpannable(amount)
-
-            spannable.setSpan(
-                    RelativeSizeSpan(0.67f),
-                    spannable.length - getDisplayUnits().length,
-                    spannable.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            unit = cryptoCurrency
+            displayAmount = "${cryptoAmount} ${cryptoCurrency}"
         } else {
 
-            val fiatBalance = when (cryptoCurrency.toUpperCase()) {
-                CryptoCurrencies.BTC.symbol -> cryptoAmount.times(BigDecimal.valueOf(btcExchangeRate))
-                CryptoCurrencies.ETHER.symbol -> cryptoAmount.times(BigDecimal.valueOf(ethExchangeRate))
+            val fiatAmount = when (cryptoCurrency.toUpperCase()) {
+                CryptoCurrencies.ETHER.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(ethExchangeRate))
+                CryptoCurrencies.BTC.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(btcExchangeRate))
                 else -> BigDecimal.ZERO//Coin type not specified
             }
 
-            val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    "${monetaryUtil.getFiatFormat(fiatString).format(fiatBalance.abs())} $fiatString")
-            spannable.setSpan(
-                    RelativeSizeSpan(0.67f),
-                    spannable.length - 3,
-                    spannable.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            unit = getPreferedFiatUnit();
+            displayAmount = "${monetaryUtil.getFiatFormat(unit).format(fiatAmount.abs())} $unit"
         }
+
+        spannable = Spannable.Factory.getInstance().newSpannable(displayAmount)
+        spannable.setSpan(
+                RelativeSizeSpan(0.67f),
+                spannable.length - unit.length,
+                spannable.length,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         return spannable
     }
 
-    private fun getDisplayUnits(): String =
-            monetaryUtil.getBtcUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)]
+    private fun getPreferedFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
     private fun getRealTradePosition(position: Int, items: List<T>): Int {
         val diff = items.size - items.count { it is Trade }
