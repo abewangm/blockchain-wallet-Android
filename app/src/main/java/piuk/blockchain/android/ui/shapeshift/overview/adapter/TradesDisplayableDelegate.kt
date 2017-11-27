@@ -56,14 +56,13 @@ class TradesDisplayableDelegate<in T>(
             //Existing Web issue - no available date to set
             viewHolder.timeSince.text = ""
         }
-        viewHolder.status.text = trade.status.toString()
 
         viewHolder.result.text = getDisplaySpannable(
                 trade.acquiredCoinType,
-                trade.quote.withdrawalAmount?: BigDecimal.ZERO
+                trade.quote.withdrawalAmount ?: BigDecimal.ZERO
         )
 
-        displayTradeColour(viewHolder, trade)
+        viewHolder.status.setText(determineStatus(viewHolder, trade))
 
         viewHolder.result.setOnClickListener {
             showCrypto = !showCrypto
@@ -87,31 +86,35 @@ class TradesDisplayableDelegate<in T>(
         return ContextCompat.getColor(viewHolder.getContext(), color)
     }
 
-    private fun displayTradeColour(viewHolder: TradeViewHolder, trade: Trade) {
+    private fun determineStatus(viewHolder: TradeViewHolder, trade: Trade) =
 
-        when (trade.status) {
-            Trade.STATUS.COMPLETE -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_complete)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
+            when (trade.status) {
+                Trade.STATUS.COMPLETE -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_complete)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
+                    R.string.shapeshift_complete_title
+                }
+                Trade.STATUS.FAILED -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
+                    R.string.shapeshift_failed_title
+                }
+                Trade.STATUS.NO_DEPOSITS -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
+                    R.string.shapeshift_in_progress_title
+                }
+                Trade.STATUS.RECEIVED -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
+                    R.string.shapeshift_in_progress_title
+                }
+                Trade.STATUS.RESOLVED -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
+                    R.string.shapeshift_in_progress_title
+                }
             }
-            Trade.STATUS.FAILED -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
-            }
-            Trade.STATUS.NO_DEPOSITS -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
-            }
-            Trade.STATUS.RECEIVED -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
-            }
-            Trade.STATUS.RESOLVED -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_green)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
-            }
-        }
-    }
 
     private fun getDisplaySpannable(
             cryptoCurrency: String,
@@ -124,7 +127,7 @@ class TradesDisplayableDelegate<in T>(
 
         if (showCrypto) {
 
-            val cryptoAmount = when(cryptoCurrency.toUpperCase()){
+            val cryptoAmount = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
                 CryptoCurrencies.BTC.symbol -> monetaryUtil.getBtcFormat().format(cryptoAmount)
                 else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified

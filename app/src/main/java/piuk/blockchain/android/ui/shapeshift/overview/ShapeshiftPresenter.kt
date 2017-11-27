@@ -83,7 +83,7 @@ class ShapeShiftPresenter @Inject constructor(
 
         return shapeShiftDataManager.getTradeStatus(trade.quote.deposit)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .repeatWhen { it.delay(5, TimeUnit.SECONDS) }
+                .repeatWhen { it.delay(10, TimeUnit.SECONDS) }
                 .takeUntil { isInFinalState(it.status) }
                 .doOnNext { handleState(trade, it) }
     }
