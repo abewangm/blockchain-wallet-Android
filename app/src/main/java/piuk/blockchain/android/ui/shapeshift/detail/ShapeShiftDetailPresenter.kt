@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.shapeshift.detail
 
 import info.blockchain.wallet.shapeshift.ShapeShiftPairs
+import info.blockchain.wallet.shapeshift.data.Quote
 import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import io.reactivex.Observable
@@ -48,30 +49,23 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 }
                 // Display information that we have stored
                 .doOnNext { updateUiAmounts(it) }
-                // Get trade info from ShapeShift
+                // Get trade info from ShapeShift only if necessary
                 .flatMap {
-                    shapeShiftDataManager.getTradeStatus(view.depositAddress)
-                            .doOnNext {
-                                handleState(it.status)
-                                updateUiFromShapeShift(it)
-                            }
+                    if (requiresMoreInfoForUi(it)) {
+                        shapeShiftDataManager.getTradeStatus(view.depositAddress)
+                                .doOnNext { handleTradeResponse(it) }
+                    } else {
+                        Observable.just(it)
+                    }
                 }
                 .doOnTerminate { view.dismissProgressDialog() }
                 // Start polling for results anyway
-                .flatMap { Observable.interval(5, TimeUnit.SECONDS, Schedulers.io()) }
-
-                // TODO: Render UI 
-                // TODO: Lots of data in the trade may not be available here
-
+                .flatMap { Observable.interval(10, TimeUnit.SECONDS, Schedulers.io()) }
                 .flatMap { shapeShiftDataManager.getTradeStatus(view.depositAddress) }
-                .doOnNext {
-                    handleState(it.status)
-                    updateUiFromShapeShift(it)
-                }
+                .doOnNext { handleTradeResponse(it) }
                 .takeUntil { isInFinalState(it.status) }
                 .subscribe(
                         {
-                            // TODO: How to avoid doing this is trade already complete? Store initial status?
                             // Doesn't particularly matter if completion is interrupted here
                             with(it) {
                                 updateMetadata(address, transaction, status)
@@ -86,31 +80,44 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 )
     }
 
-    private fun updateUiFromShapeShift(tradeStatusResponse: TradeStatusResponse) {
-        var fromCoin: CryptoCurrencies
-        var toCoin: CryptoCurrencies
-        var fromAmount: BigDecimal
-        var toAmount: BigDecimal
-
+    private fun handleTradeResponse(tradeStatusResponse: TradeStatusResponse) {
         with(tradeStatusResponse) {
-            if (outgoingType != null) {
-                fromCoin = CryptoCurrencies.fromString(outgoingType)!!
-            }
-            if (incomingType != null) {
-                toCoin = CryptoCurrencies.fromString(incomingType)!!
-            }
-            fromAmount = outgoingCoin ?: BigDecimal.ZERO
-            toAmount = incomingCoin ?: BigDecimal.ZERO
+            val fromCoin: CryptoCurrencies = CryptoCurrencies.fromString(outgoingType ?: "btc")!!
+            val toCoin: CryptoCurrencies = CryptoCurrencies.fromString(incomingType ?: "eth")!!
+            val fromAmount: BigDecimal = outgoingCoin ?: BigDecimal.ZERO
+            val toAmount: BigDecimal = incomingCoin ?: BigDecimal.ZERO
+            val status = tradeStatusResponse.status
 
+            updateUiAmounts(
+                    Trade().apply {
+                        this.status = status
+                        this.quote = Quote().apply {
+                            this.depositAmount = fromAmount
+                            this.withdrawalAmount = toAmount
+                            this.pair = """${fromCoin.symbol.toLowerCase()}_${toCoin.symbol.toLowerCase()}"""
+                            this.minerFee = BigDecimal.ZERO
+                        }
+                    }
+            )
         }
+
+        handleState(tradeStatusResponse.status)
     }
 
-    // TODO: Trade may not have this data?  
+    private fun requiresMoreInfoForUi(trade: Trade): Boolean =
+            // Amounts can only be present if trade is in progress OR if saved to metadata by Android
+            trade.status != Trade.STATUS.NO_DEPOSITS && trade.quote.depositAmount != null
+
     private fun updateUiAmounts(trade: Trade) {
-        with(trade) {
-            updateOrderId(quote.orderId)
-            // Web don't store everything, but we do. Check here
-            if (quote.pair.isNotEmpty() && !quote.pair.contains('_')) {
+        // Amounts can only be present if trade is in progress OR if saved to metadata by Android
+        if (trade.status == Trade.STATUS.NO_DEPOSITS || trade.quote.depositAmount != null) {
+            with(trade) {
+                updateOrderId(quote.orderId)
+                // Web don't store everything, but we do. Check here and make an assumption
+                if (quote.pair.isNullOrEmpty() || quote.pair == "_") {
+                    quote.pair = ShapeShiftPairs.BTC_ETH
+                }
+
                 val (to, from) = getToFromPair(quote.pair)
                 updateDeposit(from, quote.depositAmount)
                 updateDeposit(from, quote.depositAmount)

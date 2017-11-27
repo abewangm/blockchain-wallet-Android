@@ -69,6 +69,19 @@ class ShapeShiftDataManager(
         throw IllegalStateException("ShapeShiftTrades not initialized")
     }
 
+    /**
+     * For development purposes only!
+     */
+    fun clearAllTrades(): Completable {
+        shapeShiftDataStore.tradeData?.run {
+            trades = emptyList()
+            return rxPinning.call { Completable.fromCallable { save() } }
+                    .compose(RxUtil.applySchedulersToCompletable())
+        }
+
+        throw IllegalStateException("ShapeShiftTrades not initialized")
+    }
+
     fun updateTrade(trade: Trade): Completable {
         shapeShiftDataStore.tradeData?.run {
             val foundTrade = trades.find { it.quote.orderId == trade.quote.orderId }
