@@ -1,17 +1,19 @@
 package piuk.blockchain.android.ui.shapeshift.detail
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_shapeshift_detail.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
+import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.shapeshift.models.TradeDetailUiState
 import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.helperfunctions.consume
 import javax.inject.Inject
 
 class ShapeShiftDetailActivity : BaseMvpActivity<ShapeShiftDetailView, ShapeShiftDetailPresenter>(),
@@ -22,6 +24,8 @@ class ShapeShiftDetailActivity : BaseMvpActivity<ShapeShiftDetailView, ShapeShif
 
     override val depositAddress: String by lazy { intent.getStringExtra(EXTRA_DEPOSIT_ADDRESS) }
 
+    private var progressDialog: MaterialProgressDialog? = null
+
     init {
         Injector.getInstance().presenterComponent.inject(this)
     }
@@ -31,8 +35,16 @@ class ShapeShiftDetailActivity : BaseMvpActivity<ShapeShiftDetailView, ShapeShif
         setContentView(R.layout.activity_shapeshift_detail)
         setupToolbar(toolbar_general, R.string.shapeshift_in_progress_title)
 
-
         onViewReady()
+    }
+
+    override fun onSupportNavigateUp() = consume { onBackPressed() }
+
+    override fun updateUi(uiState: TradeDetailUiState) {
+        setupToolbar(toolbar_general, uiState.title)
+        textview_current_stage.setText(uiState.heading)
+        textview_current_word_step.text = uiState.message
+        imageview_progress.setImageDrawable(ContextCompat.getDrawable(this, uiState.icon))
     }
 
     override fun updateDeposit(label: String, amount: String) {
@@ -57,17 +69,25 @@ class ShapeShiftDetailActivity : BaseMvpActivity<ShapeShiftDetailView, ShapeShif
         textview_order_id_amount.text = displayString
     }
 
+    override fun showProgressDialog(@StringRes message: Int) {
+        dismissProgressDialog()
+        progressDialog = MaterialProgressDialog(this).apply {
+            setCancelable(false)
+            setMessage(message)
+            if (!isFinishing) show()
+        }
+    }
+
+    override fun dismissProgressDialog() {
+        progressDialog?.apply {
+            if (!isFinishing) dismiss()
+            progressDialog = null
+        }
+    }
+
     override fun showToast(message: Int, type: String) = toast(message, type)
 
     override fun finishPage() = finish()
-
-    @SuppressLint("StringFormatMatches")
-    override fun updateUi(uiState: TradeDetailUiState) {
-        setupToolbar(toolbar_general, uiState.title)
-        textview_current_stage.setText(uiState.heading)
-        textview_current_word_step.text = uiState.message
-        imageview_progress.setImageDrawable(ContextCompat.getDrawable(this, uiState.icon))
-    }
 
     override fun createPresenter() = shapeShiftDetailPresenter
 

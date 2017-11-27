@@ -70,11 +70,7 @@ class TradesDisplayableDelegate<in T>(
             listClickListener.onValueClicked(showCrypto)
         }
 
-        viewHolder.layout.setOnClickListener {
-            listClickListener.onTradeClicked(
-                    getRealTradePosition(viewHolder.adapterPosition, items), position
-            )
-        }
+        viewHolder.layout.setOnClickListener { listClickListener.onTradeClicked(trade.quote.deposit) }
     }
 
     fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {

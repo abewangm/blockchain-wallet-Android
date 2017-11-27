@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.shapeshift.detail
 
 import info.blockchain.wallet.shapeshift.ShapeShiftPairs
 import info.blockchain.wallet.shapeshift.data.Trade
+import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import piuk.blockchain.android.R
@@ -36,25 +37,41 @@ class ShapeShiftDetailPresenter @Inject constructor(
     }
 
     override fun onViewReady() {
-        // Poll for results
+        // Find trade first in list
         shapeShiftDataManager.findTrade(view.depositAddress)
-                .doOnNext { updateUiAmounts(it) }
+                .compose(RxUtil.applySchedulersToObservable())
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnError {
                     view.showToast(R.string.shapeshift_trade_not_found, ToastCustom.TYPE_ERROR)
                     view.finishPage()
                 }
+                // Display information that we have stored
+                .doOnNext { updateUiAmounts(it) }
+                // Get trade info from ShapeShift
+                .flatMap {
+                    shapeShiftDataManager.getTradeStatus(view.depositAddress)
+                            .doOnNext {
+                                handleState(it.status)
+                                updateUiFromShapeShift(it)
+                            }
+                }
+                .doOnTerminate { view.dismissProgressDialog() }
+                // Start polling for results anyway
                 .flatMap { Observable.interval(5, TimeUnit.SECONDS, Schedulers.io()) }
 
                 // TODO: Render UI 
-                // TODO: Show loading in progress  
+                // TODO: Lots of data in the trade may not be available here
 
                 .flatMap { shapeShiftDataManager.getTradeStatus(view.depositAddress) }
-                .doOnNext { handleState(it.status) }
+                .doOnNext {
+                    handleState(it.status)
+                    updateUiFromShapeShift(it)
+                }
                 .takeUntil { isInFinalState(it.status) }
-                .compose(RxUtil.applySchedulersToObservable())
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         {
+                            // TODO: How to avoid doing this is trade already complete? Store initial status?
                             // Doesn't particularly matter if completion is interrupted here
                             with(it) {
                                 updateMetadata(address, transaction, status)
@@ -69,15 +86,38 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 )
     }
 
+    private fun updateUiFromShapeShift(tradeStatusResponse: TradeStatusResponse) {
+        var fromCoin: CryptoCurrencies
+        var toCoin: CryptoCurrencies
+        var fromAmount: BigDecimal
+        var toAmount: BigDecimal
+
+        with(tradeStatusResponse) {
+            if (outgoingType != null) {
+                fromCoin = CryptoCurrencies.fromString(outgoingType)!!
+            }
+            if (incomingType != null) {
+                toCoin = CryptoCurrencies.fromString(incomingType)!!
+            }
+            fromAmount = outgoingCoin ?: BigDecimal.ZERO
+            toAmount = incomingCoin ?: BigDecimal.ZERO
+
+        }
+    }
+
+    // TODO: Trade may not have this data?  
     private fun updateUiAmounts(trade: Trade) {
         with(trade) {
-            val (to, from) = getToFromPair(quote.pair)
-            updateDeposit(from, quote.depositAmount)
-            updateDeposit(from, quote.depositAmount)
-            updateReceive(to, quote.withdrawalAmount)
-            updateExchangeRate(quote.quotedRate, from, to)
-            updateTransactionFee(from, quote.minerFee)
             updateOrderId(quote.orderId)
+            // Web don't store everything, but we do. Check here
+            if (quote.pair.isNotEmpty() && !quote.pair.contains('_')) {
+                val (to, from) = getToFromPair(quote.pair)
+                updateDeposit(from, quote.depositAmount)
+                updateDeposit(from, quote.depositAmount)
+                updateReceive(to, quote.withdrawalAmount)
+                updateExchangeRate(quote.quotedRate, from, to)
+                updateTransactionFee(from, quote.minerFee)
+            }
         }
     }
 
@@ -201,10 +241,11 @@ class ShapeShiftDetailPresenter @Inject constructor(
         Trade.STATUS.COMPLETE, Trade.STATUS.FAILED, Trade.STATUS.RESOLVED -> true
     }
 
-    private fun getToFromPair(pair: String) : ToFromPair = when (pair.toLowerCase()) {
+    // TODO: This needs to be safe incase web is broken, or this must not be checked if the data is invalid
+    private fun getToFromPair(pair: String): ToFromPair = when (pair.toLowerCase()) {
         ShapeShiftPairs.ETH_BTC -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BTC)
         ShapeShiftPairs.BTC_ETH -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.ETHER)
-        else -> throw IllegalStateException("Unknown currency pair $pair")
+        else -> throw IllegalStateException()
     }
 
     private data class ToFromPair(val to: CryptoCurrencies, val from: CryptoCurrencies)

@@ -7,13 +7,9 @@ enum class CryptoCurrencies(val symbol: String, val unit: String) {
     BCH("BCH", "Bitcoin Cash");
 
     companion object {
-        fun fromString(text: String): CryptoCurrencies? {
-            for (status in CryptoCurrencies.values()) {
-                if (status.symbol.equals(text, ignoreCase = true)) {
-                    return status
-                }
-            }
-            return null
-        }
+
+        fun fromString(text: String): CryptoCurrencies? =
+                CryptoCurrencies.values().firstOrNull { it.symbol.equals(text, ignoreCase = true) }
+
     }
 }

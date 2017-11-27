@@ -77,7 +77,7 @@ class TradesAdapter(
 
 interface TradesListClickListener {
 
-    fun onTradeClicked(correctedPosition: Int, absolutePosition: Int)
+    fun onTradeClicked(depositAddress: String)
 
     fun onValueClicked(isBtc: Boolean)
 

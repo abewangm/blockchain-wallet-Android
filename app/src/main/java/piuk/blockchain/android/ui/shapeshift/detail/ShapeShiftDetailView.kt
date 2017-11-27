@@ -24,4 +24,8 @@ interface ShapeShiftDetailView : View {
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType type: String)
 
     fun finishPage()
+
+    fun showProgressDialog(@StringRes message: Int)
+
+    fun dismissProgressDialog()
 }

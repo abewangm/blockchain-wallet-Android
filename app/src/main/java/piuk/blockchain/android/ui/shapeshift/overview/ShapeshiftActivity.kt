@@ -11,6 +11,8 @@ import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
+import piuk.blockchain.android.ui.shapeshift.detail.ShapeShiftDetailActivity
+import piuk.blockchain.android.ui.shapeshift.detail.ShapeShiftDetailView
 import piuk.blockchain.android.ui.shapeshift.newexchange.NewExchangeActivity
 import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesAdapter
 import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesListClickListener
@@ -121,9 +123,8 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
         tradesAdapter?.onViewFormatUpdated(isBtc, btcFormat)
     }
 
-    override fun onTradeClicked(correctedPosition: Int, absolutePosition: Int) {
-//        TradeInProgressActivity.start(this,
-//                presenter.getTradeFromIndex(correctedPosition).depositAddress)
+    override fun onTradeClicked(depositAddress: String) {
+        ShapeShiftDetailActivity.start(this, depositAddress)
     }
 
     override fun onValueClicked(isBtc: Boolean) {

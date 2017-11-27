@@ -12,6 +12,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.shapeshift.models.TradeProgressUiState
 import piuk.blockchain.android.ui.shapeshift.overview.ShapeShiftActivity
 import javax.inject.Inject
 
