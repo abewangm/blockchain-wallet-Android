@@ -21,7 +21,8 @@ class TradesAdapter(
 
     init {
         // Add all necessary AdapterDelegate objects here
-        delegatesManager.addAdapterDelegate(TradesHeaderDelegate(listClickListener))
+        delegatesManager.addAdapterDelegate(TradesNewExchangeDelegate(listClickListener))
+        delegatesManager.addAdapterDelegate(TradesHeaderDelegate())
         delegatesManager.addAdapterDelegate(tradesDelegate)
         setHasStableIds(true)
     }
@@ -43,7 +44,12 @@ class TradesAdapter(
     fun updateTradeList(trades: List<Any>) {
 
         var mutableList = trades.toMutableList()
-        mutableList.add(0, "")//Header delegate
+        mutableList.add(0, ShapeshiftNewExchangeDisplayable())//Header delegate
+
+        if(trades.size > 0) {
+            mutableList.add(1, ShapeshiftHeaderDisplayable())//Row title delegate
+        }
+
         items = mutableList
     }
 
@@ -69,7 +75,7 @@ class TradesAdapter(
 
         val matchingTrade = items.filterIsInstance(Trade::class.java).find { it.quote.deposit == tradeResponse.address }
         matchingTrade?.quote?.withdrawalAmount = trade.quote.withdrawalAmount?: tradeResponse.incomingCoin?: BigDecimal.ZERO
-        matchingTrade?.quote?.pair = trade.acquiredCoinType?: tradeResponse.outgoingType?: ""
+        matchingTrade?.quote?.pair = tradeResponse.pair?: trade.quote.pair
 
         notifyDataSetChanged()
     }
@@ -84,3 +90,7 @@ interface TradesListClickListener {
     fun onNewExchangeClicked()
 
 }
+
+class ShapeshiftNewExchangeDisplayable
+
+class ShapeshiftHeaderDisplayable

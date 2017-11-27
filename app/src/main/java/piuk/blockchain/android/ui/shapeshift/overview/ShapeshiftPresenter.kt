@@ -42,7 +42,8 @@ class ShapeShiftPresenter @Inject constructor(
                                 view.onStateUpdated(ShapeShiftState.Empty)
                             } else {
                                 pollForStatus(it.trades)
-                                view.onStateUpdated(ShapeShiftState.Data(it.trades))
+                                var sortedTrades = it.trades.sortedWith(compareBy<Trade>({it.timestamp}) ).reversed()
+                                view.onStateUpdated(ShapeShiftState.Data(sortedTrades))
                             }
                         },
                         {
@@ -78,12 +79,14 @@ class ShapeShiftPresenter @Inject constructor(
                         })
     }
 
-    private fun createPollObservable(trade: Trade) =
-        Observable.interval(5, TimeUnit.SECONDS, Schedulers.io())
+    private fun createPollObservable(trade: Trade): Observable<TradeStatusResponse> {
+
+        return shapeShiftDataManager.getTradeStatus(trade.quote.deposit)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .flatMap { shapeShiftDataManager.getTradeStatus(trade.quote.deposit) }
-                .doOnNext { handleState(trade, it) }
+                .repeatWhen { it.delay(5, TimeUnit.SECONDS) }
                 .takeUntil { isInFinalState(it.status) }
+                .doOnNext { handleState(trade, it) }
+    }
 
     /**
      * Update kv-store if need. Handle UI update
