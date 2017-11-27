@@ -56,14 +56,13 @@ class TradesDisplayableDelegate<in T>(
             //Existing Web issue - no available date to set
             viewHolder.timeSince.text = ""
         }
-        viewHolder.status.text = trade.status.toString()
 
         viewHolder.result.text = getDisplaySpannable(
                 trade.acquiredCoinType,
-                trade.quote.withdrawalAmount?: BigDecimal.ZERO
+                trade.quote.withdrawalAmount ?: BigDecimal.ZERO
         )
 
-        displayTradeColour(viewHolder, trade)
+        viewHolder.status.setText(determineStatus(viewHolder, trade))
 
         viewHolder.result.setOnClickListener {
             showCrypto = !showCrypto
@@ -87,76 +86,77 @@ class TradesDisplayableDelegate<in T>(
         return ContextCompat.getColor(viewHolder.getContext(), color)
     }
 
-    private fun displayTradeColour(viewHolder: TradeViewHolder, trade: Trade) {
+    private fun determineStatus(viewHolder: TradeViewHolder, trade: Trade) =
 
-        when (trade.status) {
-            Trade.STATUS.COMPLETE -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_complete)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
+            when (trade.status) {
+                Trade.STATUS.COMPLETE -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_complete)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
+                    R.string.shapeshift_complete_title
+                }
+                Trade.STATUS.FAILED -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
+                    R.string.shapeshift_failed_title
+                }
+                Trade.STATUS.NO_DEPOSITS -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
+                    R.string.shapeshift_in_progress_title
+                }
+                Trade.STATUS.RECEIVED -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
+                    R.string.shapeshift_in_progress_title
+                }
+                Trade.STATUS.RESOLVED -> {
+                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
+                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
+                    R.string.shapeshift_in_progress_title
+                }
             }
-            Trade.STATUS.FAILED -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
-            }
-            Trade.STATUS.NO_DEPOSITS -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
-            }
-            Trade.STATUS.RECEIVED -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
-            }
-            Trade.STATUS.RESOLVED -> {
-                viewHolder.result.setBackgroundResource(R.drawable.rounded_view_green)
-                viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
-            }
-        }
-    }
 
-    //TODO This needs cleaning up.
     private fun getDisplaySpannable(
             cryptoCurrency: String,
             cryptoAmount: BigDecimal
     ): Spannable {
         val spannable: Spannable
+
+        var displayAmount = ""
+        var unit = ""
+
         if (showCrypto) {
-            val amount = when(cryptoCurrency.toUpperCase()){
-                CryptoCurrencies.BTC.symbol -> "${monetaryUtil.getBtcFormat().format(cryptoAmount)} ${getDisplayUnits()}"
-                CryptoCurrencies.ETHER.symbol -> "${monetaryUtil.getEthFormat().format(cryptoAmount)} ${getDisplayUnits()}"
-                else -> "${cryptoAmount} ${getDisplayUnits()}"//Coin type not specified
+
+            val cryptoAmount = when (cryptoCurrency.toUpperCase()) {
+                CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
+                CryptoCurrencies.BTC.symbol -> monetaryUtil.getBtcFormat().format(cryptoAmount)
+                else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
-
-            spannable = Spannable.Factory.getInstance().newSpannable(amount)
-
-            spannable.setSpan(
-                    RelativeSizeSpan(0.67f),
-                    spannable.length - getDisplayUnits().length,
-                    spannable.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            unit = cryptoCurrency
+            displayAmount = "${cryptoAmount} ${cryptoCurrency}"
         } else {
 
-            val fiatBalance = when (cryptoCurrency.toUpperCase()) {
-                CryptoCurrencies.BTC.symbol -> cryptoAmount.times(BigDecimal.valueOf(btcExchangeRate))
-                CryptoCurrencies.ETHER.symbol -> cryptoAmount.times(BigDecimal.valueOf(ethExchangeRate))
+            val fiatAmount = when (cryptoCurrency.toUpperCase()) {
+                CryptoCurrencies.ETHER.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(ethExchangeRate))
+                CryptoCurrencies.BTC.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(btcExchangeRate))
                 else -> BigDecimal.ZERO//Coin type not specified
             }
 
-            val fiatString = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    "${monetaryUtil.getFiatFormat(fiatString).format(fiatBalance.abs())} $fiatString")
-            spannable.setSpan(
-                    RelativeSizeSpan(0.67f),
-                    spannable.length - 3,
-                    spannable.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            unit = getPreferedFiatUnit();
+            displayAmount = "${monetaryUtil.getFiatFormat(unit).format(fiatAmount.abs())} $unit"
         }
+
+        spannable = Spannable.Factory.getInstance().newSpannable(displayAmount)
+        spannable.setSpan(
+                RelativeSizeSpan(0.67f),
+                spannable.length - unit.length,
+                spannable.length,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         return spannable
     }
 
-    private fun getDisplayUnits(): String =
-            monetaryUtil.getBtcUnits()[prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)]
+    private fun getPreferedFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
     private fun getRealTradePosition(position: Int, items: List<T>): Int {
         val diff = items.size - items.count { it is Trade }
