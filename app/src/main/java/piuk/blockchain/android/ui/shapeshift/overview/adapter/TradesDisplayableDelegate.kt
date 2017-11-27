@@ -94,24 +94,14 @@ class TradesDisplayableDelegate<in T>(
                     viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_green_medium))
                     R.string.shapeshift_complete_title
                 }
-                Trade.STATUS.FAILED -> {
+                Trade.STATUS.FAILED, Trade.STATUS.RESOLVED -> {
                     viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
                     viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
                     R.string.shapeshift_failed_title
                 }
-                Trade.STATUS.NO_DEPOSITS -> {
+                Trade.STATUS.NO_DEPOSITS, Trade.STATUS.RECEIVED -> {
                     viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
                     viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
-                    R.string.shapeshift_in_progress_title
-                }
-                Trade.STATUS.RECEIVED -> {
-                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_inprogress)
-                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
-                    R.string.shapeshift_in_progress_title
-                }
-                Trade.STATUS.RESOLVED -> {
-                    viewHolder.result.setBackgroundResource(R.drawable.rounded_view_failed)
-                    viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_red_medium))
                     R.string.shapeshift_in_progress_title
                 }
             }
