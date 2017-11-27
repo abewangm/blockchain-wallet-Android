@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.shapeshift.detail
 
 import info.blockchain.wallet.shapeshift.ShapeShiftPairs
-import info.blockchain.wallet.shapeshift.data.Quote
 import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import io.reactivex.Observable
@@ -48,7 +47,10 @@ class ShapeShiftDetailPresenter @Inject constructor(
                     view.finishPage()
                 }
                 // Display information that we have stored
-                .doOnNext { updateUiAmounts(it) }
+                .doOnNext {
+                    updateUiAmounts(it)
+                    handleState(it.status)
+                }
                 // Get trade info from ShapeShift only if necessary
                 .flatMap {
                     if (requiresMoreInfoForUi(it)) {
@@ -60,10 +62,14 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 }
                 .doOnTerminate { view.dismissProgressDialog() }
                 // Start polling for results anyway
-                .flatMap { Observable.interval(10, TimeUnit.SECONDS, Schedulers.io()) }
-                .flatMap { shapeShiftDataManager.getTradeStatus(view.depositAddress) }
-                .doOnNext { handleTradeResponse(it) }
-                .takeUntil { isInFinalState(it.status) }
+                .flatMap {
+                    Observable.interval(10, TimeUnit.SECONDS, Schedulers.io())
+                            .flatMap { shapeShiftDataManager.getTradeStatus(view.depositAddress) }
+                            .compose(RxUtil.applySchedulersToObservable())
+                            .compose(RxUtil.addObservableToCompositeDisposable(this))
+                            .doOnNext { handleTradeResponse(it) }
+                            .takeUntil { isInFinalState(it.status) }
+                }
                 .subscribe(
                         {
                             // Doesn't particularly matter if completion is interrupted here
@@ -73,9 +79,6 @@ class ShapeShiftDetailPresenter @Inject constructor(
                         },
                         {
                             Timber.e(it)
-                        },
-                        {
-                            Timber.d("On Complete")
                         }
                 )
     }
@@ -86,19 +89,12 @@ class ShapeShiftDetailPresenter @Inject constructor(
             val toCoin: CryptoCurrencies = CryptoCurrencies.fromString(incomingType ?: "eth")!!
             val fromAmount: BigDecimal = outgoingCoin ?: BigDecimal.ZERO
             val toAmount: BigDecimal = incomingCoin ?: BigDecimal.ZERO
-            val status = tradeStatusResponse.status
 
-            updateUiAmounts(
-                    Trade().apply {
-                        this.status = status
-                        this.quote = Quote().apply {
-                            this.depositAmount = fromAmount
-                            this.withdrawalAmount = toAmount
-                            this.pair = """${fromCoin.symbol.toLowerCase()}_${toCoin.symbol.toLowerCase()}"""
-                            this.minerFee = BigDecimal.ZERO
-                        }
-                    }
-            )
+            val pair = """${fromCoin.symbol.toLowerCase()}_${toCoin.symbol.toLowerCase()}"""
+            val (to, from) = getToFromPair(pair)
+            updateDeposit(from, fromAmount)
+            updateDeposit(from, fromAmount)
+            updateReceive(to, toAmount)
         }
 
         handleState(tradeStatusResponse.status)
@@ -106,7 +102,7 @@ class ShapeShiftDetailPresenter @Inject constructor(
 
     private fun requiresMoreInfoForUi(trade: Trade): Boolean =
             // Amounts can only be present if trade is in progress OR if saved to metadata by Android
-            trade.status != Trade.STATUS.NO_DEPOSITS && trade.quote.depositAmount != null
+            !(trade.status == Trade.STATUS.NO_DEPOSITS || trade.quote.depositAmount != null)
 
     private fun updateUiAmounts(trade: Trade) {
         // Amounts can only be present if trade is in progress OR if saved to metadata by Android
@@ -252,7 +248,7 @@ class ShapeShiftDetailPresenter @Inject constructor(
     private fun getToFromPair(pair: String): ToFromPair = when (pair.toLowerCase()) {
         ShapeShiftPairs.ETH_BTC -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BTC)
         ShapeShiftPairs.BTC_ETH -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.ETHER)
-        else -> throw IllegalStateException()
+        else -> throw IllegalStateException("Attempt to get invalid pair $pair")
     }
 
     private data class ToFromPair(val to: CryptoCurrencies, val from: CryptoCurrencies)

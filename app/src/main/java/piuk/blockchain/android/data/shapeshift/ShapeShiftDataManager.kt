@@ -28,7 +28,7 @@ class ShapeShiftDataManager(
     /**
      * Must be called to initialize the ShapeShift trade metadata information.
      *
-     * @param masterKey The wallet's master key [info.blockchain.wallet.bip44.HDWallet.getMasterKey]
+     * @param metadataNode
      * @return A [Completable] object
      */
     fun initShapeshiftTradeData(metadataNode: DeterministicKey): Observable<ShapeShiftTrades> =

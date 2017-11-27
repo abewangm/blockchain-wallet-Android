@@ -11,6 +11,7 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.prices.data.PriceDatum;
+import info.blockchain.wallet.shapeshift.data.Trade;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
