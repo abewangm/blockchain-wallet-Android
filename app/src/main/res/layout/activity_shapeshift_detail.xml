@@ -17,30 +17,58 @@
             android:layout_width="match_parent"
             android:layout_height="0dp">
 
-            <TextView
-                android:id="@+id/textview_time_remaining"
-                fontPath="fonts/Montserrat-Light.ttf"
-                android:layout_width="wrap_content"
+            <ImageView
+                android:id="@+id/imageview_progress"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/product_gray_hint"
-                android:textSize="12sp"
+                android:layout_marginTop="16dp"
+                android:contentDescription="Progress icon"
+                android:minHeight="120dp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="MissingPrefix,RtlHardcoded"
-                tools:text="Quote expires in 4:36" />
+                app:srcCompat="@drawable/shapeshift_progress_exchange"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/textview_current_stage"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageview_progress"
+                tools:ignore="MissingPrefix"
+                tools:text="Exchange in Progress" />
+
+            <TextView
+                android:id="@+id/textview_current_word_step"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textColor="@color/product_gray_hint"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_current_stage"
+                tools:ignore="MissingPrefix"
+                tools:text="Step 1 of 3" />
 
             <include
                 android:id="@+id/divider1"
                 layout="@layout/divider_grey"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textview_time_remaining" />
+                app:layout_constraintTop_toBottomOf="@+id/textview_current_word_step" />
 
             <!-- DEPOSIT AMOUNT -->
 
@@ -154,23 +182,24 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textview_transaction_fee_amount" />
 
-            <!-- NETWORK TRANSACTION FEE -->
+            <!-- ORDER ID -->
 
             <TextView
-                android:id="@+id/textview_network_fee_title"
+                android:id="@+id/textview_order_id_title"
                 style="@style/ShapeShiftConfirmationTitle"
-                android:text="@string/shapeshift_network_fee"
+                android:text="@string/shapeshift_order_id_title"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider5" />
 
             <TextView
-                android:id="@+id/textview_network_fee_amount"
+                android:id="@+id/textview_order_id_amount"
                 style="@style/ShapeShiftConfirmationAmount"
+                android:layout_width="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/textview_network_fee_title"
+                app:layout_constraintStart_toEndOf="@+id/textview_order_id_title"
                 app:layout_constraintTop_toBottomOf="@+id/divider5"
-                tools:text="0.001 ETH" />
+                tools:text="1460140c-e7dc-428f-855d-867c5a318ff2" />
 
             <include
                 android:id="@+id/divider6"
@@ -180,54 +209,10 @@
                 android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textview_network_fee_amount" />
-
-            <!-- TERMS AND CONDITIONS -->
-
-            <Switch
-                android:id="@+id/checkbox_terms"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider6"
-                tools:ignore="RtlHardcoded" />
-
-            <TextView
-                android:id="@+id/textView_terms_conditions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginTop="8dp"
-                android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="@+id/checkbox_terms"
-                app:layout_constraintEnd_toStartOf="@+id/checkbox_terms"
-                app:layout_constraintTop_toTopOf="@+id/checkbox_terms"
-                tools:ignore="RtlHardcoded"
-                tools:text="Agree to ShapeShift terms and conditions" />
-
-            <!-- BUTTON -->
-
-            <Button
-                android:id="@+id/button_confirm"
-                style="@style/ButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="8dp"
-                android:enabled="false"
-                android:text="@string/confirm"
-                android:theme="@style/ButtonLightBlueTheme"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView_terms_conditions"
-                app:layout_constraintVertical_bias="1.0" />
+                app:layout_constraintTop_toBottomOf="@+id/textview_order_id_amount" />
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
+
+
 </LinearLayout>

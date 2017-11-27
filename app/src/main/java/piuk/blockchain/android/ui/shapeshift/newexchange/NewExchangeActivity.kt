@@ -366,7 +366,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     companion object {
 
-        private val ROTATION = 180f
+        private const val ROTATION = 180f
 
         @JvmStatic
         fun start(context: Context) {

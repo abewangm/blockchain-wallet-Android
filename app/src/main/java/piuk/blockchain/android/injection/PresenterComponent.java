@@ -24,6 +24,7 @@ import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragmen
 import piuk.blockchain.android.ui.createwallet.CreateWalletActivity;
 import piuk.blockchain.android.ui.dashboard.DashboardFragment;
 import piuk.blockchain.android.ui.shapeshift.confirmation.ShapeShiftConfirmationActivity;
+import piuk.blockchain.android.ui.shapeshift.detail.ShapeShiftDetailActivity;
 import piuk.blockchain.android.ui.shapeshift.inprogress.TradeInProgressActivity;
 import piuk.blockchain.android.ui.shapeshift.newexchange.NewExchangeActivity;
 import piuk.blockchain.android.ui.shapeshift.overview.ShapeShiftActivity;
@@ -131,4 +132,6 @@ public interface PresenterComponent {
     void inject(@NotNull ShapeShiftConfirmationActivity shapeShiftConfirmationActivity);
 
     void inject(@NotNull TradeInProgressActivity tradeInProgressActivity);
+
+    void inject(@NotNull ShapeShiftDetailActivity shapeShiftDetailActivity);
 }

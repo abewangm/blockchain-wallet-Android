@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.shapeshift.inprogress
 
-import android.support.annotation.DrawableRes
-import android.support.annotation.StringRes
 import info.blockchain.wallet.shapeshift.data.Trade
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -9,6 +7,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.ui.shapeshift.models.TradeProgressUiState
 import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -126,11 +125,3 @@ class TradeInProgressPresenter @Inject constructor(
     }
 
 }
-
-data class TradeProgressUiState(
-        @StringRes val title: Int,
-        @StringRes val message: Int,
-        @DrawableRes val icon: Int,
-        val showSteps: Boolean,
-        val stepNumber: Int
-)

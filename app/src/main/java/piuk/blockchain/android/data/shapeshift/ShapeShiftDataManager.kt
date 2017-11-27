@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.shapeshift
 
+import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.shapeshift.ShapeShiftApi
 import info.blockchain.wallet.shapeshift.ShapeShiftPairs
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
@@ -7,11 +8,6 @@ import info.blockchain.wallet.shapeshift.data.*
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
-import info.blockchain.wallet.payload.PayloadManager
-import info.blockchain.wallet.shapeshift.data.MarketInfo
-import info.blockchain.wallet.shapeshift.data.Quote
-import info.blockchain.wallet.shapeshift.data.QuoteRequest
-import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -35,14 +31,12 @@ class ShapeShiftDataManager(
      * @param masterKey The wallet's master key [info.blockchain.wallet.bip44.HDWallet.getMasterKey]
      * @return A [Completable] object
      */
-    fun initShapeshiftTradeData(metadataNode: DeterministicKey
-    ): Observable<ShapeShiftTrades> = rxPinning.call<ShapeShiftTrades> {
-
-        Observable.fromCallable { fetchOrCreateShapeShiftTradeData(metadataNode) }
-                .doOnNext { shapeShiftDataStore.tradeData = it }
-                .compose(RxUtil.applySchedulersToObservable())
-
-    }
+    fun initShapeshiftTradeData(metadataNode: DeterministicKey): Observable<ShapeShiftTrades> =
+            rxPinning.call<ShapeShiftTrades> {
+                Observable.fromCallable { fetchOrCreateShapeShiftTradeData(metadataNode) }
+                        .doOnNext { shapeShiftDataStore.tradeData = it }
+                        .compose(RxUtil.applySchedulersToObservable())
+            }
 
     fun getTradesList(): Observable<List<Trade>> {
         shapeShiftDataStore.tradeData?.run { return Observable.just(trades) }
@@ -52,7 +46,7 @@ class ShapeShiftDataManager(
 
     fun findTrade(address: String): Observable<Trade> {
         shapeShiftDataStore.tradeData?.run {
-            val foundTrade = trades.find { it.quote.deposit == address }
+            val foundTrade = trades.firstOrNull { it.quote.deposit == address }
             return if (foundTrade == null) {
                 Observable.error(Throwable("Trade not found"))
             } else {
