@@ -228,7 +228,7 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun getOnboardingStatusObservable(): Observable<Unit> {
-        return if (!isOnboardingComplete()) {
+        return if (isOnboardingComplete()) {
             Observable.empty()
         } else {
             Observable.just(displayList.removeAll { it is OnboardingModel })

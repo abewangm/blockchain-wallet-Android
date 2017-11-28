@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.shapeshift.overview
 import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -25,7 +24,7 @@ class ShapeShiftPresenter @Inject constructor(
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState
-        ) : BasePresenter<ShapeShiftView>() {
+) : BasePresenter<ShapeShiftView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
@@ -42,7 +41,10 @@ class ShapeShiftPresenter @Inject constructor(
                                 view.onStateUpdated(ShapeShiftState.Empty)
                             } else {
                                 pollForStatus(it.trades)
-                                var sortedTrades = it.trades.sortedWith(compareBy<Trade>({it.timestamp}) ).reversed()
+                                val sortedTrades = it.trades.sortedWith(compareBy<Trade> { it.timestamp })
+                                        .reversed()
+                                        // TODO: Remove me when BCH added otherwise you won't see any transactions
+                                        .filterNot { it.quote?.pair?.contains("bch", ignoreCase = true) ?: false }
                                 view.onStateUpdated(ShapeShiftState.Data(sortedTrades))
                             }
                         },
@@ -93,7 +95,7 @@ class ShapeShiftPresenter @Inject constructor(
      */
     private fun handleState(trade: Trade, tradeResponse: TradeStatusResponse) {
 
-        if(trade.status != tradeResponse.status) {
+        if (trade.status != tradeResponse.status) {
             trade.status = tradeResponse.status
             trade.hashOut = tradeResponse.transaction
 

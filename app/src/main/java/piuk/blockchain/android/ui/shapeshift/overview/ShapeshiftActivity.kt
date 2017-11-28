@@ -12,7 +12,6 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.shapeshift.detail.ShapeShiftDetailActivity
-import piuk.blockchain.android.ui.shapeshift.detail.ShapeShiftDetailView
 import piuk.blockchain.android.ui.shapeshift.newexchange.NewExchangeActivity
 import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesAdapter
 import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesListClickListener
@@ -112,7 +111,7 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
 
     private fun onData(data: ShapeShiftState.Data) {
 
-        tradesAdapter?.updateTradeList(data?.trades)
+        tradesAdapter?.updateTradeList(data.trades)
 
         shapeshift_loading_layout.gone()
         shapeshift_error_layout.gone()
