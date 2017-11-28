@@ -786,6 +786,10 @@
     <!-- KV STORE -->
     <string name="metadata_load_failure">Error loading full wallet functionality. Service might temporarily be unavailable.</string>
 
+    <!-- SHAPESHIFT ANNOUNCEMENT -->
+    <string name="shapeshift_announcement_content">You can now exchange your bitcoin for ether and vice versa directly from your Blockchain wallet!</string>
+    <string name="shapeshift_announcement_get_started">Get Started</string>
+
     <!-- SHAPESHIFT HISTORY -->
     <string name="shapeshift_exchange">Exchange</string>
     <string name="shapeshift_loading_orders">Loading order history</string>

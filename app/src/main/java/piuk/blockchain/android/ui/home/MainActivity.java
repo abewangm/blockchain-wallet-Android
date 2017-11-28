@@ -107,6 +107,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
     public static final String ACTION_RECEIVE_ETH = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE_ETH";
     public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
+    public static final String ACTION_SHAPESHIFT = "info.blockchain.wallet.ui.BalanceFragment.SHAPESHIFT";
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
@@ -153,6 +154,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                 selectedCurrency = CryptoCurrencies.BTC;
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 BuyActivity.start(MainActivity.this);
+            } else if (intent.getAction().equals(ACTION_SHAPESHIFT) && getActivity() != null) {
+                ShapeShiftActivity.start(MainActivity.this);
             }
         }
     };
@@ -196,11 +199,13 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
         IntentFilter filterReceiveEth = new IntentFilter(ACTION_RECEIVE_ETH);
         IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
+        IntentFilter filterShapeshift = new IntentFilter(ACTION_SHAPESHIFT);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveEth);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterShapeshift);
 
         appUtil = new AppUtil(this);
         balanceFragment = BalanceFragment.newInstance(false);
