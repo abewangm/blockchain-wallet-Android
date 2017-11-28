@@ -101,26 +101,25 @@ class ShapeShiftDetailPresenter @Inject constructor(
     }
 
     private fun requiresMoreInfoForUi(trade: Trade): Boolean =
-            // Amounts can only be present if trade is in progress OR if saved to metadata by Android
-            !(trade.status == Trade.STATUS.NO_DEPOSITS || trade.quote.depositAmount != null)
+            // Web isn't currently storing the deposit amount for some reason
+            trade.quote.depositAmount == null
+                    || trade.quote.pair.isNullOrEmpty()
+                    || trade.quote.pair == "_"
 
     private fun updateUiAmounts(trade: Trade) {
-        // Amounts can only be present if trade is in progress OR if saved to metadata by Android
-        if (trade.status == Trade.STATUS.NO_DEPOSITS || trade.quote.depositAmount != null) {
-            with(trade) {
-                updateOrderId(quote.orderId)
-                // Web don't store everything, but we do. Check here and make an assumption
-                if (quote.pair.isNullOrEmpty() || quote.pair == "_") {
-                    quote.pair = ShapeShiftPairs.BTC_ETH
-                }
-
-                val (to, from) = getToFromPair(quote.pair)
-                updateDeposit(from, quote.depositAmount)
-                updateDeposit(from, quote.depositAmount)
-                updateReceive(to, quote.withdrawalAmount)
-                updateExchangeRate(quote.quotedRate, from, to)
-                updateTransactionFee(from, quote.minerFee)
+        with(trade) {
+            updateOrderId(quote.orderId)
+            // Web don't store everything, but we do. Check here and make an assumption
+            if (quote.pair.isNullOrEmpty() || quote.pair == "_") {
+                quote.pair = ShapeShiftPairs.BTC_ETH
             }
+
+            val (to, from) = getToFromPair(quote.pair)
+            updateDeposit(from, quote.depositAmount ?: BigDecimal.ZERO)
+            updateDeposit(from, quote.depositAmount ?: BigDecimal.ZERO)
+            updateReceive(to, quote.withdrawalAmount)
+            updateExchangeRate(quote.quotedRate, from, to)
+            updateTransactionFee(from, quote.minerFee)
         }
     }
 
@@ -166,7 +165,6 @@ class ShapeShiftDetailPresenter @Inject constructor(
     }
     //endregion
 
-
     private fun updateMetadata(
             address: String,
             hashOut: String?,
@@ -203,7 +201,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 R.string.shapeshift_sending_title,
                 R.string.shapeshift_sending_title,
                 stringUtils.getFormattedString(R.string.shapeshift_step_number, 1),
-                R.drawable.shapeshift_progress_airplane
+                R.drawable.shapeshift_progress_airplane,
+                R.color.black
         )
         view.updateUi(state)
     }
@@ -213,7 +212,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 R.string.shapeshift_in_progress_title,
                 R.string.shapeshift_in_progress_summary,
                 stringUtils.getFormattedString(R.string.shapeshift_step_number, 2),
-                R.drawable.shapeshift_progress_exchange
+                R.drawable.shapeshift_progress_exchange,
+                R.color.black
         )
         view.updateUi(state)
     }
@@ -223,7 +223,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 R.string.shapeshift_complete_title,
                 R.string.shapeshift_complete_title,
                 stringUtils.getFormattedString(R.string.shapeshift_step_number, 3),
-                R.drawable.shapeshift_progress_complete
+                R.drawable.shapeshift_progress_complete,
+                R.color.black
         )
         view.updateUi(state)
     }
@@ -233,7 +234,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 R.string.shapeshift_failed_title,
                 R.string.shapeshift_failed_summary,
                 stringUtils.getString(R.string.shapeshift_failed_explanation),
-                R.drawable.shapeshift_progress_failed
+                R.drawable.shapeshift_progress_failed,
+                R.color.product_gray_hint
         )
         view.updateUi(state)
     }

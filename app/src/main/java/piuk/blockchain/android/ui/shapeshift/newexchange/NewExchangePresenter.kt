@@ -19,13 +19,13 @@ import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.data.shapeshift.CoinPairings
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.data.stores.Either
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
+import piuk.blockchain.android.ui.shapeshift.models.CoinPairings
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -236,13 +236,13 @@ class NewExchangePresenter @Inject constructor(
     internal fun onFromEthSelected() {
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.clearEditTexts()
-        updateUi(ethLabel, account!!.label)
+        onViewReady()
     }
 
     internal fun onToEthSelected() {
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         view.clearEditTexts()
-        updateUi(account!!.label, ethLabel)
+        onViewReady()
     }
 
     // Here we can safely assume BTC is the "from" type
@@ -250,7 +250,7 @@ class NewExchangePresenter @Inject constructor(
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         this.account = account
         view.clearEditTexts()
-        updateUi(account.label, ethLabel)
+        onViewReady()
     }
 
     // Here we can safely assume ETH is the "from" type
@@ -258,7 +258,7 @@ class NewExchangePresenter @Inject constructor(
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         this.account = account
         view.clearEditTexts()
-        updateUi(ethLabel, account.label)
+        onViewReady()
     }
 
     private fun getExchangeRates(): ExchangeRates {
