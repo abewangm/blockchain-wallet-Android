@@ -23,7 +23,7 @@ class TradeInProgressPresenter @Inject constructor(
         onNoDeposit()
 
         // Poll for results
-        Observable.interval(5, TimeUnit.SECONDS, Schedulers.io())
+        Observable.interval(10, TimeUnit.SECONDS, Schedulers.io())
                 .flatMap { shapeShiftDataManager.getTradeStatus(view.depositAddress) }
                 .doOnNext { handleState(it.status) }
                 .takeUntil { isInFinalState(it.status) }

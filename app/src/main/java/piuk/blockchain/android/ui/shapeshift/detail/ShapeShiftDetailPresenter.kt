@@ -47,31 +47,31 @@ class ShapeShiftDetailPresenter @Inject constructor(
                     view.finishPage()
                 }
                 // Display information that we have stored
-                .doOnNext { updateUiAmounts(it) }
-                // Get trade info from ShapeShift
+                .doOnNext {
+                    updateUiAmounts(it)
+                    handleState(it.status)
+                }
+                // Get trade info from ShapeShift only if necessary
                 .flatMap {
-                    shapeShiftDataManager.getTradeStatus(view.depositAddress)
-                            .doOnNext {
-                                handleState(it.status)
-                                updateUiFromShapeShift(it)
-                            }
+                    if (requiresMoreInfoForUi(it)) {
+                        shapeShiftDataManager.getTradeStatus(view.depositAddress)
+                                .doOnNext { handleTradeResponse(it) }
+                    } else {
+                        Observable.just(it)
+                    }
                 }
                 .doOnTerminate { view.dismissProgressDialog() }
                 // Start polling for results anyway
-                .flatMap { Observable.interval(5, TimeUnit.SECONDS, Schedulers.io()) }
-
-                // TODO: Render UI 
-                // TODO: Lots of data in the trade may not be available here
-
-                .flatMap { shapeShiftDataManager.getTradeStatus(view.depositAddress) }
-                .doOnNext {
-                    handleState(it.status)
-                    updateUiFromShapeShift(it)
+                .flatMap {
+                    Observable.interval(10, TimeUnit.SECONDS, Schedulers.io())
+                            .flatMap { shapeShiftDataManager.getTradeStatus(view.depositAddress) }
+                            .compose(RxUtil.applySchedulersToObservable())
+                            .compose(RxUtil.addObservableToCompositeDisposable(this))
+                            .doOnNext { handleTradeResponse(it) }
+                            .takeUntil { isInFinalState(it.status) }
                 }
-                .takeUntil { isInFinalState(it.status) }
                 .subscribe(
                         {
-                            // TODO: How to avoid doing this is trade already complete? Store initial status?
                             // Doesn't particularly matter if completion is interrupted here
                             with(it) {
                                 updateMetadata(address, transaction, status)
@@ -79,45 +79,45 @@ class ShapeShiftDetailPresenter @Inject constructor(
                         },
                         {
                             Timber.e(it)
-                        },
-                        {
-                            Timber.d("On Complete")
                         }
                 )
     }
 
-    private fun updateUiFromShapeShift(tradeStatusResponse: TradeStatusResponse) {
-        var fromCoin: CryptoCurrencies
-        var toCoin: CryptoCurrencies
-        var fromAmount: BigDecimal
-        var toAmount: BigDecimal
-
+    private fun handleTradeResponse(tradeStatusResponse: TradeStatusResponse) {
         with(tradeStatusResponse) {
-            if (outgoingType != null) {
-                fromCoin = CryptoCurrencies.fromString(outgoingType)!!
-            }
-            if (incomingType != null) {
-                toCoin = CryptoCurrencies.fromString(incomingType)!!
-            }
-            fromAmount = outgoingCoin ?: BigDecimal.ZERO
-            toAmount = incomingCoin ?: BigDecimal.ZERO
+            val fromCoin: CryptoCurrencies = CryptoCurrencies.fromString(incomingType ?: "btc")!!
+            val toCoin: CryptoCurrencies = CryptoCurrencies.fromString(outgoingType ?: "eth")!!
+            val fromAmount: BigDecimal = incomingCoin ?: BigDecimal.ZERO
+            val toAmount: BigDecimal = outgoingCoin ?: BigDecimal.ZERO
+            val pair = """${fromCoin.symbol.toLowerCase()}_${toCoin.symbol.toLowerCase()}"""
+            val (to, from) = getToFromPair(pair)
 
+            updateDeposit(from, fromAmount)
+            updateReceive(to, toAmount)
         }
+
+        handleState(tradeStatusResponse.status)
     }
 
-    // TODO: Trade may not have this data?  
+    private fun requiresMoreInfoForUi(trade: Trade): Boolean =
+            // Web isn't currently storing the deposit amount for some reason
+            trade.quote.depositAmount == null
+                    || trade.quote.pair.isNullOrEmpty()
+                    || trade.quote.pair == "_"
+
     private fun updateUiAmounts(trade: Trade) {
         with(trade) {
             updateOrderId(quote.orderId)
-            // Web don't store everything, but we do. Check here
-            if (quote.pair.isNotEmpty() && !quote.pair.contains('_')) {
-                val (to, from) = getToFromPair(quote.pair)
-                updateDeposit(from, quote.depositAmount)
-                updateDeposit(from, quote.depositAmount)
-                updateReceive(to, quote.withdrawalAmount)
-                updateExchangeRate(quote.quotedRate, from, to)
-                updateTransactionFee(from, quote.minerFee)
+            // Web don't store everything, but we do. Check here and make an assumption
+            if (quote.pair.isNullOrEmpty() || quote.pair == "_") {
+                quote.pair = ShapeShiftPairs.BTC_ETH
             }
+            val (to, from) = getToFromPair(quote.pair)
+
+            updateDeposit(from, quote.depositAmount ?: BigDecimal.ZERO)
+            updateReceive(to, quote.withdrawalAmount)
+            updateExchangeRate(quote.quotedRate, from, to)
+            updateTransactionFee(from, quote.minerFee)
         }
     }
 
@@ -163,7 +163,6 @@ class ShapeShiftDetailPresenter @Inject constructor(
     }
     //endregion
 
-
     private fun updateMetadata(
             address: String,
             hashOut: String?,
@@ -200,7 +199,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 R.string.shapeshift_sending_title,
                 R.string.shapeshift_sending_title,
                 stringUtils.getFormattedString(R.string.shapeshift_step_number, 1),
-                R.drawable.shapeshift_progress_airplane
+                R.drawable.shapeshift_progress_airplane,
+                R.color.black
         )
         view.updateUi(state)
     }
@@ -210,7 +210,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 R.string.shapeshift_in_progress_title,
                 R.string.shapeshift_in_progress_summary,
                 stringUtils.getFormattedString(R.string.shapeshift_step_number, 2),
-                R.drawable.shapeshift_progress_exchange
+                R.drawable.shapeshift_progress_exchange,
+                R.color.black
         )
         view.updateUi(state)
     }
@@ -220,7 +221,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 R.string.shapeshift_complete_title,
                 R.string.shapeshift_complete_title,
                 stringUtils.getFormattedString(R.string.shapeshift_step_number, 3),
-                R.drawable.shapeshift_progress_complete
+                R.drawable.shapeshift_progress_complete,
+                R.color.black
         )
         view.updateUi(state)
     }
@@ -230,7 +232,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
                 R.string.shapeshift_failed_title,
                 R.string.shapeshift_failed_summary,
                 stringUtils.getString(R.string.shapeshift_failed_explanation),
-                R.drawable.shapeshift_progress_failed
+                R.drawable.shapeshift_progress_failed,
+                R.color.product_gray_hint
         )
         view.updateUi(state)
     }
@@ -243,9 +246,9 @@ class ShapeShiftDetailPresenter @Inject constructor(
 
     // TODO: This needs to be safe incase web is broken, or this must not be checked if the data is invalid
     private fun getToFromPair(pair: String): ToFromPair = when (pair.toLowerCase()) {
-        ShapeShiftPairs.ETH_BTC -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BTC)
-        ShapeShiftPairs.BTC_ETH -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.ETHER)
-        else -> throw IllegalStateException()
+        ShapeShiftPairs.ETH_BTC -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.ETHER)
+        ShapeShiftPairs.BTC_ETH -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BTC)
+        else -> throw IllegalStateException("Attempt to get invalid pair $pair")
     }
 
     private data class ToFromPair(val to: CryptoCurrencies, val from: CryptoCurrencies)

@@ -27,8 +27,8 @@ public class MaterialProgressDialog {
     public MaterialProgressDialog(Context context) {
         View layout = View.inflate(context, R.layout.progress_dialog_compat, null);
 
-        mMessageTextView = (TextView) layout.findViewById(R.id.message);
-        ProgressBar progressBar = (ProgressBar) layout.findViewById(R.id.progress_bar);
+        mMessageTextView = layout.findViewById(R.id.message);
+        ProgressBar progressBar = layout.findViewById(R.id.progress_bar);
 
         mAlertDialog = new AlertDialog.Builder(context, R.style.AlertDialogStyle)
                 .setTitle(context.getString(R.string.app_name))

@@ -14,6 +14,8 @@ import org.bitcoinj.core.ECKey
 import org.web3j.protocol.core.methods.request.RawTransaction
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.answers.Logging
+import piuk.blockchain.android.data.answers.ShapeShiftEvent
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -172,8 +174,8 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 .doOnError(Timber::e)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
-                        { view.launchProgressPage(depositAddress) },
-                        { view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR) }
+                        { handleSuccess(depositAddress) },
+                        { handleFailure() }
                 )
     }
 
@@ -203,9 +205,29 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
                 .flatMapCompletable { updateMetadata(it) }
                 .subscribe(
-                        { view.launchProgressPage(depositAddress) },
-                        { view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR) }
+                        { handleSuccess(depositAddress) },
+                        { handleFailure() }
                 )
+    }
+
+    private fun handleSuccess(depositAddress: String) {
+        view.launchProgressPage(depositAddress)
+        Logging.logCustom(ShapeShiftEvent()
+                .putPair(
+                        view.shapeShiftData.fromCurrency.symbol,
+                        view.shapeShiftData.toCurrency.symbol
+                )
+                .putSuccess(true))
+    }
+
+    private fun handleFailure() {
+        view.showToast(R.string.transaction_failed, ToastCustom.TYPE_ERROR)
+        Logging.logCustom(ShapeShiftEvent()
+                .putPair(
+                        view.shapeShiftData.fromCurrency.symbol,
+                        view.shapeShiftData.toCurrency.symbol
+                )
+                .putSuccess(true))
     }
 
     private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {

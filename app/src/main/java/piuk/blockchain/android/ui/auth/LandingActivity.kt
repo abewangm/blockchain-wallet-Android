@@ -44,6 +44,8 @@ class LandingActivity : BaseMvpActivity<LandingView, LandingPresenter>(), Landin
         onViewReady()
     }
 
+    override fun logScreenView() = Unit
+
     override fun createPresenter() = landingPresenter
 
     override fun getView() = this

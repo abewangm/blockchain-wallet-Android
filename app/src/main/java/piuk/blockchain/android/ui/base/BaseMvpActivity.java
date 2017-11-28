@@ -21,6 +21,13 @@ public abstract class BaseMvpActivity<VIEW extends View, PRESENTER extends BaseP
         presenter = createPresenter();
         presenter.initView(getView());
 
+        logScreenView();
+    }
+
+    /**
+     * Allows us to disable logging of screen viewing on unimportant pages.
+     */
+    protected void logScreenView() {
         Logging.INSTANCE.logContentView(new ContentViewEvent()
                 .putContentName(getClass().getSimpleName()));
     }

@@ -45,6 +45,7 @@ class ShapeShiftDetailActivity : BaseMvpActivity<ShapeShiftDetailView, ShapeShif
         textview_current_stage.setText(uiState.heading)
         textview_current_word_step.text = uiState.message
         imageview_progress.setImageDrawable(ContextCompat.getDrawable(this, uiState.icon))
+        textview_receive_amount.setTextColor(ContextCompat.getColor(this, uiState.receiveColor))
     }
 
     override fun updateDeposit(label: String, amount: String) {
