@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.dashboard
 
 import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.ChartsDataManager
@@ -15,6 +16,7 @@ import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.AnnouncementData
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -43,7 +45,8 @@ class DashboardPresenter @Inject constructor(
         private val buyDataManager: BuyDataManager,
         private val rxBus: RxBus,
         private val swipeToReceiveHelper: SwipeToReceiveHelper,
-        private val currencyState: CurrencyState
+        private val currencyState: CurrencyState,
+        private val walletOptionsDataManager: WalletOptionsDataManager
 ) : BasePresenter<DashboardView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
@@ -51,8 +54,10 @@ class DashboardPresenter @Inject constructor(
     private val displayList = mutableListOf<Any>(ChartDisplayable())
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     private var timeSpan = TimeSpan.MONTH
-    @VisibleForTesting var btcBalance: Long = 0L
-    @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
+    @VisibleForTesting
+    var btcBalance: Long = 0L
+    @VisibleForTesting
+    var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
         cryptoCurrency = currencyState.cryptoCurrency
@@ -222,16 +227,19 @@ class DashboardPresenter @Inject constructor(
         }
     }
 
-    private fun getOnboardingStatusObservable(): Observable<Boolean> {
-        return if (isOnboardingComplete()) {
-            Observable.just(false)
-        } else
-            buyDataManager.canBuy
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnNext { displayList.removeAll { it is OnboardingModel } }
-                    .doOnNext { displayList.add(0, getOnboardingPages(it)) }
+    private fun getOnboardingStatusObservable(): Observable<Unit> {
+        return if (!isOnboardingComplete()) {
+            Observable.empty()
+        } else {
+            Observable.just(displayList.removeAll { it is OnboardingModel })
+                    .flatMap { walletOptionsDataManager.showShapeshift(payloadDataManager.wallet.guid, payloadDataManager.wallet.sharedKey) }
+                    .zipWith(buyDataManager.canBuy,
+                            BiFunction { canShapeshift: Boolean, canBuy: Boolean ->
+                                displayList.add(0, getOnboardingPages(canShapeshift, canBuy))
+                            })
                     .doOnNext { view.notifyItemAdded(displayList, 0) }
                     .doOnError { Timber.e(it) }
+        }
     }
 
     private fun checkLatestAnnouncement() {
@@ -244,8 +252,23 @@ class DashboardPresenter @Inject constructor(
         }
     }
 
-    private fun getOnboardingPages(isBuyAllowed: Boolean): OnboardingModel {
+    private fun getOnboardingPages(isShapeshiftAllowed: Boolean, isBuyAllowed: Boolean): OnboardingModel {
         val pages = mutableListOf<OnboardingPagerContent>()
+
+        if (isShapeshiftAllowed) {
+            pages.add(
+                    OnboardingPagerContent(
+                            stringUtils.getString(R.string.onboarding_available_now),
+                            "",
+                            stringUtils.getString(R.string.shapeshift_announcement_content),
+                            stringUtils.getString(R.string.shapeshift_announcement_get_started),
+                            MainActivity.ACTION_SHAPESHIFT,
+                            R.color.primary_navy_medium,
+                            R.drawable.vector_exchange_offset
+                    )
+            )
+        }
+
         if (isBuyAllowed) {
             // Buy bitcoin prompt
             pages.add(
