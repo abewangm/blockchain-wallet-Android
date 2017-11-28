@@ -85,14 +85,13 @@ class ShapeShiftDetailPresenter @Inject constructor(
 
     private fun handleTradeResponse(tradeStatusResponse: TradeStatusResponse) {
         with(tradeStatusResponse) {
-            val fromCoin: CryptoCurrencies = CryptoCurrencies.fromString(outgoingType ?: "btc")!!
-            val toCoin: CryptoCurrencies = CryptoCurrencies.fromString(incomingType ?: "eth")!!
-            val fromAmount: BigDecimal = outgoingCoin ?: BigDecimal.ZERO
-            val toAmount: BigDecimal = incomingCoin ?: BigDecimal.ZERO
-
+            val fromCoin: CryptoCurrencies = CryptoCurrencies.fromString(incomingType ?: "btc")!!
+            val toCoin: CryptoCurrencies = CryptoCurrencies.fromString(outgoingType ?: "eth")!!
+            val fromAmount: BigDecimal = incomingCoin ?: BigDecimal.ZERO
+            val toAmount: BigDecimal = outgoingCoin ?: BigDecimal.ZERO
             val pair = """${fromCoin.symbol.toLowerCase()}_${toCoin.symbol.toLowerCase()}"""
             val (to, from) = getToFromPair(pair)
-            updateDeposit(from, fromAmount)
+
             updateDeposit(from, fromAmount)
             updateReceive(to, toAmount)
         }
@@ -113,9 +112,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
             if (quote.pair.isNullOrEmpty() || quote.pair == "_") {
                 quote.pair = ShapeShiftPairs.BTC_ETH
             }
-
             val (to, from) = getToFromPair(quote.pair)
-            updateDeposit(from, quote.depositAmount ?: BigDecimal.ZERO)
+
             updateDeposit(from, quote.depositAmount ?: BigDecimal.ZERO)
             updateReceive(to, quote.withdrawalAmount)
             updateExchangeRate(quote.quotedRate, from, to)
@@ -248,8 +246,8 @@ class ShapeShiftDetailPresenter @Inject constructor(
 
     // TODO: This needs to be safe incase web is broken, or this must not be checked if the data is invalid
     private fun getToFromPair(pair: String): ToFromPair = when (pair.toLowerCase()) {
-        ShapeShiftPairs.ETH_BTC -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BTC)
-        ShapeShiftPairs.BTC_ETH -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.ETHER)
+        ShapeShiftPairs.ETH_BTC -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.ETHER)
+        ShapeShiftPairs.BTC_ETH -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BTC)
         else -> throw IllegalStateException("Attempt to get invalid pair $pair")
     }
 
