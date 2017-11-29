@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.dashboard
 
 import com.nhaarman.mockito_kotlin.*
+import info.blockchain.wallet.payload.data.Wallet
 import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -18,6 +19,7 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.home.models.MetadataEvent
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.*
@@ -39,6 +41,7 @@ class DashboardPresenterTest {
     private val swipeToReceiveHelper: SwipeToReceiveHelper = mock()
     private val view: DashboardView = mock()
     private val currencyState: CurrencyState = mock()
+    private val walletOptionsDataManager: WalletOptionsDataManager = mock()
 
     @Before
     fun setUp() {
@@ -55,7 +58,8 @@ class DashboardPresenterTest {
                 buyDataManager,
                 rxBus,
                 swipeToReceiveHelper,
-                currencyState
+                currencyState,
+                walletOptionsDataManager
         )
 
         subject.initView(view)
@@ -85,7 +89,7 @@ class DashboardPresenterTest {
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2.0)
         whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(prefsUtil.getValue(DashboardPresenter.ETH_ANNOUNCEMENT_DISMISSED, false))
+        whenever(prefsUtil.getValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false))
                 .thenReturn(true)
         // Act
         subject.onViewReady()
@@ -98,7 +102,7 @@ class DashboardPresenterTest {
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.ETH_ANNOUNCEMENT_DISMISSED, false)
+        verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false)
         verifyNoMoreInteractions(prefsUtil)
         verify(swipeToReceiveHelper).storeEthAddress()
         verifyNoMoreInteractions(swipeToReceiveHelper)
@@ -185,6 +189,10 @@ class DashboardPresenterTest {
         val combinedEthModel: CombinedEthModel = mock()
         whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
+//        val mockWallet: Wallet = mock()
+//        whenever(payloadDataManager.wallet).thenReturn(mockWallet)
+//        whenever(payloadDataManager.wallet.guid).thenReturn("")
+//        whenever(payloadDataManager.wallet.sharedKey).thenReturn("")
         val btcBalance = 21_000_000_000L
         whenever(transactionListDataManager.getBtcBalance(any())).thenReturn(btcBalance)
         val ethBalance = 22_000_000_000L
@@ -195,7 +203,7 @@ class DashboardPresenterTest {
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2.0)
         whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
         whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(prefsUtil.getValue(DashboardPresenter.ETH_ANNOUNCEMENT_DISMISSED, false))
+        whenever(prefsUtil.getValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false))
                 .thenReturn(false)
         // Act
         subject.onViewReady()
@@ -208,14 +216,15 @@ class DashboardPresenterTest {
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.ETH_ANNOUNCEMENT_DISMISSED, false)
-        verify(prefsUtil, atLeastOnce()).setValue(DashboardPresenter.ETH_ANNOUNCEMENT_DISMISSED, true)
+        verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false)
+        verify(prefsUtil, atLeastOnce()).setValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
         verify(swipeToReceiveHelper).storeEthAddress()
         verifyNoMoreInteractions(swipeToReceiveHelper)
         verify(ethDataManager).fetchEthAddress()
         verifyNoMoreInteractions(ethDataManager)
         verify(payloadDataManager).updateAllBalances()
+        verify(payloadDataManager).wallet
         verifyNoMoreInteractions(payloadDataManager)
         verify(transactionListDataManager).getBtcBalance(any())
         verifyNoMoreInteractions(transactionListDataManager)
