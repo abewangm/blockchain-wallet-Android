@@ -104,7 +104,7 @@ class ShapeShiftDataManager(
      */
     fun clearAllTrades(): Completable {
         shapeShiftDataStore.tradeData?.run {
-            trades = emptyList()
+            trades?.clear()
             return rxPinning.call { Completable.fromCallable { save() } }
                     .compose(RxUtil.applySchedulersToCompletable())
         }

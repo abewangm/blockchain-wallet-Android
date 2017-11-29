@@ -6,14 +6,20 @@ import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.shapeshift.ShapeShiftApi
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
-import info.blockchain.wallet.shapeshift.data.Quote
-import info.blockchain.wallet.shapeshift.data.Trade
+import info.blockchain.wallet.shapeshift.data.*
+import io.reactivex.Observable
+import org.amshove.kluent.`should contain`
+import org.amshove.kluent.`should equal to`
+import org.amshove.kluent.`should not contain`
 import org.amshove.kluent.mock
+import org.json.JSONException
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore
+import piuk.blockchain.android.data.stores.Either
+import piuk.blockchain.android.ui.shapeshift.models.CoinPairings
 
 class ShapeShiftDataManagerTest : RxTest() {
 
@@ -123,80 +129,280 @@ class ShapeShiftDataManagerTest : RxTest() {
         verifyNoMoreInteractions(shapeShiftDataStore)
     }
 
-    @Test
+    @Test(expected = IllegalStateException::class)
     @Throws(Exception::class)
-    fun addTradeToList() {
+    fun `addTradeToList uninitialized`() {
         // Arrange
-
+        val trade = Trade()
         // Act
-
+        val testObserver = subject.addTradeToList(trade).test()
         // Assert
-
+        testObserver.assertNotComplete()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
     }
 
     @Test
     @Throws(Exception::class)
-    fun clearAllTrades() {
+    fun `addTradeToList initialized`() {
+        // Arrange
+        val trade = Trade()
+        val list = mutableListOf<Trade>()
+        val tradeData: ShapeShiftTrades = mock()
+        whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        whenever(tradeData.trades).thenReturn(list)
+        // Act
+        val testObserver = subject.addTradeToList(trade).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+        tradeData.trades.size `should equal to` 1
+    }
+
+    @Test(expected = IllegalStateException::class)
+    @Throws(Exception::class)
+    fun `clearAllTrades uninitialized`() {
         // Arrange
 
         // Act
-
+        val testObserver = subject.clearAllTrades().test()
         // Assert
-
+        testObserver.assertNotComplete()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
     }
 
     @Test
     @Throws(Exception::class)
-    fun updateTrade() {
+    fun `clearAllTrades initialized`() {
         // Arrange
-
+        val trade = Trade()
+        val list = mutableListOf(trade)
+        val tradeData: ShapeShiftTrades = mock()
+        whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        whenever(tradeData.trades).thenReturn(list)
         // Act
-
+        val testObserver = subject.clearAllTrades().test()
         // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+        tradeData.trades.size `should equal to` 0
+    }
 
+    @Test(expected = IllegalStateException::class)
+    @Throws(Exception::class)
+    fun `updateTrade uninitialized`() {
+        // Arrange
+        val trade = Trade()
+        // Act
+        val testObserver = subject.updateTrade(trade).test()
+        // Assert
+        testObserver.assertNotComplete()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
     }
 
     @Test
     @Throws(Exception::class)
-    fun getTradeStatus() {
+    fun `updateTrade found, save successful`() {
         // Arrange
-
+        val orderId = "ORDER_ID"
+        val trade = Trade().apply { quote = Quote().apply { this.orderId = orderId } }
+        val updatedTrade = Trade().apply { quote = Quote().apply { this.orderId = orderId } }
+        val list = mutableListOf(trade)
+        val tradeData: ShapeShiftTrades = mock()
+        whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        whenever(tradeData.trades).thenReturn(list)
         // Act
-
+        val testObserver = subject.updateTrade(updatedTrade).test()
         // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+        tradeData.trades.size `should equal to` 1
+        tradeData.trades `should contain` updatedTrade
+        tradeData.trades `should not contain` trade
+    }
 
+    @Test
+    @Throws(Exception::class)
+    fun `updateTrade found, save failed`() {
+        // Arrange
+        val orderId = "ORDER_ID"
+        val trade = Trade().apply { quote = Quote().apply { this.orderId = orderId } }
+        val updatedTrade = Trade().apply { quote = Quote().apply { this.orderId = orderId } }
+        val list = mutableListOf(trade)
+        val tradeData: ShapeShiftTrades = mock()
+        whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        whenever(tradeData.trades).thenReturn(list)
+        whenever(tradeData.save()).thenThrow(JSONException::class.java)
+        // Act
+        val testObserver = subject.updateTrade(updatedTrade).test()
+        // Assert
+        testObserver.assertNotComplete()
+        testObserver.assertError(JSONException::class.java)
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+        tradeData.trades.size `should equal to` 1
+        tradeData.trades `should contain` trade
+        tradeData.trades `should not contain` updatedTrade
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `updateTrade not found`() {
+        // Arrange
+        val orderId = "ORDER_ID"
+        val trade = Trade().apply { quote = Quote().apply { this.orderId = orderId } }
+        val updatedTrade = Trade().apply { quote = Quote().apply { this.orderId = "" } }
+        val list = mutableListOf(trade)
+        val tradeData: ShapeShiftTrades = mock()
+        whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        whenever(tradeData.trades).thenReturn(list)
+        // Act
+        val testObserver = subject.updateTrade(updatedTrade).test()
+        // Assert
+        testObserver.assertNotComplete()
+        testObserver.assertError(Throwable::class.java)
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+        tradeData.trades.size `should equal to` 1
+        tradeData.trades `should contain` trade
+        tradeData.trades `should not contain` updatedTrade
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getTradeStatus success`() {
+        // Arrange
+        val depositAddress = "DEPOSIT_ADDRESS"
+        val response: TradeStatusResponse = mock()
+        whenever(shapeShiftApi.getTradeStatus(depositAddress)).thenReturn(Observable.just(response))
+        // Act
+        val testObserver = subject.getTradeStatus(depositAddress).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(response)
+        verify(shapeShiftApi).getTradeStatus(depositAddress)
+        verifyNoMoreInteractions(shapeShiftApi)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getTradeStatus failed`() {
+        // Arrange
+        val depositAddress = "DEPOSIT_ADDRESS"
+        val response: TradeStatusResponse = mock()
+        whenever(response.error).thenReturn("ERROR_STRING")
+        whenever(shapeShiftApi.getTradeStatus(depositAddress)).thenReturn(Observable.just(response))
+        // Act
+        val testObserver = subject.getTradeStatus(depositAddress).test()
+        // Assert
+        testObserver.assertNotComplete()
+        testObserver.assertError(Throwable::class.java)
+        verify(shapeShiftApi).getTradeStatus(depositAddress)
+        verifyNoMoreInteractions(shapeShiftApi)
     }
 
     @Test
     @Throws(Exception::class)
     fun getRate() {
         // Arrange
-
+        val coinPairing = CoinPairings.ETH_TO_BTC
+        val marketInfo: MarketInfo = mock()
+        whenever(shapeShiftApi.getRate(coinPairing.pairCode)).thenReturn(Observable.just(marketInfo))
         // Act
-
+        val testObserver = subject.getRate(coinPairing).test()
         // Assert
-
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(marketInfo)
+        verify(shapeShiftApi).getRate(coinPairing.pairCode)
+        verifyNoMoreInteractions(shapeShiftApi)
     }
 
     @Test
     @Throws(Exception::class)
-    fun getQuote() {
+    fun `getQuote returns valid quote`() {
         // Arrange
-
+        val quoteRequest: QuoteRequest = mock()
+        val quote: Quote = mock()
+        val responseWrapper: SendAmountResponseWrapper = mock()
+        whenever(responseWrapper.wrapper).thenReturn(quote)
+        whenever(shapeShiftApi.getQuote(quoteRequest)).thenReturn(Observable.just(responseWrapper))
         // Act
-
+        val testObserver = subject.getQuote(quoteRequest).test()
         // Assert
-
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(Either.Right(quote))
+        verify(shapeShiftApi).getQuote(quoteRequest)
+        verifyNoMoreInteractions(shapeShiftApi)
     }
 
     @Test
     @Throws(Exception::class)
-    fun getApproximateQuote() {
+    fun `getQuote returns error string`() {
         // Arrange
-
+        val quoteRequest: QuoteRequest = mock()
+        val error = "ERROR"
+        val responseWrapper: SendAmountResponseWrapper = mock()
+        whenever(responseWrapper.error).thenReturn(error)
+        whenever(shapeShiftApi.getQuote(quoteRequest)).thenReturn(Observable.just(responseWrapper))
         // Act
-
+        val testObserver = subject.getQuote(quoteRequest).test()
         // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(Either.Left(error))
+        verify(shapeShiftApi).getQuote(quoteRequest)
+        verifyNoMoreInteractions(shapeShiftApi)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getApproximateQuote returns valid quote`() {
+        // Arrange
+        val quoteRequest: QuoteRequest = mock()
+        val quote: Quote = mock()
+        val responseWrapper: QuoteResponseWrapper = mock()
+        whenever(responseWrapper.wrapper).thenReturn(quote)
+        whenever(shapeShiftApi.getApproximateQuote(quoteRequest))
+                .thenReturn(Observable.just(responseWrapper))
+        // Act
+        val testObserver = subject.getApproximateQuote(quoteRequest).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(Either.Right(quote))
+        verify(shapeShiftApi).getApproximateQuote(quoteRequest)
+        verifyNoMoreInteractions(shapeShiftApi)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getApproximateQuote returns error string`() {
+        // Arrange
+        val quoteRequest: QuoteRequest = mock()
+        val error = "ERROR"
+        val responseWrapper: QuoteResponseWrapper = mock()
+        whenever(responseWrapper.error).thenReturn(error)
+        whenever(shapeShiftApi.getApproximateQuote(quoteRequest))
+                .thenReturn(Observable.just(responseWrapper))
+        // Act
+        val testObserver = subject.getApproximateQuote(quoteRequest).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(Either.Left(error))
+        verify(shapeShiftApi).getApproximateQuote(quoteRequest)
+        verifyNoMoreInteractions(shapeShiftApi)
 
     }
 
