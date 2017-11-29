@@ -39,20 +39,20 @@ class ShapeShiftDetailPresenter @Inject constructor(
     override fun onViewReady() {
         // Find trade first in list
         shapeShiftDataManager.findTrade(view.depositAddress)
-                .compose(RxUtil.applySchedulersToObservable())
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .compose(RxUtil.applySchedulersToSingle())
+                .compose(RxUtil.addSingleToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnError {
                     view.showToast(R.string.shapeshift_trade_not_found, ToastCustom.TYPE_ERROR)
                     view.finishPage()
                 }
                 // Display information that we have stored
-                .doOnNext {
+                .doOnSuccess {
                     updateUiAmounts(it)
                     handleState(it.status)
                 }
                 // Get trade info from ShapeShift only if necessary
-                .flatMap {
+                .flatMapObservable {
                     if (requiresMoreInfoForUi(it)) {
                         shapeShiftDataManager.getTradeStatus(view.depositAddress)
                                 .doOnNext { handleTradeResponse(it) }
@@ -87,13 +87,13 @@ class ShapeShiftDetailPresenter @Inject constructor(
         with(tradeStatusResponse) {
             val fromCoin: CryptoCurrencies = CryptoCurrencies.fromString(incomingType ?: "btc")!!
             val toCoin: CryptoCurrencies = CryptoCurrencies.fromString(outgoingType ?: "eth")!!
-            val fromAmount: BigDecimal = incomingCoin ?: BigDecimal.ZERO
-            val toAmount: BigDecimal = outgoingCoin ?: BigDecimal.ZERO
+            val fromAmount: BigDecimal? = incomingCoin
+            val toAmount: BigDecimal? = outgoingCoin
             val pair = """${fromCoin.symbol.toLowerCase()}_${toCoin.symbol.toLowerCase()}"""
             val (to, from) = getToFromPair(pair)
 
-            updateDeposit(from, fromAmount)
-            updateReceive(to, toAmount)
+            fromAmount?.let { updateDeposit(from, it) }
+            toAmount?.let { updateReceive(to, it) }
         }
 
         handleState(tradeStatusResponse.status)
@@ -117,7 +117,7 @@ class ShapeShiftDetailPresenter @Inject constructor(
             updateDeposit(from, quote.depositAmount ?: BigDecimal.ZERO)
             updateReceive(to, quote.withdrawalAmount)
             updateExchangeRate(quote.quotedRate, from, to)
-            updateTransactionFee(from, quote.minerFee)
+            updateTransactionFee(to, quote.minerFee)
         }
     }
 
