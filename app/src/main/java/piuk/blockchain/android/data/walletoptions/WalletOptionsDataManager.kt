@@ -5,7 +5,6 @@ import info.blockchain.wallet.api.data.WalletOptions
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.ReplaySubject
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
@@ -53,13 +52,14 @@ class WalletOptionsDataManager(
 
         val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT) ?: false }
         val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode) ?: false }
-        val whitelistedState = options.shapeshift.statesWhitelist.let { it?.contains(settings.state) ?: true }
-        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it?.contains("US") ?: false }
-        val isUS = settings.countryCode == "US"
+        // TODO: States have to be selected manually and stored in settings
+        // TODO: Build state selection page
+//        val whitelistedState = options.shapeshift.statesWhitelist.let { it?.contains(settings.state) ?: true }
+//        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it?.contains("US") ?: false }
+//        val isUS = settings.countryCode == "US"
 
-        return isShapeShiftAllowed
-                && !blacklistedCountry
-                && (!isUS || (!isUSABlacklisted && whitelistedState))
+        return isShapeShiftAllowed && !blacklistedCountry
+//                && (!isUS || (!isUSABlacklisted && whitelistedState))
     }
 
     /**
