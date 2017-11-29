@@ -9,9 +9,9 @@ class AccountAdapter(
         accountHeadersListener: AccountHeadersListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
-    val createWalletDelegate = CreateWalletDelegate<Any>(accountHeadersListener)
-    val importAddressDelegate = ImportAddressDelegate<Any>(accountHeadersListener)
-    val accountDelegate = AccountDelegate<Any>(accountHeadersListener)
+    private val createWalletDelegate = CreateWalletDelegate<Any>(accountHeadersListener)
+    private val importAddressDelegate = ImportAddressDelegate<Any>(accountHeadersListener)
+    private val accountDelegate = AccountDelegate<Any>(accountHeadersListener)
 
     init {
         delegatesManager.apply {

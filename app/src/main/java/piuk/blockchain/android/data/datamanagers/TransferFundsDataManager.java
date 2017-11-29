@@ -21,6 +21,7 @@ import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
@@ -69,7 +70,7 @@ public class TransferFundsDataManager {
                             sendDataManager.getUnspentOutputs(legacyAddress.getAddress())
                                     .blockingFirst();
                     Pair<BigInteger, BigInteger> sweepableCoins =
-                            sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);
+                            sendDataManager.getMaximumAvailable(unspentOutputs, suggestedFeePerKb);
                     BigInteger sweepAmount = sweepableCoins.getLeft();
 
                     // Don't sweep if there are still unconfirmed funds in address

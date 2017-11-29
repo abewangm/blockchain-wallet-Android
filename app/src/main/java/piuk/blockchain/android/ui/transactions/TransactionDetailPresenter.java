@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.multiaddress.MultiAddressFactory;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,7 +23,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -35,6 +36,7 @@ import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.transactions.BtcDisplayable;
 import piuk.blockchain.android.data.transactions.Displayable;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -164,8 +166,9 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
             toAddress = stringUtils.getString(R.string.eth_default_account_label);
         }
 
-        getView().setFromAddress(fromAddress);
-        getView().setToAddresses(Collections.singletonList(new RecipientModel(
+        getView().setFromAddress(Collections.singletonList(new TransactionDetailModel(
+                fromAddress, "", "")));
+        getView().setToAddresses(Collections.singletonList(new TransactionDetailModel(
                 toAddress, "", "")));
     }
 
@@ -173,61 +176,91 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         Pair<HashMap<String, BigInteger>, HashMap<String, BigInteger>> pair =
                 transactionHelper.filterNonChangeAddresses(displayable);
 
-        // From Address
-        HashMap<String, BigInteger> inputMap = pair.getLeft();
-        ArrayList<String> labelList = new ArrayList<>();
-        Set<Map.Entry<String, BigInteger>> entrySet = inputMap.entrySet();
-        for (Map.Entry<String, BigInteger> set : entrySet) {
-            String label = payloadDataManager.addressToLabel(set.getKey());
-            if (!labelList.contains(label)) labelList.add(label);
-        }
+        // From Addresses
+        ArrayList<TransactionDetailModel> fromList = getFromList(pair.getLeft());
+        getView().setFromAddress(fromList);
 
-        String inputMapString = org.apache.commons.lang3.StringUtils.join(labelList.toArray(), "\n\n");
-        if (inputMapString.isEmpty()) {
-            inputMapString = stringUtils.getString(R.string.transaction_detail_coinbase);
-        }
-
+        // From Contacts
         ContactTransactionDisplayModel displayModel = null;
-
         if (contactsDataManager.getTransactionDisplayMap().containsKey(displayable.getHash())) {
-            displayModel =
-                    contactsDataManager.getTransactionDisplayMap().get(displayable.getHash());
+            displayModel = contactsDataManager.getTransactionDisplayMap().get(displayable.getHash());
 
-            inputMapString = displayModel.getContactName();
-        }
-
-        // TODO: 14/03/2017 Change this to dropdown like outputs, as a list of addresses looks terrible
-        getView().setFromAddress(inputMapString);
-
-        // Check if should be "Paid" state via contacts
-        if (displayModel != null) {
-            if (displayModel.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)
-                    && displayModel.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                getView().showTransactionAsPaid();
+            // Check if should be "Paid" state via contacts
+            if (displayModel != null) {
+                if (displayModel.getState().equals(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED)
+                        && displayModel.getRole().equals(FacilitatedTransaction.ROLE_PR_RECEIVER)) {
+                    getView().showTransactionAsPaid();
+                }
             }
         }
 
-        // To Address
-        HashMap<String, BigInteger> outputMap = pair.getRight();
-        ArrayList<RecipientModel> recipients = new ArrayList<>();
-
-        for (Map.Entry<String, BigInteger> item : outputMap.entrySet()) {
-            RecipientModel recipientModel = new RecipientModel(
-                    payloadDataManager.addressToLabel(item.getKey()),
-                    monetaryUtil.getDisplayAmountWithFormatting(item.getValue().longValue()),
-                    getDisplayUnits());
-
-            if (displayModel != null && displayable.getDirection().equals(Direction.SENT)) {
-                recipientModel.setAddress(displayModel.getContactName());
-            }
-
-            recipients.add(recipientModel);
-        }
-
+        // To Addresses
+        ArrayList<TransactionDetailModel> recipients = getToList(displayModel, pair.getRight());
         getView().setToAddresses(recipients);
+
         if (displayModel != null) {
             getView().setTransactionNote(displayModel.getNote());
         }
+    }
+
+    private ArrayList<TransactionDetailModel> getFromList(HashMap<String, BigInteger> inputMap) {
+        ArrayList<TransactionDetailModel> inputs = new ArrayList<>();
+
+        for (Map.Entry<String, BigInteger> item : inputMap.entrySet()) {
+
+            long value = (item.getValue() != null) ? item.getValue().longValue() : 0;
+
+            TransactionDetailModel transactionDetailModel = new TransactionDetailModel(
+                    payloadDataManager.addressToLabel(item.getKey()),
+                    monetaryUtil.getDisplayAmountWithFormatting(value),
+                    getDisplayUnits());
+
+            if (transactionDetailModel.getAddress().equals(MultiAddressFactory.ADDRESS_DECODE_ERROR)) {
+                transactionDetailModel.setAddress(stringUtils.getString(R.string.tx_decode_error));
+                transactionDetailModel.setAddressDecodeError(true);
+            }
+
+            inputs.add(transactionDetailModel);
+        }
+
+        //No inputs = coinbase
+        if (inputs.isEmpty()) {
+            TransactionDetailModel coinbase = new TransactionDetailModel(
+                    stringUtils.getString(R.string.transaction_detail_coinbase),
+                    "",
+                    getDisplayUnits());
+
+            inputs.add(coinbase);
+        }
+
+        return inputs;
+    }
+
+    private ArrayList<TransactionDetailModel> getToList(ContactTransactionDisplayModel displayModel, HashMap<String, BigInteger> outputMap) {
+        ArrayList<TransactionDetailModel> recipients = new ArrayList<>();
+
+        for (Map.Entry<String, BigInteger> item : outputMap.entrySet()) {
+
+            long value = (item.getValue() != null) ? item.getValue().longValue() : 0;
+
+            TransactionDetailModel transactionDetailModel = new TransactionDetailModel(
+                    payloadDataManager.addressToLabel(item.getKey()),
+                    monetaryUtil.getDisplayAmountWithFormatting(value),
+                    getDisplayUnits());
+
+            if (displayModel != null && displayable.getDirection().equals(Direction.SENT)) {
+                transactionDetailModel.setAddress(displayModel.getContactName());
+            }
+
+            if(transactionDetailModel.getAddress().equals(MultiAddressFactory.ADDRESS_DECODE_ERROR)) {
+                transactionDetailModel.setAddress(stringUtils.getString(R.string.tx_decode_error));
+                transactionDetailModel.setAddressDecodeError(true);
+            }
+
+            recipients.add(transactionDetailModel);
+        }
+
+        return recipients;
     }
 
     private void setFee(CryptoCurrencies currency, BigInteger fee) {

@@ -113,7 +113,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         when (cryptoCurrencies) {
             CryptoCurrencies.BTC -> tabs?.getTabAt(0)?.select()
             CryptoCurrencies.ETHER -> tabs?.getTabAt(1)?.select()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 

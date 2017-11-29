@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar_general" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+
+            <ImageView
+                android:id="@+id/imageview_progress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:contentDescription="Progress icon"
+                android:minHeight="120dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/shapeshift_progress_exchange"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/textview_current_stage"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageview_progress"
+                tools:ignore="MissingPrefix"
+                tools:text="Exchange in Progress" />
+
+            <TextView
+                android:id="@+id/textview_current_word_step"
+                fontPath="fonts/Montserrat-Regular.ttf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textColor="@color/product_gray_hint"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_current_stage"
+                tools:ignore="MissingPrefix"
+                tools:text="Step 1 of 3" />
+
+            <include
+                android:id="@+id/divider1"
+                layout="@layout/divider_grey"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_current_word_step" />
+
+            <!-- DEPOSIT AMOUNT -->
+
+            <TextView
+                android:id="@+id/textview_deposit_title"
+                style="@style/ShapeShiftConfirmationTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider1"
+                tools:text="Bitcoin to deposit" />
+
+            <TextView
+                android:id="@+id/textview_deposit_amount"
+                style="@style/ShapeShiftConfirmationAmount"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/textview_deposit_title"
+                app:layout_constraintTop_toBottomOf="@+id/divider1"
+                tools:text="0.00245835 BTC" />
+
+            <include
+                android:id="@+id/divider2"
+                layout="@layout/divider_grey"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_deposit_amount" />
+
+            <!-- RECEIVE AMOUNT -->
+
+            <TextView
+                android:id="@+id/textview_receive_title"
+                style="@style/ShapeShiftConfirmationTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider2"
+                tools:text="Ether to be Received" />
+
+            <TextView
+                android:id="@+id/textview_receive_amount"
+                style="@style/ShapeShiftConfirmationAmount"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/textview_receive_title"
+                app:layout_constraintTop_toBottomOf="@+id/divider2"
+                tools:text="0.00245835 ETH" />
+
+            <include
+                android:id="@+id/divider3"
+                layout="@layout/divider_grey"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_receive_amount" />
+
+            <!-- EXCHANGE RATE -->
+
+            <TextView
+                android:id="@+id/textview_rate_title"
+                style="@style/ShapeShiftConfirmationTitle"
+                android:text="@string/shapeshift_exchange_rate"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider3" />
+
+            <TextView
+                android:id="@+id/textview_rate_value"
+                style="@style/ShapeShiftConfirmationAmount"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/textview_rate_title"
+                app:layout_constraintTop_toBottomOf="@+id/divider3"
+                tools:text="1 BTC = 14.66826421 ETH" />
+
+            <include
+                android:id="@+id/divider4"
+                layout="@layout/divider_grey"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_rate_value" />
+
+            <!-- TRANSACTION FEE -->
+
+            <TextView
+                android:id="@+id/textview_transaction_fee_title"
+                style="@style/ShapeShiftConfirmationTitle"
+                android:text="@string/shapeshift_transaction_fee"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider4" />
+
+            <TextView
+                android:id="@+id/textview_transaction_fee_amount"
+                style="@style/ShapeShiftConfirmationAmount"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/textview_transaction_fee_title"
+                app:layout_constraintTop_toBottomOf="@+id/divider4"
+                tools:text="0.000414 BTC" />
+
+            <include
+                android:id="@+id/divider5"
+                layout="@layout/divider_grey"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_transaction_fee_amount" />
+
+            <!-- ORDER ID -->
+
+            <TextView
+                android:id="@+id/textview_order_id_title"
+                style="@style/ShapeShiftConfirmationTitle"
+                android:text="@string/shapeshift_order_id_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider5" />
+
+            <TextView
+                android:id="@+id/textview_order_id_amount"
+                style="@style/ShapeShiftConfirmationAmount"
+                android:layout_width="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/textview_order_id_title"
+                app:layout_constraintTop_toBottomOf="@+id/divider5"
+                tools:text="1460140c-e7dc-428f-855d-867c5a318ff2" />
+
+            <include
+                android:id="@+id/divider6"
+                layout="@layout/divider_grey"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_order_id_amount" />
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+
+
+</LinearLayout>

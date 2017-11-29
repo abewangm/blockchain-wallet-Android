@@ -25,6 +25,7 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
@@ -66,7 +67,7 @@ public class TransferFundsDataManagerTest extends RxTest {
         spendableUnspentOutputs.setAbsoluteFee(BigInteger.TEN);
         when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
                 .thenReturn(spendableUnspentOutputs);
-        when(sendDataManager.getSweepableCoins(unspentOutputs, BigInteger.valueOf(1_000L)))
+        when(sendDataManager.getMaximumAvailable(unspentOutputs, BigInteger.valueOf(1_000L)))
                 .thenReturn(Pair.of(BigInteger.valueOf(1_000_000L), BigInteger.TEN));
         // Act
         TestObserver<Triple<List<PendingTransaction>, Long, Long>> testObserver =

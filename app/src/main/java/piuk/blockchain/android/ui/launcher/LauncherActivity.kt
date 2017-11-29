@@ -33,6 +33,8 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
         handler.postDelayed(DelayStartRunnable(this), 500)
     }
 
+    override fun logScreenView() = Unit
+
     override fun createPresenter() = launcherPresenter
 
     override fun getView() = this

@@ -65,12 +65,12 @@ public class PaymentServiceTest extends RxTest {
         BigInteger mockAmount = mock(BigInteger.class);
         Transaction mockTx = mock(Transaction.class);
         when(mockTx.getHashAsString()).thenReturn(txHash);
-        when(payment.makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
+        when(payment.makeSimpleTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
                 .thenReturn(mockTx);
         Call<ResponseBody> mockCall = mock(Call.class);
         Response response = Response.success(mock(ResponseBody.class));
         when(mockCall.execute()).thenReturn(response);
-        when(payment.publishTransaction(mockTx)).thenReturn(mockCall);
+        when(payment.publishSimpleTransaction(mockTx)).thenReturn(mockCall);
         // Act
         TestObserver<String> testObserver = subject.submitPayment(mockOutputBundle,
                 mockEcKeys,
@@ -82,9 +82,9 @@ public class PaymentServiceTest extends RxTest {
         testObserver.assertComplete();
         testObserver.assertNoErrors();
         assertEquals(txHash, testObserver.values().get(0));
-        verify(payment).makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress));
-        verify(payment).signTransaction(mockTx, mockEcKeys);
-        verify(payment).publishTransaction(mockTx);
+        verify(payment).makeSimpleTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress));
+        verify(payment).signSimpleTransaction(mockTx, mockEcKeys);
+        verify(payment).publishSimpleTransaction(mockTx);
         verifyNoMoreInteractions(payment);
     }
 
@@ -102,12 +102,12 @@ public class PaymentServiceTest extends RxTest {
         BigInteger mockAmount = mock(BigInteger.class);
         Transaction mockTx = mock(Transaction.class);
         when(mockTx.getHashAsString()).thenReturn(txHash);
-        when(payment.makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
+        when(payment.makeSimpleTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
                 .thenReturn(mockTx);
         Call<ResponseBody> mockCall = mock(Call.class);
         Response response = Response.error(500, ResponseBody.create(MediaType.parse("application/json"), "{}"));
         when(mockCall.execute()).thenReturn(response);
-        when(payment.publishTransaction(mockTx)).thenReturn(mockCall);
+        when(payment.publishSimpleTransaction(mockTx)).thenReturn(mockCall);
         // Act
         TestObserver<String> testObserver = subject.submitPayment(mockOutputBundle,
                 mockEcKeys,
@@ -120,9 +120,9 @@ public class PaymentServiceTest extends RxTest {
         testObserver.assertTerminated();
         testObserver.assertNoValues();
         testObserver.assertError(Throwable.class);
-        verify(payment).makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress));
-        verify(payment).signTransaction(mockTx, mockEcKeys);
-        verify(payment).publishTransaction(mockTx);
+        verify(payment).makeSimpleTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress));
+        verify(payment).signSimpleTransaction(mockTx, mockEcKeys);
+        verify(payment).publishSimpleTransaction(mockTx);
         verifyNoMoreInteractions(payment);
     }
 
@@ -141,7 +141,7 @@ public class PaymentServiceTest extends RxTest {
         BigInteger mockAmount = mock(BigInteger.class);
         Transaction mockTx = mock(Transaction.class);
         when(mockTx.getHashAsString()).thenReturn(txHash);
-        when(payment.makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
+        when(payment.makeSimpleTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress)))
                 .thenThrow(new InsufficientMoneyException(new BigInteger("1")));
         // Act
         TestObserver<String> testObserver = subject.submitPayment(mockOutputBundle,
@@ -155,7 +155,7 @@ public class PaymentServiceTest extends RxTest {
         testObserver.assertTerminated();
         testObserver.assertNoValues();
         testObserver.assertError(InsufficientMoneyException.class);
-        verify(payment).makeTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress));
+        verify(payment).makeSimpleTransaction(eq(mockOutputs), any(HashMap.class), eq(mockFee), eq(changeAddress));
         verifyNoMoreInteractions(payment);
     }
 
@@ -236,17 +236,17 @@ public class PaymentServiceTest extends RxTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void getSweepableCoins() throws Exception {
+    public void getMaximumAvailable() throws Exception {
         // Arrange
         UnspentOutputs mockUnspent = mock(UnspentOutputs.class);
         BigInteger mockFee = mock(BigInteger.class);
         Pair<BigInteger, BigInteger> mockSweepableCoins = mock(Pair.class);
-        when(payment.getSweepableCoins(mockUnspent, mockFee)).thenReturn(mockSweepableCoins);
+        when(payment.getMaximumAvailable(mockUnspent, mockFee)).thenReturn(mockSweepableCoins);
         // Act
-        Pair<BigInteger, BigInteger> result = subject.getSweepableCoins(mockUnspent, mockFee);
+        Pair<BigInteger, BigInteger> result = subject.getMaximumAvailable(mockUnspent, mockFee);
         // Assert
         assertEquals(mockSweepableCoins, result);
-        verify(payment).getSweepableCoins(mockUnspent, mockFee);
+        verify(payment).getMaximumAvailable(mockUnspent, mockFee);
         verifyNoMoreInteractions(payment);
     }
 

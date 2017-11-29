@@ -64,7 +64,7 @@ class ReceivePresenter @Inject internal constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onSelectDefault(defaultAccountPosition)
             CryptoCurrencies.ETHER -> onEthSelected()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 

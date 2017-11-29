@@ -75,13 +75,11 @@ class ChartDelegate<in T>(
         showTimeSpanSelected(TimeSpan.MONTH)
     }
 
-    internal fun updateChartState(chartsState: ChartsState) {
-        return when (chartsState) {
-            is ChartsState.Data -> showData(chartsState)
-            is ChartsState.Loading -> showLoading()
-            is ChartsState.Error -> showError()
-            is ChartsState.TimeSpanUpdated -> showTimeSpanSelected(chartsState.timeSpan)
-        }
+    internal fun updateChartState(chartsState: ChartsState) = when (chartsState) {
+        is ChartsState.Data -> showData(chartsState)
+        is ChartsState.Loading -> showLoading()
+        is ChartsState.Error -> showError()
+        is ChartsState.TimeSpanUpdated -> showTimeSpanSelected(chartsState.timeSpan)
     }
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {

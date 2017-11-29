@@ -10,6 +10,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.support.annotation.ColorRes
+import android.support.annotation.Nullable
 import android.support.annotation.StringRes
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
@@ -21,7 +22,10 @@ import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.RxTextView
@@ -61,11 +65,14 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericKeyboardCallback {
+
+    override val locale: Locale = Locale.getDefault()
 
     @Inject lateinit var sendPresenter: SendPresenter
 
@@ -138,8 +145,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     override fun onResume() {
         super.onResume()
 
-        if(!handlingActivityResult)
-            presenter.onResume()
+        if (!handlingActivityResult) presenter.onResume()
 
         handlingActivityResult = false
 
@@ -488,12 +494,20 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         ToastCustom.makeText(activity, getString(message), ToastCustom.LENGTH_SHORT, toastType)
     }
 
-    override fun showSnackbar(@StringRes message: Int, duration: Int) {
+    override fun showSnackbar(message: Int, duration: Int) {
+        showSnackbar(getString(message), null, duration)
+    }
+
+    override fun showSnackbar(message: String, @Nullable extraInfo: String?, duration: Int) {
         val snackbar = Snackbar.make(activity.findViewById(R.id.coordinator_layout), message, duration)
                 .setActionTextColor(ContextCompat.getColor(context, R.color.primary_blue_accent))
 
-        if (duration == Snackbar.LENGTH_INDEFINITE) {
-            snackbar.setAction(R.string.ok_cap, {})
+        if (extraInfo != null) {
+            snackbar.setAction(R.string.more, { showSnackbar(extraInfo, null, Snackbar.LENGTH_INDEFINITE)})
+        } else {
+            if (duration == Snackbar.LENGTH_INDEFINITE) {
+                snackbar.setAction(R.string.ok_cap, {})
+            }
         }
 
         snackbar.show()
@@ -539,7 +553,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         spinnerPriority.adapter = adapter
 
         spinnerPriority.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 when (position) {
                     0, 1 -> {
                         buttonContinue.isEnabled = true

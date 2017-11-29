@@ -1,14 +1,18 @@
 package piuk.blockchain.android.ui.auth;
 
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -20,6 +24,7 @@ import android.widget.ImageView;
 
 import javax.inject.Inject;
 
+import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
@@ -84,6 +89,7 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
             binding.titleBox.setText(R.string.create_pin);
         } else {
             binding.titleBox.setText(R.string.pin_entry);
+            getPresenter().fetchInfoMessage();
         }
 
         pinBoxArray = new ImageView[PIN_LENGTH];
@@ -97,6 +103,7 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
         binding.swipeHintLayout.setOnClickListener(view -> listener.onSwipePressed());
 
         getPresenter().onViewReady();
+        getPresenter().checkForceUpgradeStatus(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);
 
         if (getArguments() != null) {
             boolean showSwipeHint = getArguments().getBoolean(KEY_SHOW_SWIPE_HINT);
@@ -212,7 +219,7 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
 
         } else if (getPresenter().allowExit()) {
             if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-                AccessState.getInstance().logout(getContext());
+                getPresenter().logout(getContext());
                 return;
             } else {
                 showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL);
@@ -228,9 +235,9 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
                 .setTitle(R.string.warning)
                 .setMessage(String.format(getString(R.string.unsupported_encryption_version), walletVersion))
                 .setCancelable(false)
-                .setPositiveButton(R.string.exit, (dialog, whichButton) -> AccessState.getInstance().logout(getContext()))
+                .setPositiveButton(R.string.exit, (dialog, whichButton) -> getPresenter().logout(getContext()))
                 .setNegativeButton(R.string.logout, (dialog, which) -> {
-                    getPresenter().getAppUtil().clearCredentialsAndRestart();
+                    getPresenter().logout(getContext());
                     getPresenter().getAppUtil().restartApp();
                 })
                 .show();
@@ -387,6 +394,32 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
     }
 
     @Override
+    public void forceUpgrade() {
+        AlertDialog alertDialog = new AlertDialog.Builder(getContext(), R.style.AlertDialogStyle)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.force_upgrade_message)
+                .setPositiveButton(R.string.update, null)
+                .setNegativeButton(R.string.exit, null)
+                .setCancelable(false)
+                .create();
+
+        alertDialog.show();
+        // Buttons are done this way to avoid dismissing the dialog
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String appPackageName = getContext().getPackageName();
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+            } catch (ActivityNotFoundException e) {
+                // Device doesn't have the Play Store installed, direct them to the official
+                // store web page anyway
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+            }
+        });
+        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(v ->
+                AccessState.getInstance().logout(getContext()));
+    }
+
+    @Override
     public Intent getPageIntent() {
         return getActivity().getIntent();
     }
@@ -428,6 +461,13 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
                 // Reset PIN buttons to blank
                 pinBox.setImageResource(R.drawable.rounded_view_blue_white_border);
             }
+        }
+    }
+
+    @Override
+    public void showCustomPrompt(AppCompatDialogFragment alertFragments) {
+        if (!getActivity().isFinishing()) {
+            alertFragments.show(getFragmentManager(), alertFragments.getTag());
         }
     }
 

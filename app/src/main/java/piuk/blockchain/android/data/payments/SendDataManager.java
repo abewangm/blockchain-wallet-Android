@@ -97,7 +97,7 @@ public class SendDataManager {
     public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs unspentCoins,
                                                      BigInteger paymentAmount,
                                                      BigInteger feePerKb)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         return paymentService.getSpendableCoins(unspentCoins, paymentAmount, feePerKb);
     }
 
@@ -111,9 +111,9 @@ public class SendDataManager {
      * @return A {@link Pair} object, where left = the sweepable amount as a {@link BigInteger},
      * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
      */
-    public Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs unspentCoins,
-                                                          BigInteger feePerKb) {
-        return paymentService.getSweepableCoins(unspentCoins, feePerKb);
+    public Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs unspentCoins,
+                                                            BigInteger feePerKb) {
+        return paymentService.getMaximumAvailable(unspentCoins, feePerKb);
     }
 
     /**

@@ -11,6 +11,7 @@ import piuk.blockchain.android.BuildConfig
  * Note: absolutely no identifying information should be included in an [AnswersEvent], ever.
  * These should be used to get a feel for how often features are used, but that's it.
  */
+@Suppress("ConstantConditionIf")
 object Logging {
 
     private val shouldLog = BuildConfig.USE_CRASHLYTICS || BuildConfig.DOGFOOD

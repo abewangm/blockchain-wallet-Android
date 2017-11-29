@@ -1,16 +1,13 @@
 package piuk.blockchain.android.util
 
-import info.blockchain.api.data.TickerItem
-import info.blockchain.api.exchangerates.ExchangeRates
-import info.blockchain.wallet.BlockchainFramework
-import info.blockchain.wallet.exceptions.ApiException
 import info.blockchain.wallet.prices.PriceApi
-import io.reactivex.Completable
+import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Observable
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
@@ -33,11 +30,10 @@ class ExchangeRateFactory private constructor() {
     }
 
     private final val priceApi by unsafeLazy { PriceApi() }
-    private final val api: ExchangeRates
     private final val rxPinning: RxPinning
     // Ticker data
-    private var btcTickerData: TreeMap<String, TickerItem>? = null
-    private var ethTickerData: TreeMap<String, TickerItem>? = null
+    private var btcTickerData: Map<String, PriceDatum>? = null
+    private var ethTickerData: Map<String, PriceDatum>? = null
 
     @Inject final lateinit var prefsUtil: PrefsUtil
     @Inject final lateinit var rxBus: RxBus
@@ -45,30 +41,30 @@ class ExchangeRateFactory private constructor() {
     init {
         @Suppress("LeakingThis") // This will be resolved in the future
         Injector.getInstance().appComponent.inject(this)
-
-        api = ExchangeRates(
-                BlockchainFramework.getRetrofitExplorerInstance(),
-                BlockchainFramework.getRetrofitApiInstance(),
-                BlockchainFramework.getApiCode()
-        )
         rxPinning = RxPinning(rxBus)
     }
 
-    fun updateTickers(): Completable = rxPinning.call {
+    fun updateTickers(): Observable<Map<String, PriceDatum>> = rxPinning.call<Map<String, PriceDatum>> {
         getBtcTicker().mergeWith(getEthTicker())
-    }.compose(RxUtil.applySchedulersToCompletable())
+    }
 
     fun getLastBtcPrice(currencyName: String) = getLastPrice(currencyName, CryptoCurrencies.BTC)
 
     fun getLastEthPrice(currencyName: String) = getLastPrice(currencyName, CryptoCurrencies.ETHER)
 
+    @Deprecated(
+            "use MonetaryUtil.getCurrencySymbol, as this method doesn't allow the passing of a locale",
+            replaceWith = ReplaceWith(
+                    "monetaryUtil.getCurrencySymbol(currencyName, Locale.getDefault())",
+                    "piuk.blockchain.android.util.MonetaryUtil"
+            )
+    )
     fun getSymbol(currencyName: String): String {
         var currency = currencyName
         if (currency.isEmpty()) {
             currency = "USD"
         }
-
-        return getBtcTickerItem(currency)?.symbol ?: "$"
+        return Currency.getInstance(currency).getSymbol(Locale.getDefault())
     }
 
     fun getCurrencyLabels(): Array<String> = btcTickerData!!.keys.toTypedArray()
@@ -86,7 +82,7 @@ class ExchangeRateFactory private constructor() {
             currency: String,
             timeInSeconds: Long
     ): Observable<Double> = rxPinning.call<Double> {
-        priceApi.getHistoricPrice("btc", currency, timeInSeconds)
+        priceApi.getHistoricPrice(CryptoCurrencies.BTC.symbol, currency, timeInSeconds)
                 .map {
                     val exchangeRate = BigDecimal.valueOf(it)
                     val satoshiDecimal = BigDecimal.valueOf(satoshis)
@@ -109,7 +105,7 @@ class ExchangeRateFactory private constructor() {
             currency: String,
             timeInSeconds: Long
     ): Observable<Double> = rxPinning.call<Double> {
-        priceApi.getHistoricPrice("eth", currency, timeInSeconds)
+        priceApi.getHistoricPrice(CryptoCurrencies.ETHER.symbol, currency, timeInSeconds)
                 .map {
                     val exchangeRate = BigDecimal.valueOf(it)
                     val ethDecimal = BigDecimal(wei)
@@ -121,7 +117,7 @@ class ExchangeRateFactory private constructor() {
 
     private fun getLastPrice(currencyName: String, cryptoCurrency: CryptoCurrencies): Double {
         val prefsKey: String
-        val tickerData: TreeMap<String, TickerItem>?
+        val tickerData: Map<String, PriceDatum>?
 
         when (cryptoCurrency) {
             CryptoCurrencies.BTC -> {
@@ -132,7 +128,7 @@ class ExchangeRateFactory private constructor() {
                 prefsKey = PREF_LAST_KNOWN_ETH_PRICE
                 tickerData = ethTickerData
             }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
         var currency = currencyName
         if (currency.isEmpty()) {
@@ -146,12 +142,15 @@ class ExchangeRateFactory private constructor() {
             lastPrice = lastKnown
         } else {
             val tickerItem = when (cryptoCurrency) {
-                CryptoCurrencies.BTC -> getBtcTickerItem(currency)
-                CryptoCurrencies.ETHER -> getEthTickerItem(currency)
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                CryptoCurrencies.BTC -> getTickerItem(currency, btcTickerData)
+                CryptoCurrencies.ETHER -> getTickerItem(currency, ethTickerData)
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
 
-            lastPrice = tickerItem?.last ?: 0.0
+            lastPrice = when (tickerItem) {
+                is Optional.Some -> tickerItem.element.price ?: 0.0
+                else -> 0.0
+            }
 
             if (lastPrice > 0.0) {
                 prefsUtil.setValue("$prefsKey$currency", lastPrice.toString())
@@ -163,31 +162,28 @@ class ExchangeRateFactory private constructor() {
         return lastPrice
     }
 
-    @Suppress("DEPRECATION")
-    private fun getBtcTicker(): Completable = Completable.fromCallable {
-        val call = api.btcTickerMap.execute()
-        if (call.isSuccessful) {
-            btcTickerData = call.body()
-            Void.TYPE
-        } else {
-            throw ApiException(call.errorBody()!!.string())
-        }
+    private fun getBtcTicker() = rxPinning.call<Map<String, PriceDatum>> {
+        priceApi.getPriceIndexes(CryptoCurrencies.BTC.symbol)
+                .doOnNext { this.btcTickerData = it.toMap() }
+                .compose(RxUtil.applySchedulersToObservable())
     }
 
-    @Suppress("DEPRECATION")
-    private fun getEthTicker(): Completable = Completable.fromCallable {
-        val call = api.ethTickerMap.execute()
-        if (call.isSuccessful) {
-            ethTickerData = call.body()
-            Void.TYPE
-        } else {
-            throw ApiException(call.errorBody()!!.string())
-        }
+    private fun getEthTicker() = rxPinning.call<Map<String, PriceDatum>> {
+        priceApi.getPriceIndexes(CryptoCurrencies.ETHER.symbol)
+                .doOnNext { this.ethTickerData = it.toMap() }
+                .compose(RxUtil.applySchedulersToObservable())
     }
 
-    private fun getBtcTickerItem(currencyName: String) = btcTickerData!![currencyName]
-
-    private fun getEthTickerItem(currencyName: String) = ethTickerData!![currencyName]
+    private fun getTickerItem(
+            currencyName: String,
+            tickerData: Map<String, PriceDatum>?
+    ): Optional<PriceDatum> {
+        val priceDatum = tickerData?.get(currencyName)
+        return when {
+            priceDatum != null -> Optional.Some(priceDatum)
+            else -> Optional.None
+        }
+    }
 
     companion object {
 

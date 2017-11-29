@@ -37,6 +37,7 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
@@ -127,8 +128,11 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
             // V2
             List<LegacyAddress> legacy = payloadDataManager.getWallet().getLegacyAddressList();
             legacyAddress = legacy.get(addressIndex);
-
-            accountModel.setLabel(legacyAddress.getLabel());
+            String label = legacyAddress.getLabel();
+            if (label == null || label.isEmpty()) {
+                label = legacyAddress.getAddress();
+            }
+            accountModel.setLabel(label);
             accountModel.setLabelHeader(stringUtils.getString(R.string.name));
             accountModel.setXpubDescriptionVisibility(View.GONE);
             accountModel.setXpubText(stringUtils.getString(R.string.address));
@@ -143,22 +147,17 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                 accountModel.setArchiveVisibility(View.VISIBLE);
             }
 
-            if (payloadDataManager.getWallet().isUpgraded()) {
-                // Subtract fee
-                long balanceAfterFee = payloadDataManager.getAddressBalance(
-                        legacyAddress.getAddress()).longValue() -
-                        sendDataManager.estimatedFee(1, 1,
-                                BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000))
-                                .longValue();
+            // Subtract fee
+            long balanceAfterFee = payloadDataManager.getAddressBalance(
+                    legacyAddress.getAddress()).longValue() -
+                    sendDataManager.estimatedFee(1, 1,
+                            BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000))
+                            .longValue();
 
-                if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
-                    accountModel.setTransferFundsVisibility(View.VISIBLE);
-                } else {
-                    // No need to show 'transfer' if funds are less than dust amount
-                    accountModel.setTransferFundsVisibility(View.GONE);
-                }
+            if (balanceAfterFee > Payment.DUST.longValue() && !legacyAddress.isWatchOnly()) {
+                accountModel.setTransferFundsVisibility(View.VISIBLE);
             } else {
-                // No transfer option for V2
+                // No need to show 'transfer' if funds are less than dust amount
                 accountModel.setTransferFundsVisibility(View.GONE);
             }
         }
@@ -251,21 +250,13 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
     private boolean isArchivable() {
         Wallet payload = payloadDataManager.getWallet();
 
-        if (payload.isUpgraded()) {
-            //V3 - can't archive default account
-            HDWallet hdWallet = payload.getHdWallets().get(0);
+        // Can't archive default account
+        HDWallet hdWallet = payload.getHdWallets().get(0);
 
-            int defaultIndex = hdWallet.getDefaultAccountIdx();
-            Account defaultAccount = hdWallet.getAccounts().get(defaultIndex);
+        int defaultIndex = hdWallet.getDefaultAccountIdx();
+        Account defaultAccount = hdWallet.getAccounts().get(defaultIndex);
 
-            if (defaultAccount == account) return false;
-        } else {
-            //V2 - must have a single unarchived address
-            List<LegacyAddress> allActiveLegacyAddresses = payload.getLegacyAddressList(LegacyAddress.NORMAL_ADDRESS);
-            return (allActiveLegacyAddresses.size() > 1);
-        }
-
-        return true;
+        return defaultAccount != account;
     }
 
     void onClickTransferFunds() {
@@ -712,7 +703,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
      * the default account in the user's wallet
      *
      * @param legacyAddress The {@link LegacyAddress} you wish to transfer funds from
-     * @return An {@link Observable <PendingTransaction>}
+     * @return An {@link Observable<PendingTransaction>}
      */
     private Observable<PendingTransaction> getPendingTransactionForLegacyAddress(LegacyAddress legacyAddress) {
         PendingTransaction pendingTransaction = new PendingTransaction();
@@ -723,12 +714,17 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                             BigInteger.valueOf(dynamicFeeCache.getBtcFeeOptions().getRegularFee() * 1000);
 
                     Pair<BigInteger, BigInteger> sweepableCoins =
-                            sendDataManager.getSweepableCoins(unspentOutputs, suggestedFeePerKb);
+                            sendDataManager.getMaximumAvailable(unspentOutputs, suggestedFeePerKb);
                     BigInteger sweepAmount = sweepableCoins.getLeft();
+
+                    String label = legacyAddress.getLabel();
+                    if (label == null || label.isEmpty()) {
+                        label = legacyAddress.getAddress();
+                    }
 
                     // To default account
                     Account defaultAccount = payloadDataManager.getDefaultAccount();
-                    pendingTransaction.sendingObject = new ItemAccount(legacyAddress.getLabel(), sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress, legacyAddress.getAddress());
+                    pendingTransaction.sendingObject = new ItemAccount(label, sweepAmount.toString(), "", sweepAmount.longValue(), legacyAddress, legacyAddress.getAddress());
                     pendingTransaction.receivingObject = new ItemAccount(defaultAccount.getLabel(), "", "", sweepAmount.longValue(), defaultAccount, null);
                     pendingTransaction.unspentOutputBundle = sendDataManager.getSpendableCoins(unspentOutputs, sweepAmount, suggestedFeePerKb);
                     pendingTransaction.bigIntAmount = sweepAmount;

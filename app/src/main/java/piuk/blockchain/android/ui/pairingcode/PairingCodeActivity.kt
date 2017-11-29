@@ -19,6 +19,7 @@ import javax.inject.Inject
 @Suppress("UNUSED_PARAMETER")
 class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresenter>(), PairingCodeView {
 
+    @Suppress("MemberVisibilityCanPrivate")
     @Inject lateinit var pairingCodePresenter: PairingCodePresenter
 
     init {
@@ -62,6 +63,8 @@ class PairingCodeActivity : BaseMvpActivity<PairingCodeView, PairingCodePresente
     override fun hideProgressSpinner() {
         progress_bar.gone()
     }
+
+    override fun enforceFlagSecure() = true
 
     override fun createPresenter() = pairingCodePresenter
 

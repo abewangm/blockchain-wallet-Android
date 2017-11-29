@@ -136,26 +136,6 @@
     <string name="change_pin_code">Cambia il PIN</string>
     <string name="enter_current_pin">Inserisci il PIN attuale.</string>
 
-    <string name="suggest_merchant">Suggerisci un commerciante</string>
-    <string name="business_category">Categoria</string>
-    <string name="street_address">Indirizzo</string>
-    <string name="description">Descrizione</string>
-    <string name="city">Città</string>
-    <string name="postal">Codice postale</string>
-    <string name="telephone">Telefono</string>
-    <string name="web">Web</string>
-    <string name="merchant_cat_hint">Scegli una categoria…</string>
-    <string name="merchant_cat1">Caffé</string>
-    <string name="merchant_cat2">Bar/Locali dove bere</string>
-    <string name="merchant_cat3">Mangiare e Cenare</string>
-    <string name="merchant_cat4">Fare Shopping/Comprare</string>
-    <string name="merchant_cat5">Bancomat</string>
-    <string name="ok_writing_merchant">Grazie per i tuoi suggerimenti.</string>
-    <string name="error_writing_merchant">Errore nella scrittura sul database. Per favore, riprova.</string>
-    <string name="call">Chiama</string>
-    <string name="navigate">Naviga</string>
-    <string name="enable_geo">Attiva il GPS o qualsiasi altro servizio di localizzazione per trovare la posizione attuale. Clicca su OK per andare alle impostazioni sui servizi di localizzazione per consentirne l\'utilizzo.</string>
-
     <string name="create_new">Crea nuovo</string>
     <string name="import_address">Importa indirizzo</string>
     <string name="save_name">Salva nome</string>
@@ -166,14 +146,10 @@
 
     <string name="ssl_pinning_invalid">La selezione del certificato SSL non è riuscita. Ciò potrebbe indicare un\'attività pericolosa. Verifica tua connessione di rete ed il dispositivo prima di continuare.</string>
 
-    <string name="merchant_suggest">Suggerisci un venditore</string>
+    <string name="description">Descrizione</string>
     <string name="name">Nome</string>
-    <string name="location">Posizione</string>
-    <string name="manual_entry">INSERIMENTO MANUALE</string>
-    <string name="use_my_current_location">USA LA MIA POSIZIONE ATTUALE</string>
     <string name="save">Salva</string>
     <string name="next">Successivo</string>
-    <string name="address_lookup_fail">Impossibile recuperare l\'indirizzo. Inserisci manualmente l\'indirizzo.</string>
 
     <string name="backup_write_down_words">È importante assicurarti che tu scriva le tue parole esattamente come appaiono qui e nello stesso ordine.</string>
     <string name="backup_of">di</string>

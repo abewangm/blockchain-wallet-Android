@@ -56,7 +56,6 @@ import java.io.UnsupportedEncodingException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
-import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -118,11 +117,11 @@ class SendPresenter @Inject constructor(
         updateCurrencyUnits()
     }
 
-    fun onResume() {
+    internal fun onResume() {
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onBitcoinChosen()
             CryptoCurrencies.ETHER -> onEtherChosen()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -202,7 +201,7 @@ class SendPresenter @Inject constructor(
                             }
                         }, { Timber.e(it) })
             }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -213,7 +212,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> submitBitcoinTransaction()
             CryptoCurrencies.ETHER -> submitEthTransaction()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -240,7 +239,8 @@ class SendPresenter @Inject constructor(
                 .subscribe({ hash ->
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(true)
-                            .putAmountForRange(pendingTransaction.bigIntAmount))
+                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putCurrencyType(CryptoCurrencies.BTC))
 
                     clearBtcUnspentResponseCache()
                     view.dismissProgressDialog()
@@ -252,11 +252,14 @@ class SendPresenter @Inject constructor(
                     Timber.e(it)
                     view.dismissProgressDialog()
                     view.dismissConfirmationDialog()
-                    view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
+                    view.showSnackbar(stringUtils.getString(R.string.transaction_failed),
+                            it.message,
+                            Snackbar.LENGTH_INDEFINITE)
 
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(false)
-                            .putAmountForRange(pendingTransaction.bigIntAmount))
+                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putCurrencyType(CryptoCurrencies.BTC))
                 }
     }
 
@@ -272,7 +275,7 @@ class SendPresenter @Inject constructor(
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
 
             if (legacyAddress.tag == PendingTransaction.WATCH_ONLY_SPEND_TAG) {
-                var eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.getAddress());
+                val eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.address)
                 Observable.just(mutableListOf(eckey))
             } else {
                 Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
@@ -312,9 +315,19 @@ class SendPresenter @Inject constructor(
                 .flatMap { ethDataManager.pushEthTx(it) }
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
                 .subscribe(
-                        { handleSuccessfulPayment(it, CryptoCurrencies.ETHER) },
+                        {
+                            handleSuccessfulPayment(it, CryptoCurrencies.ETHER)
+                            Logging.logCustom(PaymentSentEvent()
+                                    .putSuccess(true)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putCurrencyType(CryptoCurrencies.ETHER))
+                        },
                         {
                             Timber.e(it)
+                            Logging.logCustom(PaymentSentEvent()
+                                    .putSuccess(false)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putCurrencyType(CryptoCurrencies.ETHER))
                             view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
                         })
     }
@@ -429,7 +442,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> if (paymentDetails.isLargeTransaction) view.showLargeTransactionWarning()
             CryptoCurrencies.ETHER -> allowFeeChange = false
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         view.showPaymentDetails(getConfirmationDetails(), null, allowFeeChange)
@@ -445,7 +458,7 @@ class SendPresenter @Inject constructor(
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> if (FormatsUtil.isValidBitcoinAddress(address)) pendingTransaction.receivingAddress = address
                 CryptoCurrencies.ETHER -> if (FormatsUtil.isValidEthereumAddress(address)) pendingTransaction.receivingAddress = address
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
         }
     }
@@ -460,7 +473,7 @@ class SendPresenter @Inject constructor(
 
         details.cryptoUnit = currencyHelper.cryptoUnit
         details.fiatUnit = currencyHelper.fiatUnit
-        details.fiatSymbol = exchangeRateFactory.getSymbol(currencyHelper.fiatUnit)
+        details.fiatSymbol = monetaryUtil.getCurrencySymbol(currencyHelper.fiatUnit, view.locale)
 
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> {
@@ -499,7 +512,7 @@ class SendPresenter @Inject constructor(
                 details.fiatTotal = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
                         .format(currencyHelper.lastPrice * (ethTotal.toDouble()))
             }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         return details
@@ -538,13 +551,13 @@ class SendPresenter @Inject constructor(
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> R.string.to_field_helper
                 CryptoCurrencies.ETHER -> R.string.eth_to_field_helper
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
         } else {
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> R.string.to_field_helper_no_dropdown
                 CryptoCurrencies.ETHER -> R.string.eth_to_field_helper_no_dropdown
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
         }
 
@@ -557,7 +570,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> view.updateCryptoCurrency(currencyHelper.btcUnit)
             CryptoCurrencies.ETHER -> view.updateCryptoCurrency(currencyHelper.ethUnit)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -631,7 +644,7 @@ class SendPresenter @Inject constructor(
                     .doOnSubscribe { feeOptions = dynamicFeeCache.ethFeeOptions!! }
                     .doOnNext { dynamicFeeCache.ethFeeOptions = it }
 
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         observable.compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -700,7 +713,9 @@ class SendPresenter @Inject constructor(
             amountToSend: BigInteger,
             feePerKb: BigInteger
     ): BigInteger {
-        val spendableCoins = sendDataManager.getSpendableCoins(coins, amountToSend, feePerKb)
+        val spendableCoins = sendDataManager.getSpendableCoins(coins,
+                amountToSend,
+                feePerKb)
         return spendableCoins.absoluteFee
     }
 
@@ -725,7 +740,7 @@ class SendPresenter @Inject constructor(
                 fiatPrice = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
                         .format(currencyHelper.lastPrice * (eth.toDouble()))
             }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         view.updateFeeAmount(
@@ -786,7 +801,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
             CryptoCurrencies.ETHER -> getEthAccountResponse(spendAll, amountToSendText)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -806,10 +821,11 @@ class SendPresenter @Inject constructor(
                             val amountToSend = currencyHelper.getSatoshisFromText(amountToSendText, getDefaultDecimalSeparator())
 
                             // Future use. There might be some unconfirmed funds. Not displaying a warning currently (to line up with iOS and Web wallet)
-                            if (coins.notice != null)
+                            if (coins.notice != null) {
                                 view.updateWarning(coins.notice)
-                            else
+                            } else {
                                 view.clearWarning()
+                            }
 
                             updateFee(getSuggestedAbsoluteFee(coins, amountToSend, feePerKb))
 
@@ -837,7 +853,7 @@ class SendPresenter @Inject constructor(
         var amount = amountToSend
 
         //Calculate sweepable amount to display max available
-        val sweepBundle = sendDataManager.getSweepableCoins(coins, feePerKb)
+        val sweepBundle = sendDataManager.getMaximumAvailable(coins, feePerKb)
         val sweepableAmount = sweepBundle.left
 
         updateMaxAvailable(sweepableAmount)
@@ -850,9 +866,11 @@ class SendPresenter @Inject constructor(
             ))
         }
 
-        val unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
+        val unspentOutputBundle = sendDataManager.getSpendableCoins(
+                coins,
                 amount,
-                feePerKb)
+                feePerKb
+        )
 
         pendingTransaction.bigIntAmount = amount
         pendingTransaction.unspentOutputBundle = unspentOutputBundle
@@ -880,6 +898,8 @@ class SendPresenter @Inject constructor(
             amountToSendText: String?
     ) {
 
+        val amountToSendSanitised = if (amountToSendText.isNullOrEmpty()) "0" else amountToSendText
+
         val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
         val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
 
@@ -896,7 +916,7 @@ class SendPresenter @Inject constructor(
             pendingTransaction.bigIntAmount = availableEth.toBigInteger()
         } else {
             pendingTransaction.bigIntAmount =
-                    currencyHelper.getWeiFromText(amountToSendText, getDefaultDecimalSeparator())
+                    currencyHelper.getWeiFromText(amountToSendSanitised, getDefaultDecimalSeparator())
         }
 
         //Format for display
@@ -978,6 +998,7 @@ class SendPresenter @Inject constructor(
 
         if (format == null) {
             view?.showSnackbar(R.string.privkey_error, Snackbar.LENGTH_LONG)
+            return
         }
 
         when (format) {
@@ -1026,8 +1047,13 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onSendingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
+        var label = legacyAddress.label
+        if (label.isNullOrEmpty()) {
+            label = legacyAddress.address
+        }
+
         pendingTransaction.sendingObject = ItemAccount(
-                legacyAddress.label,
+                label,
                 null,
                 null,
                 null,
@@ -1035,17 +1061,18 @@ class SendPresenter @Inject constructor(
                 legacyAddress.address
         )
 
-        var label = legacyAddress.label
-        if (label.isNullOrEmpty()) {
-            label = legacyAddress.address
-        }
         view.updateSendingAddress(label)
         calculateSpendableAmounts(false, "0")
     }
 
     private fun onSendingBtcAccountSelected(account: Account) {
+        var label = account.label
+        if (label.isNullOrEmpty()) {
+            label = account.xpub
+        }
+
         pendingTransaction.sendingObject = ItemAccount(
-                account.label,
+                label,
                 null,
                 null,
                 null,
@@ -1053,18 +1080,18 @@ class SendPresenter @Inject constructor(
                 null
         )
 
-        var label = account.label
-        if (label.isNullOrEmpty()) {
-            label = account.xpub
-        }
-
         view.updateSendingAddress(label)
         calculateSpendableAmounts(false, "0")
     }
 
     private fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
+        var label = legacyAddress.label
+        if (label.isNullOrEmpty()) {
+            label = legacyAddress.address
+        }
+
         pendingTransaction.receivingObject = ItemAccount(
-                legacyAddress.label,
+                label,
                 null,
                 null,
                 null,
@@ -1073,10 +1100,6 @@ class SendPresenter @Inject constructor(
         )
         pendingTransaction.receivingAddress = legacyAddress.address
 
-        var label = legacyAddress.label
-        if (label.isNullOrEmpty()) {
-            label = legacyAddress.address
-        }
         view.updateReceivingAddress(label)
 
         if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
@@ -1092,8 +1115,13 @@ class SendPresenter @Inject constructor(
     }
 
     private fun onReceivingAccountSelected(account: Account) {
+        var label = account.label
+        if (label.isNullOrEmpty()) {
+            label = account.xpub
+        }
+
         pendingTransaction.receivingObject = ItemAccount(
-                account.label,
+                label,
                 null,
                 null,
                 null,
@@ -1101,10 +1129,6 @@ class SendPresenter @Inject constructor(
                 null
         )
 
-        var label = account.label
-        if (label.isNullOrEmpty()) {
-            label = account.xpub
-        }
         view.updateReceivingAddress(label)
 
         payloadDataManager.getNextReceiveAddress(account)
@@ -1116,7 +1140,6 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun selectSendingAccount(data: Intent?) {
-        
         try {
             val type: Class<*> = Class.forName(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
@@ -1154,8 +1177,7 @@ class SendPresenter @Inject constructor(
 
     private fun updateTicker() {
         exchangeRateFactory.updateTickers()
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .compose(RxUtil.applySchedulersToCompletable())
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
                     //no-op
                 }, { it.printStackTrace() })

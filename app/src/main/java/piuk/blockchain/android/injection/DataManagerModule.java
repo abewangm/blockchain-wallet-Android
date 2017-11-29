@@ -8,6 +8,7 @@ import info.blockchain.wallet.ethereum.EthAccountApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.prices.PriceApi;
+import info.blockchain.wallet.shapeshift.ShapeShiftApi;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 
 import dagger.Module;
@@ -41,8 +42,12 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager;
+import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore;
 import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsState;
 import piuk.blockchain.android.ui.fingerprint.FingerprintHelper;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
@@ -87,13 +92,13 @@ public class DataManagerModule {
                                                              StringUtils stringUtils,
                                                              ExchangeRateFactory exchangeRateFactory,
                                                              CurrencyState currencyState,
-                                                             EthDataStore ethDataStore) {
+                                                             EthDataManager ethDataManager) {
         return new WalletAccountHelper(payloadManager,
                 stringUtils,
                 prefsUtil,
                 exchangeRateFactory,
                 currencyState,
-                ethDataStore);
+                ethDataManager);
     }
 
     @Provides
@@ -220,6 +225,25 @@ public class DataManagerModule {
     @PresenterScope
     protected ChartsDataManager provideChartsDataManager(RxBus rxBus) {
         return new ChartsDataManager(new PriceApi(), rxBus);
+    }
+
+    @Provides
+    @PresenterScope
+    protected ShapeShiftDataManager provideShapeShiftDataManager(
+            ShapeShiftDataStore shapeShiftDataStore,
+            PayloadManager payloadManager,
+            RxBus rxBus) {
+        return new ShapeShiftDataManager(new ShapeShiftApi(), shapeShiftDataStore, payloadManager, rxBus);
+    }
+
+    @Provides
+    @PresenterScope
+    protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager,
+                                                                       SettingsDataManager settingsDataManager) {
+        return new WalletOptionsDataManager(authDataManager, WalletOptionsState.getInstance(
+                ReplaySubject.create(1),
+                ReplaySubject.create(1)),
+                settingsDataManager);
     }
 
 }

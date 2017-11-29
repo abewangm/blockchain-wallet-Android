@@ -165,26 +165,6 @@
     <string name="change_pin_code">Change PIN</string>
     <string name="enter_current_pin">Please enter current PIN.</string>
 
-    <string name="suggest_merchant">Suggest merchant</string>
-    <string name="business_category">Category</string>
-    <string name="street_address">Street address</string>
-    <string name="description">Description</string>
-    <string name="city">City</string>
-    <string name="postal">Postal code</string>
-    <string name="telephone">Telephone</string>
-    <string name="web">Web</string>
-    <string name="merchant_cat_hint">Choose a category…</string>
-    <string name="merchant_cat1">Café</string>
-    <string name="merchant_cat2">Bars/Drinking</string>
-    <string name="merchant_cat3">Food and Dining</string>
-    <string name="merchant_cat4">Shopping/Spending</string>
-    <string name="merchant_cat5">ATM</string>
-    <string name="ok_writing_merchant">Thank you for your suggestion.</string>
-    <string name="error_writing_merchant">Error writing to database. Please try again.</string>
-    <string name="call">Call</string>
-    <string name="navigate">Navigate</string>
-    <string name="enable_geo">Enable either GPS or any other location service to find current location. Click OK to go to location services settings to let you do so.</string>
-
     <string name="addresses">Bitcoin Addresses</string>
     <string name="create_new">Create New</string>
     <string name="import_address">Import Address</string>
@@ -197,15 +177,10 @@
 
     <string name="ssl_pinning_invalid">Secure connection to the host has failed. This might indicate malicious activity. Please verify your network connection and device before continuing.</string>
 
-    <string name="merchant_map">Bitcoin Merchant Map</string>
-    <string name="merchant_suggest">Suggest Merchant</string>
+    <string name="description">Description</string>
     <string name="name">Name</string>
-    <string name="location">Location</string>
-    <string name="manual_entry">MANUAL ENTRY</string>
-    <string name="use_my_current_location">USE MY CURRENT LOCATION</string>
     <string name="save">Save</string>
     <string name="next">Next</string>
-    <string name="address_lookup_fail">Could not retrieve address. Please enter address manually.</string>
 
     <string name="received_bitcoin">Received Bitcoin</string>
     <string name="received_ethereum">Received Ether</string>
@@ -776,13 +751,13 @@
 
     <string name="what_s_this">What\'s this?</string>
     <string name="dismiss">Dismiss</string>
-    
+
     <!-- ETHEREUM BALANCE -->
     <string name="eth_default_account_label">My Ether Wallet</string>
     <string name="eth_now_supporting">Now supporting Ether</string>
     <string name="eth_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to set up your Ether wallet.</string>
-    <string name="ether">ETHER</string>
-    <string name="bitcoin">BITCOIN</string>
+    <string name="ether">Ether</string>
+    <string name="bitcoin">Bitcoin</string>
     <string name="eth_to_field_helper">Enter ether address or select</string>
     <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
     <string name="eth_invalid_address">Invalid Ether address</string>
@@ -803,12 +778,70 @@
     <string name="dashboard_charts_error">Error loading chart data</string>
     <string name="dashboard_charts_price_error">Error fetching price data</string>
 
-    <!-- ETHEREUM ONBOARDING -->
-    <string name="onboarding_ether_title">Now Supporting Ether</string>
-    <string name="onboarding_ether_description">You asked, we listened. We\'re excited to announce that your Blockchain wallet will now allow you to seamlessly send and receive ether!</string>
-    <string name="onboarding_ether_cta">Get Started with Ether</string>
+    <!-- SHAPESHIFT ONBOARDING -->
+    <string translatable="false" name="onboarding_shapeshift_title">@string/onboarding_available_now</string>
+    <string name="onboarding_shapeshift_description">You can now exchange your bitcoin for ether and vice versa directly from your Blockchain wallet!</string>
+    <string name="onboarding_shapeshift_cta">Get Started</string>
 
     <!-- KV STORE -->
     <string name="metadata_load_failure">Error loading full wallet functionality. Service might temporarily be unavailable.</string>
+
+    <!-- SHAPESHIFT HISTORY -->
+    <string name="shapeshift_exchange">Exchange</string>
+    <string name="shapeshift_loading_orders">Loading order history</string>
+    <string name="shapeshift_loading_orders_failed">Loading orders failed</string>
+    <string name="shapeshift_order_history">Order history</string>
+    <string name="shapeshift_incoming">Incoming</string>
+
+    <!-- SHAPESHIFT NEW TRADE -->
+    <string name="shapeshift_use_minimum">Use minimum</string>
+    <string name="shapeshift_use_maximum">Use maximum</string>
+    <string name="shapeshift_arrow_unicode" translatable="false">→</string>
+    <string name="shapeshift_getting_information">Loading information from ShapeShift, please wait…</string>
+    <string name="shapeshift_getting_information_failed">Loading ShapeShift information failed</string>
+    <string name="shapeshift_btc">Bitcoin</string>
+    <string name="shapeshift_eth">Ether</string>
+    <string name="shapeshift_switch_currency_description">Invert currency pair</string>
+    <string name="shapeshift_getting_fees_failed">Error fetching fees</string>
+    <string name="shapeshift_fetching_unspent_outputs_failed">Error fetching unspent outputs</string>
+    <string name="shapeshift_fetching_eth_account_failed">Error fetching remaining Ether</string>
+    <string name="shapeshift_deriving_address_failed">Error deriving address</string>
+    <string name="shapeshift_new_exchange">New Exchange</string>
+
+    <!-- SHAPESHIFT CONFIRMATION -->
+    <string name="shapeshift_confirmation_agree">Agree to ShapeShift&#160;</string>
+    <string name="shapeshift_confirmation_terms">terms and conditions</string>
+    <string name="shapeshift_network_fee">Network Transaction Fee</string>
+    <string name="shapeshift_transaction_fee">Transaction Fee</string>
+    <string name="shapeshift_exchange_rate">Exchange Rate</string>
+    <string name="shapeshift_time_remaining">Quote expires in %1$s</string>
+    <string name="shapeshift_deposit_title">%1$s to deposit</string>
+    <string name="shapeshift_receive_title">%1$s to be received</string>
+    <string name="shapeshift_exchange_rate_formatted">1 %1$s = %2$s %3$s</string>
+    <string name="shapeshift_quote_expired_error">Quote expired</string>
+    <string name="shapeshift_quote_expired_error_message">Your quote has expired. Please start the process again.</string>
+
+    <!-- SHAPESHIFT IN PROGRESS -->
+    <string name="shapeshift_in_progress_explanation">Thanks for placing your trade! Exchange trades can take up to two hours, and you can keep track of your trade\'s progress in the Order History section.</string>
+    <string name="shapeshift_failed_explanation">This trade has failed. Any funds broadcast from your wallet, will be returned minus the transaction fee. Please return to the exchange tab to start a new trade</string>
+    <string name="shapeshift_sending_title">Sending Funds</string>
+    <string name="shapeshift_in_progress_title">In Progress</string>
+    <string name="shapeshift_complete_title">Complete</string>
+    <string name="shapeshift_failed_title">Failed</string>
+    <string name="shapeshift_step_number">Step %1$s of 3</string>
+
+    <!-- SHAPESHIFT ORDER DETAIL -->
+    <string name="shapeshift_order_id_title">Order ID</string>
+    <string name="shapeshift_trade_not_found">Trade not found</string>
+    <string name="shapeshift_in_progress_summary">Exchange in Progress</string>
+    <string name="shapeshift_failed_summary">Exchange Failed</string>
+
+    <string name="more">More</string>
+
+    <!-- FORCE UPGRADE -->
+    <string name="force_upgrade_message">The version of the app you are using is no longer supported. Please update the app and try again.</string>
+
+    <!-- TRANSACTIONS -->
+    <string name="tx_decode_error">Unable to decode address</string>
 
 </resources>
