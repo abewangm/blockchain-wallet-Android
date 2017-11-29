@@ -11,7 +11,6 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.prices.data.PriceDatum;
-import info.blockchain.wallet.shapeshift.data.Trade;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
@@ -161,11 +160,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     // TODO: 24/10/2017  WalletOptions api is also accessed in BuyDataManager - This should be improved soon.
      */
     private void doWalletOptionsChecks() {
-
-//        walletOptionsDataManager.showShapeshift(
-//                payloadDataManager.getWallet().getGuid(),
-//                payloadDataManager.getWallet().getSharedKey())
-        Observable.just(true)
+        walletOptionsDataManager.showShapeshift(
+                payloadDataManager.getWallet().getGuid(),
+                payloadDataManager.getWallet().getSharedKey())
                 .doOnNext(this::setShapeShiftVisibility)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(ignored -> {
@@ -180,12 +177,11 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     @SuppressWarnings("SameParameterValue")
     private void setShapeShiftVisibility(boolean showShapeshift) {
-        // STOPSHIP: 20/11/2017
-//        if (showShapeshift) {
+        if (showShapeshift) {
             getView().showShapeshift();
-//        } else {
-//            getView().hideShapeshift();
-//        }
+        } else {
+            getView().hideShapeshift();
+        }
     }
 
     // Could be used in the future
