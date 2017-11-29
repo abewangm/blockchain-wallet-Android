@@ -342,7 +342,7 @@ class BalancePresenter @Inject constructor(
         when (cryptoCurrency) {
             CryptoCurrencies.BTC -> onAccountChosen(0)
             CryptoCurrencies.ETHER -> onAccountChosen(activeAccountAndAddressList.lastIndex)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         updateCurrencyUi(cryptoCurrency)
@@ -446,7 +446,7 @@ class BalancePresenter @Inject constructor(
         when (cryptoCurrency) {
             CryptoCurrencies.BTC -> view.showAccountSpinner()
             CryptoCurrencies.ETHER -> view.hideAccountSpinner()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         view.updateSelectedCurrency(cryptoCurrency)

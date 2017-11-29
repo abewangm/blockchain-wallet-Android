@@ -43,6 +43,7 @@ import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.settings.SettingsService;
 import piuk.blockchain.android.data.settings.datastore.SettingsDataStore;
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager;
+import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore;
 import piuk.blockchain.android.data.stores.PendingTransactionListStore;
 import piuk.blockchain.android.data.stores.TransactionListStore;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
@@ -91,13 +92,13 @@ public class DataManagerModule {
                                                              StringUtils stringUtils,
                                                              ExchangeRateFactory exchangeRateFactory,
                                                              CurrencyState currencyState,
-                                                             EthDataStore ethDataStore) {
+                                                             EthDataManager ethDataManager) {
         return new WalletAccountHelper(payloadManager,
                 stringUtils,
                 prefsUtil,
                 exchangeRateFactory,
                 currencyState,
-                ethDataStore);
+                ethDataManager);
     }
 
     @Provides
@@ -162,7 +163,7 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected SendDataManager provideSendDataManager(RxBus rxBus) {
-        return new SendDataManager(new PaymentService(new Payment()), rxBus, new WalletApi());
+        return new SendDataManager(new PaymentService(new Payment()), rxBus);
     }
 
     @Provides
@@ -228,10 +229,12 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected ShapeShiftDataManager provideShapeShiftDataManager(RxBus rxBus) {
-        return new ShapeShiftDataManager(new ShapeShiftApi(), rxBus);
+    protected ShapeShiftDataManager provideShapeShiftDataManager(
+            ShapeShiftDataStore shapeShiftDataStore,
+            PayloadManager payloadManager,
+            RxBus rxBus) {
+        return new ShapeShiftDataManager(new ShapeShiftApi(), shapeShiftDataStore, payloadManager, rxBus);
     }
-
 
     @Provides
     @PresenterScope

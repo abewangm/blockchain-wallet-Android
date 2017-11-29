@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.answers
 
 import com.crashlytics.android.answers.CustomEvent
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.util.extensions.getAmountRange
 import java.math.BigInteger
 
@@ -43,6 +44,11 @@ class PaymentSentEvent : CustomEvent("Payment Sent") {
 
     fun putAmountForRange(amountSent: BigInteger): PaymentSentEvent {
         putCustomAttribute("Amount", amountSent.getAmountRange())
+        return this
+    }
+
+    fun putCurrencyType(cryptoCurrencies: CryptoCurrencies): PaymentSentEvent {
+        putCustomAttribute("Currency", cryptoCurrencies.symbol)
         return this
     }
 
@@ -101,5 +107,19 @@ enum class ContactEventType(name: String) {
     PAYMENT_BROADCASTED("Payment broadcasted"),
     INVITE_SENT("Invite sent"),
     INVITE_ACCEPTED("Invite accepted")
+}
+
+class ShapeShiftEvent : CustomEvent("ShapeShift Used") {
+
+    fun putPair(from: String, to: String): ShapeShiftEvent {
+        putCustomAttribute("Currency Pair", "$from to $to")
+        return this
+    }
+
+    fun putSuccess(successful: Boolean): ShapeShiftEvent {
+        putCustomAttribute("Success", if (successful) "true" else "false")
+        return this
+    }
+
 }
 

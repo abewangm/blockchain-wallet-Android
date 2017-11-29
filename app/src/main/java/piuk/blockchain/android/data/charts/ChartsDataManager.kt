@@ -136,7 +136,7 @@ class ChartsDataManager(private val historicPriceApi: PriceApi, rxBus: RxBus) {
         return when (cryptoCurrency) {
             CryptoCurrencies.BTC -> FIRST_BTC_ENTRY_TIME
             CryptoCurrencies.ETHER -> FIRST_ETH_ENTRY_TIME
-            CryptoCurrencies.BCC -> FIRST_BCH_ENTRY_TIME
+            CryptoCurrencies.BCH -> FIRST_BCH_ENTRY_TIME
         }
     }
 

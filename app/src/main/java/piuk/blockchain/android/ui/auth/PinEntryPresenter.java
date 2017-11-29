@@ -385,6 +385,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                         handleValidateFailure();
                     }
                 }, throwable -> {
+                    Timber.e(throwable);
                     if (throwable instanceof InvalidCredentialsException) {
                         handleValidateFailure();
                     } else {

@@ -1,20 +1,29 @@
 package piuk.blockchain.android.ui.shapeshift.overview.adapter
 
 import android.app.Activity
+import info.blockchain.wallet.shapeshift.data.Trade
+import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
+import java.math.BigDecimal
 import kotlin.properties.Delegates
 
 class TradesAdapter(
-        activity: Activity
+        activity: Activity,
+        btcExchangeRate: Double,
+        ethExchangeRate: Double,
+        showCrypto: Boolean,
+        listClickListener: TradesListClickListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
+    private val tradesDelegate = TradesDisplayableDelegate<Any>(activity, btcExchangeRate, ethExchangeRate, showCrypto, listClickListener)
 
     init {
         // Add all necessary AdapterDelegate objects here
-//        delegatesManager.addAdapterDelegate(HeaderDelegate())
-//        delegatesManager.addAdapterDelegate(summaryDelegate)
+        delegatesManager.addAdapterDelegate(TradesNewExchangeDelegate(listClickListener))
+        delegatesManager.addAdapterDelegate(TradesHeaderDelegate())
+        delegatesManager.addAdapterDelegate(tradesDelegate)
         setHasStableIds(true)
     }
 
@@ -32,4 +41,56 @@ class TradesAdapter(
      */
     override fun getItemId(position: Int): Long = items[position].hashCode().toLong()
 
+    fun updateTradeList(trades: List<Any>) {
+
+        var mutableList = trades.toMutableList()
+        mutableList.add(0, ShapeshiftNewExchangeDisplayable())//Header delegate
+
+        if(trades.size > 0) {
+            mutableList.add(1, ShapeshiftHeaderDisplayable())//Row title delegate
+        }
+
+        items = mutableList
+    }
+
+    /**
+     * Notifies the adapter that the View format (ie, whether or not to show BTC) has been changed.
+     * Will rebuild the entire adapter.
+     */
+    fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
+        tradesDelegate.onViewFormatUpdated(isBtc, btcFormat)
+        notifyDataSetChanged()
+    }
+
+    /**
+     * Notifies the adapter that the BTC & ETH exchange rate for the selected currency has been updated.
+     * Will rebuild the entire adapter.
+     */
+    fun onPriceUpdated(lastBtcPrice: Double, lastEthPrice: Double) {
+        tradesDelegate.onPriceUpdated(lastBtcPrice, lastEthPrice)
+        notifyDataSetChanged()
+    }
+
+    fun updateTrade(trade: Trade, tradeResponse: TradeStatusResponse) {
+
+        val matchingTrade = items.filterIsInstance(Trade::class.java).find { it.quote.deposit == tradeResponse.address }
+        matchingTrade?.quote?.withdrawalAmount = trade.quote.withdrawalAmount?: tradeResponse.incomingCoin?: BigDecimal.ZERO
+        matchingTrade?.quote?.pair = tradeResponse.pair?: trade.quote.pair
+
+        notifyDataSetChanged()
+    }
 }
+
+interface TradesListClickListener {
+
+    fun onTradeClicked(depositAddress: String)
+
+    fun onValueClicked(isBtc: Boolean)
+
+    fun onNewExchangeClicked()
+
+}
+
+class ShapeshiftNewExchangeDisplayable
+
+class ShapeshiftHeaderDisplayable

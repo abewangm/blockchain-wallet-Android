@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.dashboard
 
 import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.ChartsDataManager
@@ -15,6 +16,7 @@ import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.AnnouncementData
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -43,7 +45,8 @@ class DashboardPresenter @Inject constructor(
         private val buyDataManager: BuyDataManager,
         private val rxBus: RxBus,
         private val swipeToReceiveHelper: SwipeToReceiveHelper,
-        private val currencyState: CurrencyState
+        private val currencyState: CurrencyState,
+        private val walletOptionsDataManager: WalletOptionsDataManager
 ) : BasePresenter<DashboardView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
@@ -51,8 +54,10 @@ class DashboardPresenter @Inject constructor(
     private val displayList = mutableListOf<Any>(ChartDisplayable())
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     private var timeSpan = TimeSpan.MONTH
-    @VisibleForTesting var btcBalance: Long = 0L
-    @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
+    @VisibleForTesting
+    var btcBalance: Long = 0L
+    @VisibleForTesting
+    var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
         cryptoCurrency = currencyState.cryptoCurrency
@@ -92,7 +97,7 @@ class DashboardPresenter @Inject constructor(
         return when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> 0
             CryptoCurrencies.ETHER -> 1
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -197,15 +202,14 @@ class DashboardPresenter @Inject constructor(
         if (displayList.none { it is AnnouncementData }) {
             // In the future, the announcement data may be parsed from an endpoint. For now, here is fine
             val announcementData = AnnouncementData(
-                    title = R.string.onboarding_ether_title,
-                    description = R.string.onboarding_ether_description,
-                    link = R.string.onboarding_ether_cta,
-                    image = R.drawable.vector_eth_offset,
+                    title = R.string.onboarding_shapeshift_title,
+                    description = R.string.onboarding_shapeshift_description,
+                    link = R.string.onboarding_shapeshift_cta,
+                    image = R.drawable.vector_exchange_offset,
                     emoji = "",
                     closeFunction = { dismissAnnouncement() },
                     linkFunction = {
-                        currencyState.cryptoCurrency = CryptoCurrencies.ETHER
-                        view.startReceiveFragment()
+                        view.startShapeShiftActivity()
                     }
             )
 
@@ -215,7 +219,7 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun dismissAnnouncement() {
-        prefsUtil.setValue(ETH_ANNOUNCEMENT_DISMISSED, true)
+        prefsUtil.setValue(SHAPESHIFT_ANNOUNCEMENT_DISMISSED, true)
         if (displayList.any { it is AnnouncementData }) {
             displayList.removeAll { it is AnnouncementData }
             view.notifyItemRemoved(displayList, 0)
@@ -225,27 +229,38 @@ class DashboardPresenter @Inject constructor(
     private fun getOnboardingStatusObservable(): Observable<Boolean> {
         return if (isOnboardingComplete()) {
             Observable.just(false)
-        } else
+        } else {
             buyDataManager.canBuy
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnNext { displayList.removeAll { it is OnboardingModel } }
                     .doOnNext { displayList.add(0, getOnboardingPages(it)) }
                     .doOnNext { view.notifyItemAdded(displayList, 0) }
                     .doOnError { Timber.e(it) }
+        }
     }
 
     private fun checkLatestAnnouncement() {
         // If user hasn't completed onboarding, ignore announcements
-        if (isOnboardingComplete()) {
-            if (!prefsUtil.getValue(ETH_ANNOUNCEMENT_DISMISSED, false)) {
-                prefsUtil.setValue(ETH_ANNOUNCEMENT_DISMISSED, true)
-                showAnnouncement()
-            }
+        if (isOnboardingComplete() && !prefsUtil.getValue(SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false)) {
+            prefsUtil.setValue(SHAPESHIFT_ANNOUNCEMENT_DISMISSED, true)
+
+            walletOptionsDataManager.showShapeshift(payloadDataManager.wallet.guid, payloadDataManager.wallet.sharedKey)
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .subscribe(
+                            {
+                                if (it) showAnnouncement()
+                            },
+                            {
+                                Timber.e(it)
+                            })
+
+
         }
     }
 
     private fun getOnboardingPages(isBuyAllowed: Boolean): OnboardingModel {
         val pages = mutableListOf<OnboardingPagerContent>()
+
         if (isBuyAllowed) {
             // Buy bitcoin prompt
             pages.add(
@@ -371,7 +386,7 @@ class DashboardPresenter @Inject constructor(
 
     companion object {
 
-        @VisibleForTesting const val ETH_ANNOUNCEMENT_DISMISSED = "ETH_ANNOUNCEMENT_DISMISSED"
+        @VisibleForTesting const val SHAPESHIFT_ANNOUNCEMENT_DISMISSED = "SHAPESHIFT_ANNOUNCEMENT_DISMISSED"
 
     }
 

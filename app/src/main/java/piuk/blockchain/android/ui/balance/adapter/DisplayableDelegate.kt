@@ -39,9 +39,6 @@ class DisplayableDelegate<in T>(
         private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
-    private val CONFIRMATIONS_BTC = 3
-    private val CONFIRMATIONS_ETH = 12
-
     private val prefsUtil = PrefsUtil(activity)
     private val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     private val dateUtil = DateUtil(activity)
@@ -67,13 +64,13 @@ class DisplayableDelegate<in T>(
         val balance = when (tx.cryptoCurrency) {
             CryptoCurrencies.BTC -> BigDecimal(tx.total).divide(BigDecimal.valueOf(1e8))
             CryptoCurrencies.ETHER -> BigDecimal(tx.total).divide(BigDecimal.valueOf(1e18))
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         val fiatBalance = when (tx.cryptoCurrency) {
             CryptoCurrencies.BTC -> balance.multiply(BigDecimal(btcExchangeRate))
             CryptoCurrencies.ETHER -> balance.multiply(BigDecimal(ethExchangeRate))
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         viewHolder.result.setTextColor(Color.WHITE)
@@ -137,9 +134,8 @@ class DisplayableDelegate<in T>(
         this.transactionDisplayMap = transactionDisplayMap
     }
 
-    private fun getResolvedColor(viewHolder: RecyclerView.ViewHolder, @ColorRes color: Int): Int {
-        return ContextCompat.getColor(viewHolder.getContext(), color)
-    }
+    private fun getResolvedColor(viewHolder: RecyclerView.ViewHolder, @ColorRes color: Int): Int =
+            ContextCompat.getColor(viewHolder.getContext(), color)
 
     private fun displayTransferred(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.MOVED)
@@ -266,6 +262,13 @@ class DisplayableDelegate<in T>(
         init {
             contactNameLayout.gone()
         }
+    }
+
+    companion object {
+
+        private const val CONFIRMATIONS_BTC = 3
+        private const val CONFIRMATIONS_ETH = 12
+
     }
 
 }

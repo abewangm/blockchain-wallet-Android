@@ -20,14 +20,15 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 26
-        versionCode 281
-        versionName "6.8.1"
+        versionCode 283
+        versionName "6.8.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
         // Flag to hide or show the Contacts feature
         buildConfigBoolean "CONTACTS_ENABLED", false
-        manifestPlaceholders = [ FABRIC_API_KEY : buildProperties.secrets['fabricApiKey'].string ]
+        buildConfigProperty "SHAPE_SHIFT_API_KEY", buildProperties.secrets['shapeShiftApiKey']
+        manifestPlaceholders = [FABRIC_API_KEY: buildProperties.secrets['fabricApiKey'].string]
     }
     buildTypes {
         release {
@@ -152,6 +153,10 @@ allOpen {
     annotation("piuk.blockchain.android.util.annotations.Mockable")
 }
 
+androidExtensions {
+    experimental = true
+}
+
 afterEvaluate {
     // Ensure correct JSON file is being used when signing the app
     assembleEnvProdMinApi16Release.dependsOn checkFirebaseConfig
@@ -170,6 +175,7 @@ dependencies {
     implementation "com.android.support:design:$supportVersion"
     implementation "com.android.support:support-v13:$supportVersion"
     implementation "com.android.support:preference-v14:$supportVersion"
+    implementation "com.android.support:support-dynamic-animation:$supportVersion"
     // Data Binding
     kapt "com.android.databinding:compiler:$pluginVersion"
     // Play Services

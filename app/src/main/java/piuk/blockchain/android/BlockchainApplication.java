@@ -21,8 +21,6 @@ import info.blockchain.wallet.api.Environment;
 
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 
-import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.currency.CurrencyState;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
@@ -31,10 +29,12 @@ import javax.inject.Named;
 import dagger.Lazy;
 import io.fabric.sdk.android.Fabric;
 import io.reactivex.plugins.RxJavaPlugins;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.AppLaunchEvent;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityManager;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.util.AndroidUtils;

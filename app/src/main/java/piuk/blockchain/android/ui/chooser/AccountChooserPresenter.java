@@ -17,6 +17,7 @@ import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.receive.WalletAccountHelper;
 import piuk.blockchain.android.util.StringUtils;
+import timber.log.Timber;
 
 
 public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
@@ -49,6 +50,8 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
             loadReceiveAccountsAndContacts();
         } else if (paymentRequestType.equals(PaymentRequestType.REQUEST)) {
             loadReceiveAccountsOnly();
+        } else if (paymentRequestType.equals(PaymentRequestType.SHAPE_SHIFT)) {
+            loadShapeShiftAccounts();
         } else {
             loadContactsOnly();
         }
@@ -61,7 +64,7 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
                         .flatMap(accounts -> parseImportedList())
                         .subscribe(
                                 items -> getView().updateUi(itemAccounts),
-                                Throwable::printStackTrace));
+                                Timber::e));
     }
 
     private void loadReceiveAccountsOnly() {
@@ -70,7 +73,16 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
                         .flatMap(accounts -> parseImportedList())
                         .subscribe(
                                 list -> getView().updateUi(itemAccounts),
-                                Throwable::printStackTrace));
+                                Timber::e));
+    }
+
+    private void loadShapeShiftAccounts() {
+        getCompositeDisposable().add(
+                parseAccountList()
+                        .flatMap(accounts -> parseEthAccount())
+                        .subscribe(
+                                list -> getView().updateUi(itemAccounts),
+                                Timber::e));
     }
 
     private void loadContactsOnly() {
@@ -84,7 +96,7 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
                                         getView().showNoContacts();
                                     }
                                 },
-                                Throwable::printStackTrace));
+                                Timber::e));
     }
 
     @SuppressWarnings({"ConstantConditions", "Convert2streamapi"})
@@ -128,6 +140,15 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
                 });
     }
 
+    private Observable<List<ItemAccount>> parseEthAccount() {
+        return getEthAccount()
+                .doOnNext(ethModel -> {
+                    itemAccounts.add(new ItemAccount(stringUtils.getString(R.string.ether), null, null, null, null));
+                    itemAccounts.add(ethModel);
+                })
+                .map(ethModel -> itemAccounts);
+    }
+
     private Observable<List<ItemAccount>> getAccountList() {
         ArrayList<ItemAccount> result = new ArrayList<>();
         result.addAll(walletAccountHelper.getHdAccounts());
@@ -138,6 +159,11 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
         ArrayList<ItemAccount> result = new ArrayList<>();
         result.addAll(walletAccountHelper.getLegacyAddresses());
         return Observable.just(result);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private Observable<ItemAccount> getEthAccount() {
+        return Observable.just(walletAccountHelper.getEthAccount().get(0));
     }
 
 }

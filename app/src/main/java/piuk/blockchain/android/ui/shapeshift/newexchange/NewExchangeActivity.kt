@@ -1,18 +1,28 @@
 package piuk.blockchain.android.ui.shapeshift.newexchange
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.support.animation.SpringAnimation
+import android.support.animation.SpringForce
 import android.support.annotation.StringRes
+import android.support.constraint.ConstraintSet
 import android.support.design.widget.CoordinatorLayout
+import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.EditText
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.jakewharton.rxbinding2.widget.RxTextView
+import info.blockchain.wallet.ethereum.EthereumAccount
+import info.blockchain.wallet.payload.data.Account
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_new_exchange.*
 import kotlinx.android.synthetic.main.toolbar_general.*
+import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
@@ -21,9 +31,9 @@ import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
-import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.toast
-import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.ui.shapeshift.confirmation.ShapeShiftConfirmationActivity
+import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
+import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
@@ -31,14 +41,16 @@ import java.text.DecimalFormatSymbols
 import java.util.*
 import javax.inject.Inject
 
+
 class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(), NewExchangeView,
         NumericKeyboardCallback {
 
-    @Suppress("MemberVisibilityCanPrivate")
+    @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var newExchangePresenter: NewExchangePresenter
 
-    override val locale: Locale
-        get() = Locale.getDefault()
+    override val locale: Locale = Locale.getDefault()
+    override val shapeShiftApiKey: String = BuildConfig.SHAPE_SHIFT_API_KEY
+
     private val btcSymbol = CryptoCurrencies.BTC.symbol.toUpperCase()
     private val ethSymbol = CryptoCurrencies.ETHER.symbol.toUpperCase()
     private val compositeDisposable = CompositeDisposable()
@@ -65,7 +77,17 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         textview_from_address.setOnClickListener { presenter.onFromChooserClicked() }
         imageview_to_dropdown.setOnClickListener { presenter.onToChooserClicked() }
         textview_to_address.setOnClickListener { presenter.onToChooserClicked() }
-        imageview_switch_currency.setOnClickListener { presenter.onSwitchCurrencyClicked() }
+
+        imageview_switch_currency.setOnClickListener {
+            imageview_switch_currency.createSpringAnimation(
+                    SpringAnimation.ROTATION,
+                    imageview_switch_currency.rotation + ROTATION,
+                    SpringForce.STIFFNESS_LOW,
+                    SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY
+            ).start()
+
+            presenter.onSwitchCurrencyClicked()
+        }
 
         setupListeners()
         setupKeypad()
@@ -75,7 +97,6 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     override fun updateUi(
             fromCurrency: CryptoCurrencies,
-            displayDropDown: Boolean,
             fromLabel: String,
             toLabel: String,
             fiatHint: String
@@ -90,35 +111,59 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         edittext_to_crypto.hint = "0.00"
 
         when (fromCurrency) {
-            CryptoCurrencies.BTC -> showFromBtc(displayDropDown)
-            CryptoCurrencies.ETHER -> showFromEth(displayDropDown)
-            CryptoCurrencies.BCC -> throw IllegalArgumentException("BCC not supported")
+            CryptoCurrencies.BTC -> showFromBtc()
+            CryptoCurrencies.ETHER -> showFromEth()
+            CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not supported")
         }
     }
 
     override fun launchAccountChooserActivityTo() {
-        // TODO: Test me
         AccountChooserActivity.startForResult(
                 this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.REQUEST,
+                PaymentRequestType.SHAPE_SHIFT,
                 getString(R.string.to)
         )
     }
 
     override fun launchAccountChooserActivityFrom() {
-        // TODO: Test me
         AccountChooserActivity.startForResult(
                 this,
                 AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.REQUEST,
+                PaymentRequestType.SHAPE_SHIFT,
                 getString(R.string.from)
         )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        // TODO: Deserialize objects here, update UI
+        if (resultCode == Activity.RESULT_OK && data != null) {
+
+            val clazz = Class.forName(data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
+            val any = ObjectMapper().readValue(data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), clazz)
+            when (any) {
+                is Account -> {
+                    when (requestCode) {
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
+                            presenter.onFromAccountChanged(any)
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
+                            presenter.onToAccountChanged(any)
+                        else -> throw IllegalArgumentException("Unknown request code $requestCode")
+                    }
+                }
+                is EthereumAccount -> {
+                    when (requestCode) {
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
+                            presenter.onFromEthSelected()
+                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
+                            presenter.onToEthSelected()
+                        else -> throw IllegalArgumentException("Unknown request code $requestCode")
+                    }
+                }
+                else -> throw IllegalArgumentException("Unsupported class type $clazz")
+            }
+
+        }
     }
 
     override fun showProgressDialog(@StringRes message: Int) {
@@ -132,7 +177,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     override fun dismissProgressDialog() {
         progressDialog?.apply {
-            dismiss()
+            if (!isFinishing) dismiss()
             progressDialog = null
         }
     }
@@ -167,6 +212,39 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         editTexts.forEach { it.text.clear() }
     }
 
+    override fun showAmountError(errorMessage: String) {
+        textview_error.text = errorMessage
+        textview_error.visible()
+        editTexts.forEach {
+            it.setTextColor(ContextCompat.getColor(this, R.color.product_red_medium))
+        }
+    }
+
+    override fun clearError() {
+        textview_error.invisible()
+        editTexts.forEach {
+            it.setTextColor(ContextCompat.getColor(this, R.color.black))
+        }
+    }
+
+    override fun setButtonEnabled(enabled: Boolean) {
+        button_continue.isEnabled = enabled
+    }
+
+    override fun showQuoteInProgress(inProgress: Boolean) = when {
+        inProgress -> shapeshift_quote_progress_bar.visible()
+        else -> shapeshift_quote_progress_bar.invisible()
+    }
+
+    override fun launchConfirmationPage(shapeShiftData: ShapeShiftData) {
+        ShapeShiftConfirmationActivity.start(this, shapeShiftData)
+    }
+
+    override fun removeAllFocus() {
+        closeKeyPad()
+        editTexts.forEach { it.clearFocus() }
+    }
+
     override fun onKeypadClose() {
         val height = resources.getDimension(R.dimen.action_bar_height).toInt()
         // Resize activity to default
@@ -175,10 +253,12 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
             layoutParams = CoordinatorLayout.LayoutParams(
                     CoordinatorLayout.LayoutParams.MATCH_PARENT,
                     CoordinatorLayout.LayoutParams.MATCH_PARENT
-            ).apply { setMargins(0, height, 0, height) }
+            ).apply { setMargins(0, height, 0, 0) }
 
             postDelayed({ smoothScrollTo(0, 0) }, 100)
         }
+
+        cloneAndApplyConstraint(100f)
     }
 
     override fun onKeypadOpen() = Unit
@@ -195,6 +275,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
             scrollTo(0, bottom)
         }
+
+        cloneAndApplyConstraint(0f)
     }
 
     override fun onDestroy() {
@@ -217,10 +299,10 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     private fun setupListeners() {
         mapOf(
-                edittext_to_crypto to presenter::onToCryptoValueChanged,
-                edittext_from_crypto to presenter::onFromCryptoValueChanged,
-                edittext_to_fiat to presenter::onToFiatValueChanged,
-                edittext_from_fiat to presenter::onFromFiatValueChanged
+                edittext_to_crypto to presenter.toCryptoSubject,
+                edittext_from_crypto to presenter.fromCryptoSubject,
+                edittext_to_fiat to presenter.toFiatSubject,
+                edittext_from_fiat to presenter.fromFiatSubject
         ).map {
             it.key.setOnClickListener { clearEditTexts() }
             return@map getTextWatcherObservable(it.key, it.value)
@@ -232,43 +314,40 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     }
 
     private fun setupKeypad() {
-        editTexts.forEach { shapeshift_keyboard.enableOnView(it) }
+        editTexts.forEach {
+            it.disableSoftKeyboard()
+            shapeshift_keyboard.enableOnView(it)
+        }
         shapeshift_keyboard.apply {
             setDecimalSeparator(defaultDecimalSeparator)
             setCallback(this@NewExchangeActivity)
         }
     }
 
-    private fun getTextWatcherObservable(editText: EditText, presenterFunction: (String) -> Unit) =
+    private fun getTextWatcherObservable(editText: EditText, publishSubject: PublishSubject<String>) =
             RxTextView.textChanges(editText)
                     // Logging
-                    .doOnError { Timber.e(it) }
+                    .doOnError(Timber::e)
+                    .doOnTerminate { Timber.wtf("Text watcher terminated unexpectedly $editText") }
                     // Skip first event emitted when subscribing
                     .skip(1)
                     // Convert to String
                     .map { it.toString() }
-                    // Ignore elements emitted by non-user events (ie presenter updates)
-                    .doOnNext { if (currentFocus == editText) presenterFunction(it) }
+                    // Ignore elements emitted by non-user events (ie presenter updates) and those
+                    // emitted from changes to paired EditText (ie edit fiat, edit crypto)
+                    .doOnNext { if (currentFocus == editText) publishSubject.onNext(it) }
                     // Scheduling
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
 
-    private fun showFromBtc(displayDropDown: Boolean) {
-        // Units
+    private fun showFromBtc() {
         textview_unit_from.text = btcSymbol
         textview_unit_to.text = ethSymbol
-        // Visibility
-        imageview_to_dropdown.gone()
-        if (displayDropDown) imageview_from_dropdown.visible()
     }
 
-    private fun showFromEth(displayDropDown: Boolean) {
-        // Units
+    private fun showFromEth() {
         textview_unit_from.text = ethSymbol
         textview_unit_to.text = btcSymbol
-        // Visibility
-        if (displayDropDown) imageview_to_dropdown.visible()
-        imageview_from_dropdown.gone()
     }
 
     private fun isKeyboardVisible(): Boolean = shapeshift_keyboard.isVisible
@@ -277,7 +356,17 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         shapeshift_keyboard.setNumpadVisibility(View.GONE)
     }
 
+    private fun cloneAndApplyConstraint(bias: Float) {
+        ConstraintSet().apply {
+            clone(shapeshift_constraint_layout)
+            setVerticalBias(R.id.button_continue, bias)
+            applyTo(shapeshift_constraint_layout)
+        }
+    }
+
     companion object {
+
+        private const val ROTATION = 180f
 
         @JvmStatic
         fun start(context: Context) {

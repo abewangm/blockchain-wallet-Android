@@ -1,22 +1,27 @@
 package piuk.blockchain.android.ui.shapeshift.newexchange
 
 import android.support.annotation.StringRes
+
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
 import java.util.*
 
 interface NewExchangeView : View {
 
     val locale: Locale
 
+    val shapeShiftApiKey: String
+
     fun updateUi(
             fromCurrency: CryptoCurrencies,
-            displayDropDown: Boolean,
             fromLabel: String,
             toLabel: String,
             fiatHint: String
     )
+
+    fun removeAllFocus()
 
     fun launchAccountChooserActivityTo()
 
@@ -39,5 +44,15 @@ interface NewExchangeView : View {
     fun updateToFiatText(text: String)
 
     fun clearEditTexts()
+
+    fun showAmountError(errorMessage: String)
+
+    fun clearError()
+
+    fun setButtonEnabled(enabled: Boolean)
+
+    fun showQuoteInProgress(inProgress: Boolean)
+
+    fun launchConfirmationPage(shapeShiftData: ShapeShiftData)
 
 }

@@ -42,7 +42,6 @@ import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.data.transactions.BtcDisplayable
-import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -122,7 +121,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onBitcoinChosen()
             CryptoCurrencies.ETHER -> onEtherChosen()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -202,7 +201,7 @@ class SendPresenter @Inject constructor(
                             }
                         }, { Timber.e(it) })
             }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -213,7 +212,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> submitBitcoinTransaction()
             CryptoCurrencies.ETHER -> submitEthTransaction()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -240,7 +239,8 @@ class SendPresenter @Inject constructor(
                 .subscribe({ hash ->
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(true)
-                            .putAmountForRange(pendingTransaction.bigIntAmount))
+                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putCurrencyType(CryptoCurrencies.BTC))
 
                     clearBtcUnspentResponseCache()
                     view.dismissProgressDialog()
@@ -258,7 +258,8 @@ class SendPresenter @Inject constructor(
 
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(false)
-                            .putAmountForRange(pendingTransaction.bigIntAmount))
+                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putCurrencyType(CryptoCurrencies.BTC))
                 }
     }
 
@@ -274,7 +275,7 @@ class SendPresenter @Inject constructor(
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
 
             if (legacyAddress.tag == PendingTransaction.WATCH_ONLY_SPEND_TAG) {
-                var eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.getAddress());
+                val eckey = Tools.getECKeyFromKeyAndAddress(legacyAddress.privateKey, legacyAddress.address)
                 Observable.just(mutableListOf(eckey))
             } else {
                 Observable.just(mutableListOf(payloadDataManager.getAddressECKey(legacyAddress, verifiedSecondPassword)))
@@ -314,9 +315,19 @@ class SendPresenter @Inject constructor(
                 .flatMap { ethDataManager.pushEthTx(it) }
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
                 .subscribe(
-                        { handleSuccessfulPayment(it, CryptoCurrencies.ETHER) },
+                        {
+                            handleSuccessfulPayment(it, CryptoCurrencies.ETHER)
+                            Logging.logCustom(PaymentSentEvent()
+                                    .putSuccess(true)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putCurrencyType(CryptoCurrencies.ETHER))
+                        },
                         {
                             Timber.e(it)
+                            Logging.logCustom(PaymentSentEvent()
+                                    .putSuccess(false)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putCurrencyType(CryptoCurrencies.ETHER))
                             view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
                         })
     }
@@ -431,7 +442,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> if (paymentDetails.isLargeTransaction) view.showLargeTransactionWarning()
             CryptoCurrencies.ETHER -> allowFeeChange = false
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         view.showPaymentDetails(getConfirmationDetails(), null, allowFeeChange)
@@ -447,7 +458,7 @@ class SendPresenter @Inject constructor(
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> if (FormatsUtil.isValidBitcoinAddress(address)) pendingTransaction.receivingAddress = address
                 CryptoCurrencies.ETHER -> if (FormatsUtil.isValidEthereumAddress(address)) pendingTransaction.receivingAddress = address
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
         }
     }
@@ -501,7 +512,7 @@ class SendPresenter @Inject constructor(
                 details.fiatTotal = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
                         .format(currencyHelper.lastPrice * (ethTotal.toDouble()))
             }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         return details
@@ -540,13 +551,13 @@ class SendPresenter @Inject constructor(
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> R.string.to_field_helper
                 CryptoCurrencies.ETHER -> R.string.eth_to_field_helper
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
         } else {
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> R.string.to_field_helper_no_dropdown
                 CryptoCurrencies.ETHER -> R.string.eth_to_field_helper_no_dropdown
-                else -> throw IllegalArgumentException("BCC is not currently supported")
+                else -> throw IllegalArgumentException("BCH is not currently supported")
             }
         }
 
@@ -559,7 +570,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> view.updateCryptoCurrency(currencyHelper.btcUnit)
             CryptoCurrencies.ETHER -> view.updateCryptoCurrency(currencyHelper.ethUnit)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -633,7 +644,7 @@ class SendPresenter @Inject constructor(
                     .doOnSubscribe { feeOptions = dynamicFeeCache.ethFeeOptions!! }
                     .doOnNext { dynamicFeeCache.ethFeeOptions = it }
 
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         observable.compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -729,7 +740,7 @@ class SendPresenter @Inject constructor(
                 fiatPrice = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit)
                         .format(currencyHelper.lastPrice * (eth.toDouble()))
             }
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
 
         view.updateFeeAmount(
@@ -790,7 +801,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> calculateUnspentBtc(spendAll, amountToSendText, feePerKb)
             CryptoCurrencies.ETHER -> getEthAccountResponse(spendAll, amountToSendText)
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -855,9 +866,11 @@ class SendPresenter @Inject constructor(
             ))
         }
 
-        val unspentOutputBundle = sendDataManager.getSpendableCoins(coins,
+        val unspentOutputBundle = sendDataManager.getSpendableCoins(
+                coins,
                 amount,
-                feePerKb)
+                feePerKb
+        )
 
         pendingTransaction.bigIntAmount = amount
         pendingTransaction.unspentOutputBundle = unspentOutputBundle
