@@ -35,7 +35,6 @@ import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-@Mockable
 class ShapeShiftConfirmationPresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager,
         private val payloadDataManager: PayloadDataManager,
