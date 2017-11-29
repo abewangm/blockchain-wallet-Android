@@ -239,7 +239,8 @@ class SendPresenter @Inject constructor(
                 .subscribe({ hash ->
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(true)
-                            .putAmountForRange(pendingTransaction.bigIntAmount))
+                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putCurrencyType(CryptoCurrencies.BTC))
 
                     clearBtcUnspentResponseCache()
                     view.dismissProgressDialog()
@@ -257,7 +258,8 @@ class SendPresenter @Inject constructor(
 
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(false)
-                            .putAmountForRange(pendingTransaction.bigIntAmount))
+                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putCurrencyType(CryptoCurrencies.BTC))
                 }
     }
 
@@ -313,9 +315,19 @@ class SendPresenter @Inject constructor(
                 .flatMap { ethDataManager.pushEthTx(it) }
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
                 .subscribe(
-                        { handleSuccessfulPayment(it, CryptoCurrencies.ETHER) },
+                        {
+                            handleSuccessfulPayment(it, CryptoCurrencies.ETHER)
+                            Logging.logCustom(PaymentSentEvent()
+                                    .putSuccess(true)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putCurrencyType(CryptoCurrencies.ETHER))
+                        },
                         {
                             Timber.e(it)
+                            Logging.logCustom(PaymentSentEvent()
+                                    .putSuccess(false)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putCurrencyType(CryptoCurrencies.ETHER))
                             view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
                         })
     }

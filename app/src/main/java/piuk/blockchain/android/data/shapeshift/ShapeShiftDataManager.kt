@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.shapeshift
 
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.shapeshift.ShapeShiftApi
-import info.blockchain.wallet.shapeshift.ShapeShiftPairs
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
 import info.blockchain.wallet.shapeshift.data.*
 import io.reactivex.Completable
@@ -13,6 +12,7 @@ import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore
 import piuk.blockchain.android.data.stores.Either
+import piuk.blockchain.android.ui.shapeshift.models.CoinPairings
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
 
@@ -28,7 +28,7 @@ class ShapeShiftDataManager(
     /**
      * Must be called to initialize the ShapeShift trade metadata information.
      *
-     * @param masterKey The wallet's master key [info.blockchain.wallet.bip44.HDWallet.getMasterKey]
+     * @param metadataNode
      * @return A [Completable] object
      */
     fun initShapeshiftTradeData(metadataNode: DeterministicKey): Observable<ShapeShiftTrades> =
@@ -63,6 +63,19 @@ class ShapeShiftDataManager(
             return rxPinning.call { Completable.fromCallable { save() } }
                     // Reset state on failure
                     .doOnError { trades.remove(trade) }
+                    .compose(RxUtil.applySchedulersToCompletable())
+        }
+
+        throw IllegalStateException("ShapeShiftTrades not initialized")
+    }
+
+    /**
+     * For development purposes only!
+     */
+    fun clearAllTrades(): Completable {
+        shapeShiftDataStore.tradeData?.run {
+            trades = emptyList()
+            return rxPinning.call { Completable.fromCallable { save() } }
                     .compose(RxUtil.applySchedulersToCompletable())
         }
 
@@ -142,12 +155,5 @@ class ShapeShiftDataManager(
 
         return shapeShiftData
     }
-}
 
-/**
- * For strict type checking and convenience.
- */
-enum class CoinPairings(val pairCode: String) {
-    BTC_TO_ETH(ShapeShiftPairs.BTC_ETH),
-    ETH_TO_BTC(ShapeShiftPairs.ETH_BTC)
 }
