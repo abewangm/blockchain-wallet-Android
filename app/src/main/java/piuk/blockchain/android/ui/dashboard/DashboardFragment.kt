@@ -144,9 +144,9 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
                 .sendBroadcast(Intent(MainActivity.ACTION_BUY))
     }
 
-    override fun startReceiveFragment() {
+    override fun startShapeShiftActivity() {
         LocalBroadcastManager.getInstance(activity)
-                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
+                .sendBroadcast(Intent(MainActivity.ACTION_SHAPESHIFT))
     }
 
     override fun createPresenter() = dashboardPresenter
