@@ -778,17 +778,13 @@
     <string name="dashboard_charts_error">Error loading chart data</string>
     <string name="dashboard_charts_price_error">Error fetching price data</string>
 
-    <!-- ETHEREUM ONBOARDING -->
-    <string name="onboarding_ether_title">Now Supporting Ether</string>
-    <string name="onboarding_ether_description">You asked, we listened. We\'re excited to announce that your Blockchain wallet will now allow you to seamlessly send and receive ether!</string>
-    <string name="onboarding_ether_cta">Get Started with Ether</string>
+    <!-- SHAPESHIFT ONBOARDING -->
+    <string translatable="false" name="onboarding_shapeshift_title">@string/onboarding_available_now</string>
+    <string name="onboarding_shapeshift_description">You can now exchange your bitcoin for ether and vice versa directly from your Blockchain wallet!</string>
+    <string name="onboarding_shapeshift_cta">Get Started</string>
 
     <!-- KV STORE -->
     <string name="metadata_load_failure">Error loading full wallet functionality. Service might temporarily be unavailable.</string>
-
-    <!-- SHAPESHIFT ANNOUNCEMENT -->
-    <string name="shapeshift_announcement_content">You can now exchange your bitcoin for ether and vice versa directly from your Blockchain wallet!</string>
-    <string name="shapeshift_announcement_get_started">Get Started</string>
 
     <!-- SHAPESHIFT HISTORY -->
     <string name="shapeshift_exchange">Exchange</string>
