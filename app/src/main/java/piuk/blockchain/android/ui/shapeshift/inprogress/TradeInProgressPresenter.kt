@@ -8,12 +8,10 @@ import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.shapeshift.models.TradeProgressUiState
-import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-@Mockable
 class TradeInProgressPresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager
 ) : BasePresenter<TradeInProgressView>() {
@@ -38,9 +36,6 @@ class TradeInProgressPresenter @Inject constructor(
                         },
                         {
                             Timber.e(it)
-                        },
-                        {
-                            Timber.d("On Complete")
                         }
                 )
     }
