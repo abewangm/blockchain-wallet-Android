@@ -58,7 +58,9 @@ class WalletOptionsDataManager(
 //        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it?.contains("US") ?: false }
 //        val isUS = settings.countryCode == "US"
 
-        return isShapeShiftAllowed && !blacklistedCountry
+        return true
+
+//        return isShapeShiftAllowed && !blacklistedCountry
 //                && (!isUS || (!isUSABlacklisted && whitelistedState))
     }
 

@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.dashboard
 
 import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
-import io.reactivex.functions.BiFunction
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.ChartsDataManager
@@ -54,10 +53,8 @@ class DashboardPresenter @Inject constructor(
     private val displayList = mutableListOf<Any>(ChartDisplayable())
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     private var timeSpan = TimeSpan.MONTH
-    @VisibleForTesting
-    var btcBalance: Long = 0L
-    @VisibleForTesting
-    var ethBalance: BigInteger = BigInteger.ZERO
+    @VisibleForTesting var btcBalance: Long = 0L
+    @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
         cryptoCurrency = currencyState.cryptoCurrency
@@ -206,7 +203,7 @@ class DashboardPresenter @Inject constructor(
                     description = R.string.onboarding_shapeshift_description,
                     link = R.string.onboarding_shapeshift_cta,
                     image = R.drawable.vector_exchange_offset,
-                    emoji = "",
+                    emoji = "\uD83C\uDF89",
                     closeFunction = { dismissAnnouncement() },
                     linkFunction = {
                         view.startShapeShiftActivity()
