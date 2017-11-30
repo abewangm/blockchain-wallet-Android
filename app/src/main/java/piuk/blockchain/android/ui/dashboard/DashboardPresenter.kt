@@ -335,9 +335,12 @@ class DashboardPresenter @Inject constructor(
     private fun getBtcBalanceString(isBtc: Boolean, btcBalance: Long): String {
         val strFiat = getFiatCurrency()
         val fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8)
+        var balance = monetaryUtil.getDisplayAmountWithFormatting(btcBalance)
+        // Replace 0.0 with 0 to match web
+        if (balance == "0.0") balance = "0"
 
         return if (isBtc) {
-            "${monetaryUtil.getDisplayAmountWithFormatting(btcBalance)} ${getBtcDisplayUnits()}"
+            "$balance ${getBtcDisplayUnits()}"
         } else {
             "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
         }

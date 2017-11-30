@@ -16,6 +16,7 @@ import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.util.*
 
 @Mockable
@@ -195,11 +196,15 @@ class WalletAccountHelper(
     private fun getDefaultEthAccount(): ItemAccount {
         val ethModel = ethDataManager.getEthResponseModel()
         val ethAccount = ethDataManager.getEthWallet()!!.account
-        var amount = Convert.fromWei(ethModel?.getTotalBalance().toString(), Convert.Unit.ETHER)
-        amount = amount.setScale(8, RoundingMode.HALF_DOWN)
+        val amount = Convert.fromWei(ethModel?.getTotalBalance().toString(), Convert.Unit.ETHER)
+        amount.setScale(8, RoundingMode.HALF_DOWN)
+        val numberFormat = DecimalFormat.getInstance().apply {
+            minimumFractionDigits = 1
+            maximumFractionDigits = 8
+        }
         return ItemAccount(
                 ethAccount?.label,
-                "($amount ETH)",
+                "(${numberFormat.format(amount)} ETH)",
                 null,
                 0,
                 ethAccount,
