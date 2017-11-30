@@ -176,14 +176,14 @@ class NewExchangePresenter @Inject constructor(
         // State check
         check(shapeShiftData != null) { "ShapeShiftData is null, presenter state invalid" }
         // Check user isn't submitting an empty page
-        if (shapeShiftData?.withdrawalAmount == BigDecimal.ZERO) {
+        if (shapeShiftData?.withdrawalAmount?.compareTo(BigDecimal.ZERO) == 0) {
             view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
             return
         }
 
         // It's possible that the fee observable can return zero but not kill the chain with an
         // error, hence checking here
-        if (shapeShiftData?.networkFee == BigDecimal.ZERO) {
+        if (shapeShiftData?.networkFee?.compareTo(BigDecimal.ZERO) == 0) {
             view.showToast(R.string.shapeshift_getting_fees_failed, ToastCustom.TYPE_ERROR)
             return
         }
@@ -211,9 +211,20 @@ class NewExchangePresenter @Inject constructor(
         view.showQuoteInProgress(true)
         getMaxCurrencyObservable().subscribe(
                 {
-                    fromCryptoSubject.onNext(cryptoFormat.format(it))
-                    // This is a bit of a hack to bypass focus issues
-                    view.updateFromCryptoText(cryptoFormat.format(it))
+                    // 'it' can be zero here if amounts insufficient
+                    if (getMinimum() > it) {
+                        view.showAmountError(
+                                stringUtils.getFormattedString(
+                                        R.string.shapeshift_amount_to_low,
+                                        getMinimum(),
+                                        currencyState.cryptoCurrency.symbol.toUpperCase())
+                        )
+                        view.showQuoteInProgress(false)
+                    } else {
+                        fromCryptoSubject.onNext(cryptoFormat.format(it))
+                        // This is a bit of a hack to bypass focus issues
+                        view.updateFromCryptoText(cryptoFormat.format(it))
+                    }
                 },
                 { Timber.e(it) }
         )
@@ -222,11 +233,28 @@ class NewExchangePresenter @Inject constructor(
     internal fun onMinPressed() {
         view.removeAllFocus()
         view.showQuoteInProgress(true)
-        with(getMinimum()) {
-            fromCryptoSubject.onNext(cryptoFormat.format(this))
-            // This is a bit of a hack to bypass focus issues
-            view.updateFromCryptoText(cryptoFormat.format(this))
-        }
+
+        getMaxCurrencyObservable()
+                .subscribe(
+                        {
+                            if (getMinimum() > it) {
+                                view.showAmountError(
+                                        stringUtils.getFormattedString(
+                                                R.string.shapeshift_amount_to_low,
+                                                getMinimum(),
+                                                currencyState.cryptoCurrency.symbol.toUpperCase())
+                                )
+                                view.showQuoteInProgress(false)
+                            } else {
+                                with(getMinimum()) {
+                                    fromCryptoSubject.onNext(cryptoFormat.format(this))
+                                    // This is a bit of a hack to bypass focus issues
+                                    view.updateFromCryptoText(cryptoFormat.format(this))
+                                }
+                            }
+                        },
+                        { Timber.e(it) }
+                )
     }
 
     internal fun onFromChooserClicked() = view.launchAccountChooserActivityFrom()
@@ -304,15 +332,6 @@ class NewExchangePresenter @Inject constructor(
     private fun getMinimum() = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
 
     //region Field Updates
-    private fun updateUi(fromLabel: String, toLabel: String) {
-        view.updateUi(
-                currencyState.cryptoCurrency,
-                fromLabel,
-                toLabel,
-                monetaryUtil.getFiatDisplayString(0.0, currencyHelper.fiatUnit, Locale.getDefault())
-        )
-    }
-
     private fun updateFromFiat(amount: BigDecimal) {
         view.updateFromFiatText(
                 monetaryUtil.getFiatDisplayString(
@@ -549,7 +568,6 @@ class NewExchangePresenter @Inject constructor(
 
     private fun getEthMaxObservable(): Observable<BigDecimal> = ethDataManager.fetchEthAddress()
             .compose(RxUtil.addObservableToCompositeDisposable(this))
-            .doOnError { view.showToast(R.string.shapeshift_fetching_eth_account_failed, ToastCustom.TYPE_ERROR) }
             .map {
                 val gwei = BigDecimal.valueOf(feeOptions!!.gasLimit * feeOptions!!.regularFee)
                 val wei = Convert.toWei(gwei, Convert.Unit.GWEI)
@@ -560,10 +578,10 @@ class NewExchangePresenter @Inject constructor(
                 val availableEth = Convert.fromWei(maxAvailable.toString(), Convert.Unit.ETHER)
                 return@map if (availableEth > getMaximum()) getMaximum() else availableEth
             }
+            .onErrorReturn { BigDecimal.ZERO }
 
     private fun getBtcMaxObservable(): Observable<BigDecimal> = getUnspentApiResponse(account!!.xpub)
             .compose(RxUtil.addObservableToCompositeDisposable(this))
-            .doOnError { view.showToast(R.string.shapeshift_fetching_unspent_outputs_failed, ToastCustom.TYPE_ERROR) }
             .map {
                 val sweepBundle = sendDataManager.getMaximumAvailable(
                         it,
@@ -572,6 +590,7 @@ class NewExchangePresenter @Inject constructor(
                 val sweepableAmount = BigDecimal(sweepBundle.left).divide(BigDecimal.valueOf(1e8))
                 return@map if (sweepableAmount > getMaximum()) getMaximum() else sweepableAmount
             }
+            .onErrorReturn { BigDecimal.ZERO }
     //endregion
 
     private fun PublishSubject<String>.applyDefaults(): Observable<BigDecimal> = this.doOnNext {

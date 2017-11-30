@@ -820,6 +820,7 @@
     <string name="shapeshift_exchange_rate_formatted">1 %1$s = %2$s %3$s</string>
     <string name="shapeshift_quote_expired_error">Quote expired</string>
     <string name="shapeshift_quote_expired_error_message">Your quote has expired. Please start the process again.</string>
+    <string name="shapeshift_amount_to_low">%1$s %2$s required to exchange</string>
 
     <!-- SHAPESHIFT IN PROGRESS -->
     <string name="shapeshift_in_progress_explanation">Thanks for placing your trade! Exchange trades can take up to two hours, and you can keep track of your trade\'s progress in the Order History section.</string>
