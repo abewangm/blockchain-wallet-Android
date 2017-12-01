@@ -24,8 +24,6 @@ import piuk.blockchain.android.util.helperfunctions.consume
 class ShapeShiftStateSelectionActivity : BaseMvpActivity<
         ShapeShiftStateSelectionView, ShapeShiftStateSelectionPresenter>(), ShapeShiftStateSelectionView {
 
-    var initialSelect = true
-
     override fun finishActivityWithResult(resultCode: Int) {
         setResult(resultCode)
         finish()
@@ -79,12 +77,6 @@ class ShapeShiftStateSelectionActivity : BaseMvpActivity<
         spinnerState.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: android.view.View, position: Int, id: Long) {
 
-                if (initialSelect) {
-                    //Hack to skip auto selection on startup
-                    initialSelect = false
-                    return
-                }
-
                 stateSelectError.invisible()
                 btnConfirm.gone()
 
@@ -110,6 +102,7 @@ class ShapeShiftStateSelectionActivity : BaseMvpActivity<
 
     companion object {
 
+        //TODO we need a request code handler/incrementer to avoid potential collisions
         val STATE_SELECTION_REQUEST_CODE = 54021
 
         @JvmStatic
