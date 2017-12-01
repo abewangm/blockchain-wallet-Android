@@ -77,6 +77,8 @@ class ShapeShiftStateSelectionActivity : BaseMvpActivity<
         spinnerState.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: android.view.View, position: Int, id: Long) {
 
+                if (position == adapter.count) return
+
                 stateSelectError.invisible()
                 btnConfirm.gone()
 
