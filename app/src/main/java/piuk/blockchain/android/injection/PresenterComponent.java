@@ -40,6 +40,7 @@ import piuk.blockchain.android.ui.receive.ReceiveQrActivity;
 import piuk.blockchain.android.ui.recover.RecoverFundsActivity;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsFragment;
+import piuk.blockchain.android.ui.shapeshift.stateselection.ShapeShiftStateSelectionActivity;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveFragment;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
@@ -134,4 +135,6 @@ public interface PresenterComponent {
     void inject(@NotNull TradeInProgressActivity tradeInProgressActivity);
 
     void inject(@NotNull ShapeShiftDetailActivity shapeShiftDetailActivity);
+
+    void inject(@NotNull ShapeShiftStateSelectionActivity shapeShiftStateSelectionActivity);
 }
