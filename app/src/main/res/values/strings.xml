@@ -792,6 +792,9 @@
     <string name="shapeshift_loading_orders_failed">Loading orders failed</string>
     <string name="shapeshift_order_history">Order history</string>
     <string name="shapeshift_incoming">Incoming</string>
+    <string name="shapeshift_select_state_residency">Select your state of residency</string>
+    <string name="shapeshift_select_state">Select state</string>
+    <string name="shapeshift_unavailable_in_state">This service is not yet available in your state.</string>
 
     <!-- SHAPESHIFT NEW TRADE -->
     <string name="shapeshift_use_minimum">Use minimum</string>

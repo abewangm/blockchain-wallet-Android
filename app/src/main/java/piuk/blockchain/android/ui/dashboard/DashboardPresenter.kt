@@ -248,6 +248,7 @@ class DashboardPresenter @Inject constructor(
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(
                             {
+                                Timber.d("vos dashboard "+it)
                                 if (it) showAnnouncement()
                             },
                             {

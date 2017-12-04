@@ -140,6 +140,9 @@
         <activity
             android:name=".ui.shapeshift.detail.ShapeShiftDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".ui.shapeshift.stateselection.ShapeShiftStateSelectionActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service
             android:name=".data.websocket.WebSocketService"
