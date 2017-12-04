@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.shapeshift.overview
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -15,7 +16,9 @@ import piuk.blockchain.android.ui.shapeshift.detail.ShapeShiftDetailActivity
 import piuk.blockchain.android.ui.shapeshift.newexchange.NewExchangeActivity
 import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesAdapter
 import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesListClickListener
+import piuk.blockchain.android.ui.shapeshift.stateselection.ShapeShiftStateSelectionActivity
 import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 import javax.inject.Inject
@@ -44,6 +47,19 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     override fun onResume() {
         super.onResume()
         presenter.onResume()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == ShapeShiftStateSelectionActivity.STATE_SELECTION_REQUEST_CODE &&
+                resultCode == Activity.RESULT_OK) {
+            //State whitelisted - Reload
+            onViewReady()
+        } else {
+            finish()
+        }
+
     }
 
     private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean) {
@@ -132,6 +148,10 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
 
     override fun onNewExchangeClicked() {
         NewExchangeActivity.start(this)
+    }
+
+    override fun showStateSelection() {
+        ShapeShiftStateSelectionActivity.start(this, ShapeShiftStateSelectionActivity.STATE_SELECTION_REQUEST_CODE)
     }
 
     companion object {

@@ -7,6 +7,7 @@ import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -23,36 +24,41 @@ class ShapeShiftPresenter @Inject constructor(
         private val payloadDataManager: PayloadDataManager,
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
-        private val currencyState: CurrencyState
+        private val currencyState: CurrencyState,
+        private val walletOptionsDataManager: WalletOptionsDataManager
 ) : BasePresenter<ShapeShiftView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
     override fun onViewReady() {
 
-        payloadDataManager.metadataNodeFactory
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
-                .doOnError { view.onStateUpdated(ShapeShiftState.Error) }
-                .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
-                .subscribe(
-                        {
-                            if (it.trades.isEmpty()) {
-                                view.onStateUpdated(ShapeShiftState.Empty)
-                            } else {
-                                pollForStatus(it.trades)
-                                val sortedTrades = it.trades.sortedWith(compareBy<Trade> { it.timestamp })
-                                        .reversed()
-                                        // TODO: Remove me when BCH added otherwise you won't see any transactions
-                                        .filterNot { it.quote?.pair?.contains("bch", ignoreCase = true) ?: false }
-                                view.onStateUpdated(ShapeShiftState.Data(sortedTrades))
+        if (walletOptionsDataManager.isAmericanStateSelectionRequired()) {
+            view.showStateSelection()
+        } else {
+            payloadDataManager.metadataNodeFactory
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
+                    .doOnError { view.onStateUpdated(ShapeShiftState.Error) }
+                    .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
+                    .subscribe(
+                            {
+                                if (it.trades.isEmpty()) {
+                                    view.onStateUpdated(ShapeShiftState.Empty)
+                                } else {
+                                    pollForStatus(it.trades)
+                                    val sortedTrades = it.trades.sortedWith(compareBy<Trade> { it.timestamp })
+                                            .reversed()
+                                            // TODO: Remove me when BCH added otherwise you won't see any transactions
+                                            .filterNot { it.quote?.pair?.contains("bch", ignoreCase = true) ?: false }
+                                    view.onStateUpdated(ShapeShiftState.Data(sortedTrades))
+                                }
+                            },
+                            {
+                                Timber.e(it)
+                                view.onStateUpdated(ShapeShiftState.Error)
                             }
-                        },
-                        {
-                            Timber.e(it)
-                            view.onStateUpdated(ShapeShiftState.Error)
-                        }
-                )
+                    )
+        }
     }
 
     internal fun onResume() {
