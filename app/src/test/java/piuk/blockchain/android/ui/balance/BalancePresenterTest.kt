@@ -157,7 +157,7 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
         verify(view).setUiState(UiState.LOADING)
         verify(view).setUiState(UiState.CONTENT)
         verify(view).onTransactionsUpdated(listOf(transactionSummary))
@@ -195,7 +195,7 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
         verify(view).setUiState(UiState.LOADING)
         verify(view).setUiState(UiState.EMPTY)
         verify(view).onTransactionsUpdated(emptyList())
@@ -294,7 +294,7 @@ class BalancePresenterTest {
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(view).isContactsEnabled
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
         verify(view).setUiState(UiState.CONTENT)
         verify(view, times(2)).onTransactionsUpdated(emptyList())
         verify(view).onContactsHashMapUpdated(any())
@@ -358,7 +358,7 @@ class BalancePresenterTest {
         verify(stringUtils).getString(R.string.contacts_transaction_history)
         verifyNoMoreInteractions(stringUtils)
         verify(view).isContactsEnabled
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
         verify(view, times(2)).setUiState(UiState.CONTENT)
         verify(view, times(2)).onTransactionsUpdated(any())
         verify(view).onContactsHashMapUpdated(HashMap())
@@ -386,7 +386,7 @@ class BalancePresenterTest {
         verify(currencyState).isDisplayingCryptoCurrency = true
         verifyNoMoreInteractions(accessState)
         verify(view).onViewTypeChanged(true, 0)
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
     }
 
     @Test
