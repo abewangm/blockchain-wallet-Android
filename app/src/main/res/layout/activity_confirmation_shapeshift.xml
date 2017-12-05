@@ -70,23 +70,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textview_deposit_amount" />
 
-            <!-- RECEIVE AMOUNT -->
+            <!-- TRANSACTION FEE -->
 
             <TextView
-                android:id="@+id/textview_receive_title"
+                android:id="@+id/textview_transaction_fee_title"
                 style="@style/ShapeShiftConfirmationTitle"
+                android:text="@string/shapeshift_transaction_fee"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider2"
-                tools:text="Ether to be Received" />
+                app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
             <TextView
-                android:id="@+id/textview_receive_amount"
+                android:id="@+id/textview_transaction_fee_amount"
                 style="@style/ShapeShiftConfirmationAmount"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/textview_receive_title"
+                app:layout_constraintStart_toEndOf="@+id/textview_transaction_fee_title"
                 app:layout_constraintTop_toBottomOf="@+id/divider2"
-                tools:text="0.00245835 ETH" />
+                tools:text="0.000414 BTC" />
 
             <include
                 android:id="@+id/divider3"
@@ -96,25 +96,25 @@
                 android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textview_receive_amount" />
+                app:layout_constraintTop_toBottomOf="@+id/textview_transaction_fee_amount" />
 
-            <!-- EXCHANGE RATE -->
+            <!-- TOTAL SPENT AMOUNT -->
 
             <TextView
-                android:id="@+id/textview_rate_title"
+                android:id="@+id/textview_total_spent_title"
                 style="@style/ShapeShiftConfirmationTitle"
-                android:text="@string/shapeshift_exchange_rate"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider3" />
+                app:layout_constraintTop_toBottomOf="@+id/divider3"
+                tools:text="Total bitcoin spent" />
 
             <TextView
-                android:id="@+id/textview_rate_value"
+                android:id="@+id/textview_total_spent_amount"
                 style="@style/ShapeShiftConfirmationAmount"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/textview_rate_title"
+                app:layout_constraintStart_toEndOf="@+id/textview_total_spent_title"
                 app:layout_constraintTop_toBottomOf="@+id/divider3"
-                tools:text="1 BTC = 14.66826421 ETH" />
+                tools:text="0.00245835 BTC" />
 
             <include
                 android:id="@+id/divider4"
@@ -124,25 +124,25 @@
                 android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textview_rate_value" />
+                app:layout_constraintTop_toBottomOf="@+id/textview_total_spent_title" />
 
-            <!-- TRANSACTION FEE -->
+            <!-- EXCHANGE RATE -->
 
             <TextView
-                android:id="@+id/textview_transaction_fee_title"
+                android:id="@+id/textview_rate_title"
                 style="@style/ShapeShiftConfirmationTitle"
-                android:text="@string/shapeshift_transaction_fee"
+                android:text="@string/shapeshift_exchange_rate"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider4" />
 
             <TextView
-                android:id="@+id/textview_transaction_fee_amount"
+                android:id="@+id/textview_rate_value"
                 style="@style/ShapeShiftConfirmationAmount"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/textview_transaction_fee_title"
+                app:layout_constraintStart_toEndOf="@+id/textview_rate_title"
                 app:layout_constraintTop_toBottomOf="@+id/divider4"
-                tools:text="0.000414 BTC" />
+                tools:text="1 BTC = 14.66826421 ETH" />
 
             <include
                 android:id="@+id/divider5"
@@ -152,7 +152,7 @@
                 android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textview_transaction_fee_amount" />
+                app:layout_constraintTop_toBottomOf="@+id/textview_rate_value" />
 
             <!-- NETWORK TRANSACTION FEE -->
 
@@ -182,6 +182,34 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textview_network_fee_amount" />
 
+            <!-- RECEIVE AMOUNT -->
+
+            <TextView
+                android:id="@+id/textview_receive_title"
+                style="@style/ShapeShiftConfirmationTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider6"
+                tools:text="Ether to be Received" />
+
+            <TextView
+                android:id="@+id/textview_receive_amount"
+                style="@style/ShapeShiftConfirmationAmount"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/textview_receive_title"
+                app:layout_constraintTop_toBottomOf="@+id/divider6"
+                tools:text="0.00245835 ETH" />
+
+            <include
+                android:id="@+id/divider7"
+                layout="@layout/divider_grey"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textview_receive_title" />
+
             <!-- TERMS AND CONDITIONS -->
 
             <android.support.v7.widget.SwitchCompat
@@ -191,7 +219,7 @@
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider6"
+                app:layout_constraintTop_toBottomOf="@+id/divider7"
                 tools:ignore="RtlHardcoded" />
 
             <TextView

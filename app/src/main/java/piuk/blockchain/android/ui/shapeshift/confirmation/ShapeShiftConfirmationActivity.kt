@@ -108,6 +108,11 @@ class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationVie
         textview_receive_amount.text = amount
     }
 
+    override fun updateTotalAmount(label: String, amount: String) {
+        textview_total_spent_title.text = label
+        textview_total_spent_amount.text = amount
+    }
+
     override fun updateExchangeRate(exchangeRate: String) {
         textview_rate_value.text = exchangeRate
     }

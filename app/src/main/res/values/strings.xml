@@ -820,9 +820,10 @@
     <string name="shapeshift_time_remaining">Quote expires in %1$s</string>
     <string name="shapeshift_deposit_title">%1$s to deposit</string>
     <string name="shapeshift_receive_title">%1$s to be received</string>
+    <string name="shapeshift_total_title">Total %1$s spent</string>
     <string name="shapeshift_exchange_rate_formatted">1 %1$s = %2$s %3$s</string>
     <string name="shapeshift_quote_expired_error">Quote expired</string>
-    <string name="shapeshift_quote_expired_error_message">Your quote has expired. Please start the process again.</string>
+    <string name="shapeshift_quote_expired_error_message">Your trade has expired. Please return to the Exchange page to start your trade again.</string>
     <string name="shapeshift_amount_to_low">%1$s %2$s required to exchange</string>
 
     <!-- SHAPESHIFT IN PROGRESS -->

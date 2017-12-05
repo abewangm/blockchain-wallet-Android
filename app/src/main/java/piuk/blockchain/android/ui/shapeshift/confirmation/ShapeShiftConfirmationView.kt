@@ -24,6 +24,8 @@ interface ShapeShiftConfirmationView : View {
 
     fun updateReceive(label: String, amount: String)
 
+    fun updateTotalAmount(label: String, amount: String)
+
     fun updateExchangeRate(exchangeRate: String)
 
     fun updateTransactionFee(displayString: String)
