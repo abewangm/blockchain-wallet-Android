@@ -87,7 +87,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                     CryptoCurrencies.BTC -> sendBtcTransaction(
                             xPub,
                             depositAddress,
-                            returnAddress,
+                            changeAddress,
                             depositAmount,
                             transactionFee,
                             feePerKb
@@ -138,7 +138,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private fun sendBtcTransaction(
             xPub: String,
             depositAddress: String,
-            returnAddress: String,
+            changeAddress: String,
             depositAmount: BigDecimal,
             transactionFee: BigInteger,
             feePerKb: BigInteger
@@ -162,7 +162,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                                         unspent,
                                         it,
                                         depositAddress,
-                                        returnAddress,
+                                        changeAddress,
                                         transactionFee,
                                         satoshis
                                 )

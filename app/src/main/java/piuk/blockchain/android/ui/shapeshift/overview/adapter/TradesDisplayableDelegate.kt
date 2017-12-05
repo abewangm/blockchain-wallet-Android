@@ -21,6 +21,9 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.inflate
 import java.math.BigDecimal
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.*
 
 class TradesDisplayableDelegate<in T>(
         activity: Activity,
@@ -33,6 +36,11 @@ class TradesDisplayableDelegate<in T>(
     private val prefsUtil = PrefsUtil(activity)
     private val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     private val dateUtil = DateUtil(activity)
+
+    private var btcFormat = (NumberFormat.getInstance(Locale.getDefault()) as DecimalFormat).apply {
+        minimumFractionDigits = 1
+        maximumFractionDigits = 8
+    }
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is Trade
@@ -119,7 +127,7 @@ class TradesDisplayableDelegate<in T>(
 
             val cryptoAmount = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
-                CryptoCurrencies.BTC.symbol -> monetaryUtil.getBtcFormat().format(cryptoAmount)
+                CryptoCurrencies.BTC.symbol -> btcFormat.format(cryptoAmount)
                 else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
             unit = cryptoCurrency

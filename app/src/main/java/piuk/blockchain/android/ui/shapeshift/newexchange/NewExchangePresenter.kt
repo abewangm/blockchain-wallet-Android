@@ -8,6 +8,8 @@ import info.blockchain.wallet.shapeshift.data.MarketInfo
 import info.blockchain.wallet.shapeshift.data.Quote
 import info.blockchain.wallet.shapeshift.data.QuoteRequest
 import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Function3
 import io.reactivex.subjects.PublishSubject
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -452,6 +454,7 @@ class NewExchangePresenter @Inject constructor(
                                                         fromCurrency = selectedCurrency,
                                                         toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
                                                         depositAmount = quote.depositAmount,
+                                                        changeAddress = addresses.changeAddress,
                                                         depositAddress = quote.deposit ?: "",
                                                         withdrawalAmount = quote.withdrawalAmount,
                                                         withdrawalAddress = addresses.withdrawalAddress,
@@ -519,15 +522,18 @@ class NewExchangePresenter @Inject constructor(
     //region Address Pair Observables
     private fun getAddressPair(selectedCurrency: CryptoCurrencies): Observable<Addresses> =
             when (selectedCurrency) {
-                CryptoCurrencies.BTC -> getBtcReceiveAddress()
-                        .flatMap { returnAddress ->
-                            getEthAddress()
-                                    .map { Addresses(it, returnAddress) }
-                        }
+                CryptoCurrencies.BTC ->
+                    Observable.zip(
+                            getBtcReceiveAddress(),
+                            getEthAddress(),
+                            getNextChangeAddress(),
+                            Function3 { returnAddress, withdrawalAddress, changeAddress ->
+                                Addresses(withdrawalAddress, returnAddress, changeAddress)
+                            })
                 CryptoCurrencies.ETHER -> getEthAddress()
                         .flatMap { returnAddress ->
                             getBtcReceiveAddress()
-                                    .map { Addresses(it, returnAddress) }
+                                    .map { Addresses(it, returnAddress, "") }
                         }
                 else -> throw IllegalArgumentException("BCH not yet supported")
             }.doOnError { view.showToast(R.string.shapeshift_deriving_address_failed, ToastCustom.TYPE_ERROR) }
@@ -537,6 +543,10 @@ class NewExchangePresenter @Inject constructor(
 
     private fun getBtcReceiveAddress(): Observable<String> =
             payloadDataManager.getNextReceiveAddress(account!!)
+
+
+    private fun getNextChangeAddress(): Observable<String> =
+            payloadDataManager.getNextChangeAddress(account!!)
     //endregion
 
     //region Max Amounts Observables
@@ -602,6 +612,6 @@ class NewExchangePresenter @Inject constructor(
 
     private data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
 
-    private data class Addresses(val withdrawalAddress: String, val returnAddress: String)
+    private data class Addresses(val withdrawalAddress: String, val returnAddress: String, val changeAddress: String)
 
 }

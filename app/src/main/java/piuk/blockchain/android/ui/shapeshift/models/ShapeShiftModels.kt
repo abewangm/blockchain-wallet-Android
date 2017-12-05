@@ -21,6 +21,8 @@ data class ShapeShiftData(
         var depositAmount: BigDecimal,
         // The address you're sending the funds to
         var depositAddress: String,
+        // Your change address
+        var changeAddress: String,
         // The amount you'll get back from ShapeShift
         var withdrawalAmount: BigDecimal,
         // The address to which you want to receive funds
