@@ -48,9 +48,9 @@ class ExchangeRateFactory private constructor() {
         getBtcTicker().mergeWith(getEthTicker())
     }
 
-    fun getLastBtcPrice(currencyName: String) = getLastPrice(currencyName, CryptoCurrencies.BTC)
+    fun getLastBtcPrice(currencyName: String) = getLastPrice(currencyName.toUpperCase(), CryptoCurrencies.BTC)
 
-    fun getLastEthPrice(currencyName: String) = getLastPrice(currencyName, CryptoCurrencies.ETHER)
+    fun getLastEthPrice(currencyName: String) = getLastPrice(currencyName.toUpperCase(), CryptoCurrencies.ETHER)
 
     @Deprecated(
             "use MonetaryUtil.getCurrencySymbol, as this method doesn't allow the passing of a locale",
