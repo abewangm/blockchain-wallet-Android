@@ -466,7 +466,7 @@ class NewExchangePresenter @Inject constructor(
                     }
                     .flatMap { quote ->
                         // Get fee for the proposed payment amount
-                        getFeeForPayment(quote.withdrawalAmount, selectedCurrency)
+                        getFeeForPayment(quote.depositAmount, selectedCurrency)
                                 .flatMap { fee ->
                                     // Get receive/change address pair
                                     getAddressPair(selectedCurrency)
