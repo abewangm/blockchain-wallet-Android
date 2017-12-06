@@ -38,15 +38,23 @@ class ShapeShiftPresenter @Inject constructor(
             payloadDataManager.metadataNodeFactory
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
-                    .doOnError { view.onStateUpdated(ShapeShiftState.Error) }
                     .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
+                    .flatMapIterable { it.trades }
+                    .flatMap { shapeShiftDataManager.getTradeStatusPair(it) }
+                    .flatMap {
+                        handleState(it.tradeMetadata, it.tradeStatusResponse)
+                        Observable.just(it.tradeMetadata)
+                    }
+                    .doOnError { view.onStateUpdated(ShapeShiftState.Error) }
+                    .toList()
                     .subscribe(
                             {
-                                if (it.trades.isEmpty()) {
+                                val trades = it.toList()
+                                if (it.isEmpty()) {
                                     view.onStateUpdated(ShapeShiftState.Empty)
                                 } else {
-                                    pollForStatus(it.trades)
-                                    val sortedTrades = it.trades.sortedWith(compareBy<Trade> { it.timestamp })
+                                    pollForStatus(trades)
+                                    val sortedTrades = trades.sortedWith(compareBy<Trade> { it.timestamp })
                                             .reversed()
                                             // TODO: Remove me when BCH added otherwise you won't see any transactions
                                             .filterNot { it.quote?.pair?.contains("bch", ignoreCase = true) ?: false }
@@ -108,12 +116,18 @@ class ShapeShiftPresenter @Inject constructor(
             updateMetadata(trade)
         }
 
+        //Update trade fields for display
+        if (trade.quote?.withdrawalAmount == null && tradeResponse.incomingCoin != null) {
+            trade.quote?.withdrawalAmount = tradeResponse.incomingCoin
+        }
+
+        if (trade.quote?.pair == null && tradeResponse.pair != null) {
+            trade.quote?.pair = tradeResponse.pair
+        }
+
         if (tradeResponse.incomingType.equals("bch", true)
                 ||tradeResponse.outgoingType.equals("bch", true)) {
-            // Remove trade
-            // TODO: Remove trade
-            // TODO: This page needs a complete rethink otherwise this will be terrible  
-//            view.removeTrade(tradeResponse)
+            //no-op
         } else {
             view.onTradeUpdate(trade, tradeResponse)
         }
