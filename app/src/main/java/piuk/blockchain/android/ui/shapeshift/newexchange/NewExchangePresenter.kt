@@ -8,6 +8,7 @@ import info.blockchain.wallet.shapeshift.data.MarketInfo
 import info.blockchain.wallet.shapeshift.data.Quote
 import info.blockchain.wallet.shapeshift.data.QuoteRequest
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Function3
 import io.reactivex.subjects.PublishSubject
 import org.web3j.utils.Convert
@@ -599,9 +600,9 @@ class NewExchangePresenter @Inject constructor(
 
     private fun getBtcMaxObservable(): Observable<BigDecimal> = getUnspentApiResponse(account!!.xpub)
             .compose(RxUtil.addObservableToCompositeDisposable(this))
-            .map {
+            .map { unspentOutputs ->
                 val sweepBundle = sendDataManager.getMaximumAvailable(
-                        it,
+                        unspentOutputs,
                         BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
                 )
                 val sweepableAmount = BigDecimal(sweepBundle.left).divide(BigDecimal.valueOf(1e8))
@@ -645,15 +646,30 @@ class NewExchangePresenter @Inject constructor(
         view.clearError()
         view.setButtonEnabled(false)
         view.showQuoteInProgress(true)
-    }.debounce(500, TimeUnit.MILLISECONDS)
+    }.debounce(750, TimeUnit.MILLISECONDS)
             // Here we kill any quotes in flight already, as they take up to ten seconds to fulfill
             .doOnNext { compositeDisposable.clear() }
+            // Strip out localised information for predictable formatting
             .map { it.sanitise().parse(view.locale) }
-            .doOnError(Timber::e)
+            // Logging
+            .doOnError(Timber::wtf)
+            // Return zero if empty or some other error
             .onErrorReturn { BigDecimal.ZERO }
-            .compose(RxUtil.applySchedulersToObservable())
+            // Scheduling for UI updates if necessary
+            .observeOn(AndroidSchedulers.mainThread())
+            // If zero, clear all EditTexts and reset UI state
+            .doOnNext {
+                if (it <= BigDecimal.ZERO) {
+                    view.clearEditTexts()
+                    view.setButtonEnabled(false)
+                    view.showQuoteInProgress(false)
+                }
+            }
+            // Don't pass zero events to the API as they're invalid
+            .filter { it > BigDecimal.ZERO }
     //endregion
 
+    //region Extension Functions
     private fun String.sanitise() = if (isNotEmpty()) this else "0"
 
     private fun Double.toBigDecimal() = BigDecimal.valueOf(this)
@@ -666,6 +682,7 @@ class NewExchangePresenter @Inject constructor(
         }
         return format.parse(this.replace("[^\\d.,]".toRegex(), "")) as BigDecimal
     }
+    //endregion
 
     private data class ExchangeRates(val toRate: BigDecimal, val fromRate: BigDecimal)
 
