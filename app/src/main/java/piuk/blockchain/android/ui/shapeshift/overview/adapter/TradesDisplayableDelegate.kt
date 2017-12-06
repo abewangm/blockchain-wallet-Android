@@ -120,8 +120,8 @@ class TradesDisplayableDelegate<in T>(
     ): Spannable {
         val spannable: Spannable
 
-        var displayAmount = ""
-        var unit = ""
+        val displayAmount: String
+        val unit: String
 
         if (showCrypto) {
 
@@ -131,7 +131,7 @@ class TradesDisplayableDelegate<in T>(
                 else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
             unit = cryptoCurrency
-            displayAmount = "${cryptoAmount} ${cryptoCurrency}"
+            displayAmount = "$cryptoAmount $cryptoCurrency"
         } else {
 
             val fiatAmount = when (cryptoCurrency.toUpperCase()) {
@@ -149,17 +149,13 @@ class TradesDisplayableDelegate<in T>(
                 RelativeSizeSpan(0.67f),
                 spannable.length - unit.length,
                 spannable.length,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
 
         return spannable
     }
 
     private fun getPreferedFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-
-    private fun getRealTradePosition(position: Int, items: List<T>): Int {
-        val diff = items.size - items.count { it is Trade }
-        return position - diff
-    }
 
     private class TradeViewHolder internal constructor(
             itemView: View

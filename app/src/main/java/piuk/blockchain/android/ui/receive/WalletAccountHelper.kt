@@ -15,7 +15,9 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import java.math.BigDecimal
 import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.util.*
 
 @Mockable
@@ -32,6 +34,7 @@ class WalletAccountHelper(
     private val btcUnit: String by unsafeLazy { monetaryUtil.getBtcUnit(btcUnitType) }
     private val fiatUnit: String by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY) }
     private val btcExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastBtcPrice(fiatUnit) }
+    private val ethExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastEthPrice(fiatUnit) }
 
     /**
      * Returns a list of [ItemAccount] objects containing both HD accounts and [LegacyAddress]
@@ -195,11 +198,24 @@ class WalletAccountHelper(
     private fun getDefaultEthAccount(): ItemAccount {
         val ethModel = ethDataManager.getEthResponseModel()
         val ethAccount = ethDataManager.getEthWallet()!!.account
-        var amount = Convert.fromWei(ethModel?.getTotalBalance().toString(), Convert.Unit.ETHER)
-        amount = amount.setScale(8, RoundingMode.HALF_DOWN)
+        val amount = Convert.fromWei(ethModel?.getTotalBalance().toString(), Convert.Unit.ETHER)
+        amount.setScale(8, RoundingMode.HALF_DOWN)
+
+        val displayString = if (currencyState.isDisplayingCryptoCurrency) {
+            val numberFormat = DecimalFormat.getInstance().apply {
+                minimumFractionDigits = 1
+                maximumFractionDigits = 8
+            }
+
+            "(${numberFormat.format(amount)} ETH)"
+        } else {
+            val fiatBalance = amount.multiply(BigDecimal.valueOf(ethExchangeRate))
+            "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
+        }
+
         return ItemAccount(
                 ethAccount?.label,
-                "($amount ETH)",
+                displayString,
                 null,
                 0,
                 ethAccount,

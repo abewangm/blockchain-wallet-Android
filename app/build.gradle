@@ -230,7 +230,7 @@ dependencies {
     // Charts
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     // Crash reporting
-    implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
         transitive = true
     }
     // Device specs

@@ -8,7 +8,6 @@ import io.reactivex.schedulers.Schedulers
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
-import timber.log.Timber
 
 @Mockable
 class WalletOptionsDataManager(
@@ -60,7 +59,7 @@ class WalletOptionsDataManager(
         return isShapeShiftAllowed && !blacklistedCountry
     }
 
-    fun isStateWhitelisted(state: String) = walletOptionsState.walletOptionsSource
+    fun isStateWhitelisted(state: String): Observable<Boolean> = walletOptionsState.walletOptionsSource
             .map { it.shapeshift.statesWhitelist.let { it?.contains(state) ?: true } }
 
     /**

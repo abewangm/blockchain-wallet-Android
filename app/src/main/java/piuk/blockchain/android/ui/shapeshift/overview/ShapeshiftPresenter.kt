@@ -108,7 +108,16 @@ class ShapeShiftPresenter @Inject constructor(
             updateMetadata(trade)
         }
 
-        view.onTradeUpdate(trade, tradeResponse)
+        if (tradeResponse.incomingType.equals("bch", true)
+                ||tradeResponse.outgoingType.equals("bch", true)) {
+            // Remove trade
+            // TODO: Remove trade
+            // TODO: This page needs a complete rethink otherwise this will be terrible  
+//            view.removeTrade(tradeResponse)
+        } else {
+            view.onTradeUpdate(trade, tradeResponse)
+        }
+
     }
 
     fun updateMetadata(trade: Trade) {
