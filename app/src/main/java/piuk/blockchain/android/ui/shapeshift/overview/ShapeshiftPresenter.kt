@@ -38,7 +38,6 @@ class ShapeShiftPresenter @Inject constructor(
             payloadDataManager.metadataNodeFactory
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
-                    .doOnError { view.onStateUpdated(ShapeShiftState.Error) }
                     .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
                     .flatMapIterable { it.trades }
                     .flatMap { shapeShiftDataManager.getTradeStatusPair(it) }
@@ -46,6 +45,7 @@ class ShapeShiftPresenter @Inject constructor(
                         handleState(it.tradeMetadata, it.tradeStatusResponse)
                         Observable.just(it.tradeMetadata)
                     }
+                    .doOnError { view.onStateUpdated(ShapeShiftState.Error) }
                     .toList()
                     .subscribe(
                             {
@@ -127,10 +127,7 @@ class ShapeShiftPresenter @Inject constructor(
 
         if (tradeResponse.incomingType.equals("bch", true)
                 ||tradeResponse.outgoingType.equals("bch", true)) {
-            // Remove trade
-            // TODO: Remove trade
-            // TODO: This page needs a complete rethink otherwise this will be terrible  
-//            view.removeTrade(tradeResponse)
+            //no-op
         } else {
             view.onTradeUpdate(trade, tradeResponse)
         }
