@@ -201,7 +201,7 @@ class ReceivePresenter @Inject internal constructor(
         fiatAmount = monetaryUtil.getFiatFormat(fiatUnit)
                 .format(exchangeRate * (satoshis.toDouble() / 1e8))
 
-        fiatSymbol = exchangeRateFactory.getSymbol(fiatUnit)
+        fiatSymbol = monetaryUtil.getCurrencySymbol(fiatUnit, view.locale)
     }
 
     internal fun onShowBottomSheetSelected() {
