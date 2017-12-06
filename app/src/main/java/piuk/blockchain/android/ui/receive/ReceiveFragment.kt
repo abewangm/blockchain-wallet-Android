@@ -62,14 +62,15 @@ import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.io.IOException
 import java.text.DecimalFormatSymbols
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveView, NumericKeyboardCallback {
 
-    override val isContactsEnabled: Boolean
-        get() = BuildConfig.CONTACTS_ENABLED
+    override val isContactsEnabled: Boolean = BuildConfig.CONTACTS_ENABLED
+    override val locale: Locale = Locale.getDefault()
 
     @Inject lateinit var receivePresenter: ReceivePresenter
     private var bottomSheetDialog: BottomSheetDialog? = null

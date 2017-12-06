@@ -153,7 +153,7 @@ class ShapeShiftDataManager(
             rxPinning.call<TradeStatusResponse> {
                 shapeShiftApi.getTradeStatus(depositAddress)
                         .flatMap {
-                            if (it.error != null) {
+                            if (it.error != null && it.status == null) {
                                 Observable.error(Throwable(it.error))
                             } else {
                                 Observable.just(it)
@@ -173,9 +173,7 @@ class ShapeShiftDataManager(
     fun getTradeStatusPair(tradeMetadata: Trade): Observable<TradeStatusPair> =
             rxPinning.call<TradeStatusPair> {
                 shapeShiftApi.getTradeStatus(tradeMetadata.quote.deposit)
-                        .flatMap {
-                            Observable.just(TradeStatusPair(tradeMetadata, it))
-                        }
+                        .map { TradeStatusPair(tradeMetadata, it) }
             }.compose(RxUtil.applySchedulersToObservable())
 
     /**
