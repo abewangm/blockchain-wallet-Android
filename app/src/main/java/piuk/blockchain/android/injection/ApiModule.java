@@ -4,6 +4,7 @@ import android.util.Log;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -15,19 +16,17 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import info.blockchain.wallet.shapeshift.ShapeShiftApi;
-import info.blockchain.wallet.shapeshift.ShapeShiftEndpoints;
-import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
 import okhttp3.CertificatePinner;
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.ApiInterceptor;
 import piuk.blockchain.android.data.api.ConnectionApi;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.api.interceptors.ApiInterceptor;
+import piuk.blockchain.android.data.api.interceptors.UserAgentInterceptor;
+import piuk.blockchain.android.data.notifications.NotificationService;
 import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
-import piuk.blockchain.android.data.notifications.NotificationService;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
 import piuk.blockchain.android.util.TLSSocketFactory;
@@ -80,7 +79,10 @@ public class ApiModule {
                 .pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .certificatePinner(certificatePinner)
-                .addInterceptor(new ApiInterceptor());
+                // Add logging for debugging purposes
+                .addInterceptor(new ApiInterceptor())
+                // Add header in all requests
+                .addInterceptor(new UserAgentInterceptor());
 
         /*
           Enable TLS specific version V.1.2
@@ -128,9 +130,9 @@ public class ApiModule {
     @Singleton
     @Named("explorer")
     protected Retrofit provideRetrofitExplorerInstance(OkHttpClient okHttpClient,
-                                                         JacksonConverterFactory converterFactory,
-                                                         RxJava2CallAdapterFactory rxJavaCallFactory,
-                                                         EnvironmentSettings environmentSettings) {
+                                                       JacksonConverterFactory converterFactory,
+                                                       RxJava2CallAdapterFactory rxJavaCallFactory,
+                                                       EnvironmentSettings environmentSettings) {
         return new Retrofit.Builder()
                 .baseUrl(environmentSettings.getExplorerUrl())
                 .client(okHttpClient)
@@ -151,8 +153,8 @@ public class ApiModule {
     @Singleton
     @Named("shapeshift")
     protected Retrofit provideRetrofitShapeShiftInstance(OkHttpClient okHttpClient,
-                                                       JacksonConverterFactory converterFactory,
-                                                       RxJava2CallAdapterFactory rxJavaCallFactory) {
+                                                         JacksonConverterFactory converterFactory,
+                                                         RxJava2CallAdapterFactory rxJavaCallFactory) {
         return new Retrofit.Builder()
                 .baseUrl(ShapeShiftUrls.SHAPESHIFT_URL)
                 .client(okHttpClient)
