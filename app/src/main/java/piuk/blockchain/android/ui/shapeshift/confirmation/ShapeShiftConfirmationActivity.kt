@@ -24,11 +24,14 @@ import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import java.util.*
 import javax.inject.Inject
 
 class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationView, ShapeShiftConfirmationPresenter>(),
         ShapeShiftConfirmationView,
         SecondPasswordHandler.ResultListener {
+
+    override val locale: Locale = Locale.getDefault()
 
     @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var confirmationPresenter: ShapeShiftConfirmationPresenter

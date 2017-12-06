@@ -4,10 +4,13 @@ import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.shapeshift.models.TradeDetailUiState
+import java.util.*
 
 interface ShapeShiftDetailView : View {
 
     val depositAddress: String
+
+    val locale: Locale
 
     fun updateUi(uiState: TradeDetailUiState)
 

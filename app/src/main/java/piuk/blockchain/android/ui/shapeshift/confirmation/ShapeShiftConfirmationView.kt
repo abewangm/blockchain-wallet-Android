@@ -3,10 +3,13 @@ package piuk.blockchain.android.ui.shapeshift.confirmation
 import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
+import java.util.*
 
 interface ShapeShiftConfirmationView : View {
 
     val shapeShiftData: ShapeShiftData
+
+    val locale: Locale
 
     fun showToast(message: Int, toastType: String)
 

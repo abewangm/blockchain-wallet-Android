@@ -14,10 +14,13 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.shapeshift.models.TradeDetailUiState
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.consume
+import java.util.*
 import javax.inject.Inject
 
 class ShapeShiftDetailActivity : BaseMvpActivity<ShapeShiftDetailView, ShapeShiftDetailPresenter>(),
         ShapeShiftDetailView {
+
+    override val locale: Locale = Locale.getDefault()
 
     @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var shapeShiftDetailPresenter: ShapeShiftDetailPresenter
