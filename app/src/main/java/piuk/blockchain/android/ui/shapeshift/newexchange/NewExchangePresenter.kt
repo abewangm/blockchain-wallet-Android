@@ -646,7 +646,7 @@ class NewExchangePresenter @Inject constructor(
         view.clearError()
         view.setButtonEnabled(false)
         view.showQuoteInProgress(true)
-    }.debounce(500, TimeUnit.MILLISECONDS)
+    }.debounce(750, TimeUnit.MILLISECONDS)
             // Here we kill any quotes in flight already, as they take up to ten seconds to fulfill
             .doOnNext { compositeDisposable.clear() }
             // Strip out localised information for predictable formatting
