@@ -177,7 +177,11 @@ class NewExchangePresenter @Inject constructor(
 
     internal fun onContinuePressed() {
         // State check
-        check(shapeShiftData != null) { "ShapeShiftData is null, presenter state invalid" }
+        if (shapeShiftData == null) {
+            view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
+            return
+        }
+
         // Check user isn't submitting an empty page
         if (shapeShiftData?.withdrawalAmount?.compareTo(BigDecimal.ZERO) == 0) {
             view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
@@ -646,7 +650,7 @@ class NewExchangePresenter @Inject constructor(
         view.clearError()
         view.setButtonEnabled(false)
         view.showQuoteInProgress(true)
-    }.debounce(750, TimeUnit.MILLISECONDS)
+    }.debounce(1000, TimeUnit.MILLISECONDS)
             // Here we kill any quotes in flight already, as they take up to ten seconds to fulfill
             .doOnNext { compositeDisposable.clear() }
             // Strip out localised information for predictable formatting
