@@ -38,12 +38,12 @@ class ContactConfirmRequestFragment : BaseFragment<ContactConfirmRequestView, Co
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ) = container?.inflate(R.layout.fragment_contact_payment_request_notes)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         button_send.setOnClickListener {

@@ -31,12 +31,12 @@ class BackupWalletVerifyFragment : BaseFragment<BackupVerifyView, BackupVerifyPr
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ) = container!!.inflate(R.layout.fragment_backup_wallet_verify)
+    ): View? = container?.inflate(R.layout.fragment_backup_wallet_verify)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         onViewReady()
 
@@ -93,19 +93,23 @@ class BackupWalletVerifyFragment : BaseFragment<BackupVerifyView, BackupVerifyPr
 
     override fun onDestroyView() {
         super.onDestroyView()
-        val view = activity.currentFocus
-        if (view != null) {
-            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        activity?.run {
+            val view = currentFocus
+            if (view != null) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+            }
         }
     }
 
     private fun popAllAndStartFragment(fragment: Fragment, tag: String) {
-        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, fragment)
-                .addToBackStack(tag)
-                .commit()
+        fragmentManager?.run {
+            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .addToBackStack(tag)
+                    .commit()
+        }
     }
 
 }

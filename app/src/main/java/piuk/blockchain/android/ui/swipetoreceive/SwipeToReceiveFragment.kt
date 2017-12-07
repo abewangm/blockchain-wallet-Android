@@ -23,7 +23,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     @Inject lateinit var swipeToReceivePresenter: SwipeToReceivePresenter
     override val cryptoCurrency: CryptoCurrencies
-        get() = arguments.getSerializable(ARGUMENT_CRYPTOCURRENCY) as CryptoCurrencies
+        get() = arguments!!.getSerializable(ARGUMENT_CRYPTOCURRENCY) as CryptoCurrencies
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -39,12 +39,12 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ) = container?.inflate(R.layout.fragment_swipe_to_receive)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         imageview_qr.setOnClickListener { showClipboardWarning() }
@@ -58,10 +58,10 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
         // Register address as the one we're interested in via broadcast
         val intent = Intent(WebSocketService.ACTION_INTENT).apply { putExtra("address", address) }
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
 
         // Listen for corresponding broadcasts
-        LocalBroadcastManager.getInstance(context).registerReceiver(
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(
                 broadcastReceiver, IntentFilter(BalanceFragment.ACTION_INTENT))
     }
 
@@ -84,7 +84,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     override fun onStop() {
         super.onStop()
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(broadcastReceiver)
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
     }
 
     override fun createPresenter() = swipeToReceivePresenter
@@ -107,18 +107,20 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     }
 
     private fun showClipboardWarning() {
-        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.receive_address_to_clipboard)
-                .setCancelable(false)
-                .setPositiveButton(R.string.yes, { _, _ ->
-                    val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Send address", textview_address.text)
-                    toast(R.string.copied_to_clipboard)
-                    clipboard.primaryClip = clip
-                })
-                .setNegativeButton(R.string.no, null)
-                .show()
+        activity?.run {
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.receive_address_to_clipboard)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.yes, { _, _ ->
+                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Send address", textview_address.text)
+                        toast(R.string.copied_to_clipboard)
+                        clipboard.primaryClip = clip
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .show()
+        }
     }
 
     companion object {

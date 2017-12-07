@@ -24,12 +24,12 @@ class BackupWalletStartingFragment : BaseFragment<BackupWalletStartingView, Back
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ) = container!!.inflate(R.layout.fragment_backup_start)
+    ): View? = container!!.inflate(R.layout.fragment_backup_start)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         button_start.setOnClickListener {
@@ -62,10 +62,12 @@ class BackupWalletStartingFragment : BaseFragment<BackupWalletStartingView, Back
     override fun getMvpView() = this
 
     private fun loadFragment(fragment: Fragment) {
-        activity.supportFragmentManager.beginTransaction()
-                .replace(R.id.content_frame, fragment)
-                .addToBackStack(null)
-                .commit()
+        activity?.run {
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .addToBackStack(null)
+                    .commit()
+        }
     }
 
     companion object {

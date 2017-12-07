@@ -1,7 +1,9 @@
 package piuk.blockchain.android.ui.balance
 
+import android.annotation.TargetApi
 import android.content.*
 import android.content.pm.ShortcutManager
+import android.os.Build
 import android.os.Bundle
 import android.support.annotation.StringRes
 import android.support.v4.content.LocalBroadcastManager
@@ -71,12 +73,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ) = container?.inflate(R.layout.fragment_balance)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         swipe_container.setProgressViewEndTarget(
@@ -243,13 +245,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
         }
 
-        LocalBroadcastManager.getInstance(context)
+        LocalBroadcastManager.getInstance(context!!)
                 .registerReceiver(receiver, IntentFilter(ACTION_INTENT))
     }
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver)
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
         // Fixes issue with Swipe Layout messing with Fragment transitions
         swipe_container?.let {
             swipe_container.isRefreshing = false
@@ -276,20 +278,22 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount)
         }
 
-        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(R.string.contacts_balance_dialog_payment_requested)
-                .setMessage(message)
-                .setPositiveButton(
-                        R.string.contacts_balance_dialog_accept,
-                        { _, _ -> presenter.onPaymentRequestAccepted(fctxId) }
-                )
-                .setNegativeButton(
-                        R.string.contacts_balance_dialog_decline,
-                        { _, _ -> presenter.declineTransaction(fctxId) }
-                )
-                .setNeutralButton(android.R.string.cancel, null)
-                .create()
-                .show()
+        activity?.run {
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.contacts_balance_dialog_payment_requested)
+                    .setMessage(message)
+                    .setPositiveButton(
+                            R.string.contacts_balance_dialog_accept,
+                            { _, _ -> presenter.onPaymentRequestAccepted(fctxId) }
+                    )
+                    .setNegativeButton(
+                            R.string.contacts_balance_dialog_decline,
+                            { _, _ -> presenter.declineTransaction(fctxId) }
+                    )
+                    .setNeutralButton(android.R.string.cancel, null)
+                    .create()
+                    .show()
+        }
     }
 
     override fun showSendAddressDialog(
@@ -304,20 +308,22 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
         }
 
-        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(R.string.contacts_balance_dialog_receiving_payment)
-                .setMessage(message)
-                .setPositiveButton(
-                        R.string.contacts_balance_dialog_accept,
-                        { _, _ -> presenter.onAccountChosen(0, fctxId) }
-                )
-                .setNegativeButton(
-                        R.string.contacts_balance_dialog_decline,
-                        { _, _ -> presenter.declineTransaction(fctxId) }
-                )
-                .setNeutralButton(android.R.string.cancel, null)
-                .create()
-                .show()
+        activity?.run {
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.contacts_balance_dialog_receiving_payment)
+                    .setMessage(message)
+                    .setPositiveButton(
+                            R.string.contacts_balance_dialog_accept,
+                            { _, _ -> presenter.onAccountChosen(0, fctxId) }
+                    )
+                    .setNegativeButton(
+                            R.string.contacts_balance_dialog_decline,
+                            { _, _ -> presenter.declineTransaction(fctxId) }
+                    )
+                    .setNeutralButton(android.R.string.cancel, null)
+                    .create()
+                    .show()
+        }
     }
 
     override fun showWaitingForPaymentDialog() =
@@ -361,21 +367,23 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
         message += "\n\n${getString(R.string.contacts_balance_dialog_choose_account_message)}\n"
 
-        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(R.string.contacts_balance_dialog_receiving_payment)
-                .setMessage(message)
-                .setView(ViewUtils.getAlertDialogPaddedView(context, spinner))
-                .setPositiveButton(
-                        R.string.contacts_balance_dialog_accept,
-                        { _, _ -> presenter.onAccountChosen(selection[0], fctxId) }
-                )
-                .setNegativeButton(
-                        R.string.contacts_balance_dialog_decline,
-                        { _, _ -> presenter.declineTransaction(fctxId) }
-                )
-                .setNeutralButton(android.R.string.cancel, null)
-                .create()
-                .show()
+        activity?.run {
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.contacts_balance_dialog_receiving_payment)
+                    .setMessage(message)
+                    .setView(ViewUtils.getAlertDialogPaddedView(context, spinner))
+                    .setPositiveButton(
+                            R.string.contacts_balance_dialog_accept,
+                            { _, _ -> presenter.onAccountChosen(selection[0], fctxId) }
+                    )
+                    .setNegativeButton(
+                            R.string.contacts_balance_dialog_decline,
+                            { _, _ -> presenter.declineTransaction(fctxId) }
+                    )
+                    .setNeutralButton(android.R.string.cancel, null)
+                    .create()
+                    .show()
+        }
     }
 
     override fun initiatePayment(uri: String, recipientId: String, mdid: String, fctxId: String) {
@@ -383,13 +391,17 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun startBuyActivity() {
-        LocalBroadcastManager.getInstance(activity)
-                .sendBroadcast(Intent(MainActivity.ACTION_BUY))
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
+        }
     }
 
     override fun startReceiveFragment() {
-        LocalBroadcastManager.getInstance(activity)
-                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
+        }
     }
 
     override fun showProgressDialog() {
@@ -445,8 +457,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     private fun startReceiveFragmentEth() {
-        LocalBroadcastManager.getInstance(activity)
-                .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
+        }
     }
 
     private fun onContentLoaded() {
@@ -456,7 +470,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean, txNoteMap: MutableMap<String, String>) {
         balanceAdapter = BalanceAdapter(
-                activity,
+                activity!!,
                 btcExchangeRate,
                 ethExchangeRate,
                 isBtc,
@@ -477,12 +491,14 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         TransactionDetailActivity.start(activity, bundle)
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     private fun generateLauncherShortcuts() {
         if (AndroidUtils.is25orHigher() && presenter.areLauncherShortcutsEnabled()) {
             val launcherShortcutHelper = LauncherShortcutHelper(
                     activity,
                     presenter.payloadDataManager,
-                    activity.getSystemService(ShortcutManager::class.java))
+                    activity!!.getSystemService(ShortcutManager::class.java)
+            )
 
             launcherShortcutHelper.generateReceiveShortcuts()
         }
@@ -494,16 +510,18 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             clickListener: DialogInterface.OnClickListener?,
             showNegativeButton: Boolean
     ) {
-        val builder = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, clickListener)
-                .setNegativeButton(android.R.string.cancel, null)
+        activity?.run {
+            val builder = AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton(android.R.string.ok, clickListener)
+                    .setNegativeButton(android.R.string.cancel, null)
 
-        if (showNegativeButton) {
-            builder.setNegativeButton(android.R.string.cancel, null)
+            if (showNegativeButton) {
+                builder.setNegativeButton(android.R.string.cancel, null)
+            }
+            builder.show()
         }
-        builder.show()
     }
 
     private fun showDialog(

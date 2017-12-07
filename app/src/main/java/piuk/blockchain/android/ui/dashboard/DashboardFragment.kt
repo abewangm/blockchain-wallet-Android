@@ -34,7 +34,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         get() = AndroidUtils.is19orHigher()
 
     @Inject lateinit var dashboardPresenter: DashboardPresenter
-    private val dashboardAdapter by unsafeLazy { DashboardDelegateAdapter(activity) }
+    private val dashboardAdapter by unsafeLazy { DashboardDelegateAdapter(context!!) }
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT && activity != null) {
@@ -49,12 +49,12 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ) = container?.inflate(R.layout.fragment_dashboard)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         tabs_dashboard.apply {
@@ -90,13 +90,13 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
         }
-        LocalBroadcastManager.getInstance(context)
+        LocalBroadcastManager.getInstance(context!!)
                 .registerReceiver(receiver, IntentFilter(BalanceFragment.ACTION_INTENT))
     }
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver)
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
     }
 
     override fun notifyItemAdded(displayItems: MutableList<Any>, position: Int) {
@@ -140,13 +140,17 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     }
 
     override fun startBuyActivity() {
-        LocalBroadcastManager.getInstance(activity)
-                .sendBroadcast(Intent(MainActivity.ACTION_BUY))
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
+        }
     }
 
     override fun startShapeShiftActivity() {
-        LocalBroadcastManager.getInstance(activity)
-                .sendBroadcast(Intent(MainActivity.ACTION_SHAPESHIFT))
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_SHAPESHIFT))
+        }
     }
 
     override fun createPresenter() = dashboardPresenter

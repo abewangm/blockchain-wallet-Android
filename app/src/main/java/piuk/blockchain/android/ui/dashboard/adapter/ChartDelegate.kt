@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.dashboard.adapter
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.graphics.Paint
 import android.graphics.PorterDuff
@@ -29,7 +28,10 @@ import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.dashboard.ChartDisplayable
 import piuk.blockchain.android.ui.dashboard.ChartsState
-import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.invisible
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
@@ -38,17 +40,17 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class ChartDelegate<in T>(
-        private val activity: Activity
+        private val context: Context
 ) : AdapterDelegate<T> {
 
     private var viewHolder: ChartViewHolder? = null
     private var fiatSymbol: String? = null
 
     private val typefaceRegular by unsafeLazy {
-        TypefaceUtils.load(activity.assets, "fonts/Montserrat-Regular.ttf")
+        TypefaceUtils.load(context.assets, "fonts/Montserrat-Regular.ttf")
     }
     private val typefaceLight by unsafeLazy {
-        TypefaceUtils.load(activity.assets, "fonts/Montserrat-Light.ttf")
+        TypefaceUtils.load(context.assets, "fonts/Montserrat-Light.ttf")
     }
     private val buttonsList by unsafeLazy {
         listOf(
@@ -115,13 +117,13 @@ class ChartDelegate<in T>(
 
                 val entries = data.data.map { Entry(it.timestamp.toFloat(), it.price.toFloat()) }
                 this.data = LineData(LineDataSet(entries, null).apply {
-                    color = ContextCompat.getColor(activity, R.color.primary_navy_medium)
+                    color = ContextCompat.getColor(context, R.color.primary_navy_medium)
                     lineWidth = 3f
                     mode = LineDataSet.Mode.LINEAR
                     setDrawValues(false)
                     circleRadius = 1.5f
                     setDrawCircleHole(false)
-                    setCircleColor(ContextCompat.getColor(activity, R.color.primary_navy_medium))
+                    setCircleColor(ContextCompat.getColor(context, R.color.primary_navy_medium))
                     setDrawFilled(false)
                     isHighlightEnabled = true
                     setDrawHighlightIndicators(false)
@@ -176,7 +178,12 @@ class ChartDelegate<in T>(
             }
         }
 
-        activity.toast(R.string.dashboard_charts_error, ToastCustom.TYPE_ERROR)
+        ToastCustom.makeText(
+                context,
+                context.getText(R.string.dashboard_charts_error),
+                ToastCustom.LENGTH_SHORT,
+                ToastCustom.TYPE_ERROR
+        )
     }
 
     private fun showTimeSpanSelected(timeSpan: TimeSpan) {

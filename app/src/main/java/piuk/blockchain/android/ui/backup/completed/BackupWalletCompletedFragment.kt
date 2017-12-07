@@ -30,12 +30,12 @@ class BackupWalletCompletedFragment : BaseFragment<BackupWalletCompletedView, Ba
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ) = container?.inflate(R.layout.fragment_backup_complete)
+    ): View? = container?.inflate(R.layout.fragment_backup_complete)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         button_backup_again.setOnClickListener { onBackupAgainRequested() }
@@ -59,7 +59,7 @@ class BackupWalletCompletedFragment : BaseFragment<BackupWalletCompletedView, Ba
     }
 
     override fun showTransferFundsPrompt() {
-        val alertDialog = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+        val alertDialog = AlertDialog.Builder(context!!, R.style.AlertDialogStyle)
                 .setTitle(R.string.transfer_funds)
                 .setMessage(getString(R.string.transfer_recommend))
                 .setPositiveButton(R.string.transfer) { _, _ -> showTransferFundsConfirmationDialog() }
@@ -69,7 +69,7 @@ class BackupWalletCompletedFragment : BaseFragment<BackupWalletCompletedView, Ba
         alertDialog.show()
 
         alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE).apply {
-            setTextColor(ContextCompat.getColor(activity, R.color.primary_gray_dark))
+            setTextColor(ContextCompat.getColor(context, R.color.primary_gray_dark))
         }
     }
 
@@ -78,16 +78,20 @@ class BackupWalletCompletedFragment : BaseFragment<BackupWalletCompletedView, Ba
     override fun getMvpView() = this
 
     private fun onBackupAgainRequested() {
-        activity.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        activity.supportFragmentManager.beginTransaction()
-                .replace(R.id.content_frame, BackupWalletStartingFragment())
-                .addToBackStack(BackupWalletStartingFragment.TAG)
-                .commit()
+        activity?.run {
+            supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, BackupWalletStartingFragment())
+                    .addToBackStack(BackupWalletStartingFragment.TAG)
+                    .commit()
+        }
     }
 
     private fun showTransferFundsConfirmationDialog() {
-        val fragment = ConfirmFundsTransferDialogFragment.newInstance()
-        fragment.show(activity.supportFragmentManager, ConfirmFundsTransferDialogFragment.TAG)
+        activity?.let {
+            val fragment = ConfirmFundsTransferDialogFragment.newInstance()
+            fragment.show(it.supportFragmentManager, ConfirmFundsTransferDialogFragment.TAG)
+        }
     }
 
     companion object {
@@ -100,5 +104,7 @@ class BackupWalletCompletedFragment : BaseFragment<BackupWalletCompletedView, Ba
             fragment.arguments = Bundle().apply { putBoolean(KEY_CHECK_TRANSFER, checkTransfer) }
             return fragment
         }
+
     }
+
 }
