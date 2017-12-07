@@ -37,6 +37,7 @@ import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 import javax.inject.Inject
@@ -57,6 +58,12 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     private val defaultDecimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator.toString()
     private val editTexts by unsafeLazy {
         listOf(edittext_from_crypto, edittext_to_crypto, edittext_to_fiat, edittext_from_fiat)
+    }
+    private val decimalFormat by unsafeLazy {
+        DecimalFormat.getNumberInstance(locale).apply {
+            minimumIntegerDigits = 1
+            minimumFractionDigits = 2
+        }
     }
 
     private var progressDialog: MaterialProgressDialog? = null
@@ -107,8 +114,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         // Hints
         edittext_to_fiat.hint = fiatHint
         edittext_from_fiat.hint = fiatHint
-        edittext_from_crypto.hint = "0.00"
-        edittext_to_crypto.hint = "0.00"
+        edittext_from_crypto.hint = decimalFormat.format(0.0)
+        edittext_to_crypto.hint = decimalFormat.format(0.0)
 
         when (fromCurrency) {
             CryptoCurrencies.BTC -> showFromBtc()

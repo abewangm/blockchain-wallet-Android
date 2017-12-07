@@ -1,4 +1,4 @@
-package piuk.blockchain.android.data.api
+package piuk.blockchain.android.data.api.interceptors
 
 import okhttp3.Interceptor
 import okhttp3.RequestBody

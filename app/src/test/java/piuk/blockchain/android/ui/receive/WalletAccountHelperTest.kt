@@ -112,6 +112,7 @@ class WalletAccountHelperTest {
         // Arrange
         val ethAccount: EthereumAccount = mock()
         val combinedEthModel: CombinedEthModel = mock()
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         whenever(ethDataManager.getEthWallet()?.account).thenReturn(ethAccount)
         whenever(ethDataManager.getEthResponseModel()).thenReturn(combinedEthModel)
@@ -181,6 +182,7 @@ class WalletAccountHelperTest {
         // Arrange
         val ethAccount: EthereumAccount = mock()
         val combinedEthModel: CombinedEthModel = mock()
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         whenever(ethDataManager.getEthWallet()?.account).thenReturn(ethAccount)

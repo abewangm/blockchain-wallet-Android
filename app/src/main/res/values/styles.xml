@@ -375,7 +375,7 @@
         <item name="android:layout_marginRight">16dp</item>
         <item name="android:layout_marginLeft">16dp</item>
         <item name="android:ellipsize">end</item>
-        <item name="android:maxLines">1</item>
+        <item name="android:maxLines">2</item>
         <item name="android:gravity">right</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:textColor">@color/black</item>

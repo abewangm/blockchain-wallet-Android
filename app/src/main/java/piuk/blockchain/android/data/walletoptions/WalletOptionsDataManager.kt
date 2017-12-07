@@ -5,7 +5,6 @@ import info.blockchain.wallet.api.data.WalletOptions
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.ReplaySubject
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
@@ -53,14 +52,15 @@ class WalletOptionsDataManager(
 
         val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT) ?: false }
         val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode) ?: false }
-        val whitelistedState = options.shapeshift.statesWhitelist.let { it?.contains(settings.state) ?: true }
-        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it?.contains("US") ?: false }
         val isUS = settings.countryCode == "US"
 
-        return isShapeShiftAllowed
-                && !blacklistedCountry
-                && (!isUS || (!isUSABlacklisted && whitelistedState))
+        walletOptionsState.isAmericanStateSelectionRequired = isUS
+
+        return isShapeShiftAllowed && !blacklistedCountry
     }
+
+    fun isStateWhitelisted(state: String): Observable<Boolean> = walletOptionsState.walletOptionsSource
+            .map { it.shapeshift.statesWhitelist.let { it?.contains(state) ?: true } }
 
     /**
      * Mobile info retrieved from wallet-options.json based on wallet setting
@@ -130,6 +130,18 @@ class WalletOptionsDataManager(
         }
 
         return result
+    }
+
+    fun setAmericanState(state: String) {
+        return walletOptionsState.setAmericanState(state)
+    }
+
+    fun setAmericanStateSelectionRequired(state: Boolean) {
+        walletOptionsState.isAmericanStateSelectionRequired = state
+    }
+
+    fun isAmericanStateSelectionRequired(): Boolean {
+        return walletOptionsState.isAmericanStateSelectionRequired
     }
 
     companion object {

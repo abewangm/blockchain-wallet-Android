@@ -21,6 +21,9 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.inflate
 import java.math.BigDecimal
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.*
 
 class TradesDisplayableDelegate<in T>(
         activity: Activity,
@@ -33,6 +36,11 @@ class TradesDisplayableDelegate<in T>(
     private val prefsUtil = PrefsUtil(activity)
     private val monetaryUtil = MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
     private val dateUtil = DateUtil(activity)
+
+    private var btcFormat = (NumberFormat.getInstance(Locale.getDefault()) as DecimalFormat).apply {
+        minimumFractionDigits = 1
+        maximumFractionDigits = 8
+    }
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is Trade
@@ -112,18 +120,18 @@ class TradesDisplayableDelegate<in T>(
     ): Spannable {
         val spannable: Spannable
 
-        var displayAmount = ""
-        var unit = ""
+        val displayAmount: String
+        val unit: String
 
         if (showCrypto) {
 
             val cryptoAmount = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
-                CryptoCurrencies.BTC.symbol -> monetaryUtil.getBtcFormat().format(cryptoAmount)
+                CryptoCurrencies.BTC.symbol -> btcFormat.format(cryptoAmount)
                 else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
             unit = cryptoCurrency
-            displayAmount = "${cryptoAmount} ${cryptoCurrency}"
+            displayAmount = "$cryptoAmount $cryptoCurrency"
         } else {
 
             val fiatAmount = when (cryptoCurrency.toUpperCase()) {
@@ -141,17 +149,13 @@ class TradesDisplayableDelegate<in T>(
                 RelativeSizeSpan(0.67f),
                 spannable.length - unit.length,
                 spannable.length,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
 
         return spannable
     }
 
     private fun getPreferedFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-
-    private fun getRealTradePosition(position: Int, items: List<T>): Int {
-        val diff = items.size - items.count { it is Trade }
-        return position - diff
-    }
 
     private class TradeViewHolder internal constructor(
             itemView: View

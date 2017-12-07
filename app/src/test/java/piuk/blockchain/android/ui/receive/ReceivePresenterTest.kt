@@ -8,6 +8,7 @@ import info.blockchain.wallet.api.Environment
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
+import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should equal to`
@@ -32,6 +33,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import retrofit2.Retrofit
+import java.util.*
 
 class ReceivePresenterTest {
 
@@ -212,6 +214,7 @@ class ReceivePresenterTest {
                 .thenReturn(Observable.empty())
         whenever(payloadDataManager.getNextReceiveAddress(account))
                 .thenReturn(Observable.just(address))
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         // Act
         subject.onAccountSelected(account)
         // Assert
@@ -219,11 +222,12 @@ class ReceivePresenterTest {
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
-        verify(activity).showQrLoading()
+        verify(activity, times(2)).showQrLoading()
         verifyNoMoreInteractions(activity)
         verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
         verifyNoMoreInteractions(qrCodeDataManager)
         verify(payloadDataManager).getNextReceiveAddress(account)
+        verify(payloadDataManager).updateAllTransactions()
         verifyNoMoreInteractions(payloadDataManager)
         subject.selectedAccount `should be` account
         subject.selectedAddress `should be` address
@@ -231,19 +235,22 @@ class ReceivePresenterTest {
 
     @Test
     @Throws(Exception::class)
-    fun `onAccountSelected failure`() {
+    fun `onAccountSelected address derivation failure`() {
         // Arrange
         val label = "LABEL"
         val account = Account().apply { this.label = label }
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         whenever(payloadDataManager.getNextReceiveAddress(account))
                 .thenReturn(Observable.error { Throwable() })
         // Act
         subject.onAccountSelected(account)
         // Assert
         verify(activity).setTabSelection(0)
+        verify(activity).showQrLoading()
         verify(activity).updateReceiveLabel(label)
         verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
         verifyNoMoreInteractions(activity)
+        verify(payloadDataManager).updateAllTransactions()
         verify(payloadDataManager).getNextReceiveAddress(account)
         verifyNoMoreInteractions(payloadDataManager)
         subject.selectedAccount `should be` account
@@ -290,6 +297,7 @@ class ReceivePresenterTest {
                 .thenReturn(Observable.empty())
         whenever(payloadDataManager.getNextReceiveAddress(account))
                 .thenReturn(Observable.just(address))
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         // Act
         subject.onSelectDefault(accountPosition)
         // Assert
@@ -297,13 +305,14 @@ class ReceivePresenterTest {
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
-        verify(activity).showQrLoading()
+        verify(activity, times(2)).showQrLoading()
         verify(activity).displayBitcoinLayout()
         verifyNoMoreInteractions(activity)
         verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
         verifyNoMoreInteractions(qrCodeDataManager)
         verify(payloadDataManager).getNextReceiveAddress(account)
         verify(payloadDataManager).getAccount(accountPosition)
+        verify(payloadDataManager).updateAllTransactions()
         verifyNoMoreInteractions(payloadDataManager)
         subject.selectedAccount `should be` account
         subject.selectedAddress `should be` address
@@ -323,6 +332,7 @@ class ReceivePresenterTest {
                 .thenReturn(Observable.empty())
         whenever(payloadDataManager.getNextReceiveAddress(account))
                 .thenReturn(Observable.just(address))
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         // Act
         subject.onSelectDefault(accountPosition)
         // Assert
@@ -330,12 +340,13 @@ class ReceivePresenterTest {
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
-        verify(activity).showQrLoading()
+        verify(activity, times(2)).showQrLoading()
         verify(activity).displayBitcoinLayout()
         verifyNoMoreInteractions(activity)
         verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
         verifyNoMoreInteractions(qrCodeDataManager)
         verify(payloadDataManager).getNextReceiveAddress(account)
+        verify(payloadDataManager).updateAllTransactions()
         verify(payloadDataManager).defaultAccount
         verifyNoMoreInteractions(payloadDataManager)
         subject.selectedAccount `should be` account
@@ -442,20 +453,19 @@ class ReceivePresenterTest {
                 .thenReturn("GBP")
         whenever(exchangeRateFactory.getLastBtcPrice("GBP"))
                 .thenReturn(3426.00)
-        whenever(exchangeRateFactory.getSymbol("GBP"))
-                .thenReturn("£")
         whenever(activity.getBtcAmount()).thenReturn("1.0")
+        whenever(activity.locale).thenReturn(Locale.UK)
         // Act
         val result = subject.getConfirmationDetails()
         // Assert
         verify(activity).getContactName()
         verify(activity).getBtcAmount()
+        verify(activity).locale
         verifyNoMoreInteractions(activity)
         verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("GBP")
-        verify(exchangeRateFactory).getSymbol("GBP")
         verifyNoMoreInteractions(exchangeRateFactory)
         result.fromLabel `should equal to` label
         result.toLabel `should equal to` contactName

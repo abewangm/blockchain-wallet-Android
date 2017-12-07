@@ -29,7 +29,7 @@ class ShapeShiftDetailPresenter @Inject constructor(
 ) : BasePresenter<ShapeShiftDetailView>() {
 
     private val decimalFormat by unsafeLazy {
-        DecimalFormat().apply {
+        DecimalFormat.getNumberInstance(view.locale).apply {
             minimumIntegerDigits = 1
             minimumFractionDigits = 1
             maximumFractionDigits = 8
@@ -124,14 +124,14 @@ class ShapeShiftDetailPresenter @Inject constructor(
     //region View Updates
     private fun updateDeposit(fromCurrency: CryptoCurrencies, depositAmount: BigDecimal) {
         val label = stringUtils.getFormattedString(R.string.shapeshift_deposit_title, fromCurrency.unit)
-        val amount = "${depositAmount.toPlainString()} ${fromCurrency.symbol.toUpperCase()}"
+        val amount = "${depositAmount.toLocalisedString()} ${fromCurrency.symbol.toUpperCase()}"
 
         view.updateDeposit(label, amount)
     }
 
     private fun updateReceive(toCurrency: CryptoCurrencies, receiveAmount: BigDecimal) {
         val label = stringUtils.getFormattedString(R.string.shapeshift_receive_title, toCurrency.unit)
-        val amount = "${receiveAmount.toPlainString()} ${toCurrency.symbol.toUpperCase()}"
+        val amount = "${receiveAmount.toLocalisedString()} ${toCurrency.symbol.toUpperCase()}"
 
         view.updateReceive(label, amount)
     }
@@ -142,6 +142,7 @@ class ShapeShiftDetailPresenter @Inject constructor(
             toCurrency: CryptoCurrencies
     ) {
         val formattedExchangeRate = exchangeRate.setScale(8, RoundingMode.HALF_DOWN)
+                .toLocalisedString()
         val formattedString = stringUtils.getFormattedString(
                 R.string.shapeshift_exchange_rate_formatted,
                 fromCurrency.symbol,
@@ -153,7 +154,7 @@ class ShapeShiftDetailPresenter @Inject constructor(
     }
 
     private fun updateTransactionFee(fromCurrency: CryptoCurrencies, transactionFee: BigDecimal) {
-        val displayString = "${decimalFormat.format(transactionFee)} ${fromCurrency.symbol}"
+        val displayString = "${transactionFee.toLocalisedString()} ${fromCurrency.symbol}"
 
         view.updateTransactionFee(displayString)
     }
@@ -163,12 +164,7 @@ class ShapeShiftDetailPresenter @Inject constructor(
     }
     //endregion
 
-    private fun updateMetadata(
-            address: String,
-            hashOut: String?,
-            status: Trade.STATUS
-    ) {
-
+    private fun updateMetadata(address: String, hashOut: String?, status: Trade.STATUS) {
         shapeShiftDataManager.findTrade(address)
                 .map {
                     it.apply {
@@ -244,12 +240,13 @@ class ShapeShiftDetailPresenter @Inject constructor(
         Trade.STATUS.COMPLETE, Trade.STATUS.FAILED, Trade.STATUS.RESOLVED -> true
     }
 
-    // TODO: This needs to be safe incase web is broken, or this must not be checked if the data is invalid
     private fun getToFromPair(pair: String): ToFromPair = when (pair.toLowerCase()) {
         ShapeShiftPairs.ETH_BTC -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.ETHER)
         ShapeShiftPairs.BTC_ETH -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BTC)
         else -> throw IllegalStateException("Attempt to get invalid pair $pair")
     }
+
+    private fun BigDecimal.toLocalisedString(): String = decimalFormat.format(this)
 
     private data class ToFromPair(val to: CryptoCurrencies, val from: CryptoCurrencies)
 

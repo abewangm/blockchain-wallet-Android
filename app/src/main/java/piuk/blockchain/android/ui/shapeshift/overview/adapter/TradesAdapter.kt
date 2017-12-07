@@ -42,11 +42,10 @@ class TradesAdapter(
     override fun getItemId(position: Int): Long = items[position].hashCode().toLong()
 
     fun updateTradeList(trades: List<Any>) {
-
-        var mutableList = trades.toMutableList()
+        val mutableList = trades.toMutableList()
         mutableList.add(0, ShapeshiftNewExchangeDisplayable())//Header delegate
 
-        if(trades.size > 0) {
+        if (trades.isNotEmpty()) {
             mutableList.add(1, ShapeshiftHeaderDisplayable())//Row title delegate
         }
 
@@ -72,10 +71,9 @@ class TradesAdapter(
     }
 
     fun updateTrade(trade: Trade, tradeResponse: TradeStatusResponse) {
-
         val matchingTrade = items.filterIsInstance(Trade::class.java).find { it.quote.deposit == tradeResponse.address }
-        matchingTrade?.quote?.withdrawalAmount = trade.quote.withdrawalAmount?: tradeResponse.incomingCoin?: BigDecimal.ZERO
-        matchingTrade?.quote?.pair = tradeResponse.pair?: trade.quote.pair
+        matchingTrade?.quote?.withdrawalAmount = trade.quote.withdrawalAmount ?: tradeResponse.incomingCoin ?: BigDecimal.ZERO
+        matchingTrade?.quote?.pair = tradeResponse.pair ?: trade.quote.pair
 
         notifyDataSetChanged()
     }

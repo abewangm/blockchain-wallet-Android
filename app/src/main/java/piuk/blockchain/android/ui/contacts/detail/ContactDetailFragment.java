@@ -220,6 +220,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
                 btcExchangeRate,
                 getPresenter().getEthExchangeRate(),
                 isBtc,
+                null,//TODO Check this when dev on Contacts resume
                 new BalanceListClickListener() {
                     @Override
                     public void onTransactionClicked(int correctedPosition, int absolutePosition) {
