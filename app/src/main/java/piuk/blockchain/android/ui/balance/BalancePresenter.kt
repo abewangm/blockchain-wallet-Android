@@ -26,6 +26,7 @@ import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -55,7 +56,8 @@ class BalancePresenter @Inject constructor(
         private val stringUtils: StringUtils,
         private val prefsUtil: PrefsUtil,
         private val rxBus: RxBus,
-        private val currencyState: CurrencyState
+        private val currencyState: CurrencyState,
+        private val shapeShiftDataManager: ShapeShiftDataManager
 ) : BasePresenter<BalanceView>() {
 
     @VisibleForTesting var contactsEventObservable: Observable<ContactsEvent>? = null
@@ -66,6 +68,7 @@ class BalancePresenter @Inject constructor(
     @VisibleForTesting val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
     private val displayList: MutableList<Any> = mutableListOf()
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
+    private var txNoteMap: MutableMap<String, String> = mutableMapOf()
 
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
@@ -80,6 +83,8 @@ class BalancePresenter @Inject constructor(
                     activeAccountAndAddressList.clear()
                     activeAccountAndAddressList.addAll(getAllDisplayableAccounts())
                 }
+                .flatMap { getShapeShiftTxNotesObservable() }
+                .doOnNext { txNoteMap.putAll(it) }
                 .doOnComplete { setupTransactions() }
                 .subscribe(
                         { updateSelectedCurrency(currencyState.cryptoCurrency) },
@@ -101,7 +106,8 @@ class BalancePresenter @Inject constructor(
         view.onExchangeRateUpdated(
                 getLastBtcPrice(getFiatCurrency()),
                 getLastEthPrice(getFiatCurrency()),
-                currencyState.isDisplayingCryptoCurrency
+                currencyState.isDisplayingCryptoCurrency,
+                txNoteMap
         )
         view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
     }
@@ -518,7 +524,8 @@ class BalancePresenter @Inject constructor(
                     view.onExchangeRateUpdated(
                             exchangeRateFactory.getLastBtcPrice(getFiatCurrency()),
                             exchangeRateFactory.getLastEthPrice(getFiatCurrency()),
-                            currencyState.isDisplayingCryptoCurrency
+                            currencyState.isDisplayingCryptoCurrency,
+                            txNoteMap
                     )
                 }
     }
@@ -654,5 +661,24 @@ class BalancePresenter @Inject constructor(
 
     private fun getFiatCurrency() =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+
+    private fun getShapeShiftTxNotesObservable() =
+        payloadDataManager.metadataNodeFactory
+                .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .map {
+                    val map: MutableMap<String, String> = mutableMapOf()
+
+                    for (trade in it.trades) {
+                        trade.hashIn?.let {
+                            map.put(it, stringUtils.getString(R.string.shapeshift_deposit_to))
+                        }
+                        trade.hashOut?.let {
+                            map.put(it, stringUtils.getString(R.string.shapeshift_deposit_from))
+                        }
+                    }
+                    map
+                }
+                .onErrorReturn { mutableMapOf() }
 
 }

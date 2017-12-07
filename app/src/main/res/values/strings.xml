@@ -795,6 +795,8 @@
     <string name="shapeshift_select_state_residency">Select your state of residency</string>
     <string name="shapeshift_select_state">Select state</string>
     <string name="shapeshift_unavailable_in_state">This service is not yet available in your state.</string>
+    <string name="shapeshift_deposit_from">Deposit from ShapeShift</string>
+    <string name="shapeshift_deposit_to">Deposit to ShapeShift</string>
 
     <!-- SHAPESHIFT NEW TRADE -->
     <string name="shapeshift_use_minimum">Use minimum</string>
