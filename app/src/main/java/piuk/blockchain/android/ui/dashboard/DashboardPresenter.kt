@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.dashboard
 
 import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
-import io.reactivex.functions.BiFunction
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.ChartsDataManager
@@ -54,10 +53,8 @@ class DashboardPresenter @Inject constructor(
     private val displayList = mutableListOf<Any>(ChartDisplayable())
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     private var timeSpan = TimeSpan.MONTH
-    @VisibleForTesting
-    var btcBalance: Long = 0L
-    @VisibleForTesting
-    var ethBalance: BigInteger = BigInteger.ZERO
+    @VisibleForTesting var btcBalance: Long = 0L
+    @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
         cryptoCurrency = currencyState.cryptoCurrency
@@ -206,7 +203,7 @@ class DashboardPresenter @Inject constructor(
                     description = R.string.onboarding_shapeshift_description,
                     link = R.string.onboarding_shapeshift_cta,
                     image = R.drawable.vector_exchange_offset,
-                    emoji = "",
+                    emoji = "\uD83C\uDF89",
                     closeFunction = { dismissAnnouncement() },
                     linkFunction = {
                         view.startShapeShiftActivity()
@@ -248,6 +245,7 @@ class DashboardPresenter @Inject constructor(
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(
                             {
+                                Timber.d("vos dashboard "+it)
                                 if (it) showAnnouncement()
                             },
                             {
@@ -338,9 +336,12 @@ class DashboardPresenter @Inject constructor(
     private fun getBtcBalanceString(isBtc: Boolean, btcBalance: Long): String {
         val strFiat = getFiatCurrency()
         val fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8)
+        var balance = monetaryUtil.getDisplayAmountWithFormatting(btcBalance)
+        // Replace 0.0 with 0 to match web
+        if (balance == "0.0") balance = "0"
 
         return if (isBtc) {
-            "${monetaryUtil.getDisplayAmountWithFormatting(btcBalance)} ${getBtcDisplayUnits()}"
+            "$balance ${getBtcDisplayUnits()}"
         } else {
             "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
         }

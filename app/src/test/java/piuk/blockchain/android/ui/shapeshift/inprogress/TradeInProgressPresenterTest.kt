@@ -17,6 +17,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.shapeshift.models.TradeProgressUiState
+import java.util.concurrent.TimeUnit
 
 class TradeInProgressPresenterTest : RxTest() {
 
@@ -71,7 +72,7 @@ class TradeInProgressPresenterTest : RxTest() {
                 .thenReturn(Observable.error(Throwable()))
         // Act
         subject.onViewReady()
-        testScheduler.triggerActions()
+        testScheduler.advanceTimeBy(10, TimeUnit.SECONDS)
         // Assert
         verify(shapeShiftDataManager).getTradeStatus(depositAddress)
         verifyNoMoreInteractions(shapeShiftDataManager)
@@ -89,7 +90,7 @@ class TradeInProgressPresenterTest : RxTest() {
                 .thenReturn(Observable.just(response))
         // Act
         subject.onViewReady()
-        testScheduler.triggerActions()
+        testScheduler.advanceTimeBy(10, TimeUnit.SECONDS)
         // Assert
         verify(shapeShiftDataManager).getTradeStatus(depositAddress)
         verifyNoMoreInteractions(shapeShiftDataManager)
@@ -107,7 +108,7 @@ class TradeInProgressPresenterTest : RxTest() {
                 .thenReturn(Observable.just(response))
         // Act
         subject.onViewReady()
-        testScheduler.triggerActions()
+        testScheduler.advanceTimeBy(10, TimeUnit.SECONDS)
         // Assert
         verify(shapeShiftDataManager).getTradeStatus(depositAddress)
         verifyNoMoreInteractions(shapeShiftDataManager)
@@ -134,7 +135,7 @@ class TradeInProgressPresenterTest : RxTest() {
         whenever(shapeShiftDataManager.updateTrade(trade)).thenReturn(Completable.complete())
         // Act
         subject.onViewReady()
-        testScheduler.triggerActions()
+        testScheduler.advanceTimeBy(10, TimeUnit.SECONDS)
         // Assert
         verify(shapeShiftDataManager).getTradeStatus(depositAddress)
         verify(shapeShiftDataManager).findTrade(depositAddress)
@@ -165,7 +166,7 @@ class TradeInProgressPresenterTest : RxTest() {
         whenever(shapeShiftDataManager.updateTrade(trade)).thenReturn(Completable.complete())
         // Act
         subject.onViewReady()
-        testScheduler.triggerActions()
+        testScheduler.advanceTimeBy(10, TimeUnit.SECONDS)
         // Assert
         verify(shapeShiftDataManager).getTradeStatus(depositAddress)
         verify(shapeShiftDataManager).findTrade(depositAddress)
@@ -196,7 +197,7 @@ class TradeInProgressPresenterTest : RxTest() {
         whenever(shapeShiftDataManager.updateTrade(trade)).thenReturn(Completable.complete())
         // Act
         subject.onViewReady()
-        testScheduler.triggerActions()
+        testScheduler.advanceTimeBy(10, TimeUnit.SECONDS)
         // Assert
         verify(shapeShiftDataManager).getTradeStatus(depositAddress)
         verify(shapeShiftDataManager).findTrade(depositAddress)

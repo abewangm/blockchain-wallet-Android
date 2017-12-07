@@ -25,7 +25,6 @@ import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.StringUtils
-import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.math.BigDecimal
@@ -44,7 +43,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
 ) : BasePresenter<ShapeShiftConfirmationView>() {
 
     private val decimalFormat by unsafeLazy {
-        DecimalFormat().apply {
+        DecimalFormat.getNumberInstance(view.locale).apply {
             minimumIntegerDigits = 1
             minimumFractionDigits = 1
             maximumFractionDigits = 8
@@ -58,6 +57,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             // Render data
             updateDeposit(fromCurrency, depositAmount)
             updateReceive(toCurrency, withdrawalAmount)
+            updateTotal(fromCurrency, depositAmount, transactionFee)
             updateExchangeRate(exchangeRate, fromCurrency, toCurrency)
             updateTransactionFee(fromCurrency, transactionFee)
             updateNetworkFee(toCurrency, networkFee)
@@ -87,7 +87,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                     CryptoCurrencies.BTC -> sendBtcTransaction(
                             xPub,
                             depositAddress,
-                            returnAddress,
+                            changeAddress,
                             depositAmount,
                             transactionFee,
                             feePerKb
@@ -138,7 +138,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private fun sendBtcTransaction(
             xPub: String,
             depositAddress: String,
-            returnAddress: String,
+            changeAddress: String,
             depositAmount: BigDecimal,
             transactionFee: BigInteger,
             feePerKb: BigInteger
@@ -162,7 +162,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                                         unspent,
                                         it,
                                         depositAddress,
-                                        returnAddress,
+                                        changeAddress,
                                         transactionFee,
                                         satoshis
                                 )
@@ -265,16 +265,25 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     //region View Updates
     private fun updateDeposit(fromCurrency: CryptoCurrencies, depositAmount: BigDecimal) {
         val label = stringUtils.getFormattedString(R.string.shapeshift_deposit_title, fromCurrency.unit)
-        val amount = "${depositAmount.toPlainString()} ${fromCurrency.symbol.toUpperCase()}"
+        val amount = "${depositAmount.toLocalisedString()} ${fromCurrency.symbol.toUpperCase()}"
 
         view.updateDeposit(label, amount)
     }
 
     private fun updateReceive(toCurrency: CryptoCurrencies, receiveAmount: BigDecimal) {
         val label = stringUtils.getFormattedString(R.string.shapeshift_receive_title, toCurrency.unit)
-        val amount = "${receiveAmount.toPlainString()} ${toCurrency.symbol.toUpperCase()}"
+        val amount = "${receiveAmount.toLocalisedString()} ${toCurrency.symbol.toUpperCase()}"
 
         view.updateReceive(label, amount)
+    }
+
+    private fun updateTotal(toCurrency: CryptoCurrencies, depositAmount: BigDecimal, transactionFee: BigInteger) {
+        val label = stringUtils.getFormattedString(R.string.shapeshift_total_title, toCurrency.unit)
+        val fee = getFeeForCurrency(toCurrency, transactionFee)
+        val totalSent = depositAmount.plus(fee)
+        val amount = "${totalSent.toLocalisedString()} ${toCurrency.symbol.toUpperCase()}"
+
+        view.updateTotalAmount(label, amount)
     }
 
     private fun updateExchangeRate(
@@ -283,6 +292,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             toCurrency: CryptoCurrencies
     ) {
         val formattedExchangeRate = exchangeRate.setScale(8, RoundingMode.HALF_DOWN)
+                .toLocalisedString()
         val formattedString = stringUtils.getFormattedString(
                 R.string.shapeshift_exchange_rate_formatted,
                 fromCurrency.symbol,
@@ -294,19 +304,14 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     }
 
     private fun updateTransactionFee(fromCurrency: CryptoCurrencies, transactionFee: BigInteger) {
-        val amount = when (fromCurrency) {
-            CryptoCurrencies.BTC -> BigDecimal(transactionFee).divide(BigDecimal.valueOf(BTC_DEC), 8, RoundingMode.HALF_DOWN)
-            CryptoCurrencies.ETHER -> Convert.fromWei(BigDecimal(transactionFee), Convert.Unit.ETHER)
-            CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not yet supported")
-        }
-
-        val displayString = "${decimalFormat.format(amount)} ${fromCurrency.symbol}"
+        val fee = getFeeForCurrency(fromCurrency, transactionFee)
+        val displayString = "${fee.toLocalisedString()} ${fromCurrency.symbol}"
 
         view.updateTransactionFee(displayString)
     }
 
     private fun updateNetworkFee(toCurrency: CryptoCurrencies, networkFee: BigDecimal) {
-        val displayString = "${decimalFormat.format(networkFee)} ${toCurrency.symbol}"
+        val displayString = "${networkFee.toLocalisedString()} ${toCurrency.symbol}"
 
         view.updateNetworkFee(displayString)
     }
@@ -337,6 +342,15 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                     .subscribe()
         }
     }
+
+    private fun getFeeForCurrency(toCurrency: CryptoCurrencies, transactionFee: BigInteger): BigDecimal =
+            when (toCurrency) {
+                CryptoCurrencies.BTC -> BigDecimal(transactionFee).divide(BigDecimal.valueOf(BTC_DEC), 8, RoundingMode.HALF_DOWN)
+                CryptoCurrencies.ETHER -> Convert.fromWei(BigDecimal(transactionFee), Convert.Unit.ETHER)
+                CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not yet supported")
+            }
+
+    private fun BigDecimal.toLocalisedString() : String = decimalFormat.format(this)
 
     companion object {
 

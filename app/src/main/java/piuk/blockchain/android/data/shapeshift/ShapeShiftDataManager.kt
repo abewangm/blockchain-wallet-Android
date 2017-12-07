@@ -153,12 +153,26 @@ class ShapeShiftDataManager(
             rxPinning.call<TradeStatusResponse> {
                 shapeShiftApi.getTradeStatus(depositAddress)
                         .flatMap {
-                            if (it.error != null) {
+                            if (it.error != null && it.status == null) {
                                 Observable.error(Throwable(it.error))
                             } else {
                                 Observable.just(it)
                             }
                         }
+            }.compose(RxUtil.applySchedulersToObservable())
+
+    /**
+     * Gets the [TradeStatusResponse] for a given [Trade] deposit address and returns it along with the original trade.
+     * Note that this won't
+     * return an invalid [TradeStatusResponse] if the server returned an error response.
+     *
+     * @param tradeMetadata The [Trade] data stored in kv-store
+     * @return An [Observable] wrapping a [Pair<Trade, TradeStatusResponse>] object.
+     */
+    fun getTradeStatusPair(tradeMetadata: Trade): Observable<TradeStatusPair> =
+            rxPinning.call<TradeStatusPair> {
+                shapeShiftApi.getTradeStatus(tradeMetadata.quote.deposit)
+                        .map { TradeStatusPair(tradeMetadata, it) }
             }.compose(RxUtil.applySchedulersToObservable())
 
     /**
@@ -230,4 +244,5 @@ class ShapeShiftDataManager(
         return shapeShiftData
     }
 
+    data class TradeStatusPair(val tradeMetadata: Trade, val tradeStatusResponse: TradeStatusResponse)
 }

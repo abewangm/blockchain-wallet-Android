@@ -12,11 +12,12 @@ class BalanceAdapter(
         btcExchangeRate: Double,
         ethExchangeRate: Double,
         showCrypto: Boolean,
+        noteMap: Map<String, String>,
         listClickListener: BalanceListClickListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     private val summaryDelegate =
-            DisplayableDelegate<Any>(activity, btcExchangeRate, ethExchangeRate, showCrypto, listClickListener)
+            DisplayableDelegate<Any>(activity, btcExchangeRate, ethExchangeRate, showCrypto, noteMap, listClickListener)
     private val fctxDelegate =
             FctxDelegate<Any>(activity, btcExchangeRate, showCrypto, listClickListener)
 

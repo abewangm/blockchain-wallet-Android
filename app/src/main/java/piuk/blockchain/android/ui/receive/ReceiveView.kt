@@ -4,10 +4,13 @@ import android.graphics.Bitmap
 import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import java.util.*
 
 interface ReceiveView : View {
 
     val isContactsEnabled: Boolean
+
+    val locale: Locale
 
     fun getQrBitmap(): Bitmap
 

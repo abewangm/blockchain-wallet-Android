@@ -2,7 +2,6 @@ package piuk.blockchain.android.ui.shapeshift.inprogress
 
 import info.blockchain.wallet.shapeshift.data.Trade
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
@@ -21,7 +20,7 @@ class TradeInProgressPresenter @Inject constructor(
         onNoDeposit()
 
         // Poll for results
-        Observable.interval(10, TimeUnit.SECONDS, Schedulers.io())
+        Observable.interval(10, TimeUnit.SECONDS)
                 .flatMap { shapeShiftDataManager.getTradeStatus(view.depositAddress) }
                 .doOnNext { handleState(it.status) }
                 .takeUntil { isInFinalState(it.status) }
@@ -34,9 +33,7 @@ class TradeInProgressPresenter @Inject constructor(
                                 updateMetadata(address, transaction, status)
                             }
                         },
-                        {
-                            Timber.e(it)
-                        }
+                        { Timber.e(it) }
                 )
     }
 

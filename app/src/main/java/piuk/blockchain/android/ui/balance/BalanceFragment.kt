@@ -226,10 +226,11 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun onExchangeRateUpdated(
             btcExchangeRate: Double,
             ethExchangeRate: Double,
-            isBtc: Boolean
+            isBtc: Boolean,
+            txNoteMap: MutableMap<String, String>
     ) {
         if (balanceAdapter == null) {
-            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc)
+            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc, txNoteMap)
         } else {
             balanceAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
         }
@@ -453,12 +454,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.gone()
     }
 
-    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean) {
+    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean, txNoteMap: MutableMap<String, String>) {
         balanceAdapter = BalanceAdapter(
                 activity,
                 btcExchangeRate,
                 ethExchangeRate,
                 isBtc,
+                txNoteMap,
                 this
         )
 

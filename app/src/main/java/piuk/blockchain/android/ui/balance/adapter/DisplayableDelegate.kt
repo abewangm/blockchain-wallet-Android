@@ -11,9 +11,7 @@ import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import kotlinx.android.synthetic.main.item_balance.view.*
 import piuk.blockchain.android.R
@@ -28,6 +26,7 @@ import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
+import timber.log.Timber
 import java.math.BigDecimal
 import java.text.DecimalFormat
 
@@ -36,6 +35,7 @@ class DisplayableDelegate<in T>(
         private var btcExchangeRate: Double,
         private var ethExchangeRate: Double,
         private var showCrypto: Boolean,
+        private val txNoteMap: Map<String, String>,
         private val listClickListener: BalanceListClickListener
 ) : AdapterDelegate<T> {
 
@@ -83,20 +83,23 @@ class DisplayableDelegate<in T>(
             else -> throw IllegalStateException("Tx direction isn't SENT, RECEIVED or TRANSFERRED")
         }
 
-        viewHolder.note.gone()
-        viewHolder.contactNameLayout.gone()
+//        transactionDisplayMap[tx.hash]?.apply {
+//            viewHolder.note.text = note
+//            viewHolder.contactName.text = contactName
+//            viewHolder.note.visible()
+//            viewHolder.contactNameLayout.visible()
+//
+//            if (state == FacilitatedTransaction.STATE_PAYMENT_BROADCASTED
+//                    && role == FacilitatedTransaction.ROLE_PR_RECEIVER) {
+//                viewHolder.result.setText(R.string.paid)
+//            }
+//        }
 
-        transactionDisplayMap[tx.hash]?.apply {
-            viewHolder.note.text = note
-            viewHolder.contactName.text = contactName
+        txNoteMap[tx.hash]?.let {
+            viewHolder.note.text = it
             viewHolder.note.visible()
-            viewHolder.contactNameLayout.visible()
 
-            if (state == FacilitatedTransaction.STATE_PAYMENT_BROADCASTED
-                    && role == FacilitatedTransaction.ROLE_PR_RECEIVER) {
-                viewHolder.result.setText(R.string.paid)
-            }
-        }
+        } ?: viewHolder.note.gone()
 
         viewHolder.result.text = getDisplaySpannable(
                 tx.cryptoCurrency,
@@ -254,14 +257,8 @@ class DisplayableDelegate<in T>(
         internal var timeSince: TextView = itemView.date
         internal var direction: TextView = itemView.direction
         internal var watchOnly: TextView = itemView.watch_only
-        internal var note: TextView = itemView.note
         internal var doubleSpend: ImageView = itemView.double_spend_warning
-        internal var contactName: TextView = itemView.contact_name
-        internal var contactNameLayout: LinearLayout = itemView.contact_name_layout
-
-        init {
-            contactNameLayout.gone()
-        }
+        internal var note: TextView = itemView.tx_note
     }
 
     companion object {

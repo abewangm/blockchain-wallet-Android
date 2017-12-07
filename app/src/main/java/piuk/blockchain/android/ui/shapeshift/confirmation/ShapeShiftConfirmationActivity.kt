@@ -24,11 +24,14 @@ import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import java.util.*
 import javax.inject.Inject
 
 class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationView, ShapeShiftConfirmationPresenter>(),
         ShapeShiftConfirmationView,
         SecondPasswordHandler.ResultListener {
+
+    override val locale: Locale = Locale.getDefault()
 
     @Suppress("MemberVisibilityCanPrivate", "unused")
     @Inject lateinit var confirmationPresenter: ShapeShiftConfirmationPresenter
@@ -106,6 +109,11 @@ class ShapeShiftConfirmationActivity : BaseMvpActivity<ShapeShiftConfirmationVie
     override fun updateReceive(label: String, amount: String) {
         textview_receive_title.text = label
         textview_receive_amount.text = amount
+    }
+
+    override fun updateTotalAmount(label: String, amount: String) {
+        textview_total_spent_title.text = label
+        textview_total_spent_amount.text = amount
     }
 
     override fun updateExchangeRate(exchangeRate: String) {

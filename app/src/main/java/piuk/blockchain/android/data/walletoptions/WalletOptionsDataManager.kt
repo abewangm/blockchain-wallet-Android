@@ -52,15 +52,15 @@ class WalletOptionsDataManager(
 
         val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT) ?: false }
         val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode) ?: false }
-        // TODO: States have to be selected manually and stored in settings
-        // TODO: Build state selection page
-//        val whitelistedState = options.shapeshift.statesWhitelist.let { it?.contains(settings.state) ?: true }
-//        val isUSABlacklisted = options.shapeshift.countriesBlacklist.let { it?.contains("US") ?: false }
-//        val isUS = settings.countryCode == "US"
+        val isUS = settings.countryCode == "US"
+
+        walletOptionsState.isAmericanStateSelectionRequired = isUS
 
         return isShapeShiftAllowed && !blacklistedCountry
-//                && (!isUS || (!isUSABlacklisted && whitelistedState))
     }
+
+    fun isStateWhitelisted(state: String): Observable<Boolean> = walletOptionsState.walletOptionsSource
+            .map { it.shapeshift.statesWhitelist.let { it?.contains(state) ?: true } }
 
     /**
      * Mobile info retrieved from wallet-options.json based on wallet setting
@@ -130,6 +130,18 @@ class WalletOptionsDataManager(
         }
 
         return result
+    }
+
+    fun setAmericanState(state: String) {
+        return walletOptionsState.setAmericanState(state)
+    }
+
+    fun setAmericanStateSelectionRequired(state: Boolean) {
+        walletOptionsState.isAmericanStateSelectionRequired = state
+    }
+
+    fun isAmericanStateSelectionRequired(): Boolean {
+        return walletOptionsState.isAmericanStateSelectionRequired
     }
 
     companion object {
