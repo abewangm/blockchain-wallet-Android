@@ -1,0 +1,92 @@
+ext.versions = [
+        androidPlugin   : '3.0.1',
+
+        kotlin          : '1.2.0',
+
+        supportLibs     : '27.0.2',
+        googleServices  : '11.6.2',
+        constraintLayout: '1.0.2',
+        supportTesting  : '1.0.1',
+        espresso        : '3.0.1',
+        multidex        : '1.0.2',
+
+        retrofit        : '2.3.0',
+        okHttp          : '3.9.0',
+        dagger          : '2.12',
+        rxJava          : '2.1.7',
+        rxAndroid       : '2.0.1',
+        rxBinding       : '2.0.0',
+
+        bitcoinj        : '0.14.4',
+        web3j           : '2.2.1',
+        // Keep at 1.3 to match Android
+        commonsCodec    : '1.3',
+        commonsLang     : '3.4',
+
+        timber          : '4.5.1',
+        slf4j           : '1.7.20',
+        crashlytics     : '2.8.0',
+
+        mockito         : '2.8.47',
+        mockitoKotlin   : '1.5.0',
+        kluent          : '1.19',
+        hamcrestJunit   : '2.0.0.0',
+        junit           : '4.12',
+        robolectric     : '3.4.2',
+        json            : '20140107',
+]
+
+ext.libraries = [
+        kotlin                  : "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin",
+
+        appCompat               : "com.android.support:appcompat-v7:$versions.supportLibs",
+        recyclerView            : "com.android.support:recyclerview-v7:$versions.supportLibs",
+        cardView                : "com.android.support:cardview-v7:$versions.supportLibs",
+        gridLayout              : "com.android.support:gridlayout-v7:$versions.supportLibs",
+        design                  : "com.android.support:design:$versions.supportLibs",
+        v13                     : "com.android.support:support-v13:$versions.supportLibs",
+        v14                     : "com.android.support:preference-v14:$versions.supportLibs",
+        dynamicAnims            : "com.android.support:support-dynamic-animation:$versions.supportLibs",
+        annotations             : "com.android.support:support-annotations:$versions.supportLibs",
+        constraintLayout        : "com.android.support.constraint:constraint-layout:$versions.constraintLayout",
+        dataBindingKapt         : "com.android.databinding:compiler:$versions.androidPlugin",
+        multidex                : "com.android.support:multidex:$versions.multidex",
+
+        firebaseMessaging       : "com.google.firebase:firebase-messaging:$versions.googleServices",
+        googlePlayServicesBase  : "com.google.android.gms:play-services-base:$versions.googleServices",
+
+        testRules               : "com.android.support.test:rules:$versions.supportTesting",
+        testRunner              : "com.android.support.test:runner:$versions.supportTesting",
+        espresso                : "com.android.support.test.espresso:espresso-core:$versions.espresso",
+
+        retrofit                : "com.squareup.retrofit2:retrofit:$versions.retrofit",
+        retrofitJacksonConverter: "com.squareup.retrofit2:converter-jackson:$versions.retrofit",
+        retrofitRxJavaAdapter   : "com.squareup.retrofit2:adapter-rxjava2:$versions.retrofit",
+        okHttp                  : "com.squareup.okhttp3:okhttp:$versions.okHttp",
+        okHttpInterceptor       : "com.squareup.okhttp3:logging-interceptor:$versions.okHttp",
+        dagger                  : "com.google.dagger:dagger:$versions.dagger",
+        daggerKapt              : "com.google.dagger:dagger-compiler:$versions.dagger",
+        rxJava                  : "io.reactivex.rxjava2:rxjava:$versions.rxJava",
+        rxAndroid               : "io.reactivex.rxjava2:rxandroid:$versions.rxAndroid",
+        rxBinding               : "com.jakewharton.rxbinding2:rxbinding-support-v4:$versions.rxBinding",
+
+        bitcoinj                : "org.bitcoinj:bitcoinj-core:$versions.bitcoinj",
+        web3j                   : "org.web3j:core-android:$versions.web3j",
+        commonsCodec            : "commons-codec:commons-codec:$versions.commonsCodec",
+        commonsLang             : "org.apache.commons:commons-lang3:$versions.commonsLang",
+
+        timber                  : "com.jakewharton.timber:timber:$versions.timber",
+        slf4j                   : "org.slf4j:slf4j-simple:$versions.slf4j",
+        slf4jNoOp               : "org.slf4j:slf4j-nop:$versions.slf4j",
+        crashlytics             : "com.crashlytics.sdk.android:crashlytics:${versions.crashlytics}@aar",
+
+        mockito                 : "org.mockito:mockito-core:$versions.mockito",
+        mockitoKotlin           : "com.nhaarman:mockito-kotlin:$versions.mockitoKotlin",
+        kluent                  : "org.amshove.kluent:kluent:$versions.kluent",
+        kotlinJunit             : "org.jetbrains.kotlin:kotlin-test-junit:$versions.kotlin",
+        hamcrestJunit           : "org.hamcrest:hamcrest-junit:$versions.hamcrestJunit",
+        junit                   : "junit:junit:$versions.junit",
+        robolectric             : "org.robolectric:robolectric:$versions.robolectric",
+        json                    : "org.json:json:$versions.json"
+
+]

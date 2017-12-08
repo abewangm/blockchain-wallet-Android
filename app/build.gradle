@@ -7,6 +7,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'com.novoda.build-properties'
 apply from: '../quality/jacoco.gradle'
 apply from: '../quality/releasechecks.gradle'
+apply from: '../dependencies.gradle'
 
 buildProperties {
     secrets.file rootProject.file('app/secrets.properties')
@@ -165,100 +166,96 @@ afterEvaluate {
 dependencies {
     implementation files('libs/MyWalletHD.jar')
     implementation files('libs/api-client-0.1.15-SNAPSHOT.jar')
-    // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     // Support Libs
-    implementation "com.android.support:appcompat-v7:$supportVersion"
-    implementation "com.android.support:recyclerview-v7:$supportVersion"
-    implementation "com.android.support:cardview-v7:$supportVersion"
-    implementation "com.android.support:gridlayout-v7:$supportVersion"
-    implementation "com.android.support:design:$supportVersion"
-    implementation "com.android.support:support-v13:$supportVersion"
-    implementation "com.android.support:preference-v14:$supportVersion"
-    implementation "com.android.support:support-dynamic-animation:$supportVersion"
+    implementation libraries.appCompat
+    implementation libraries.recyclerView
+    implementation libraries.cardView
+    implementation libraries.gridLayout
+    implementation libraries.design
+    implementation libraries.v13
+    implementation libraries.v14
+    implementation libraries.dynamicAnims
+
+    // Kotlin
+    implementation libraries.kotlin
     // Data Binding
-    kapt "com.android.databinding:compiler:$pluginVersion"
+    kapt libraries.dataBindingKapt
     // Play Services
-    implementation "com.google.firebase:firebase-messaging:$googleServicesVersion"
-    implementation "com.google.android.gms:play-services-maps:$googleServicesVersion"
+    implementation libraries.firebaseMessaging
+    implementation libraries.googlePlayServicesBase
+
     // Constraint Layout
-    implementation "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
+    implementation libraries.constraintLayout
     // MultiDex
-    implementation 'com.android.support:multidex:1.0.2'
+    implementation libraries.multidex
     // BitcoinJ
-    implementation 'org.bitcoinj:bitcoinj-core:0.14.4'
+    implementation libraries.bitcoinj
     // Ethereum web3j
-    implementation 'org.web3j:core-android:2.2.1'
-    // Keep at 1.3 to match Android implementation
-    //noinspection GradleDependency
-    implementation 'commons-codec:commons-codec:1.3'
-    //noinspection GradleDependency
-    implementation 'org.apache.commons:commons-lang3:3.4'
+    implementation libraries.web3j
+    // Apache Commons
+    implementation libraries.commonsCodec
+    implementation libraries.commonsLang
     implementation('com.google.zxing:core:3.3.0') { transitive = true }
     implementation 'com.github.mukeshsolanki:country-picker-android:1.1.7'
     implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
     // URL Builder
     implementation "io.mikael:urlbuilder:2.0.8"
     // RxJava
-    implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
-    implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
-    implementation 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.0.0'
+    implementation libraries.rxJava
+    implementation libraries.rxAndroid
+    implementation libraries.rxBinding
     // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+    implementation libraries.retrofit
+    implementation libraries.retrofitJacksonConverter
+    implementation libraries.retrofitRxJavaAdapter
     // OkHttp
-    implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
-    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    implementation libraries.okHttp
+    implementation libraries.okHttpInterceptor
     // Dagger2
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation libraries.dagger
+    kapt libraries.daggerKapt
     // Fingerprint authentication
     implementation 'com.mtramin:rxfingerprint:2.1.0'
     // Custom fonts
     implementation 'uk.co.chrisjenx:calligraphy:2.2.0'
     // Logging
-    implementation 'com.jakewharton.timber:timber:4.5.1'
-    //noinspection GradleDependency
-    releaseImplementation 'org.slf4j:slf4j-nop:1.7.20'
-    //noinspection GradleDependency
-    dogfoodImplementation 'org.slf4j:slf4j-nop:1.7.20'
-    //noinspection GradleDependency
-    debugImplementation 'org.slf4j:slf4j-simple:1.7.20'
+    implementation libraries.timber
+    releaseImplementation libraries.slf4jNoOp
+    dogfoodImplementation libraries.slf4jNoOp
+    debugImplementation libraries.slf4j
     // ViewPager Indicator
     implementation 'me.relex:circleindicator:1.2.2@aar'
     // Charts
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     // Crash reporting
-    implementation('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
+    implementation(libraries.crashlytics) {
         transitive = true
     }
     // Device specs
     implementation 'com.facebook.device.yearclass:yearclass:2.0.0'
 
     // UI/Instrumentation Tests
-    androidTestImplementation 'junit:junit:4.12'
-    androidTestImplementation "org.mockito:mockito-core:$mockitoVersion"
-    androidTestImplementation "com.android.support:support-annotations:$supportVersion"
-    androidTestImplementation 'com.android.support.test:rules:1.0.1'
-    androidTestImplementation('com.android.support.test:runner:1.0.1') {
+    androidTestImplementation libraries.junit
+    androidTestImplementation libraries.mockito
+    androidTestImplementation libraries.annotations
+    androidTestImplementation libraries.testRules
+    androidTestImplementation(libraries.testRunner) {
         exclude module: 'support-annotations'
     }
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.1') {
+    androidTestImplementation(libraries.espresso) {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
 
     // Unit Tests
-    //noinspection GradleDependency
-    testImplementation 'org.json:json:20140107'
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testImplementation 'org.amshove.kluent:kluent:1.19'
-    testImplementation("com.nhaarman:mockito-kotlin:1.5.0") {
+    testImplementation libraries.json
+    testImplementation libraries.mockito
+    testImplementation libraries.hamcrestJunit
+    testImplementation libraries.kotlinJunit
+    testImplementation libraries.kluent
+    testImplementation(libraries.mockitoKotlin) {
         exclude module: 'kotlin-stdlib'
     }
-    testImplementation('org.robolectric:robolectric:3.4.2') {
+    testImplementation(libraries.robolectric) {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }
