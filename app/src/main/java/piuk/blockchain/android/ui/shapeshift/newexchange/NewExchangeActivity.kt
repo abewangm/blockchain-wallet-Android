@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.shapeshift.newexchange
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.support.annotation.StringRes
 import android.support.constraint.ConstraintSet
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.LocalBroadcastManager
 import android.view.View
 import android.widget.EditText
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -31,8 +33,10 @@ import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
+import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.shapeshift.confirmation.ShapeShiftConfirmationActivity
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
+import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
@@ -51,6 +55,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     override val locale: Locale = Locale.getDefault()
     override val shapeShiftApiKey: String = BuildConfig.SHAPE_SHIFT_API_KEY
+    override val isBuyPermitted: Boolean = AndroidUtils.is19orHigher()
 
     private val btcSymbol = CryptoCurrencies.BTC.symbol.toUpperCase()
     private val ethSymbol = CryptoCurrencies.ETHER.symbol.toUpperCase()
@@ -250,6 +255,30 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     override fun removeAllFocus() {
         closeKeyPad()
         editTexts.forEach { it.clearFocus() }
+    }
+
+    override fun showNoFunds(canBuy: Boolean) {
+        AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                .setTitle(R.string.shapeshift_no_funds_title)
+                .setMessage(R.string.shapeshift_no_funds_message)
+                .setCancelable(false)
+                .setNeutralButton(android.R.string.cancel) { _, _ -> finish() }
+                .setNegativeButton(R.string.onboarding_get_bitcoin) { _, _ ->
+                    if (canBuy) {
+                        LocalBroadcastManager.getInstance(this)
+                                .sendBroadcastSync(Intent(MainActivity.ACTION_BUY))
+                    } else {
+                        LocalBroadcastManager.getInstance(this)
+                                .sendBroadcastSync(Intent(MainActivity.ACTION_RECEIVE))
+                    }
+                    finish()
+                }
+                .setPositiveButton(R.string.onboarding_get_eth) { _, _ ->
+                    LocalBroadcastManager.getInstance(this)
+                            .sendBroadcastSync(Intent(MainActivity.ACTION_RECEIVE_ETH))
+                    finish()
+                }
+                .show()
     }
 
     override fun onKeypadClose() {
