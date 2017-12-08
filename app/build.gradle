@@ -164,8 +164,11 @@ afterEvaluate {
 }
 
 dependencies {
+    // Blockchain libraries
     implementation files('libs/MyWalletHD.jar')
     implementation files('libs/api-client-0.1.15-SNAPSHOT.jar')
+    // Kotlin
+    implementation libraries.kotlin
     // Support Libs
     implementation libraries.appCompat
     implementation libraries.recyclerView
@@ -175,65 +178,44 @@ dependencies {
     implementation libraries.v13
     implementation libraries.v14
     implementation libraries.dynamicAnims
-
-    // Kotlin
-    implementation libraries.kotlin
-    // Data Binding
+    implementation libraries.constraintLayout
+    implementation libraries.multidex
     kapt libraries.dataBindingKapt
-    // Play Services
+    // Google services
     implementation libraries.firebaseMessaging
     implementation libraries.googlePlayServicesBase
-
-    // Constraint Layout
-    implementation libraries.constraintLayout
-    // MultiDex
-    implementation libraries.multidex
-    // BitcoinJ
+    // Utils
     implementation libraries.bitcoinj
-    // Ethereum web3j
     implementation libraries.web3j
-    // Apache Commons
     implementation libraries.commonsCodec
     implementation libraries.commonsLang
-    implementation('com.google.zxing:core:3.3.0') { transitive = true }
-    implementation 'com.github.mukeshsolanki:country-picker-android:1.1.7'
-    implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
-    // URL Builder
-    implementation "io.mikael:urlbuilder:2.0.8"
-    // RxJava
+    implementation libraries.urlBuilder
+    implementation libraries.yearclass
+    // Networking and Core libs
     implementation libraries.rxJava
     implementation libraries.rxAndroid
     implementation libraries.rxBinding
-    // Retrofit
+    implementation libraries.rxFingerprint
     implementation libraries.retrofit
     implementation libraries.retrofitJacksonConverter
     implementation libraries.retrofitRxJavaAdapter
-    // OkHttp
     implementation libraries.okHttp
     implementation libraries.okHttpInterceptor
-    // Dagger2
     implementation libraries.dagger
     kapt libraries.daggerKapt
-    // Fingerprint authentication
-    implementation 'com.mtramin:rxfingerprint:2.1.0'
-    // Custom fonts
-    implementation 'uk.co.chrisjenx:calligraphy:2.2.0'
+    // Views
+    implementation libraries.calligraphy
+    implementation(libraries.zxing) { transitive = true }
+    implementation libraries.countryPicker
+    implementation libraries.bottomNav
+    implementation libraries.circleIndicator
+    implementation libraries.charts
     // Logging
     implementation libraries.timber
+    implementation(libraries.crashlytics) { transitive = true }
     releaseImplementation libraries.slf4jNoOp
     dogfoodImplementation libraries.slf4jNoOp
     debugImplementation libraries.slf4j
-    // ViewPager Indicator
-    implementation 'me.relex:circleindicator:1.2.2@aar'
-    // Charts
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
-    // Crash reporting
-    implementation(libraries.crashlytics) {
-        transitive = true
-    }
-    // Device specs
-    implementation 'com.facebook.device.yearclass:yearclass:2.0.0'
-
     // UI/Instrumentation Tests
     androidTestImplementation libraries.junit
     androidTestImplementation libraries.mockito
@@ -245,7 +227,6 @@ dependencies {
     androidTestImplementation(libraries.espresso) {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
-
     // Unit Tests
     testImplementation libraries.json
     testImplementation libraries.mockito
