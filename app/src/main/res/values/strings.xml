@@ -812,6 +812,8 @@
     <string name="shapeshift_fetching_eth_account_failed">Error fetching remaining Ether</string>
     <string name="shapeshift_deriving_address_failed">Error deriving address</string>
     <string name="shapeshift_new_exchange">New Exchange</string>
+    <string name="shapeshift_no_funds_title">No funds to exchange</string>
+    <string name="shapeshift_no_funds_message">You have no funds to exchange. Why not get started by getting some coins into your wallet?</string>
 
     <!-- SHAPESHIFT CONFIRMATION -->
     <string name="shapeshift_confirmation_agree">Agree to ShapeShift&#160;</string>

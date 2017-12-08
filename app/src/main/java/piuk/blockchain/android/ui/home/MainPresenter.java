@@ -463,4 +463,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     CryptoCurrencies getCurrentCryptoCurrency() {
         return currencyState.getCryptoCurrency();
     }
+
+    void setCryptoCurrency(CryptoCurrencies cryptoCurrency) {
+        currencyState.setCryptoCurrency(cryptoCurrency);
+    }
+
 }

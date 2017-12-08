@@ -38,7 +38,6 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
-import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
@@ -700,14 +699,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     companion object {
 
         private val ARG_SELECTED_ACCOUNT_POSITION = "ARG_SELECTED_ACCOUNT_POSITION"
-        private val ARG_SELECTED_CRYPTOCURRENCY = "ARG_SELECTED_CRYPTOCURRENCY"
         private val COOL_DOWN_MILLIS = 2 * 1000
 
         @JvmStatic
-        fun newInstance(selectedAccountPosition: Int, cryptoCurrency: CryptoCurrencies) = ReceiveFragment().apply {
+        fun newInstance(selectedAccountPosition: Int) = ReceiveFragment().apply {
             arguments = Bundle().apply {
                 putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition)
-                putSerializable(ARG_SELECTED_CRYPTOCURRENCY, cryptoCurrency)
             }
         }
     }
