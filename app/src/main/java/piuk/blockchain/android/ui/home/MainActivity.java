@@ -76,12 +76,12 @@ import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.dashboard.DashboardFragment;
-import piuk.blockchain.android.ui.shapeshift.overview.ShapeShiftActivity;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
+import piuk.blockchain.android.ui.shapeshift.overview.ShapeShiftActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -138,7 +138,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;
     private boolean initialized;
-    @Thunk CryptoCurrencies selectedCurrency = CryptoCurrencies.BTC;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -146,12 +145,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
                 requestScan();
             } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.BTC);
                 binding.bottomNavigation.setCurrentItem(3);
             } else if (intent.getAction().equals(ACTION_RECEIVE_ETH) && getActivity() != null) {
-                selectedCurrency = CryptoCurrencies.ETHER;
+                getPresenter().setCryptoCurrency(CryptoCurrencies.ETHER);
                 binding.bottomNavigation.setCurrentItem(3);
-                // Reset after selection, this is a temporary fix until we handle system-wide currency prefs properly
-                selectedCurrency = CryptoCurrencies.BTC;
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 BuyActivity.start(MainActivity.this);
             } else if (intent.getAction().equals(ACTION_SHAPESHIFT) && getActivity() != null) {
@@ -177,7 +175,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                     onStartBalanceFragment(paymentMade);
                     break;
                 case 3:
-                    startReceiveFragment(selectedCurrency);
+                    startReceiveFragment();
                     break;
             }
         }
@@ -768,9 +766,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         addFragmentToBackStack(sendFragment);
     }
 
-    private void startReceiveFragment(CryptoCurrencies selectedCurrency) {
+    private void startReceiveFragment() {
         ReceiveFragment receiveFragment =
-                ReceiveFragment.newInstance(getSelectedAccountFromFragments(), selectedCurrency);
+                ReceiveFragment.newInstance(getSelectedAccountFromFragments());
         addFragmentToBackStack(receiveFragment);
     }
 
