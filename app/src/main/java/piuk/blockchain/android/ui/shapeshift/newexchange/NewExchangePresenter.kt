@@ -121,7 +121,10 @@ class NewExchangePresenter @Inject constructor(
                     getQuoteFromRequest(amount, currencyState.cryptoCurrency)
                             .doOnNext { updateToFields(it.withdrawalAmount) }
                 }
-                .subscribe()
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
 
         fromFiatSubject.applyDefaults()
                 // Convert to fromCrypto amount
@@ -136,7 +139,10 @@ class NewExchangePresenter @Inject constructor(
                     getQuoteFromRequest(amount, currencyState.cryptoCurrency)
                             .doOnNext { updateToFields(it.withdrawalAmount) }
                 }
-                .subscribe()
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
 
         toCryptoSubject.applyDefaults()
                 // Update to Fiat as it's not dependent on web results
@@ -146,7 +152,10 @@ class NewExchangePresenter @Inject constructor(
                     getQuoteToRequest(amount, currencyState.cryptoCurrency)
                             .doOnNext { updateFromFields(it.depositAmount) }
                 }
-                .subscribe()
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
 
         toFiatSubject.applyDefaults()
                 // Convert to toCrypto amount
@@ -161,13 +170,17 @@ class NewExchangePresenter @Inject constructor(
                     getQuoteToRequest(amount, currencyState.cryptoCurrency)
                             .doOnNext { updateFromFields(it.depositAmount) }
                 }
-                .subscribe()
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
     }
 
     internal fun onSwitchCurrencyClicked() {
         currencyState.toggleCryptoCurrency()
                 .run { compositeDisposable.clear() }
                 .run { view.clearEditTexts() }
+                .run { view.clearError() }
                 .run {
                     // This is a bit hacky and should be abstracted out when more currencies are
                     // available, hence the null checks in onViewReady().
@@ -210,7 +223,11 @@ class NewExchangePresenter @Inject constructor(
                     } else {
                         sendFinalRequest(selectedCurrency)
                     }
-                }.subscribe()
+                }
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
     }
 
     internal fun onMaxPressed() {
@@ -233,7 +250,7 @@ class NewExchangePresenter @Inject constructor(
                         view.updateFromCryptoText(cryptoFormat.format(it))
                     }
                 },
-                { Timber.e(it) }
+                { setUnknownErrorState(it) }
         )
     }
 
@@ -260,7 +277,7 @@ class NewExchangePresenter @Inject constructor(
                                 }
                             }
                         },
-                        { Timber.e(it) }
+                        { setUnknownErrorState(it) }
                 )
     }
 
@@ -339,9 +356,9 @@ class NewExchangePresenter @Inject constructor(
         else -> ShapeShiftPairs.ETH_BTC
     }
 
-    private fun getMaximum() = BigDecimal.valueOf(marketInfo?.maxLimit ?: 0.0)
+    private fun getMaximum() = marketInfo?.maxLimit ?: BigDecimal.ZERO
 
-    private fun getMinimum() = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
+    private fun getMinimum() = marketInfo?.minimum ?: BigDecimal.ZERO
 
     //region Field Updates
     private fun updateFromFiat(amount: BigDecimal) {
@@ -384,8 +401,8 @@ class NewExchangePresenter @Inject constructor(
      */
     private fun sendFinalRequest(selectedCurrency: CryptoCurrencies) {
         val quoteRequest = QuoteRequest().apply {
-            depositAmount = shapeShiftData!!.depositAmount.toDouble()
-            withdrawalAmount = shapeShiftData!!.withdrawalAmount.toDouble()
+            depositAmount = shapeShiftData!!.depositAmount
+            withdrawalAmount = shapeShiftData!!.withdrawalAmount
             withdrawal = shapeShiftData!!.withdrawalAddress
             pair = getShapeShiftPair(selectedCurrency)
             returnAddress = shapeShiftData!!.returnAddress
@@ -409,7 +426,7 @@ class NewExchangePresenter @Inject constructor(
             selectedCurrency: CryptoCurrencies
     ): Observable<Quote> {
         val quoteRequest = QuoteRequest().apply {
-            depositAmount = fromAmount.setScale(8, RoundingMode.HALF_DOWN).toDouble()
+            depositAmount = fromAmount.setScale(8, RoundingMode.HALF_DOWN)
             pair = getShapeShiftPair(selectedCurrency)
             apiKey = view.shapeShiftApiKey
         }
@@ -422,7 +439,7 @@ class NewExchangePresenter @Inject constructor(
             selectedCurrency: CryptoCurrencies
     ): Observable<Quote> {
         val quoteRequest = QuoteRequest().apply {
-            withdrawalAmount = toAmount.setScale(8, RoundingMode.HALF_DOWN).toDouble()
+            withdrawalAmount = toAmount.setScale(8, RoundingMode.HALF_DOWN)
             pair = getShapeShiftPair(selectedCurrency)
             apiKey = view.shapeShiftApiKey
         }
@@ -460,10 +477,10 @@ class NewExchangePresenter @Inject constructor(
                                 view.showAmountError(it.value)
                                 return@map Quote().apply {
                                     orderId = ""
-                                    quotedRate = (marketInfo?.rate ?: 1.0).toBigDecimal()
-                                    minerFee = (marketInfo?.minerFee ?: 0.0).toBigDecimal()
-                                    withdrawalAmount = quoteRequest.withdrawalAmount.toBigDecimal()
-                                    depositAmount = quoteRequest.depositAmount.toBigDecimal()
+                                    quotedRate = marketInfo?.rate ?: BigDecimal.ONE
+                                    minerFee = marketInfo?.minerFee ?: BigDecimal.ZERO
+                                    withdrawalAmount = quoteRequest.withdrawalAmount ?: BigDecimal.ZERO
+                                    depositAmount = quoteRequest.depositAmount ?: BigDecimal.ZERO
                                     expiration = 0L
                                 }
                             }
@@ -482,10 +499,10 @@ class NewExchangePresenter @Inject constructor(
                                                         orderId = quote.orderId,
                                                         fromCurrency = selectedCurrency,
                                                         toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
-                                                        depositAmount = quote.depositAmount,
+                                                        depositAmount = quote.depositAmount ?: BigDecimal.ZERO,
                                                         changeAddress = addresses.changeAddress,
                                                         depositAddress = quote.deposit ?: "",
-                                                        withdrawalAmount = quote.withdrawalAmount,
+                                                        withdrawalAmount = quote.withdrawalAmount ?: BigDecimal.ZERO,
                                                         withdrawalAddress = addresses.withdrawalAddress,
                                                         exchangeRate = quote.quotedRate,
                                                         transactionFee = fee,
@@ -501,11 +518,20 @@ class NewExchangePresenter @Inject constructor(
                                                 return@map quote
                                             }
                                 }
+                                .doOnError { setUnknownErrorState(it) }
                     }
-                    .doOnTerminate {
+                    .doAfterNext {
                         view.showQuoteInProgress(false)
                         view.setButtonEnabled(true)
                     }
+                    .doOnError { setUnknownErrorState(it) }
+
+    private fun setUnknownErrorState(throwable: Throwable) {
+        Timber.e(throwable)
+        view.clearEditTexts()
+        view.setButtonEnabled(false)
+        view.showToast(R.string.shapeshift_getting_information_failed, ToastCustom.TYPE_ERROR)
+    }
 
     //region Fees Observables
     private fun getFeeForPayment(
@@ -675,8 +701,6 @@ class NewExchangePresenter @Inject constructor(
 
     //region Extension Functions
     private fun String.sanitise() = if (isNotEmpty()) this else "0"
-
-    private fun Double.toBigDecimal() = BigDecimal.valueOf(this)
 
     @Throws(ParseException::class)
     private fun String.parse(locale: Locale): BigDecimal {
