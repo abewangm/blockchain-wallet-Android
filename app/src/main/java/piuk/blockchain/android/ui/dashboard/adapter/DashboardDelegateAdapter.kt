@@ -1,17 +1,17 @@
 package piuk.blockchain.android.ui.dashboard.adapter
 
-import android.app.Activity
+import android.content.Context
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.ui.dashboard.ChartsState
 
 class DashboardDelegateAdapter(
-        activity: Activity
+        context: Context
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
-    private val chartDelegate = ChartDelegate<Any>(activity)
-    private val onboardingDelegate = OnboardingDelegate<Any>(activity)
+    private val chartDelegate = ChartDelegate<Any>(context)
+    private val onboardingDelegate = OnboardingDelegate<Any>(context)
 
     init {
         // Add all necessary AdapterDelegate objects here

@@ -112,6 +112,7 @@ class TradesDisplayableDelegate<in T>(
                     viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
                     R.string.shapeshift_in_progress_title
                 }
+                else -> throw IllegalStateException("Unknown status ${trade.status}")
             }
 
     private fun getDisplaySpannable(
