@@ -28,11 +28,19 @@ captures
 # Firebase config
 google-services.json
 
-# App secrets
-secrets.properties
+# App secrets and release key
+properties
+fastlane/.env.secret
+*.keystore
 
 # Fabric API Key
 fabric.properties
 
 # Release output
 app/**/release/output.json
+
+# fastlane specific
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output

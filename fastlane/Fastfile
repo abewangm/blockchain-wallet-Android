@@ -1,0 +1,109 @@
+# Customize this file, documentation can be found here:
+# https://docs.fastlane.tools/actions/
+# All available actions: https://docs.fastlane.tools/actions
+# can also be listed using the `fastlane actions` command
+
+# Change the syntax highlighting to Ruby
+# All lines starting with a # are ignored when running `fastlane`
+
+# If you want to automatically update fastlane if a new version is available:
+# update_fastlane
+
+# This is the minimum version number required.
+# Update this, if you use features of a newer version
+fastlane_version "2.68.2"
+fastlane_require 'dotenv'
+
+default_platform :android
+
+platform :android do
+  before_all do
+    Dotenv.overload '.env.secret'
+
+    # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+  end
+
+    desc "Runs all tests"
+    lane :test do
+      gradle(task: "testEnvProdMinApi21DebugUnitTestCoverage")
+
+    end
+
+    desc "Submit a Dogfood Beta build to Crashlytics Beta"
+    lane :beta do
+      UI.header "Release notes"
+      notes = UI.input("Enter release notes for this Beta upload:")
+
+      apiToken = ENV["FABRIC_API_KEY"]
+      buildSecret = ENV["FABRIC_BUILD_SECRET"]
+      gradle(task: "clean")
+
+      gradle(
+        task: 'assemble',
+        build_type: 'Dogfood',
+        flavor: 'EnvProdMinApi16'
+      )
+
+      crashlytics(
+        api_token: "#{apiToken}",
+        build_secret: "#{buildSecret}",
+        notes: "#{notes}"
+      )
+
+      UI.success "Successfully uploaded beta build to Crashlytics"
+
+    end
+
+    desc "Submit a release Alpha build to the Play Store"
+    lane :alpha do
+      gradle(task: "clean")
+
+    # Adjust the `build_type` and `flavor` params as needed to build the right APK for your setup
+    gradle(
+      task: 'assemble',
+      build_type: 'Release',
+      flavor: 'EnvProdMinApi16'
+    )
+
+    # TODO Sign current commit and create release, generate changelog
+    # Commit the version bump to git, and tag the commit with the release version and push
+#    git_commit(
+#        path: File.dirname(ENV["GRADLE_PATH"])
+#        message: "HockeyApp deployment version #"
+#    )
+#    add_git_tag(
+#        tag: "v#{lane_context[SharedValues::ANDROID_VERSION_NAME]}"
+#    )
+#    push_to_git_remote
+
+  end
+
+  desc "Deploy a new version to the Google Play"
+  lane :deploy do
+    gradle(task: "assembleRelease")
+    supply
+  end
+
+  # You can define as many lanes as you want
+
+  after_all do |lane|
+    # This block is called, only if the executed lane was successful
+
+    # slack(
+    #   message: "Successfully deployed new App Update to Play Store Alpha and Crashlytics Beta."
+    # )
+  end
+
+  error do |lane, exception|
+    # slack(
+    #   message: exception.message,
+    #   success: false
+    # )
+  end
+end
+
+# More information about multiple platforms in fastlane: https://docs.fastlane.tools/advanced/#control-configuration-by-lane-and-by-platform
+# All available actions: https://docs.fastlane.tools/actions
+
+# fastlane reports which actions are used. No personal data is recorded.
+# Learn more at https://docs.fastlane.tools/#metrics
