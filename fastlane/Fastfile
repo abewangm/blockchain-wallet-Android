@@ -23,16 +23,21 @@ platform :android do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
   end
 
+
     desc "Runs all tests"
     lane :test do
       gradle(task: "testEnvProdMinApi21DebugUnitTestCoverage")
 
     end
 
+
     desc "Submit a Dogfood Beta build to Crashlytics Beta"
     lane :beta do
-      UI.header "Release notes"
-      notes = UI.input("Enter release notes for this Beta upload:")
+      UI.header "Changelog"
+      notes = prompt(
+        text: "Enter changelog: ",
+        multi_line_end_keyword: "END"
+      )
 
       apiToken = ENV["FABRIC_API_KEY"]
       buildSecret = ENV["FABRIC_BUILD_SECRET"]
@@ -53,6 +58,35 @@ platform :android do
       UI.success "Successfully uploaded beta build to Crashlytics"
 
     end
+
+
+    desc "Generate release builds for both staging and production"
+    lane :generate_test_apks do
+#      gradle(task: "clean")
+
+      gradle(
+        task: 'assemble',
+        build_type: 'Release',
+        flavor: 'EnvProdMinApi16'
+      )
+
+      gradle(
+        task: 'assemble',
+        build_type: 'Release',
+        flavor: 'EnvStagingMinApi16'
+      )
+
+    end
+
+
+    desc "Upload APKs to Google Drive"
+    lane :upload_apks_to_drive do
+      # This is nasty but there's no integration to allow access to GDrive just yet
+      sh 'mv ../app/build/outputs/apk/envProdMinApi16/release/*.apk ~/Google\ Drive\ File\ Stream/My\ Drive/Android\ APKs'
+      sh 'mv ../app/build/outputs/apk/envStagingMinApi16/release/*.apk ~/Google\ Drive\ File\ Stream/My\ Drive/Android\ APKs'
+
+    end
+
 
     desc "Submit a release Alpha build to the Play Store"
     lane :alpha do
@@ -78,11 +112,13 @@ platform :android do
 
   end
 
+
   desc "Deploy a new version to the Google Play"
   lane :deploy do
     gradle(task: "assembleRelease")
     supply
   end
+
 
   # You can define as many lanes as you want
 
@@ -93,6 +129,7 @@ platform :android do
     #   message: "Successfully deployed new App Update to Play Store Alpha and Crashlytics Beta."
     # )
   end
+
 
   error do |lane, exception|
     # slack(

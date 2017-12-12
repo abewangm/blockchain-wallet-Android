@@ -40,6 +40,16 @@ Runs all tests
 fastlane android beta
 ```
 Submit a Dogfood Beta build to Crashlytics Beta
+### android generate_test_apks
+```
+fastlane android generate_test_apks
+```
+Generate release builds for both staging and production
+### android upload_apks_to_drive
+```
+fastlane android upload_apks_to_drive
+```
+Upload APKs to Google Drive
 ### android alpha
 ```
 fastlane android alpha
