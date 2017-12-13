@@ -62,7 +62,7 @@ platform :android do
 
     desc "Generate release builds for both staging and production"
     lane :generate_test_apks do
-#      gradle(task: "clean")
+      gradle(task: "clean")
 
       gradle(
         task: 'assemble',
