@@ -1,6 +1,5 @@
 # Built application files
 *.apk
-*.ap_
 
 # Gradle files
 .gradle/
@@ -29,15 +28,14 @@ captures
 google-services.json
 
 # App secrets and release key
-properties
 fastlane/.env.secret
+properties/releaseSigning.properties
+properties/secrets.properties
+app/secrets.properties
 *.keystore
 
 # Fabric API Key
 fabric.properties
-
-# Release output
-app/**/release/output.json
 
 # fastlane specific
 fastlane/report.xml
