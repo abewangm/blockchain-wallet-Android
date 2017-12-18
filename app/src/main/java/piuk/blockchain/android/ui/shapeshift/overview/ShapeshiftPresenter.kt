@@ -106,6 +106,11 @@ class ShapeShiftPresenter @Inject constructor(
 
     /**
      * Update kv-store if need. Handle UI update
+     * Update kv-store entry if the current trade status from ShapeShift has changed.
+     * Handle UI update
+     *
+     * @param trade The trade object saved in kv-store
+     * @param tradeResponse The related trade details returned from ShapeShift
      */
     private fun handleState(trade: Trade, tradeResponse: TradeStatusResponse) {
 
@@ -114,15 +119,6 @@ class ShapeShiftPresenter @Inject constructor(
             trade.hashOut = tradeResponse.transaction
 
             updateMetadata(trade)
-        }
-
-        //Update trade fields for display
-        if (trade.quote?.withdrawalAmount == null && tradeResponse.incomingCoin != null) {
-            trade.quote?.withdrawalAmount = tradeResponse.incomingCoin
-        }
-
-        if (trade.quote?.pair == null && tradeResponse.pair != null) {
-            trade.quote?.pair = tradeResponse.pair
         }
 
         if (tradeResponse.incomingType.equals("bch", true)

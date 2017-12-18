@@ -71,6 +71,16 @@ class TradesAdapter(
     }
 
     fun updateTrade(trade: Trade, tradeResponse: TradeStatusResponse) {
+
+        //Update trade fields for display
+        if (trade.quote?.withdrawalAmount == null && tradeResponse.outgoingCoin != null) {
+            trade.quote?.withdrawalAmount = tradeResponse.outgoingCoin
+        }
+
+        if (trade.quote?.pair == null && tradeResponse.pair != null) {
+            trade.quote?.pair = tradeResponse.pair
+        }
+
         val matchingTrade = items.filterIsInstance(Trade::class.java).find { it.quote.deposit == tradeResponse.address }
         matchingTrade?.quote?.withdrawalAmount = trade.quote.withdrawalAmount ?: tradeResponse.incomingCoin ?: BigDecimal.ZERO
         matchingTrade?.quote?.pair = tradeResponse.pair ?: trade.quote.pair
