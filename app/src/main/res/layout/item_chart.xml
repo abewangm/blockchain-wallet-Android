@@ -43,6 +43,7 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toEndOf="@+id/textview_price"
         app:layout_constraintTop_toTopOf="@+id/textview_price"
+        tools:ignore="RtlHardcoded"
         tools:visibility="visible" />
 
     <TextView
@@ -152,14 +153,14 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="16dp"
-        tools:text="@string/dashboard_bitcoin_price"
         android:textAllCaps="true"
         android:textColor="@color/primary_navy_medium"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingPrefix" />
+        tools:ignore="MissingPrefix"
+        tools:text="@string/dashboard_bitcoin_price" />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"

@@ -239,7 +239,7 @@ class SendPresenter @Inject constructor(
                 .subscribe({ hash ->
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(true)
-                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.ETHER)
                             .putCurrencyType(CryptoCurrencies.BTC))
 
                     clearBtcUnspentResponseCache()
@@ -258,7 +258,7 @@ class SendPresenter @Inject constructor(
 
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(false)
-                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.ETHER)
                             .putCurrencyType(CryptoCurrencies.BTC))
                 }
     }
@@ -316,17 +316,18 @@ class SendPresenter @Inject constructor(
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
                 .subscribe(
                         {
-                            handleSuccessfulPayment(it, CryptoCurrencies.ETHER)
                             Logging.logCustom(PaymentSentEvent()
                                     .putSuccess(true)
-                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.ETHER)
                                     .putCurrencyType(CryptoCurrencies.ETHER))
+                            // handleSuccessfulPayment(...) clears PendingTransaction object
+                            handleSuccessfulPayment(it, CryptoCurrencies.ETHER)
                         },
                         {
                             Timber.e(it)
                             Logging.logCustom(PaymentSentEvent()
                                     .putSuccess(false)
-                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.ETHER)
                                     .putCurrencyType(CryptoCurrencies.ETHER))
                             view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
                         })
