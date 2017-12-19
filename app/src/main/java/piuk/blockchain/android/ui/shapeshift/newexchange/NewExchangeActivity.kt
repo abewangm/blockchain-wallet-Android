@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.shapeshift.newexchange
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -12,6 +11,7 @@ import android.support.constraint.ConstraintSet
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v7.app.AlertDialog
 import android.view.View
 import android.widget.EditText
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -45,7 +45,6 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 import javax.inject.Inject
-
 
 class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(), NewExchangeView,
         NumericKeyboardCallback {

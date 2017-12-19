@@ -1,12 +1,15 @@
 package piuk.blockchain.android.ui.shapeshift.overview
 
+import info.blockchain.wallet.shapeshift.ShapeShiftTrades
 import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import io.reactivex.Observable
+import io.reactivex.Single
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
+import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.util.ExchangeRateFactory
@@ -31,42 +34,37 @@ class ShapeShiftPresenter @Inject constructor(
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
     override fun onViewReady() {
-
-        if (walletOptionsDataManager.isAmericanStateSelectionRequired()) {
-            view.showStateSelection()
-        } else {
-            payloadDataManager.metadataNodeFactory
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
-                    .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
-                    .flatMapIterable { it.trades }
-                    .flatMap { shapeShiftDataManager.getTradeStatusPair(it) }
-                    .flatMap {
-                        handleState(it.tradeMetadata, it.tradeStatusResponse)
-                        Observable.just(it.tradeMetadata)
-                    }
-                    .doOnError { view.onStateUpdated(ShapeShiftState.Error) }
-                    .toList()
-                    .subscribe(
-                            {
-                                val trades = it.toList()
-                                if (it.isEmpty()) {
-                                    view.onStateUpdated(ShapeShiftState.Empty)
+        payloadDataManager.metadataNodeFactory
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
+                .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
+                .flatMap { trades ->
+                    walletOptionsDataManager.isInUsa()
+                            .flatMap { usa ->
+                                if (usa) {
+                                    shapeShiftDataManager.getState()
+                                            .flatMapSingle { state ->
+                                                when (state) {
+                                                // If there is a saved state, we assume it's valid and continue
+                                                    is Optional.Some -> handleTrades(trades)
+                                                    else -> {
+                                                        view.showStateSelection()
+                                                        Single.just(emptyList<Trade>())
+                                                    }
+                                                }
+                                            }
                                 } else {
-                                    pollForStatus(trades)
-                                    val sortedTrades = trades.sortedWith(compareBy<Trade> { it.timestamp })
-                                            .reversed()
-                                            // TODO: Remove me when BCH added otherwise you won't see any transactions
-                                            .filterNot { it.quote?.pair?.contains("bch", ignoreCase = true) ?: false }
-                                    view.onStateUpdated(ShapeShiftState.Data(sortedTrades))
+                                    handleTrades(trades).toObservable()
                                 }
-                            },
-                            {
-                                Timber.e(it)
-                                view.onStateUpdated(ShapeShiftState.Error)
                             }
-                    )
-        }
+                }
+                .subscribe(
+                        { /* No-op */ },
+                        {
+                            Timber.e(it)
+                            view.onStateUpdated(ShapeShiftState.Error)
+                        }
+                )
     }
 
     internal fun onResume() {
@@ -79,6 +77,15 @@ class ShapeShiftPresenter @Inject constructor(
                 currencyState.isDisplayingCryptoCurrency
         )
         view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
+    }
+
+    internal fun onRetryPressed() {
+        onViewReady()
+    }
+
+    internal fun setViewType(isBtc: Boolean) {
+        currencyState.isDisplayingCryptoCurrency = isBtc
+        view.onViewTypeChanged(isBtc, getBtcUnitType())
     }
 
     private fun pollForStatus(trades: List<Trade>) {
@@ -95,14 +102,34 @@ class ShapeShiftPresenter @Inject constructor(
                         })
     }
 
-    private fun createPollObservable(trade: Trade): Observable<TradeStatusResponse> {
+    private fun handleTrades(shapeShiftTrades: ShapeShiftTrades): Single<MutableList<Trade>> =
+            Observable.fromIterable(shapeShiftTrades.trades)
+                    .flatMap { shapeShiftDataManager.getTradeStatusPair(it) }
+                    .map {
+                        handleState(it.tradeMetadata, it.tradeStatusResponse)
+                        return@map it.tradeMetadata
+                    }
+                    .toList()
+                    .doOnSuccess {
+                        val trades = it.toList()
+                        if (it.isEmpty()) {
+                            view.onStateUpdated(ShapeShiftState.Empty)
+                        } else {
+                            pollForStatus(trades)
+                            val sortedTrades = trades.sortedWith(compareBy<Trade> { it.timestamp })
+                                    .reversed()
+                                    // TODO: Remove me when BCH added otherwise you won't see any transactions
+                                    .filterNot { it.quote?.pair?.contains("bch", ignoreCase = true) ?: false }
+                            view.onStateUpdated(ShapeShiftState.Data(sortedTrades))
+                        }
+                    }
 
-        return shapeShiftDataManager.getTradeStatus(trade.quote.deposit)
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .repeatWhen { it.delay(10, TimeUnit.SECONDS) }
-                .takeUntil { isInFinalState(it.status) }
-                .doOnNext { handleState(trade, it) }
-    }
+    private fun createPollObservable(trade: Trade): Observable<TradeStatusResponse> =
+            shapeShiftDataManager.getTradeStatus(trade.quote.deposit)
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .repeatWhen { it.delay(10, TimeUnit.SECONDS) }
+                    .takeUntil { isInFinalState(it.status) }
+                    .doOnNext { handleState(trade, it) }
 
     /**
      * Update kv-store if need. Handle UI update
@@ -122,7 +149,7 @@ class ShapeShiftPresenter @Inject constructor(
         }
 
         if (tradeResponse.incomingType.equals("bch", true)
-                ||tradeResponse.outgoingType.equals("bch", true)) {
+                || tradeResponse.outgoingType.equals("bch", true)) {
             //no-op
         } else {
             view.onTradeUpdate(trade, tradeResponse)
@@ -130,7 +157,7 @@ class ShapeShiftPresenter @Inject constructor(
 
     }
 
-    fun updateMetadata(trade: Trade) {
+    private fun updateMetadata(trade: Trade) {
         shapeShiftDataManager.updateTrade(trade)
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
@@ -139,26 +166,15 @@ class ShapeShiftPresenter @Inject constructor(
                 )
     }
 
-    internal fun onRetryPressed() {
-        onViewReady()
-    }
-
     private fun isInFinalState(status: Trade.STATUS) = when (status) {
         Trade.STATUS.NO_DEPOSITS, Trade.STATUS.RECEIVED -> false
         Trade.STATUS.COMPLETE, Trade.STATUS.FAILED, Trade.STATUS.RESOLVED -> true
         else -> true
     }
 
-    internal fun setViewType(isBtc: Boolean) {
-        currencyState.isDisplayingCryptoCurrency = isBtc
-        view.onViewTypeChanged(isBtc, getBtcUnitType())
-    }
-
     private fun getLastBtcPrice(fiat: String) = exchangeRateFactory.getLastBtcPrice(fiat)
 
     private fun getLastEthPrice(fiat: String) = exchangeRateFactory.getLastEthPrice(fiat)
-
-    private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
 
     private fun getBtcUnitType() =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)

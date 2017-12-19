@@ -1,6 +1,6 @@
 package piuk.blockchain.android.util
 
-val americanStatesMap = hashMapOf<String, String>(
+val americanStatesMap = hashMapOf(
         "Alabama" to "AL",
         "Alaska" to "AK",
         "American Samoa" to "AS",

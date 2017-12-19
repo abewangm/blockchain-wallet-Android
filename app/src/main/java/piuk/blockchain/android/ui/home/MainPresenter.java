@@ -17,6 +17,7 @@ import org.bitcoinj.crypto.DeterministicKey;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.inject.Inject;
 
@@ -134,7 +135,11 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .firstOrError()
                 .subscribe(
                         getView()::showCustomPrompt,
-                        Timber::e);
+                        throwable -> {
+                            if (!(throwable instanceof NoSuchElementException)) {
+                                Timber.e(throwable);
+                            }
+                        });
     }
 
     @Override

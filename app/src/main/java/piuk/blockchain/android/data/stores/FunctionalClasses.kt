@@ -8,6 +8,10 @@ sealed class Optional<out T> {
     object None : Optional<Nothing>()
 }
 
+/**
+ * Left is generally used as an Error or Empty status, Right is generally containing the value
+ * requested.
+ */
 @Suppress("unused")
 sealed class Either<out A, out B> {
     data class Left<out A>(val value: A) : Either<A, Nothing>()

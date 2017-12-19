@@ -2,7 +2,8 @@ package piuk.blockchain.android.data.answers
 
 import com.crashlytics.android.answers.CustomEvent
 import piuk.blockchain.android.data.currency.CryptoCurrencies
-import piuk.blockchain.android.util.extensions.getAmountRange
+import piuk.blockchain.android.util.extensions.getAmountRangeBtc
+import piuk.blockchain.android.util.extensions.getAmountRangeEth
 import java.math.BigInteger
 
 class RecoverWalletEvent : CustomEvent("Recover Wallet") {
@@ -42,8 +43,14 @@ class PaymentSentEvent : CustomEvent("Payment Sent") {
         return this
     }
 
-    fun putAmountForRange(amountSent: BigInteger): PaymentSentEvent {
-        putCustomAttribute("Amount", amountSent.getAmountRange())
+    fun putAmountForRange(amountSent: BigInteger, cryptoCurrencies: CryptoCurrencies): PaymentSentEvent {
+        val amountRange = when(cryptoCurrencies) {
+            CryptoCurrencies.BTC -> amountSent.getAmountRangeBtc()
+            CryptoCurrencies.ETHER -> amountSent.getAmountRangeEth()
+            else -> throw IllegalArgumentException("BCH not yet supported")
+        }
+
+        putCustomAttribute("Amount", amountRange)
         return this
     }
 

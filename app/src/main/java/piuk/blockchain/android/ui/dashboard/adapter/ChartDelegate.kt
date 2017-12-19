@@ -33,6 +33,7 @@ import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -237,7 +238,13 @@ class ChartDelegate<in T>(
             description.isEnabled = false
             legend.isEnabled = false
             axisLeft.setDrawGridLines(false)
-            axisLeft.setValueFormatter { fl, _ -> "$fiatSymbol${NumberFormat.getNumberInstance(Locale.getDefault()).format(fl)}" }
+            axisLeft.setValueFormatter { fl, _ ->
+                "$fiatSymbol${NumberFormat.getNumberInstance(Locale.getDefault())
+                        .apply {
+                            maximumFractionDigits = 0
+                            roundingMode = RoundingMode.HALF_UP
+                        }.format(fl)}"
+            }
             axisLeft.typeface = typefaceLight
             axisLeft.textColor = ContextCompat.getColor(context, R.color.primary_gray_medium)
             axisRight.isEnabled = false
@@ -264,7 +271,9 @@ class ChartDelegate<in T>(
         @SuppressLint("SimpleDateFormat", "SetTextI18n")
         override fun refreshContent(e: Entry, highlight: Highlight) {
             date.text = SimpleDateFormat("E, MMM dd, HH:mm").format(Date(e.x.toLong() * 1000))
-            price.text = "$fiatSymbol${NumberFormat.getNumberInstance(Locale.getDefault()).format(e.y)}"
+            price.text = "$fiatSymbol${NumberFormat.getNumberInstance(Locale.getDefault())
+                    .apply { maximumFractionDigits = 2 }
+                    .format(e.y)}"
 
             super.refreshContent(e, highlight)
         }
