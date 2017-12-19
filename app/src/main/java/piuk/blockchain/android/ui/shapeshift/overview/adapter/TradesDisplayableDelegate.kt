@@ -117,20 +117,18 @@ class TradesDisplayableDelegate<in T>(
     private fun getDisplaySpannable(
             cryptoCurrency: String,
             cryptoAmount: BigDecimal
-    ): Spannable {
-        val spannable: Spannable
+    ): String {
 
         val displayAmount: String
-        val unit: String
 
         if (showCrypto) {
 
-            val cryptoAmount = when (cryptoCurrency.toUpperCase()) {
+            var cryptoAmount = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
                 CryptoCurrencies.BTC.symbol -> btcFormat.format(cryptoAmount)
                 else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
-            unit = cryptoCurrency
+
             displayAmount = "$cryptoAmount $cryptoCurrency"
         } else {
 
@@ -140,19 +138,11 @@ class TradesDisplayableDelegate<in T>(
                 else -> BigDecimal.ZERO//Coin type not specified
             }
 
-            unit = getPreferedFiatUnit();
+            val unit = getPreferedFiatUnit();
             displayAmount = "${monetaryUtil.getFiatFormat(unit).format(fiatAmount.abs())} $unit"
         }
 
-        spannable = Spannable.Factory.getInstance().newSpannable(displayAmount)
-        spannable.setSpan(
-                RelativeSizeSpan(0.67f),
-                spannable.length - unit.length,
-                spannable.length,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-
-        return spannable
+        return displayAmount
     }
 
     private fun getPreferedFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
