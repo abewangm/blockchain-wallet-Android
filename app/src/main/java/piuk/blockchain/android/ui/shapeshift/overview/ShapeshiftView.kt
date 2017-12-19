@@ -1,7 +1,5 @@
 package piuk.blockchain.android.ui.shapeshift.overview
 
-import android.support.annotation.Nullable
-import android.support.annotation.StringRes
 import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import piuk.blockchain.android.ui.base.View

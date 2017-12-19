@@ -8,10 +8,7 @@ import info.blockchain.wallet.shapeshift.ShapeShiftApi
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
 import info.blockchain.wallet.shapeshift.data.*
 import io.reactivex.Observable
-import org.amshove.kluent.`should contain`
-import org.amshove.kluent.`should equal to`
-import org.amshove.kluent.`should not contain`
-import org.amshove.kluent.mock
+import org.amshove.kluent.*
 import org.json.JSONException
 import org.junit.Before
 import org.junit.Test
@@ -19,6 +16,7 @@ import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore
 import piuk.blockchain.android.data.stores.Either
+import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.ui.shapeshift.models.CoinPairings
 
 class ShapeShiftDataManagerTest : RxTest() {
@@ -45,6 +43,85 @@ class ShapeShiftDataManagerTest : RxTest() {
 
         // Assert
 
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getState initialized null`() {
+        // Arrange
+        val tradeData: ShapeShiftTrades = mock()
+        whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        whenever(tradeData.usState).thenReturn(null)
+        // Act
+        val testObserver = subject.getState().test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(Optional.None)
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getState initialized with value`() {
+        // Arrange
+        val tradeData: ShapeShiftTrades = mock()
+        val state = State("STATE", "STATE")
+        whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        whenever(tradeData.usState).thenReturn(state)
+        // Act
+        val testObserver = subject.getState().test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        (testObserver.values()[0] as Optional.Some<State>).element `should be` state
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    @Throws(Exception::class)
+    fun `getState uninitialized`() {
+        // Arrange
+        whenever(shapeShiftDataStore.tradeData).thenReturn(null)
+        // Act
+        val testObserver = subject.getState().test()
+        // Assert
+        testObserver.assertNotComplete()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `setState initialized`() {
+        // Arrange
+        val tradeData: ShapeShiftTrades = mock()
+        val state = State("STATE", "STATE")
+        whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        // Act
+        val testObserver = subject.setState(state).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
+        verify(tradeData).save()
+    }
+
+    @Test(expected = IllegalStateException::class)
+    @Throws(Exception::class)
+    fun `setState uninitialized`() {
+        // Arrange
+        val state = State("STATE", "STATE")
+        whenever(shapeShiftDataStore.tradeData).thenReturn(null)
+        // Act
+        val testObserver = subject.setState(state).test()
+        // Assert
+        testObserver.assertNotComplete()
+        verify(shapeShiftDataStore).tradeData
+        verifyNoMoreInteractions(shapeShiftDataStore)
     }
 
     @Test

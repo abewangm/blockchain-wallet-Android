@@ -79,19 +79,13 @@ class SendPresenter @Inject constructor(
 
     private val locale: Locale by unsafeLazy { Locale.getDefault() }
     private val currencyHelper by unsafeLazy {
-        ReceiveCurrencyHelper(
-                monetaryUtil,
-                locale,
-                prefsUtil,
-                exchangeRateFactory,
-                currencyState
-        )
+        ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory, currencyState)
     }
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-
-    private var feeOptions: FeeOptions? = null
     private val pendingTransaction by unsafeLazy { PendingTransaction() }
     private val unspentApiResponses by unsafeLazy { HashMap<String, UnspentOutputs>() }
+
+    private var feeOptions: FeeOptions? = null
     private var textChangeSubject = PublishSubject.create<String>()
     private var absoluteSuggestedFee = BigInteger.ZERO
     private var maxAvailable = BigInteger.ZERO
