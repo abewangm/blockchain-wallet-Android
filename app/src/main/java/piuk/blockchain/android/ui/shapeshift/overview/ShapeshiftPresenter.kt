@@ -148,6 +148,16 @@ class ShapeShiftPresenter @Inject constructor(
             updateMetadata(trade)
         }
 
+        //Update trade fields for display
+        if (trade.quote?.withdrawalAmount == null && tradeResponse.outgoingCoin != null) {
+            trade.quote?.withdrawalAmount = tradeResponse.outgoingCoin
+        }
+
+        //Set quote pair (Temporarily used to filter out BCH)
+        if (trade.quote?.pair == null && tradeResponse.pair != null) {
+            trade.quote?.pair = tradeResponse.pair
+        }
+
         if (tradeResponse.incomingType.equals("bch", true)
                 || tradeResponse.outgoingType.equals("bch", true)) {
             //no-op
