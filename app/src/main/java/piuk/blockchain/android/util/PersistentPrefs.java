@@ -35,7 +35,7 @@ interface PersistentPrefs {
     String KEY_SWIPE_TO_RECEIVE_ENABLED = "swipe_to_receive_enabled";
     String KEY_APP_VISITS = "app_visits";
     String KEY_SCREENSHOTS_ENABLED = "screenshots_enabled";
-    String KEY_ONBOARDING_COMPLETE = "onboarding_complete";
+    String KEY_ONBOARDING_COMPLETE = "onboarding_complete_1";
     String KEY_OVERLAY_TRUSTED = "overlay_trusted";
     String KEY_CONTACTS_INTRODUCTION_COMPLETE = "contacts_intro_complete";
     String KEY_CURRENCY_CRYPTO_STATE = "KEY_CURRENCY_CRYPTO_STATE";

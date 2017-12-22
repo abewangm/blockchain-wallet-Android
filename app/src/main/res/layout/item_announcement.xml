@@ -34,15 +34,21 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:src="@drawable/ic_clear_white_24dp"
-                android:tint="@color/primary_gray" />
+                android:tint="@color/primary_gray"
+                tools:ignore="RtlHardcoded" />
 
             <ImageView
                 android:id="@+id/imageview_icon"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_below="@+id/imageview_close"
-                app:srcCompat="@drawable/vector_wallet_offset" />
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="-16dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitStart"
+                app:srcCompat="@drawable/vector_exchange_offset"
+                tools:ignore="RtlHardcoded" />
 
             <LinearLayout
                 android:id="@+id/layout_main"
@@ -51,7 +57,9 @@
                 android:layout_below="@+id/imageview_close"
                 android:layout_toRightOf="@id/imageview_icon"
                 android:orientation="vertical"
-                android:paddingRight="16dp">
+                android:paddingEnd="16dp"
+                android:paddingRight="16dp"
+                tools:ignore="RtlHardcoded,RtlSymmetry">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -90,7 +98,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_below="@+id/layout_main"
                 android:layout_toEndOf="@+id/imageview_icon"
                 android:layout_toRightOf="@+id/imageview_icon"
                 android:gravity="center_horizontal|bottom"
@@ -98,7 +105,7 @@
                 android:paddingRight="16dp"
                 android:paddingTop="16dp"
                 android:textColor="@color/primary_navy_medium"
-                tools:ignore="MissingPrefix"
+                tools:ignore="MissingPrefix,RtlHardcoded,RtlSymmetry"
                 tools:text="@string/onboarding_buy_bitcoin" />
 
         </RelativeLayout>

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Options;
@@ -162,69 +161,6 @@ public class AccountEditPresenterTest {
         verify(accountEditModel).setTransferFundsVisibility(anyInt());
     }
 
-    @SuppressWarnings("WrongConstant")
-    @Test
-    public void onViewReadyV2() throws Exception {
-        // Arrange
-        Intent intent = new Intent();
-        intent.putExtra("address_index", 0);
-        when(activity.getIntent()).thenReturn(intent);
-        Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
-        LegacyAddress legacyAddress = new LegacyAddress();
-        when(mockPayload.getLegacyAddressList())
-                .thenReturn(Collections.singletonList(legacyAddress));
-        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
-        when(mockPayload.getHdWallets().get(0).getAccounts().get(anyInt()))
-                .thenReturn(mock(Account.class));
-        when(stringUtils.getString(anyInt())).thenReturn("string resource");
-        when(payloadDataManager.getImportedAddressesBalance()).thenReturn(BigInteger.TEN);
-        // Act
-        subject.onViewReady();
-        // Assert
-        verify(activity).getIntent();
-        verify(accountEditModel).setLabel(isNull());
-        verify(accountEditModel).setLabelHeader("string resource");
-        verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
-        verify(accountEditModel).setXpubText("string resource");
-        verify(accountEditModel).setTransferFundsVisibility(anyInt());
-    }
-
-    @SuppressWarnings("WrongConstant")
-    @Test
-    public void onViewReadyV2WatchOnlyUpgraded() throws Exception {
-        // Arrange
-        Intent intent = new Intent();
-        intent.putExtra("address_index", 0);
-        when(activity.getIntent()).thenReturn(intent);
-        Wallet mockPayload = mock(Wallet.class, RETURNS_DEEP_STUBS);
-        LegacyAddress legacyAddress = new LegacyAddress();
-        legacyAddress.setPrivateKey("");
-        legacyAddress.setAddress("");
-        when(mockPayload.getLegacyAddressList())
-                .thenReturn(Collections.singletonList(legacyAddress));
-        when(payloadDataManager.getWallet()).thenReturn(mockPayload);
-        when(mockPayload.isUpgraded()).thenReturn(true);
-        when(mockPayload.getHdWallets().get(0).getAccounts().get(anyInt()))
-                .thenReturn(mock(Account.class));
-        when(stringUtils.getString(anyInt())).thenReturn("string resource");
-        when(payloadDataManager.getImportedAddressesBalance()).thenReturn(BigInteger.TEN);
-        when(payloadDataManager.getAddressBalance(anyString())).thenReturn(BigInteger.TEN);
-        Fee mockFee = mock(Fee.class);
-        when(mockFee.getFee()).thenReturn(100.0d);
-        when(dynamicFeeCache.getBtcFeeOptions().getRegularFee()).thenReturn(100L);
-        when(sendDataManager.estimatedFee(anyInt(), anyInt(), any(BigInteger.class)))
-                .thenReturn(BigInteger.TEN);
-        // Act
-        subject.onViewReady();
-        // Assert
-        verify(activity).getIntent();
-        verify(accountEditModel).setLabel(isNull());
-        verify(accountEditModel).setLabelHeader("string resource");
-        verify(accountEditModel).setScanPrivateKeyVisibility(anyInt());
-        verify(accountEditModel).setXpubText("string resource");
-        verify(accountEditModel).setTransferFundsVisibility(anyInt());
-    }
-
     @Test
     public void onClickTransferFundsSuccess() throws Exception {
         // Arrange
@@ -239,7 +175,7 @@ public class AccountEditPresenterTest {
                 .thenReturn(Observable.just("address"));
         when(sendDataManager.getUnspentOutputs(legacyAddress.getAddress()))
                 .thenReturn(Observable.just(mock(UnspentOutputs.class)));
-        when(sendDataManager.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
+        when(sendDataManager.getMaximumAvailable(any(UnspentOutputs.class), any(BigInteger.class)))
                 .thenReturn(sweepableCoins);
         SpendableUnspentOutputs spendableUnspentOutputs = mock(SpendableUnspentOutputs.class);
         when(spendableUnspentOutputs.getAbsoluteFee()).thenReturn(BigInteger.TEN);
@@ -272,7 +208,7 @@ public class AccountEditPresenterTest {
                 .thenReturn(Observable.just("address"));
         when(sendDataManager.getUnspentOutputs(legacyAddress.getAddress()))
                 .thenReturn(Observable.just(mock(UnspentOutputs.class)));
-        when(sendDataManager.getSweepableCoins(any(UnspentOutputs.class), any(BigInteger.class)))
+        when(sendDataManager.getMaximumAvailable(any(UnspentOutputs.class), any(BigInteger.class)))
                 .thenReturn(sweepableCoins);
         when(sendDataManager.getSpendableCoins(any(UnspentOutputs.class), any(BigInteger.class), any(BigInteger.class)))
                 .thenReturn(mock(SpendableUnspentOutputs.class));

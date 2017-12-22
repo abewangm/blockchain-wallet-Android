@@ -232,6 +232,8 @@ class CreateWalletActivity : BaseMvpActivity<CreateWalletView, CreateWalletPrese
         return getString(R.string.default_wallet_name)
     }
 
+    override fun enforceFlagSecure() = true
+
     private fun onNextClicked() {
         val email = email_address.text.toString().trim()
         val password1 = wallet_pass.text.toString()

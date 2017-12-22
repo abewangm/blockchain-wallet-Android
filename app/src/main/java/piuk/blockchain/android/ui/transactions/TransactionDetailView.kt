@@ -20,9 +20,9 @@ interface TransactionDetailView : View {
 
     fun setTransactionValueFiat(fiat: String?)
 
-    fun setToAddresses(addresses: List<RecipientModel>)
+    fun setToAddresses(addresses: List<TransactionDetailModel>)
 
-    fun setFromAddress(address: String?)
+    fun setFromAddress(addresses: List<TransactionDetailModel>)
 
     fun setStatus(cryptoCurrency: CryptoCurrencies, status: String?, hash: String?)
 

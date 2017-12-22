@@ -1,7 +1,9 @@
 package piuk.blockchain.android.data.answers
 
 import com.crashlytics.android.answers.CustomEvent
-import piuk.blockchain.android.util.extensions.getAmountRange
+import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.util.extensions.getAmountRangeBtc
+import piuk.blockchain.android.util.extensions.getAmountRangeEth
 import java.math.BigInteger
 
 class RecoverWalletEvent : CustomEvent("Recover Wallet") {
@@ -41,8 +43,19 @@ class PaymentSentEvent : CustomEvent("Payment Sent") {
         return this
     }
 
-    fun putAmountForRange(amountSent: BigInteger): PaymentSentEvent {
-        putCustomAttribute("Amount", amountSent.getAmountRange())
+    fun putAmountForRange(amountSent: BigInteger, cryptoCurrencies: CryptoCurrencies): PaymentSentEvent {
+        val amountRange = when(cryptoCurrencies) {
+            CryptoCurrencies.BTC -> amountSent.getAmountRangeBtc()
+            CryptoCurrencies.ETHER -> amountSent.getAmountRangeEth()
+            else -> throw IllegalArgumentException("BCH not yet supported")
+        }
+
+        putCustomAttribute("Amount", amountRange)
+        return this
+    }
+
+    fun putCurrencyType(cryptoCurrencies: CryptoCurrencies): PaymentSentEvent {
+        putCustomAttribute("Currency", cryptoCurrencies.symbol)
         return this
     }
 
@@ -101,5 +114,19 @@ enum class ContactEventType(name: String) {
     PAYMENT_BROADCASTED("Payment broadcasted"),
     INVITE_SENT("Invite sent"),
     INVITE_ACCEPTED("Invite accepted")
+}
+
+class ShapeShiftEvent : CustomEvent("ShapeShift Used") {
+
+    fun putPair(from: String, to: String): ShapeShiftEvent {
+        putCustomAttribute("Currency Pair", "$from to $to")
+        return this
+    }
+
+    fun putSuccess(successful: Boolean): ShapeShiftEvent {
+        putCustomAttribute("Success", if (successful) "true" else "false")
+        return this
+    }
+
 }
 

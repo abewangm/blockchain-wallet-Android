@@ -3,6 +3,7 @@ apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-allopen'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'com.novoda.build-properties'
 apply from: '../quality/jacoco.gradle'
 apply from: '../quality/releasechecks.gradle'
@@ -19,14 +20,15 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 26
-        versionCode 283
-        versionName "6.8.2"
+        versionCode 291
+        versionName "6.9.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
         // Flag to hide or show the Contacts feature
         buildConfigBoolean "CONTACTS_ENABLED", false
-        manifestPlaceholders = [ FABRIC_API_KEY : buildProperties.secrets['fabricApiKey'].string ]
+        buildConfigProperty "SHAPE_SHIFT_API_KEY", buildProperties.secrets['shapeShiftApiKey']
+        manifestPlaceholders = [FABRIC_API_KEY: buildProperties.secrets['fabricApiKey'].string]
     }
     buildTypes {
         release {
@@ -35,13 +37,11 @@ android {
             zipAlignEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            manifestPlaceholders = [ GOOGLE_MAPS_KEY : buildProperties.secrets['mapsReleaseKey'].string ]
             multiDexEnabled false
             buildConfigBoolean "DOGFOOD", false
             buildConfigBoolean "USE_CRASHLYTICS", true
         }
         debug {
-            manifestPlaceholders = [ GOOGLE_MAPS_KEY : buildProperties.secrets['mapsDebugKey'].string ]
             multiDexEnabled true
             buildConfigBoolean "DOGFOOD", false
             buildConfigBoolean "USE_CRASHLYTICS", false
@@ -153,6 +153,10 @@ allOpen {
     annotation("piuk.blockchain.android.util.annotations.Mockable")
 }
 
+androidExtensions {
+    experimental = true
+}
+
 afterEvaluate {
     // Ensure correct JSON file is being used when signing the app
     assembleEnvProdMinApi16Release.dependsOn checkFirebaseConfig
@@ -171,6 +175,9 @@ dependencies {
     implementation "com.android.support:design:$supportVersion"
     implementation "com.android.support:support-v13:$supportVersion"
     implementation "com.android.support:preference-v14:$supportVersion"
+    implementation "com.android.support:support-dynamic-animation:$supportVersion"
+    // Data Binding
+    kapt "com.android.databinding:compiler:$pluginVersion"
     // Play Services
     implementation "com.google.firebase:firebase-messaging:$googleServicesVersion"
     implementation "com.google.android.gms:play-services-maps:$googleServicesVersion"
@@ -205,7 +212,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
     // Dagger2
     implementation "com.google.dagger:dagger:$daggerVersion"
-    annotationProcessor "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     // Fingerprint authentication
     implementation 'com.mtramin:rxfingerprint:2.1.0'
     // Custom fonts
@@ -223,7 +230,7 @@ dependencies {
     // Charts
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     // Crash reporting
-    implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
         transitive = true
     }
     // Device specs
@@ -265,7 +272,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.22.1'
+        classpath 'io.fabric.tools:gradle:1.24.4'
         classpath 'com.novoda:gradle-build-properties-plugin:0.3'
     }
 }

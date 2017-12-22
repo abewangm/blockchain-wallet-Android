@@ -22,6 +22,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.DecimalFormat
@@ -64,7 +65,7 @@ class ReceivePresenter @Inject internal constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onSelectDefault(defaultAccountPosition)
             CryptoCurrencies.ETHER -> onEthSelected()
-            else -> throw IllegalArgumentException("BCC is not currently supported")
+            else -> throw IllegalArgumentException("BCH is not currently supported")
         }
     }
 
@@ -85,10 +86,11 @@ class ReceivePresenter @Inject internal constructor(
 
         selectedAccount = null
         view.updateReceiveLabel(
-                if (!legacyAddress.label.isNullOrEmpty())
+                if (!legacyAddress.label.isNullOrEmpty()) {
                     legacyAddress.label
-                else
+                } else {
                     legacyAddress.address
+                }
         )
 
         legacyAddress.address.let {
@@ -103,7 +105,11 @@ class ReceivePresenter @Inject internal constructor(
         view.setTabSelection(0)
         selectedAccount = account
         view.updateReceiveLabel(account.label)
-        payloadDataManager.getNextReceiveAddress(account)
+        view.showQrLoading()
+        payloadDataManager.updateAllTransactions()
+                .doOnError { Timber.wtf(it) }
+                .onErrorComplete()
+                .andThen(payloadDataManager.getNextReceiveAddress(account))
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnNext {
                     selectedAddress = it
@@ -139,10 +145,11 @@ class ReceivePresenter @Inject internal constructor(
         compositeDisposable.clear()
         view.displayBitcoinLayout()
         onAccountSelected(
-                if (defaultAccountPosition > -1)
+                if (defaultAccountPosition > -1) {
                     payloadDataManager.getAccount(defaultAccountPosition)
-                else
+                } else {
                     payloadDataManager.defaultAccount
+                }
         )
     }
 
@@ -194,7 +201,7 @@ class ReceivePresenter @Inject internal constructor(
         fiatAmount = monetaryUtil.getFiatFormat(fiatUnit)
                 .format(exchangeRate * (satoshis.toDouble() / 1e8))
 
-        fiatSymbol = exchangeRateFactory.getSymbol(fiatUnit)
+        fiatSymbol = monetaryUtil.getCurrencySymbol(fiatUnit, view.locale)
     }
 
     internal fun onShowBottomSheetSelected() {
@@ -295,6 +302,7 @@ class ReceivePresenter @Inject internal constructor(
         val amount = try {
             amountToSend.toDouble()
         } catch (nfe: NumberFormatException) {
+            Timber.e(nfe)
             0.0
         }
 

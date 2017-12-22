@@ -24,6 +24,7 @@ import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
@@ -51,6 +52,7 @@ class BalancePresenterTest {
     private var currencyState: CurrencyState = mock()
     private var rxBus: RxBus = mock()
     private var ethDataManager: EthDataManager = mock()
+    private var shapeShiftDataManager: ShapeShiftDataManager = mock()
 
     @Before
     fun setUp() {
@@ -66,7 +68,8 @@ class BalancePresenterTest {
                 stringUtils,
                 prefsUtil,
                 rxBus,
-                currencyState
+                currencyState,
+                shapeShiftDataManager
         )
         subject.initView(view)
     }
@@ -121,7 +124,7 @@ class BalancePresenterTest {
         verify(exchangeRateFactory).getLastEthPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(view).onViewTypeChanged(true, 0)
-        verify(view).onExchangeRateUpdated(2717.0, 318.0, true)
+        verify(view).onExchangeRateUpdated(2717.0, 318.0, true, mutableMapOf())
         verifyNoMoreInteractions(view)
     }
 
@@ -157,7 +160,7 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
         verify(view).setUiState(UiState.LOADING)
         verify(view).setUiState(UiState.CONTENT)
         verify(view).onTransactionsUpdated(listOf(transactionSummary))
@@ -195,7 +198,7 @@ class BalancePresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
         verify(view).setUiState(UiState.LOADING)
         verify(view).setUiState(UiState.EMPTY)
         verify(view).onTransactionsUpdated(emptyList())
@@ -294,7 +297,7 @@ class BalancePresenterTest {
         verify(exchangeRateFactory).getLastBtcPrice("USD")
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(view).isContactsEnabled
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
         verify(view).setUiState(UiState.CONTENT)
         verify(view, times(2)).onTransactionsUpdated(emptyList())
         verify(view).onContactsHashMapUpdated(any())
@@ -358,7 +361,7 @@ class BalancePresenterTest {
         verify(stringUtils).getString(R.string.contacts_transaction_history)
         verifyNoMoreInteractions(stringUtils)
         verify(view).isContactsEnabled
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
         verify(view, times(2)).setUiState(UiState.CONTENT)
         verify(view, times(2)).onTransactionsUpdated(any())
         verify(view).onContactsHashMapUpdated(HashMap())
@@ -386,7 +389,7 @@ class BalancePresenterTest {
         verify(currencyState).isDisplayingCryptoCurrency = true
         verifyNoMoreInteractions(accessState)
         verify(view).onViewTypeChanged(true, 0)
-        verify(view).onTotalBalanceUpdated("0.0 BTC")
+        verify(view).onTotalBalanceUpdated("0 BTC")
     }
 
     @Test

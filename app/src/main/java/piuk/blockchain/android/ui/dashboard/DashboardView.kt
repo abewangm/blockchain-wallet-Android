@@ -27,7 +27,7 @@ interface DashboardView : View {
 
     fun startBuyActivity()
 
-    fun startReceiveFragment()
+    fun startShapeShiftActivity()
 
     fun updateDashboardSelectedCurrency(cryptoCurrency: CryptoCurrencies)
 }

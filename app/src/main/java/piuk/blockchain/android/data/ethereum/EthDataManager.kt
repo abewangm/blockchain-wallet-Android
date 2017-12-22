@@ -6,13 +6,11 @@ import info.blockchain.wallet.ethereum.EthereumWallet
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.ethereum.data.EthLatestBlock
 import info.blockchain.wallet.ethereum.data.EthTransaction
-import info.blockchain.wallet.ethereum.data.EthTxDetails
 import info.blockchain.wallet.exceptions.HDWalletException
 import info.blockchain.wallet.exceptions.InvalidCredentialsException
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.functions.Consumer
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.DeterministicKey
 import org.web3j.protocol.core.methods.request.RawTransaction
@@ -20,10 +18,7 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.util.annotations.Mockable
-import retrofit2.HttpException
-import timber.log.Timber
 import java.math.BigInteger
 import java.util.*
 
@@ -100,10 +95,10 @@ class EthDataManager(
         val lastTxHash = ethDataStore.ethWallet?.lastTransactionHash
 
         return fetchEthAddress().flatMapIterable { it.getTransactions() }
-                .filter{ list -> list.hash == lastTxHash }
+                .filter { list -> list.hash == lastTxHash }
                 .toList()
                 .flatMapObservable {
-                    val originalSize = ethDataStore.ethAddressResponse?.getTransactions()?.size?: 0
+                    val originalSize = ethDataStore.ethAddressResponse?.getTransactions()?.size ?: 0
 
                     Observable.just(lastTxHash != null && originalSize != 0 && it.size == 0)
                 }
@@ -230,7 +225,7 @@ class EthDataManager(
                 val masterKey = payloadManager.payload.hdWallets[0].masterKey
                 ethWallet = EthereumWallet(masterKey, defaultLabel)
                 ethWallet.save()
-            }catch (e : HDWalletException) {
+            } catch (e: HDWalletException) {
                 //Wallet private key unavailable. First decrypt with second password.
                 throw InvalidCredentialsException(e.message)
             }

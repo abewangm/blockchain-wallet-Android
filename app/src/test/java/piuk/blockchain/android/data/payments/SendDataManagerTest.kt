@@ -132,13 +132,13 @@ class SendDataManagerTest : RxTest() {
         val mockUnspent: UnspentOutputs = mock()
         val mockFee: BigInteger = mock()
         val mockSweepableCoins: Pair<BigInteger, BigInteger> = mock()
-        whenever(mockPaymentService.getSweepableCoins(mockUnspent, mockFee))
+        whenever(mockPaymentService.getMaximumAvailable(mockUnspent, mockFee))
                 .thenReturn(mockSweepableCoins)
         // Act
-        val result = subject.getSweepableCoins(mockUnspent, mockFee)
+        val result = subject.getMaximumAvailable(mockUnspent, mockFee)
         // Assert
         result shouldEqual mockSweepableCoins
-        verify(mockPaymentService).getSweepableCoins(mockUnspent, mockFee)
+        verify(mockPaymentService).getMaximumAvailable(mockUnspent, mockFee)
         verifyNoMoreInteractions(mockPaymentService)
     }
 

@@ -209,6 +209,36 @@ class MonetaryUtil(unit: Int) {
         }
     }
 
+    /**
+     * Accepts a [Double] value in fiat currency and returns a [String] formatted to the region
+     * with the correct currency symbol. For example, 1.2345 with country code "USD" and locale
+     * [Locale.UK] would return "US$1.23".
+     *
+     * @param amount The amount of fiat currency to be formatted as a [Double]
+     * @param currencyCode The 3-letter currency code, eg. "GBP"
+     * @param locale The current device [Locale]
+     * @return The formatted currency [String]
+     */
+    fun getFiatDisplayString(amount: Double, currencyCode: String, locale: Locale): String {
+        val numberFormat = NumberFormat.getCurrencyInstance(locale)
+        val decimalFormatSymbols = (numberFormat as DecimalFormat).decimalFormatSymbols
+        numberFormat.decimalFormatSymbols = decimalFormatSymbols.apply {
+            this.currencySymbol = getCurrencySymbol(currencyCode, locale)
+        }
+        return numberFormat.format(amount)
+    }
+
+    /**
+     * Returns the symbol for the chosen currency, based on the passed currency code and the chosen
+     * device [Locale].
+     *
+     * @param currencyCode The 3-letter currency code, eg. "GBP"
+     * @param locale The current device [Locale]
+     * @return The correct currency symbol (eg. "$")
+     */
+    fun getCurrencySymbol(currencyCode: String, locale: Locale): String =
+            Currency.getInstance(currencyCode).getSymbol(locale)
+
     companion object {
         /**
          * BTC Unit type constants

@@ -163,6 +163,11 @@ public class PasswordRequiredActivity extends BaseMvpActivity<PasswordRequiredVi
     }
 
     @Override
+    protected boolean enforceFlagSecure() {
+        return true;
+    }
+
+    @Override
     protected PasswordRequiredPresenter createPresenter() {
         return passwordRequiredPresenter;
     }

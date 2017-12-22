@@ -3,10 +3,11 @@ package piuk.blockchain.android.ui.receive
 import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
+import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
-import piuk.blockchain.android.data.ethereum.EthDataStore
+import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -14,6 +15,10 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import java.util.*
 
 @Mockable
 class WalletAccountHelper(
@@ -22,13 +27,14 @@ class WalletAccountHelper(
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState,
-        private val ethDataStore: EthDataStore
+        private val ethDataManager: EthDataManager
 ) {
     private val btcUnitType: Int by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC) }
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(btcUnitType) }
     private val btcUnit: String by unsafeLazy { monetaryUtil.getBtcUnit(btcUnitType) }
     private val fiatUnit: String by unsafeLazy { prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY) }
     private val btcExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastBtcPrice(fiatUnit) }
+    private val ethExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastEthPrice(fiatUnit) }
 
     /**
      * Returns a list of [ItemAccount] objects containing both HD accounts and [LegacyAddress]
@@ -36,17 +42,15 @@ class WalletAccountHelper(
      *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getAccountItems(): List<ItemAccount> {
-        return when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> mutableListOf<ItemAccount>().apply {
-                // V3
-                addAll(getHdAccounts())
-                // V2l
-                addAll(getLegacyAddresses())
-            }.toList()
+    fun getAccountItems(): List<ItemAccount> = when (currencyState.cryptoCurrency) {
+        CryptoCurrencies.BTC -> mutableListOf<ItemAccount>().apply {
+            // V3
+            addAll(getHdAccounts())
+            // V2l
+            addAll(getLegacyAddresses())
+        }.toList()
 
-            else -> getEthAccount().toList()
-        }
+        else -> getEthAccount().toList()
     }
 
     /**
@@ -54,19 +58,21 @@ class WalletAccountHelper(
      *
      * @return Returns a list of [ItemAccount] objects
      */
-    fun getHdAccounts() = payloadManager.payload.hdWallets[0].accounts
-            // Skip archived account
-            .filterNot { it.isArchived }
-            .map {
-                ItemAccount(
-                        it.label,
-                        getAccountBalance(it, btcExchangeRate, fiatUnit, btcUnit),
-                        null,
-                        getAccountAbsoluteBalance(it),
-                        it,
-                        it.xpub
-                )
-            }
+    fun getHdAccounts(): List<ItemAccount> {
+        val list = payloadManager.payload?.hdWallets?.get(0)?.accounts ?: Collections.emptyList<Account>()
+        // Skip archived account
+        return list.filterNot { it.isArchived }
+                .map {
+                    ItemAccount(
+                            it.label,
+                            getAccountBalance(it, btcExchangeRate, fiatUnit, btcUnit),
+                            null,
+                            getAccountAbsoluteBalance(it),
+                            it,
+                            it.xpub
+                    )
+                }
+    }
 
     /**
      * Returns a list of [ItemAccount] objects containing only [LegacyAddress] objects.
@@ -116,11 +122,9 @@ class WalletAccountHelper(
         )
     } ?: emptyList()
 
-    fun getDefaultAccount(): ItemAccount {
-        return when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> getDefaultBtcAccount()
-            else -> getDefaultEthAccount()
-        }
+    fun getDefaultAccount(): ItemAccount = when (currencyState.cryptoCurrency) {
+        CryptoCurrencies.BTC -> getDefaultBtcAccount()
+        else -> getDefaultEthAccount()
     }
 
     fun getEthAccount() = mutableListOf<ItemAccount>().apply {
@@ -192,14 +196,31 @@ class WalletAccountHelper(
     }
 
     private fun getDefaultEthAccount(): ItemAccount {
-        val ethAccount = ethDataStore.ethWallet?.account
+        val ethModel = ethDataManager.getEthResponseModel()
+        val ethAccount = ethDataManager.getEthWallet()!!.account
+        val amount = Convert.fromWei(ethModel?.getTotalBalance().toString(), Convert.Unit.ETHER)
+        amount.setScale(8, RoundingMode.HALF_DOWN)
+
+        val displayString = if (currencyState.isDisplayingCryptoCurrency) {
+            val numberFormat = DecimalFormat.getInstance().apply {
+                minimumFractionDigits = 1
+                maximumFractionDigits = 8
+            }
+
+            "(${numberFormat.format(amount)} ETH)"
+        } else {
+            val fiatBalance = amount.multiply(BigDecimal.valueOf(ethExchangeRate))
+            "(${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit)"
+        }
+
         return ItemAccount(
                 ethAccount?.label,
-                "0 ETH",
+                displayString,
                 null,
                 0,
                 ethAccount,
-                ethAccount?.address)
+                ethAccount?.address
+        )
     }
 
 }

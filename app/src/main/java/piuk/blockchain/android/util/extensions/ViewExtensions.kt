@@ -3,6 +3,9 @@
 package piuk.blockchain.android.util.extensions
 
 import android.annotation.SuppressLint
+import android.support.animation.DynamicAnimation
+import android.support.animation.SpringAnimation
+import android.support.animation.SpringForce
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,8 +48,8 @@ fun ViewGroup.inflate(layoutId: Int, attachToRoot: Boolean = false): View {
 /**
  * Returns the current [String] entered into an [EditText]. Non-null, ie can return an empty String.
  */
-fun EditText.getTextString(): String {
-    return this.text.toString()
+fun EditText?.getTextString(): String {
+    return this?.text.toString()
 }
 
 /**
@@ -59,7 +62,28 @@ fun EditText.getTextString(): String {
 fun EditText.disableSoftKeyboard() {
     try {
         showSoftInputOnFocus = false
-    } catch (e : Exception) {
+    } catch (e: Exception) {
         Timber.e(e)
+    }
+}
+
+/**
+ * Returns a physics-based [SpringAnimation] for a given [View].
+ *
+ * @param property The [DynamicAnimation.ViewProperty] you wish to animate, such as rotation,
+ * X or Y position etc.
+ * @param finalPosition The end position for the [View] after animation complete
+ * @param stiffness The stiffness of the animation, see [SpringForce]
+ * @param dampingRatio The damping ratio of the animation, see [SpringForce]
+ */
+fun View.createSpringAnimation(
+        property: DynamicAnimation.ViewProperty,
+        finalPosition: Float,
+        stiffness: Float,
+        dampingRatio: Float
+) = SpringAnimation(this, property).apply {
+    spring = SpringForce(finalPosition).apply {
+        this.stiffness = stiffness
+        this.dampingRatio = dampingRatio
     }
 }

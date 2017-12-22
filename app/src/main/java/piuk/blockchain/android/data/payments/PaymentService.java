@@ -51,15 +51,15 @@ public class PaymentService {
             HashMap<String, BigInteger> receivers = new HashMap<>();
             receivers.put(toAddress, bigIntAmount);
 
-            Transaction tx = payment.makeTransaction(
+            Transaction tx = payment.makeSimpleTransaction(
                     unspentOutputBundle.getSpendableOutputs(),
                     receivers,
                     bigIntFee,
                     changeAddress);
 
-            payment.signTransaction(tx, keys);
+            payment.signSimpleTransaction(tx, keys);
 
-            Response<ResponseBody> exe = payment.publishTransaction(tx).execute();
+            Response<ResponseBody> exe = payment.publishSimpleTransaction(tx).execute();
 
             if (exe.isSuccessful()) {
                 if (!observableOnSubscribe.isDisposed()) {
@@ -125,9 +125,9 @@ public class PaymentService {
      * @return A {@link Pair} object, where left = the sweepable amount as a {@link BigInteger},
      * right = the absolute fee needed to sweep those coins, also as a {@link BigInteger}
      */
-    Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs unspentCoins,
-                                                   BigInteger feePerKb) {
-        return payment.getSweepableCoins(unspentCoins, feePerKb);
+    Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs unspentCoins,
+                                                     BigInteger feePerKb) {
+        return payment.getMaximumAvailable(unspentCoins, feePerKb);
     }
 
     /**

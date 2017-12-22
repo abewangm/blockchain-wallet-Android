@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:id="@+id/relative_layout"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:gravity="bottom"
+        android:background="@color/primary_gray_lightest"
+        android:foreground="?attr/selectableItemBackground"
+        android:theme="@style/PlainTheme">
+
+        <TextView
+            android:id="@+id/header_1"
+            android:layout_alignParentLeft="true"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingLeft="16dp"
+            android:paddingBottom="8dp"
+            android:text="@string/shapeshift_order_history"
+            android:textAllCaps="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/header_2"
+            android:layout_alignParentRight="true"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:paddingRight="16dp"
+            android:paddingBottom="8dp"
+            android:text="@string/shapeshift_incoming"
+            android:textAllCaps="true"
+            android:textSize="14sp" />
+
+    </RelativeLayout>
+</layout>

@@ -45,6 +45,8 @@ class BackupWalletActivity : BaseAuthActivity() {
         }
     }
 
+    override fun enforceFlagSecure() = true
+
     override fun onSupportNavigateUp() = consume { onBackPressed() }
 
     private fun isBackedUp() = PayloadManager.getInstance().payload != null

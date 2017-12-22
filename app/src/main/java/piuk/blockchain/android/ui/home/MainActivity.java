@@ -11,11 +11,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Typeface;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -83,6 +81,7 @@ import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
 import piuk.blockchain.android.ui.receive.ReceiveFragment;
 import piuk.blockchain.android.ui.send.SendFragment;
 import piuk.blockchain.android.ui.settings.SettingsActivity;
+import piuk.blockchain.android.ui.shapeshift.overview.ShapeShiftActivity;
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity;
 import piuk.blockchain.android.ui.zxing.CaptureActivity;
 import piuk.blockchain.android.util.AndroidUtils;
@@ -108,10 +107,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
     public static final String ACTION_RECEIVE_ETH = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE_ETH";
     public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
+    public static final String ACTION_SHAPESHIFT = "info.blockchain.wallet.ui.BalanceFragment.SHAPESHIFT";
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
-    private static final int MERCHANT_ACTIVITY = 1;
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
 
     public static final String EXTRA_URI = "transaction_uri";
@@ -139,7 +138,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;
     private boolean initialized;
-    @Thunk CryptoCurrencies selectedCurrency = CryptoCurrencies.BTC;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -147,14 +145,15 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             if (intent.getAction().equals(ACTION_SEND) && getActivity() != null) {
                 requestScan();
             } else if (intent.getAction().equals(ACTION_RECEIVE) && getActivity() != null) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.BTC);
                 binding.bottomNavigation.setCurrentItem(3);
             } else if (intent.getAction().equals(ACTION_RECEIVE_ETH) && getActivity() != null) {
-                selectedCurrency = CryptoCurrencies.ETHER;
+                getPresenter().setCryptoCurrency(CryptoCurrencies.ETHER);
                 binding.bottomNavigation.setCurrentItem(3);
-                // Reset after selection, this is a temporary fix until we handle system-wide currency prefs properly
-                selectedCurrency = CryptoCurrencies.BTC;
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 BuyActivity.start(MainActivity.this);
+            } else if (intent.getAction().equals(ACTION_SHAPESHIFT) && getActivity() != null) {
+                ShapeShiftActivity.start(MainActivity.this);
             }
         }
     };
@@ -176,7 +175,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                     onStartBalanceFragment(paymentMade);
                     break;
                 case 3:
-                    startReceiveFragment(selectedCurrency);
+                    startReceiveFragment();
                     break;
             }
         }
@@ -198,11 +197,13 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
         IntentFilter filterReceiveEth = new IntentFilter(ACTION_RECEIVE_ETH);
         IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
+        IntentFilter filterShapeshift = new IntentFilter(ACTION_SHAPESHIFT);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveEth);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterShapeshift);
 
         appUtil = new AppUtil(this);
         balanceFragment = BalanceFragment.newInstance(false);
@@ -415,6 +416,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             case R.id.nav_backup:
                 startActivityForResult(new Intent(this, BackupWalletActivity.class), REQUEST_BACKUP);
                 break;
+            case R.id.nav_exchange:
+                ShapeShiftActivity.start(this);
+                break;
             case R.id.nav_addresses:
                 startActivityForResult(new Intent(this, AccountActivity.class), ACCOUNT_EDIT);
                 break;
@@ -426,9 +430,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                 break;
             case R.id.login_web_wallet:
                 PairingCodeActivity.start(this);
-                break;
-            case R.id.nav_map:
-                startMerchantActivity();
                 break;
             case R.id.nav_settings:
                 startActivityForResult(new Intent(this, SettingsActivity.class), SETTINGS_EDIT);
@@ -486,30 +487,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         }
     }
 
-    private void startMerchantActivity() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            PermissionUtil.requestLocationPermissionFromActivity(binding.getRoot(), this);
-        } else {
-            LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-            boolean enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-            if (!enabled) {
-                String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
-                new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                        .setMessage(getActivity().getString(R.string.enable_geo))
-                        .setPositiveButton(android.R.string.ok, (d, id) ->
-                                getActivity().startActivity(new Intent(action)))
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .create()
-                        .show();
-            } else {
-                Intent intent = new Intent(MainActivity.this, piuk.blockchain.android.ui.directory.MapActivity.class);
-                startActivityForResult(intent, MERCHANT_ACTIVITY);
-            }
-        }
-    }
-
     @Thunk
     void requestScan() {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -534,15 +511,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             } else {
                 // Permission request was denied.
             }
-        }
-        if (requestCode == PermissionUtil.PERMISSION_REQUEST_LOCATION) {
-            if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                startMerchantActivity();
-            } else {
-                // Permission request was denied.
-            }
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
@@ -589,15 +557,17 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void showProgressDialog(@StringRes int message) {
         hideProgressDialog();
-        materialProgressDialog = new MaterialProgressDialog(this);
-        materialProgressDialog.setCancelable(false);
-        materialProgressDialog.setMessage(message);
-        materialProgressDialog.show();
+        if (!isFinishing()) {
+            materialProgressDialog = new MaterialProgressDialog(this);
+            materialProgressDialog.setCancelable(false);
+            materialProgressDialog.setMessage(message);
+            materialProgressDialog.show();
+        }
     }
 
     @Override
     public void hideProgressDialog() {
-        if (materialProgressDialog != null) {
+        if (!isFinishing() && materialProgressDialog != null) {
             materialProgressDialog.dismiss();
             materialProgressDialog = null;
         }
@@ -796,9 +766,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         addFragmentToBackStack(sendFragment);
     }
 
-    private void startReceiveFragment(CryptoCurrencies selectedCurrency) {
+    private void startReceiveFragment() {
         ReceiveFragment receiveFragment =
-                ReceiveFragment.newInstance(getSelectedAccountFromFragments(), selectedCurrency);
+                ReceiveFragment.newInstance(getSelectedAccountFromFragments());
         addFragmentToBackStack(receiveFragment);
     }
 
@@ -903,6 +873,18 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void showToast(@StringRes int message, @ToastCustom.ToastType String toastType) {
         ToastCustom.makeText(this, getString(message), ToastCustom.LENGTH_SHORT, toastType);
+    }
+
+    @Override
+    public void showShapeshift() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_exchange).setVisible(true);
+    }
+
+    @Override
+    public void hideShapeshift() {
+        Menu menu = binding.navigationView.getMenu();
+        menu.findItem(R.id.nav_exchange).setVisible(false);
     }
 
     @Override

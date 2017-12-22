@@ -38,7 +38,6 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
-import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
@@ -62,14 +61,15 @@ import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.io.IOException
 import java.text.DecimalFormatSymbols
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveView, NumericKeyboardCallback {
 
-    override val isContactsEnabled: Boolean
-        get() = BuildConfig.CONTACTS_ENABLED
+    override val isContactsEnabled: Boolean = BuildConfig.CONTACTS_ENABLED
+    override val locale: Locale = Locale.getDefault()
 
     @Inject lateinit var receivePresenter: ReceivePresenter
     private var bottomSheetDialog: BottomSheetDialog? = null
@@ -605,7 +605,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     private fun setCustomKeypad() {
         custom_keyboard.apply {
-            setCallback(mvpView)
+            setCallback(this@ReceiveFragment)
             setDecimalSeparator(defaultDecimalSeparator)
             // Enable custom keypad and disables default keyboard from popping up
             enableOnView(amount_container.amountCrypto)
@@ -699,14 +699,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     companion object {
 
         private val ARG_SELECTED_ACCOUNT_POSITION = "ARG_SELECTED_ACCOUNT_POSITION"
-        private val ARG_SELECTED_CRYPTOCURRENCY = "ARG_SELECTED_CRYPTOCURRENCY"
         private val COOL_DOWN_MILLIS = 2 * 1000
 
         @JvmStatic
-        fun newInstance(selectedAccountPosition: Int, cryptoCurrency: CryptoCurrencies) = ReceiveFragment().apply {
+        fun newInstance(selectedAccountPosition: Int) = ReceiveFragment().apply {
             arguments = Bundle().apply {
                 putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition)
-                putSerializable(ARG_SELECTED_CRYPTOCURRENCY, cryptoCurrency)
             }
         }
     }

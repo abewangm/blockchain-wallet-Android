@@ -7,7 +7,6 @@ import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
-import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.util.MonetaryUtil
 
 interface BalanceView : View {
@@ -20,7 +19,7 @@ interface BalanceView : View {
 
     fun onTotalBalanceUpdated(balance: String)
 
-    fun onExchangeRateUpdated(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean)
+    fun onExchangeRateUpdated(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean, txNoteMap: MutableMap<String, String>)
 
     fun showProgressDialog()
 
