@@ -6,8 +6,6 @@ import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.text.Spannable
-import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -26,7 +24,6 @@ import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
-import timber.log.Timber
 import java.math.BigDecimal
 import java.text.DecimalFormat
 
@@ -101,7 +98,7 @@ class DisplayableDelegate<in T>(
 
         } ?: viewHolder.note.gone()
 
-        viewHolder.result.text = getDisplaySpannable(
+        viewHolder.result.text = getDisplayText(
                 tx.cryptoCurrency,
                 tx.total.toDouble(),
                 fiatBalance.toDouble(),
@@ -191,45 +188,27 @@ class DisplayableDelegate<in T>(
         )
     }
 
-    private fun getDisplaySpannable(
+    private fun getDisplayText(
             cryptoCurrency: CryptoCurrencies,
             cryptoAmount: Double,
             fiatAmount: Double,
             fiatString: String
-    ): Spannable {
-        val spannable: Spannable
+    ): String {
+        var result: String
         if (showCrypto) {
             if (cryptoCurrency == CryptoCurrencies.BTC) {
-                spannable = Spannable.Factory.getInstance().newSpannable(
-                        "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(cryptoAmount))} ${getDisplayUnits()}")
-                spannable.setSpan(
-                        RelativeSizeSpan(0.67f),
-                        spannable.length - getDisplayUnits().length,
-                        spannable.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                result = "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(cryptoAmount))} ${getDisplayUnits()}"
             } else {
                 val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
                         .run { format(cryptoAmount / 1e18) }
 
-                spannable = Spannable.Factory.getInstance().newSpannable(
-                        "$number ETH")
-                spannable.setSpan(
-                        RelativeSizeSpan(0.67f),
-                        spannable.length - "ETH".length,
-                        spannable.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                result = "$number ETH"
             }
         } else {
-            spannable = Spannable.Factory.getInstance().newSpannable(
-                    "${monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount))} $fiatString")
-            spannable.setSpan(
-                    RelativeSizeSpan(0.67f),
-                    spannable.length - 3,
-                    spannable.length,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            result = "${monetaryUtil.getFiatFormat(fiatString).format(Math.abs(fiatAmount))} $fiatString"
         }
 
-        return spannable
+        return result
     }
 
     private fun getDisplayUnits(): String =

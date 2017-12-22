@@ -14,6 +14,8 @@ interface NewExchangeView : View {
 
     val shapeShiftApiKey: String
 
+    val isBuyPermitted: Boolean
+
     fun updateUi(
             fromCurrency: CryptoCurrencies,
             fromLabel: String,
@@ -54,5 +56,7 @@ interface NewExchangeView : View {
     fun showQuoteInProgress(inProgress: Boolean)
 
     fun launchConfirmationPage(shapeShiftData: ShapeShiftData)
+
+    fun showNoFunds(canBuy: Boolean)
 
 }

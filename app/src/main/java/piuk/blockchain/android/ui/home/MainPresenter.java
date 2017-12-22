@@ -17,6 +17,7 @@ import org.bitcoinj.crypto.DeterministicKey;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.inject.Inject;
 
@@ -134,7 +135,11 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .firstOrError()
                 .subscribe(
                         getView()::showCustomPrompt,
-                        Timber::e);
+                        throwable -> {
+                            if (!(throwable instanceof NoSuchElementException)) {
+                                Timber.e(throwable);
+                            }
+                        });
     }
 
     @Override
@@ -235,13 +240,21 @@ public class MainPresenter extends BasePresenter<MainView> {
                 }, throwable -> {
                     //noinspection StatementWithEmptyBody
                     if (throwable instanceof InvalidCredentialsException || throwable instanceof HDWalletException) {
-                        // Wallet double encrypted and needs to be decrypted to set up ether wallet, contacts etc
-                        getView().showSecondPasswordDialog();
+                        if (payloadDataManager.isDoubleEncrypted()) {
+                            // Wallet double encrypted and needs to be decrypted to set up ether wallet, contacts etc
+                            getView().showSecondPasswordDialog();
+                        } else {
+                            logException(throwable);
+                        }
                     } else {
-                        Logging.INSTANCE.logException(throwable);
-                        getView().showMetadataNodeFailure();
+                        logException(throwable);
                     }
                 });
+    }
+
+    private void logException(Throwable throwable) {
+        Logging.INSTANCE.logException(throwable);
+        getView().showMetadataNodeFailure();
     }
 
     private void storeSwipeReceiveAddresses() {
@@ -455,4 +468,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     CryptoCurrencies getCurrentCryptoCurrency() {
         return currencyState.getCryptoCurrency();
     }
+
+    void setCryptoCurrency(CryptoCurrencies cryptoCurrency) {
+        currencyState.setCryptoCurrency(cryptoCurrency);
+    }
+
 }

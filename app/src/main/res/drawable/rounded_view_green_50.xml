@@ -4,8 +4,8 @@
     <solid android:color="@color/product_green_received_50" />
 
     <padding
-        android:left="1dp"
-        android:right="1dp"
+        android:left="8dp"
+        android:right="8dp"
         android:top="1dp" />
 
     <corners android:radius="5dp" />
