@@ -20,7 +20,7 @@ fun BigInteger.getAmountRangeBtc(): String {
 }
 
 fun BigInteger.getAmountRangeEth(): String {
-    val amountEth = Convert.fromWei(BigDecimal(this), Convert.Unit.WEI)
+    val amountEth = Convert.fromWei(BigDecimal(this), Convert.Unit.ETHER)
 
     return when (amountEth.toLong()) {
         in 0.0..0.05 -> "0 - 0.05 ETH"

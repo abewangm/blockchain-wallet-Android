@@ -1,7 +1,7 @@
 ext.versions = [
         androidPlugin   : '3.0.1',
 
-        kotlin          : '1.2.0',
+        kotlin          : '1.2.10',
 
         supportLibs     : '27.0.2',
         googleServices  : '11.6.2',
