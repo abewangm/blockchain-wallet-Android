@@ -12,12 +12,10 @@ import android.support.v7.widget.AppCompatSpinner
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
-import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
@@ -29,6 +27,7 @@ import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
+import piuk.blockchain.android.ui.customviews.CurrencySelectionListener
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.receive.ReceiveFragment
@@ -37,9 +36,11 @@ import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
-import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -61,7 +62,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_INTENT && activity != null) {
-                tabs?.post { tabs.getTabAt(0)?.select() }
+                updateSelectedCurrency(CryptoCurrencies.BTC)
                 recyclerview?.scrollToPosition(0)
                 presenter.onViewReady()
             }
@@ -93,43 +94,31 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         )
 
         textview_balance.setOnClickListener { presenter.invertViewType() }
+        currency_header.setSelectionListener(object : CurrencySelectionListener {
+            override fun onCurrencyClicked(cryptoCurrency: CryptoCurrencies) {
+                presenter.updateSelectedCurrency(cryptoCurrency)
+            }
+        })
 
         setUiState(UiState.LOADING)
-
-        tabs.apply {
-            addTab(tabs.newTab().setText(R.string.bitcoin))
-            addTab(tabs.newTab().setText(R.string.ether))
-            setOnTabSelectedListener {
-                if (it == 1) {
-                    presenter.updateSelectedCurrency(CryptoCurrencies.ETHER)
-                } else {
-                    presenter.updateSelectedCurrency(CryptoCurrencies.BTC)
-                }
-            }
-        }
-
         onViewReady()
     }
 
-    override fun updateSelectedCurrency(cryptoCurrencies: CryptoCurrencies) {
-        when (cryptoCurrencies) {
-            CryptoCurrencies.BTC -> tabs?.getTabAt(0)?.select()
-            CryptoCurrencies.ETHER -> tabs?.getTabAt(1)?.select()
-            else -> throw IllegalArgumentException("BCH is not currently supported")
-        }
+    override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
     }
 
     override fun showAccountSpinner() {
-        if (accountsAdapter?.count ?: 1 > 1) {
-            accounts_spinner.visible()
-        } else if (accountsAdapter?.count ?: 1 == 1) {
-            accounts_spinner.setSelection(0, false)
-            accounts_spinner.invisible()
-        }
+//        if (accountsAdapter?.count ?: 1 > 1) {
+//            accounts_spinner.visible()
+//        } else if (accountsAdapter?.count ?: 1 == 1) {
+//            accounts_spinner.setSelection(0, false)
+//            accounts_spinner.invisible()
+//        }
     }
 
     override fun hideAccountSpinner() {
-        accounts_spinner.invisible()
+//        accounts_spinner.invisible()
     }
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
@@ -168,35 +157,35 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean
     ) {
-        if (accountsAdapter == null) {
-            accountsAdapter = BalanceHeaderAdapter(
-                    context,
-                    R.layout.spinner_balance_header,
-                    accounts,
-                    isBtc,
-                    monetaryUtil,
-                    fiat,
-                    lastBtcPrice
-            ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
-
-            accounts_spinner.adapter = accountsAdapter
-        }
-
-        if (accounts.isNotEmpty()) accounts_spinner.setSelection(0, false)
-
-        if (accounts.size > 1) {
-            accounts_spinner.visible()
-        } else if (accounts.isNotEmpty()) {
-            accounts_spinner.invisible()
-        }
-        accounts_spinner.setOnTouchListener({ _, event ->
-            event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
-        })
-
-        accounts_spinner.onItemSelectedListener = onItemSelectedListener {
-            presenter.onAccountChosen(it)
-            recyclerview.scrollToPosition(0)
-        }
+//        if (accountsAdapter == null) {
+//            accountsAdapter = BalanceHeaderAdapter(
+//                    context,
+//                    R.layout.spinner_balance_header,
+//                    accounts,
+//                    isBtc,
+//                    monetaryUtil,
+//                    fiat,
+//                    lastBtcPrice
+//            ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
+//
+//            accounts_spinner.adapter = accountsAdapter
+//        }
+//
+//        if (accounts.isNotEmpty()) accounts_spinner.setSelection(0, false)
+//
+//        if (accounts.size > 1) {
+//            accounts_spinner.visible()
+//        } else if (accounts.isNotEmpty()) {
+//            accounts_spinner.invisible()
+//        }
+//        accounts_spinner.setOnTouchListener({ _, event ->
+//            event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
+//        })
+//
+//        accounts_spinner.onItemSelectedListener = onItemSelectedListener {
+//            presenter.onAccountChosen(it)
+//            recyclerview.scrollToPosition(0)
+//        }
     }
 
     override fun onTotalBalanceUpdated(balance: String) {
@@ -429,13 +418,14 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
      * instead.
      */
     fun getSelectedAccountPosition(): Int {
-        var position = accounts_spinner.selectedItemPosition
-        if (position >= accounts_spinner.count - 1) {
-            // End of list is imported addresses, ignore
-            position = 0
-        }
-
-        return position - 1
+//        var position = accounts_spinner.selectedItemPosition
+//        if (position >= accounts_spinner.count - 1) {
+//            // End of list is imported addresses, ignore
+//            position = 0
+//        }
+//
+//        return position - 1
+        return 0
     }
 
     private fun setShowRefreshing(showRefreshing: Boolean) {
@@ -445,15 +435,19 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private fun onEmptyState() {
         setShowRefreshing(false)
         no_transaction_include.visible()
-        if (tabs.selectedTabPosition == 0) {
-            button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
-            button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
-            description.setText(R.string.transaction_occur_when_bitcoin)
-        } else {
-            button_get_bitcoin.setText(R.string.onboarding_get_eth)
-            button_get_bitcoin.setOnClickListener { startReceiveFragmentEth() }
-            description.setText(R.string.transaction_occur_when_eth)
+
+        when (currency_header.selectedCurrency) {
+        // TODO
         }
+//        if (tabs.selectedTabPosition == 0) {
+//            button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
+//            button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
+//            description.setText(R.string.transaction_occur_when_bitcoin)
+//        } else {
+//            button_get_bitcoin.setText(R.string.onboarding_get_eth)
+//            button_get_bitcoin.setOnClickListener { startReceiveFragmentEth() }
+//            description.setText(R.string.transaction_occur_when_eth)
+//        }
     }
 
     private fun startReceiveFragmentEth() {

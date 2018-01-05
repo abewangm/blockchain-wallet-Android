@@ -15,7 +15,7 @@ buildProperties {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.1'
+    buildToolsVersion '27.0.3'
     dexOptions.javaMaxHeapSize "3g"
 
     defaultConfig {
@@ -166,7 +166,7 @@ afterEvaluate {
 dependencies {
     // Blockchain libraries
     implementation files('libs/MyWalletHD.jar')
-    implementation files('libs/api-client-0.1.15-SNAPSHOT.jar')
+    implementation files('libs/api-client-0.1.16-SNAPSHOT.jar')
     // Kotlin
     implementation libraries.kotlin
     // Support Libs

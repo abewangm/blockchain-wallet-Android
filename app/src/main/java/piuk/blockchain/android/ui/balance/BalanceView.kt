@@ -71,7 +71,7 @@ interface BalanceView : View {
 
     fun startReceiveFragment()
 
-    fun updateSelectedCurrency(cryptoCurrencies: CryptoCurrencies)
+    fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies)
 
     fun hideAccountSpinner()
 

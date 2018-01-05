@@ -344,6 +344,8 @@ class BalancePresenter @Inject constructor(
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         currencyState.cryptoCurrency = cryptoCurrency
+        // Kill any requests in flight
+        compositeDisposable.clear()
 
         when (cryptoCurrency) {
             CryptoCurrencies.BTC -> onAccountChosen(0)
