@@ -13,7 +13,7 @@ ext.versions = [
         retrofit        : '2.3.0',
         okHttp          : '3.9.0',
         dagger          : '2.12',
-        rxJava          : '2.1.7',
+        rxJava          : '2.1.8',
         rxAndroid       : '2.0.1',
         rxBinding       : '2.0.0',
         rxFingerprint   : '2.1.0',
@@ -32,7 +32,7 @@ ext.versions = [
         countryPicker   : '1.1.7',
         zxing           : '3.3.0',
 
-        timber          : '4.5.1',
+        timber          : '4.6.0',
         slf4j           : '1.7.20',
         crashlytics     : '2.8.0',
 

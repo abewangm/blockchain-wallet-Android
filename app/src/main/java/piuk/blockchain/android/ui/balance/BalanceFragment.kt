@@ -12,10 +12,12 @@ import android.support.v7.widget.AppCompatSpinner
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
+import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
@@ -27,7 +29,6 @@ import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
-import piuk.blockchain.android.ui.customviews.CurrencySelectionListener
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.receive.ReceiveFragment
@@ -46,10 +47,8 @@ import javax.inject.Inject
 @Suppress("MemberVisibilityCanPrivate")
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 
-    override val isContactsEnabled: Boolean
-        get() = BuildConfig.CONTACTS_ENABLED
-    override val shouldShowBuy: Boolean
-        get() = AndroidUtils.is19orHigher()
+    override val isContactsEnabled = BuildConfig.CONTACTS_ENABLED
+    override val shouldShowBuy = AndroidUtils.is19orHigher()
 
     @Inject lateinit var balancePresenter: BalancePresenter
     // Adapters
@@ -94,14 +93,11 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         )
 
         textview_balance.setOnClickListener { presenter.invertViewType() }
-        currency_header.setSelectionListener(object : CurrencySelectionListener {
-            override fun onCurrencyClicked(cryptoCurrency: CryptoCurrencies) {
-                presenter.updateSelectedCurrency(cryptoCurrency)
-            }
-        })
+        currency_header.setSelectionListener { presenter.updateSelectedCurrency(it) }
 
         setUiState(UiState.LOADING)
         onViewReady()
+        presenter.chooseDefaultAccount()
     }
 
     override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
@@ -109,16 +105,16 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun showAccountSpinner() {
-//        if (accountsAdapter?.count ?: 1 > 1) {
-//            accounts_spinner.visible()
-//        } else if (accountsAdapter?.count ?: 1 == 1) {
-//            accounts_spinner.setSelection(0, false)
-//            accounts_spinner.invisible()
-//        }
+        if (accountsAdapter?.count ?: 1 > 1) {
+            layout_spinner.visible()
+        } else if (accountsAdapter?.count ?: 1 == 1) {
+            accounts_spinner.setSelection(0, false)
+            layout_spinner.gone()
+        }
     }
 
     override fun hideAccountSpinner() {
-//        accounts_spinner.invisible()
+        layout_spinner.gone()
     }
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
@@ -157,35 +153,35 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             monetaryUtil: MonetaryUtil,
             isBtc: Boolean
     ) {
-//        if (accountsAdapter == null) {
-//            accountsAdapter = BalanceHeaderAdapter(
-//                    context,
-//                    R.layout.spinner_balance_header,
-//                    accounts,
-//                    isBtc,
-//                    monetaryUtil,
-//                    fiat,
-//                    lastBtcPrice
-//            ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
-//
-//            accounts_spinner.adapter = accountsAdapter
-//        }
-//
-//        if (accounts.isNotEmpty()) accounts_spinner.setSelection(0, false)
-//
-//        if (accounts.size > 1) {
-//            accounts_spinner.visible()
-//        } else if (accounts.isNotEmpty()) {
-//            accounts_spinner.invisible()
-//        }
-//        accounts_spinner.setOnTouchListener({ _, event ->
-//            event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
-//        })
-//
-//        accounts_spinner.onItemSelectedListener = onItemSelectedListener {
-//            presenter.onAccountChosen(it)
-//            recyclerview.scrollToPosition(0)
-//        }
+        if (accountsAdapter == null) {
+            accountsAdapter = BalanceHeaderAdapter(
+                    context,
+                    R.layout.spinner_balance_header,
+                    accounts,
+                    isBtc,
+                    monetaryUtil,
+                    fiat,
+                    lastBtcPrice
+            ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
+
+            accounts_spinner.adapter = accountsAdapter
+        }
+
+        if (accounts.isNotEmpty()) accounts_spinner.setSelection(0, false)
+
+        if (accounts.size > 1) {
+            layout_spinner.visible()
+        } else if (accounts.isNotEmpty()) {
+            layout_spinner.gone()
+        }
+        accounts_spinner.setOnTouchListener({ _, event ->
+            event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
+        })
+
+        accounts_spinner.onItemSelectedListener = onItemSelectedListener {
+            presenter.onAccountChosen(it)
+            recyclerview.scrollToPosition(0)
+        }
     }
 
     override fun onTotalBalanceUpdated(balance: String) {
@@ -418,14 +414,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
      * instead.
      */
     fun getSelectedAccountPosition(): Int {
-//        var position = accounts_spinner.selectedItemPosition
-//        if (position >= accounts_spinner.count - 1) {
-//            // End of list is imported addresses, ignore
-//            position = 0
-//        }
-//
-//        return position - 1
-        return 0
+        var position = accounts_spinner.selectedItemPosition
+        if (position >= accounts_spinner.count - 1) {
+            // End of list is imported addresses, ignore
+            position = 0
+        }
+
+        return position - 1
     }
 
     private fun setShowRefreshing(showRefreshing: Boolean) {
@@ -437,23 +432,35 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.visible()
 
         when (currency_header.selectedCurrency) {
-        // TODO
+            CryptoCurrencies.BTC -> {
+                button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
+                button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
+                description.setText(R.string.transaction_occur_when_bitcoin)
+            }
+            CryptoCurrencies.ETHER -> {
+                button_get_bitcoin.setText(R.string.onboarding_get_eth)
+                button_get_bitcoin.setOnClickListener { startReceiveFragmentEth() }
+                description.setText(R.string.transaction_occur_when_eth)
+            }
+            CryptoCurrencies.BCH -> {
+                button_get_bitcoin.setText(R.string.onboarding_get_bitcoin_cash)
+                button_get_bitcoin.setOnClickListener { startReceiveFragmentBch() }
+                description.setText(R.string.transaction_occur_when_bitcoin_cash)
+            }
         }
-//        if (tabs.selectedTabPosition == 0) {
-//            button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
-//            button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
-//            description.setText(R.string.transaction_occur_when_bitcoin)
-//        } else {
-//            button_get_bitcoin.setText(R.string.onboarding_get_eth)
-//            button_get_bitcoin.setOnClickListener { startReceiveFragmentEth() }
-//            description.setText(R.string.transaction_occur_when_eth)
-//        }
     }
 
     private fun startReceiveFragmentEth() {
         activity?.run {
             LocalBroadcastManager.getInstance(this)
                     .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
+        }
+    }
+
+    private fun startReceiveFragmentBch() {
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
         }
     }
 

@@ -6,6 +6,7 @@ import android.support.annotation.DrawableRes
 import android.support.annotation.StringRes
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
+import android.support.transition.TransitionManager
 import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import android.util.AttributeSet
@@ -28,7 +29,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs), View.OnClickListener {
 
-    private lateinit var selectionListener: CurrencySelectionListener
+    private lateinit var selectionListener: (CryptoCurrencies) -> Unit
     var selectedCurrency = CryptoCurrencies.BTC
 
     init {
@@ -77,7 +78,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         }
     }
 
-    fun setSelectionListener(selectionListener: CurrencySelectionListener) {
+    fun setSelectionListener(selectionListener: (CryptoCurrencies) -> Unit) {
         this.selectionListener = selectionListener
     }
 
@@ -142,7 +143,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
                         onAnimationEnd {
                             textview_selected_currency.alpha = 1.0f
                             // Inform parent of update
-                            selectionListener.onCurrencyClicked(cryptoCurrency)
+                            selectionListener(cryptoCurrency)
                         }
                     }
 
@@ -153,7 +154,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         }
 
         // Trigger layout change
-//        TransitionManager.beginDelayedTransition(frame_layout_expandable_header)
+        TransitionManager.beginDelayedTransition(frame_layout_expandable_header)
         linear_layout_coin_selection.gone()
     }
 

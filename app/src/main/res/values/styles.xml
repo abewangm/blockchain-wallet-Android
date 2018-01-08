@@ -173,6 +173,10 @@
         <item name="colorControlNormal">@color/white</item>
     </style>
 
+    <style name="SpinnerBlack">
+        <item name="colorControlNormal">@color/black</item>
+    </style>
+
     <style name="RecoveryPhraseEditText">
         <item name="fontPath">fonts/Montserrat-Regular.ttf</item>
         <item name="android:layout_width">match_parent</item>

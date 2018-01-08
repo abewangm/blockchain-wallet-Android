@@ -4,13 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:animateLayoutChanges="true"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <!-- HEADER LAYOUT -->
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
         android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay">
 
@@ -18,33 +21,59 @@
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
             android:elevation="0dp"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="snap|scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
-            <TextView
-                android:id="@+id/textview_balance"
-                fontPath="fonts/Montserrat-Light.ttf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:textColor="@color/white"
-                android:textSize="32sp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="MissingPrefix"
-                tools:text="1.03252623 BTC" />
-
-            <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader
-                android:id="@+id/currency_header"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/action_bar_height"
-                app:layout_collapseMode="pin" />
+                android:animateLayoutChanges="true"
+                android:orientation="vertical"
+                app:layout_collapseMode="pin">
+
+                <TextView
+                    android:id="@+id/textview_balance"
+                    fontPath="fonts/Montserrat-Light.ttf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="MissingPrefix"
+                    tools:text="1.03252623 BTC" />
+
+                <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader
+                    android:id="@+id/currency_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <FrameLayout
+                    android:id="@+id/layout_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/primary_gray_lightest"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <Spinner
+                        android:id="@+id/accounts_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:spinnerMode="dropdown"
+                        android:theme="@style/SpinnerBlack"
+                        tools:layout_height="36dp"
+                        tools:text="All wallets" />
+                </FrameLayout>
+
+            </LinearLayout>
 
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
