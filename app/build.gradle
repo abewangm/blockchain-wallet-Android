@@ -198,9 +198,9 @@ dependencies {
     implementation 'com.github.mukeshsolanki:country-picker-android:1.1.7'
     implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
     // Bitcoinj dependencies
-//    compile group: 'com.google.protobuf', name: 'protobuf-java', version:'2.6.1'
-//    compile group: 'com.google.code.findbugs', name: 'jsr305', version:'2.0.1'
-//    compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version:'2.6.1'
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version:'2.0.1'
+    compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
     // URL Builder
     implementation "io.mikael:urlbuilder:2.0.8"
     // RxJava
