@@ -1,6 +1,5 @@
 package piuk.blockchain.android.data.ethereum
 
-import com.subgraph.orchid.encoders.Hex
 import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.EthereumWallet
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
@@ -13,6 +12,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.DeterministicKey
+import org.spongycastle.util.encoders.Hex
 import org.web3j.protocol.core.methods.request.RawTransaction
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus

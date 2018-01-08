@@ -21,7 +21,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.BIP38PrivateKey;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.BitcoinMainNetParams;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -547,10 +547,11 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         }
     }
 
+    // TODO: 08/01/2018 This will default to bitcoin network parameters
     void importUnmatchedPrivateKey(ECKey key) throws Exception {
-        if (payloadDataManager.getWallet().getLegacyAddressStringList().contains(key.toAddress(MainNetParams.get()).toString())) {
+        if (payloadDataManager.getWallet().getLegacyAddressStringList().contains(key.toAddress(BitcoinMainNetParams.get()).toString())) {
             // Wallet contains address associated with this private key, find & save it with scanned key
-            String foundAddressString = key.toAddress(MainNetParams.get()).toString();
+            String foundAddressString = key.toAddress(BitcoinMainNetParams.get()).toString();
             for (LegacyAddress legacyAddress : payloadDataManager.getWallet().getLegacyAddressList()) {
                 if (legacyAddress.getAddress().equals(foundAddressString)) {
                     importAddressPrivateKey(key, legacyAddress, false);
@@ -633,13 +634,14 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
                         }, throwable -> getView().showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR)));
     }
 
+    // TODO: 08/01/2018 This will default to bitcoin network parameters
     private void importNonBIP38Address(final String format, final String data) {
         getView().showProgressDialog(R.string.please_wait);
 
         try {
             final ECKey key = privateKeyFactory.getKey(format, data);
             if (key != null && key.hasPrivKey()) {
-                final String keyAddress = key.toAddress(MainNetParams.get()).toString();
+                final String keyAddress = key.toAddress(BitcoinMainNetParams.get()).toString();
                 if (!legacyAddress.getAddress().equals(keyAddress)) {
                     // Private key does not match this address - warn user but import nevertheless
                     importUnmatchedPrivateKey(key);
@@ -656,15 +658,16 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         getView().dismissProgressDialog();
     }
 
+    // TODO: 08/01/2018 This will default to bitcoin network parameters
     void importBIP38Address(final String data, final String pw) {
         getView().showProgressDialog(R.string.please_wait);
 
         try {
-            BIP38PrivateKey bip38 = BIP38PrivateKey.fromBase58(MainNetParams.get(), data);
+            BIP38PrivateKey bip38 = BIP38PrivateKey.fromBase58(BitcoinMainNetParams.get(), data);
             final ECKey key = bip38.decrypt(pw);
 
             if (key != null && key.hasPrivKey()) {
-                final String keyAddress = key.toAddress(MainNetParams.get()).toString();
+                final String keyAddress = key.toAddress(BitcoinMainNetParams.get()).toString();
                 if (!legacyAddress.getAddress().equals(keyAddress)) {
                     // Private key does not match this address - warn user but import nevertheless
                     importUnmatchedPrivateKey(key);
