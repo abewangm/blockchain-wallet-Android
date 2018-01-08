@@ -6,21 +6,19 @@ import android.support.annotation.DrawableRes
 import android.support.annotation.StringRes
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
-import android.support.design.widget.AppBarLayout
-import android.support.design.widget.CoordinatorLayout
 import android.support.transition.AutoTransition
 import android.support.transition.TransitionManager
 import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import kotlinx.android.synthetic.main.view_expanding_currency_header.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.setAnimationListener
 
 
@@ -112,22 +110,14 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         animation.setAnimationListener {
             onAnimationEnd {
                 textview_selected_currency.alpha = 0.0f
-                TransitionManager.beginDelayedTransition(
-                        constraint_layout,
-                        AutoTransition().apply { duration = 500 }
-                )
-                ConstraintSet().apply {
-                    clone(constraint_layout)
-                    setVisibility(R.id.linear_layout_coin_selection, View.VISIBLE)
-                    applyTo(constraint_layout)
-                }
+                animateCoinSelectionLayout(View.VISIBLE)
             }
         }
     }
 
     private fun closeLayout(cryptoCurrency: CryptoCurrencies) {
-        // Update UI before visibility change
-        setCurrentlySelectedCurrency(cryptoCurrency)
+        // Inform parent of currency selection
+//        selectionListener(cryptoCurrency)
         // Listen for finish of animation as UI responds to visibility change
         constraint_layout.layoutTransition.apply {
             addTransitionListener(object : LayoutTransition.TransitionListener {
@@ -144,14 +134,14 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
                         view: View?,
                         transitionType: Int
                 ) {
+                    // Update UI before visibility change
+                    setCurrentlySelectedCurrency(cryptoCurrency)
                     // Fade in title
                     val alphaAnimation = AlphaAnimation(0.0f, 1.0f).apply { duration = 250 }
                     textview_selected_currency.startAnimation(alphaAnimation)
                     alphaAnimation.setAnimationListener {
                         onAnimationEnd {
                             textview_selected_currency.alpha = 1.0f
-                            // Inform parent of update
-                            selectionListener(cryptoCurrency)
                         }
                     }
 
@@ -162,34 +152,19 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         }
 
         // Trigger layout change
+        animateCoinSelectionLayout(View.GONE)
+    }
+
+    private fun animateCoinSelectionLayout(@ViewUtils.Visibility visibility: Int) {
         TransitionManager.beginDelayedTransition(
                 constraint_layout,
                 AutoTransition().apply { duration = 500 }
         )
         ConstraintSet().apply {
             clone(constraint_layout)
-            setVisibility(R.id.linear_layout_coin_selection, View.GONE)
+            setVisibility(R.id.linear_layout_coin_selection, visibility)
             applyTo(constraint_layout)
         }
     }
 
-}
-
-interface CurrencySelectionListener {
-
-    fun onCurrencyClicked(cryptoCurrency: CryptoCurrencies)
-
-}
-
-@Suppress("unused")
-class ExpandableCurrencyHeaderBehavior(
-        context: Context,
-        attrs: AttributeSet
-) : AppBarLayout.Behavior(context, attrs) {
-
-    override fun onInterceptTouchEvent(
-            parent: CoordinatorLayout?,
-            child: AppBarLayout?,
-            ev: MotionEvent
-    ) = false
 }

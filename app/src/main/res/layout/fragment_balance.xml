@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:fitsSystemWindows="true">
 
     <!-- HEADER LAYOUT -->
     <android.support.design.widget.AppBarLayout
@@ -22,7 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:animateLayoutChanges="true"
-            android:elevation="0dp"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="snap|scroll|exitUntilCollapsed"
@@ -71,10 +69,10 @@
                         android:theme="@style/SpinnerBlack"
                         tools:layout_height="36dp"
                         tools:text="All wallets" />
+
                 </FrameLayout>
 
             </LinearLayout>
-
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
