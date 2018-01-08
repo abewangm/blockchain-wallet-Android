@@ -10,7 +10,7 @@ import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
 import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.ECKey
-import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.params.BitcoinMainNetParams
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -73,6 +73,7 @@ class SendDataManagerTest : RxTest() {
     // not sure what's changed. The test passes now, but should be changed to assert success conditions
     // when the fix is discovered.
     // TODO: Fix me, and then test for success
+    // TODO: 08/01/2018 This will default to bitcoin network parameters
     @Ignore
     @Test
     @Throws(Exception::class)
@@ -80,7 +81,7 @@ class SendDataManagerTest : RxTest() {
         // Arrange
         val password = "thisisthepassword"
         val scanData = "6PYP4i7UyewqZWqdnpQwMdCyneXPaFDPkk8LArmVexqoGsy9Yx92SiLCPm"
-        val params = MainNetParams.get()
+        val params = BitcoinMainNetParams.get()
         // Act
         val testObserver = subject.getEcKeyFromBip38(password, scanData, params).test()
         // Assert

@@ -13,8 +13,10 @@ import io.reactivex.Observable
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should equal to`
 import org.apache.commons.lang3.NotImplementedException
-import org.bitcoinj.params.AbstractBitcoinNetParams
-import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.core.NetworkParameters
+import org.bitcoinj.params.AbstractNetParams
+import org.bitcoinj.params.BitcoinCashMainNetParams
+import org.bitcoinj.params.BitcoinMainNetParams
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
@@ -587,8 +589,12 @@ class ReceivePresenterTest {
                 throw NotImplementedException("Function should not be called")
             }
 
-            override fun getNetworkParameters(): AbstractBitcoinNetParams {
-                return MainNetParams.get()
+            override fun getBitcoinParams(): NetworkParameters {
+                return BitcoinMainNetParams.get()
+            }
+
+            override fun getBitcoinCashParams(): NetworkParameters {
+                return BitcoinCashMainNetParams.get()
             }
         })
     }

@@ -1,10 +1,7 @@
 package piuk.blockchain.android.data.api
 
 import info.blockchain.wallet.api.Environment
-
-import org.bitcoinj.params.AbstractBitcoinNetParams
-import org.bitcoinj.params.MainNetParams
-import org.bitcoinj.params.TestNet3Params
+import org.bitcoinj.params.*
 
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.util.annotations.Mockable
@@ -31,11 +28,19 @@ class EnvironmentSettings {
     val ethWebsocketUrl: String
         get() = BuildConfig.ETHEREUM_WEBSOCKET_URL
 
-    val networkParameters: AbstractBitcoinNetParams
+    val networkParameters: AbstractNetParams
         get() {
             return when (environment) {
-                Environment.TESTNET -> TestNet3Params.get()
-                else -> MainNetParams.get()
+                Environment.TESTNET -> BitcoinTestNet3Params.get()
+                else -> BitcoinMainNetParams.get()
+            }
+        }
+
+    val bitcoinCashNetworkParameters: AbstractNetParams
+        get() {
+            return when (environment) {
+                Environment.TESTNET -> BitcoinCashTestNet3Params.get()
+                else -> BitcoinCashMainNetParams.get()
             }
         }
 }
