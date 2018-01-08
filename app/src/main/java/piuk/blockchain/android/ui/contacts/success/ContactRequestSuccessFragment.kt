@@ -16,21 +16,24 @@ class ContactRequestSuccessFragment : Fragment() {
     private var listener: ContactsRequestSuccessListener? = null
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ) = container?.inflate(R.layout.fragment_contact_request_success)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val requestType = arguments.getSerializable(ARGUMENT_REQUEST_TYPE)
-        val contactName = arguments.getString(ARGUMENT_CONTACT_NAME)
-        val btcAmount = arguments.getString(ARGUMENT_BTC_AMOUNT)
-        when (requestType) {
-            PaymentRequestType.REQUEST -> updateUiForRequest(contactName, btcAmount)
-            PaymentRequestType.SEND -> updateUiForSend(contactName)
-            PaymentRequestType.CONTACT -> throw IllegalArgumentException("This case is not handled by this fragment")
+        arguments?.let {
+            val bundle = arguments!!
+            val requestType = bundle.getSerializable(ARGUMENT_REQUEST_TYPE)
+            val contactName = bundle.getString(ARGUMENT_CONTACT_NAME)
+            val btcAmount = bundle.getString(ARGUMENT_BTC_AMOUNT)
+            when (requestType) {
+                PaymentRequestType.REQUEST -> updateUiForRequest(contactName, btcAmount)
+                PaymentRequestType.SEND -> updateUiForSend(contactName)
+                PaymentRequestType.CONTACT -> throw IllegalArgumentException("This case is not handled by this fragment")
+            }
         }
 
         button_done.setOnClickListener { listener?.onRequestSuccessDismissed() }

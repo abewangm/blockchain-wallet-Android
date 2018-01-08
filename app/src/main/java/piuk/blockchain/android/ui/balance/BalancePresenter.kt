@@ -112,9 +112,20 @@ class BalancePresenter @Inject constructor(
         view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
     }
 
+    // TODO: This will need updating for BCH
+    internal fun chooseDefaultAccount() {
+        if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) {
+            onAccountChosen(activeAccountAndAddressList.lastIndex)
+        } else {
+            onAccountChosen(0)
+        }
+    }
+
     internal fun onAccountChosen(position: Int) {
-        if (position - 1 > activeAccountAndAddressList.size || activeAccountAndAddressList.isEmpty())
+        if (position - 1 > activeAccountAndAddressList.size || activeAccountAndAddressList.isEmpty()) {
+            Timber.d("activeAccountAndAddressList.size == 0")
             return
+        }
 
         view.setUiState(UiState.LOADING)
         chosenAccount = activeAccountAndAddressList[if (position >= 0) position else 0]
@@ -344,7 +355,6 @@ class BalancePresenter @Inject constructor(
 
     internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         currencyState.cryptoCurrency = cryptoCurrency
-
         when (cryptoCurrency) {
             CryptoCurrencies.BTC -> onAccountChosen(0)
             CryptoCurrencies.ETHER -> onAccountChosen(activeAccountAndAddressList.lastIndex)
@@ -663,22 +673,23 @@ class BalancePresenter @Inject constructor(
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
     private fun getShapeShiftTxNotesObservable() =
-        payloadDataManager.metadataNodeFactory
-                .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .map {
-                    val map: MutableMap<String, String> = mutableMapOf()
+            payloadDataManager.metadataNodeFactory
+                    .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .map {
+                        val map: MutableMap<String, String> = mutableMapOf()
 
-                    for (trade in it.trades) {
-                        trade.hashIn?.let {
-                            map.put(it, stringUtils.getString(R.string.shapeshift_deposit_to))
+                        for (trade in it.trades) {
+                            trade.hashIn?.let {
+                                map.put(it, stringUtils.getString(R.string.shapeshift_deposit_to))
+                            }
+                            trade.hashOut?.let {
+                                map.put(it, stringUtils.getString(R.string.shapeshift_deposit_from))
+                            }
                         }
-                        trade.hashOut?.let {
-                            map.put(it, stringUtils.getString(R.string.shapeshift_deposit_from))
-                        }
+                        return@map map
                     }
-                    map
-                }
-                .onErrorReturn { mutableMapOf() }
+                    .doOnError { Timber.e(it) }
+                    .onErrorReturn { mutableMapOf() }
 
 }

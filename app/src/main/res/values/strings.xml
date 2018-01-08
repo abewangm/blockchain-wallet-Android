@@ -211,6 +211,7 @@
     <string name="your_transactions">No Transactions</string>
     <string name="transaction_occur_when_bitcoin">Transactions occur when you receive and send bitcoin.</string>
     <string name="transaction_occur_when_eth">Transactions occur when you receive and send ether.</string>
+    <string name="transaction_occur_when_bitcoin_cash">Transactions occur when you receive and send bitcoin cash.</string>
     <string name="click">Click</string>
     <string name="to_start_sending_and_receiving_btc">to start sending and receiving bitcoin.</string>
 
@@ -711,6 +712,7 @@
     <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
     <string name="onboarding_get_bitcoin">Get Bitcoin</string>
     <string name="onboarding_get_eth">Get Ether</string>
+    <string name="onboarding_get_bitcoin_cash">Get Bitcoin Cash</string>
     <string name="onboarding_complete_title">That\'s it for now!</string>
     <string name="onboarding_complete_content">We’ll keep you up-to-date here with recommendations and new features.</string>
     <string name="onboarding_start_over">Start Over</string>
@@ -852,5 +854,9 @@
 
     <!-- TRANSACTIONS -->
     <string name="tx_decode_error">Unable to decode address</string>
+
+    <!-- BCH UPDATE -->
+    <string name="ethereum" translatable="false">Ethereum</string>
+    <string name="bitcoin_cash" translatable="false">Bitcoin Cash</string>
 
 </resources>

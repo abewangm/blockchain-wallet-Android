@@ -83,7 +83,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     private val intentFilter = IntentFilter(BalanceFragment.ACTION_INTENT)
     private val defaultDecimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator.toString()
-    private val receiveIntentHelper by unsafeLazy { ReceiveIntentHelper(context) }
+    private val receiveIntentHelper by unsafeLazy { ReceiveIntentHelper(context!!) }
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT) {
@@ -105,18 +105,18 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
-        if (arguments != null) {
-            defaultAccountPosition = arguments.getInt(ARG_SELECTED_ACCOUNT_POSITION)
+        arguments?.run {
+            defaultAccountPosition = getInt(ARG_SELECTED_ACCOUNT_POSITION)
         }
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ) = container?.inflate(R.layout.fragment_receive)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         onViewReady()
@@ -361,7 +361,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
         closeKeypad()
         setupToolbar()
-        LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, intentFilter)
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, intentFilter)
     }
 
     override fun showQrLoading() {
@@ -481,7 +481,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 layoutManager = LinearLayoutManager(context)
             }
 
-            bottomSheetDialog = BottomSheetDialog(context, R.style.BottomSheetDialog).apply {
+            bottomSheetDialog = BottomSheetDialog(context!!, R.style.BottomSheetDialog).apply {
                 setContentView(sheetView)
             }
 
@@ -495,19 +495,21 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     private fun onShareClicked() {
-        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.receive_address_to_share)
-                .setCancelable(false)
-                .setPositiveButton(R.string.yes) { _, _ ->
-                    if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        PermissionUtil.requestWriteStoragePermissionFromFragment(activity.findViewById(R.id.coordinator_layout), this)
-                    } else {
-                        presenter.onShowBottomSheetSelected()
+        activity?.run {
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.receive_address_to_share)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.yes) { _, _ ->
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            PermissionUtil.requestWriteStoragePermissionFromFragment(this.findViewById(R.id.coordinator_layout), this@ReceiveFragment)
+                        } else {
+                            presenter.onShowBottomSheetSelected()
+                        }
                     }
-                }
-                .setNegativeButton(R.string.no, null)
-                .show()
+                    .setNegativeButton(R.string.no, null)
+                    .show()
+        }
     }
 
     override fun shouldShowRequestPermissionRationale(permission: String): Boolean {
@@ -528,24 +530,26 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun showWatchOnlyWarning() {
-        val dialogView = layoutInflater.inflate(R.layout.alert_watch_only_spend, null)
-        val alertDialog = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setView(dialogView.rootView)
-                .setCancelable(false)
-                .create()
+        activity?.run {
+            val dialogView = layoutInflater.inflate(R.layout.alert_watch_only_spend, null)
+            val alertDialog = AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setView(dialogView.rootView)
+                    .setCancelable(false)
+                    .create()
 
-        dialogView.confirm_cancel.setOnClickListener {
-            presenter.onSelectDefault(defaultAccountPosition)
-            presenter.setWarnWatchOnlySpend(!dialogView.confirm_dont_ask_again.isChecked)
-            alertDialog.dismiss()
+            dialogView.confirm_cancel.setOnClickListener {
+                presenter.onSelectDefault(defaultAccountPosition)
+                presenter.setWarnWatchOnlySpend(!dialogView.confirm_dont_ask_again.isChecked)
+                alertDialog.dismiss()
+            }
+
+            dialogView.confirm_continue.setOnClickListener {
+                presenter.setWarnWatchOnlySpend(!dialogView.confirm_dont_ask_again.isChecked)
+                alertDialog.dismiss()
+            }
+
+            alertDialog.show()
         }
-
-        dialogView.confirm_continue.setOnClickListener {
-            presenter.setWarnWatchOnlySpend(!dialogView.confirm_dont_ask_again.isChecked)
-            alertDialog.dismiss()
-        }
-
-        alertDialog.show()
     }
 
     override fun getQrBitmap(): Bitmap = (image_qr.drawable as BitmapDrawable).bitmap
@@ -561,18 +565,20 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     private fun showClipboardWarning() {
-        AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setTitle(R.string.app_name)
-                .setMessage(R.string.receive_address_to_clipboard)
-                .setCancelable(false)
-                .setPositiveButton(R.string.yes) { _, _ ->
-                    val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Send address", textview_receiving_address.text)
-                    toast(R.string.copied_to_clipboard)
-                    clipboard.primaryClip = clip
-                }
-                .setNegativeButton(R.string.no, null)
-                .show()
+        activity?.run {
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.app_name)
+                    .setMessage(R.string.receive_address_to_clipboard)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.yes) { _, _ ->
+                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Send address", textview_receiving_address.text)
+                        toast(R.string.copied_to_clipboard)
+                        clipboard.primaryClip = clip
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .show()
+        }
     }
 
     private fun handleBackPressed() {
@@ -595,7 +601,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun onPause() {
-        LocalBroadcastManager.getInstance(activity).unregisterReceiver(broadcastReceiver)
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
         super.onPause()
     }
 
@@ -648,7 +654,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
         }
 
-        val height = activity.resources.getDimension(R.dimen.action_bar_height).toInt()
+        val height = activity!!.resources.getDimension(R.dimen.action_bar_height).toInt()
         // Resize activity to default
         scrollview.apply {
             setPadding(0, 0, 0, 0)
@@ -670,7 +676,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun onKeypadOpenCompleted() {
         // Resize activity around view
-        val height = activity.resources.getDimension(R.dimen.action_bar_height).toInt()
+        val height = activity!!.resources.getDimension(R.dimen.action_bar_height).toInt()
         scrollview.apply {
             setPadding(0, 0, 0, custom_keyboard.height)
             layoutParams = CoordinatorLayout.LayoutParams(
@@ -707,6 +713,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 putInt(ARG_SELECTED_ACCOUNT_POSITION, selectedAccountPosition)
             }
         }
+
     }
 
 }

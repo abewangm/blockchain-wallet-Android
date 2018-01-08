@@ -1,6 +1,6 @@
 package piuk.blockchain.android.ui.dashboard.adapter
 
-import android.app.Activity
+import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
@@ -24,10 +24,10 @@ import piuk.blockchain.android.util.helperfunctions.onPageChangeListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 
 class OnboardingDelegate<in T>(
-        private val activity: Activity
+        private val context: Context
 ) : AdapterDelegate<T> {
 
-    private val onboardingPagerAdapter by unsafeLazy { OnboardingPagerAdapter(activity) }
+    private val onboardingPagerAdapter by unsafeLazy { OnboardingPagerAdapter(context) }
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is OnboardingModel

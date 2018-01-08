@@ -107,11 +107,13 @@ class DisplayableDelegate<in T>(
         viewHolder.watchOnly.visibility = if (tx.watchOnly) View.VISIBLE else View.GONE
         viewHolder.doubleSpend.visibility = if (tx.doubleSpend) View.VISIBLE else View.GONE
 
+        // TODO: Move this click listener to the ViewHolder to avoid unnecessary object instantiation during binding
         viewHolder.result.setOnClickListener {
             showCrypto = !showCrypto
             listClickListener.onValueClicked(showCrypto)
         }
 
+        // TODO: Move this click listener to the ViewHolder to avoid unnecessary object instantiation during binding
         viewHolder.itemView.setOnClickListener {
             listClickListener.onTransactionClicked(
                     getRealTxPosition(viewHolder.adapterPosition, items), position)
@@ -194,7 +196,7 @@ class DisplayableDelegate<in T>(
             fiatAmount: Double,
             fiatString: String
     ): String {
-        var result: String
+        val result: String
         if (showCrypto) {
             if (cryptoCurrency == CryptoCurrencies.BTC) {
                 result = "${monetaryUtil.getDisplayAmountWithFormatting(Math.abs(cryptoAmount))} ${getDisplayUnits()}"
