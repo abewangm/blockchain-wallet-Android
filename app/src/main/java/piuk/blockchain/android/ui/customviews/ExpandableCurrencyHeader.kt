@@ -4,8 +4,11 @@ import android.animation.LayoutTransition
 import android.content.Context
 import android.support.annotation.DrawableRes
 import android.support.annotation.StringRes
+import android.support.constraint.ConstraintLayout
+import android.support.constraint.ConstraintSet
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
+import android.support.transition.AutoTransition
 import android.support.transition.TransitionManager
 import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
@@ -15,19 +18,16 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
-import android.widget.FrameLayout
 import kotlinx.android.synthetic.main.view_expanding_currency_header.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
-import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.setAnimationListener
-import piuk.blockchain.android.util.extensions.visible
 
 
 class ExpandableCurrencyHeader @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null
-) : FrameLayout(context, attrs), View.OnClickListener {
+) : ConstraintLayout(context, attrs), View.OnClickListener {
 
     private lateinit var selectionListener: (CryptoCurrencies) -> Unit
     var selectedCurrency = CryptoCurrencies.BTC
@@ -63,7 +63,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         // Select Bitcoin by default but without triggering callback
         updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
         // Set layout transition preferences
-        frame_layout_expandable_header.layoutTransition.apply {
+        constraint_layout.layoutTransition.apply {
             enableTransitionType(LayoutTransition.APPEARING)
             enableTransitionType(LayoutTransition.DISAPPEARING)
         }
@@ -112,7 +112,15 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         animation.setAnimationListener {
             onAnimationEnd {
                 textview_selected_currency.alpha = 0.0f
-                linear_layout_coin_selection.visible()
+                TransitionManager.beginDelayedTransition(
+                        constraint_layout,
+                        AutoTransition().apply { duration = 500 }
+                )
+                ConstraintSet().apply {
+                    clone(constraint_layout)
+                    setVisibility(R.id.linear_layout_coin_selection, View.VISIBLE)
+                    applyTo(constraint_layout)
+                }
             }
         }
     }
@@ -121,7 +129,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         // Update UI before visibility change
         setCurrentlySelectedCurrency(cryptoCurrency)
         // Listen for finish of animation as UI responds to visibility change
-        frame_layout_expandable_header.layoutTransition.apply {
+        constraint_layout.layoutTransition.apply {
             addTransitionListener(object : LayoutTransition.TransitionListener {
                 override fun startTransition(
                         transition: LayoutTransition?,
@@ -154,8 +162,15 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         }
 
         // Trigger layout change
-        TransitionManager.beginDelayedTransition(frame_layout_expandable_header)
-        linear_layout_coin_selection.gone()
+        TransitionManager.beginDelayedTransition(
+                constraint_layout,
+                AutoTransition().apply { duration = 500 }
+        )
+        ConstraintSet().apply {
+            clone(constraint_layout)
+            setVisibility(R.id.linear_layout_coin_selection, View.GONE)
+            applyTo(constraint_layout)
+        }
     }
 
 }
