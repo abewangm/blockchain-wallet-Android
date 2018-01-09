@@ -28,10 +28,7 @@ import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.dashboard.ChartDisplayable
 import piuk.blockchain.android.ui.dashboard.ChartsState
-import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
-import piuk.blockchain.android.util.extensions.invisible
-import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
@@ -105,15 +102,15 @@ class ChartDelegate<in T>(
         configureChart()
         updatePercentChange(data)
 
-        viewHolder?.let {
-            it.day.setOnClickListener { data.getChartDay() }
-            it.week.setOnClickListener { data.getChartWeek() }
-            it.month.setOnClickListener { data.getChartMonth() }
-            it.year.setOnClickListener { data.getChartYear() }
-            it.allTime.setOnClickListener { data.getChartAllTime() }
+        viewHolder?.apply {
+            day.setOnClickListener { data.getChartDay() }
+            week.setOnClickListener { data.getChartWeek() }
+            month.setOnClickListener { data.getChartMonth() }
+            year.setOnClickListener { data.getChartYear() }
+            allTime.setOnClickListener { data.getChartAllTime() }
 
-            it.progressBar.gone()
-            it.chart.apply {
+            progressBar.gone()
+            chart.apply {
                 visible()
 
                 val entries = data.data.map { Entry(it.timestamp.toFloat(), it.price.toFloat()) }
@@ -179,12 +176,7 @@ class ChartDelegate<in T>(
             }
         }
 
-        ToastCustom.makeText(
-                context,
-                context.getText(R.string.dashboard_charts_error),
-                ToastCustom.LENGTH_SHORT,
-                ToastCustom.TYPE_ERROR
-        )
+        context.toast(R.string.dashboard_charts_error, ToastCustom.TYPE_ERROR)
     }
 
     private fun showTimeSpanSelected(timeSpan: TimeSpan) {

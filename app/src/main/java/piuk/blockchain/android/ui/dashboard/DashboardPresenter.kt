@@ -52,7 +52,7 @@ class DashboardPresenter @Inject constructor(
     private lateinit var cryptoCurrency: CryptoCurrencies
     private val displayList = mutableListOf<Any>(
             stringUtils.getString(R.string.dashboard_balances),
-            ChartsState.Loading,
+            PieChartsState.Loading,
             stringUtils.getString(R.string.dashboard_price_charts)
     )
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
@@ -173,17 +173,26 @@ class DashboardPresenter @Inject constructor(
                 )
     }
 
-//    PieChartDisplayable(
-//    "$",
-//    BigDecimal.ONE,
-//    BigDecimal.ONE,
-//    BigDecimal.ONE,
-//    BigDecimal.ONE,
-//    BigDecimal.ONE,
-//    BigDecimal.ONE
-//    )
-
     private fun updateCryptoBalances() {
+        // TODO: This is temporary
+        view.updatePieChartState(
+                PieChartsState.Data(
+                        fiatSymbol = getCurrencySymbol(),
+                        // Amounts in Fiat
+                        bitcoinValue = BigDecimal.valueOf(35.0000),
+                        etherValue = BigDecimal.valueOf(34.244),
+                        bitcoinCashValue = BigDecimal.valueOf(23.9304),
+                        // Formatted fiat value Strings
+                        bitcoinValueString = "$1000.00",
+                        etherValueString = "$1000.00",
+                        bitcoinCashValueString = "$1000.00",
+                        // Formatted Amount Strings
+                        bitcoinAmountString = "1000.00 BTC",
+                        etherAmountString = "2353.00 ETH",
+                        bitcoinCashAmountString = "25.03 BCH"
+                )
+        )
+
 //        view.updateBtcBalance(getBtcBalanceString(
 //                currencyState.isDisplayingCryptoCurrency,
 //                btcBalance
@@ -355,7 +364,7 @@ class DashboardPresenter @Inject constructor(
         }
     }
 
-    private fun getCurrencySymbol() = exchangeRateFactory.getSymbol(getFiatCurrency())
+    private fun getCurrencySymbol() = monetaryUtil.getCurrencySymbol(getFiatCurrency(), view.locale)
 
     private fun getBtcString(): String {
         val lastBtcPrice = getLastBtcPrice(getFiatCurrency())
@@ -411,12 +420,18 @@ sealed class PieChartsState {
 
     data class Data(
             val fiatSymbol: String,
-            val bitcoinAmount: BigDecimal,
-            val etherAmount: BigDecimal,
-            val bitcoinCashAmount: BigDecimal,
-            val bitcoinExchangeRate: BigDecimal,
-            val etherExchangeRate: BigDecimal,
-            val bitcoinCashExchangeRate: BigDecimal
+            // Amounts in Fiat
+            val bitcoinValue: BigDecimal,
+            val etherValue: BigDecimal,
+            val bitcoinCashValue: BigDecimal,
+            // Formatted fiat value Strings
+            val bitcoinValueString: String,
+            val etherValueString: String,
+            val bitcoinCashValueString: String,
+            // Formatted Amount Strings
+            val bitcoinAmountString: String,
+            val etherAmountString: String,
+            val bitcoinCashAmountString: String
     ) : PieChartsState()
 
     object Error : PieChartsState()

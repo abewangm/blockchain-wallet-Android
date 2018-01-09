@@ -4,10 +4,13 @@ import android.support.annotation.StringRes
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import java.util.*
 
 interface DashboardView : View {
 
     val shouldShowBuy: Boolean
+
+    val locale: Locale
 
     fun updateChartState(chartsState: ChartsState)
 

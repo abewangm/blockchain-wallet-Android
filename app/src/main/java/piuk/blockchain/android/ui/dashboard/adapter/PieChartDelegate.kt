@@ -1,6 +1,5 @@
 package piuk.blockchain.android.ui.dashboard.adapter
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
@@ -23,15 +22,11 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.dashboard.PieChartsState
-import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
-import piuk.blockchain.android.util.extensions.invisible
-import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
 import java.math.BigDecimal
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -39,6 +34,10 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
 
     private var viewHolder: PieChartViewHolder? = null
     private var fiatSymbol: String? = null
+    // For working out labels in ValueMarker class
+    private var bitcoinValue = BigDecimal.ZERO
+    private var etherValue = BigDecimal.ZERO
+    private var bitcoinCashValue = BigDecimal.ZERO
 
     private val typefaceRegular by unsafeLazy {
         TypefaceUtils.load(context.assets, "fonts/Montserrat-Regular.ttf")
@@ -56,31 +55,7 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
             holder: RecyclerView.ViewHolder,
             payloads: List<*>
     ) {
-
-        fiatSymbol = "$" // TODO: Remove this
         viewHolder = holder as PieChartViewHolder
-
-        viewHolder?.chart?.apply {
-            setDrawCenterText(true)
-            setCenterTextTypeface(typefaceRegular)
-            setCenterTextColor(ContextCompat.getColor(context, R.color.primary_gray_dark))
-            setCenterTextSize(16f)
-            centerText = "$22,866.48"
-
-            isDrawHoleEnabled = true
-            setHoleColor(Color.TRANSPARENT)
-            holeRadius = 70f
-
-            animateY(1000, Easing.EasingOption.EaseInOutQuad)
-            isRotationEnabled = false
-            legend.isEnabled = false
-            description.isEnabled = false
-
-            setTransparentCircleColor(Color.WHITE)
-            setTransparentCircleAlpha(110)
-            marker = ValueMarker(context, R.layout.item_pie_chart_marker)
-        }
-
     }
 
     internal fun updateChartState(pieChartsState: PieChartsState) = when (pieChartsState) {
@@ -106,42 +81,78 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
             }
         }
 
-        ToastCustom.makeText(
-                context,
-                context.getText(R.string.dashboard_charts_balance_error),
-                ToastCustom.LENGTH_SHORT,
-                ToastCustom.TYPE_ERROR
-        )
+        context.toast(R.string.dashboard_charts_balance_error, ToastCustom.TYPE_ERROR)
     }
 
     private fun renderData(data: PieChartsState.Data) {
-        val entries = ArrayList<PieEntry>()
+        // Store values for comparisons
+        bitcoinValue = data.bitcoinValue
+        etherValue = data.etherValue
+        bitcoinCashValue = data.bitcoinCashValue
+        fiatSymbol = data.fiatSymbol
 
-        (0 until 5).forEach { entries.add(PieEntry((Math.random() * 400 + 400 / 5).toFloat())) }
+        configureChart()
 
-        val dataSet = PieDataSet(entries, context.getString(R.string.dashboard_balances))
+        val entries = listOf(
+                PieEntry(data.bitcoinValue.toFloat(), context.getString(R.string.bitcoin)),
+                PieEntry(data.etherValue.toFloat(), context.getString(R.string.ether)),
+                PieEntry(data.bitcoinCashValue.toFloat(), context.getString(R.string.bitcoin_cash))
+        )
 
-        dataSet.setDrawIcons(false)
-
-        dataSet.sliceSpace = 0f
-        dataSet.selectionShift = 5f
-
-        val colors = listOf(
+        val coinColors = listOf(
                 ContextCompat.getColor(context, R.color.color_bitcoin),
                 ContextCompat.getColor(context, R.color.color_ether),
                 ContextCompat.getColor(context, R.color.color_bitcoin_cash)
         )
 
-        dataSet.colors = colors
+        val dataSet = PieDataSet(entries, context.getString(R.string.dashboard_balances)).apply {
+            setDrawIcons(false)
+            sliceSpace = 0f
+            selectionShift = 5f
+            colors = coinColors
+        }
 
-        val chartData = PieData(dataSet)
-        chartData.setDrawValues(false)
+        val chartData = PieData(dataSet).apply { setDrawValues(false) }
+
+        viewHolder?.apply {
+            bitcoinValue.text = data.bitcoinValueString
+            etherValue.text = data.etherValueString
+            bitcoinCashValue.text = data.bitcoinCashValueString
+            bitcoinAmount.text = data.bitcoinAmountString
+            etherAmount.text = data.etherAmountString
+            bitcoinCashAmount.text = data.bitcoinCashAmountString
+
+            progressBar.gone()
+            chart.apply {
+                val total = data.bitcoinValue + data.etherValue + data.bitcoinCashValue
+                centerText = getFormattedFiatAmount(data.fiatSymbol, total)
+                this.data = chartData
+                highlightValues(null)
+                invalidate()
+                visible()
+            }
+        }
+    }
+
+    private fun configureChart() {
         viewHolder?.chart?.apply {
-            this.data = chartData
-            highlightValues(null)
-            invalidate()
+            setDrawCenterText(true)
+            setCenterTextTypeface(typefaceRegular)
+            setCenterTextColor(ContextCompat.getColor(context, R.color.primary_gray_dark))
+            setCenterTextSize(16f)
 
-            textview_value_bitcoin.text = getFormattedFiatAmount(data.fiatSymbol, data.bitcoinAmount * data.bitcoinExchangeRate)
+            isDrawHoleEnabled = true
+            setHoleColor(Color.TRANSPARENT)
+            holeRadius = 70f
+
+            animateY(1000, Easing.EasingOption.EaseInOutQuad)
+            isRotationEnabled = false
+            legend.isEnabled = false
+            description.isEnabled = false
+            setDrawEntryLabels(false)
+
+            setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
+            marker = ValueMarker(context, R.layout.item_pie_chart_marker)
         }
     }
 
@@ -160,11 +171,16 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
 
         private var mpPointF: MPPointF? = null
 
-        @SuppressLint("SimpleDateFormat", "SetTextI18n")
         override fun refreshContent(e: Entry, highlight: Highlight) {
-            // TODO: Change this
-            coin.text = SimpleDateFormat("E, MMM dd, HH:mm").format(Date(e.x.toLong() * 1000))
-            price.text = getFormattedFiatAmount(fiatSymbol!!, e.y.toBigDecimal())
+            val amount = e.y.toBigDecimal()
+            price.text = getFormattedFiatAmount(fiatSymbol!!, amount)
+
+            coin.text = when (amount) {
+                bitcoinValue -> context.getString(R.string.bitcoin)
+                etherValue -> context.getString(R.string.ether)
+                bitcoinCashValue -> context.getString(R.string.bitcoin_cash)
+                else -> ""
+            }
 
             super.refreshContent(e, highlight)
         }

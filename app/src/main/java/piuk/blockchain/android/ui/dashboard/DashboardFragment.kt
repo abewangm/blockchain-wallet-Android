@@ -25,13 +25,14 @@ import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import java.util.*
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), DashboardView {
 
-    override val shouldShowBuy: Boolean
-        get() = AndroidUtils.is19orHigher()
+    override val shouldShowBuy: Boolean = AndroidUtils.is19orHigher()
+    override val locale: Locale = Locale.getDefault()
 
     @Inject lateinit var dashboardPresenter: DashboardPresenter
     private val dashboardAdapter by unsafeLazy { DashboardDelegateAdapter(context!!) }
