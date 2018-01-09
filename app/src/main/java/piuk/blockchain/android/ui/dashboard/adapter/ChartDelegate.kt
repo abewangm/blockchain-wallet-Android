@@ -271,7 +271,10 @@ class ChartDelegate<in T>(
         override fun refreshContent(e: Entry, highlight: Highlight) {
             date.text = SimpleDateFormat("E, MMM dd, HH:mm").format(Date(e.x.toLong() * 1000))
             price.text = "$fiatSymbol${NumberFormat.getNumberInstance(Locale.getDefault())
-                    .apply { maximumFractionDigits = 2 }
+                    .apply {
+                        maximumFractionDigits = 2
+                        minimumFractionDigits = 2
+                    }
                     .format(e.y)}"
 
             super.refreshContent(e, highlight)

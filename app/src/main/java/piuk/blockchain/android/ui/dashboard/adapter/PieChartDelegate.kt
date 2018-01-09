@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.dashboard.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
@@ -26,6 +27,7 @@ import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.util.*
 
@@ -124,8 +126,7 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
 
             progressBar.gone()
             chart.apply {
-                val total = data.bitcoinValue + data.etherValue + data.bitcoinCashValue
-                centerText = getFormattedFiatAmount(data.fiatSymbol, total)
+                centerText = data.totalValueString
                 this.data = chartData
                 highlightValues(null)
                 invalidate()
@@ -156,11 +157,6 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
         }
     }
 
-    private fun getFormattedFiatAmount(fiatSymbol: String, value: BigDecimal): String =
-            "$fiatSymbol${NumberFormat.getNumberInstance(Locale.getDefault())
-                    .apply { maximumFractionDigits = 2 }
-                    .format(value)}"
-
     private inner class ValueMarker(
             context: Context,
             layoutResource: Int
@@ -171,14 +167,22 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
 
         private var mpPointF: MPPointF? = null
 
+        @SuppressLint("SetTextI18n")
         override fun refreshContent(e: Entry, highlight: Highlight) {
             val amount = e.y.toBigDecimal()
-            price.text = getFormattedFiatAmount(fiatSymbol!!, amount)
+            price.text = "$fiatSymbol${NumberFormat.getNumberInstance(Locale.getDefault())
+                    .apply {
+                        maximumFractionDigits = 2
+                        minimumFractionDigits = 2
+                    }
+                    .format(amount)}"
 
-            coin.text = when (amount) {
-                bitcoinValue -> context.getString(R.string.bitcoin)
-                etherValue -> context.getString(R.string.ether)
-                bitcoinCashValue -> context.getString(R.string.bitcoin_cash)
+            // Rounded for comparison as at some point in the stack we're truncating full BigDecimals
+            // to doubles and then converting them back again
+            coin.text = when (amount.setScale(2, RoundingMode.HALF_UP)) {
+                bitcoinValue.setScale(2, RoundingMode.HALF_UP) -> context.getString(R.string.bitcoin)
+                etherValue.setScale(2, RoundingMode.HALF_UP) -> context.getString(R.string.ether)
+                bitcoinCashValue.setScale(2, RoundingMode.HALF_UP) -> context.getString(R.string.bitcoin_cash)
                 else -> ""
             }
 

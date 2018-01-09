@@ -84,6 +84,14 @@ class MonetaryUtil(unit: Int) {
     fun getBtcUnits(): Array<String> = BTC_UNITS.clone()
 
     /**
+     * Returns an [Array] clone of the [BCH_UNITS] array.
+     *
+     * @return An [Array] containing the list of BCH formats as [String]
+     * @see [BCH_UNITS]
+     */
+    fun getBchUnits(): Array<String> = BCH_UNITS.clone()
+
+    /**
      * Returns a specific BTC Unit [String] for a given BTC unit type
      *
      * @param unit The chosen BTC unit
@@ -253,6 +261,11 @@ class MonetaryUtil(unit: Int) {
         private val MICRO_LONG = 1000000L
         private val BTC_DEC = 1e8
         private val BTC_UNITS = arrayOf("BTC", "mBTC", "bits")
+
+        /**
+         * BCH Unit type constants
+         */
+        private val BCH_UNITS = arrayOf("BCH", "mBCH", "bits")
 
         /**
          * ETH Unit type constants

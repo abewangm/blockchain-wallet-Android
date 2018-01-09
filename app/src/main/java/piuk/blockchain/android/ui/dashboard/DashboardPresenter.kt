@@ -7,7 +7,6 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.ChartsDataManager
 import piuk.blockchain.android.data.charts.TimeSpan
 import piuk.blockchain.android.data.charts.models.ChartDatumDto
-import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
@@ -49,7 +48,6 @@ class DashboardPresenter @Inject constructor(
 ) : BasePresenter<DashboardView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-    private lateinit var cryptoCurrency: CryptoCurrencies
     private val displayList = mutableListOf<Any>(
             stringUtils.getString(R.string.dashboard_balances),
             PieChartsState.Loading,
@@ -58,6 +56,7 @@ class DashboardPresenter @Inject constructor(
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     private var timeSpan = TimeSpan.MONTH
     @VisibleForTesting var btcBalance: Long = 0L
+    @VisibleForTesting var bchBalance: Long = 0L
     @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
@@ -79,15 +78,7 @@ class DashboardPresenter @Inject constructor(
         super.onViewDestroyed()
     }
 
-    internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        this.cryptoCurrency = cryptoCurrency
-        currencyState.cryptoCurrency = cryptoCurrency
-        updateCryptoPrice()
-        updateChartsData(timeSpan)
-    }
-
     internal fun onResume() {
-        cryptoCurrency = currencyState.cryptoCurrency
         updateChartsData(timeSpan)
         updateAllBalances()
         updatePrices()
@@ -97,19 +88,11 @@ class DashboardPresenter @Inject constructor(
         exchangeRateFactory.updateTickers()
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
-                        { updateCryptoPrice() },
+                        {
+                            //                            updateCryptoPrice()
+                        },
                         { Timber.e(it) }
                 )
-    }
-
-    private fun updateCryptoPrice() {
-        view.updateCryptoCurrencyPrice(
-                if (cryptoCurrency == CryptoCurrencies.BTC) {
-                    getBtcString()
-                } else {
-                    getEthString()
-                }
-        )
     }
 
     private fun updateChartsData(timeSpan: TimeSpan) {
@@ -117,22 +100,22 @@ class DashboardPresenter @Inject constructor(
         compositeDisposable.clear()
 
         view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
-
-        when (timeSpan) {
-            TimeSpan.ALL_TIME -> chartsDataManager.getAllTimePrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.YEAR -> chartsDataManager.getYearPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.MONTH -> chartsDataManager.getMonthPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.WEEK -> chartsDataManager.getWeekPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.DAY -> chartsDataManager.getDayPrice(cryptoCurrency, getFiatCurrency())
-        }.compose(RxUtil.addObservableToCompositeDisposable(this))
-                .toList()
-                .doOnSubscribe { view.updateChartState(ChartsState.Loading) }
-                .doOnSuccess { view.updateChartState(getChartsData(it)) }
-                .doOnError { view.updateChartState(ChartsState.Error) }
-                .subscribe(
-                        { view.updateDashboardSelectedCurrency(cryptoCurrency) },
-                        { Timber.e(it) }
-                )
+//
+//        when (timeSpan) {
+//            TimeSpan.ALL_TIME -> chartsDataManager.getAllTimePrice(cryptoCurrency, getFiatCurrency())
+//            TimeSpan.YEAR -> chartsDataManager.getYearPrice(cryptoCurrency, getFiatCurrency())
+//            TimeSpan.MONTH -> chartsDataManager.getMonthPrice(cryptoCurrency, getFiatCurrency())
+//            TimeSpan.WEEK -> chartsDataManager.getWeekPrice(cryptoCurrency, getFiatCurrency())
+//            TimeSpan.DAY -> chartsDataManager.getDayPrice(cryptoCurrency, getFiatCurrency())
+//        }.compose(RxUtil.addObservableToCompositeDisposable(this))
+//                .toList()
+//                .doOnSubscribe { view.updateChartState(ChartsState.Loading) }
+//                .doOnSuccess { view.updateChartState(getChartsData(it)) }
+//                .doOnError { view.updateChartState(ChartsState.Error) }
+//                .subscribe(
+//                        { view.updateDashboardSelectedCurrency(cryptoCurrency) },
+//                        { Timber.e(it) }
+//                )
     }
 
     private fun getChartsData(list: List<ChartDatumDto>) = ChartsState.Data(
@@ -153,17 +136,41 @@ class DashboardPresenter @Inject constructor(
                                 btcBalance = transactionListDataManager.getBtcBalance(ItemAccount().apply {
                                     type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
                                 })
+
+                                bchBalance = transactionListDataManager.getBchBalance(ItemAccount().apply {
+                                    type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+                                })
                                 ethBalance = ethAddressResponse.getTotalBalance()
                                 updateCryptoBalances()
 
                                 val btcFiat = exchangeRateFactory.getLastBtcPrice(getFiatCurrency()) * (btcBalance / 1e8)
+                                val bchFiat = exchangeRateFactory.getLastBchPrice(getFiatCurrency()) * (bchBalance / 1e8)
                                 val ethFiat = BigDecimal(exchangeRateFactory.getLastEthPrice(getFiatCurrency()))
                                         .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
 
                                 val totalDouble = btcFiat.plus(ethFiat.toDouble())
 
                                 val totalString = "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(totalDouble)}"
-//                                view.updateTotalBalance(totalString)
+
+                                view.updatePieChartState(
+                                        PieChartsState.Data(
+                                                fiatSymbol = getCurrencySymbol(),
+                                                // Amounts in Fiat
+                                                bitcoinValue = BigDecimal.valueOf(btcFiat),
+                                                etherValue = ethFiat,
+                                                bitcoinCashValue = BigDecimal.valueOf(bchFiat),
+                                                // Formatted fiat value Strings
+                                                bitcoinValueString = getBtcFiatString(btcBalance),
+                                                etherValueString = getEthFiatString(ethBalance),
+                                                bitcoinCashValueString = getBchFiatString(bchBalance),
+                                                // Formatted Amount Strings
+                                                bitcoinAmountString = getBtcBalanceString(btcBalance),
+                                                etherAmountString = getEthBalanceString(ethBalance),
+                                                bitcoinCashAmountString = getBchBalanceString(bchBalance),
+                                                // Total
+                                                totalValueString = totalString
+                                        )
+                                )
                             }
                 }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
@@ -174,24 +181,6 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun updateCryptoBalances() {
-        // TODO: This is temporary
-        view.updatePieChartState(
-                PieChartsState.Data(
-                        fiatSymbol = getCurrencySymbol(),
-                        // Amounts in Fiat
-                        bitcoinValue = BigDecimal.valueOf(35.0000),
-                        etherValue = BigDecimal.valueOf(34.244),
-                        bitcoinCashValue = BigDecimal.valueOf(23.9304),
-                        // Formatted fiat value Strings
-                        bitcoinValueString = "$1000.00",
-                        etherValueString = "$1000.00",
-                        bitcoinCashValueString = "$1000.00",
-                        // Formatted Amount Strings
-                        bitcoinAmountString = "1000.00 BTC",
-                        etherAmountString = "2353.00 ETH",
-                        bitcoinCashAmountString = "25.03 BCH"
-                )
-        )
 
 //        view.updateBtcBalance(getBtcBalanceString(
 //                currencyState.isDisplayingCryptoCurrency,
@@ -336,47 +325,66 @@ class DashboardPresenter @Inject constructor(
         )
     }
 
-    private fun getBtcBalanceString(isBtc: Boolean, btcBalance: Long): String {
-        val strFiat = getFiatCurrency()
-        val fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8)
+    private fun getBtcBalanceString(btcBalance: Long): String {
         var balance = monetaryUtil.getDisplayAmountWithFormatting(btcBalance)
         // Replace 0.0 with 0 to match web
         if (balance == "0.0") balance = "0"
 
-        return if (isBtc) {
-            "$balance ${getBtcDisplayUnits()}"
-        } else {
-            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
-        }
+        return "$balance ${getBtcDisplayUnits()}"
     }
 
-    private fun getEthBalanceString(isEth: Boolean, ethBalance: BigInteger): String {
+    private fun getBtcFiatString(btcBalance: Long): String {
         val strFiat = getFiatCurrency()
-        val fiatBalance = BigDecimal.valueOf(exchangeRateFactory.getLastEthPrice(strFiat))
-                .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
+        val fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8)
+        
+        return "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
+    }
+
+    private fun getBchBalanceString(bchBalance: Long): String {
+        var balance = monetaryUtil.getDisplayAmountWithFormatting(bchBalance)
+        // Replace 0.0 with 0 to match web
+        if (balance == "0.0") balance = "0"
+
+        return "$balance ${getBchDisplayUnits()}"
+    }
+
+    private fun getBchFiatString(bchBalance: Long): String {
+        val strFiat = getFiatCurrency()
+        val fiatBalance = exchangeRateFactory.getLastBchPrice(strFiat) * (bchBalance / 1e8)
+
+        return "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
+    }
+
+    private fun getEthBalanceString(ethBalance: BigInteger): String {
         val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
                 .run { format(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER)) }
 
-        return if (isEth) {
-            "$number ETH"
-        } else {
-            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance.toDouble())} $strFiat"
-        }
+        return "$number ETH"
     }
 
-    private fun getCurrencySymbol() = monetaryUtil.getCurrencySymbol(getFiatCurrency(), view.locale)
+    private fun getEthFiatString(ethBalance: BigInteger): String {
+        val strFiat = getFiatCurrency()
+        val fiatBalance = BigDecimal.valueOf(exchangeRateFactory.getLastEthPrice(strFiat))
+                .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
 
-    private fun getBtcString(): String {
+        return "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance.toDouble())} $strFiat"
+    }
+
+    private fun getBtcPriceString(): String {
         val lastBtcPrice = getLastBtcPrice(getFiatCurrency())
         return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastBtcPrice)}"
     }
 
-    private fun getEthString(): String {
+    private fun getEthPriceString(): String {
         val lastEthPrice = getLastEthPrice(getFiatCurrency())
         return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastEthPrice)}"
     }
 
+    private fun getCurrencySymbol() = monetaryUtil.getCurrencySymbol(getFiatCurrency(), view.locale)
+
     private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
+
+    private fun getBchDisplayUnits() = monetaryUtil.getBchUnits()[getBtcUnitType()]
 
     private fun getBtcUnitType() =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -431,7 +439,9 @@ sealed class PieChartsState {
             // Formatted Amount Strings
             val bitcoinAmountString: String,
             val etherAmountString: String,
-            val bitcoinCashAmountString: String
+            val bitcoinCashAmountString: String,
+            // Total String
+            val totalValueString: String
     ) : PieChartsState()
 
     object Error : PieChartsState()
