@@ -11,11 +11,7 @@ interface DashboardView : View {
 
     fun updateChartState(chartsState: ChartsState)
 
-    fun updateEthBalance(balance: String)
-
-    fun updateBtcBalance(balance: String)
-
-    fun updateTotalBalance(balance: String)
+    fun updatePieChartState(chartsState: PieChartsState)
 
     fun updateCryptoCurrencyPrice(price: String)
 
@@ -30,4 +26,5 @@ interface DashboardView : View {
     fun startShapeShiftActivity()
 
     fun updateDashboardSelectedCurrency(cryptoCurrency: CryptoCurrencies)
+
 }

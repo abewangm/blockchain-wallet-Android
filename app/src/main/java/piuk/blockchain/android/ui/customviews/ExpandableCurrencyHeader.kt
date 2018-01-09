@@ -117,7 +117,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
 
     private fun closeLayout(cryptoCurrency: CryptoCurrencies) {
         // Inform parent of currency selection
-//        selectionListener(cryptoCurrency)
+        selectionListener(cryptoCurrency)
         // Listen for finish of animation as UI responds to visibility change
         constraint_layout.layoutTransition.apply {
             addTransitionListener(object : LayoutTransition.TransitionListener {
@@ -140,9 +140,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
                     val alphaAnimation = AlphaAnimation(0.0f, 1.0f).apply { duration = 250 }
                     textview_selected_currency.startAnimation(alphaAnimation)
                     alphaAnimation.setAnimationListener {
-                        onAnimationEnd {
-                            textview_selected_currency.alpha = 1.0f
-                        }
+                        onAnimationEnd { textview_selected_currency.alpha = 1.0f }
                     }
 
                     // Remove listener

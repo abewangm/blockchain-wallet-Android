@@ -21,9 +21,9 @@ import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.util.AndroidUtils
+import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
-import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import javax.inject.Inject
 
@@ -57,28 +57,10 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tabs_dashboard.apply {
-            addTab(tabs_dashboard.newTab().setText(R.string.bitcoin))
-            addTab(tabs_dashboard.newTab().setText(R.string.ether))
-            getTabAt(presenter.getCurrentCryptoCurrency())?.select()
-            setOnTabSelectedListener {
-                if (it == 0) {
-                    presenter.updateSelectedCurrency(CryptoCurrencies.BTC)
-                    dashboardAdapter.updateSelectedCurrency(CryptoCurrencies.BTC)
-                } else {
-                    presenter.updateSelectedCurrency(CryptoCurrencies.ETHER)
-                    dashboardAdapter.updateSelectedCurrency(CryptoCurrencies.ETHER)
-                }
-            }
-        }
-
         recycler_view?.apply {
             layoutManager = LinearLayoutManager(activity)
             this.adapter = dashboardAdapter
         }
-
-        textview_btc.setOnClickListener { presenter.invertViewType() }
-        textview_eth.setOnClickListener { presenter.invertViewType() }
 
         onViewReady()
     }
@@ -115,16 +97,8 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         dashboardAdapter.updateChartState(chartsState)
     }
 
-    override fun updateEthBalance(balance: String) {
-        textview_eth?.text = balance
-    }
-
-    override fun updateBtcBalance(balance: String) {
-        textview_btc?.text = balance
-    }
-
-    override fun updateTotalBalance(balance: String) {
-        textview_total?.text = balance
+    override fun updatePieChartState(chartsState: PieChartsState) {
+        dashboardAdapter.updatePieChartState(chartsState)
     }
 
     override fun updateCryptoCurrencyPrice(price: String) {
@@ -160,7 +134,9 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     private fun setupToolbar() {
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
-                    (activity as MainActivity).supportActionBar, null)
+                    (activity as MainActivity).supportActionBar, R.string.dashboard_title)
+
+            ViewUtils.setElevation((activity as MainActivity).toolbar, 5f)
         }
     }
 

@@ -232,11 +232,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         });
 
         // Set up toolbar
-        toolbar = findViewById(R.id.toolbar_general);
+        toolbar = findViewById(R.id.toolbar_main);
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.vector_menu));
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        ViewUtils.setElevation(toolbar, 0F);
 
         // Notify Presenter that page is setup
         onViewReady();
@@ -264,6 +263,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         handleIncomingIntent();
         applyFontToNavDrawer();
+    }
+
+    @Nullable
+    public Toolbar getToolbar() {
+        return toolbar;
     }
 
     @SuppressLint("NewApi")

@@ -5,6 +5,7 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.ui.dashboard.ChartsState
+import piuk.blockchain.android.ui.dashboard.PieChartsState
 
 class DashboardDelegateAdapter(
         context: Context
@@ -12,12 +13,14 @@ class DashboardDelegateAdapter(
 
     private val chartDelegate = ChartDelegate<Any>(context)
     private val onboardingDelegate = OnboardingDelegate<Any>(context)
+    private val pieChartDelegate = PieChartDelegate<Any>(context)
 
     init {
         // Add all necessary AdapterDelegate objects here
         delegatesManager.addAdapterDelegate(AnnouncementDelegate())
+        delegatesManager.addAdapterDelegate(HeaderDelegate())
         delegatesManager.addAdapterDelegate(onboardingDelegate)
-        delegatesManager.addAdapterDelegate(chartDelegate)
+        delegatesManager.addAdapterDelegate(pieChartDelegate)
     }
 
     /**
@@ -25,6 +28,13 @@ class DashboardDelegateAdapter(
      */
     fun updateChartState(chartsState: ChartsState) {
         chartDelegate.updateChartState(chartsState)
+    }
+
+    /**
+     * Updates the state of the Balance card without causing a refresh of the entire View.
+     */
+    fun updatePieChartState(chartsState: PieChartsState) {
+        pieChartDelegate.updateChartState(chartsState)
     }
 
     /**

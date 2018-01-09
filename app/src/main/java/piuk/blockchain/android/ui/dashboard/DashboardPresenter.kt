@@ -50,14 +50,17 @@ class DashboardPresenter @Inject constructor(
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
     private lateinit var cryptoCurrency: CryptoCurrencies
-    private val displayList = mutableListOf<Any>(ChartDisplayable())
+    private val displayList = mutableListOf<Any>(
+            stringUtils.getString(R.string.dashboard_balances),
+            ChartsState.Loading,
+            stringUtils.getString(R.string.dashboard_price_charts)
+    )
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     private var timeSpan = TimeSpan.MONTH
     @VisibleForTesting var btcBalance: Long = 0L
     @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
-        cryptoCurrency = currencyState.cryptoCurrency
         view.notifyItemAdded(displayList, 0)
 
         // Triggers various updates to the page once all metadata is loaded
@@ -88,19 +91,6 @@ class DashboardPresenter @Inject constructor(
         updateChartsData(timeSpan)
         updateAllBalances()
         updatePrices()
-    }
-
-    internal fun getCurrentCryptoCurrency(): Int {
-        return when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> 0
-            CryptoCurrencies.ETHER -> 1
-            else -> throw IllegalArgumentException("BCH is not currently supported")
-        }
-    }
-
-    internal fun invertViewType() {
-        currencyState.toggleDisplayingCrypto()
-        updateCryptoBalances()
     }
 
     private fun updatePrices() {
@@ -173,7 +163,7 @@ class DashboardPresenter @Inject constructor(
                                 val totalDouble = btcFiat.plus(ethFiat.toDouble())
 
                                 val totalString = "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(totalDouble)}"
-                                view.updateTotalBalance(totalString)
+//                                view.updateTotalBalance(totalString)
                             }
                 }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
@@ -183,15 +173,25 @@ class DashboardPresenter @Inject constructor(
                 )
     }
 
+//    PieChartDisplayable(
+//    "$",
+//    BigDecimal.ONE,
+//    BigDecimal.ONE,
+//    BigDecimal.ONE,
+//    BigDecimal.ONE,
+//    BigDecimal.ONE,
+//    BigDecimal.ONE
+//    )
+
     private fun updateCryptoBalances() {
-        view.updateBtcBalance(getBtcBalanceString(
-                currencyState.isDisplayingCryptoCurrency,
-                btcBalance
-        ))
-        view.updateEthBalance(getEthBalanceString(
-                currencyState.isDisplayingCryptoCurrency,
-                ethBalance
-        ))
+//        view.updateBtcBalance(getBtcBalanceString(
+//                currencyState.isDisplayingCryptoCurrency,
+//                btcBalance
+//        ))
+//        view.updateEthBalance(getEthBalanceString(
+//                currencyState.isDisplayingCryptoCurrency,
+//                ethBalance
+//        ))
     }
 
     private fun showAnnouncement() {
@@ -244,15 +244,9 @@ class DashboardPresenter @Inject constructor(
             walletOptionsDataManager.showShapeshift(payloadDataManager.wallet.guid, payloadDataManager.wallet.sharedKey)
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(
-                            {
-                                Timber.d("vos dashboard "+it)
-                                if (it) showAnnouncement()
-                            },
-                            {
-                                Timber.e(it)
-                            })
-
-
+                            { if (it) showAnnouncement() },
+                            { Timber.e(it) }
+                    )
         }
     }
 
@@ -412,3 +406,19 @@ sealed class ChartsState {
 }
 
 class ChartDisplayable
+
+sealed class PieChartsState {
+
+    data class Data(
+            val fiatSymbol: String,
+            val bitcoinAmount: BigDecimal,
+            val etherAmount: BigDecimal,
+            val bitcoinCashAmount: BigDecimal,
+            val bitcoinExchangeRate: BigDecimal,
+            val etherExchangeRate: BigDecimal,
+            val bitcoinCashExchangeRate: BigDecimal
+    ) : PieChartsState()
+
+    object Error : PieChartsState()
+    object Loading : PieChartsState()
+}

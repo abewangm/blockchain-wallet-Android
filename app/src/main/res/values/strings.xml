@@ -779,6 +779,9 @@
     <string name="dashboard_ether_price">Ether price</string>
     <string name="dashboard_charts_error">Error loading chart data</string>
     <string name="dashboard_charts_price_error">Error fetching price data</string>
+    <string name="dashboard_charts_balance_error">Error fetching balance data</string>
+    <string name="dashboard_balances">Balances</string>
+    <string name="dashboard_price_charts">Price charts</string>
 
     <!-- SHAPESHIFT ONBOARDING -->
     <string translatable="false" name="onboarding_shapeshift_title">@string/onboarding_available_now</string>
