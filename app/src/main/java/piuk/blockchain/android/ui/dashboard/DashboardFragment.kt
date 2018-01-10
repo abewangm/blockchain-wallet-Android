@@ -72,6 +72,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         presenter.onResume()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+            ViewUtils.setElevation((activity as MainActivity).toolbar, 5f)
         }
         LocalBroadcastManager.getInstance(context!!)
                 .registerReceiver(receiver, IntentFilter(BalanceFragment.ACTION_INTENT))
@@ -94,8 +95,13 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         recycler_view.smoothScrollToPosition(0)
     }
 
+    override fun notifyItemUpdated(displayItems: MutableList<Any>, position: Int) {
+        dashboardAdapter.items = displayItems
+        dashboardAdapter.notifyItemChanged(position)
+    }
+
     override fun updateChartState(chartsState: ChartsState) {
-        dashboardAdapter.updateChartState(chartsState)
+//        dashboardAdapter.updateChartState(chartsState)
     }
 
     override fun updatePieChartState(chartsState: PieChartsState) {
@@ -103,11 +109,11 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     }
 
     override fun updateCryptoCurrencyPrice(price: String) {
-        dashboardAdapter.updateCurrencyPrice(price)
+//        dashboardAdapter.updateCurrencyPrice(price)
     }
 
     override fun updateDashboardSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        dashboardAdapter.updateSelectedCurrency(cryptoCurrency)
+//        dashboardAdapter.updateSelectedCurrency(cryptoCurrency)
     }
 
     override fun showToast(message: Int, toastType: String) {
@@ -136,8 +142,6 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
                     (activity as MainActivity).supportActionBar, R.string.dashboard_title)
-
-            ViewUtils.setElevation((activity as MainActivity).toolbar, 5f)
         }
     }
 

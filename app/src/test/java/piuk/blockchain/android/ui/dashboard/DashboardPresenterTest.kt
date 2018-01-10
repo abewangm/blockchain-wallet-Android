@@ -11,7 +11,6 @@ import org.junit.Test
 import piuk.blockchain.android.data.charts.ChartsDataManager
 import piuk.blockchain.android.data.charts.models.ChartDatumDto
 import piuk.blockchain.android.data.currency.CryptoCurrencies
-import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
@@ -39,7 +38,6 @@ class DashboardPresenterTest {
     private val rxBus: RxBus = mock()
     private val swipeToReceiveHelper: SwipeToReceiveHelper = mock()
     private val view: DashboardView = mock()
-    private val currencyState: CurrencyState = mock()
     private val walletOptionsDataManager: WalletOptionsDataManager = mock()
 
     @Before
@@ -57,7 +55,6 @@ class DashboardPresenterTest {
                 buyDataManager,
                 rxBus,
                 swipeToReceiveHelper,
-                currencyState,
                 walletOptionsDataManager
         )
 
@@ -68,8 +65,8 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding complete, no announcement`() {
         // Arrange
-        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
+//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
+//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -122,8 +119,8 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding not complete`() {
         // Arrange
-        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
+//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
+//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -180,8 +177,8 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding complete with announcement`() {
         // Arrange
-        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
+//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
+//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -249,64 +246,10 @@ class DashboardPresenterTest {
 
     @Test
     @Throws(Exception::class)
-    fun `updateSelectedCurrency BTC`() {
-        // Arrange
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-                .thenReturn("USD")
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.BTC, "USD"))
-                .thenReturn(Observable.just(mock(ChartDatumDto::class)))
-        // Act
-        subject.updateSelectedCurrency(CryptoCurrencies.BTC)
-        // Assert
-        verify(view, times(3)).updateChartState(any())
-        verify(view).updateCryptoCurrencyPrice(any())
-        verify(view).updateDashboardSelectedCurrency(any())
-        verifyNoMoreInteractions(view)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastBtcPrice("USD")
-        verify(exchangeRateFactory, times(2)).getSymbol("USD")
-        verifyNoMoreInteractions(exchangeRateFactory)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `updateSelectedCurrency ETH`() {
-        // Arrange
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-                .thenReturn("USD")
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.ETHER, "USD"))
-                .thenReturn(Observable.just(mock(ChartDatumDto::class)))
-        // Act
-        subject.updateSelectedCurrency(CryptoCurrencies.ETHER)
-        // Assert
-        verify(view, times(3)).updateChartState(any())
-        verify(view).updateDashboardSelectedCurrency(any())
-        verify(view).updateCryptoCurrencyPrice(any())
-        verifyNoMoreInteractions(view)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastEthPrice("USD")
-        verify(exchangeRateFactory, times(2)).getSymbol("USD")
-        verifyNoMoreInteractions(exchangeRateFactory)
-    }
-
-    @Test
-    @Throws(Exception::class)
     fun onResume() {
         // Arrange
-        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
+//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
+//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)

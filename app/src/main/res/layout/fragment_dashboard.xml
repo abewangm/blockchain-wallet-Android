@@ -4,5 +4,4 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_gray_lightest"
-    android:fitsSystemWindows="true"
-    android:paddingBottom="@dimen/action_bar_height" />
+    android:fitsSystemWindows="true"/>
