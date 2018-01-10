@@ -1,17 +1,19 @@
 package piuk.blockchain.android.ui.dashboard.adapter
 
 import android.content.Context
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.ui.dashboard.PieChartsState
 
 class DashboardDelegateAdapter(
-        context: Context
+        context: Context,
+        assetSelector: (CryptoCurrencies) -> Unit
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     private val onboardingDelegate = OnboardingDelegate<Any>(context)
     private val pieChartDelegate = PieChartDelegate<Any>(context)
-    private val assetPriceDelegate = AssetPriceCardDelegate<Any>(context)
+    private val assetPriceDelegate = AssetPriceCardDelegate<Any>(context, assetSelector)
 
     init {
         // Add all necessary AdapterDelegate objects here

@@ -35,7 +35,11 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override val locale: Locale = Locale.getDefault()
 
     @Inject lateinit var dashboardPresenter: DashboardPresenter
-    private val dashboardAdapter by unsafeLazy { DashboardDelegateAdapter(context!!) }
+    private val dashboardAdapter by unsafeLazy {
+        DashboardDelegateAdapter(context!!) {
+            presenter.onAssetSelected(it)
+        }
+    }
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT && activity != null) {

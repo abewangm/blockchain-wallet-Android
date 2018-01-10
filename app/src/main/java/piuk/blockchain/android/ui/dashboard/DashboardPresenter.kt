@@ -89,6 +89,10 @@ class DashboardPresenter @Inject constructor(
         updatePrices()
     }
 
+    internal fun onAssetSelected(cryptoCurrency: CryptoCurrencies) {
+        // TODO: Load graph in own floating activity, move much of this logic elsewhere
+    }
+
     private fun updatePrices() {
         exchangeRateFactory.updateTickers()
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
