@@ -44,7 +44,6 @@ class DashboardPresenterTest {
     fun setUp() {
 
         subject = DashboardPresenter(
-                chartsDataManager,
                 prefsUtil,
                 exchangeRateFactory,
                 ethDataManager,
@@ -65,8 +64,6 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding complete, no announcement`() {
         // Arrange
-//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -91,10 +88,6 @@ class DashboardPresenterTest {
         subject.onViewReady()
         // Assert
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
-        // TODO: Fix me
-//        verify(view).updateBtcBalance("210.0 BTC")
-//        verify(view).updateEthBalance("0.00000002 ETH")
-//        verify(view).updateTotalBalance("\$420.00")
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -119,8 +112,6 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding not complete`() {
         // Arrange
-//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -146,10 +137,6 @@ class DashboardPresenterTest {
         subject.onViewReady()
         // Assert
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
-        // TODO: Fix me
-//        verify(view).updateBtcBalance("210.0 BTC")
-//        verify(view).updateEthBalance("0.00000002 ETH")
-//        verify(view).updateTotalBalance("\$420.00")
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -177,8 +164,6 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding complete with announcement`() {
         // Arrange
-//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -187,10 +172,6 @@ class DashboardPresenterTest {
         val combinedEthModel: CombinedEthModel = mock()
         whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
-//        val mockWallet: Wallet = mock()
-//        whenever(payloadDataManager.wallet).thenReturn(mockWallet)
-//        whenever(payloadDataManager.wallet.guid).thenReturn("")
-//        whenever(payloadDataManager.wallet.sharedKey).thenReturn("")
         val btcBalance = 21_000_000_000L
         whenever(transactionListDataManager.getBtcBalance(any())).thenReturn(btcBalance)
         val ethBalance = 22_000_000_000L
@@ -207,10 +188,6 @@ class DashboardPresenterTest {
         subject.onViewReady()
         // Assert
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
-        // TODO: Fix me
-//        verify(view).updateBtcBalance("210.0 BTC")
-//        verify(view).updateEthBalance("0.00000002 ETH")
-//        verify(view).updateTotalBalance("\$420.00")
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -248,8 +225,6 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun onResume() {
         // Arrange
-//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
@@ -275,13 +250,6 @@ class DashboardPresenterTest {
         // Act
         subject.onResume()
         // Assert
-        verify(view, times(3)).updateChartState(any())
-        verify(view).updateCryptoCurrencyPrice(any())
-        // TODO: Fix me
-//        verify(view).updateBtcBalance("210.0 BTC")
-//        verify(view).updateEthBalance("0.00000002 ETH")
-//        verify(view).updateTotalBalance("\$420.00")
-        verify(view).updateDashboardSelectedCurrency(any())
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)

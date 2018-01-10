@@ -4,9 +4,6 @@ import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.charts.ChartsDataManager
-import piuk.blockchain.android.data.charts.TimeSpan
-import piuk.blockchain.android.data.charts.models.ChartDatumDto
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
@@ -32,7 +29,6 @@ import java.text.DecimalFormat
 import javax.inject.Inject
 
 class DashboardPresenter @Inject constructor(
-        private val chartsDataManager: ChartsDataManager,
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val ethDataManager: EthDataManager,
@@ -56,7 +52,6 @@ class DashboardPresenter @Inject constructor(
             AssetPriceCardState.Loading(CryptoCurrencies.BCH)
     )
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
-    private var timeSpan = TimeSpan.MONTH
     @Suppress("MemberVisibilityCanPrivate")
     @VisibleForTesting var btcBalance: Long = 0L
     @Suppress("MemberVisibilityCanPrivate")
@@ -84,13 +79,8 @@ class DashboardPresenter @Inject constructor(
     }
 
     internal fun onResume() {
-        updateChartsData(timeSpan)
         updateAllBalances()
         updatePrices()
-    }
-
-    internal fun onAssetSelected(cryptoCurrency: CryptoCurrencies) {
-        // TODO: Load graph in own floating activity, move much of this logic elsewhere
     }
 
     private fun updatePrices() {
@@ -128,42 +118,6 @@ class DashboardPresenter @Inject constructor(
                 displayList.indexOfFirst { it is AssetPriceCardState }
         )
     }
-
-    private fun updateChartsData(timeSpan: TimeSpan) {
-        this.timeSpan = timeSpan
-        compositeDisposable.clear()
-
-        view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
-
-        // TODO: This is a temporary variable
-        val cryptoCurrency = CryptoCurrencies.BCH
-
-        when (timeSpan) {
-            TimeSpan.ALL_TIME -> chartsDataManager.getAllTimePrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.YEAR -> chartsDataManager.getYearPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.MONTH -> chartsDataManager.getMonthPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.WEEK -> chartsDataManager.getWeekPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.DAY -> chartsDataManager.getDayPrice(cryptoCurrency, getFiatCurrency())
-        }.compose(RxUtil.addObservableToCompositeDisposable(this))
-                .toList()
-                .doOnSubscribe { view.updateChartState(ChartsState.Loading) }
-                .doOnSuccess { view.updateChartState(getChartsData(it)) }
-                .doOnError { view.updateChartState(ChartsState.Error) }
-                .subscribe(
-                        { view.updateDashboardSelectedCurrency(cryptoCurrency) },
-                        { Timber.e(it) }
-                )
-    }
-
-    private fun getChartsData(list: List<ChartDatumDto>) = ChartsState.Data(
-            data = list,
-            fiatSymbol = getCurrencySymbol(),
-            getChartAllTime = { updateChartsData(TimeSpan.ALL_TIME) },
-            getChartYear = { updateChartsData(TimeSpan.YEAR) },
-            getChartMonth = { updateChartsData(TimeSpan.MONTH) },
-            getChartWeek = { updateChartsData(TimeSpan.WEEK) },
-            getChartDay = { updateChartsData(TimeSpan.DAY) }
-    )
 
     private fun updateAllBalances() {
         ethDataManager.fetchEthAddress()
@@ -432,24 +386,6 @@ class DashboardPresenter @Inject constructor(
         @VisibleForTesting const val SHAPESHIFT_ANNOUNCEMENT_DISMISSED = "SHAPESHIFT_ANNOUNCEMENT_DISMISSED"
 
     }
-
-}
-
-sealed class ChartsState {
-
-    data class Data(
-            val data: List<ChartDatumDto>,
-            val fiatSymbol: String,
-            val getChartAllTime: () -> Unit,
-            val getChartYear: () -> Unit,
-            val getChartMonth: () -> Unit,
-            val getChartWeek: () -> Unit,
-            val getChartDay: () -> Unit
-    ) : ChartsState()
-
-    class TimeSpanUpdated(val timeSpan: TimeSpan) : ChartsState()
-    object Loading : ChartsState()
-    object Error : ChartsState()
 
 }
 
