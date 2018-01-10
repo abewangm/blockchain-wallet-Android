@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.coin.GenericMetadataAccount;
 import info.blockchain.wallet.ethereum.EthereumWallet;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
@@ -29,6 +30,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthService;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactsEvent;
@@ -38,6 +40,7 @@ import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
+import piuk.blockchain.android.data.metadata.MetadataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -81,6 +84,8 @@ public class MainPresenter extends BasePresenter<MainView> {
     private EthDataManager ethDataManager;
     private CurrencyState currencyState;
     private WalletOptionsDataManager walletOptionsDataManager;
+    private MetadataManager metadataManager;
+    private BchDataManager bchDataManager;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -102,7 +107,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                   EthDataManager ethDataManager,
                   SwipeToReceiveHelper swipeToReceiveHelper,
                   CurrencyState currencyState,
-                  WalletOptionsDataManager walletOptionsDataManager) {
+                  WalletOptionsDataManager walletOptionsDataManager,
+                  MetadataManager metadataManager,
+                  BchDataManager bchDataManager) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -124,6 +131,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.swipeToReceiveHelper = swipeToReceiveHelper;
         this.currencyState = currencyState;
         this.walletOptionsDataManager = walletOptionsDataManager;
+        this.metadataManager = metadataManager;
+        this.bchDataManager = bchDataManager;
         osUtil = new OSUtil(applicationContext);
     }
 
@@ -204,16 +213,8 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     void initMetadataElements() {
-        initMetadataNodesObservable()
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
-                .flatMapCompletable(metadataNodeFactory -> {
-                    //Initialise contacts
-                    //contactsDataManager.initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode());
-                    //payloadDataManager.registerMdid()
-                    //contactsDataManager.publishXpub()
-                    return Completable.complete();
-                })
+        metadataManager.attemptMetadataSetup()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .andThen(feesCompletable())
                 .doAfterTerminate(() -> {
                             getView().hideProgressDialog();
@@ -236,7 +237,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                     } else {
                         getView().setBuySellEnabled(false);
                     }
-//                    initContactsService();
                 }, throwable -> {
                     //noinspection StatementWithEmptyBody
                     if (throwable instanceof InvalidCredentialsException || throwable instanceof HDWalletException) {
@@ -265,22 +265,6 @@ public class MainPresenter extends BasePresenter<MainView> {
         }).subscribeOn(Schedulers.computation())
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(() -> { /* No-op*/ }, Timber::e);
-    }
-
-    private Observable<MetadataNodeFactory> initMetadataNodesObservable() {
-        return payloadDataManager.loadNodes()
-                .flatMap(loaded -> {
-                    if (loaded) {
-                        return payloadDataManager.getMetadataNodeFactory();
-                    } else {
-                        if (!payloadManager.getPayload().isDoubleEncryption()) {
-                            return payloadDataManager.generateNodes(null)
-                                    .andThen(payloadDataManager.getMetadataNodeFactory());
-                        } else {
-                            throw new InvalidCredentialsException("Payload is double encrypted");
-                        }
-                    }
-                });
     }
 
     private Observable<Map<String, PriceDatum>> feesCompletable() {
@@ -442,26 +426,14 @@ public class MainPresenter extends BasePresenter<MainView> {
         }
     }
 
-    /**
-     * Initialises ethereum wallet.
-     */
-    private Observable<EthereumWallet> ethWalletObservable(DeterministicKey hdNode) {
-        return ethDataManager.initEthereumWallet(hdNode,
-                stringUtils.getString(R.string.eth_default_account_label));
-    }
-
-    void generateMetadataHDNodeAndEthereumWallet(@Nullable String secondPassword) {
+    void generateAndSetupMetadata(@Nullable String secondPassword) {
         if (!payloadDataManager.validateSecondPassword(secondPassword)) {
             getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
             getView().showSecondPasswordDialog();
         } else {
-            payloadDataManager.generateNodes(secondPassword)
+            metadataManager.generateAndSetupMetadata(secondPassword)
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                    .andThen(payloadDataManager.getMetadataNodeFactory())
-                    .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
-                    .subscribe(
-                            ethereumWallet -> appUtil.restartApp(),
-                            Throwable::printStackTrace);
+                    .subscribe(() -> appUtil.restartApp(), Throwable::printStackTrace);
         }
     }
 
