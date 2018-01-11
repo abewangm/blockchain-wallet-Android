@@ -21,17 +21,19 @@ class ChartsPresenter @Inject constructor(
 ) : BasePresenter<ChartsView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
+    internal var selectedTimeSpan by Delegates.observable(TimeSpan.MONTH) { _, _, new ->
+        updateChartsData(new)
+    }
 
     override fun onViewReady() {
-        updateChartsData(selectedTimeSpan)
+        selectedTimeSpan = TimeSpan.MONTH
     }
 
     private fun updateChartsData(timeSpan: TimeSpan) {
-        selectedTimeSpan = timeSpan
         compositeDisposable.clear()
         getCurrentPrice()
 
-        view.updateChartState(ChartsState.TimeSpanUpdated(selectedTimeSpan))
+        view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
 
         when (timeSpan) {
             TimeSpan.ALL_TIME -> chartsDataManager.getAllTimePrice(view.cryptoCurrency, getFiatCurrency())
@@ -51,22 +53,14 @@ class ChartsPresenter @Inject constructor(
                 )
     }
 
-    private fun getChartsData(list: List<ChartDatumDto>) = ChartsState.Data(
-            data = list,
-            fiatSymbol = getCurrencySymbol(),
-            getChartAllTime = { updateChartsData(TimeSpan.ALL_TIME) },
-            getChartYear = { updateChartsData(TimeSpan.YEAR) },
-            getChartMonth = { updateChartsData(TimeSpan.MONTH) },
-            getChartWeek = { updateChartsData(TimeSpan.WEEK) },
-            getChartDay = { updateChartsData(TimeSpan.DAY) }
-    )
+    private fun getChartsData(list: List<ChartDatumDto>) = ChartsState.Data(list, getCurrencySymbol())
 
     private fun getCurrentPrice() {
-       val price = when (view.cryptoCurrency) {
+        val price = when (view.cryptoCurrency) {
             CryptoCurrencies.BTC -> exchangeRateFactory.getLastBtcPrice(getFiatCurrency())
             CryptoCurrencies.ETHER -> exchangeRateFactory.getLastEthPrice(getFiatCurrency())
             CryptoCurrencies.BCH -> exchangeRateFactory.getLastBchPrice(getFiatCurrency())
-       }
+        }
 
         view.updateCurrentPrice(getCurrencySymbol(), price)
     }
@@ -80,27 +74,13 @@ class ChartsPresenter @Inject constructor(
     private fun getBtcUnitType() =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
 
-    companion object {
-
-        // Shared between all graphs
-        private var selectedTimeSpan by Delegates.observable(TimeSpan.MONTH) { prop, old, new ->
-            // TODO: How to access method here?
-        }
-
-    }
-
 }
 
 sealed class ChartsState {
 
     data class Data(
             val data: List<ChartDatumDto>,
-            val fiatSymbol: String,
-            val getChartAllTime: () -> Unit,
-            val getChartYear: () -> Unit,
-            val getChartMonth: () -> Unit,
-            val getChartWeek: () -> Unit,
-            val getChartDay: () -> Unit
+            val fiatSymbol: String
     ) : ChartsState()
 
     class TimeSpanUpdated(val timeSpan: TimeSpan) : ChartsState()

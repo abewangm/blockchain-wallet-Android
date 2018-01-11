@@ -3,21 +3,24 @@ package piuk.blockchain.android.ui.charts
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import kotlinx.android.synthetic.main.activity_graphs.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.charts.TimeSpan
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 
-class ChartsActivity : BaseAuthActivity() {
+class ChartsActivity : BaseAuthActivity(), TimeSpanUpdateListener {
 
     private val cryptoCurrency: CryptoCurrencies by unsafeLazy {
         intent.getSerializableExtra(EXTRA_CRYPTOCURRENCY) as CryptoCurrencies
     }
+    private val bitcoin = ChartsFragment.newInstance(CryptoCurrencies.BTC)
+    private val ether = ChartsFragment.newInstance(CryptoCurrencies.ETHER)
+    private val bitcoinCash = ChartsFragment.newInstance(CryptoCurrencies.BCH)
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -27,16 +30,7 @@ class ChartsActivity : BaseAuthActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_graphs)
 
-        val bitcoin = ChartsFragment.newInstance(CryptoCurrencies.BTC)
-        val ether = ChartsFragment.newInstance(CryptoCurrencies.ETHER)
-        val bitcoinCash = ChartsFragment.newInstance(CryptoCurrencies.BCH)
-
-        val adapter = ChartsFragmentPagerAdapter(
-                supportFragmentManager,
-                bitcoin,
-                ether,
-                bitcoinCash
-        )
+        val adapter = ChartsFragmentPagerAdapter(supportFragmentManager, bitcoin, ether, bitcoinCash)
 
         viewpager.run {
             offscreenPageLimit = 3
@@ -51,6 +45,10 @@ class ChartsActivity : BaseAuthActivity() {
         }
 
         button_close.setOnClickListener { finish() }
+    }
+
+    override fun onTimeSpanUpdated(timeSpan: TimeSpan) {
+        listOf(bitcoin, ether, bitcoinCash).forEach { it.onTimeSpanUpdated(timeSpan) }
     }
 
     companion object {
@@ -73,13 +71,11 @@ class ChartsActivity : BaseAuthActivity() {
             private val bitcoinCash: ChartsFragment
     ) : FragmentPagerAdapter(fragmentManager) {
 
-        override fun getItem(position: Int): Fragment? {
-            return when (position) {
-                0 -> bitcoin
-                1 -> ether
-                2 -> bitcoinCash
-                else -> null
-            }
+        override fun getItem(position: Int) = when (position) {
+            0 -> bitcoin
+            1 -> ether
+            2 -> bitcoinCash
+            else -> null
         }
 
         override fun getCount(): Int = NUM_ITEMS

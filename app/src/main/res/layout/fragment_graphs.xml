@@ -189,6 +189,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="320dp" />
+        app:layout_constraintGuide_begin="310dp" />
 
 </android.support.constraint.ConstraintLayout>

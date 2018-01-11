@@ -62,6 +62,7 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
                 textview_all_time
         )
     }
+    private var listener: TimeSpanUpdateListener? = null
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -99,9 +100,31 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
                 }.format(price)}"
     }
 
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context is TimeSpanUpdateListener) {
+            listener = context
+        } else {
+            throw RuntimeException(context!!.toString() + " must implement TimeSpanUpdateListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
+
     override fun createPresenter() = chartsPresenter
 
     override fun getMvpView() = this
+
+    /**
+     * Updates the Presenter's [TimeSpan] variable, which then notifies the rest of the Presenter
+     * to update the UI.
+     */
+    internal fun onTimeSpanUpdated(timeSpan: TimeSpan) {
+        presenter.selectedTimeSpan = timeSpan
+    }
 
     private fun showTimeSpanSelected(timeSpan: TimeSpan) {
         selectButton(timeSpan)
@@ -147,14 +170,14 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
     }
 
     private fun showData(data: ChartsState.Data) {
-        configureChart(data.fiatSymbol)
+        configureChart()
         updatePercentChange(data)
 
-        textview_day.setOnClickListener { data.getChartDay() }
-        textview_week.setOnClickListener { data.getChartWeek() }
-        textview_month.setOnClickListener { data.getChartMonth() }
-        textview_year.setOnClickListener { data.getChartYear() }
-        textview_all_time.setOnClickListener { data.getChartAllTime() }
+        textview_day.setOnClickListener { listener?.onTimeSpanUpdated(TimeSpan.DAY) }
+        textview_week.setOnClickListener { listener?.onTimeSpanUpdated(TimeSpan.WEEK) }
+        textview_month.setOnClickListener { listener?.onTimeSpanUpdated(TimeSpan.MONTH) }
+        textview_year.setOnClickListener { listener?.onTimeSpanUpdated(TimeSpan.YEAR) }
+        textview_all_time.setOnClickListener { listener?.onTimeSpanUpdated(TimeSpan.ALL_TIME) }
 
         progress_bar.invisible()
         chart.apply {
@@ -163,13 +186,10 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
             val entries = data.data.map { Entry(it.timestamp.toFloat(), it.price.toFloat()) }
             this.data = LineData(LineDataSet(entries, null).apply {
                 color = ContextCompat.getColor(context, R.color.primary_navy_medium)
-                lineWidth = 3f
+                lineWidth = 2f
                 mode = LineDataSet.Mode.LINEAR
                 setDrawValues(false)
-                circleRadius = 1.5f
-                setDrawCircleHole(false)
-                setCircleColor(ContextCompat.getColor(context, R.color.primary_navy_medium))
-                setDrawFilled(false)
+                setDrawCircles(false)
                 isHighlightEnabled = true
                 setDrawHighlightIndicators(false)
                 marker = ValueMarker(context, R.layout.item_chart_marker, data.fiatSymbol)
@@ -220,7 +240,7 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun configureChart(fiatSymbol: String) {
+    private fun configureChart() {
         chart.apply {
             setDrawGridBackground(false)
             setDrawBorders(false)
@@ -231,11 +251,11 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
             legend.isEnabled = false
             axisLeft.setDrawGridLines(false)
             axisLeft.setValueFormatter { fl, _ ->
-                "$fiatSymbol${NumberFormat.getNumberInstance(Locale.getDefault())
+                NumberFormat.getNumberInstance(Locale.getDefault())
                         .apply {
                             maximumFractionDigits = 0
                             roundingMode = RoundingMode.HALF_UP
-                        }.format(fl)}"
+                        }.format(fl)
             }
             axisLeft.typeface = typefaceLight
             axisLeft.textColor = ContextCompat.getColor(context, R.color.primary_gray_medium)
@@ -296,5 +316,11 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
             return mpPointF!!
         }
     }
+
+}
+
+interface TimeSpanUpdateListener {
+
+    fun onTimeSpanUpdated(timeSpan: TimeSpan)
 
 }
