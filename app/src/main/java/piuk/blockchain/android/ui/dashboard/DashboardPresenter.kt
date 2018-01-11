@@ -137,7 +137,7 @@ class DashboardPresenter @Inject constructor(
 
                                 val totalDouble = btcFiat.plus(ethFiat.toDouble())
 
-                                val totalString = "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(totalDouble)}"
+                                val totalString = getFormattedCurrencyString(totalDouble)
 
                                 view.updatePieChartState(
                                         PieChartsState.Data(
@@ -312,7 +312,7 @@ class DashboardPresenter @Inject constructor(
         val strFiat = getFiatCurrency()
         val fiatBalance = getLastBtcPrice(strFiat) * (btcBalance / 1e8)
 
-        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(fiatBalance)}"
+        return getFormattedCurrencyString(fiatBalance)
     }
 
     private fun getBchBalanceString(bchBalance: Long): String {
@@ -327,7 +327,7 @@ class DashboardPresenter @Inject constructor(
         val strFiat = getFiatCurrency()
         val fiatBalance = getLastBchPrice(strFiat) * (bchBalance / 1e8)
 
-        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(fiatBalance)}"
+        return getFormattedCurrencyString(fiatBalance)
     }
 
     private fun getEthBalanceString(ethBalance: BigInteger): String {
@@ -342,23 +342,20 @@ class DashboardPresenter @Inject constructor(
         val fiatBalance = BigDecimal.valueOf(getLastEthPrice(strFiat))
                 .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
 
-        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(fiatBalance)}"
+        return getFormattedCurrencyString(fiatBalance.toDouble())
     }
 
-    private fun getBtcPriceString(): String {
-        val lastBtcPrice = getLastBtcPrice(getFiatCurrency())
-        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastBtcPrice)}"
-    }
+    private fun getBtcPriceString(): String =
+            getLastBtcPrice(getFiatCurrency()).run { getFormattedCurrencyString(this) }
 
-    private fun getEthPriceString(): String {
-        val lastEthPrice = getLastEthPrice(getFiatCurrency())
-        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastEthPrice)}"
-    }
+    private fun getEthPriceString(): String =
+            getLastEthPrice(getFiatCurrency()).run { getFormattedCurrencyString(this) }
 
-    private fun getBchPriceString(): String {
-        val lastBchPrice = getLastBchPrice(getFiatCurrency())
-        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(lastBchPrice)}"
-    }
+    private fun getBchPriceString(): String =
+            getLastBchPrice(getFiatCurrency()).run { getFormattedCurrencyString(this) }
+
+    private fun getFormattedCurrencyString(price: Double) =
+            "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(price)}"
 
     private fun getCurrencySymbol() = monetaryUtil.getCurrencySymbol(getFiatCurrency(), view.locale)
 

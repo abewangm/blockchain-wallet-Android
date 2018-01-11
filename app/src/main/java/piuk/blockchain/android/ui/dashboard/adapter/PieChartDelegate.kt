@@ -93,19 +93,12 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
         bitcoinCashValue = data.bitcoinCashValue
         fiatSymbol = data.fiatSymbol
 
-        configureChart()
+        val isEmpty = (data.bitcoinValue + data.etherValue + data.bitcoinCashValue)
+                .compareTo(BigDecimal.ZERO) == 0
+        configureChart(isEmpty)
 
-        val entries = listOf(
-                PieEntry(data.bitcoinValue.toFloat(), context.getString(R.string.bitcoin)),
-                PieEntry(data.etherValue.toFloat(), context.getString(R.string.ether)),
-                PieEntry(data.bitcoinCashValue.toFloat(), context.getString(R.string.bitcoin_cash))
-        )
-
-        val coinColors = listOf(
-                ContextCompat.getColor(context, R.color.color_bitcoin),
-                ContextCompat.getColor(context, R.color.color_ether),
-                ContextCompat.getColor(context, R.color.color_bitcoin_cash)
-        )
+        val entries = getEntries(isEmpty, data)
+        val coinColors = getCoinColors(isEmpty)
 
         val dataSet = PieDataSet(entries, context.getString(R.string.dashboard_balances)).apply {
             setDrawIcons(false)
@@ -135,7 +128,27 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
         }
     }
 
-    private fun configureChart() {
+    private fun getEntries(empty: Boolean, data: PieChartsState.Data): List<PieEntry> = if (empty) {
+        listOf(PieEntry(100.0f, ""))
+    } else {
+        listOf(
+                PieEntry(data.bitcoinValue.toFloat(), context.getString(R.string.bitcoin)),
+                PieEntry(data.etherValue.toFloat(), context.getString(R.string.ether)),
+                PieEntry(data.bitcoinCashValue.toFloat(), context.getString(R.string.bitcoin_cash))
+        )
+    }
+
+    private fun getCoinColors(empty: Boolean): List<Int> = if (empty) {
+        listOf(ContextCompat.getColor(context, R.color.primary_gray_light))
+    } else {
+        listOf(
+                ContextCompat.getColor(context, R.color.color_bitcoin),
+                ContextCompat.getColor(context, R.color.color_ether),
+                ContextCompat.getColor(context, R.color.color_bitcoin_cash)
+        )
+    }
+
+    private fun configureChart(empty: Boolean) {
         viewHolder?.chart?.apply {
             setDrawCenterText(true)
             setCenterTextTypeface(typefaceRegular)
@@ -153,7 +166,7 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
             setDrawEntryLabels(false)
 
             setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
-            marker = ValueMarker(context, R.layout.item_pie_chart_marker)
+            if (!empty) marker = ValueMarker(context, R.layout.item_pie_chart_marker)
         }
     }
 

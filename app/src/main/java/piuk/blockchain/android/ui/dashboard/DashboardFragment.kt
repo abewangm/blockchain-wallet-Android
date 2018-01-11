@@ -18,6 +18,7 @@ import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.charts.ChartsActivity
+import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.util.AndroidUtils
@@ -45,6 +46,9 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
                 presenter?.onViewReady()
             }
         }
+    }
+    private val spacerDecoration: BottomSpacerDecoration by unsafeLazy {
+        BottomSpacerDecoration(ViewUtils.convertDpToPixel(56f, context).toInt())
     }
 
     init {
@@ -87,18 +91,19 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun notifyItemAdded(displayItems: MutableList<Any>, position: Int) {
         dashboardAdapter.items = displayItems
         dashboardAdapter.notifyItemInserted(position)
-        recycler_view.scrollToPosition(0)
+        handleRecyclerViewUpdates()
     }
 
     override fun notifyItemRemoved(displayItems: MutableList<Any>, position: Int) {
         dashboardAdapter.items = displayItems
         dashboardAdapter.notifyItemRemoved(position)
-        recycler_view.smoothScrollToPosition(0)
+        handleRecyclerViewUpdates()
     }
 
     override fun notifyItemUpdated(displayItems: MutableList<Any>, position: Int) {
         dashboardAdapter.items = displayItems
         dashboardAdapter.notifyItemChanged(position)
+        handleRecyclerViewUpdates()
     }
 
     override fun updatePieChartState(chartsState: PieChartsState) {
@@ -126,6 +131,16 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun createPresenter() = dashboardPresenter
 
     override fun getMvpView() = this
+
+    /**
+     * Inserts a spacer into the last position in the list
+     */
+    private fun handleRecyclerViewUpdates() {
+        recycler_view?.apply {
+            removeItemDecoration(spacerDecoration)
+            addItemDecoration(spacerDecoration)
+        }
+    }
 
     private fun setupToolbar() {
         if ((activity as AppCompatActivity).supportActionBar != null) {
