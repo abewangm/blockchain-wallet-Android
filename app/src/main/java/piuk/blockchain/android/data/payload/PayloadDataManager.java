@@ -510,6 +510,12 @@ public class PayloadDataManager {
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
+    public Observable<MetadataNodeFactory> generateAndReturnNodes(@Nullable String secondPassword) {
+        return rxPinning.call(() -> payloadService.generateNodes(secondPassword))
+                .andThen(getMetadataNodeFactory())
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
     /**
      * Returns a {@link MetadataNodeFactory} object which allows you to access the {@link
      * DeterministicKey} objects needed to initialise the Contacts service.
@@ -688,5 +694,9 @@ public class PayloadDataManager {
 
     public void decryptHDWallet(String secondPassword) throws Exception {
         payloadManager.getPayload().decryptHDWallet(0, secondPassword);
+    }
+
+    public List<String> getMnemonic() throws HDWalletException {
+        return payloadManager.getPayload().getHdWallets().get(0).getMnemonic();
     }
 }

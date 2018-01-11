@@ -3,11 +3,12 @@ package piuk.blockchain.android.data.ethereum
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.EthereumWallet
-import info.blockchain.wallet.ethereum.data.*
+import info.blockchain.wallet.ethereum.data.EthAddressResponse
+import info.blockchain.wallet.ethereum.data.EthAddressResponseMap
+import info.blockchain.wallet.ethereum.data.EthLatestBlock
+import info.blockchain.wallet.ethereum.data.EthTransaction
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Observable
-import okhttp3.MediaType
-import okhttp3.ResponseBody
 import org.amshove.kluent.*
 import org.bitcoinj.core.ECKey
 import org.junit.Before
@@ -17,11 +18,8 @@ import org.web3j.protocol.core.methods.request.RawTransaction
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.stores.Optional
-import retrofit2.HttpException
-import retrofit2.Response
-import java.io.IOException
 
+@Suppress("IllegalIdentifier")
 class EthDataManagerTest : RxTest() {
 
     private lateinit var subject: EthDataManager

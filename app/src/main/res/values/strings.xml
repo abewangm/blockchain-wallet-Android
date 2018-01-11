@@ -858,5 +858,6 @@
     <!-- BCH UPDATE -->
     <string name="ethereum" translatable="false">Ethereum</string>
     <string name="bitcoin_cash" translatable="false">Bitcoin Cash</string>
+    <string name="bch_default_account_label">My Bitcoin Cash Wallet</string>
 
 </resources>

@@ -17,6 +17,8 @@ import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.auth.AuthService;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
+import piuk.blockchain.android.data.bitcoincash.BchDataStore;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.charts.ChartsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
@@ -34,6 +36,7 @@ import piuk.blockchain.android.data.exchange.BuyConditions;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeService;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
+import piuk.blockchain.android.data.metadata.MetadataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payload.PayloadService;
 import piuk.blockchain.android.data.payments.PaymentService;
@@ -56,6 +59,8 @@ import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.BackupWalletUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MetadataUtils;
+import piuk.blockchain.android.util.NetworkParameterUtils;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -246,4 +251,22 @@ public class DataManagerModule {
                 settingsDataManager);
     }
 
+    @Provides
+    @PresenterScope
+    protected MetadataManager provideMetadataManager(PayloadDataManager payloadDataManager,
+                                                     EthDataManager ethDataManager,
+                                                     BchDataManager bchDataManager,
+                                                     StringUtils stringUtils) {
+        return new MetadataManager(payloadDataManager, ethDataManager, bchDataManager, stringUtils);
+    }
+
+    @Provides
+    @PresenterScope
+    protected BchDataManager provideBchDataManager(PayloadDataManager payloadDataManager,
+                                                   BchDataStore bchDataStore,
+                                                   NetworkParameterUtils networkParameterUtils,
+                                                   MetadataUtils metadataUtils,
+                                                   RxBus rxBus) {
+        return new BchDataManager(payloadDataManager, bchDataStore, networkParameterUtils, metadataUtils, rxBus);
+    }
 }
