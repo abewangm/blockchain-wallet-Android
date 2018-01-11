@@ -6,42 +6,43 @@ import piuk.blockchain.android.data.charts.models.ChartDatumDto
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.base.BasePresenter
+import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 class ChartsPresenter @Inject constructor(
         private val chartsDataManager: ChartsDataManager,
+        private val exchangeRateFactory: ExchangeRateFactory,
         private val prefsUtil: PrefsUtil
 ) : BasePresenter<ChartsView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-    private var timeSpan = TimeSpan.MONTH
-    private var cryptoCurrency = CryptoCurrencies.BTC
 
     override fun onViewReady() {
-        cryptoCurrency = view.cryptoCurrency
-        updateChartsData(timeSpan)
+        updateChartsData(selectedTimeSpan)
     }
 
     private fun updateChartsData(timeSpan: TimeSpan) {
-        this.timeSpan = timeSpan
+        selectedTimeSpan = timeSpan
         compositeDisposable.clear()
+        getCurrentPrice()
 
-        view.updateChartState(ChartsState.TimeSpanUpdated(timeSpan))
+        view.updateChartState(ChartsState.TimeSpanUpdated(selectedTimeSpan))
 
         when (timeSpan) {
-            TimeSpan.ALL_TIME -> chartsDataManager.getAllTimePrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.YEAR -> chartsDataManager.getYearPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.MONTH -> chartsDataManager.getMonthPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.WEEK -> chartsDataManager.getWeekPrice(cryptoCurrency, getFiatCurrency())
-            TimeSpan.DAY -> chartsDataManager.getDayPrice(cryptoCurrency, getFiatCurrency())
+            TimeSpan.ALL_TIME -> chartsDataManager.getAllTimePrice(view.cryptoCurrency, getFiatCurrency())
+            TimeSpan.YEAR -> chartsDataManager.getYearPrice(view.cryptoCurrency, getFiatCurrency())
+            TimeSpan.MONTH -> chartsDataManager.getMonthPrice(view.cryptoCurrency, getFiatCurrency())
+            TimeSpan.WEEK -> chartsDataManager.getWeekPrice(view.cryptoCurrency, getFiatCurrency())
+            TimeSpan.DAY -> chartsDataManager.getDayPrice(view.cryptoCurrency, getFiatCurrency())
         }.compose(RxUtil.addObservableToCompositeDisposable(this))
                 .toList()
                 .doOnSubscribe { view.updateChartState(ChartsState.Loading) }
-                .doOnSubscribe { view.updateSelectedCurrency(cryptoCurrency) }
+                .doOnSubscribe { view.updateSelectedCurrency(view.cryptoCurrency) }
                 .doOnSuccess { view.updateChartState(getChartsData(it)) }
                 .doOnError { view.updateChartState(ChartsState.Error) }
                 .subscribe(
@@ -60,13 +61,33 @@ class ChartsPresenter @Inject constructor(
             getChartDay = { updateChartsData(TimeSpan.DAY) }
     )
 
+    private fun getCurrentPrice() {
+       val price = when (view.cryptoCurrency) {
+            CryptoCurrencies.BTC -> exchangeRateFactory.getLastBtcPrice(getFiatCurrency())
+            CryptoCurrencies.ETHER -> exchangeRateFactory.getLastEthPrice(getFiatCurrency())
+            CryptoCurrencies.BCH -> exchangeRateFactory.getLastBchPrice(getFiatCurrency())
+       }
+
+        view.updateCurrentPrice(getCurrencySymbol(), price)
+    }
+
     private fun getFiatCurrency() =
             prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
-    private fun getCurrencySymbol() = monetaryUtil.getCurrencySymbol(getFiatCurrency(), view.locale)
+    private fun getCurrencySymbol() =
+            monetaryUtil.getCurrencySymbol(getFiatCurrency(), view.locale)
 
     private fun getBtcUnitType() =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+
+    companion object {
+
+        // Shared between all graphs
+        private var selectedTimeSpan by Delegates.observable(TimeSpan.MONTH) { prop, old, new ->
+            // TODO: How to access method here?
+        }
+
+    }
 
 }
 

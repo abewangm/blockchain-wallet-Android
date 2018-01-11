@@ -61,6 +61,8 @@ class DashboardPresenter @Inject constructor(
 
     override fun onViewReady() {
         view.notifyItemAdded(displayList, 0)
+        updateAllBalances()
+        updatePrices()
 
         // Triggers various updates to the page once all metadata is loaded
         metadataObservable.flatMap { getOnboardingStatusObservable() }
@@ -76,11 +78,6 @@ class DashboardPresenter @Inject constructor(
     override fun onViewDestroyed() {
         rxBus.unregister(MetadataEvent::class.java, metadataObservable)
         super.onViewDestroyed()
-    }
-
-    internal fun onResume() {
-        updateAllBalances()
-        updatePrices()
     }
 
     private fun updatePrices() {
@@ -315,7 +312,7 @@ class DashboardPresenter @Inject constructor(
         val strFiat = getFiatCurrency()
         val fiatBalance = getLastBtcPrice(strFiat) * (btcBalance / 1e8)
 
-        return "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
+        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(fiatBalance)}"
     }
 
     private fun getBchBalanceString(bchBalance: Long): String {
@@ -330,7 +327,7 @@ class DashboardPresenter @Inject constructor(
         val strFiat = getFiatCurrency()
         val fiatBalance = getLastBchPrice(strFiat) * (bchBalance / 1e8)
 
-        return "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
+        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(fiatBalance)}"
     }
 
     private fun getEthBalanceString(ethBalance: BigInteger): String {
@@ -345,7 +342,7 @@ class DashboardPresenter @Inject constructor(
         val fiatBalance = BigDecimal.valueOf(getLastEthPrice(strFiat))
                 .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
 
-        return "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance.toDouble())} $strFiat"
+        return "${getCurrencySymbol()}${monetaryUtil.getFiatFormat(getFiatCurrency()).format(fiatBalance)}"
     }
 
     private fun getBtcPriceString(): String {
@@ -388,8 +385,6 @@ class DashboardPresenter @Inject constructor(
     }
 
 }
-
-class ChartDisplayable
 
 sealed class PieChartsState {
 

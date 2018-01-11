@@ -143,10 +143,10 @@
         <activity
             android:name=".ui.shapeshift.stateselection.ShapeShiftStateSelectionActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity android:name=".ui.charts.ChartsActivity"
-            android:theme="@style/AppTheme.ReceiveQrWindow"
+        <activity
+            android:name=".ui.charts.ChartsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            />
+            android:theme="@style/AppTheme.ChartsWindow" />
 
         <service
             android:name=".data.websocket.WebSocketService"

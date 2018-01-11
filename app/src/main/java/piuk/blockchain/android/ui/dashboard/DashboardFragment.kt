@@ -42,7 +42,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT && activity != null) {
                 // Update balances
-                presenter?.onResume()
+                presenter?.onViewReady()
             }
         }
     }
@@ -71,7 +71,6 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun onResume() {
         super.onResume()
         setupToolbar()
-        presenter.onResume()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
             ViewUtils.setElevation((activity as MainActivity).toolbar, 5f)
