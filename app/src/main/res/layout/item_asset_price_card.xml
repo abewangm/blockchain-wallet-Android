@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:theme="@style/PlainTheme"
+    app:cardCornerRadius="3dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:id="@+id/textview_price"
+            fontPath="fonts/Montserrat-Regular.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary_navy_medium"
+            android:textSize="26sp"
+            app:layout_constraintBottom_toTopOf="@+id/progress_bar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textview_currency"
+            app:layout_constraintVertical_bias="0.0"
+            tools:ignore="MissingPrefix"
+            tools:text="$4521.02" />
+
+        <TextView
+            android:id="@+id/textview_currency"
+            fontPath="fonts/Montserrat-Light.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textAllCaps="true"
+            android:textColor="@color/primary_gray_medium"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingPrefix"
+            tools:text="@string/dashboard_bitcoin_price" />
+
+        <TextView
+            android:id="@+id/textview_error"
+            fontPath="fonts/Montserrat-Light.ttf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dashboard_charts_price_error"
+            android:textColor="@color/primary_gray_medium"
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/textview_price"
+            app:layout_constraintEnd_toEndOf="@id/textview_price"
+            app:layout_constraintStart_toStartOf="@id/textview_price"
+            app:layout_constraintTop_toTopOf="@id/textview_price"
+            tools:ignore="MissingPrefix" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:theme="@style/AppTheme"
+            app:layout_constraintBottom_toBottomOf="@id/textview_price"
+            app:layout_constraintEnd_toEndOf="@id/textview_price"
+            app:layout_constraintStart_toStartOf="@id/textview_price"
+            app:layout_constraintTop_toTopOf="@id/textview_price" />
+
+        <LinearLayout
+            android:id="@+id/button_see_charts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textview_price">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:contentDescription="@string/dashboard_see_charts"
+                app:srcCompat="@drawable/vector_chart" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="8dp"
+                android:drawablePadding="10dp"
+                android:text="@string/dashboard_see_charts"
+                android:textAllCaps="true"
+                android:textColor="@color/primary_blue_accent"
+                tools:ignore="RtlHardcoded" />
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
+</android.support.v7.widget.CardView>

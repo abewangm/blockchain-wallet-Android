@@ -28,7 +28,7 @@ ext.versions = [
         findbugs        : '2.0.1',
         guava           : '23.5-android',
 
-        charts          : '3.0.2',
+        charts          : '3.0.3',
         calligraphy     : '2.2.0',
         circleIndicator : '1.2.2',
         bottomNav       : '2.1.0',

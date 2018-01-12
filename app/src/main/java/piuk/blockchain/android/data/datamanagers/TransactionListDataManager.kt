@@ -80,6 +80,21 @@ class TransactionListDataManager(
     }
 
     /**
+     * Get total BCH balance from [ItemAccount].
+     *
+     * @param itemAccount [ItemAccount]
+     * @return A BCH value as a long.
+     */
+    fun getBchBalance(itemAccount: ItemAccount): Long {
+        return when (itemAccount.type) {
+            ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> payloadManager.walletBalanceBch.toLong()
+            ItemAccount.TYPE.ALL_LEGACY -> payloadManager.importedAddressesBalanceBch.toLong()
+            ItemAccount.TYPE.SINGLE_ACCOUNT -> payloadManager.getAddressBalanceBch(itemAccount.address).toLong()
+            else -> throw IllegalArgumentException("You can't get the BCH balance of an ETH account")
+        }
+    }
+
+    /**
      * Get a specific [Displayable] from a hash
      *
      * @param transactionHash The hash of the Tx to be returned

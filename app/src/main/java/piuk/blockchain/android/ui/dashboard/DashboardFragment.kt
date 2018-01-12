@@ -18,30 +18,49 @@ import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
+import piuk.blockchain.android.ui.charts.ChartsActivity
+import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
 import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.home.MainActivity.*
 import piuk.blockchain.android.util.AndroidUtils
+import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
-import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import java.util.*
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), DashboardView {
 
-    override val shouldShowBuy: Boolean
-        get() = AndroidUtils.is19orHigher()
+    override val shouldShowBuy: Boolean = AndroidUtils.is19orHigher()
+    override val locale: Locale = Locale.getDefault()
 
     @Inject lateinit var dashboardPresenter: DashboardPresenter
-    private val dashboardAdapter by unsafeLazy { DashboardDelegateAdapter(context!!) }
+    private val dashboardAdapter by unsafeLazy {
+        DashboardDelegateAdapter(
+                context!!,
+                { ChartsActivity.start(context!!, it) },
+                {
+                    when (it) {
+                        CryptoCurrencies.BTC -> TODO("Launch balance page")
+                        CryptoCurrencies.ETHER -> TODO("Launch balance page")
+                        CryptoCurrencies.BCH -> TODO("Launch balance page")
+                    }
+                }
+        )
+    }
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT && activity != null) {
                 // Update balances
-                presenter?.onResume()
+                presenter?.onViewReady()
             }
         }
+    }
+    private val spacerDecoration: BottomSpacerDecoration by unsafeLazy {
+        BottomSpacerDecoration(ViewUtils.convertDpToPixel(56f, context).toInt())
     }
 
     init {
@@ -57,28 +76,10 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tabs_dashboard.apply {
-            addTab(tabs_dashboard.newTab().setText(R.string.bitcoin))
-            addTab(tabs_dashboard.newTab().setText(R.string.ether))
-            getTabAt(presenter.getCurrentCryptoCurrency())?.select()
-            setOnTabSelectedListener {
-                if (it == 0) {
-                    presenter.updateSelectedCurrency(CryptoCurrencies.BTC)
-                    dashboardAdapter.updateSelectedCurrency(CryptoCurrencies.BTC)
-                } else {
-                    presenter.updateSelectedCurrency(CryptoCurrencies.ETHER)
-                    dashboardAdapter.updateSelectedCurrency(CryptoCurrencies.ETHER)
-                }
-            }
-        }
-
         recycler_view?.apply {
             layoutManager = LinearLayoutManager(activity)
             this.adapter = dashboardAdapter
         }
-
-        textview_btc.setOnClickListener { presenter.invertViewType() }
-        textview_eth.setOnClickListener { presenter.invertViewType() }
 
         onViewReady()
     }
@@ -86,9 +87,9 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun onResume() {
         super.onResume()
         setupToolbar()
-        presenter.onResume()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+            ViewUtils.setElevation((activity as MainActivity).appBar, 100f)
         }
         LocalBroadcastManager.getInstance(context!!)
                 .registerReceiver(receiver, IntentFilter(BalanceFragment.ACTION_INTENT))
@@ -96,48 +97,46 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+        context?.run {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == SETTINGS_EDIT || requestCode == CONTACTS_EDIT || requestCode == ACCOUNT_EDIT) {
+            presenter.onViewReady()
+        }
+    }
+
+    override fun scrollToTop() {
+        recycler_view?.run { smoothScrollToPosition(0) }
     }
 
     override fun notifyItemAdded(displayItems: MutableList<Any>, position: Int) {
         dashboardAdapter.items = displayItems
         dashboardAdapter.notifyItemInserted(position)
-        recycler_view.scrollToPosition(0)
+        handleRecyclerViewUpdates()
+    }
+
+    override fun notifyItemUpdated(displayItems: MutableList<Any>, positions: List<Int>) {
+        dashboardAdapter.items = displayItems
+        positions.forEach { dashboardAdapter.notifyItemChanged(it) }
+        handleRecyclerViewUpdates()
     }
 
     override fun notifyItemRemoved(displayItems: MutableList<Any>, position: Int) {
         dashboardAdapter.items = displayItems
         dashboardAdapter.notifyItemRemoved(position)
-        recycler_view.smoothScrollToPosition(0)
     }
 
-    override fun updateChartState(chartsState: ChartsState) {
-        dashboardAdapter.updateChartState(chartsState)
+    override fun updatePieChartState(chartsState: PieChartsState) {
+        dashboardAdapter.updatePieChartState(chartsState)
+        handleRecyclerViewUpdates()
     }
 
-    override fun updateEthBalance(balance: String) {
-        textview_eth?.text = balance
-    }
-
-    override fun updateBtcBalance(balance: String) {
-        textview_btc?.text = balance
-    }
-
-    override fun updateTotalBalance(balance: String) {
-        textview_total?.text = balance
-    }
-
-    override fun updateCryptoCurrencyPrice(price: String) {
-        dashboardAdapter.updateCurrencyPrice(price)
-    }
-
-    override fun updateDashboardSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        dashboardAdapter.updateSelectedCurrency(cryptoCurrency)
-    }
-
-    override fun showToast(message: Int, toastType: String) {
-        toast(message, toastType)
-    }
+    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
     override fun startBuyActivity() {
         activity?.run {
@@ -146,10 +145,10 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         }
     }
 
-    override fun startShapeShiftActivity() {
+    override fun startBitcoinCashReceive() {
         activity?.run {
             LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_SHAPESHIFT))
+                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
         }
     }
 
@@ -157,10 +156,20 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun getMvpView() = this
 
+    /**
+     * Inserts a spacer into the last position in the list
+     */
+    private fun handleRecyclerViewUpdates() {
+        recycler_view?.apply {
+            removeItemDecoration(spacerDecoration)
+            addItemDecoration(spacerDecoration)
+        }
+    }
+
     private fun setupToolbar() {
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
-                    (activity as MainActivity).supportActionBar, null)
+                    (activity as MainActivity).supportActionBar, R.string.dashboard_title)
         }
     }
 

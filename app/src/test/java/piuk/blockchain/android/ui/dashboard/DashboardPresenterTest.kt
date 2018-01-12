@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.dashboard
 
 import com.nhaarman.mockito_kotlin.*
-import info.blockchain.wallet.payload.data.Wallet
 import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -9,10 +8,6 @@ import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
-import piuk.blockchain.android.data.charts.ChartsDataManager
-import piuk.blockchain.android.data.charts.models.ChartDatumDto
-import piuk.blockchain.android.data.currency.CryptoCurrencies
-import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
@@ -28,7 +23,6 @@ import java.math.BigInteger
 class DashboardPresenterTest {
 
     private lateinit var subject: DashboardPresenter
-    private val chartsDataManager: ChartsDataManager = mock()
     private val prefsUtil: PrefsUtil = mock()
     private val exchangeRateFactory: ExchangeRateFactory = mock()
     private val ethDataManager: EthDataManager = mock()
@@ -40,14 +34,12 @@ class DashboardPresenterTest {
     private val rxBus: RxBus = mock()
     private val swipeToReceiveHelper: SwipeToReceiveHelper = mock()
     private val view: DashboardView = mock()
-    private val currencyState: CurrencyState = mock()
     private val walletOptionsDataManager: WalletOptionsDataManager = mock()
 
     @Before
     fun setUp() {
 
         subject = DashboardPresenter(
-                chartsDataManager,
                 prefsUtil,
                 exchangeRateFactory,
                 ethDataManager,
@@ -58,7 +50,6 @@ class DashboardPresenterTest {
                 buyDataManager,
                 rxBus,
                 swipeToReceiveHelper,
-                currencyState,
                 walletOptionsDataManager
         )
 
@@ -69,8 +60,6 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding complete, no announcement`() {
         // Arrange
-        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -83,38 +72,43 @@ class DashboardPresenterTest {
         whenever(transactionListDataManager.getBtcBalance(any())).thenReturn(btcBalance)
         val ethBalance = 22_000_000_000L
         whenever(combinedEthModel.getTotalBalance()).thenReturn(BigInteger.valueOf(ethBalance))
+        val bchBalance = 21_000_000_000L
+        whenever(transactionListDataManager.getBchBalance(any())).thenReturn(bchBalance)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2.0)
         whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(prefsUtil.getValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false))
+        whenever(exchangeRateFactory.updateTickers())
+                .thenReturn(Observable.just(mapOf("" to PriceDatum())))
+        whenever(prefsUtil.getValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false))
                 .thenReturn(true)
+        whenever(stringUtils.getString(any())).thenReturn("")
         // Act
         subject.onViewReady()
         // Assert
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
-        verify(view).updateBtcBalance("210.0 BTC")
-        verify(view).updateEthBalance("0.00000002 ETH")
-        verify(view).updateTotalBalance("\$420.00")
+        verify(view, atLeastOnce()).notifyItemUpdated(any(), any())
+        verify(view, atLeastOnce()).locale
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false)
+        verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false)
         verifyNoMoreInteractions(prefsUtil)
         verify(swipeToReceiveHelper).storeEthAddress()
         verifyNoMoreInteractions(swipeToReceiveHelper)
-        verify(ethDataManager).fetchEthAddress()
+        verify(ethDataManager, times(2)).fetchEthAddress()
         verifyNoMoreInteractions(ethDataManager)
-        verify(payloadDataManager).updateAllBalances()
+        verify(payloadDataManager, times(2)).updateAllBalances()
         verifyNoMoreInteractions(payloadDataManager)
-        verify(transactionListDataManager).getBtcBalance(any())
+        verify(transactionListDataManager, times(2)).getBtcBalance(any())
+        verify(transactionListDataManager, times(2)).getBchBalance(any())
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(exchangeRateFactory, times(2)).getLastBtcPrice("USD")
+        verify(exchangeRateFactory, times(3)).getLastBtcPrice("USD")
         verify(exchangeRateFactory, times(2)).getLastEthPrice("USD")
-        verify(exchangeRateFactory).getSymbol("USD")
+        verify(exchangeRateFactory, times(2)).getLastBchPrice("USD")
+        verify(exchangeRateFactory).updateTickers()
         verifyNoMoreInteractions(exchangeRateFactory)
     }
 
@@ -122,8 +116,6 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding not complete`() {
         // Arrange
-        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -142,16 +134,16 @@ class DashboardPresenterTest {
                 .thenReturn("USD")
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2.0)
         whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
+        whenever(exchangeRateFactory.updateTickers())
+                .thenReturn(Observable.just(mapOf("" to PriceDatum())))
         whenever(stringUtils.getString(any())).thenReturn("")
         whenever(stringUtils.getFormattedString(any(), any())).thenReturn("")
         // Act
         subject.onViewReady()
         // Assert
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
-        verify(view).updateBtcBalance("210.0 BTC")
-        verify(view).updateEthBalance("0.00000002 ETH")
-        verify(view).updateTotalBalance("\$420.00")
+        verify(view, atLeastOnce()).notifyItemUpdated(any(), any())
+        verify(view, atLeastOnce()).locale
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -159,17 +151,17 @@ class DashboardPresenterTest {
         verifyNoMoreInteractions(prefsUtil)
         verify(appUtil, atLeastOnce()).isNewlyCreated
         verifyNoMoreInteractions(appUtil)
-        verify(swipeToReceiveHelper).storeEthAddress()
-        verifyNoMoreInteractions(swipeToReceiveHelper)
         verify(ethDataManager).fetchEthAddress()
         verifyNoMoreInteractions(ethDataManager)
         verify(payloadDataManager).updateAllBalances()
         verifyNoMoreInteractions(payloadDataManager)
         verify(transactionListDataManager).getBtcBalance(any())
+        verify(transactionListDataManager).getBchBalance(any())
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(exchangeRateFactory, atLeastOnce()).getLastBtcPrice("USD")
-        verify(exchangeRateFactory, times(2)).getLastEthPrice("USD")
-        verify(exchangeRateFactory, atLeastOnce()).getSymbol("USD")
+        verify(exchangeRateFactory, times(3)).getLastBtcPrice("USD")
+        verify(exchangeRateFactory).getLastEthPrice("USD")
+        verify(exchangeRateFactory).getLastBchPrice("USD")
+        verify(exchangeRateFactory).updateTickers()
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(buyDataManager).canBuy
         verifyNoMoreInteractions(buyDataManager)
@@ -179,8 +171,6 @@ class DashboardPresenterTest {
     @Throws(Exception::class)
     fun `onViewReady onboarding complete with announcement`() {
         // Arrange
-        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         val metadataObservable = Observable.just(MetadataEvent.SETUP_COMPLETE)
         whenever(rxBus.register(MetadataEvent::class.java)).thenReturn(metadataObservable)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false))
@@ -189,10 +179,6 @@ class DashboardPresenterTest {
         val combinedEthModel: CombinedEthModel = mock()
         whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
-//        val mockWallet: Wallet = mock()
-//        whenever(payloadDataManager.wallet).thenReturn(mockWallet)
-//        whenever(payloadDataManager.wallet.guid).thenReturn("")
-//        whenever(payloadDataManager.wallet.sharedKey).thenReturn("")
         val btcBalance = 21_000_000_000L
         whenever(transactionListDataManager.getBtcBalance(any())).thenReturn(btcBalance)
         val ethBalance = 22_000_000_000L
@@ -202,35 +188,38 @@ class DashboardPresenterTest {
                 .thenReturn("USD")
         whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2.0)
         whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(prefsUtil.getValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false))
+        whenever(exchangeRateFactory.updateTickers())
+                .thenReturn(Observable.just(mapOf("" to PriceDatum())))
+        whenever(prefsUtil.getValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false))
                 .thenReturn(false)
+        whenever(stringUtils.getString(any())).thenReturn("")
         // Act
         subject.onViewReady()
         // Assert
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
-        verify(view).updateBtcBalance("210.0 BTC")
-        verify(view).updateEthBalance("0.00000002 ETH")
-        verify(view).updateTotalBalance("\$420.00")
+        verify(view, atLeastOnce()).notifyItemUpdated(any(), any())
+        verify(view, atLeastOnce()).locale
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false)
-        verify(prefsUtil, atLeastOnce()).setValue(DashboardPresenter.SHAPESHIFT_ANNOUNCEMENT_DISMISSED, true)
+        verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false)
+        verify(prefsUtil, atLeastOnce()).setValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
         verify(swipeToReceiveHelper).storeEthAddress()
         verifyNoMoreInteractions(swipeToReceiveHelper)
-        verify(ethDataManager).fetchEthAddress()
+        verify(ethDataManager, times(2)).fetchEthAddress()
         verifyNoMoreInteractions(ethDataManager)
-        verify(payloadDataManager).updateAllBalances()
+        verify(payloadDataManager, times(2)).updateAllBalances()
         verify(payloadDataManager).wallet
         verifyNoMoreInteractions(payloadDataManager)
-        verify(transactionListDataManager).getBtcBalance(any())
+        verify(transactionListDataManager, times(2)).getBtcBalance(any())
+        verify(transactionListDataManager, times(2)).getBchBalance(any())
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(exchangeRateFactory, times(2)).getLastBtcPrice("USD")
+        verify(exchangeRateFactory, times(3)).getLastBtcPrice("USD")
         verify(exchangeRateFactory, times(2)).getLastEthPrice("USD")
-        verify(exchangeRateFactory).getSymbol("USD")
+        verify(exchangeRateFactory, times(2)).getLastBchPrice("USD")
+        verify(exchangeRateFactory).updateTickers()
         verifyNoMoreInteractions(exchangeRateFactory)
     }
 
@@ -243,140 +232,6 @@ class DashboardPresenterTest {
         subject.onViewDestroyed()
         // Assert
         verify(rxBus).unregister(eq(MetadataEvent::class.java), anyOrNull())
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `updateSelectedCurrency BTC`() {
-        // Arrange
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-                .thenReturn("USD")
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.BTC, "USD"))
-                .thenReturn(Observable.just(mock(ChartDatumDto::class)))
-        // Act
-        subject.updateSelectedCurrency(CryptoCurrencies.BTC)
-        // Assert
-        verify(view, times(3)).updateChartState(any())
-        verify(view).updateCryptoCurrencyPrice(any())
-        verify(view).updateDashboardSelectedCurrency(any())
-        verifyNoMoreInteractions(view)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastBtcPrice("USD")
-        verify(exchangeRateFactory, times(2)).getSymbol("USD")
-        verifyNoMoreInteractions(exchangeRateFactory)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `updateSelectedCurrency ETH`() {
-        // Arrange
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-                .thenReturn("USD")
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.ETHER, "USD"))
-                .thenReturn(Observable.just(mock(ChartDatumDto::class)))
-        // Act
-        subject.updateSelectedCurrency(CryptoCurrencies.ETHER)
-        // Assert
-        verify(view, times(3)).updateChartState(any())
-        verify(view).updateDashboardSelectedCurrency(any())
-        verify(view).updateCryptoCurrencyPrice(any())
-        verifyNoMoreInteractions(view)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory).getLastEthPrice("USD")
-        verify(exchangeRateFactory, times(2)).getSymbol("USD")
-        verifyNoMoreInteractions(exchangeRateFactory)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun onResume() {
-        // Arrange
-        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-                .thenReturn("USD")
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        whenever(chartsDataManager.getMonthPrice(CryptoCurrencies.BTC, "USD"))
-                .thenReturn(Observable.just(mock(ChartDatumDto::class)))
-        whenever(exchangeRateFactory.updateTickers())
-                .thenReturn(Observable.just(mapOf("" to mock(PriceDatum::class))))
-        val combinedEthModel: CombinedEthModel = mock()
-        whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))
-        whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
-        val btcBalance = 21_000_000_000L
-        whenever(transactionListDataManager.getBtcBalance(any())).thenReturn(btcBalance)
-        val ethBalance = 22_000_000_000L
-        whenever(combinedEthModel.getTotalBalance()).thenReturn(BigInteger.valueOf(ethBalance))
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-                .thenReturn("USD")
-        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2.0)
-        whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        // Act
-        subject.onResume()
-        // Assert
-        verify(view, times(3)).updateChartState(any())
-        verify(view).updateCryptoCurrencyPrice(any())
-        verify(view).updateBtcBalance("210.0 BTC")
-        verify(view).updateEthBalance("0.00000002 ETH")
-        verify(view).updateTotalBalance("\$420.00")
-        verify(view).updateDashboardSelectedCurrency(any())
-        verifyNoMoreInteractions(view)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verifyNoMoreInteractions(prefsUtil)
-        verify(ethDataManager).fetchEthAddress()
-        verifyNoMoreInteractions(ethDataManager)
-        verify(payloadDataManager).updateAllBalances()
-        verifyNoMoreInteractions(payloadDataManager)
-        verify(transactionListDataManager).getBtcBalance(any())
-        verifyNoMoreInteractions(transactionListDataManager)
-        verify(exchangeRateFactory, atLeastOnce()).getLastBtcPrice("USD")
-        verify(exchangeRateFactory, times(2)).getLastEthPrice("USD")
-        verify(exchangeRateFactory).updateTickers()
-        verify(exchangeRateFactory, atLeastOnce()).getSymbol("USD")
-        verifyNoMoreInteractions(exchangeRateFactory)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun invertViewType() {
-        // Arrange
-        subject.btcBalance = 1_000_000_000L
-        subject.ethBalance = BigInteger.valueOf(1_000_000_000_000_000_000L)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-                .thenReturn("USD")
-        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(2.0)
-        whenever(exchangeRateFactory.getLastEthPrice("USD")).thenReturn(3.0)
-        whenever(exchangeRateFactory.getSymbol("USD")).thenReturn("$")
-        // Act
-        subject.invertViewType()
-        // Assert
-        verify(view).updateBtcBalance("20.00 USD")
-        verify(view).updateEthBalance("3.00 USD")
-        verifyNoMoreInteractions(view)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-        verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verifyNoMoreInteractions(prefsUtil)
-        verify(exchangeRateFactory, atLeastOnce()).getLastBtcPrice("USD")
-        verify(exchangeRateFactory).getLastEthPrice("USD")
-        verifyNoMoreInteractions(exchangeRateFactory)
     }
 
 }

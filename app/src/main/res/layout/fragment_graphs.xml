@@ -2,11 +2,9 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraint_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
-    android:paddingBottom="8dp"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="25dp">
 
@@ -56,7 +54,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/imageview_arrow"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toEndOf="@+id/imageview_arrow"
         app:layout_constraintTop_toTopOf="@+id/imageview_arrow"
         tools:ignore="MissingPrefix"
@@ -67,16 +65,16 @@
         fontPath="fonts/Montserrat-Light.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:text="@string/dashboard_time_span_month"
         android:textColor="@color/primary_navy_medium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/textview_week"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toEndOf="@+id/textview_year"
         app:layout_constraintTop_toBottomOf="@+id/chart"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingPrefix" />
 
     <TextView
@@ -84,16 +82,16 @@
         fontPath="fonts/Montserrat-Light.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:text="@string/dashboard_time_span_all_time"
         android:textColor="@color/primary_navy_medium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/textview_year"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chart"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingPrefix" />
 
     <TextView
@@ -101,16 +99,16 @@
         fontPath="fonts/Montserrat-Light.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:text="@string/dashboard_time_span_year"
         android:textColor="@color/primary_navy_medium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/textview_month"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toStartOf="@id/textview_all_time"
         app:layout_constraintTop_toBottomOf="@+id/chart"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingPrefix" />
 
     <TextView
@@ -118,7 +116,6 @@
         fontPath="fonts/Montserrat-Light.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:text="@string/dashboard_time_span_week"
         android:textColor="@color/primary_navy_medium"
@@ -127,6 +124,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/textview_month"
         app:layout_constraintTop_toBottomOf="@+id/chart"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingPrefix" />
 
     <TextView
@@ -134,7 +132,6 @@
         fontPath="fonts/Montserrat-Light.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:text="@string/dashboard_time_span_day"
         android:textColor="@color/primary_navy_medium"
@@ -143,6 +140,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/textview_week"
         app:layout_constraintTop_toBottomOf="@+id/chart"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingPrefix" />
 
     <TextView
@@ -154,7 +152,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="16dp"
         android:textAllCaps="true"
-        android:textColor="@color/primary_navy_medium"
+        android:textColor="@color/primary_gray_medium"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -188,9 +186,9 @@
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="280dp" />
+        app:layout_constraintGuide_begin="310dp" />
 
 </android.support.constraint.ConstraintLayout>

@@ -306,6 +306,83 @@ public class TransactionListDataManagerTest extends RxTest {
     }
 
     @Test
+    public void getBchBalanceAccountTagAll() throws Exception {
+        // Arrange
+        Account account = new Account();
+        BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
+        when(payloadManager.getWalletBalanceBch()).thenReturn(balance);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setType(ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY);
+        // Act
+        long value = subject.getBchBalance(itemAccount);
+        // Assert
+        verify(payloadManager).getWalletBalanceBch();
+        assertEquals(1_000_000_000_000L, value);
+    }
+
+    @Test
+    public void getBchBalanceAccountTagImported() throws Exception {
+        // Arrange
+        Account account = new Account();
+        BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
+        when(payloadManager.getImportedAddressesBalanceBch()).thenReturn(balance);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setType(ItemAccount.TYPE.ALL_LEGACY);
+        // Act
+        long value = subject.getBchBalance(itemAccount);
+        // Assert
+        verify(payloadManager).getImportedAddressesBalanceBch();
+        assertEquals(1_000_000_000_000L, value);
+    }
+
+    @Test
+    public void getBchBalanceAccount() throws Exception {
+        // Arrange
+        Account account = new Account();
+        String xPub = "X_PUB";
+        BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
+        when(payloadManager.getAddressBalanceBch(xPub)).thenReturn(balance);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(account);
+        itemAccount.setAddress(xPub);
+        // Act
+        long value = subject.getBchBalance(itemAccount);
+        // Assert
+        verify(payloadManager).getAddressBalanceBch(xPub);
+        assertEquals(1_000_000_000_000L, value);
+    }
+
+    @Test
+    public void getBchBalanceLegacyAddress() throws Exception {
+        // Arrange
+        LegacyAddress legacyAddress = new LegacyAddress();
+        String address = "ADDRESS";
+        BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
+        when(payloadManager.getAddressBalanceBch(address)).thenReturn(balance);
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setAccountObject(legacyAddress);
+        itemAccount.setAddress(address);
+        // Act
+        long value = subject.getBchBalance(itemAccount);
+        // Assert
+        verify(payloadManager).getAddressBalanceBch(address);
+        assertEquals(1_000_000_000_000L, value);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getBchBalanceEthereum() throws Exception {
+        // Arrange
+        ItemAccount itemAccount = new ItemAccount();
+        itemAccount.setType(ItemAccount.TYPE.ETHEREUM);
+        // Act
+        subject.getBtcBalance(itemAccount);
+        // Assert
+
+    }
+
+    @Test
     public void getTxFromHashFound() {
         // Arrange
         String txHash = "TX_HASH";

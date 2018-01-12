@@ -16,6 +16,8 @@ import piuk.blockchain.android.ui.backup.verify.BackupWalletVerifyFragment;
 import piuk.blockchain.android.ui.backup.wordlist.BackupWalletWordListFragment;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.buy.BuyActivity;
+import piuk.blockchain.android.ui.charts.ChartsActivity;
+import piuk.blockchain.android.ui.charts.ChartsFragment;
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity;
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog;
 import piuk.blockchain.android.ui.contacts.detail.ContactDetailFragment;
@@ -137,4 +139,8 @@ public interface PresenterComponent {
     void inject(@NotNull ShapeShiftDetailActivity shapeShiftDetailActivity);
 
     void inject(@NotNull ShapeShiftStateSelectionActivity shapeShiftStateSelectionActivity);
+
+    void inject(@NotNull ChartsActivity chartsActivity);
+
+    void inject(@NotNull ChartsFragment chartsFragment);
 }

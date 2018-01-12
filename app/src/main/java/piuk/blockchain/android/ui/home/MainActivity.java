@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -211,17 +212,17 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
                 // No-op
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
                 drawerIsOpen = true;
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
                 drawerIsOpen = false;
             }
 
@@ -232,11 +233,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         });
 
         // Set up toolbar
-        toolbar = findViewById(R.id.toolbar_general);
+        toolbar = findViewById(R.id.toolbar_main);
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.vector_menu));
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        ViewUtils.setElevation(toolbar, 0F);
 
         // Notify Presenter that page is setup
         onViewReady();
@@ -264,6 +264,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         handleIncomingIntent();
         applyFontToNavDrawer();
+    }
+
+    @Nullable
+    public AppBarLayout getAppBar() {
+        return binding.appbarLayout;
     }
 
     @SuppressLint("NewApi")
