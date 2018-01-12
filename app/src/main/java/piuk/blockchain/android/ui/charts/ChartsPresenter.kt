@@ -9,7 +9,6 @@ import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import javax.inject.Inject
@@ -79,12 +78,12 @@ class ChartsPresenter @Inject constructor(
 
 sealed class ChartsState {
 
-    @Mockable data class Data(
+    data class Data(
             val data: List<ChartDatumDto>,
             val fiatSymbol: String
     ) : ChartsState()
 
-    @Mockable class TimeSpanUpdated(val timeSpan: TimeSpan) : ChartsState()
+    class TimeSpanUpdated(val timeSpan: TimeSpan) : ChartsState()
     object Loading : ChartsState()
     object Error : ChartsState()
 

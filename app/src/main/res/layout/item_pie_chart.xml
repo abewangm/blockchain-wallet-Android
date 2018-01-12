@@ -72,77 +72,100 @@
             tools:ignore="RtlHardcoded" />
 
         <!-- BITCOIN -->
-        <TextView
-            android:id="@+id/textview_title_bitcoin"
-            style="@style/DashboardCoinTitle"
-            android:text="@string/bitcoin"
+        <LinearLayout
+            android:id="@+id/linear_layout_bitcoin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="@id/line_bitcoin"
             app:layout_constraintStart_toStartOf="@id/line_bitcoin"
-            app:layout_constraintTop_toBottomOf="@id/line_bitcoin" />
+            app:layout_constraintTop_toBottomOf="@id/line_bitcoin">
 
-        <TextView
-            android:id="@+id/textview_value_bitcoin"
-            style="@style/DashboardCoinAmounts"
-            app:layout_constraintEnd_toStartOf="@id/line_ethereum"
-            app:layout_constraintStart_toStartOf="@id/line_bitcoin"
-            app:layout_constraintTop_toBottomOf="@id/textview_title_bitcoin"
-            tools:text="$17,000.23" />
+            <TextView
+                android:id="@+id/textview_title_bitcoin"
+                style="@style/DashboardCoinTitle"
+                android:text="@string/bitcoin" />
 
-        <TextView
-            android:id="@+id/textview_amount_bitcoin"
-            style="@style/DashboardCoinAmounts"
-            app:layout_constraintEnd_toStartOf="@id/line_ethereum"
-            app:layout_constraintStart_toStartOf="@id/line_bitcoin"
-            app:layout_constraintTop_toBottomOf="@id/textview_value_bitcoin"
-            tools:text="1.2352003 BTC" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/textview_value_bitcoin"
+                style="@style/DashboardCoinAmounts"
+                app:autoSizePresetSizes="@array/autosize_text_sizes"
+                app:autoSizeTextType="uniform"
+                tools:text="$17,000.23" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/textview_amount_bitcoin"
+                style="@style/DashboardCoinAmounts"
+                app:autoSizePresetSizes="@array/autosize_text_sizes"
+                app:autoSizeTextType="uniform"
+                tools:text="1.2352003 BTC" />
+
+        </LinearLayout>
 
         <!-- ETHEREUM -->
-        <TextView
-            android:id="@+id/textview_title_ether"
-            style="@style/DashboardCoinTitle"
-            android:text="@string/ether"
+        <LinearLayout
+            android:id="@+id/linear_layout_ether"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="@id/line_ethereum"
             app:layout_constraintStart_toStartOf="@id/line_ethereum"
-            app:layout_constraintTop_toBottomOf="@id/line_ethereum" />
+            app:layout_constraintTop_toBottomOf="@id/line_ethereum">
 
-        <TextView
-            android:id="@+id/textview_value_ether"
-            style="@style/DashboardCoinAmounts"
-            app:layout_constraintEnd_toStartOf="@+id/line_bitcoin_cash"
-            app:layout_constraintStart_toStartOf="@id/line_ethereum"
-            app:layout_constraintTop_toBottomOf="@id/textview_title_ether"
-            tools:text="$1,103.01" />
+            <TextView
+                android:id="@+id/textview_title_ether"
+                style="@style/DashboardCoinTitle"
+                android:text="@string/ether" />
 
-        <TextView
-            android:id="@+id/textview_amount_ether"
-            style="@style/DashboardCoinAmounts"
-            app:layout_constraintEnd_toStartOf="@+id/line_bitcoin_cash"
-            app:layout_constraintStart_toStartOf="@id/line_ethereum"
-            app:layout_constraintTop_toBottomOf="@id/textview_value_ether"
-            tools:text="1.73472884 ETH" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/textview_value_ether"
+                style="@style/DashboardCoinAmounts"
+                app:autoSizePresetSizes="@array/autosize_text_sizes"
+                app:autoSizeTextType="uniform"
+                tools:text="$1,103.01" />
 
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/textview_amount_ether"
+                style="@style/DashboardCoinAmounts"
+                app:autoSizePresetSizes="@array/autosize_text_sizes"
+                app:autoSizeTextType="uniform"
+                tools:text="1.73472884 ETH" />
+
+        </LinearLayout>
 
         <!-- BITCOIN CASH -->
-        <TextView
-            android:id="@+id/textview_title_bitcoin_cash"
-            style="@style/DashboardCoinTitle"
-            android:text="@string/bitcoin_cash"
+        <LinearLayout
+            android:id="@+id/linear_layout_bitcoin_cash"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="@id/line_bitcoin_cash"
             app:layout_constraintStart_toStartOf="@id/line_bitcoin_cash"
-            app:layout_constraintTop_toBottomOf="@id/line_bitcoin_cash" />
+            app:layout_constraintTop_toBottomOf="@id/line_bitcoin_cash">
 
-        <TextView
-            android:id="@+id/textview_value_bitcoin_cash"
-            style="@style/DashboardCoinAmounts"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/line_bitcoin_cash"
-            app:layout_constraintTop_toBottomOf="@id/textview_title_bitcoin_cash"
-            tools:text="$3,301.35" />
+            <TextView
+                android:id="@+id/textview_title_bitcoin_cash"
+                style="@style/DashboardCoinTitle"
+                android:text="@string/bitcoin_cash" />
 
-        <TextView
-            android:id="@+id/textview_amount_bitcoin_cash"
-            style="@style/DashboardCoinAmounts"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/line_bitcoin_cash"
-            app:layout_constraintTop_toBottomOf="@id/textview_value_bitcoin_cash"
-            tools:text="0.6352324 BCH" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/textview_value_bitcoin_cash"
+                style="@style/DashboardCoinAmounts"
+                app:autoSizePresetSizes="@array/autosize_text_sizes"
+                app:autoSizeTextType="uniform"
+                tools:text="$3,301.35" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/textview_amount_bitcoin_cash"
+                style="@style/DashboardCoinAmounts"
+                app:autoSizePresetSizes="@array/autosize_text_sizes"
+                app:autoSizeTextType="uniform"
+                tools:text="0.6352324 BCH" />
+
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progress_bar"

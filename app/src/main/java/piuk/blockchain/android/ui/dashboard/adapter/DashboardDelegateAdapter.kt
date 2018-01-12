@@ -6,13 +6,19 @@ import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.ui.dashboard.PieChartsState
 
+/**
+ * @param context The Activity/Fragment [Context]
+ * @param assetSelector A callback for getting the selected coin from the asset balance card
+ * @param coinSelector A callback for getting the selected coin from the pie Chart
+ */
 class DashboardDelegateAdapter(
         context: Context,
-        assetSelector: (CryptoCurrencies) -> Unit
+        assetSelector: (CryptoCurrencies) -> Unit,
+        coinSelector: (CryptoCurrencies) -> Unit
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     private val onboardingDelegate = OnboardingDelegate<Any>(context)
-    private val pieChartDelegate = PieChartDelegate<Any>(context)
+    private val pieChartDelegate = PieChartDelegate<Any>(context, coinSelector)
     private val assetPriceDelegate = AssetPriceCardDelegate<Any>(context, assetSelector)
 
     init {

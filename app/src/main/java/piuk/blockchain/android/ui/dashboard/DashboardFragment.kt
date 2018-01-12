@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
@@ -37,7 +38,17 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     @Inject lateinit var dashboardPresenter: DashboardPresenter
     private val dashboardAdapter by unsafeLazy {
-        DashboardDelegateAdapter(context!!) { ChartsActivity.start(context!!, it) }
+        DashboardDelegateAdapter(
+                context!!,
+                { ChartsActivity.start(context!!, it) },
+                {
+                    when (it) {
+                        CryptoCurrencies.BTC -> TODO("Launch balance page")
+                        CryptoCurrencies.ETHER -> TODO("Launch balance page")
+                        CryptoCurrencies.BCH -> TODO("Launch balance page")
+                    }
+                }
+        )
     }
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -113,6 +124,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun updatePieChartState(chartsState: PieChartsState) {
         dashboardAdapter.updatePieChartState(chartsState)
+        handleRecyclerViewUpdates()
     }
 
     override fun showToast(message: Int, toastType: String) = toast(message, toastType)

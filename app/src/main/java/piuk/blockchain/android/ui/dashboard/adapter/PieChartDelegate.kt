@@ -7,6 +7,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.github.mikephil.charting.animation.Easing
@@ -20,6 +21,7 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 import kotlinx.android.synthetic.main.item_pie_chart.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.dashboard.PieChartsState
@@ -32,7 +34,10 @@ import java.text.NumberFormat
 import java.util.*
 
 
-class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> {
+class PieChartDelegate<in T>(
+        private val context: Context,
+        private val coinSelector: (CryptoCurrencies) -> Unit
+) : AdapterDelegate<T> {
 
     private var viewHolder: PieChartViewHolder? = null
     private var fiatSymbol: String? = null
@@ -49,7 +54,7 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
             = items[position] is PieChartsState
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder
-            = PieChartViewHolder(parent.inflate(R.layout.item_pie_chart))
+            = PieChartViewHolder(parent.inflate(R.layout.item_pie_chart), coinSelector)
 
     override fun onBindViewHolder(
             items: List<T>,
@@ -213,7 +218,8 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
     }
 
     private class PieChartViewHolder internal constructor(
-            itemView: View
+            itemView: View,
+            private val coinSelector: (CryptoCurrencies) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
 
         internal var chart: PieChart = itemView.pie_chart
@@ -221,12 +227,21 @@ class PieChartDelegate<in T>(private val context: Context) : AdapterDelegate<T> 
         // Bitcoin
         internal var bitcoinValue: TextView = itemView.textview_value_bitcoin
         internal var bitcoinAmount: TextView = itemView.textview_amount_bitcoin
+        internal var bitcoinButton: LinearLayout = itemView.linear_layout_bitcoin
         // Ether
         internal var etherValue: TextView = itemView.textview_value_ether
         internal var etherAmount: TextView = itemView.textview_amount_ether
+        internal var etherButton: LinearLayout = itemView.linear_layout_ether
         // Bitcoin Cash
         internal var bitcoinCashValue: TextView = itemView.textview_value_bitcoin_cash
         internal var bitcoinCashAmount: TextView = itemView.textview_amount_bitcoin_cash
+        internal var bitcoinCashButton: LinearLayout = itemView.linear_layout_bitcoin_cash
+
+        init {
+            bitcoinButton.setOnClickListener { coinSelector.invoke(CryptoCurrencies.BTC) }
+            etherButton.setOnClickListener { coinSelector.invoke(CryptoCurrencies.ETHER) }
+            bitcoinCashButton.setOnClickListener { coinSelector.invoke(CryptoCurrencies.BCH) }
+        }
 
     }
 
