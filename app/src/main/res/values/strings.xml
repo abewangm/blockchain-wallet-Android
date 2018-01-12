@@ -785,10 +785,9 @@
     <string name="dashboard_see_charts">See charts</string>
     <string name="dashboard_price">%1$s price</string>
 
-    <!-- SHAPESHIFT ONBOARDING -->
-    <string translatable="false" name="onboarding_shapeshift_title">@string/onboarding_available_now</string>
-    <string name="onboarding_shapeshift_description">You can now exchange your bitcoin for ether and vice versa directly from your Blockchain wallet!</string>
-    <string name="onboarding_shapeshift_cta">Get Started</string>
+    <!-- ONBOARDING -->
+    <string name="onboarding_cta">Get Started</string>
+    <string name="onboarding_bitcoin_cash_description">We are excited to announce that your Blockchain wallet will allow to seamlessly send, receive and exchange Bitcoin Cash!</string>
 
     <!-- KV STORE -->
     <string name="metadata_load_failure">Error loading full wallet functionality. Service might temporarily be unavailable.</string>

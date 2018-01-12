@@ -172,24 +172,23 @@ class DashboardPresenter @Inject constructor(
         if (displayList.none { it is AnnouncementData }) {
             // In the future, the announcement data may be parsed from an endpoint. For now, here is fine
             val announcementData = AnnouncementData(
-                    title = R.string.onboarding_shapeshift_title,
-                    description = R.string.onboarding_shapeshift_description,
-                    link = R.string.onboarding_shapeshift_cta,
-                    image = R.drawable.vector_exchange_offset,
+                    title = R.string.bitcoin_cash,
+                    description = R.string.onboarding_bitcoin_cash_description,
+                    link = R.string.onboarding_cta,
+                    image = R.drawable.vector_bch_onboarding,
                     emoji = "\uD83C\uDF89",
                     closeFunction = { dismissAnnouncement() },
-                    linkFunction = {
-                        view.startShapeShiftActivity()
-                    }
+                    linkFunction = { view.startBitcoinCashReceive() }
             )
 
             displayList.add(0, announcementData)
             view.notifyItemAdded(displayList, 0)
+            view.scrollToTop()
         }
     }
 
     private fun dismissAnnouncement() {
-        prefsUtil.setValue(SHAPESHIFT_ANNOUNCEMENT_DISMISSED, true)
+        prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
         if (displayList.any { it is AnnouncementData }) {
             displayList.removeAll { it is AnnouncementData }
             view.notifyItemRemoved(displayList, 0)
@@ -205,22 +204,24 @@ class DashboardPresenter @Inject constructor(
                     .doOnNext { displayList.removeAll { it is OnboardingModel } }
                     .doOnNext { displayList.add(0, getOnboardingPages(it)) }
                     .doOnNext { view.notifyItemAdded(displayList, 0) }
+                    .doOnNext { view.scrollToTop() }
                     .doOnError { Timber.e(it) }
         }
     }
 
     private fun checkLatestAnnouncement() {
+        showAnnouncement()
         // If user hasn't completed onboarding, ignore announcements
-        if (isOnboardingComplete() && !prefsUtil.getValue(SHAPESHIFT_ANNOUNCEMENT_DISMISSED, false)) {
-            prefsUtil.setValue(SHAPESHIFT_ANNOUNCEMENT_DISMISSED, true)
-
-            walletOptionsDataManager.showShapeshift(payloadDataManager.wallet.guid, payloadDataManager.wallet.sharedKey)
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .subscribe(
-                            { if (it) showAnnouncement() },
-                            { Timber.e(it) }
-                    )
-        }
+//        if (isOnboardingComplete() && !prefsUtil.getValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false)) {
+//            prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
+//
+//            walletOptionsDataManager.showShapeshift(payloadDataManager.wallet.guid, payloadDataManager.wallet.sharedKey)
+//                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+//                    .subscribe(
+//                            { if (it) showAnnouncement() },
+//                            { Timber.e(it) }
+//                    )
+//        }
     }
 
     private fun getOnboardingPages(isBuyAllowed: Boolean): OnboardingModel {
@@ -377,7 +378,7 @@ class DashboardPresenter @Inject constructor(
 
     companion object {
 
-        @VisibleForTesting const val SHAPESHIFT_ANNOUNCEMENT_DISMISSED = "SHAPESHIFT_ANNOUNCEMENT_DISMISSED"
+        @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED = "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"
 
     }
 

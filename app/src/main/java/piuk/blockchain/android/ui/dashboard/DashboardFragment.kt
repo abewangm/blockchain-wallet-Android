@@ -77,7 +77,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         setupToolbar()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
-            ViewUtils.setElevation((activity as MainActivity).toolbar, 5f)
+            ViewUtils.setElevation((activity as MainActivity).appBar, 100f)
         }
         LocalBroadcastManager.getInstance(context!!)
                 .registerReceiver(receiver, IntentFilter(BalanceFragment.ACTION_INTENT))
@@ -85,18 +85,18 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+        context?.run {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+        }
+    }
+
+    override fun scrollToTop() {
+        recycler_view?.run { smoothScrollToPosition(0) }
     }
 
     override fun notifyItemAdded(displayItems: MutableList<Any>, position: Int) {
         dashboardAdapter.items = displayItems
         dashboardAdapter.notifyItemInserted(position)
-        handleRecyclerViewUpdates()
-    }
-
-    override fun notifyItemRemoved(displayItems: MutableList<Any>, position: Int) {
-        dashboardAdapter.items = displayItems
-        dashboardAdapter.notifyItemRemoved(position)
         handleRecyclerViewUpdates()
     }
 
@@ -106,13 +106,16 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         handleRecyclerViewUpdates()
     }
 
+    override fun notifyItemRemoved(displayItems: MutableList<Any>, position: Int) {
+        dashboardAdapter.items = displayItems
+        dashboardAdapter.notifyItemRemoved(position)
+    }
+
     override fun updatePieChartState(chartsState: PieChartsState) {
         dashboardAdapter.updatePieChartState(chartsState)
     }
 
-    override fun showToast(message: Int, toastType: String) {
-        toast(message, toastType)
-    }
+    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
     override fun startBuyActivity() {
         activity?.run {
@@ -121,10 +124,10 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         }
     }
 
-    override fun startShapeShiftActivity() {
+    override fun startBitcoinCashReceive() {
         activity?.run {
             LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_SHAPESHIFT))
+                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
         }
     }
 

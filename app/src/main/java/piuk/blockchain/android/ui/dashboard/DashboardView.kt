@@ -23,6 +23,7 @@ interface DashboardView : View {
 
     fun startBuyActivity()
 
-    fun startShapeShiftActivity()
+    fun startBitcoinCashReceive()
 
+    fun scrollToTop()
 }
