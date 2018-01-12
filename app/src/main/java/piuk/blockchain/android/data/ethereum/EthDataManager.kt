@@ -1,6 +1,5 @@
 package piuk.blockchain.android.data.ethereum
 
-import com.subgraph.orchid.encoders.Hex
 import info.blockchain.wallet.ethereum.EthAccountApi
 import info.blockchain.wallet.ethereum.EthereumWallet
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
@@ -13,6 +12,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.DeterministicKey
+import org.spongycastle.util.encoders.Hex
 import org.web3j.protocol.core.methods.request.RawTransaction
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
@@ -154,18 +154,20 @@ class EthDataManager(
     }.compose(RxUtil.applySchedulersToCompletable())
 
     /**
-     * Returns EthereumWallet stored in metadata. If metadata entry doesn't exists it will be inserted.
+     * Fetches EthereumWallet stored in metadata. If metadata entry doesn't exists it will be created.
      *
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
-     * @return An [Observable] returning EthereumWallet
+     * @return An [Completable]
      */
     fun initEthereumWallet(
             metadataNode: DeterministicKey,
             defaultLabel: String
-    ): Observable<EthereumWallet> = rxPinning.call<EthereumWallet> {
-        Observable.fromCallable { fetchOrCreateEthereumWallet(metadataNode, defaultLabel) }
-                .doOnNext { ethDataStore.ethWallet = it }
-                .compose(RxUtil.applySchedulersToObservable())
+    ): Completable = rxPinning.call {
+        Completable.fromCallable {
+            ethDataStore.ethWallet = fetchOrCreateEthereumWallet(metadataNode, defaultLabel)
+            return@fromCallable Void.TYPE
+
+        }.compose(RxUtil.applySchedulersToCompletable())
     }
 
     /**

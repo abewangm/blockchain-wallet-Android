@@ -79,19 +79,13 @@ class SendPresenter @Inject constructor(
 
     private val locale: Locale by unsafeLazy { Locale.getDefault() }
     private val currencyHelper by unsafeLazy {
-        ReceiveCurrencyHelper(
-                monetaryUtil,
-                locale,
-                prefsUtil,
-                exchangeRateFactory,
-                currencyState
-        )
+        ReceiveCurrencyHelper(monetaryUtil, locale, prefsUtil, exchangeRateFactory, currencyState)
     }
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-
-    private var feeOptions: FeeOptions? = null
     private val pendingTransaction by unsafeLazy { PendingTransaction() }
     private val unspentApiResponses by unsafeLazy { HashMap<String, UnspentOutputs>() }
+
+    private var feeOptions: FeeOptions? = null
     private var textChangeSubject = PublishSubject.create<String>()
     private var absoluteSuggestedFee = BigInteger.ZERO
     private var maxAvailable = BigInteger.ZERO
@@ -239,7 +233,7 @@ class SendPresenter @Inject constructor(
                 .subscribe({ hash ->
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(true)
-                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.ETHER)
                             .putCurrencyType(CryptoCurrencies.BTC))
 
                     clearBtcUnspentResponseCache()
@@ -258,7 +252,7 @@ class SendPresenter @Inject constructor(
 
                     Logging.logCustom(PaymentSentEvent()
                             .putSuccess(false)
-                            .putAmountForRange(pendingTransaction.bigIntAmount)
+                            .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.ETHER)
                             .putCurrencyType(CryptoCurrencies.BTC))
                 }
     }
@@ -316,17 +310,18 @@ class SendPresenter @Inject constructor(
                 .flatMap { ethDataManager.setLastTxHashObservable(it) }
                 .subscribe(
                         {
-                            handleSuccessfulPayment(it, CryptoCurrencies.ETHER)
                             Logging.logCustom(PaymentSentEvent()
                                     .putSuccess(true)
-                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.ETHER)
                                     .putCurrencyType(CryptoCurrencies.ETHER))
+                            // handleSuccessfulPayment(...) clears PendingTransaction object
+                            handleSuccessfulPayment(it, CryptoCurrencies.ETHER)
                         },
                         {
                             Timber.e(it)
                             Logging.logCustom(PaymentSentEvent()
                                     .putSuccess(false)
-                                    .putAmountForRange(pendingTransaction.bigIntAmount)
+                                    .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.ETHER)
                                     .putCurrencyType(CryptoCurrencies.ETHER))
                             view.showSnackbar(R.string.transaction_failed, Snackbar.LENGTH_INDEFINITE)
                         })

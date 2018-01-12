@@ -37,18 +37,18 @@ import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
-import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 
-    override val isContactsEnabled: Boolean
-        get() = BuildConfig.CONTACTS_ENABLED
-    override val shouldShowBuy: Boolean
-        get() = AndroidUtils.is19orHigher()
+    override val isContactsEnabled = BuildConfig.CONTACTS_ENABLED
+    override val shouldShowBuy = AndroidUtils.is19orHigher()
 
     @Inject lateinit var balancePresenter: BalancePresenter
     // Adapters
@@ -61,7 +61,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_INTENT && activity != null) {
-                tabs?.post { tabs.getTabAt(0)?.select() }
+                updateSelectedCurrency(CryptoCurrencies.BTC)
                 recyclerview?.scrollToPosition(0)
                 presenter.onViewReady()
             }
@@ -93,43 +93,28 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         )
 
         textview_balance.setOnClickListener { presenter.invertViewType() }
+        currency_header.setSelectionListener { presenter.updateSelectedCurrency(it) }
 
         setUiState(UiState.LOADING)
-
-        tabs.apply {
-            addTab(tabs.newTab().setText(R.string.bitcoin))
-            addTab(tabs.newTab().setText(R.string.ether))
-            setOnTabSelectedListener {
-                if (it == 1) {
-                    presenter.updateSelectedCurrency(CryptoCurrencies.ETHER)
-                } else {
-                    presenter.updateSelectedCurrency(CryptoCurrencies.BTC)
-                }
-            }
-        }
-
         onViewReady()
+        presenter.chooseDefaultAccount()
     }
 
-    override fun updateSelectedCurrency(cryptoCurrencies: CryptoCurrencies) {
-        when (cryptoCurrencies) {
-            CryptoCurrencies.BTC -> tabs?.getTabAt(0)?.select()
-            CryptoCurrencies.ETHER -> tabs?.getTabAt(1)?.select()
-            else -> throw IllegalArgumentException("BCH is not currently supported")
-        }
+    override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
     }
 
     override fun showAccountSpinner() {
         if (accountsAdapter?.count ?: 1 > 1) {
-            accounts_spinner.visible()
+            layout_spinner.visible()
         } else if (accountsAdapter?.count ?: 1 == 1) {
             accounts_spinner.setSelection(0, false)
-            accounts_spinner.invisible()
+            layout_spinner.gone()
         }
     }
 
     override fun hideAccountSpinner() {
-        accounts_spinner.invisible()
+        layout_spinner.gone()
     }
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
@@ -185,9 +170,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         if (accounts.isNotEmpty()) accounts_spinner.setSelection(0, false)
 
         if (accounts.size > 1) {
-            accounts_spinner.visible()
+            layout_spinner.visible()
         } else if (accounts.isNotEmpty()) {
-            accounts_spinner.invisible()
+            layout_spinner.gone()
         }
         accounts_spinner.setOnTouchListener({ _, event ->
             event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
@@ -445,14 +430,23 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private fun onEmptyState() {
         setShowRefreshing(false)
         no_transaction_include.visible()
-        if (tabs.selectedTabPosition == 0) {
-            button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
-            button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
-            description.setText(R.string.transaction_occur_when_bitcoin)
-        } else {
-            button_get_bitcoin.setText(R.string.onboarding_get_eth)
-            button_get_bitcoin.setOnClickListener { startReceiveFragmentEth() }
-            description.setText(R.string.transaction_occur_when_eth)
+
+        when (currency_header.selectedCurrency) {
+            CryptoCurrencies.BTC -> {
+                button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
+                button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
+                description.setText(R.string.transaction_occur_when_bitcoin)
+            }
+            CryptoCurrencies.ETHER -> {
+                button_get_bitcoin.setText(R.string.onboarding_get_eth)
+                button_get_bitcoin.setOnClickListener { startReceiveFragmentEth() }
+                description.setText(R.string.transaction_occur_when_eth)
+            }
+            CryptoCurrencies.BCH -> {
+                button_get_bitcoin.setText(R.string.onboarding_get_bitcoin_cash)
+                button_get_bitcoin.setOnClickListener { startReceiveFragmentBch() }
+                description.setText(R.string.transaction_occur_when_bitcoin_cash)
+            }
         }
     }
 
@@ -460,6 +454,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         activity?.run {
             LocalBroadcastManager.getInstance(this)
                     .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
+        }
+    }
+
+    private fun startReceiveFragmentBch() {
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
         }
     }
 

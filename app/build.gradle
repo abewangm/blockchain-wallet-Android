@@ -16,14 +16,14 @@ buildProperties {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.1'
+    buildToolsVersion '27.0.3'
     dexOptions.javaMaxHeapSize "3g"
 
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 27
-        versionCode 284
-        versionName "6.9.0-rc1"
+        versionCode 293
+        versionName "6.9.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"
@@ -177,7 +177,9 @@ afterEvaluate {
 dependencies {
     // Blockchain libraries
     implementation files('libs/MyWalletHD.jar')
-    implementation files('libs/api-client-0.1.15-SNAPSHOT.jar')
+    implementation files('libs/api-client-0.1.16-SNAPSHOT.jar')
+    // Bitcoinj
+    implementation files('libs/bitcoinj-core-0.15-SNAPSHOT.jar')
     // Kotlin
     implementation libraries.kotlin
     // Support Libs
@@ -196,12 +198,15 @@ dependencies {
     implementation libraries.firebaseMessaging
     implementation libraries.googlePlayServicesBase
     // Utils
-    implementation libraries.bitcoinj
     implementation libraries.web3j
     implementation libraries.commonsCodec
     implementation libraries.commonsLang
     implementation libraries.urlBuilder
     implementation libraries.yearclass
+    // Bitcoinj dependencies
+    implementation libraries.protobuf
+    implementation libraries.findbugs
+    implementation libraries.guava
     // Networking and Core libs
     implementation libraries.rxJava
     implementation libraries.rxAndroid

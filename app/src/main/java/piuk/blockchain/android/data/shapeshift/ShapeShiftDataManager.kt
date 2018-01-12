@@ -14,6 +14,7 @@ import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore
 import piuk.blockchain.android.data.stores.Either
+import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.ui.shapeshift.models.CoinPairings
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
@@ -43,8 +44,44 @@ class ShapeShiftDataManager(
             }
 
     /**
+     * Returns the US state that the user has selected and stored in metadata, contained within an
+     * [Optional] wrapper. If [Optional.None], no State has been set. Will throw an
+     * [IllegalArgumentException] if [ShapeShiftTrades] has not been initialized.
+     *
+     * @return An [Observable] containing an [Optional]
+     */
+    fun getState(): Observable<Optional<State>> {
+        shapeShiftDataStore.tradeData?.run {
+            return when (usState) {
+                null -> Observable.just(Optional.None)
+                else -> Observable.just(Optional.Some(usState))
+            }
+        }
+
+        throw IllegalStateException("ShapeShiftTrades not initialized")
+    }
+
+    /**
+     * Sets the user's selected State and saves it to metadata. Can be null to clear the saved
+     * State. Will throw an [IllegalArgumentException] if [ShapeShiftTrades] has not been
+     * initialized.
+     *
+     * @return A [Completable] object
+     */
+    fun setState(state: State?): Completable {
+        shapeShiftDataStore.tradeData?.run {
+            usState = state
+            return rxPinning.call { Completable.fromCallable { save() } }
+                    .compose(RxUtil.applySchedulersToCompletable())
+        }
+
+        throw IllegalStateException("ShapeShiftTrades not initialized")
+    }
+
+    /**
      * Returns a list of [Trade] objects previously fetched from metadata. Note that this does
-     * not refresh the list.
+     * not refresh the list. Will throw an [IllegalArgumentException] if [ShapeShiftTrades] has
+     * not been initialized.
      *
      * @return An [Observable] wrapping a list of [Trade] objects
      */

@@ -9,6 +9,7 @@ import info.blockchain.wallet.shapeshift.data.Quote
 import info.blockchain.wallet.shapeshift.data.QuoteRequest
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
 import io.reactivex.subjects.PublishSubject
 import org.web3j.utils.Convert
@@ -18,6 +19,7 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.FeeDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
+import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -58,6 +60,7 @@ class NewExchangePresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager,
         private val stringUtils: StringUtils,
         private val settingsDataManager: SettingsDataManager,
+        private val buyDataManager: BuyDataManager,
         walletAccountHelper: WalletAccountHelper
 ) : BasePresenter<NewExchangeView>() {
 
@@ -104,8 +107,11 @@ class NewExchangePresenter @Inject constructor(
                 .doOnTerminate { view.dismissProgressDialog() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
-                        // Only set account the first time
-                        { if (account == null) account = payloadDataManager.defaultAccount },
+                        {
+                            // Only set account the first time
+                            if (account == null) account = payloadDataManager.defaultAccount
+                            checkForEmptyBalances()
+                        },
                         {
                             Timber.e(it)
                             view.showToast(R.string.shapeshift_getting_information_failed, ToastCustom.TYPE_ERROR)
@@ -113,61 +119,14 @@ class NewExchangePresenter @Inject constructor(
                         }
                 )
 
-        fromCryptoSubject.applyDefaults()
-                // Update to Fiat as it's not dependent on web results
-                .doOnNext { updateFromFiat(it) }
-                // Update results dependent on Shapeshift
-                .flatMap { amount ->
-                    getQuoteFromRequest(amount, currencyState.cryptoCurrency)
-                            .doOnNext { updateToFields(it.withdrawalAmount) }
-                }
-                .subscribe()
-
-        fromFiatSubject.applyDefaults()
-                // Convert to fromCrypto amount
-                .map {
-                    val (_, toExchangeRate) = getExchangeRates(currencyHelper.fiatUnit)
-                    return@map it.divide(toExchangeRate, 18, RoundingMode.HALF_UP)
-                }
-                // Update from amount view
-                .doOnNext { view.updateFromCryptoText(cryptoFormat.format(it)) }
-                // Update results dependent on Shapeshift
-                .flatMap { amount ->
-                    getQuoteFromRequest(amount, currencyState.cryptoCurrency)
-                            .doOnNext { updateToFields(it.withdrawalAmount) }
-                }
-                .subscribe()
-
-        toCryptoSubject.applyDefaults()
-                // Update to Fiat as it's not dependent on web results
-                .doOnNext { updateToFiat(it) }
-                // Update results dependent on Shapeshift
-                .flatMap { amount ->
-                    getQuoteToRequest(amount, currencyState.cryptoCurrency)
-                            .doOnNext { updateFromFields(it.depositAmount) }
-                }
-                .subscribe()
-
-        toFiatSubject.applyDefaults()
-                // Convert to toCrypto amount
-                .map {
-                    val (fromExchangeRate, _) = getExchangeRates(currencyHelper.fiatUnit)
-                    return@map it.divide(fromExchangeRate, 18, RoundingMode.HALF_UP)
-                }
-                // Update from amount view
-                .doOnNext { view.updateToCryptoText(cryptoFormat.format(it)) }
-                // Update results dependent on Shapeshift
-                .flatMap { amount ->
-                    getQuoteToRequest(amount, currencyState.cryptoCurrency)
-                            .doOnNext { updateFromFields(it.depositAmount) }
-                }
-                .subscribe()
+        subscribeToEditTexts()
     }
 
     internal fun onSwitchCurrencyClicked() {
         currencyState.toggleCryptoCurrency()
                 .run { compositeDisposable.clear() }
                 .run { view.clearEditTexts() }
+                .run { view.clearError() }
                 .run {
                     // This is a bit hacky and should be abstracted out when more currencies are
                     // available, hence the null checks in onViewReady().
@@ -177,7 +136,11 @@ class NewExchangePresenter @Inject constructor(
 
     internal fun onContinuePressed() {
         // State check
-        check(shapeShiftData != null) { "ShapeShiftData is null, presenter state invalid" }
+        if (shapeShiftData == null) {
+            view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
+            return
+        }
+
         // Check user isn't submitting an empty page
         if (shapeShiftData?.withdrawalAmount?.compareTo(BigDecimal.ZERO) == 0) {
             view.showToast(R.string.invalid_amount, ToastCustom.TYPE_ERROR)
@@ -206,7 +169,11 @@ class NewExchangePresenter @Inject constructor(
                     } else {
                         sendFinalRequest(selectedCurrency)
                     }
-                }.subscribe()
+                }
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
     }
 
     internal fun onMaxPressed() {
@@ -229,7 +196,7 @@ class NewExchangePresenter @Inject constructor(
                         view.updateFromCryptoText(cryptoFormat.format(it))
                     }
                 },
-                { Timber.e(it) }
+                { setUnknownErrorState(it) }
         )
     }
 
@@ -256,7 +223,7 @@ class NewExchangePresenter @Inject constructor(
                                 }
                             }
                         },
-                        { Timber.e(it) }
+                        { setUnknownErrorState(it) }
                 )
     }
 
@@ -290,6 +257,92 @@ class NewExchangePresenter @Inject constructor(
         this.account = account
         view.clearEditTexts()
         onViewReady()
+    }
+
+    private fun checkForEmptyBalances() {
+        hasEmptyBalances()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .compose(RxUtil.applySchedulersToObservable())
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
+                .doOnTerminate { view.dismissProgressDialog() }
+                .flatMap { empty ->
+                    if (empty) buyDataManager.canBuy else Observable.empty<Boolean>()
+                }
+                .subscribe(
+                        { canBuy -> view.showNoFunds(canBuy && view.isBuyPermitted) },
+                        { Timber.e(it) }
+                )
+    }
+
+    private fun subscribeToEditTexts() {
+        fromCryptoSubject.applyDefaults()
+                // Update to Fiat as it's not dependent on web results
+                .doOnNext { updateFromFiat(it) }
+                // Update results dependent on Shapeshift
+                .flatMap { amount ->
+                    getQuoteFromRequest(amount, currencyState.cryptoCurrency)
+                            .doOnNext { updateToFields(it.withdrawalAmount) }
+                }
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
+
+        fromFiatSubject.applyDefaults()
+                // Convert to fromCrypto amount
+                .map {
+                    val (_, toExchangeRate) = getExchangeRates(currencyHelper.fiatUnit)
+                    return@map it.divide(toExchangeRate, 18, RoundingMode.HALF_UP)
+                }
+                // Update from amount view
+                .doOnNext { view.updateFromCryptoText(cryptoFormat.format(it)) }
+                // Update results dependent on Shapeshift
+                .flatMap { amount ->
+                    getQuoteFromRequest(amount, currencyState.cryptoCurrency)
+                            .doOnNext { updateToFields(it.withdrawalAmount) }
+                }
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
+
+        toCryptoSubject.applyDefaults()
+                // Update to Fiat as it's not dependent on web results
+                .doOnNext { updateToFiat(it) }
+                // Update results dependent on Shapeshift
+                .flatMap { amount ->
+                    getQuoteToRequest(amount, currencyState.cryptoCurrency)
+                            .doOnNext { updateFromFields(it.depositAmount) }
+                }
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
+
+        toFiatSubject.applyDefaults()
+                // Convert to toCrypto amount
+                .map {
+                    val (fromExchangeRate, _) = getExchangeRates(currencyHelper.fiatUnit)
+                    return@map it.divide(fromExchangeRate, 18, RoundingMode.HALF_UP)
+                }
+                // Update from amount view
+                .doOnNext { view.updateToCryptoText(cryptoFormat.format(it)) }
+                // Update results dependent on Shapeshift
+                .flatMap { amount ->
+                    getQuoteToRequest(amount, currencyState.cryptoCurrency)
+                            .doOnNext { updateFromFields(it.depositAmount) }
+                }
+                .subscribe(
+                        { /* No-op */ },
+                        { setUnknownErrorState(it) }
+                )
+    }
+
+    private fun setUnknownErrorState(throwable: Throwable) {
+        Timber.e(throwable)
+        view.clearEditTexts()
+        view.setButtonEnabled(false)
+        view.showToast(R.string.shapeshift_getting_information_failed, ToastCustom.TYPE_ERROR)
     }
 
     private fun getExchangeRates(currencyCode: String): ExchangeRates {
@@ -335,9 +388,9 @@ class NewExchangePresenter @Inject constructor(
         else -> ShapeShiftPairs.ETH_BTC
     }
 
-    private fun getMaximum() = BigDecimal.valueOf(marketInfo?.maxLimit ?: 0.0)
+    private fun getMaximum() = marketInfo?.maxLimit ?: BigDecimal.ZERO
 
-    private fun getMinimum() = BigDecimal.valueOf(marketInfo?.minimum ?: 0.0)
+    private fun getMinimum() = marketInfo?.minimum ?: BigDecimal.ZERO
 
     //region Field Updates
     private fun updateFromFiat(amount: BigDecimal) {
@@ -380,8 +433,8 @@ class NewExchangePresenter @Inject constructor(
      */
     private fun sendFinalRequest(selectedCurrency: CryptoCurrencies) {
         val quoteRequest = QuoteRequest().apply {
-            depositAmount = shapeShiftData!!.depositAmount.toDouble()
-            withdrawalAmount = shapeShiftData!!.withdrawalAmount.toDouble()
+            depositAmount = shapeShiftData!!.depositAmount
+            withdrawalAmount = shapeShiftData!!.withdrawalAmount
             withdrawal = shapeShiftData!!.withdrawalAddress
             pair = getShapeShiftPair(selectedCurrency)
             returnAddress = shapeShiftData!!.returnAddress
@@ -405,7 +458,7 @@ class NewExchangePresenter @Inject constructor(
             selectedCurrency: CryptoCurrencies
     ): Observable<Quote> {
         val quoteRequest = QuoteRequest().apply {
-            depositAmount = fromAmount.setScale(8, RoundingMode.HALF_DOWN).toDouble()
+            depositAmount = fromAmount.setScale(8, RoundingMode.HALF_DOWN)
             pair = getShapeShiftPair(selectedCurrency)
             apiKey = view.shapeShiftApiKey
         }
@@ -418,7 +471,7 @@ class NewExchangePresenter @Inject constructor(
             selectedCurrency: CryptoCurrencies
     ): Observable<Quote> {
         val quoteRequest = QuoteRequest().apply {
-            withdrawalAmount = toAmount.setScale(8, RoundingMode.HALF_DOWN).toDouble()
+            withdrawalAmount = toAmount.setScale(8, RoundingMode.HALF_DOWN)
             pair = getShapeShiftPair(selectedCurrency)
             apiKey = view.shapeShiftApiKey
         }
@@ -456,10 +509,10 @@ class NewExchangePresenter @Inject constructor(
                                 view.showAmountError(it.value)
                                 return@map Quote().apply {
                                     orderId = ""
-                                    quotedRate = (marketInfo?.rate ?: 1.0).toBigDecimal()
-                                    minerFee = (marketInfo?.minerFee ?: 0.0).toBigDecimal()
-                                    withdrawalAmount = quoteRequest.withdrawalAmount.toBigDecimal()
-                                    depositAmount = quoteRequest.depositAmount.toBigDecimal()
+                                    quotedRate = marketInfo?.rate ?: BigDecimal.ONE
+                                    minerFee = marketInfo?.minerFee ?: BigDecimal.ZERO
+                                    withdrawalAmount = quoteRequest.withdrawalAmount ?: BigDecimal.ZERO
+                                    depositAmount = quoteRequest.depositAmount ?: BigDecimal.ZERO
                                     expiration = 0L
                                 }
                             }
@@ -478,10 +531,10 @@ class NewExchangePresenter @Inject constructor(
                                                         orderId = quote.orderId,
                                                         fromCurrency = selectedCurrency,
                                                         toCurrency = if (selectedCurrency == CryptoCurrencies.BTC) CryptoCurrencies.ETHER else CryptoCurrencies.BTC,
-                                                        depositAmount = quote.depositAmount,
+                                                        depositAmount = quote.depositAmount ?: BigDecimal.ZERO,
                                                         changeAddress = addresses.changeAddress,
                                                         depositAddress = quote.deposit ?: "",
-                                                        withdrawalAmount = quote.withdrawalAmount,
+                                                        withdrawalAmount = quote.withdrawalAmount ?: BigDecimal.ZERO,
                                                         withdrawalAddress = addresses.withdrawalAddress,
                                                         exchangeRate = quote.quotedRate,
                                                         transactionFee = fee,
@@ -497,11 +550,20 @@ class NewExchangePresenter @Inject constructor(
                                                 return@map quote
                                             }
                                 }
+                                .doOnError { setUnknownErrorState(it) }
                     }
-                    .doOnTerminate {
+                    .doAfterNext {
                         view.showQuoteInProgress(false)
                         view.setButtonEnabled(true)
                     }
+                    .doOnError { setUnknownErrorState(it) }
+
+    private fun hasEmptyBalances(): Observable<Boolean> =
+            Observable.zip(
+                    getBtcMaxObservable(),
+                    getEthMaxObservable(),
+                    BiFunction { btc, eth -> btc == BigDecimal.ZERO && eth == BigDecimal.ZERO }
+            )
 
     //region Fees Observables
     private fun getFeeForPayment(
@@ -646,7 +708,7 @@ class NewExchangePresenter @Inject constructor(
         view.clearError()
         view.setButtonEnabled(false)
         view.showQuoteInProgress(true)
-    }.debounce(750, TimeUnit.MILLISECONDS)
+    }.debounce(1000, TimeUnit.MILLISECONDS)
             // Here we kill any quotes in flight already, as they take up to ten seconds to fulfill
             .doOnNext { compositeDisposable.clear() }
             // Strip out localised information for predictable formatting
@@ -671,8 +733,6 @@ class NewExchangePresenter @Inject constructor(
 
     //region Extension Functions
     private fun String.sanitise() = if (isNotEmpty()) this else "0"
-
-    private fun Double.toBigDecimal() = BigDecimal.valueOf(this)
 
     @Throws(ParseException::class)
     private fun String.parse(locale: Locale): BigDecimal {

@@ -4,6 +4,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import piuk.blockchain.android.data.bitcoincash.BchDataStore;
 import piuk.blockchain.android.data.contacts.datastore.ContactsMapStore;
 import piuk.blockchain.android.data.ethereum.EthDataStore;
 import piuk.blockchain.android.data.settings.SettingsService;
@@ -52,4 +53,9 @@ class PersistentStoreModule {
         return new ShapeShiftDataStore();
     }
 
+    @Provides
+    @Singleton
+    BchDataStore provideBchDataStore() {
+        return new BchDataStore();
+    }
 }

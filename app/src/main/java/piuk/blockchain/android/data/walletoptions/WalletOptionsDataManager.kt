@@ -52,12 +52,12 @@ class WalletOptionsDataManager(
 
         val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT) ?: false }
         val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode) ?: false }
-        val isUS = settings.countryCode == "US"
-
-        walletOptionsState.isAmericanStateSelectionRequired = isUS
 
         return isShapeShiftAllowed && !blacklistedCountry
     }
+
+    fun isInUsa(): Observable<Boolean> =
+            walletOptionsState.walletSettingsSource.map { it.countryCode == "US" }
 
     fun isStateWhitelisted(state: String): Observable<Boolean> = walletOptionsState.walletOptionsSource
             .map { it.shapeshift.statesWhitelist.let { it?.contains(state) ?: true } }
@@ -130,18 +130,6 @@ class WalletOptionsDataManager(
         }
 
         return result
-    }
-
-    fun setAmericanState(state: String) {
-        return walletOptionsState.setAmericanState(state)
-    }
-
-    fun setAmericanStateSelectionRequired(state: Boolean) {
-        walletOptionsState.isAmericanStateSelectionRequired = state
-    }
-
-    fun isAmericanStateSelectionRequired(): Boolean {
-        return walletOptionsState.isAmericanStateSelectionRequired
     }
 
     companion object {

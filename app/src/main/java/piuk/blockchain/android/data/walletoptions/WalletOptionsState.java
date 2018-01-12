@@ -11,14 +11,10 @@ public class WalletOptionsState {
     ReplaySubject<WalletOptions> walletOptionsSource;
     ReplaySubject<Settings> walletSettingsSource;
 
-    boolean americanStateSelectionRequired = false;
-    String americanState;
-
     private WalletOptionsState(ReplaySubject<WalletOptions> walletOptionsSource,
                                      ReplaySubject<Settings> walletSettingsSource) {
         this.walletOptionsSource = walletOptionsSource;
         this.walletSettingsSource = walletSettingsSource;
-        this.americanState = null;
     }
 
     public static WalletOptionsState getInstance(ReplaySubject<WalletOptions> walletOptionsSubject,
@@ -32,19 +28,4 @@ public class WalletOptionsState {
         instance = null;
     }
 
-    public boolean isAmericanStateSelectionRequired() {
-        return americanStateSelectionRequired;
-    }
-
-    public void setAmericanStateSelectionRequired(boolean required) {
-        this.americanStateSelectionRequired = required;
-    }
-
-    public String getAmericanState() {
-        return americanState;
-    }
-
-    public void setAmericanState(String americanState) {
-        this.americanState = americanState;
-    }
 }

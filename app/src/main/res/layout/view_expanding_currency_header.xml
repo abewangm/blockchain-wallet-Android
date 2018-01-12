@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraint_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:animateLayoutChanges="true"
+    android:background="?attr/colorPrimary"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textview_selected_currency"
+        fontPath="fonts/Montserrat-Regular.ttf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:drawablePadding="8dp"
+        android:drawableRight="@drawable/ic_arrow_drop_down_grey600_24dp"
+        android:drawableTint="@color/white"
+        android:gravity="center"
+        android:padding="8dp"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:drawableLeft="@drawable/vector_bitcoin"
+        tools:ignore="MissingPrefix"
+        tools:text="Selected Currency" />
+
+    <LinearLayout
+        android:id="@+id/linear_layout_coin_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/textview_bitcoin"
+            style="@style/CryptoCurrencySelectorTextView"
+            android:text="@string/bitcoin"
+            tools:drawableLeft="@drawable/vector_bitcoin" />
+
+        <TextView
+            android:id="@+id/textview_ethereum"
+            style="@style/CryptoCurrencySelectorTextView"
+            android:text="@string/ethereum"
+            tools:drawableLeft="@drawable/vector_eth" />
+
+        <TextView
+            android:id="@+id/textview_bitcoin_cash"
+            style="@style/CryptoCurrencySelectorTextView"
+            android:text="@string/bitcoin_cash"
+            tools:drawableLeft="@drawable/vector_bitcoin_cash" />
+
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>
