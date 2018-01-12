@@ -43,14 +43,16 @@ class DashboardPresenter @Inject constructor(
 ) : BasePresenter<DashboardView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-    private val displayList = mutableListOf<Any>(
-            stringUtils.getString(R.string.dashboard_balances),
-            PieChartsState.Loading,
-            stringUtils.getString(R.string.dashboard_price_charts),
-            AssetPriceCardState.Loading(CryptoCurrencies.BTC),
-            AssetPriceCardState.Loading(CryptoCurrencies.ETHER),
-            AssetPriceCardState.Loading(CryptoCurrencies.BCH)
-    )
+    private val displayList by unsafeLazy {
+        mutableListOf<Any>(
+                stringUtils.getString(R.string.dashboard_balances),
+                PieChartsState.Loading,
+                stringUtils.getString(R.string.dashboard_price_charts),
+                AssetPriceCardState.Loading(CryptoCurrencies.BTC),
+                AssetPriceCardState.Loading(CryptoCurrencies.ETHER),
+                AssetPriceCardState.Loading(CryptoCurrencies.BCH)
+        )
+    }
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
     @Suppress("MemberVisibilityCanPrivate")
     @VisibleForTesting var btcBalance: Long = 0L
@@ -210,18 +212,17 @@ class DashboardPresenter @Inject constructor(
     }
 
     private fun checkLatestAnnouncement() {
-        showAnnouncement()
         // If user hasn't completed onboarding, ignore announcements
-//        if (isOnboardingComplete() && !prefsUtil.getValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false)) {
-//            prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
-//
-//            walletOptionsDataManager.showShapeshift(payloadDataManager.wallet.guid, payloadDataManager.wallet.sharedKey)
-//                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-//                    .subscribe(
-//                            { if (it) showAnnouncement() },
-//                            { Timber.e(it) }
-//                    )
-//        }
+        if (isOnboardingComplete() && !prefsUtil.getValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false)) {
+            prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
+
+            walletOptionsDataManager.showShapeshift(payloadDataManager.wallet.guid, payloadDataManager.wallet.sharedKey)
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .subscribe(
+                            { if (it) showAnnouncement() },
+                            { Timber.e(it) }
+                    )
+        }
     }
 
     private fun getOnboardingPages(isBuyAllowed: Boolean): OnboardingModel {
@@ -381,8 +382,8 @@ class DashboardPresenter @Inject constructor(
         @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED = "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"
 
     }
-
 }
+
 
 sealed class PieChartsState {
 
