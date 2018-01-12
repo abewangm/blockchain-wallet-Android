@@ -112,10 +112,15 @@ class DashboardPresenter @Inject constructor(
         displayList.removeAll { it is AssetPriceCardState }
         displayList.addAll(list)
 
-        view.notifyItemUpdated(
-                displayList,
-                displayList.indexOfFirst { it is AssetPriceCardState }
+        val firstPosition = displayList.indexOfFirst { it is AssetPriceCardState }
+
+        val positions = listOf(
+                firstPosition,
+                firstPosition + 1,
+                firstPosition + 2
         )
+
+        view.notifyItemUpdated(displayList, positions)
     }
 
     private fun updateAllBalances() {

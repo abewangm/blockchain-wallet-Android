@@ -22,6 +22,7 @@ import piuk.blockchain.android.ui.charts.ChartsActivity
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
 import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.home.MainActivity.*
 import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.inflate
@@ -101,6 +102,14 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == SETTINGS_EDIT || requestCode == CONTACTS_EDIT || requestCode == ACCOUNT_EDIT) {
+            presenter.onViewReady()
+        }
+    }
+
     override fun scrollToTop() {
         recycler_view?.run { smoothScrollToPosition(0) }
     }
@@ -111,9 +120,9 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         handleRecyclerViewUpdates()
     }
 
-    override fun notifyItemUpdated(displayItems: MutableList<Any>, position: Int) {
+    override fun notifyItemUpdated(displayItems: MutableList<Any>, positions: List<Int>) {
         dashboardAdapter.items = displayItems
-        dashboardAdapter.notifyItemChanged(position)
+        positions.forEach { dashboardAdapter.notifyItemChanged(it) }
         handleRecyclerViewUpdates()
     }
 

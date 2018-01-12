@@ -19,7 +19,7 @@ interface DashboardView : View {
 
     fun notifyItemRemoved(displayItems: MutableList<Any>, position: Int)
 
-    fun notifyItemUpdated(displayItems: MutableList<Any>, position: Int)
+    fun notifyItemUpdated(displayItems: MutableList<Any>, positions: List<Int>)
 
     fun startBuyActivity()
 
