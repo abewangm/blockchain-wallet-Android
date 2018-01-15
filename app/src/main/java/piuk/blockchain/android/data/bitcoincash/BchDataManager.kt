@@ -42,7 +42,6 @@ class BchDataManager(
         Completable.fromCallable {
             fetchOrCreateBchMetadata(metadataNode, defaultLabel)
             restoreBchWallet(bchDataStore.bchMetadata!!)
-            updateAllBalances()
             return@fromCallable Void.TYPE
 
         }.compose(RxUtil.applySchedulersToCompletable())
@@ -119,13 +118,10 @@ class BchDataManager(
 
         val result = mutableListOf<String>()
 
-        var i = 0
-
-        bchDataStore.bchMetadata?.accounts?.forEach {
-            if (!it.isArchived) {
+        bchDataStore.bchMetadata?.accounts?.forEachIndexed { i, account ->
+            if (!account.isArchived) {
                 result.add(bchDataStore.bchWallet?.getAccountPubB58(i)!!)
             }
-            i++
         }
 
         return result
