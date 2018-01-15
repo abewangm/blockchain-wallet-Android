@@ -12,8 +12,7 @@ jobs:
           name: Decode API Keys and Secrets
           command: |
             echo $FIREBASE_API_JSON  | base64 --decode > app/google-services.json
-            echo $SECRETS_PROPERTIES | base64 --decode > properties/secrets.properties
-            echo "$RELEASESIGNING_PROPERTIES" > properties/releaseSigning.properties
+            echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
 
       - restore_cache:
           keys:
@@ -65,8 +64,7 @@ jobs:
           name: Decode API Keys and Secrets
           command: |
             echo $FIREBASE_API_JSON  | base64 --decode > app/google-services.json
-            echo $SECRETS_PROPERTIES | base64 --decode > properties/secrets.properties
-            echo "$RELEASESIGNING_PROPERTIES" > properties/releaseSigning.properties
+            echo $SECRETS_PROPERTIES | base64 --decode > app/secrets.properties
 
       - restore_cache:
           keys:
