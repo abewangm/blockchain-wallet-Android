@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_swipe_to_receive.*
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.balance.BalanceFragment
@@ -19,11 +18,10 @@ import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.util.extensions.*
 import javax.inject.Inject
 
+@Suppress("MemberVisibilityCanPrivate")
 class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(), SwipeToReceiveView {
 
     @Inject lateinit var swipeToReceivePresenter: SwipeToReceivePresenter
-    override val cryptoCurrency: CryptoCurrencies
-        get() = arguments!!.getSerializable(ARGUMENT_CRYPTOCURRENCY) as CryptoCurrencies
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -47,9 +45,13 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        imageview_qr.setOnClickListener { showClipboardWarning() }
-        textview_address.setOnClickListener { showClipboardWarning() }
+        listOf(imageview_qr, textview_address, textview_request_currency).forEach {
+            it.setOnClickListener { showClipboardWarning() }
+        }
 
+        imageview_left_arrow.setOnClickListener { presenter.onLeftClicked() }
+        imageview_right_arrow.setOnClickListener { presenter.onRightClicked() }
+        
         onViewReady()
     }
 
@@ -67,6 +69,10 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     override fun displayReceiveAccount(accountName: String) {
         textview_account?.text = accountName
+    }
+
+    override fun displayCoinType(requestString: String) {
+        textview_request_currency.text = requestString
     }
 
     override fun setUiState(uiState: Int) {
@@ -102,7 +108,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     }
 
     private fun showNoAddressesAvailable() {
-        layout_content.gone()
+        layout_qr.gone()
         layout_error.visible()
     }
 
@@ -125,15 +131,9 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     companion object {
 
-        private const val ARGUMENT_CRYPTOCURRENCY = "ARGUMENT_CRYPTOCURRENCY"
-
         @JvmStatic
-        fun newInstance(cryptoCurrency: CryptoCurrencies): SwipeToReceiveFragment =
-                SwipeToReceiveFragment().apply {
-                    arguments = Bundle().apply {
-                        putSerializable(ARGUMENT_CRYPTOCURRENCY, cryptoCurrency)
-                    }
-                }
+        fun newInstance(): SwipeToReceiveFragment = SwipeToReceiveFragment()
+
     }
 
 }
