@@ -10,8 +10,7 @@ apply from: '../quality/releasechecks.gradle'
 apply from: '../dependencies.gradle'
 
 buildProperties {
-    secrets.file rootProject.file('properties/secrets.properties')
-    releaseSigning.file rootProject.file('properties/releaseSigning.properties')
+    secrets.file rootProject.file('app/secrets.properties')
 }
 
 android {
@@ -31,16 +30,6 @@ android {
         buildConfigBoolean "CONTACTS_ENABLED", false
         buildConfigProperty "SHAPE_SHIFT_API_KEY", buildProperties.secrets['shapeShiftApiKey']
         manifestPlaceholders = [FABRIC_API_KEY: buildProperties.secrets['fabricApiKey'].string]
-        signingConfigs {
-            release {
-                keyAlias buildProperties.releaseSigning['keyAlias'].string
-                keyPassword buildProperties.releaseSigning['keyPassword'].string
-                storeFile file(buildProperties.releaseSigning['storeFile'].string)
-                storePassword buildProperties.releaseSigning['storePassword'].string
-                v1SigningEnabled true
-                v2SigningEnabled true
-            }
-        }
     }
     buildTypes {
         release {
@@ -52,7 +41,6 @@ android {
             multiDexEnabled false
             buildConfigBoolean "DOGFOOD", false
             buildConfigBoolean "USE_CRASHLYTICS", true
-            signingConfig signingConfigs.release
         }
         debug {
             multiDexEnabled true

@@ -12,7 +12,7 @@ ext.versions = [
 
         retrofit        : '2.3.0',
         okHttp          : '3.9.0',
-        dagger          : '2.12',
+        dagger          : '2.14.1',
         rxJava          : '2.1.8',
         rxAndroid       : '2.0.1',
         rxBinding       : '2.0.0',

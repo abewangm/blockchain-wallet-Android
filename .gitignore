@@ -28,10 +28,9 @@ captures
 google-services.json
 
 # App secrets and release key
-fastlane/.env.secret
-properties/releaseSigning.properties
-properties/secrets.properties
+fastlane/.env.default
 app/secrets.properties
+# Just in case
 *.keystore
 
 # Fabric API Key

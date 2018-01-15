@@ -11,15 +11,13 @@
 
 # This is the minimum version number required.
 # Update this, if you use features of a newer version
-fastlane_version "2.68.2"
+fastlane_version "2.75.1"
 fastlane_require 'dotenv'
 
 default_platform :android
 
 platform :android do
   before_all do
-    Dotenv.overload '.env.secret'
-
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
   end
 
@@ -41,12 +39,24 @@ platform :android do
 
       apiToken = ENV["FABRIC_API_KEY"]
       buildSecret = ENV["FABRIC_BUILD_SECRET"]
+      storeFile = ENV["STORE_FILE"]
+      storePassword = ENV["STORE_PASSWORD"]
+      keyAlias = ENV["KEY_ALIAS"]
+      keyPassword = ENV["KEY_PASSWORD"]
+
       gradle(task: "clean")
 
       gradle(
         task: 'assemble',
         build_type: 'Dogfood',
-        flavor: 'EnvProdMinApi16'
+        flavor: 'EnvProdMinApi16',
+        print_command: false,
+        properties: {
+          "android.injected.signing.store.file" => "#{storeFile}",
+          "android.injected.signing.store.password" => "#{storePassword}",
+          "android.injected.signing.key.alias" => "#{keyAlias}",
+          "android.injected.signing.key.password" => "#{keyPassword}"
+        }
       )
 
       crashlytics(
@@ -60,27 +70,72 @@ platform :android do
     end
 
 
-    desc "Generate release builds for both staging and production"
-    lane :generate_test_apks do
+    desc "Generate release build for staging"
+    private_lane :generate_staging do
+
       gradle(task: "clean")
 
-      gradle(
-        task: 'assemble',
-        build_type: 'Release',
-        flavor: 'EnvProdMinApi16'
-      )
+      apiToken = ENV["FABRIC_API_KEY"]
+      buildSecret = ENV["FABRIC_BUILD_SECRET"]
+      storeFile = ENV["STORE_FILE"]
+      storePassword = ENV["STORE_PASSWORD"]
+      keyAlias = ENV["KEY_ALIAS"]
+      keyPassword = ENV["KEY_PASSWORD"]
 
       gradle(
         task: 'assemble',
         build_type: 'Release',
-        flavor: 'EnvStagingMinApi16'
+        flavor: 'EnvStagingMinApi16',
+        print_command: false,
+        properties: {
+          "android.injected.signing.store.file" => "#{storeFile}",
+          "android.injected.signing.store.password" => "#{storePassword}",
+          "android.injected.signing.key.alias" => "#{keyAlias}",
+          "android.injected.signing.key.password" => "#{keyPassword}"
+        }
+      )
+
+    end
+
+    desc "Generate release build for production"
+    private_lane :generate_production do
+
+      gradle(task: "clean")
+
+      apiToken = ENV["FABRIC_API_KEY"]
+      buildSecret = ENV["FABRIC_BUILD_SECRET"]
+      storeFile = ENV["STORE_FILE"]
+      storePassword = ENV["STORE_PASSWORD"]
+      keyAlias = ENV["KEY_ALIAS"]
+      keyPassword = ENV["KEY_PASSWORD"]
+
+      gradle(
+        task: 'assemble',
+        build_type: 'Release',
+        flavor: 'EnvProdMinApi16',
+        print_command: false,
+        properties: {
+          "android.injected.signing.store.file" => "#{storeFile}",
+          "android.injected.signing.store.password" => "#{storePassword}",
+          "android.injected.signing.key.alias" => "#{keyAlias}",
+          "android.injected.signing.key.password" => "#{keyPassword}"
+        }
       )
 
     end
 
 
+    desc "Generate release builds for both staging and production"
+    lane :generate_apks do
+
+      generate_staging
+      generate_production
+
+    end
+
+
     desc "Upload APKs to Google Drive"
-    lane :upload_apks_to_drive do
+    lane :archive do
       # This is nasty but there's no integration to allow access to GDrive just yet
       sh 'mv ../app/build/outputs/apk/envProdMinApi16/release/*.apk ~/Google\ Drive\ File\ Stream/My\ Drive/Android\ APKs'
       sh 'mv ../app/build/outputs/apk/envStagingMinApi16/release/*.apk ~/Google\ Drive\ File\ Stream/My\ Drive/Android\ APKs'
@@ -90,16 +145,12 @@ platform :android do
 
     desc "Submit a release Alpha build to the Play Store"
     lane :alpha do
+
       gradle(task: "clean")
 
-    # Adjust the `build_type` and `flavor` params as needed to build the right APK for your setup
-    gradle(
-      task: 'assemble',
-      build_type: 'Release',
-      flavor: 'EnvProdMinApi16'
-    )
+      generate_production
 
-    # TODO Sign current commit and create release, generate changelog
+    # generate changelog
     # Commit the version bump to git, and tag the commit with the release version and push
 #    git_commit(
 #        path: File.dirname(ENV["GRADLE_PATH"])
@@ -115,8 +166,12 @@ platform :android do
 
   desc "Deploy a new version to the Google Play"
   lane :deploy do
-    gradle(task: "assembleRelease")
+    gradle(task: "clear")
+
+    generate_production
+
     supply
+
   end
 
 
