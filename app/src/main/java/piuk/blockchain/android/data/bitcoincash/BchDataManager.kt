@@ -1,9 +1,11 @@
 package piuk.blockchain.android.data.bitcoincash
 
+import info.blockchain.api.blockexplorer.BlockExplorer
 import info.blockchain.wallet.BitcoinCashWallet
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.coin.GenericMetadataWallet
 import io.reactivex.Completable
+import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
@@ -15,10 +17,11 @@ import piuk.blockchain.android.util.annotations.Mockable
 
 @Mockable
 class BchDataManager(
-        val payloadDataManager: PayloadDataManager,
-        val bchDataStore: BchDataStore,
-        val networkParameterUtils: NetworkParameterUtils,
-        val metadataUtils: MetadataUtils,
+        private val payloadDataManager: PayloadDataManager,
+        private val bchDataStore: BchDataStore,
+        private val metadataUtils: MetadataUtils,
+        private val networkParameterUtils: NetworkParameterUtils,
+        private val blockExplorer: BlockExplorer,
         rxBus: RxBus
 ) {
 
@@ -37,18 +40,18 @@ class BchDataManager(
      */
     fun initBchWallet(metadataNode: DeterministicKey, defaultLabel: String) = rxPinning.call {
         Completable.fromCallable {
-            fetchOrCreateBchWallet(metadataNode, defaultLabel)
+            fetchOrCreateBchMetadata(metadataNode, defaultLabel)
+            restoreBchWallet(bchDataStore.bchMetadata!!)
+            updateAllBalances()
             return@fromCallable Void.TYPE
 
         }.compose(RxUtil.applySchedulersToCompletable())
     }
 
-    private fun fetchOrCreateBchWallet(
+    private fun fetchOrCreateBchMetadata(
             metadataKey: DeterministicKey,
             defaultLabel: String
     ) {
-
-        restoreBchWallet()
 
         val bchMetadataNode = metadataUtils.getMetadataNode(metadataKey, BitcoinCashWallet.METADATA_TYPE_EXTERNAL)
         var walletJson = bchMetadataNode.getMetadata()
@@ -77,30 +80,128 @@ class BchDataManager(
                 isHasSeen = true
             }
         }
-
     }
 
     /**
      * Restore bitcoin cash wallet
      */
-    private fun restoreBchWallet() {
+    private fun restoreBchWallet(walletMetadata: GenericMetadataWallet) {
         if (!payloadDataManager.isDoubleEncrypted) {
             bchDataStore.bchWallet = BitcoinCashWallet.restore(
+                    blockExplorer,
                     networkParameterUtils.bitcoinCashParams,
                     BitcoinCashWallet.BITCOIN_COIN_PATH,
                     payloadDataManager.mnemonic,
                     "")
 
-            for(i in payloadDataManager.accounts) {
+            var i = 0
+            payloadDataManager.accounts.forEach {
                 bchDataStore.bchWallet?.addAccount()
+                walletMetadata.accounts[i].xpub = it.xpub
+                i++
             }
         } else {
 
-            bchDataStore.bchWallet = BitcoinCashWallet.createWatchOnly(networkParameterUtils.bitcoinCashParams)
+            bchDataStore.bchWallet = BitcoinCashWallet.createWatchOnly(
+                    blockExplorer,
+                    networkParameterUtils.bitcoinCashParams)
 
-            for(i in payloadDataManager.accounts) {
-                bchDataStore.bchWallet?.addWatchOnlyAccount(i.xpub)
+            var i = 0
+            payloadDataManager.accounts.forEach {
+                bchDataStore.bchWallet?.addWatchOnlyAccount(it.xpub)
+                walletMetadata.accounts[i].xpub = it.xpub
+                i++
             }
         }
+    }
+
+    fun getActiveXpubs(): List<String> {
+
+        val result = mutableListOf<String>()
+
+        var i = 0
+
+        bchDataStore.bchMetadata?.accounts?.forEach {
+            if (!it.isArchived) {
+                result.add(bchDataStore.bchWallet?.getAccountPubB58(i)!!)
+            }
+            i++
+        }
+
+        return result
+    }
+
+    fun updateAllBalances() = bchDataStore.bchWallet?.updateAllBalances(getActiveXpubs())
+
+    fun getAddressBalance(address: String) = bchDataStore.bchWallet?.getAddressBalance(address)
+
+    fun getWalletBalance() = bchDataStore.bchWallet?.getWalletBalance()
+
+    fun getAddressTransactions(address: String, limit: Int, offset: Int) =
+            bchDataStore.bchWallet?.getTransactions(getActiveXpubs(), address, limit, offset)
+
+    fun getWalletTransactions(limit: Int, offset: Int) =
+            bchDataStore.bchWallet?.getTransactions(getActiveXpubs(), null, limit, offset)
+
+    /**
+     * Returns all non-archived accounts
+     * @return Generic account data that contains label and xpub/address
+     */
+    fun getActiveAccounts(): MutableList<GenericMetadataAccount> {
+
+        val active = mutableListOf<GenericMetadataAccount>()
+
+        bchDataStore.bchMetadata?.accounts?.forEach {
+            if (!it.isArchived) {
+                active.add(it)
+            }
+        }
+
+        return active
+    }
+
+    fun getNextReceiveCashAddress(accountIndex: Int) =
+            Observable.fromCallable {
+                bchDataStore.bchWallet?.getNextReceiveCashAddress(accountIndex)
+            }
+
+    fun getNextChangeCashAddress(accountIndex: Int) =
+            Observable.fromCallable {
+                bchDataStore.bchWallet?.getNextChangeCashAddress(accountIndex)
+            }
+
+    fun getNextChangeCashAddress(accountIndex: Int, addressIndex: Int) =
+            Observable.fromCallable {
+                bchDataStore.bchWallet?.getReceiveAddressAtPositionBch(accountIndex, addressIndex)
+            }
+
+    fun incrementNextReceiveAddressBch(xpub: String) =
+            Completable.fromCallable {
+                bchDataStore.bchWallet?.incrementNextReceiveAddressBch(xpub)
+            }
+
+    fun incrementNextChangeAddressBch(xpub: String) =
+            Completable.fromCallable {
+                bchDataStore.bchWallet?.incrementNextChangeAddressBch(xpub)
+            }
+
+    fun isOwnAddress(address: String) =
+            bchDataStore.bchWallet?.isOwnAddress(address)
+
+    /**
+     * Converts any Bitcoin Cash address to a label.
+     *
+     * @param address Accepts account receive or change chain address, as well as legacy address.
+     * @return Account or legacy address label
+     */
+    fun getLabelFromBchAddress(address: String): String? {
+        val xpub = bchDataStore.bchWallet?.getXpubFromAddress(address)
+
+        bchDataStore.bchMetadata?.accounts?.forEach {
+            if (it.xpub == xpub) {
+                return it.label
+            }
+        }
+        return null
     }
 }
