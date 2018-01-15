@@ -65,6 +65,8 @@ platform :android do
         notes: "#{notes}"
       )
 
+      slack(message: "Dogfood build uploaded to Crashlytics Beta")
+
       UI.success "Successfully uploaded beta build to Crashlytics"
 
     end

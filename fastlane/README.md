@@ -33,9 +33,9 @@ Submit a Dogfood Beta build to Crashlytics Beta
 fastlane android generate_apks
 ```
 Generate release builds for both staging and production
-### android upload_apks
+### android archive
 ```
-fastlane android upload_apks
+fastlane android archive
 ```
 Upload APKs to Google Drive
 ### android alpha
