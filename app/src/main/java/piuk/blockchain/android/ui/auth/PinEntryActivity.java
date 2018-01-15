@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.MotionEvent;
 import android.view.Window;
 
@@ -23,7 +24,8 @@ import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
 
 public class PinEntryActivity extends BaseAuthActivity implements
-        PinEntryFragment.OnPinEntryFragmentInteractionListener {
+        PinEntryFragment.OnPinEntryFragmentInteractionListener,
+        ViewPager.OnPageChangeListener {
 
     private static final int COOL_DOWN_MILLIS = 2 * 1000;
     @Thunk ActivityPinEntryBinding binding;
@@ -100,6 +102,21 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
             backPressed = System.currentTimeMillis();
         }
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        // No-op
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        pinEntryFragment.clearPinBoxes();
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+        // No-op
     }
 
     private void finishWithResultCanceled() {

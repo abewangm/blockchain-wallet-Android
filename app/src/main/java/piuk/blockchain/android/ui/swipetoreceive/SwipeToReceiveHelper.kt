@@ -165,7 +165,10 @@ class SwipeToReceiveHelper(
     /**
      * Returns the Bitcoin Cash account name associated with the receive addresses.
      */
-    fun getBitcoinCashAccountName(): String = prefsUtil.getValue(KEY_SWIPE_RECEIVE_BCH_ACCOUNT_NAME, "")
+    fun getBitcoinCashAccountName(): String = prefsUtil.getValue(
+            KEY_SWIPE_RECEIVE_BCH_ACCOUNT_NAME,
+            stringUtils.getString(R.string.bch_default_account_label)
+    )
 
     /**
      * Returns the default account name for new Ethereum accounts.

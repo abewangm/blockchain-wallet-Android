@@ -23,25 +23,43 @@ inline fun onItemSelectedListener(
 
 }
 
-/**
- * Allow us to use a functional interface in place of implementing members that we might not need to.
- */
-inline fun onPageChangeListener(
-        crossinline function: (position: Int, positionOffset: Float) -> Unit
-): ViewPager.OnPageChangeListener = object : ViewPager.OnPageChangeListener {
+inline fun ViewPager.setOnPageChangeListener(func: OnPageChangeListener.() -> Unit) {
+    val listener = OnPageChangeListener()
+    listener.func()
+    addOnPageChangeListener(listener)
+}
+
+@Suppress("unused")
+class OnPageChangeListener : ViewPager.OnPageChangeListener {
+
+    private var onPageScrollStateChanged: ((state: Int) -> Unit)? = null
+    private var onPageScrolled: ((position: Int, positionOffset: Float) -> Unit)? = null
+    private var onPageSelected: ((position: Int) -> Unit)? = null
+
+    override fun onPageScrollStateChanged(state: Int) {
+        onPageScrollStateChanged?.invoke(state)
+    }
 
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-        // Pass the object position and offset to the supplied function
-        function.invoke(position, positionOffset)
+        onPageScrolled?.invoke(position, positionOffset)
     }
 
     override fun onPageSelected(position: Int) {
-        // No-op
+        onPageSelected?.invoke(position)
     }
 
-    override fun onPageScrollStateChanged(state: Int) {
-        // No-op
+    fun onPageScrollStateChanged(func: (state: Int) -> Unit) {
+        onPageScrollStateChanged = func
     }
+
+    fun onPageScrolled(func: (position: Int, positionOffset: Float) -> Unit) {
+        onPageScrolled = func
+    }
+
+    fun onPageSelected(func: (position: Int) -> Unit) {
+        onPageSelected = func
+    }
+
 }
 
 /**

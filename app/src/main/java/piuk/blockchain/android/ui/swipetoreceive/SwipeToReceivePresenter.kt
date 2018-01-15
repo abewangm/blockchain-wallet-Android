@@ -17,15 +17,15 @@ class SwipeToReceivePresenter @Inject constructor(
         private val stringUtils: StringUtils
 ) : BasePresenter<SwipeToReceiveView>() {
 
+    var currencyPosition by Delegates.observable(0) { _, _, new ->
+        onCurrencySelected(currencyList[new])
+    }
+
     private val currencyList = listOf(
             CryptoCurrencies.BTC,
             CryptoCurrencies.ETHER,
             CryptoCurrencies.BCH
     )
-
-    private var currencyPosition by Delegates.observable(0) { _, _, new ->
-        onCurrencySelected(currencyList[new])
-    }
 
     private val bitcoinAddress: Single<String>
         get() = swipeToReceiveHelper.getNextAvailableBitcoinAddressSingle()
@@ -64,12 +64,12 @@ class SwipeToReceivePresenter @Inject constructor(
             }
         }
 
+        view.displayReceiveAccount(accountName)
+
         // Check we actually have addresses stored
         if (!hasAddresses) {
             view.setUiState(UiState.EMPTY)
         } else {
-            view.displayReceiveAccount(accountName)
-
             single.doOnSuccess { require(it.isNotEmpty()) { "Returned address is empty, no more addresses available" } }
                     .doOnSuccess { view.displayReceiveAddress(it) }
                     .flatMapObservable { dataManager.generateQrCode(it, DIMENSION_QR_CODE) }
@@ -81,14 +81,6 @@ class SwipeToReceivePresenter @Inject constructor(
                             },
                             { _ -> view.setUiState(UiState.FAILURE) })
         }
-    }
-
-    internal fun onLeftClicked() {
-        if (currencyPosition > 0) currencyPosition--
-    }
-
-    internal fun onRightClicked() {
-        if (currencyPosition < 2) currencyPosition++
     }
 
     companion object {
