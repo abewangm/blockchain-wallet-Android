@@ -3,10 +3,13 @@ package piuk.blockchain.android.ui.swipetoreceive
 import info.blockchain.api.data.Balance
 import io.reactivex.Observable
 import io.reactivex.Single
+import org.bitcoinj.core.Address
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
@@ -19,7 +22,9 @@ class SwipeToReceiveHelper(
         private val payloadDataManager: PayloadDataManager,
         private val prefsUtil: PrefsUtil,
         private val ethDataManager: EthDataManager,
-        private val stringUtils: StringUtils
+        private val bchDataManager: BchDataManager,
+        private val stringUtils: StringUtils,
+        private val networkParameterUtils: NetworkParameterUtils
 ) {
 
     /**
@@ -33,7 +38,7 @@ class SwipeToReceiveHelper(
 
             val defaultAccount = payloadDataManager.defaultAccount
             val receiveAccountName = defaultAccount.label
-            storeAccountName(receiveAccountName)
+            storeBtcAccountName(receiveAccountName)
 
             val stringBuilder = StringBuilder()
 
@@ -50,23 +55,30 @@ class SwipeToReceiveHelper(
         }
     }
 
+    /**
+     * Derives 5 addresses from the current point on the receive chain. Stores them alongside the
+     * account name in SharedPrefs. Only stores addresses if enabled in SharedPrefs. This should be
+     * called on a Computation thread as it can take up to 2 seconds on a mid-range device.
+     */
     fun updateAndStoreBitcoinCashAddresses() {
         if (getIfSwipeEnabled()) {
             val numOfAddresses = 5
 
-            val defaultAccount = payloadDataManager.defaultAccount
+            val defaultAccount = bchDataManager.getDefaultGenericMetadataAccount()!!
+            val defaultAccountPosition = bchDataManager.getDefaultAccountPosition()
             val receiveAccountName = defaultAccount.label
-            storeAccountName(receiveAccountName)
+            storeBchAccountName(receiveAccountName)
 
             val stringBuilder = StringBuilder()
 
             for (i in 0 until numOfAddresses) {
-                val receiveAddress = payloadDataManager.getReceiveAddressAtPosition(defaultAccount, i) ?:
+                val receiveAddress = bchDataManager.getReceiveAddressAtPosition(defaultAccountPosition, i) ?:
                         // Likely not initialized yet
                         break
 
-                stringBuilder.append(receiveAddress)
-                        .append(",")
+                val base58Address =
+                        Address.fromBech32(networkParameterUtils.bitcoinCashParams, receiveAddress).toBase58()
+                stringBuilder.append(base58Address).append(",")
             }
 
             storeBitcoinCashAddresses(stringBuilder.toString())
@@ -115,7 +127,8 @@ class SwipeToReceiveHelper(
                     for ((address, value) in map) {
                         val balance = value.finalBalance
                         if (balance.compareTo(BigInteger.ZERO) == 0) {
-                            return@map address
+                            return@map Address.fromBase58(networkParameterUtils.bitcoinCashParams, address)
+                                    .toBech32()
                         }
                     }
                     return@map ""
@@ -177,15 +190,13 @@ class SwipeToReceiveHelper(
 
     private fun getIfSwipeEnabled(): Boolean = prefsUtil.getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true)
 
-    private fun getBalanceOfAddresses(addresses: List<String>): Observable<HashMap<String, Balance>> {
-        return payloadDataManager.getBalanceOfAddresses(addresses)
-                .compose(RxUtil.applySchedulersToObservable())
-    }
+    private fun getBalanceOfAddresses(addresses: List<String>): Observable<HashMap<String, Balance>> =
+            payloadDataManager.getBalanceOfAddresses(addresses)
+                    .compose(RxUtil.applySchedulersToObservable())
 
-    private fun getBalanceOfBchAddresses(addresses: List<String>): Observable<HashMap<String, Balance>> {
-        return payloadDataManager.getBalanceOfAddresses(addresses)
-                .compose(RxUtil.applySchedulersToObservable())
-    }
+    private fun getBalanceOfBchAddresses(addresses: List<String>): Observable<HashMap<String, Balance>> =
+            payloadDataManager.getBalanceOfBchAddresses(addresses)
+                    .compose(RxUtil.applySchedulersToObservable())
 
     private fun storeBitcoinAddresses(addresses: String) {
         prefsUtil.setValue(KEY_SWIPE_RECEIVE_ADDRESSES, addresses)
@@ -199,8 +210,12 @@ class SwipeToReceiveHelper(
         prefsUtil.setValue(KEY_SWIPE_RECEIVE_ETH_ADDRESS, address)
     }
 
-    private fun storeAccountName(accountName: String) {
+    private fun storeBtcAccountName(accountName: String) {
         prefsUtil.setValue(KEY_SWIPE_RECEIVE_ACCOUNT_NAME, accountName)
+    }
+
+    private fun storeBchAccountName(accountName: String) {
+        prefsUtil.setValue(KEY_SWIPE_RECEIVE_BCH_ACCOUNT_NAME, accountName)
     }
 
     companion object {

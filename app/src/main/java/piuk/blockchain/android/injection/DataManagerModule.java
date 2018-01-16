@@ -3,7 +3,6 @@ package piuk.blockchain.android.injection;
 import android.content.Context;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthAccountApi;
@@ -163,8 +162,15 @@ public class DataManagerModule {
     protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
                                                                PrefsUtil prefsUtil,
                                                                EthDataManager ethDataManager,
-                                                               StringUtils stringUtils) {
-        return new SwipeToReceiveHelper(payloadDataManager, prefsUtil, ethDataManager, stringUtils);
+                                                               BchDataManager bchDataManager,
+                                                               StringUtils stringUtils,
+                                                               NetworkParameterUtils networkParameterUtils) {
+        return new SwipeToReceiveHelper(payloadDataManager,
+                prefsUtil,
+                ethDataManager,
+                bchDataManager,
+                stringUtils,
+                networkParameterUtils);
     }
 
     @Provides

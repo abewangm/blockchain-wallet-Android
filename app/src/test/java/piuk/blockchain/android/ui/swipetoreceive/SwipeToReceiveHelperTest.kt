@@ -18,6 +18,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import piuk.blockchain.android.R
 import piuk.blockchain.android.RxTest
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.Companion.KEY_SWIPE_RECEIVE_ACCOUNT_NAME
@@ -35,13 +36,20 @@ class SwipeToReceiveHelperTest : RxTest() {
     private val prefsUtil: PrefsUtil = mock()
     private val stringUtils: StringUtils = mock()
     private val ethDataManager: EthDataManager = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+    private val bchDataManager: BchDataManager = mock()
 
     @Before
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
 
-        subject = SwipeToReceiveHelper(payloadDataManager, prefsUtil, ethDataManager, stringUtils)
+        subject = SwipeToReceiveHelper(
+                payloadDataManager,
+                prefsUtil,
+                ethDataManager,
+                bchDataManager,
+                stringUtils
+        )
     }
 
     @Test

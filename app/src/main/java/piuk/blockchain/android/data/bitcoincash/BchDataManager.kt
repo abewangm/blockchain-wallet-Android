@@ -4,6 +4,7 @@ import info.blockchain.api.blockexplorer.BlockExplorer
 import info.blockchain.wallet.BitcoinCashWallet
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.coin.GenericMetadataWallet
+import info.blockchain.wallet.crypto.DeterministicAccount
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
@@ -53,7 +54,7 @@ class BchDataManager(
     ) {
 
         val bchMetadataNode = metadataUtils.getMetadataNode(metadataKey, BitcoinCashWallet.METADATA_TYPE_EXTERNAL)
-        var walletJson = bchMetadataNode.getMetadata()
+        val walletJson = bchMetadataNode.metadata
 
         if (walletJson != null) {
             //Fetch wallet
@@ -143,7 +144,7 @@ class BchDataManager(
      * Returns all non-archived accounts
      * @return Generic account data that contains label and xpub/address
      */
-    fun getActiveAccounts(): MutableList<GenericMetadataAccount> {
+    fun getActiveAccounts(): List<GenericMetadataAccount> {
 
         val active = mutableListOf<GenericMetadataAccount>()
 
@@ -155,6 +156,17 @@ class BchDataManager(
 
         return active
     }
+
+    fun getDefaultAccountPosition(): Int = bchDataStore.bchMetadata?.defaultAcccountIdx ?: 0
+
+    fun getDefaultDeterministicAccount(): DeterministicAccount? =
+            bchDataStore.bchWallet?.accounts?.get(getDefaultAccountPosition())
+
+    fun getDefaultGenericMetadataAccount(): GenericMetadataAccount? =
+            bchDataStore.bchMetadata?.accounts?.get(getDefaultAccountPosition())
+
+    fun getReceiveAddressAtPosition(accountIndex: Int, addressIndex: Int): String? =
+            bchDataStore.bchWallet?.getReceiveAddressAtPositionBch(accountIndex, addressIndex)
 
     fun getNextReceiveCashAddress(accountIndex: Int) =
             Observable.fromCallable {
@@ -168,7 +180,7 @@ class BchDataManager(
 
     fun getNextChangeCashAddress(accountIndex: Int, addressIndex: Int) =
             Observable.fromCallable {
-                bchDataStore.bchWallet?.getReceiveAddressAtPositionBch(accountIndex, addressIndex)
+                bchDataStore.bchWallet?.getChangeCashAddressAt(accountIndex, addressIndex)
             }
 
     fun incrementNextReceiveAddressBch(xpub: String) =
@@ -193,11 +205,6 @@ class BchDataManager(
     fun getLabelFromBchAddress(address: String): String? {
         val xpub = bchDataStore.bchWallet?.getXpubFromAddress(address)
 
-        bchDataStore.bchMetadata?.accounts?.forEach {
-            if (it.xpub == xpub) {
-                return it.label
-            }
-        }
-        return null
+        return bchDataStore.bchMetadata?.accounts?.find { it.xpub == xpub }?.label
     }
 }
