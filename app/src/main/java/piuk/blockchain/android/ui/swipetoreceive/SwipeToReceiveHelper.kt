@@ -3,7 +3,7 @@ package piuk.blockchain.android.ui.swipetoreceive
 import info.blockchain.api.data.Balance
 import io.reactivex.Observable
 import io.reactivex.Single
-import org.bitcoinj.core.Address
+import org.bitcoinj.core.Bech32
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
@@ -15,6 +15,7 @@ import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import java.math.BigInteger
+import java.nio.charset.Charset
 import java.util.*
 
 @Mockable
@@ -76,8 +77,7 @@ class SwipeToReceiveHelper(
                         // Likely not initialized yet
                         break
 
-                val base58Address =
-                        Address.fromBech32(networkParameterUtils.bitcoinCashParams, receiveAddress).toBase58()
+                val base58Address = Bech32.decode(networkParameterUtils.bitcoinCashParams, receiveAddress)
                 stringBuilder.append(base58Address).append(",")
             }
 
@@ -127,8 +127,10 @@ class SwipeToReceiveHelper(
                     for ((address, value) in map) {
                         val balance = value.finalBalance
                         if (balance.compareTo(BigInteger.ZERO) == 0) {
-                            return@map Address.fromBase58(networkParameterUtils.bitcoinCashParams, address)
-                                    .toBech32()
+                            return@map Bech32.encode(
+                                    networkParameterUtils.bitcoinCashParams,
+                                    address.toByteArray(Charset.forName("utf8"))
+                            )
                         }
                     }
                     return@map ""

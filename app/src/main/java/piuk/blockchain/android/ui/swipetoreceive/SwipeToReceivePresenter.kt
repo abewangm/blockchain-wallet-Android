@@ -17,7 +17,8 @@ class SwipeToReceivePresenter @Inject constructor(
         private val stringUtils: StringUtils
 ) : BasePresenter<SwipeToReceiveView>() {
 
-    var currencyPosition by Delegates.observable(0) { _, _, new ->
+    internal var currencyPosition by Delegates.observable(0) { _, _, new ->
+        check(new in 0 until currencyList.size) { "Invalid currency position" }
         onCurrencySelected(currencyList[new])
     }
 
