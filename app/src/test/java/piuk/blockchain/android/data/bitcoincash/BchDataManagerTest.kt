@@ -1,44 +1,57 @@
 package piuk.blockchain.android.data.bitcoincash
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
+import com.nhaarman.mockito_kotlin.whenever
+import info.blockchain.api.blockexplorer.BlockExplorer
+import info.blockchain.wallet.BitcoinCashWallet
+import info.blockchain.wallet.coin.GenericMetadataWallet
 import info.blockchain.wallet.metadata.Metadata
-import org.amshove.kluent.*
-import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.payload.data.Account
+import io.reactivex.Completable
+import org.amshove.kluent.any
+import org.amshove.kluent.mock
+import org.amshove.kluent.that
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.params.BitcoinCashMainNetParams
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import org.robolectric.annotation.Config
+import piuk.blockchain.android.BlockchainTestApplication
+import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.util.MetadataUtils
 import piuk.blockchain.android.util.NetworkParameterUtils
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
+@Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @Suppress("IllegalIdentifier")
 class BchDataManagerTest : RxTest(){
 
     private lateinit var subject: BchDataManager
+
     private val payloadDataManager: PayloadDataManager = mock()
-    private lateinit var bchDataStore: BchDataStore
+    private var bchDataStore: BchDataStore = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
     private val networkParameterUtils: NetworkParameterUtils = mock()
     private val metadatUtils: MetadataUtils = mock()
+    private val blockExplorer: BlockExplorer = mock()
     private val rxBus = RxBus()
 
     @Before
     override fun setUp() {
         super.setUp()
 
-        bchDataStore = BchDataStore()
+        whenever(networkParameterUtils.bitcoinCashParams).thenReturn(BitcoinCashMainNetParams.get())
 
         subject = BchDataManager(
                 payloadDataManager,
                 bchDataStore,
-                networkParameterUtils,
                 metadatUtils,
+                networkParameterUtils,
+                blockExplorer,
                 rxBus
         )
     }
@@ -51,8 +64,8 @@ class BchDataManagerTest : RxTest(){
         // Act
         subject.clearBchAccountDetails()
         // Assert
-        assertNull(bchDataStore.bchMetadata)
-        assertNull(bchDataStore.bchWallet)
+        verify(bchDataStore).clearBchData()
+        verifyNoMoreInteractions(bchDataStore)
     }
 
     @Test
@@ -72,17 +85,15 @@ class BchDataManagerTest : RxTest(){
         whenever(metadata.getMetadata()).thenReturn(null)//json is null = no metadata entry
 
         // create 1 account
-        val accounts: List<Account> = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        val account: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        val accounts = mutableListOf<Account>(account)
         whenever(payloadDataManager.accounts).thenReturn(accounts)
-        whenever(accounts.size).thenReturn(1)
 
         // Act
         val testObserver = subject.initBchWallet(key, "Bitcoin cash account").test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        assertNotNull(bchDataStore.bchWallet)
-        assertNotNull(bchDataStore.bchMetadata)
     }
 
     @Test
@@ -109,8 +120,6 @@ class BchDataManagerTest : RxTest(){
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        assertNotNull(bchDataStore.bchWallet)
-        assertNotNull(bchDataStore.bchMetadata)
     }
 
     @Test
@@ -129,17 +138,16 @@ class BchDataManagerTest : RxTest(){
         whenever(metadata.getMetadata()).thenReturn(null)//json is null = no metadata entry
 
         // 1 account
-        val accounts: List<Account> = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        val account: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        val accounts = mutableListOf<Account>(account)
         whenever(payloadDataManager.accounts).thenReturn(accounts)
-        whenever(accounts.size).thenReturn(1)
+        whenever(account.xpub).thenReturn("xpub6BpNXEHYiYidePgYPQGEFSL46N5phqiddhdkfw5yibtcjr2o9DtMMEaLntH2wPLtFoUN8eW7MZfRA9VfVQju368cnisuPzdBvkEYVrFZ2s5")
 
         // Act
         val testObserver = subject.initBchWallet(key, "Bitcoin cash account").test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        assertNotNull(bchDataStore.bchWallet)
-        assertNotNull(bchDataStore.bchMetadata)
     }
 
     @Test
@@ -167,8 +175,6 @@ class BchDataManagerTest : RxTest(){
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        assertNotNull(bchDataStore.bchWallet)
-        assertNotNull(bchDataStore.bchMetadata)
     }
 
     fun split(words: String): List<String> {

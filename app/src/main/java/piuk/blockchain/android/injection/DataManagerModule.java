@@ -2,6 +2,8 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthAccountApi;
@@ -264,9 +266,13 @@ public class DataManagerModule {
     @PresenterScope
     protected BchDataManager provideBchDataManager(PayloadDataManager payloadDataManager,
                                                    BchDataStore bchDataStore,
-                                                   NetworkParameterUtils networkParameterUtils,
                                                    MetadataUtils metadataUtils,
+                                                   NetworkParameterUtils networkParameterUtils,
+                                                   BlockExplorer blockExplorer,
                                                    RxBus rxBus) {
-        return new BchDataManager(payloadDataManager, bchDataStore, networkParameterUtils, metadataUtils, rxBus);
+        return new BchDataManager(payloadDataManager, bchDataStore,
+                metadataUtils, networkParameterUtils,
+                blockExplorer,
+                rxBus);
     }
 }
