@@ -4,6 +4,7 @@ import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.util.FormatsUtil
 import io.reactivex.Observable
 import io.reactivex.Single
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.stores.TransactionListStore
@@ -18,6 +19,7 @@ import java.util.*
 class TransactionListDataManager(
         private val payloadManager: PayloadManager,
         private val ethDataManager: EthDataManager,
+        private val bchDataManager: BchDataManager,
         private val transactionListStore: TransactionListStore
 ) {
 
@@ -87,9 +89,10 @@ class TransactionListDataManager(
      */
     fun getBchBalance(itemAccount: ItemAccount): Long {
         return when (itemAccount.type) {
-            ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> payloadManager.walletBalanceBch.toLong()
-            ItemAccount.TYPE.ALL_LEGACY -> payloadManager.importedAddressesBalanceBch.toLong()
-            ItemAccount.TYPE.SINGLE_ACCOUNT -> payloadManager.getAddressBalanceBch(itemAccount.address).toLong()
+            ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY ->
+                (bchDataManager.getWalletBalance() + bchDataManager.getImportedAddressBalance()).toLong()
+            ItemAccount.TYPE.ALL_LEGACY -> bchDataManager.getImportedAddressBalance().toLong()
+            ItemAccount.TYPE.SINGLE_ACCOUNT -> bchDataManager.getAddressBalance(itemAccount.address!!).toLong()
             else -> throw IllegalArgumentException("You can't get the BCH balance of an ETH account")
         }
     }

@@ -5,6 +5,7 @@ import info.blockchain.wallet.BitcoinCashWallet
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.coin.GenericMetadataWallet
 import info.blockchain.wallet.crypto.DeterministicAccount
+import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
@@ -15,6 +16,7 @@ import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.util.MetadataUtils
 import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.annotations.Mockable
+import java.math.BigInteger
 
 @Mockable
 class BchDataManager(
@@ -53,7 +55,8 @@ class BchDataManager(
             defaultLabel: String
     ) {
 
-        val bchMetadataNode = metadataUtils.getMetadataNode(metadataKey, BitcoinCashWallet.METADATA_TYPE_EXTERNAL)
+        val bchMetadataNode =
+                metadataUtils.getMetadataNode(metadataKey, BitcoinCashWallet.METADATA_TYPE_EXTERNAL)
         val walletJson = bchMetadataNode.metadata
 
         if (walletJson != null) {
@@ -92,7 +95,8 @@ class BchDataManager(
                     networkParameterUtils.bitcoinCashParams,
                     BitcoinCashWallet.BITCOIN_COIN_PATH,
                     payloadDataManager.mnemonic,
-                    "")
+                    ""
+            )
 
             var i = 0
             payloadDataManager.accounts.forEach {
@@ -104,7 +108,8 @@ class BchDataManager(
 
             bchDataStore.bchWallet = BitcoinCashWallet.createWatchOnly(
                     blockExplorer,
-                    networkParameterUtils.bitcoinCashParams)
+                    networkParameterUtils.bitcoinCashParams
+            )
 
             var i = 0
             payloadDataManager.accounts.forEach {
@@ -128,11 +133,23 @@ class BchDataManager(
         return result
     }
 
-    fun updateAllBalances() = bchDataStore.bchWallet?.updateAllBalances(getActiveXpubs())
+    fun updateAllBalances(): Completable {
+        val legacyAddresses = payloadDataManager.legacyAddresses
+                .filterNot { it.isWatchOnly || it.tag == LegacyAddress.ARCHIVED_ADDRESS }
+                .map { it.address }
+        val all = getActiveXpubs().plus(legacyAddresses)
+        return rxPinning.call { bchDataStore.bchWallet!!.updateAllBalances(legacyAddresses, all) }
+                .compose(RxUtil.applySchedulersToCompletable())
+    }
 
-    fun getAddressBalance(address: String) = bchDataStore.bchWallet?.getAddressBalance(address)
+    fun getAddressBalance(address: String): BigInteger =
+            bchDataStore.bchWallet?.getAddressBalance(address) ?: BigInteger.ZERO
 
-    fun getWalletBalance() = bchDataStore.bchWallet?.getWalletBalance()
+    fun getWalletBalance(): BigInteger =
+            bchDataStore.bchWallet?.getWalletBalance() ?: BigInteger.ZERO
+
+    fun getImportedAddressBalance(): BigInteger =
+            bchDataStore.bchWallet?.getImportedAddressBalance() ?: BigInteger.ZERO
 
     fun getAddressTransactions(address: String, limit: Int, offset: Int) =
             bchDataStore.bchWallet?.getTransactions(getActiveXpubs(), address, limit, offset)

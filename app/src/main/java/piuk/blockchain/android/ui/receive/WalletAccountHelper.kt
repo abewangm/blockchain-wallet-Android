@@ -152,8 +152,7 @@ class WalletAccountHelper(
         // Skip archived address
         .filterNot { it.tag == LegacyAddress.ARCHIVED_ADDRESS }
         .filterNot {
-            bchDataManager.getAddressBalance(it.address) ?: BigInteger.ZERO
-                .compareTo(BigInteger.ZERO) == 0
+            bchDataManager.getAddressBalance(it.address).compareTo(BigInteger.ZERO) == 0
         }
         .map {
             // If address has no label, we'll display address
@@ -216,7 +215,7 @@ class WalletAccountHelper(
      * Returns the balance of a [GenericMetadataAccount] in Satoshis (BCH)
      */
     private fun getAccountAbsoluteBalance(account: GenericMetadataAccount) =
-        bchDataManager.getAddressBalance(account.xpub)?.toLong() ?: 0L
+            bchDataManager.getAddressBalance(account.xpub).toLong()
 
     /**
      * Returns the balance of an [Account], formatted for display.
@@ -268,7 +267,7 @@ class WalletAccountHelper(
      * Returns the balance of a [LegacyAddress] in Satoshis
      */
     private fun getBchAddressAbsoluteBalance(legacyAddress: LegacyAddress) =
-        bchDataManager.getAddressBalance(legacyAddress.address)?.toLong() ?: 0L
+            bchDataManager.getAddressBalance(legacyAddress.address).toLong()
 
     /**
      * Returns the balance of a [LegacyAddress], formatted for display

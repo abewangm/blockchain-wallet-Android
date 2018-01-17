@@ -113,10 +113,12 @@ public class DataManagerModule {
     @PresenterScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            EthDataManager ethDataManager,
+                                                                           BchDataManager bchDataManager,
                                                                            TransactionListStore transactionListStore) {
         return new TransactionListDataManager(
                 payloadManager,
                 ethDataManager,
+                bchDataManager,
                 transactionListStore);
     }
 
