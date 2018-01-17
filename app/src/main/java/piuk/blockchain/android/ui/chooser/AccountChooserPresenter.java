@@ -161,6 +161,18 @@ public class AccountChooserPresenter extends BasePresenter<AccountChooserView> {
         return Observable.just(result);
     }
 
+    private Observable<List<ItemAccount>> getBchAccountList() {
+        ArrayList<ItemAccount> result = new ArrayList<>();
+        result.addAll(walletAccountHelper.getHdBchAccounts());
+        return Observable.just(result);
+    }
+
+    private Observable<List<ItemAccount>> getBchImportedList() {
+        ArrayList<ItemAccount> result = new ArrayList<>();
+        result.addAll(walletAccountHelper.getLegacyBchAddresses());
+        return Observable.just(result);
+    }
+
     @SuppressWarnings("ConstantConditions")
     private Observable<ItemAccount> getEthAccount() {
         return Observable.just(walletAccountHelper.getEthAccount().get(0));

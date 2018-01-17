@@ -101,6 +101,15 @@ class MonetaryUtil(unit: Int) {
     fun getBtcUnit(unit: Int) = BTC_UNITS[unit]
 
     /**
+     * Returns a specific BCH Unit [String] for a given BCH unit type
+     *
+     * @param unit The chosen BCH unit
+     * @return A BCH format string
+     * @see [BCH_UNITS]
+     */
+    fun getBchUnit(unit: Int) = BCH_UNITS[unit]
+
+    /**
      * Returns a specific ETHER Unit [String] for a given ETH unit type
      *
      * @param unit The chosen ETH unit
