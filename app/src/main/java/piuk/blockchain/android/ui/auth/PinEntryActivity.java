@@ -9,13 +9,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.Window;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
-import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.databinding.ActivityPinEntryBinding;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
@@ -58,46 +55,20 @@ public class PinEntryActivity extends BaseAuthActivity implements
             fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,
-                    new Fragment(),
                     new Fragment());
 
             lockViewpager();
         } else {
-            SwipeToReceiveFragment bitcoinFragment =
-                    SwipeToReceiveFragment.newInstance(CryptoCurrencies.BTC);
-
-            SwipeToReceiveFragment ethFragment =
-                    SwipeToReceiveFragment.newInstance(CryptoCurrencies.ETHER);
-
             fragmentPagerAdapter = new SwipeToReceiveFragmentPagerAdapter(
                     getSupportFragmentManager(),
                     pinEntryFragment,
-                    bitcoinFragment,
-                    ethFragment);
+                    SwipeToReceiveFragment.newInstance());
 
             startWebSocketService();
         }
 
-        binding.viewpager.setOffscreenPageLimit(3);
+        binding.viewpager.setOffscreenPageLimit(2);
         binding.viewpager.setAdapter(fragmentPagerAdapter);
-        binding.viewpager.addOnPageChangeListener(this);
-        binding.indicator.setViewPager(binding.viewpager);
-
-        EnvironmentSettings environmentSettings = new EnvironmentSettings();
-
-        if (environmentSettings.shouldShowDebugMenu()) {
-            ToastCustom.makeText(
-                    this,
-                    "Current environment: "
-                            + environmentSettings.getEnvironment().getName(),
-                    ToastCustom.LENGTH_SHORT,
-                    ToastCustom.TYPE_GENERAL);
-
-            binding.buttonSettings.setVisibility(View.VISIBLE);
-            binding.buttonSettings.setOnClickListener(view ->
-                    new EnvironmentSwitcher(this, new PrefsUtil(this))
-                            .showDebugMenu());
-        }
     }
 
     private boolean shouldHideSwipeToReceive() {
@@ -133,6 +104,21 @@ public class PinEntryActivity extends BaseAuthActivity implements
         }
     }
 
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        // No-op
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        pinEntryFragment.clearPinBoxes();
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+        // No-op
+    }
+
     private void finishWithResultCanceled() {
         Intent intent = new Intent();
         setResult(RESULT_CANCELED, intent);
@@ -147,26 +133,6 @@ public class PinEntryActivity extends BaseAuthActivity implements
     public boolean dispatchTouchEvent(MotionEvent event) {
         // Test for screen overlays before user enters PIN
         return appUtil.detectObscuredWindow(this, event) || super.dispatchTouchEvent(event);
-    }
-
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        if (position > 0) {
-            binding.indicator.setAlpha(1f);
-            binding.indicator.setVisibility(View.VISIBLE);
-        } else {
-            binding.indicator.setAlpha(positionOffset);
-        }
-    }
-
-    @Override
-    public void onPageSelected(int position) {
-        pinEntryFragment.resetPinEntry();
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-        // No-op
     }
 
     @Override
@@ -189,19 +155,16 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
     private static class SwipeToReceiveFragmentPagerAdapter extends FragmentPagerAdapter {
 
-        private static final int NUM_ITEMS = 3;
+        private static final int NUM_ITEMS = 2;
         private final PinEntryFragment pinEntryFragment;
-        private final Fragment bitcoinFragment;
-        private final Fragment ethFragment;
+        private final Fragment swipeToReceiveFragment;
 
         SwipeToReceiveFragmentPagerAdapter(FragmentManager fm,
                                            PinEntryFragment pinEntryFragment,
-                                           Fragment bitcoinFragment,
-                                           Fragment ethFragment) {
+                                           Fragment swipeToReceiveFragment) {
             super(fm);
             this.pinEntryFragment = pinEntryFragment;
-            this.bitcoinFragment = bitcoinFragment;
-            this.ethFragment = ethFragment;
+            this.swipeToReceiveFragment = swipeToReceiveFragment;
         }
 
         @Override
@@ -210,9 +173,7 @@ public class PinEntryActivity extends BaseAuthActivity implements
                 case 0:
                     return pinEntryFragment;
                 case 1:
-                    return bitcoinFragment;
-                case 2:
-                    return ethFragment;
+                    return swipeToReceiveFragment;
                 default:
                     return null;
             }

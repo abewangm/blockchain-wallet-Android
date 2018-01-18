@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.FragmentPinEntryBinding;
 import piuk.blockchain.android.injection.Injector;
@@ -38,6 +39,7 @@ import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.util.DialogButtonCallback;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -80,7 +82,8 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_pin_entry, container, false);
 
@@ -123,6 +126,22 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
                 getPresenter().onDeleteClicked();
             }
         });
+
+        EnvironmentSettings environmentSettings = new EnvironmentSettings();
+
+        if (environmentSettings.shouldShowDebugMenu()) {
+            ToastCustom.makeText(
+                    getActivity(),
+                    "Current environment: "
+                            + environmentSettings.getEnvironment().getName(),
+                    ToastCustom.LENGTH_SHORT,
+                    ToastCustom.TYPE_GENERAL);
+
+            binding.buttonSettings.setVisibility(View.VISIBLE);
+            binding.buttonSettings.setOnClickListener(view ->
+                    new EnvironmentSwitcher(getActivity(), new PrefsUtil(getActivity()))
+                            .showDebugMenu());
+        }
 
         return binding.getRoot();
     }

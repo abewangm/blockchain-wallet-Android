@@ -568,6 +568,7 @@ class BalancePresenter @Inject constructor(
         // Defer to background thread as deriving addresses is quite processor intensive
         Completable.fromCallable {
             swipeToReceiveHelper.updateAndStoreBitcoinAddresses()
+            swipeToReceiveHelper.updateAndStoreBitcoinCashAddresses()
             Void.TYPE
         }.subscribeOn(Schedulers.computation())
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))

@@ -220,6 +220,18 @@ public class PayloadDataManager {
     }
 
     /**
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their Bitcoin Cash
+     * addresses.
+     *
+     * @param addresses A List of Bitcoin cash addresses as Strings
+     * @return A {@link LinkedHashMap}
+     */
+    public Observable<LinkedHashMap<String, Balance>> getBalanceOfBchAddresses(List<String> addresses) {
+        return rxPinning.call(() -> payloadService.getBalanceOfBchAddresses(addresses))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
      * Converts any address to a label.
      *
      * @param address Accepts account receive or change chain address, as well as legacy address.

@@ -261,6 +261,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         // Defer to background thread as deriving addresses is quite processor intensive
         Completable.fromCallable(() -> {
             swipeToReceiveHelper.updateAndStoreBitcoinAddresses();
+            swipeToReceiveHelper.updateAndStoreBitcoinCashAddresses();
             return Void.TYPE;
         }).subscribeOn(Schedulers.computation())
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))

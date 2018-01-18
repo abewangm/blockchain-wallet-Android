@@ -231,6 +231,23 @@ class PayloadDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
+    fun getBalanceOfBchAddresses() {
+        // Arrange
+        val address = "ADDRESS"
+        val hashMap: LinkedHashMap<String, Balance> = LinkedHashMap(mapOf(Pair(address, Balance())))
+        whenever(payloadService.getBalanceOfBchAddresses(listOf(address)))
+                .thenReturn(Observable.just(hashMap))
+        // Act
+        val testObserver = subject.getBalanceOfBchAddresses(listOf(address)).test()
+        // Assert
+        verify(payloadService).getBalanceOfBchAddresses(listOf(address))
+        verifyNoMoreInteractions(payloadService)
+        testObserver.assertComplete()
+        testObserver.assertValue(hashMap)
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun addressToLabel() {
         // Arrange
         val address = "ADDRESS"
