@@ -26,11 +26,11 @@ import kotlinx.android.synthetic.main.activity_new_exchange.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseMvpActivity
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
+import piuk.blockchain.android.ui.chooser.AccountMode
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.home.MainActivity
@@ -131,8 +131,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     override fun launchAccountChooserActivityTo() {
         AccountChooserActivity.startForResult(
                 this,
-                AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.SHAPE_SHIFT,
+                AccountMode.ShapeShift,
+                REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                 getString(R.string.to)
         )
     }
@@ -140,8 +140,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     override fun launchAccountChooserActivityFrom() {
         AccountChooserActivity.startForResult(
                 this,
-                AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.SHAPE_SHIFT,
+                AccountMode.ShapeShift,
+                REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
                 getString(R.string.from)
         )
     }
@@ -155,18 +155,18 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
             when (any) {
                 is Account -> {
                     when (requestCode) {
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
+                        REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
                             presenter.onFromAccountChanged(any)
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
+                        REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
                             presenter.onToAccountChanged(any)
                         else -> throw IllegalArgumentException("Unknown request code $requestCode")
                     }
                 }
                 is EthereumAccount -> {
                     when (requestCode) {
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
+                        REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
                             presenter.onFromEthSelected()
-                        AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
+                        REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
                             presenter.onToEthSelected()
                         else -> throw IllegalArgumentException("Unknown request code $requestCode")
                     }
@@ -402,6 +402,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
     companion object {
 
         private const val ROTATION = 180f
+        private const val REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND = 911
+        private const val REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND = 912
 
         @JvmStatic
         fun start(context: Context) {

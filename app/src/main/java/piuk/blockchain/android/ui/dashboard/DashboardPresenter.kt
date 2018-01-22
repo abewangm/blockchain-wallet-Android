@@ -56,11 +56,11 @@ class DashboardPresenter @Inject constructor(
         )
     }
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
-    @Suppress("MemberVisibilityCanPrivate")
+    @Suppress("MemberVisibilityCanBePrivate")
     @VisibleForTesting var btcBalance: Long = 0L
-    @Suppress("MemberVisibilityCanPrivate")
+    @Suppress("MemberVisibilityCanBePrivate")
     @VisibleForTesting var bchBalance: Long = 0L
-    @Suppress("MemberVisibilityCanPrivate")
+    @Suppress("MemberVisibilityCanBePrivate")
     @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
@@ -73,6 +73,7 @@ class DashboardPresenter @Inject constructor(
                 .doOnNext { swipeToReceiveHelper.storeEthAddress() }
                 .doOnNext { updateAllBalances() }
                 .doOnNext { checkLatestAnnouncement() }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
                         { Timber.e(it) }

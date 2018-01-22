@@ -102,7 +102,7 @@ class WalletAccountHelper(
             .map {
                 ItemAccount(
                         it.label,
-                        getAccountBalanceBch(it, btcExchangeRate, fiatUnit, btcUnit),
+                        getAccountBalanceBch(it, btcExchangeRate, fiatUnit, bchUnit),
                         null,
                         getAccountAbsoluteBalance(it),
                         it,

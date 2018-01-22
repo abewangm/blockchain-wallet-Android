@@ -5,6 +5,7 @@ import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import piuk.blockchain.android.util.annotations.Mockable
 
+@Suppress("LeakingThis")
 @Mockable
 class ItemAccount {
 
@@ -42,13 +43,15 @@ class ItemAccount {
     }
 
     @JvmOverloads
-    constructor(label: String?,
-                displayBalance: String?,
-                tag: String?,
-                absoluteBalance: Long?,
-                accountObject: Any? = null,
-                address: String?,
-                type: TYPE = TYPE.SINGLE_ACCOUNT) {
+    constructor(
+            label: String?,
+            displayBalance: String?,
+            tag: String?,
+            absoluteBalance: Long?,
+            accountObject: Any? = null,
+            address: String?,
+            type: TYPE = TYPE.SINGLE_ACCOUNT
+    ) {
         this.label = label
         this.displayBalance = displayBalance
         this.tag = tag
@@ -56,6 +59,10 @@ class ItemAccount {
         this.address = address
         this.accountObject = accountObject
         this.type = type
+    }
+
+    constructor(label: String?) {
+        this.label = label
     }
 
 }
