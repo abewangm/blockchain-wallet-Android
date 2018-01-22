@@ -4,192 +4,243 @@ import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
 import com.nhaarman.mockito_kotlin.whenever
+import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.contacts.data.Contact
+import info.blockchain.wallet.payload.data.Account
+import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Observable
+import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.contacts.ContactsDataManager
-import piuk.blockchain.android.data.contacts.models.PaymentRequestType
+import piuk.blockchain.android.data.currency.CurrencyState
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
+import java.math.BigInteger
 import java.util.*
 
 class AccountChooserPresenterTest {
 
     private lateinit var subject: AccountChooserPresenter
-    private var mockActivity: AccountChooserView = mock()
-    private var mockWalletAccountHelper: WalletAccountHelper = mock()
-    private var mockStringUtils: StringUtils = mock()
-    private var mockContactsManager: ContactsDataManager = mock()
+    private var activity: AccountChooserView = mock()
+    private val exchangeRateFactory: ExchangeRateFactory = mock()
+    private val walletAccountHelper: WalletAccountHelper = mock()
+    private val payloadDataManager: PayloadDataManager = mock()
+    private val bchDataManager: BchDataManager = mock()
+    private val prefsUtil: PrefsUtil = mock()
+    private val currencyState: CurrencyState = mock()
+    private val stringUtils: StringUtils = mock()
+    private val contactsDataManager: ContactsDataManager = mock()
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
         subject = AccountChooserPresenter(
-                mockWalletAccountHelper,
-                mockStringUtils,
-                mockContactsManager
+                exchangeRateFactory,
+                        walletAccountHelper,
+                        payloadDataManager,
+                        bchDataManager,
+                        prefsUtil,
+                        currencyState,
+                        stringUtils,
+                        contactsDataManager
         )
-        subject.initView(mockActivity)
-    }
-
-    @Test(expected = RuntimeException::class)
-    @Throws(Exception::class)
-    fun onViewReadyRequestTypeNull() {
-        // Arrange
-        whenever(mockActivity.paymentRequestType).thenReturn(null)
-        // Act
-        subject.onViewReady()
-        // Assert
-
+        subject.initView(activity)
     }
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeContact() {
+    fun `onViewReady mode contacts`() {
         // Arrange
-        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.CONTACT)
-        whenever(mockActivity.isContactsEnabled).thenReturn(true)
+        whenever(activity.accountMode).thenReturn(AccountMode.ContactsOnly)
+        whenever(activity.isContactsEnabled).thenReturn(true)
         val contact0 = Contact()
         contact0.mdid = "mdid"
         val contact1 = Contact()
         contact1.mdid = "mdid"
         val contact2 = Contact()
-        whenever(mockContactsManager.getContactList())
+        whenever(contactsDataManager.getContactList())
                 .thenReturn(Observable.just(contact0, contact1, contact2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).getContactList()
+        verify(contactsDataManager).getContactList()
         val captor = argumentCaptor<List<ItemAccount>>()
-        verify(mockActivity).updateUi(captor.capture())
+        verify(activity).updateUi(captor.capture())
         // Value is 3 as only 2 confirmed contacts plus header
         captor.firstValue.size shouldEqual 3
     }
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeContactNoConfirmedContacts() {
+    fun `onViewReady mode contacts no confirmed contacts`() {
         // Arrange
-        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.CONTACT)
-        whenever(mockActivity.isContactsEnabled).thenReturn(true)
+        whenever(activity.accountMode).thenReturn(AccountMode.ContactsOnly)
+        whenever(activity.isContactsEnabled).thenReturn(true)
         val contact0 = Contact()
         val contact1 = Contact()
         val contact2 = Contact()
-        whenever(mockContactsManager.getContactList())
+        whenever(contactsDataManager.getContactList())
                 .thenReturn(Observable.just(contact0, contact1, contact2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).getContactList()
-        verify(mockActivity).showNoContacts()
+        verify(contactsDataManager).getContactList()
+        verify(activity).showNoContacts()
     }
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeRequest() {
+    fun `onViewReady mode ShapeShift`() {
         // Arrange
-        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.REQUEST)
+        whenever(activity.accountMode).thenReturn(AccountMode.ShapeShift)
         val itemAccount0 = ItemAccount("", "", null, null, null, null)
         val itemAccount1 = ItemAccount("", "", null, null, null, null)
         val itemAccount2 = ItemAccount("", "", null, null, null, null)
-        whenever(mockWalletAccountHelper.getHdAccounts())
+        whenever(walletAccountHelper.getHdAccounts())
+                .thenReturn(listOf(itemAccount0, itemAccount1, itemAccount2))
+        val itemAccount3 = ItemAccount("", "", null, null, null, null)
+        whenever(walletAccountHelper.getEthAccount())
+                .thenReturn(Arrays.asList(itemAccount3))
+        whenever(walletAccountHelper.getHdBchAccounts())
+                .thenReturn(listOf(itemAccount0, itemAccount1, itemAccount2))
+        // Act
+        subject.onViewReady()
+        // Assert
+        verify(walletAccountHelper).getHdAccounts()
+        verify(walletAccountHelper).getEthAccount()
+        verify(walletAccountHelper).getHdBchAccounts()
+        verifyNoMoreInteractions(walletAccountHelper)
+        val captor = argumentCaptor<List<ItemAccount>>()
+        verify(activity).updateUi(captor.capture())
+        // Value includes 3 headers, 3 BTC accounts, 1 ETH account, 3 BCH accounts
+        captor.firstValue.size shouldEqual 10
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onViewReady mode bitcoin`() {
+        // Arrange
+        whenever(activity.accountMode).thenReturn(AccountMode.Bitcoin)
+        val itemAccount0 = ItemAccount()
+        val itemAccount1 = ItemAccount()
+        val itemAccount2 = ItemAccount()
+        whenever(walletAccountHelper.getHdAccounts())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses())
+        whenever(walletAccountHelper.getLegacyAddresses())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockWalletAccountHelper).getHdAccounts()
-        verify(mockWalletAccountHelper).getLegacyAddresses()
+        verify(walletAccountHelper).getHdAccounts()
+        verify(walletAccountHelper).getLegacyAddresses()
         val captor = argumentCaptor<List<ItemAccount>>()
-        verify(mockActivity).updateUi(captor.capture())
-        // Value includes 2 headers, 3 accounts, 3 legacy addresses
+        verify(activity).updateUi(captor.capture())
+        // Value includes 3 headers, 3 accounts, 3 legacy addresses
         captor.firstValue.size shouldEqual 8
     }
 
     @Test
     @Throws(Exception::class)
-    fun onViewReadyRequestTypeShapeShift() {
+    fun `onViewReady mode bitcoin cash`() {
         // Arrange
-        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SHAPE_SHIFT)
-        val itemAccount0 = ItemAccount("", "", null, null, null, null)
-        val itemAccount1 = ItemAccount("", "", null, null, null, null)
-        val itemAccount2 = ItemAccount("", "", null, null, null, null)
-        whenever(mockWalletAccountHelper.getHdAccounts())
+        whenever(activity.accountMode).thenReturn(AccountMode.BitcoinCash)
+        val itemAccount0 = ItemAccount()
+        val itemAccount1 = ItemAccount()
+        val itemAccount2 = ItemAccount()
+        whenever(walletAccountHelper.getHdBchAccounts())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        val itemAccount3 = ItemAccount("", "", null, null, null, null)
-        whenever(mockWalletAccountHelper.getEthAccount())
-                .thenReturn(Arrays.asList(itemAccount3))
+        whenever(walletAccountHelper.getLegacyBchAddresses())
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockWalletAccountHelper).getHdAccounts()
-        verify(mockWalletAccountHelper).getEthAccount()
-        verifyNoMoreInteractions(mockWalletAccountHelper)
+        verify(walletAccountHelper).getHdBchAccounts()
+        verify(walletAccountHelper).getLegacyBchAddresses()
         val captor = argumentCaptor<List<ItemAccount>>()
-        verify(mockActivity).updateUi(captor.capture())
-        // Value includes 2 headers, 3 accounts, 1 eth account
+        verify(activity).updateUi(captor.capture())
+        // Value includes 3 headers, 3 accounts, 3 legacy addresses
+        captor.firstValue.size shouldEqual 8
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onViewReady mode bitcoin summary`() {
+        // Arrange
+        whenever(activity.accountMode).thenReturn(AccountMode.BitcoinSummary)
+        val account0 = Account()
+        val account1 = Account()
+        val account2 = Account()
+        val legacyAddress0 = LegacyAddress()
+        val legacyAddress1 = LegacyAddress()
+        val itemAccount0 = ItemAccount()
+        val itemAccount1 = ItemAccount()
+        val itemAccount2 = ItemAccount()
+        whenever(walletAccountHelper.getHdAccounts())
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(payloadDataManager.walletBalance).thenReturn(BigInteger.TEN)
+        whenever(payloadDataManager.importedAddressesBalance).thenReturn(BigInteger.TEN)
+        whenever(payloadDataManager.legacyAddresses)
+                .thenReturn(listOf(legacyAddress0, legacyAddress1))
+        whenever(payloadDataManager.accounts)
+                .thenReturn(listOf(account0, account1, account2))
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
+        whenever(exchangeRateFactory.getLastBtcPrice("USD")).thenReturn(11350.00)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn("USD")
+        whenever(stringUtils.getString(any())).thenReturn("")
+        // Act
+        subject.onViewReady()
+        // Assert
+        verify(walletAccountHelper).getHdAccounts()
+        val captor = argumentCaptor<List<ItemAccount>>()
+        verify(activity).updateUi(captor.capture())
+        // Value includes 1 headers, 3 accounts, 1 total summary, 1 legacy summary
         captor.firstValue.size shouldEqual 6
     }
 
     @Test
     @Throws(Exception::class)
-    fun `onViewReadyRequestTypeSend contactsEnabled`() {
+    fun `onViewReady mode bitcoin cash summary`() {
         // Arrange
-        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
-        whenever(mockActivity.isContactsEnabled).thenReturn(true)
-        val contact0 = Contact()
-        contact0.mdid = "mdid"
-        val contact1 = Contact()
-        contact1.mdid = "mdid"
-        val contact2 = Contact()
-        whenever(mockContactsManager.getContactList())
-                .thenReturn(Observable.just(contact0, contact1, contact2))
+        whenever(activity.accountMode).thenReturn(AccountMode.BitcoinCashSummary)
+        val account0 = GenericMetadataAccount()
+        val account1 = GenericMetadataAccount()
+        val account2 = GenericMetadataAccount()
+        val legacyAddress0 = LegacyAddress()
+        val legacyAddress1 = LegacyAddress()
         val itemAccount0 = ItemAccount()
         val itemAccount1 = ItemAccount()
         val itemAccount2 = ItemAccount()
-        whenever(mockWalletAccountHelper.getHdAccounts())
+        whenever(walletAccountHelper.getHdBchAccounts())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses())
-                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        whenever(bchDataManager.getWalletBalance()).thenReturn(BigInteger.TEN)
+        whenever(bchDataManager.getImportedAddressBalance()).thenReturn(BigInteger.TEN)
+        whenever(payloadDataManager.legacyAddresses)
+                .thenReturn(listOf(legacyAddress0, legacyAddress1))
+        whenever(bchDataManager.getActiveAccounts())
+                .thenReturn(listOf(account0, account1, account2))
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
+        whenever(exchangeRateFactory.getLastBchPrice("USD")).thenReturn(1450.00)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
+        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn("USD")
+        whenever(stringUtils.getString(any())).thenReturn("")
         // Act
         subject.onViewReady()
         // Assert
-        verify(mockContactsManager).getContactList()
-        verify(mockWalletAccountHelper).getHdAccounts()
-        verify(mockWalletAccountHelper).getLegacyAddresses()
+        verify(walletAccountHelper).getHdBchAccounts()
         val captor = argumentCaptor<List<ItemAccount>>()
-        verify(mockActivity).updateUi(captor.capture())
-        // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
-        captor.firstValue.size shouldEqual 11
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `onViewReadyRequestTypeSend contactsDisabled`() {
-        // Arrange
-        whenever(mockActivity.paymentRequestType).thenReturn(PaymentRequestType.SEND)
-        whenever(mockActivity.isContactsEnabled).thenReturn(false)
-        val itemAccount0 = ItemAccount()
-        val itemAccount1 = ItemAccount()
-        val itemAccount2 = ItemAccount()
-        whenever(mockWalletAccountHelper.getHdAccounts())
-                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        whenever(mockWalletAccountHelper.getLegacyAddresses())
-                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
-        // Act
-        subject.onViewReady()
-        // Assert
-        verify(mockWalletAccountHelper).getHdAccounts()
-        verify(mockWalletAccountHelper).getLegacyAddresses()
-        val captor = argumentCaptor<List<ItemAccount>>()
-        verify(mockActivity).updateUi(captor.capture())
-        // Value includes 3 headers, 3 accounts, 3 legacy addresses, 2 confirmed contacts
-        captor.firstValue.size shouldEqual 8
+        verify(activity).updateUi(captor.capture())
+        // Value includes 1 headers, 3 accounts, 1 total summary, 1 legacy summary
+        captor.firstValue.size shouldEqual 6
     }
 
 }

@@ -98,23 +98,27 @@ public class DataManagerModule {
                                                              StringUtils stringUtils,
                                                              ExchangeRateFactory exchangeRateFactory,
                                                              CurrencyState currencyState,
-                                                             EthDataManager ethDataManager) {
+                                                             EthDataManager ethDataManager,
+                                                             BchDataManager bchDataManager) {
         return new WalletAccountHelper(payloadManager,
                 stringUtils,
                 prefsUtil,
                 exchangeRateFactory,
                 currencyState,
-                ethDataManager);
+                ethDataManager,
+                bchDataManager);
     }
 
     @Provides
     @PresenterScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            EthDataManager ethDataManager,
+                                                                           BchDataManager bchDataManager,
                                                                            TransactionListStore transactionListStore) {
         return new TransactionListDataManager(
                 payloadManager,
                 ethDataManager,
+                bchDataManager,
                 transactionListStore);
     }
 

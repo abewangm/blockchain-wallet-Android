@@ -38,6 +38,8 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.models.PaymentRequestType
+import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.PaymentConfirmationDetails
@@ -45,8 +47,9 @@ import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
-import piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_ITEM
-import piuk.blockchain.android.ui.chooser.AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE
+import piuk.blockchain.android.ui.chooser.AccountChooserActivity.Companion.EXTRA_SELECTED_ITEM
+import piuk.blockchain.android.ui.chooser.AccountChooserActivity.Companion.EXTRA_SELECTED_OBJECT_TYPE
+import piuk.blockchain.android.ui.chooser.AccountMode
 import piuk.blockchain.android.ui.contacts.IntroducingContactsPromptDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -66,7 +69,8 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
-class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveView, NumericKeyboardCallback {
+class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveView,
+    NumericKeyboardCallback {
 
     override val isContactsEnabled: Boolean = BuildConfig.CONTACTS_ENABLED
     override val locale: Locale = Locale.getDefault()
@@ -82,7 +86,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     private var handlingActivityResult = false
 
     private val intentFilter = IntentFilter(BalanceFragment.ACTION_INTENT)
-    private val defaultDecimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator.toString()
+    private val defaultDecimalSeparator =
+            DecimalFormatSymbols.getInstance().decimalSeparator.toString()
     private val receiveIntentHelper by unsafeLazy { ReceiveIntentHelper(context!!) }
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -133,8 +138,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override fun startContactSelectionActivity() {
         AccountChooserActivity.startForResult(
                 this,
-                AccountChooserActivity.REQUEST_CODE_CHOOSE_CONTACT,
-                PaymentRequestType.CONTACT,
+                AccountMode.ContactsOnly,
+                REQUEST_CODE_CHOOSE_CONTACT,
                 getString(R.string.from)
         )
     }
@@ -142,7 +147,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     private fun setupToolbar() {
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
-                    (activity as MainActivity).supportActionBar, R.string.receive_bitcoin)
+                    (activity as MainActivity).supportActionBar, R.string.receive_bitcoin
+            )
         } else {
             finishPage()
         }
@@ -184,8 +190,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         toAddressTextView.setOnClickListener {
             AccountChooserActivity.startForResult(
                     this,
-                    AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
-                    PaymentRequestType.REQUEST,
+                    if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
+                        AccountMode.Bitcoin
+                    } else {
+                        AccountMode.BitcoinCash
+                    },
+                    REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                     getString(R.string.to)
             )
         }
@@ -193,8 +203,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         toArrowImage.setOnClickListener {
             AccountChooserActivity.startForResult(
                     this,
-                    AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
-                    PaymentRequestType.REQUEST,
+                    if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
+                        AccountMode.Bitcoin
+                    } else {
+                        AccountMode.BitcoinCash
+                    },
+                    REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
                     getString(R.string.to)
             )
         }
@@ -361,7 +375,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
         closeKeypad()
         setupToolbar()
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(broadcastReceiver, intentFilter)
+        LocalBroadcastManager.getInstance(context!!)
+                .registerReceiver(broadcastReceiver, intentFilter)
     }
 
     override fun showQrLoading() {
@@ -426,8 +441,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
         // Set receiving account
         if (resultCode == Activity.RESULT_OK
-                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
-                && data != null) {
+            && requestCode == REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
+            && data != null) {
 
             try {
                 val type: Class<*> = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE))
@@ -449,8 +464,8 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
             // Choose contact for request
         } else if (resultCode == Activity.RESULT_OK
-                && requestCode == AccountChooserActivity.REQUEST_CODE_CHOOSE_CONTACT
-                && data != null) {
+            && requestCode == REQUEST_CODE_CHOOSE_CONTACT
+            && data != null) {
 
             try {
                 val contact = ObjectMapper().readValue(
@@ -501,8 +516,15 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                     .setMessage(R.string.receive_address_to_share)
                     .setCancelable(false)
                     .setPositiveButton(R.string.yes) { _, _ ->
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                            PermissionUtil.requestWriteStoragePermissionFromFragment(this.findViewById(R.id.coordinator_layout), this@ReceiveFragment)
+                        if (ContextCompat.checkSelfPermission(
+                                    this,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            ) != PackageManager.PERMISSION_GRANTED) {
+                            PermissionUtil.requestWriteStoragePermissionFromFragment(
+                                    this.findViewById(
+                                            R.id.coordinator_layout
+                                    ), this@ReceiveFragment
+                            )
                         } else {
                             presenter.onShowBottomSheetSelected()
                         }
@@ -517,7 +539,11 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 || super.shouldShowRequestPermissionRationale(permission)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<String>,
+            grantResults: IntArray
+    ) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_WRITE_STORAGE) {
             if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 presenter.onShowBottomSheetSelected()
@@ -571,8 +597,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                     .setMessage(R.string.receive_address_to_clipboard)
                     .setCancelable(false)
                     .setPositiveButton(R.string.yes) { _, _ ->
-                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText("Send address", textview_receiving_address.text)
+                        val clipboard =
+                                getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText(
+                                "Send address",
+                                textview_receiving_address.text
+                        )
                         toast(R.string.copied_to_clipboard)
                         clipboard.primaryClip = clip
                     }
@@ -704,8 +734,11 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     companion object {
 
-        private val ARG_SELECTED_ACCOUNT_POSITION = "ARG_SELECTED_ACCOUNT_POSITION"
-        private val COOL_DOWN_MILLIS = 2 * 1000
+        private const val REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE = 911
+        private const val REQUEST_CODE_CHOOSE_CONTACT = 912
+
+        private const val ARG_SELECTED_ACCOUNT_POSITION = "ARG_SELECTED_ACCOUNT_POSITION"
+        private const val COOL_DOWN_MILLIS = 2 * 1000
 
         @JvmStatic
         fun newInstance(selectedAccountPosition: Int) = ReceiveFragment().apply {

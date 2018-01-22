@@ -4,6 +4,7 @@ import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
@@ -32,6 +33,7 @@ class DashboardPresenter @Inject constructor(
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val ethDataManager: EthDataManager,
+        private val bchDataManager: BchDataManager,
         private val payloadDataManager: PayloadDataManager,
         private val transactionListDataManager: TransactionListDataManager,
         private val stringUtils: StringUtils,
@@ -54,11 +56,11 @@ class DashboardPresenter @Inject constructor(
         )
     }
     private val metadataObservable by unsafeLazy { rxBus.register(MetadataEvent::class.java) }
-    @Suppress("MemberVisibilityCanPrivate")
+    @Suppress("MemberVisibilityCanBePrivate")
     @VisibleForTesting var btcBalance: Long = 0L
-    @Suppress("MemberVisibilityCanPrivate")
+    @Suppress("MemberVisibilityCanBePrivate")
     @VisibleForTesting var bchBalance: Long = 0L
-    @Suppress("MemberVisibilityCanPrivate")
+    @Suppress("MemberVisibilityCanBePrivate")
     @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
@@ -71,6 +73,7 @@ class DashboardPresenter @Inject constructor(
                 .doOnNext { swipeToReceiveHelper.storeEthAddress() }
                 .doOnNext { updateAllBalances() }
                 .doOnNext { checkLatestAnnouncement() }
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
                         { Timber.e(it) }
@@ -89,9 +92,18 @@ class DashboardPresenter @Inject constructor(
                 .subscribe(
                         {
                             val list = listOf(
-                                    AssetPriceCardState.Data(getBtcPriceString(), CryptoCurrencies.BTC),
-                                    AssetPriceCardState.Data(getEthPriceString(), CryptoCurrencies.ETHER),
-                                    AssetPriceCardState.Data(getBchPriceString(), CryptoCurrencies.BCH)
+                                    AssetPriceCardState.Data(
+                                            getBtcPriceString(),
+                                            CryptoCurrencies.BTC
+                                    ),
+                                    AssetPriceCardState.Data(
+                                            getEthPriceString(),
+                                            CryptoCurrencies.ETHER
+                                    ),
+                                    AssetPriceCardState.Data(
+                                            getBchPriceString(),
+                                            CryptoCurrencies.BCH
+                                    )
                             )
 
                             handleAssetPriceUpdate(list)
@@ -127,20 +139,38 @@ class DashboardPresenter @Inject constructor(
         ethDataManager.fetchEthAddress()
                 .flatMapCompletable { ethAddressResponse ->
                     payloadDataManager.updateAllBalances()
+                            .andThen(
+                                    bchDataManager.updateAllBalances()
+                                            .doOnError { Timber.e(it) }
+                                            .onErrorComplete()
+                            )
                             .doOnComplete {
-                                btcBalance = transactionListDataManager.getBtcBalance(ItemAccount().apply {
-                                    type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
-                                })
+                                btcBalance =
+                                        transactionListDataManager.getBtcBalance(ItemAccount().apply {
+                                            type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+                                        })
 
-                                bchBalance = transactionListDataManager.getBchBalance(ItemAccount().apply {
-                                    type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
-                                })
+                                bchBalance =
+                                        transactionListDataManager.getBchBalance(ItemAccount().apply {
+                                            type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+                                        })
                                 ethBalance = ethAddressResponse.getTotalBalance()
 
-                                val btcFiat = exchangeRateFactory.getLastBtcPrice(getFiatCurrency()) * (btcBalance / 1e8)
-                                val bchFiat = exchangeRateFactory.getLastBchPrice(getFiatCurrency()) * (bchBalance / 1e8)
-                                val ethFiat = BigDecimal(exchangeRateFactory.getLastEthPrice(getFiatCurrency()))
-                                        .multiply(Convert.fromWei(BigDecimal(ethBalance), Convert.Unit.ETHER))
+                                val btcFiat =
+                                        exchangeRateFactory.getLastBtcPrice(getFiatCurrency()) * (btcBalance / 1e8)
+                                val bchFiat =
+                                        exchangeRateFactory.getLastBchPrice(getFiatCurrency()) * (bchBalance / 1e8)
+                                val ethFiat =
+                                        BigDecimal(
+                                                exchangeRateFactory.getLastEthPrice(
+                                                        getFiatCurrency()
+                                                )
+                                        ).multiply(
+                                                Convert.fromWei(
+                                                        BigDecimal(ethBalance),
+                                                        Convert.Unit.ETHER
+                                                )
+                                        )
 
                                 val totalDouble = btcFiat.plus(ethFiat.toDouble())
 
@@ -218,10 +248,16 @@ class DashboardPresenter @Inject constructor(
 
     private fun checkLatestAnnouncement() {
         // If user hasn't completed onboarding, ignore announcements
-        if (isOnboardingComplete() && !prefsUtil.getValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false)) {
+        if (isOnboardingComplete() && !prefsUtil.getValue(
+                    BITCOIN_CASH_ANNOUNCEMENT_DISMISSED,
+                    false
+            )) {
             prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
 
-            walletOptionsDataManager.showShapeshift(payloadDataManager.wallet.guid, payloadDataManager.wallet.sharedKey)
+            walletOptionsDataManager.showShapeshift(
+                    payloadDataManager.wallet.guid,
+                    payloadDataManager.wallet.sharedKey
+            )
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(
                             { if (it) showAnnouncement() },
@@ -384,7 +420,8 @@ class DashboardPresenter @Inject constructor(
 
     companion object {
 
-        @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED = "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"
+        @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED =
+                "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"
 
     }
 }

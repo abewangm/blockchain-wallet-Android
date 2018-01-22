@@ -8,6 +8,7 @@ import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
@@ -26,6 +27,7 @@ class DashboardPresenterTest {
     private val prefsUtil: PrefsUtil = mock()
     private val exchangeRateFactory: ExchangeRateFactory = mock()
     private val ethDataManager: EthDataManager = mock()
+    private val bchDataManager: BchDataManager = mock()
     private val payloadDataManager: PayloadDataManager = mock()
     private val transactionListDataManager: TransactionListDataManager = mock()
     private val stringUtils: StringUtils = mock()
@@ -43,6 +45,7 @@ class DashboardPresenterTest {
                 prefsUtil,
                 exchangeRateFactory,
                 ethDataManager,
+                bchDataManager,
                 payloadDataManager,
                 transactionListDataManager,
                 stringUtils,
@@ -84,6 +87,7 @@ class DashboardPresenterTest {
         whenever(prefsUtil.getValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false))
                 .thenReturn(true)
         whenever(stringUtils.getString(any())).thenReturn("")
+        whenever(bchDataManager.updateAllBalances()).thenReturn(Completable.complete())
         // Act
         subject.onViewReady()
         // Assert
@@ -110,6 +114,7 @@ class DashboardPresenterTest {
         verify(exchangeRateFactory, times(2)).getLastBchPrice("USD")
         verify(exchangeRateFactory).updateTickers()
         verifyNoMoreInteractions(exchangeRateFactory)
+        verify(bchDataManager, atLeastOnce()).updateAllBalances()
     }
 
     @Test
@@ -138,6 +143,7 @@ class DashboardPresenterTest {
                 .thenReturn(Observable.just(mapOf("" to PriceDatum())))
         whenever(stringUtils.getString(any())).thenReturn("")
         whenever(stringUtils.getFormattedString(any(), any())).thenReturn("")
+        whenever(bchDataManager.updateAllBalances()).thenReturn(Completable.complete())
         // Act
         subject.onViewReady()
         // Assert
@@ -165,6 +171,7 @@ class DashboardPresenterTest {
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(buyDataManager).canBuy
         verifyNoMoreInteractions(buyDataManager)
+        verify(bchDataManager).updateAllBalances()
     }
 
     @Test
@@ -193,6 +200,7 @@ class DashboardPresenterTest {
         whenever(prefsUtil.getValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false))
                 .thenReturn(false)
         whenever(stringUtils.getString(any())).thenReturn("")
+        whenever(bchDataManager.updateAllBalances()).thenReturn(Completable.complete())
         // Act
         subject.onViewReady()
         // Assert
@@ -221,6 +229,7 @@ class DashboardPresenterTest {
         verify(exchangeRateFactory, times(2)).getLastBchPrice("USD")
         verify(exchangeRateFactory).updateTickers()
         verifyNoMoreInteractions(exchangeRateFactory)
+        verify(bchDataManager, atLeastOnce()).updateAllBalances()
     }
 
     @Test

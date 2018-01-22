@@ -40,8 +40,8 @@ import kotlinx.android.synthetic.main.include_to_row_editable.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus
-import piuk.blockchain.android.data.contacts.models.PaymentRequestType
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.services.EventService
 import piuk.blockchain.android.injection.Injector
@@ -51,6 +51,7 @@ import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
+import piuk.blockchain.android.ui.chooser.AccountMode
 import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
@@ -197,7 +198,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         scrollView.setPadding(0, 0, 0, 0)
         val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT)
+                LinearLayout.LayoutParams.MATCH_PARENT
+        )
         scrollView.layoutParams = layoutParams
     }
 
@@ -215,7 +217,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
         val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT)
+                LinearLayout.LayoutParams.MATCH_PARENT
+        )
         scrollView.layoutParams = layoutParams
     }
 
@@ -238,7 +241,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     private fun setupToolbar() {
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
-                    (activity as MainActivity).supportActionBar, R.string.send_bitcoin)
+                    (activity as MainActivity).supportActionBar, R.string.send_bitcoin
+            )
         } else {
             finishPage()
         }
@@ -266,15 +270,22 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         if (resultCode != Activity.RESULT_OK) return
 
         when (requestCode) {
-            MainActivity.SCAN_URI -> presenter.handleURIScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT), EventService.EVENT_TX_INPUT_FROM_QR)
+            MainActivity.SCAN_URI -> presenter.handleURIScan(
+                    data?.getStringExtra(CaptureActivity.SCAN_RESULT),
+                    EventService.EVENT_TX_INPUT_FROM_QR
+            )
             SCAN_PRIVX -> presenter.handlePrivxScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT))
-            AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> presenter.selectReceivingAccount(data)
-            AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> presenter.selectSendingAccount(data)
+            REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> presenter.selectReceivingAccount(data)
+            REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> presenter.selectSendingAccount(data)
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
+    ) {
         if (requestCode == PermissionUtil.PERMISSION_REQUEST_CAMERA) {
             if (grantResults.size == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startScanActivity(SCAN_URI)
@@ -313,8 +324,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         toContainer.toArrow.setOnClickListener {
             AccountChooserActivity.startForResult(
                     this,
-                    AccountChooserActivity.REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
-                    PaymentRequestType.SEND,
+                    if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
+                        AccountMode.Bitcoin
+                    } else {
+                        AccountMode.BitcoinCash
+                    },
+                    REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
                     getString(R.string.to)
             )
         }
@@ -417,7 +432,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         if (arguments != null) {
             // TODO: This doesn't currently work; it gets reset by onViewReady which is called
             // after this method. Not worth fixing for this release.
-            presenter.selectSendingBtcAccount(arguments!!.getInt(ARGUMENT_SELECTED_ACCOUNT_POSITION, -1))
+            presenter.selectSendingBtcAccount(
+                    arguments!!.getInt(
+                            ARGUMENT_SELECTED_ACCOUNT_POSITION,
+                            -1
+                    )
+            )
 
             val scanData = arguments!!.getString(ARGUMENT_SCAN_DATA)
             val metricInputFlag = arguments!!.getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE)
@@ -443,10 +463,16 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     private fun startFromFragment() {
-        AccountChooserActivity.startForResult(this,
-                AccountChooserActivity.REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
-                PaymentRequestType.REQUEST,
-                getString(R.string.from))
+        AccountChooserActivity.startForResult(
+                this,
+                if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
+                    AccountMode.Bitcoin
+                } else {
+                    AccountMode.BitcoinCash
+                },
+                REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
+                getString(R.string.from)
+        )
     }
 
     fun onChangeFeeClicked() {
@@ -504,7 +530,9 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                     .setActionTextColor(ContextCompat.getColor(this, R.color.primary_blue_accent))
 
             if (extraInfo != null) {
-                snackbar.setAction(R.string.more, { showSnackbar(extraInfo, null, Snackbar.LENGTH_INDEFINITE) })
+                snackbar.setAction(
+                        R.string.more,
+                        { showSnackbar(extraInfo, null, Snackbar.LENGTH_INDEFINITE) })
             } else {
                 if (duration == Snackbar.LENGTH_INDEFINITE) {
                     snackbar.setAction(R.string.ok_cap, {})
@@ -522,7 +550,14 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                     R.string.eth_support_contract_not_allowed,
                     Snackbar.LENGTH_INDEFINITE
             ).setActionTextColor(ContextCompat.getColor(this, R.color.primary_blue_accent))
-                    .setAction(R.string.learn_more, { showSnackbar(R.string.eth_support_only_eth, Snackbar.LENGTH_INDEFINITE) })
+                    .setAction(
+                            R.string.learn_more,
+                            {
+                                showSnackbar(
+                                        R.string.eth_support_only_eth,
+                                        Snackbar.LENGTH_INDEFINITE
+                                )
+                            })
                     .show()
         }
     }
@@ -557,7 +592,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         spinnerPriority.adapter = adapter
 
         spinnerPriority.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    position: Int,
+                    id: Long
+            ) {
                 when (position) {
                     0, 1 -> {
                         buttonContinue.isEnabled = true
@@ -681,7 +721,12 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                     .setMessage(R.string.bip38_password_entry)
                     .setView(ViewUtils.getAlertDialogPaddedView(context, password))
                     .setCancelable(false)
-                    .setPositiveButton(android.R.string.ok) { _, _ -> presenter.spendFromWatchOnlyBIP38(password.text.toString(), scanData) }
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        presenter.spendFromWatchOnlyBIP38(
+                                password.text.toString(),
+                                scanData
+                        )
+                    }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
         }
@@ -752,11 +797,22 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         activity?.run {
             AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.privx_required)
-                    .setMessage(String.format(getString(R.string.watch_only_spend_instructionss), address))
+                    .setMessage(
+                            String.format(
+                                    getString(R.string.watch_only_spend_instructionss),
+                                    address
+                            )
+                    )
                     .setCancelable(false)
                     .setPositiveButton(R.string.dialog_continue) { _, _ ->
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                            PermissionUtil.requestCameraPermissionFromActivity(coordinator_layout, activity)
+                        if (ContextCompat.checkSelfPermission(
+                                    this,
+                                    Manifest.permission.CAMERA
+                            ) != PackageManager.PERMISSION_GRANTED) {
+                            PermissionUtil.requestCameraPermissionFromActivity(
+                                    coordinator_layout,
+                                    activity
+                            )
                         } else {
                             startScanActivity(SCAN_PRIVX)
                         }
@@ -783,7 +839,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             note: String?,
             allowFeeChange: Boolean
     ) {
-        confirmPaymentDialog = ConfirmPaymentDialog.newInstance(confirmationDetails, note, allowFeeChange)
+        confirmPaymentDialog =
+                ConfirmPaymentDialog.newInstance(confirmationDetails, note, allowFeeChange)
         confirmPaymentDialog?.show(fragmentManager, ConfirmPaymentDialog::class.java.simpleName)
     }
 
@@ -813,7 +870,9 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                         presenter.disableAdvancedFeeWarning()
                         displayCustomFeeField()
                     }
-                    .setNegativeButton(android.R.string.cancel) { _, _ -> spinnerPriority.setSelection(0) }
+                    .setNegativeButton(android.R.string.cancel) { _, _ ->
+                        spinnerPriority.setSelection(0)
+                    }
                     .show()
         }
     }
@@ -831,9 +890,11 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
         edittextCustomFee.setOnFocusChangeListener({ _, hasFocus ->
             if (hasFocus || !edittextCustomFee.text.toString().isEmpty()) {
-                textInputLayout.hint = getString(R.string.fee_options_sat_byte_inline_hint,
+                textInputLayout.hint = getString(
+                        R.string.fee_options_sat_byte_inline_hint,
                         presenter.getBitcoinFeeOptions()?.regularFee.toString(),
-                        presenter.getBitcoinFeeOptions()?.priorityFee.toString())
+                        presenter.getBitcoinFeeOptions()?.priorityFee.toString()
+                )
             } else if (edittextCustomFee.text.toString().isEmpty()) {
                 textInputLayout.hint = getString(R.string.fee_options_sat_byte_hint)
             } else {
@@ -954,6 +1015,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         private const val ARGUMENT_CONTACT_ID = "contact_id"
         private const val ARGUMENT_CONTACT_MDID = "contact_mdid"
         private const val ARGUMENT_FCTX_ID = "fctx_id"
+        private const val REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND = 911
+        private const val REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND = 912
 
         fun newInstance(
                 scanData: String?,

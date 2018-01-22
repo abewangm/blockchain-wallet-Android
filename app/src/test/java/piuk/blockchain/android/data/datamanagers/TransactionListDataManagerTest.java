@@ -22,6 +22,7 @@ import java.util.NoSuchElementException;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel;
 import piuk.blockchain.android.data.stores.TransactionListStore;
@@ -39,6 +40,7 @@ public class TransactionListDataManagerTest extends RxTest {
 
     @Mock private PayloadManager payloadManager;
     @Mock private EthDataManager ethDataManager;
+    @Mock private BchDataManager bchDataManager;
     private TransactionListStore transactionListStore;
     private TransactionListDataManager subject;
 
@@ -52,6 +54,7 @@ public class TransactionListDataManagerTest extends RxTest {
         subject = new TransactionListDataManager(
                 payloadManager,
                 ethDataManager,
+                bchDataManager,
                 transactionListStore);
     }
 
@@ -310,15 +313,16 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
         Account account = new Account();
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
-        when(payloadManager.getWalletBalanceBch()).thenReturn(balance);
+        when(bchDataManager.getWalletBalance()).thenReturn(balance);
+        when(bchDataManager.getImportedAddressBalance()).thenReturn(balance);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
         itemAccount.setType(ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY);
         // Act
         long value = subject.getBchBalance(itemAccount);
         // Assert
-        verify(payloadManager).getWalletBalanceBch();
-        assertEquals(1_000_000_000_000L, value);
+        verify(bchDataManager).getWalletBalance();
+        assertEquals(1_000_000_000_000L + 1_000_000_000_000L, value);
     }
 
     @Test
@@ -326,14 +330,14 @@ public class TransactionListDataManagerTest extends RxTest {
         // Arrange
         Account account = new Account();
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
-        when(payloadManager.getImportedAddressesBalanceBch()).thenReturn(balance);
+        when(bchDataManager.getImportedAddressBalance()).thenReturn(balance);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
         itemAccount.setType(ItemAccount.TYPE.ALL_LEGACY);
         // Act
         long value = subject.getBchBalance(itemAccount);
         // Assert
-        verify(payloadManager).getImportedAddressesBalanceBch();
+        verify(bchDataManager).getImportedAddressBalance();
         assertEquals(1_000_000_000_000L, value);
     }
 
@@ -343,14 +347,14 @@ public class TransactionListDataManagerTest extends RxTest {
         Account account = new Account();
         String xPub = "X_PUB";
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
-        when(payloadManager.getAddressBalanceBch(xPub)).thenReturn(balance);
+        when(bchDataManager.getAddressBalance(xPub)).thenReturn(balance);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
         itemAccount.setAddress(xPub);
         // Act
         long value = subject.getBchBalance(itemAccount);
         // Assert
-        verify(payloadManager).getAddressBalanceBch(xPub);
+        verify(bchDataManager).getAddressBalance(xPub);
         assertEquals(1_000_000_000_000L, value);
     }
 
@@ -360,14 +364,14 @@ public class TransactionListDataManagerTest extends RxTest {
         LegacyAddress legacyAddress = new LegacyAddress();
         String address = "ADDRESS";
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
-        when(payloadManager.getAddressBalanceBch(address)).thenReturn(balance);
+        when(bchDataManager.getAddressBalance(address)).thenReturn(balance);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(legacyAddress);
         itemAccount.setAddress(address);
         // Act
         long value = subject.getBchBalance(itemAccount);
         // Assert
-        verify(payloadManager).getAddressBalanceBch(address);
+        verify(bchDataManager).getAddressBalance(address);
         assertEquals(1_000_000_000_000L, value);
     }
 
