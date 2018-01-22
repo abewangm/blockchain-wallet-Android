@@ -232,16 +232,6 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
                         getPresenter().onBtcFormatChanged(isBtc);
                         balanceAdapter.onViewFormatUpdated(isBtc, btcFormat);
                     }
-
-                    @Override
-                    public void onFctxClicked(@NonNull String fctxId) {
-                        getPresenter().onTransactionClicked(fctxId);
-                    }
-
-                    @Override
-                    public void onFctxLongClicked(@NonNull String fctxId) {
-                        getPresenter().onTransactionLongClicked(fctxId);
-                    }
                 });
 
         binding.recyclerView.setAdapter(balanceAdapter);

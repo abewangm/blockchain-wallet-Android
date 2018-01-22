@@ -39,34 +39,6 @@ interface BalanceView : View {
 
     fun onViewTypeChanged(isBtc: Boolean, btcFormat: Int)
 
-    fun showFctxRequiringAttention(number: Int)
-
-    fun onContactsHashMapUpdated(
-            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
-    )
-
-    fun showAccountChoiceDialog(
-            accounts: List<String>,
-            fctxId: String,
-            amount: String,
-            name: String,
-            note: String?
-    )
-
-    fun initiatePayment(uri: String, recipientId: String, mdid: String, fctxId: String)
-
-    fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?)
-
-    fun showWaitingForPaymentDialog()
-
-    fun showWaitingForAddressDialog()
-
-    fun showSendAddressDialog(fctxId: String, amount: String, name: String, note: String?)
-
-    fun showTransactionDeclineDialog(fctxId: String)
-
-    fun showTransactionCancelDialog(fctxId: String)
-
     fun startBuyActivity()
 
     fun startReceiveFragment()

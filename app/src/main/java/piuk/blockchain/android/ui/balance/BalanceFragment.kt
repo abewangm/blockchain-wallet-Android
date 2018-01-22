@@ -125,14 +125,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         presenter.setViewType(isBtc)
     }
 
-    override fun onFctxClicked(fctxId: String) {
-        presenter.onPendingTransactionClicked(fctxId)
-    }
-
-    override fun onFctxLongClicked(fctxId: String) {
-        presenter.onPendingTransactionLongClicked(fctxId)
-    }
-
     override fun onViewTypeChanged(isBtc: Boolean, btcFormat: Int) {
         balanceAdapter?.onViewFormatUpdated(isBtc, btcFormat)
         accountsAdapter?.notifyBtcChanged(isBtc, btcFormat)
@@ -204,12 +196,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         generateLauncherShortcuts()
     }
 
-    override fun onContactsHashMapUpdated(
-            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
-    ) {
-        balanceAdapter?.onContactsMapChanged(transactionDisplayMap)
-    }
-
     override fun onExchangeRateUpdated(
             btcExchangeRate: Double,
             ethExchangeRate: Double,
@@ -250,130 +236,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         interactionListener = activity as OnFragmentInteractionListener?
     }
 
-    override fun showFctxRequiringAttention(number: Int) {
-        activity?.let { (activity as MainActivity).setMessagesCount(number) }
-    }
-
     override fun showToast(message: Int, toastType: String) = toast(message, toastType)
-
-    override fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?) {
-        val message: String = if (!note.isNullOrEmpty()) {
-            getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note)
-        } else {
-            getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount)
-        }
-
-        activity?.run {
-            AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.contacts_balance_dialog_payment_requested)
-                    .setMessage(message)
-                    .setPositiveButton(
-                            R.string.contacts_balance_dialog_accept,
-                            { _, _ -> presenter.onPaymentRequestAccepted(fctxId) }
-                    )
-                    .setNegativeButton(
-                            R.string.contacts_balance_dialog_decline,
-                            { _, _ -> presenter.declineTransaction(fctxId) }
-                    )
-                    .setNeutralButton(android.R.string.cancel, null)
-                    .create()
-                    .show()
-        }
-    }
-
-    override fun showSendAddressDialog(
-            fctxId: String,
-            amount: String,
-            name: String,
-            note: String?
-    ) {
-        val message: String = if (!note.isNullOrEmpty()) {
-            getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
-        } else {
-            getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
-        }
-
-        activity?.run {
-            AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.contacts_balance_dialog_receiving_payment)
-                    .setMessage(message)
-                    .setPositiveButton(
-                            R.string.contacts_balance_dialog_accept,
-                            { _, _ -> presenter.onAccountChosen(0, fctxId) }
-                    )
-                    .setNegativeButton(
-                            R.string.contacts_balance_dialog_decline,
-                            { _, _ -> presenter.declineTransaction(fctxId) }
-                    )
-                    .setNeutralButton(android.R.string.cancel, null)
-                    .create()
-                    .show()
-        }
-    }
-
-    override fun showWaitingForPaymentDialog() =
-            showDialog(R.string.app_name, R.string.contacts_waiting_for_payment_message, null, false)
-
-    override fun showWaitingForAddressDialog() =
-            showDialog(R.string.app_name, R.string.contacts_waiting_for_address_message, null, false)
-
-    override fun showTransactionDeclineDialog(fctxId: String) = showDialog(
-            R.string.contacts_balance_dialog_decline_title,
-            R.string.contacts_decline_pending_transaction,
-            DialogInterface.OnClickListener { _, _ -> presenter.confirmDeclineTransaction(fctxId) },
-            true
-    )
-
-    override fun showTransactionCancelDialog(fctxId: String) = showDialog(
-            R.string.contacts_balance_dialog_cancel_title,
-            R.string.contacts_cancel_pending_transaction,
-            DialogInterface.OnClickListener { _, _ -> presenter.confirmCancelTransaction(fctxId) },
-            true
-    )
-
-    override fun showAccountChoiceDialog(
-            accounts: List<String>,
-            fctxId: String,
-            amount: String,
-            name: String,
-            note: String?
-    ) {
-        val spinner = AppCompatSpinner(activity)
-        spinner.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, accounts)
-        val selection = intArrayOf(0)
-
-        spinner.onItemSelectedListener = onItemSelectedListener { selection[0] = it }
-
-        var message: String = if (!note.isNullOrEmpty()) {
-            getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
-        } else {
-            getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
-        }
-
-        message += "\n\n${getString(R.string.contacts_balance_dialog_choose_account_message)}\n"
-
-        activity?.run {
-            AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.contacts_balance_dialog_receiving_payment)
-                    .setMessage(message)
-                    .setView(ViewUtils.getAlertDialogPaddedView(context, spinner))
-                    .setPositiveButton(
-                            R.string.contacts_balance_dialog_accept,
-                            { _, _ -> presenter.onAccountChosen(selection[0], fctxId) }
-                    )
-                    .setNegativeButton(
-                            R.string.contacts_balance_dialog_decline,
-                            { _, _ -> presenter.declineTransaction(fctxId) }
-                    )
-                    .setNeutralButton(android.R.string.cancel, null)
-                    .create()
-                    .show()
-        }
-    }
-
-    override fun initiatePayment(uri: String, recipientId: String, mdid: String, fctxId: String) {
-        interactionListener?.onPaymentInitiated(uri, recipientId, mdid, fctxId)
-    }
 
     override fun startBuyActivity() {
         activity?.run {
@@ -553,8 +416,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     interface OnFragmentInteractionListener {
 
         fun resetNavigationDrawer()
-
-        fun onPaymentInitiated(uri: String, recipientId: String, mdid: String, fctxId: String)
 
     }
 

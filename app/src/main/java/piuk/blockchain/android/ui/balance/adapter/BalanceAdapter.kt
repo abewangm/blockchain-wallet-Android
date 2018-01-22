@@ -82,8 +82,4 @@ interface BalanceListClickListener {
 
     fun onValueClicked(isBtc: Boolean)
 
-    fun onFctxClicked(fctxId: String)
-
-    fun onFctxLongClicked(fctxId: String)
-
 }

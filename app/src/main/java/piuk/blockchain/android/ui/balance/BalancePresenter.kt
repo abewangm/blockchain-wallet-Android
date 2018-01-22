@@ -2,9 +2,6 @@ package piuk.blockchain.android.ui.balance
 
 import android.annotation.SuppressLint
 import android.support.annotation.VisibleForTesting
-import android.view.Display
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction
-import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.prices.data.PriceDatum
@@ -14,9 +11,6 @@ import io.reactivex.schedulers.Schedulers
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AuthEvent
-import piuk.blockchain.android.data.contacts.ContactsDataManager
-import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
-import piuk.blockchain.android.data.contacts.models.ContactsEvent
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
@@ -31,7 +25,6 @@ import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
-import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -48,7 +41,6 @@ import javax.inject.Inject
 class BalancePresenter @Inject constructor(
         private val exchangeRateFactory: ExchangeRateFactory,
         private val transactionListDataManager: TransactionListDataManager,
-        private val contactsDataManager: ContactsDataManager,
         private val ethDataManager: EthDataManager,
         private val swipeToReceiveHelper: SwipeToReceiveHelper,
         internal val payloadDataManager: PayloadDataManager,
@@ -60,7 +52,6 @@ class BalancePresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager
 ) : BasePresenter<BalanceView>() {
 
-    @VisibleForTesting var contactsEventObservable: Observable<ContactsEvent>? = null
     @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
     @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
     @VisibleForTesting var chosenAccount: ItemAccount? = null
@@ -72,6 +63,9 @@ class BalancePresenter @Inject constructor(
 
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
+
+        currencyState.cryptoCurrency = CryptoCurrencies.BTC
+
         subscribeToEvents()
         updateCurrencyUi(currencyState.cryptoCurrency)
 
@@ -93,7 +87,6 @@ class BalancePresenter @Inject constructor(
     }
 
     override fun onViewDestroyed() {
-        contactsEventObservable?.let { rxBus.unregister(ContactsEvent::class.java, it) }
         notificationObservable?.let { rxBus.unregister(NotificationPayload::class.java, it) }
         authEventObservable?.let { rxBus.unregister(AuthEvent::class.java, it) }
         super.onViewDestroyed()
@@ -145,8 +138,7 @@ class BalancePresenter @Inject constructor(
         chosenAccount?.let {
             Observable.merge(
                     getBalanceObservable(it),
-                    getTransactionsListObservable(it),
-                    getFacilitatedTransactionsObservable()
+                    getTransactionsListObservable(it)
             ).compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnError { Timber.e(it) }
                     .subscribe(
@@ -171,171 +163,6 @@ class BalancePresenter @Inject constructor(
 
     internal fun areLauncherShortcutsEnabled() =
             prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
-
-    internal fun onPendingTransactionClicked(fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .compose(RxUtil.addSingleToCompositeDisposable(this))
-                .subscribe({
-                    val transaction = it.facilitatedTransactions[fctxId]
-
-                    if (transaction == null) {
-                        view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)
-                    } else {
-                        when {
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
-                                // Payment request sent, waiting for address from recipient
-                                view.showWaitingForAddressDialog()
-
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                                    && transaction.role == FacilitatedTransaction.ROLE_PR_INITIATOR ->
-                                // Payment request sent, waiting for payment
-                                view.showWaitingForPaymentDialog()
-
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
-                                // Received payment request, need to send address to sender
-                                showSendAddressDialog(
-                                        fctxId,
-                                        transaction.intendedAmount,
-                                        it.name,
-                                        transaction.note
-                                )
-
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                                    && transaction.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
-                                // Waiting for payment, pay or reject
-                                view.showPayOrDeclineDialog(
-                                        fctxId,
-                                        getBtcBalanceString(true, transaction.intendedAmount),
-                                        it.name,
-                                        transaction.note
-                                )
-
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
-                                // Need to send payment to recipient
-                                view.initiatePayment(
-                                        transaction.toBitcoinURI(),
-                                        it.id,
-                                        it.mdid,
-                                        transaction.id
-                                )
-
-                            else -> view.showTransactionCancelDialog(fctxId)
-                        }
-                    }
-                }, {
-                    Timber.e(it)
-                    view.showToast(
-                            R.string.contacts_not_found_error,
-                            ToastCustom.TYPE_ERROR
-                    )
-                })
-    }
-
-    internal fun onPaymentRequestAccepted(fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .compose(RxUtil.addSingleToCompositeDisposable(this))
-                .subscribe({
-                    val transaction = it.facilitatedTransactions[fctxId]
-                    if (transaction == null) {
-                        view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)
-                    } else {
-                        // Need to send payment to recipient
-                        view.initiatePayment(
-                                transaction.toBitcoinURI(),
-                                it.id,
-                                it.mdid,
-                                transaction.id
-                        )
-                    }
-                }, {
-                    Timber.e(it)
-                    view.showToast(
-                            R.string.contacts_not_found_error,
-                            ToastCustom.TYPE_ERROR
-                    )
-                })
-    }
-
-    internal fun onPendingTransactionLongClicked(fctxId: String) {
-        contactsDataManager.getFacilitatedTransactions()
-                .filter { it.facilitatedTransaction.id == fctxId }
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe({
-                    val fctx = it.facilitatedTransaction
-
-                    if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                            && fctx.role == FacilitatedTransaction.ROLE_RPR_INITIATOR) {
-                        view.showTransactionCancelDialog(fctxId)
-                    } else if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                            && fctx.role == FacilitatedTransaction.ROLE_PR_INITIATOR) {
-                        view.showTransactionCancelDialog(fctxId)
-                    }
-                }, { Timber.e(it) })
-    }
-
-    internal fun onAccountChosen(accountPosition: Int, fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .doOnSubscribe { view.showProgressDialog() }
-                .doOnError { view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR) }
-                .flatMapCompletable { contact ->
-                    val transaction = contact.facilitatedTransactions[fctxId]
-
-                    val paymentRequest = PaymentRequest().apply {
-                        intendedAmount = transaction?.intendedAmount ?: 0L
-                        id = fctxId
-                    }
-
-                    payloadDataManager.getNextReceiveAddressAndReserve(
-                            payloadDataManager.getPositionOfAccountInActiveList(accountPosition),
-                            "Payment request ${transaction?.id}"
-                    ).doOnNext { paymentRequest.address = it }
-                            .flatMapCompletable {
-                                contactsDataManager.sendPaymentRequestResponse(
-                                        contact.mdid,
-                                        paymentRequest,
-                                        fctxId
-                                )
-                            }
-                }
-                .doAfterTerminate { view.dismissProgressDialog() }
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnError { Timber.e(it) }
-                .subscribe(
-                        {
-                            view.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK)
-                            refreshFacilitatedTransactions()
-                        },
-                        { view.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR) })
-    }
-
-    internal fun declineTransaction(fctxId: String) = view.showTransactionDeclineDialog(fctxId)
-
-    internal fun confirmDeclineTransaction(fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .flatMapCompletable { contactsDataManager.sendPaymentDeclinedResponse(it.mdid, fctxId) }
-                .doOnError { contactsDataManager.fetchContacts() }
-                .doAfterTerminate(this::refreshFacilitatedTransactions)
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnError { Timber.e(it) }
-                .subscribe(
-                        { view.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK) },
-                        { view.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR) })
-    }
-
-    internal fun confirmCancelTransaction(fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .flatMapCompletable { contactsDataManager.sendPaymentCancelledResponse(it.mdid, fctxId) }
-                .doOnError { contactsDataManager.fetchContacts() }
-                .doAfterTerminate(this::refreshFacilitatedTransactions)
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnError { Timber.e(it) }
-                .subscribe(
-                        { view.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK) },
-                        { view.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR) })
-    }
 
     internal fun getBitcoinClicked() {
         if (view.shouldShowBuy) {
@@ -433,31 +260,6 @@ class BalancePresenter @Inject constructor(
         return mutableList
     }
 
-    private fun showSendAddressDialog(fctxId: String, amount: Long, name: String, note: String?) {
-        val accountNames = payloadDataManager.accounts
-                .filterNot { it.isArchived }
-                .mapTo(ArrayList<String>()) { it.label }
-
-        if (accountNames.size == 1) {
-            // Only one account, ask if you want to send an address
-            view.showSendAddressDialog(
-                    fctxId,
-                    getBtcBalanceString(true, amount),
-                    name,
-                    note
-            )
-        } else {
-            // Show dialog allowing user to select which account they want to use
-            view.showAccountChoiceDialog(
-                    accountNames,
-                    fctxId,
-                    getBtcBalanceString(true, amount),
-                    name,
-                    note
-            )
-        }
-    }
-
     private fun updateCurrencyUi(cryptoCurrency: CryptoCurrencies) {
         when (cryptoCurrency) {
             CryptoCurrencies.BTC -> view.showAccountSpinner()
@@ -473,8 +275,7 @@ class BalancePresenter @Inject constructor(
             Observable.merge(
                     getBalanceObservable(it),
                     getTransactionsListObservable(it),
-                    getUpdateTickerObservable(),
-                    getFacilitatedTransactionsObservable()
+                    getUpdateTickerObservable()
             ).compose(RxUtil.addObservableToCompositeDisposable(this))
                     .doOnError { Timber.e(it) }
                     .subscribe(
@@ -540,30 +341,6 @@ class BalancePresenter @Inject constructor(
                 }
     }
 
-    private fun getFacilitatedTransactionsObservable() = if (view.isContactsEnabled) {
-        contactsDataManager.fetchContacts()
-                .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
-                .toList()
-                .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
-                .toList()
-                .onErrorReturnItem(emptyList())
-                .toObservable()
-                .doOnNext {
-                    handlePendingTransactions(it)
-                    view.onContactsHashMapUpdated(contactsDataManager.getTransactionDisplayMap())
-                }
-    } else {
-        Observable.empty()
-    }
-
-    private fun refreshFacilitatedTransactions() {
-        getFacilitatedTransactionsObservable()
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(
-                        { /* No-op */ },
-                        { Timber.e(it) })
-    }
-
     private fun storeSwipeReceiveAddresses() {
         // Defer to background thread as deriving addresses is quite processor intensive
         Completable.fromCallable {
@@ -578,59 +355,19 @@ class BalancePresenter @Inject constructor(
     }
 
     private fun subscribeToEvents() {
-        contactsEventObservable = rxBus.register(ContactsEvent::class.java).apply {
-            subscribe({ refreshFacilitatedTransactions() })
-        }
 
         authEventObservable = rxBus.register(AuthEvent::class.java).apply {
             subscribe({
                 displayList.clear()
                 transactionListDataManager.clearTransactionList()
-                contactsDataManager.resetContacts()
             })
         }
 
         notificationObservable = rxBus.register(NotificationPayload::class.java).apply {
             subscribe({ notificationPayload ->
-                if (notificationPayload.type != null
-                        && notificationPayload.type == NotificationPayload.NotificationType.PAYMENT) {
-                    refreshFacilitatedTransactions()
-                }
+                //no-op
             })
         }
-    }
-
-    private fun handlePendingTransactions(transactions: List<ContactTransactionModel>) {
-        displayList.removeAll { it !is Display }
-        view.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions))
-        if (transactions.isNotEmpty()) {
-            val reversed = transactions.sortedBy { it.facilitatedTransaction.lastUpdated }.reversed()
-            displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction))
-            displayList.addAll(1, reversed)
-            displayList.add(reversed.size + 1, stringUtils.getString(R.string.contacts_transaction_history))
-            view.onTransactionsUpdated(displayList)
-            view.setUiState(UiState.CONTENT)
-        } else {
-            view.onTransactionsUpdated(displayList)
-        }
-    }
-
-    private fun getNumberOfFctxRequiringAttention(facilitatedTransactions: List<ContactTransactionModel>): Int {
-        var value = 0
-        facilitatedTransactions
-                .asSequence()
-                .map { it.facilitatedTransaction }
-                .forEach {
-                    if (it.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                            && it.role == FacilitatedTransaction.ROLE_RPR_RECEIVER) {
-                        value++
-                    } else if (it.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                            && (it.role == FacilitatedTransaction.ROLE_RPR_INITIATOR
-                            || it.role == FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                        value++
-                    }
-                }
-        return value
     }
 
     private fun getBtcBalanceString(isBtc: Boolean, btcBalance: Long): String {
