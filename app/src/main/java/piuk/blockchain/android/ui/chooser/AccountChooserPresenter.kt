@@ -38,33 +38,6 @@ class AccountChooserPresenter @Inject internal constructor(
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
     private val itemAccounts = ArrayList<ItemAccount>()
 
-    private val btcAccountList: Observable<List<ItemAccount>>
-        get() {
-            val result = ArrayList(walletAccountHelper.getHdAccounts())
-            return Observable.just(result)
-        }
-
-    private val btcImportedList: Observable<List<ItemAccount>>
-        get() {
-            val result = ArrayList(walletAccountHelper.getLegacyAddresses())
-            return Observable.just(result)
-        }
-
-    private val bchAccountList: Observable<List<ItemAccount>>
-        get() {
-            val result = ArrayList(walletAccountHelper.getHdBchAccounts())
-            return Observable.just(result)
-        }
-
-    private val bchImportedList: Observable<List<ItemAccount>>
-        get() {
-            val result = ArrayList(walletAccountHelper.getLegacyBchAddresses())
-            return Observable.just(result)
-        }
-
-    private val ethAccount: Observable<ItemAccount> =
-            Observable.just(walletAccountHelper.getEthAccount()[0])
-
     override fun onViewReady() {
         val mode = view.accountMode
 
@@ -157,7 +130,7 @@ class AccountChooserPresenter @Inject internal constructor(
         val accounts = bchDataManager.getActiveAccounts()
 
         // Show "All Accounts" if necessary
-        if (accounts.size > 1 || bchDataManager.getImportedAddressBalance().compareTo(BigInteger.ZERO) > 1) {
+        if (accounts.size > 1 || bchDataManager.getImportedAddressBalance() > BigInteger.ZERO) {
             val bigIntBalance = bchDataManager.getWalletBalance()
 
             itemAccounts.add(ItemAccount().apply {
@@ -177,7 +150,7 @@ class AccountChooserPresenter @Inject internal constructor(
                 .compose(RxUtil.addSingleToCompositeDisposable(this))
                 .doOnSuccess {
                     // Show "Imported Addresses" if wallet contains legacy addresses
-                    if (bchDataManager.getImportedAddressBalance().compareTo(BigInteger.ZERO) > 1) {
+                    if (bchDataManager.getImportedAddressBalance() > BigInteger.ZERO) {
                         val bigIntBalance = bchDataManager.getImportedAddressBalance()
 
                         itemAccounts.add(ItemAccount().apply {
@@ -254,13 +227,13 @@ class AccountChooserPresenter @Inject internal constructor(
     }
 
     private fun parseBtcAccountList(): Single<List<ItemAccount>> =
-            btcAccountList.doOnNext { itemAccounts.addAll(it) }.singleOrError()
+            getBtcAccountList().doOnNext { itemAccounts.addAll(it) }.singleOrError()
 
     private fun parseBchAccountList(): Single<List<ItemAccount>> =
-            bchAccountList.doOnNext { itemAccounts.addAll(it) }.singleOrError()
+            getBchAccountList().doOnNext { itemAccounts.addAll(it) }.singleOrError()
 
     private fun parseBtcImportedList(): Single<List<ItemAccount>> {
-        return btcImportedList.doOnNext {
+        return getBtcImportedList().doOnNext {
             if (!it.isEmpty()) {
                 itemAccounts.add(ItemAccount(stringUtils.getString(R.string.imported_addresses)))
                 itemAccounts.addAll(it)
@@ -269,7 +242,7 @@ class AccountChooserPresenter @Inject internal constructor(
     }
 
     private fun parseBchImportedList(): Single<List<ItemAccount>> {
-        return bchImportedList.doOnNext {
+        return getBchImportedList().doOnNext {
             if (!it.isEmpty()) {
                 itemAccounts.add(ItemAccount(stringUtils.getString(R.string.imported_addresses)))
                 itemAccounts.addAll(it)
@@ -278,12 +251,27 @@ class AccountChooserPresenter @Inject internal constructor(
     }
 
     private fun parseEthAccount(): Single<List<ItemAccount>> {
-        return ethAccount.doOnNext {
+        return getEthAccount().doOnNext {
             itemAccounts.add(ItemAccount(stringUtils.getString(R.string.ether)))
             itemAccounts.add(it)
         }.map { itemAccounts.toList() }
                 .singleOrError()
     }
+
+    private fun getBtcAccountList(): Observable<List<ItemAccount>> =
+            Observable.just(walletAccountHelper.getHdAccounts())
+
+    private fun getBtcImportedList(): Observable<List<ItemAccount>> =
+            Observable.just(ArrayList(walletAccountHelper.getLegacyAddresses()))
+
+    private fun getBchAccountList(): Observable<List<ItemAccount>> =
+            Observable.just(ArrayList(walletAccountHelper.getHdBchAccounts()))
+
+    private fun getBchImportedList(): Observable<List<ItemAccount>> =
+            Observable.just(ArrayList(walletAccountHelper.getLegacyBchAddresses()))
+
+    private fun getEthAccount(): Observable<ItemAccount> =
+            Observable.just(walletAccountHelper.getEthAccount()[0])
 
     private fun getBtcBalanceString(
             isBtc: Boolean,
