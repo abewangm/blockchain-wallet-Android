@@ -16,25 +16,27 @@ import piuk.blockchain.android.databinding.SpinnerBalanceHeaderBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.util.MonetaryUtil;
 
-class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
+class BalanceHeaderAdapter2 extends ArrayAdapter<ItemAccount> {
 
     private boolean isBtc;
     private final MonetaryUtil monetaryUtil;
     private String fiatUnits;
     private double exchangeRate;
+    private List<ItemAccount> accountList;
 
-    BalanceHeaderAdapter(Context context,
-                         int textViewResourceId,
-                         List<ItemAccount> accountList,
-                         boolean isBtc,
-                         MonetaryUtil monetaryUtil,
-                         String fiatUnits,
-                         double exchangeRate) {
+    BalanceHeaderAdapter2(Context context,
+                          int textViewResourceId,
+                          List<ItemAccount> accountList,
+                          boolean isBtc,
+                          MonetaryUtil monetaryUtil,
+                          String fiatUnits,
+                          double exchangeRate) {
         super(context, textViewResourceId, accountList);
         this.isBtc = isBtc;
         this.monetaryUtil = monetaryUtil;
         this.fiatUnits = fiatUnits;
         this.exchangeRate = exchangeRate;
+        this.accountList = accountList;
     }
 
     @Override
@@ -98,4 +100,8 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
         notifyDataSetChanged();
     }
 
+    void updateAccountList(List<ItemAccount> accountList) {
+        this.accountList.clear();
+        this.accountList.addAll(accountList);
+    }
 }

@@ -33,7 +33,7 @@ class DisplayableDelegate<in T>(
         private var ethExchangeRate: Double,
         private var showCrypto: Boolean,
         private val txNoteMap: Map<String, String>,
-        private val listClickListener: BalanceListClickListener
+        private val listClickListener: TxFeedClickListener
 ) : AdapterDelegate<T> {
 
     private val prefsUtil = PrefsUtil(activity)

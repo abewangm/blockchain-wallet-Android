@@ -7,25 +7,22 @@ import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
 import kotlin.properties.Delegates
 
-class BalanceAdapter(
+class TxFeedAdapter(
         activity: Activity,
         btcExchangeRate: Double,
         ethExchangeRate: Double,
         showCrypto: Boolean,
         noteMap: Map<String, String>,
-        listClickListener: BalanceListClickListener
+        listClickListener: TxFeedClickListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     private val summaryDelegate =
             DisplayableDelegate<Any>(activity, btcExchangeRate, ethExchangeRate, showCrypto, noteMap, listClickListener)
-    private val fctxDelegate =
-            FctxDelegate<Any>(activity, btcExchangeRate, showCrypto, listClickListener)
 
     init {
         // Add all necessary AdapterDelegate objects here
         delegatesManager.addAdapterDelegate(HeaderDelegate())
         delegatesManager.addAdapterDelegate(summaryDelegate)
-        delegatesManager.addAdapterDelegate(fctxDelegate)
         setHasStableIds(true)
     }
 
@@ -49,7 +46,6 @@ class BalanceAdapter(
      */
     fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
         summaryDelegate.onViewFormatUpdated(isBtc, btcFormat)
-        fctxDelegate.onViewFormatUpdated(isBtc, btcFormat)
         notifyDataSetChanged()
     }
 
@@ -70,13 +66,12 @@ class BalanceAdapter(
      */
     fun onPriceUpdated(lastBtcPrice: Double, lastEthPrice: Double) {
         summaryDelegate.onPriceUpdated(lastBtcPrice, lastEthPrice)
-        fctxDelegate.onPriceUpdated(lastBtcPrice)
         notifyDataSetChanged()
     }
 
 }
 
-interface BalanceListClickListener {
+interface TxFeedClickListener {
 
     fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int)
 
