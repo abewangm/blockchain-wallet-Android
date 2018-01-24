@@ -79,45 +79,6 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         textview_bitcoin_cash.setOnClickListener { closeLayout(CryptoCurrencies.BCH) }
     }
 
-    private fun animateLayout(expanding: Boolean) {
-        if (expanding) {
-            textview_selected_currency.setOnClickListener(null)
-            val animation = AlphaAnimation(1.0f, 0.0f).apply { duration = 250 }
-            textview_selected_currency.startAnimation(animation)
-            animation.setAnimationListener {
-                onAnimationEnd {
-                    textview_selected_currency.alpha = 0.0f
-                    startContentAnimation()
-                }
-            }
-        } else {
-            textview_selected_currency.setOnClickListener { animateLayout(true) }
-            startContentAnimation()
-        }
-    }
-
-    private fun startContentAnimation() {
-        val animation: Animation = if (expanded) {
-            linear_layout_coin_selection.invisible()
-            ExpandAnimation(contentHeight, collapsedHeight)
-        } else {
-            this@ExpandableCurrencyHeader.invalidate()
-            ExpandAnimation(collapsedHeight, contentHeight)
-        }
-
-        animation.duration = 300L
-        animation.setAnimationListener {
-            onAnimationEnd {
-                expanded = !expanded
-                if (expanded) {
-                    linear_layout_coin_selection.visible()
-                }
-            }
-        }
-
-        content_frame.startAnimation(animation)
-    }
-
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         content_frame.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
         textview_selected_currency.measure(View.MeasureSpec.UNSPECIFIED, heightMeasureSpec)
@@ -169,6 +130,45 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         textview_ethereum.gone()
     }
 
+    private fun animateLayout(expanding: Boolean) {
+        if (expanding) {
+            textview_selected_currency.setOnClickListener(null)
+            val animation = AlphaAnimation(1.0f, 0.0f).apply { duration = 250 }
+            textview_selected_currency.startAnimation(animation)
+            animation.setAnimationListener {
+                onAnimationEnd {
+                    textview_selected_currency.alpha = 0.0f
+                    startContentAnimation()
+                }
+            }
+        } else {
+            textview_selected_currency.setOnClickListener { animateLayout(true) }
+            startContentAnimation()
+        }
+    }
+
+    private fun startContentAnimation() {
+        val animation: Animation = if (expanded) {
+            linear_layout_coin_selection.invisible()
+            ExpandAnimation(contentHeight, collapsedHeight)
+        } else {
+            this@ExpandableCurrencyHeader.invalidate()
+            ExpandAnimation(collapsedHeight, contentHeight)
+        }
+
+        animation.duration = 300L
+        animation.setAnimationListener {
+            onAnimationEnd {
+                expanded = !expanded
+                if (expanded) {
+                    linear_layout_coin_selection.visible()
+                }
+            }
+        }
+
+        content_frame.startAnimation(animation)
+    }
+
     private fun updateCurrencyUi(@DrawableRes leftDrawable: Int, @StringRes title: Int) {
         textview_selected_currency.run {
             text = context.getText(title).toString().toUpperCase()
@@ -182,16 +182,15 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
     }
 
     private fun closeLayout(cryptoCurrency: CryptoCurrencies) {
-        animateLayout(false)
         // Update UI
         setCurrentlySelectedCurrency(cryptoCurrency)
         // Trigger layout change
-//        animateCoinSelectionLayout(View.GONE)
+        animateLayout(false)
         // Fade in title
         val alphaAnimation = AlphaAnimation(0.0f, 1.0f).apply { duration = 250 }
         textview_selected_currency.startAnimation(alphaAnimation)
         alphaAnimation.setAnimationListener {
-            onAnimationEnd { 
+            onAnimationEnd {
                 textview_selected_currency.alpha = 1.0f
                 // Inform parent of currency selection once animation complete to avoid glitches
                 selectionListener(cryptoCurrency)
