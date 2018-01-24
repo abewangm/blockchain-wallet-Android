@@ -1,24 +1,29 @@
 package piuk.blockchain.android.ui.customviews
 
-import android.animation.LayoutTransition
+import android.annotation.TargetApi
 import android.content.Context
+import android.graphics.Outline
+import android.os.Build
 import android.support.annotation.DrawableRes
 import android.support.annotation.StringRes
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
-import android.support.transition.AutoTransition
+import android.support.transition.ChangeBounds
 import android.support.transition.TransitionManager
 import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import kotlinx.android.synthetic.main.view_expanding_currency_header.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.ViewUtils
+import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.setAnimationListener
 
 
@@ -60,10 +65,12 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         )
         // Select Bitcoin by default but without triggering callback
         updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
-        // Set layout transition preferences
-        constraint_layout.layoutTransition.apply {
-            enableTransitionType(LayoutTransition.APPEARING)
-            enableTransitionType(LayoutTransition.DISAPPEARING)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            outlineProvider = CustomOutline(w, h)
         }
     }
 
@@ -85,11 +92,18 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         if (selectedCurrency != cryptoCurrency) {
             selectedCurrency = cryptoCurrency
             when (selectedCurrency) {
-                CryptoCurrencies.BTC -> updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
-                CryptoCurrencies.ETHER -> updateCurrencyUi(R.drawable.vector_eth, R.string.ethereum)
-                CryptoCurrencies.BCH -> updateCurrencyUi(R.drawable.vector_bitcoin_cash, R.string.bitcoin_cash)
+                CryptoCurrencies.BTC ->
+                    updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
+                CryptoCurrencies.ETHER ->
+                    updateCurrencyUi(R.drawable.vector_eth, R.string.ethereum)
+                CryptoCurrencies.BCH ->
+                    updateCurrencyUi(R.drawable.vector_bitcoin_cash, R.string.bitcoin_cash)
             }
         }
+    }
+
+    fun hideEthereum() {
+        textview_ethereum.gone()
     }
 
     private fun updateCurrencyUi(@DrawableRes leftDrawable: Int, @StringRes title: Int) {
@@ -118,51 +132,64 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
     private fun closeLayout(cryptoCurrency: CryptoCurrencies) {
         // Inform parent of currency selection
         selectionListener(cryptoCurrency)
-        // Listen for finish of animation as UI responds to visibility change
-        constraint_layout.layoutTransition.apply {
-            addTransitionListener(object : LayoutTransition.TransitionListener {
-                override fun startTransition(
-                        transition: LayoutTransition?,
-                        container: ViewGroup?,
-                        view: View?,
-                        transitionType: Int
-                ) = Unit
-
-                override fun endTransition(
-                        transition: LayoutTransition?,
-                        container: ViewGroup?,
-                        view: View?,
-                        transitionType: Int
-                ) {
-                    // Update UI before visibility change
-                    setCurrentlySelectedCurrency(cryptoCurrency)
-                    // Fade in title
-                    val alphaAnimation = AlphaAnimation(0.0f, 1.0f).apply { duration = 250 }
-                    textview_selected_currency.startAnimation(alphaAnimation)
-                    alphaAnimation.setAnimationListener {
-                        onAnimationEnd { textview_selected_currency.alpha = 1.0f }
-                    }
-
-                    // Remove listener
-                    removeTransitionListener(this)
-                }
-            })
-        }
-
+        // Update UI
+        setCurrentlySelectedCurrency(cryptoCurrency)
         // Trigger layout change
         animateCoinSelectionLayout(View.GONE)
+        // Fade in title
+        val alphaAnimation = AlphaAnimation(0.0f, 1.0f).apply { duration = 250 }
+        textview_selected_currency.startAnimation(alphaAnimation)
+        alphaAnimation.setAnimationListener {
+            onAnimationEnd { textview_selected_currency.alpha = 1.0f }
+        }
     }
 
     private fun animateCoinSelectionLayout(@ViewUtils.Visibility visibility: Int) {
-        TransitionManager.beginDelayedTransition(
-                constraint_layout,
-                AutoTransition().apply { duration = 500 }
-        )
+        val elevation = if (AndroidUtils.is21orHigher()) {
+            this.elevation
+        } else {
+            0.0f
+        }
+
         ConstraintSet().apply {
+            layoutAnimationListener = object: Animation.AnimationListener {
+                override fun onAnimationRepeat(animation: Animation?) = Unit
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    if (AndroidUtils.is21orHigher()) {
+                        // Restore elevation
+                        this@ExpandableCurrencyHeader.elevation = elevation
+                    }
+                }
+
+                override fun onAnimationStart(animation: Animation?) {
+                    // Temporarily remove elevation as it interferes with animation
+                    if (AndroidUtils.is21orHigher()) {
+                        this@ExpandableCurrencyHeader.elevation = 0.0f
+                    }
+                }
+            }
             clone(constraint_layout)
             setVisibility(R.id.linear_layout_coin_selection, visibility)
             applyTo(constraint_layout)
         }
+
+        TransitionManager.beginDelayedTransition(
+                constraint_layout,
+                ChangeBounds().apply { duration = 300 }
+        )
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private inner class CustomOutline internal constructor(
+            internal var width: Int,
+            internal var height: Int
+    ) : ViewOutlineProvider() {
+
+        override fun getOutline(view: View, outline: Outline) {
+            outline.setRect(0, 0, width, height)
+        }
+
     }
 
 }

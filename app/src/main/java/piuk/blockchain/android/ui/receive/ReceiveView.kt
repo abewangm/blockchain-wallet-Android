@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.receive
 
 import android.graphics.Bitmap
 import android.support.annotation.StringRes
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import java.util.*
@@ -46,7 +47,7 @@ interface ReceiveView : View {
 
     fun showBottomSheet(uri: String)
 
-    fun setTabSelection(tabIndex: Int)
+    fun setSelectedCurrency(cryptoCurrency: CryptoCurrencies)
 
     fun finishPage()
 

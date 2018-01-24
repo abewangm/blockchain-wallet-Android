@@ -59,7 +59,6 @@ import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.consume
-import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.io.IOException
@@ -94,9 +93,10 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             if (intent.action == BalanceFragment.ACTION_INTENT) {
                 presenter?.let {
                     // Update UI with new Address + QR
-                    if (tabs_receive?.selectedTabPosition == 0) {
-                        presenter.onSelectDefault(defaultAccountPosition)
-                    }
+                    // TODO:
+//                    if (tabs_receive?.selectedTabPosition == 0) {
+//                        presenter.onSelectDefault(defaultAccountPosition)
+//                    }
                 }
             }
         }
@@ -129,10 +129,18 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         setCustomKeypad()
 
         scrollview?.post { scrollview.scrollTo(0, 0) }
+
+        currency_header.setSelectionListener { currency ->
+            when (currency) {
+                CryptoCurrencies.BTC -> presenter?.onSelectDefault(defaultAccountPosition)
+                CryptoCurrencies.ETHER -> presenter?.onEthSelected()
+                CryptoCurrencies.BCH -> presenter?.onSelectBchDefault(defaultAccountPosition)
+            }
+        }
     }
 
-    override fun setTabSelection(tabIndex: Int) {
-        tabs_receive?.getTabAt(tabIndex)?.select()
+    override fun setSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currency_header.setCurrentlySelectedCurrency(cryptoCurrency)
     }
 
     override fun startContactSelectionActivity() {
@@ -267,14 +275,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             from_container.gone()
             textview_whats_this.gone()
             divider4.gone()
-        }
-
-        tabs_receive?.apply {
-            addTab(tabs_receive.newTab().setText("BITCOIN"))
-            addTab(tabs_receive.newTab().setText("ETHER"))
-            setOnTabSelectedListener {
-                if (it == 0) presenter?.onSelectDefault(defaultAccountPosition) else presenter?.onEthSelected()
-            }
         }
     }
 
@@ -436,7 +436,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
         handlingActivityResult = true
 
         // Set receiving account
@@ -468,10 +467,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             && data != null) {
 
             try {
-                val contact = ObjectMapper().readValue(
-                        data.getStringExtra(EXTRA_SELECTED_ITEM),
-                        Contact::class.java
-                )
+                val contact: Contact = data.getStringExtra(EXTRA_SELECTED_ITEM).toKotlinObject()
                 presenter.selectedContactId = contact.id
                 from_container.fromAddressTextView.text = contact.name
 

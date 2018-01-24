@@ -45,7 +45,8 @@ import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
-class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
+class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView,
+    BalanceListClickListener {
 
     override val isContactsEnabled = BuildConfig.CONTACTS_ENABLED
     override val shouldShowBuy = AndroidUtils.is19orHigher()
@@ -256,7 +257,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
-    override fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?) {
+    override fun showPayOrDeclineDialog(
+            fctxId: String,
+            amount: String,
+            name: String,
+            note: String?
+    ) {
         val message: String = if (!note.isNullOrEmpty()) {
             getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note)
         } else {
@@ -312,10 +318,20 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun showWaitingForPaymentDialog() =
-            showDialog(R.string.app_name, R.string.contacts_waiting_for_payment_message, null, false)
+            showDialog(
+                    R.string.app_name,
+                    R.string.contacts_waiting_for_payment_message,
+                    null,
+                    false
+            )
 
     override fun showWaitingForAddressDialog() =
-            showDialog(R.string.app_name, R.string.contacts_waiting_for_address_message, null, false)
+            showDialog(
+                    R.string.app_name,
+                    R.string.contacts_waiting_for_address_message,
+                    null,
+                    false
+            )
 
     override fun showTransactionDeclineDialog(fctxId: String) = showDialog(
             R.string.contacts_balance_dialog_decline_title,
@@ -339,7 +355,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             note: String?
     ) {
         val spinner = AppCompatSpinner(activity)
-        spinner.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, accounts)
+        spinner.adapter =
+                ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, accounts)
         val selection = intArrayOf(0)
 
         spinner.onItemSelectedListener = onItemSelectedListener { selection[0] = it }
@@ -469,7 +486,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.gone()
     }
 
-    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean, txNoteMap: MutableMap<String, String>) {
+    private fun setUpRecyclerView(
+            btcExchangeRate: Double,
+            ethExchangeRate: Double,
+            isBtc: Boolean,
+            txNoteMap: MutableMap<String, String>
+    ) {
         balanceAdapter = BalanceAdapter(
                 activity!!,
                 btcExchangeRate,

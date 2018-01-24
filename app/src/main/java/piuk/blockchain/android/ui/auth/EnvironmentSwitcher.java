@@ -24,9 +24,9 @@ class EnvironmentSwitcher {
     void showDebugMenu() {
         new AlertDialog.Builder(context, R.style.AlertDialogStyle)
                 .setTitle("Debug settings")
-                .setMessage("Select 'Reset Timers' to reset various device timers and saved states, such as warning dialogs, onboarding etc.\n\nSelect 'Wipe Wallet' to log out and completely reset this app.")
+                .setMessage("Select 'Reset Prefs' to reset various device timers and saved states, such as warning dialogs, onboarding etc.\n\nSelect 'Wipe Wallet' to log out and completely reset this app.")
                 .setPositiveButton("Reset Timers", (dialogInterface, i) -> resetAllTimers())
-                .setNegativeButton("Reset Wallet", (dialogInterface, i) ->
+                .setNegativeButton("Reset Prefs", (dialogInterface, i) ->
                         new AppUtil(context).clearCredentialsAndRestart())
                 .setNeutralButton(android.R.string.cancel, null)
                 .create()
@@ -43,6 +43,7 @@ class EnvironmentSwitcher {
         prefsUtil.removeValue(PrefsUtil.KEY_ONBOARDING_COMPLETE);
         prefsUtil.removeValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN);
         prefsUtil.removeValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_DISMISSED);
+        prefsUtil.removeValue(PrefsUtil.KEY_CURRENCY_CRYPTO_STATE);
 
         AppRate.reset(context);
         AccessState.getInstance().setPIN(null);

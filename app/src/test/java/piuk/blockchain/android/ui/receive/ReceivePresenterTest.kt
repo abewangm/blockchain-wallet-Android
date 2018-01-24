@@ -14,7 +14,6 @@ import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should equal to`
 import org.apache.commons.lang3.NotImplementedException
 import org.bitcoinj.core.NetworkParameters
-import org.bitcoinj.params.AbstractNetParams
 import org.bitcoinj.params.BitcoinCashMainNetParams
 import org.bitcoinj.params.BitcoinMainNetParams
 import org.junit.Before
@@ -220,7 +219,7 @@ class ReceivePresenterTest {
         // Act
         subject.onAccountSelected(account)
         // Assert
-        verify(activity).setTabSelection(0)
+        verify(activity).setSelectedCurrency(0)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
@@ -247,7 +246,7 @@ class ReceivePresenterTest {
         // Act
         subject.onAccountSelected(account)
         // Assert
-        verify(activity).setTabSelection(0)
+        verify(activity).setSelectedCurrency(0)
         verify(activity).showQrLoading()
         verify(activity).updateReceiveLabel(label)
         verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
@@ -274,7 +273,7 @@ class ReceivePresenterTest {
         // Act
         subject.onEthSelected()
         // Assert
-        verify(activity).setTabSelection(1)
+        verify(activity).setSelectedCurrency(1)
         verify(activity).hideBitcoinLayout()
         verify(activity).updateReceiveAddress(ethAccount)
         verify(activity).showQrLoading()
@@ -303,7 +302,7 @@ class ReceivePresenterTest {
         // Act
         subject.onSelectDefault(accountPosition)
         // Assert
-        verify(activity).setTabSelection(0)
+        verify(activity).setSelectedCurrency(0)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
@@ -338,7 +337,7 @@ class ReceivePresenterTest {
         // Act
         subject.onSelectDefault(accountPosition)
         // Assert
-        verify(activity).setTabSelection(0)
+        verify(activity).setSelectedCurrency(0)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)

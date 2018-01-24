@@ -168,16 +168,20 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                         // This is a bit of a hack to allow the selection of the correct button
                         // On the bottom nav bar, but without starting the fragment again
                         startSendFragment(null, null);
+                        ViewUtils.setElevation(binding.appbarLayout, 0f);
                     }
                     break;
                 case 1:
                     startDashboardFragment();
+                    ViewUtils.setElevation(binding.appbarLayout, 4f);
                     break;
                 case 2:
                     onStartBalanceFragment(paymentMade);
+                    ViewUtils.setElevation(binding.appbarLayout, 0f);
                     break;
                 case 3:
                     startReceiveFragment();
+                    ViewUtils.setElevation(binding.appbarLayout, 0f);
                     break;
             }
         }
@@ -266,9 +270,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         applyFontToNavDrawer();
     }
 
+    // Might be used shortly depending on design review, warning is fine for now
+    public void setToolbarTitle(String title) {
+        setupToolbar(binding.toolbarMain.toolbarGeneral, title);
+    }
+
     @Nullable
-    public AppBarLayout getAppBar() {
-        return binding.appbarLayout;
+    public Toolbar getToolbar() {
+        return binding.toolbarMain.toolbarGeneral;
     }
 
     @SuppressLint("NewApi")

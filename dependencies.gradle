@@ -1,7 +1,7 @@
 ext.versions = [
         androidPlugin   : '3.0.1',
 
-        kotlin          : '1.2.20',
+        kotlin          : '1.2.21',
 
         supportLibs     : '27.0.2',
         googleServices  : '11.6.2',
@@ -13,7 +13,7 @@ ext.versions = [
         retrofit        : '2.3.0',
         okHttp          : '3.9.0',
         dagger          : '2.12',
-        rxJava          : '2.1.8',
+        rxJava          : '2.1.9',
         rxAndroid       : '2.0.1',
         rxBinding       : '2.0.0',
         rxFingerprint   : '2.1.0',

@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.receive
 
 import android.support.annotation.VisibleForTesting
+import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.util.FormatsUtil
@@ -9,6 +10,7 @@ import org.bitcoinj.core.Coin
 import org.bitcoinj.uri.BitcoinURI
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
@@ -37,6 +39,7 @@ class ReceivePresenter @Inject internal constructor(
         private val payloadDataManager: PayloadDataManager,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val ethDataStore: EthDataStore,
+        private val bchDataManager: BchDataManager,
         private val environmentSettings: EnvironmentSettings,
         private val currencyState: CurrencyState
 ) : BasePresenter<ReceiveView>() {
@@ -65,7 +68,8 @@ class ReceivePresenter @Inject internal constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onSelectDefault(defaultAccountPosition)
             CryptoCurrencies.ETHER -> onEthSelected()
-            else -> throw IllegalArgumentException("BCH is not currently supported")
+            CryptoCurrencies.BCH -> onSelectBchDefault(defaultAccountPosition)
+            else -> throw IllegalArgumentException("${currencyState.cryptoCurrency.unit} is not currently supported")
         }
     }
 
@@ -102,7 +106,7 @@ class ReceivePresenter @Inject internal constructor(
 
     internal fun onAccountSelected(account: Account) {
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
-        view.setTabSelection(0)
+        view.setSelectedCurrency(currencyState.cryptoCurrency)
         selectedAccount = account
         view.updateReceiveLabel(account.label)
         view.showQrLoading()
@@ -124,7 +128,7 @@ class ReceivePresenter @Inject internal constructor(
     internal fun onEthSelected() {
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         compositeDisposable.clear()
-        view.setTabSelection(1)
+        view.setSelectedCurrency(currencyState.cryptoCurrency)
         view.hideBitcoinLayout()
         selectedAccount = null
         // This can be null at this stage for some reason - TODO investigate thoroughly
@@ -138,6 +142,40 @@ class ReceivePresenter @Inject internal constructor(
         } else {
             view.finishPage()
         }
+    }
+
+    internal fun onSelectBchDefault(defaultAccountPosition: Int) {
+        currencyState.cryptoCurrency = CryptoCurrencies.BCH
+        compositeDisposable.clear()
+        view.displayBitcoinLayout()
+        onBchAccountSelected(
+                if (defaultAccountPosition > -1) {
+                    bchDataManager.getActiveAccounts()[defaultAccountPosition]
+                } else {
+                    bchDataManager.getDefaultGenericMetadataAccount()!!
+                }
+        )
+    }
+
+    internal fun onBchAccountSelected(account: GenericMetadataAccount) {
+        currencyState.cryptoCurrency = CryptoCurrencies.BCH
+        view.setSelectedCurrency(currencyState.cryptoCurrency)
+//        selectedAccount = account
+//        view.updateReceiveLabel(account.label)
+//        view.showQrLoading()
+//        payloadDataManager.updateAllTransactions()
+//                .doOnError { Timber.wtf(it) }
+//                .onErrorComplete()
+//                .andThen(payloadDataManager.getNextReceiveAddress(account))
+//                .compose(RxUtil.addObservableToCompositeDisposable(this))
+//                .doOnNext {
+//                    selectedAddress = it
+//                    view.updateReceiveAddress(it)
+//                    generateQrCode(getBitcoinUri(it, view.getBtcAmount()))
+//                }
+//                .subscribe(
+//                        { /* No-op */ },
+//                        { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
     }
 
     internal fun onSelectDefault(defaultAccountPosition: Int) {
@@ -322,7 +360,7 @@ class ReceivePresenter @Inject internal constructor(
     companion object {
 
         @VisibleForTesting const val KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend"
-        private val DIMENSION_QR_CODE = 600
+        private const val DIMENSION_QR_CODE = 600
 
     }
 
