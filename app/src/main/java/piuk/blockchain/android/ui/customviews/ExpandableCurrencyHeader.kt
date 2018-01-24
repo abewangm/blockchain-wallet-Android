@@ -6,10 +6,6 @@ import android.graphics.Outline
 import android.os.Build
 import android.support.annotation.DrawableRes
 import android.support.annotation.StringRes
-import android.support.constraint.ConstraintLayout
-import android.support.constraint.ConstraintSet
-import android.support.transition.ChangeBounds
-import android.support.transition.TransitionManager
 import android.support.v4.content.ContextCompat
 import android.support.v7.content.res.AppCompatResources
 import android.util.AttributeSet
@@ -18,19 +14,28 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import android.view.animation.Transformation
+import android.widget.RelativeLayout
 import kotlinx.android.synthetic.main.view_expanding_currency_header.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
-import piuk.blockchain.android.util.AndroidUtils
-import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.setAnimationListener
+import piuk.blockchain.android.util.extensions.visible
 
 
 class ExpandableCurrencyHeader @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null
-) : ConstraintLayout(context, attrs), View.OnClickListener {
+) : RelativeLayout(context, attrs) {
+
+    private var expanded = false
+    private var firstOpen = true
+
+    private var collapsedHeight: Int = 0
+    private var contentHeight: Int = 0
+    private var contentWidth: Int = 0
 
     private lateinit var selectionListener: (CryptoCurrencies) -> Unit
     var selectedCurrency = CryptoCurrencies.BTC
@@ -39,11 +44,6 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         // Inflate layout
         LayoutInflater.from(getContext())
                 .inflate(R.layout.view_expanding_currency_header, this, true)
-        // Set click listeners
-        textview_selected_currency.setOnClickListener(this)
-        textview_bitcoin.setOnClickListener(this)
-        textview_ethereum.setOnClickListener(this)
-        textview_bitcoin_cash.setOnClickListener(this)
         // Add compound drawables manually to avoid inflation errors on <21
         textview_bitcoin.setCompoundDrawablesWithIntrinsicBounds(
                 AppCompatResources.getDrawable(context, R.drawable.vector_bitcoin),
@@ -67,19 +67,82 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
     }
 
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+
+        linear_layout_coin_selection.invisible()
+
+        textview_selected_currency.setOnClickListener { animateLayout(true) }
+
+        textview_bitcoin.setOnClickListener { closeLayout(CryptoCurrencies.BTC) }
+        textview_ethereum.setOnClickListener { closeLayout(CryptoCurrencies.ETHER) }
+        textview_bitcoin_cash.setOnClickListener { closeLayout(CryptoCurrencies.BCH) }
+    }
+
+    private fun animateLayout(expanding: Boolean) {
+        if (expanding) {
+            textview_selected_currency.setOnClickListener(null)
+            val animation = AlphaAnimation(1.0f, 0.0f).apply { duration = 250 }
+            textview_selected_currency.startAnimation(animation)
+            animation.setAnimationListener {
+                onAnimationEnd {
+                    textview_selected_currency.alpha = 0.0f
+                    startContentAnimation()
+                }
+            }
+        } else {
+            textview_selected_currency.setOnClickListener { animateLayout(true) }
+            startContentAnimation()
+        }
+    }
+
+    private fun startContentAnimation() {
+        val animation: Animation = if (expanded) {
+            linear_layout_coin_selection.invisible()
+            ExpandAnimation(contentHeight, collapsedHeight)
+        } else {
+            this@ExpandableCurrencyHeader.invalidate()
+            ExpandAnimation(collapsedHeight, contentHeight)
+        }
+
+        animation.duration = 300L
+        animation.setAnimationListener {
+            onAnimationEnd {
+                expanded = !expanded
+                if (expanded) {
+                    linear_layout_coin_selection.visible()
+                }
+            }
+        }
+
+        content_frame.startAnimation(animation)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        content_frame.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        textview_selected_currency.measure(View.MeasureSpec.UNSPECIFIED, heightMeasureSpec)
+        collapsedHeight = textview_selected_currency.measuredHeight
+        contentWidth = content_frame.measuredWidth
+        contentHeight = content_frame.measuredHeight
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+
+        if (firstOpen) {
+            content_frame.layoutParams.width = contentWidth
+            content_frame.layoutParams.height = collapsedHeight
+            firstOpen = false
+        }
+
+        val width = textview_selected_currency.measuredWidth + content_frame.measuredWidth
+        val height = content_frame.measuredHeight
+
+        setMeasuredDimension(width, height)
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             outlineProvider = CustomOutline(w, h)
-        }
-    }
-
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.textview_selected_currency -> openLayout()
-            R.id.textview_bitcoin -> closeLayout(CryptoCurrencies.BTC)
-            R.id.textview_ethereum -> closeLayout(CryptoCurrencies.ETHER)
-            R.id.textview_bitcoin_cash -> closeLayout(CryptoCurrencies.BCH)
         }
     }
 
@@ -118,66 +181,22 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         }
     }
 
-    private fun openLayout() {
-        val animation = AlphaAnimation(1.0f, 0.0f).apply { duration = 250 }
-        textview_selected_currency.startAnimation(animation)
-        animation.setAnimationListener {
-            onAnimationEnd {
-                textview_selected_currency.alpha = 0.0f
-                animateCoinSelectionLayout(View.VISIBLE)
-            }
-        }
-    }
-
     private fun closeLayout(cryptoCurrency: CryptoCurrencies) {
-        // Inform parent of currency selection
-        selectionListener(cryptoCurrency)
+        animateLayout(false)
         // Update UI
         setCurrentlySelectedCurrency(cryptoCurrency)
         // Trigger layout change
-        animateCoinSelectionLayout(View.GONE)
+//        animateCoinSelectionLayout(View.GONE)
         // Fade in title
         val alphaAnimation = AlphaAnimation(0.0f, 1.0f).apply { duration = 250 }
         textview_selected_currency.startAnimation(alphaAnimation)
         alphaAnimation.setAnimationListener {
-            onAnimationEnd { textview_selected_currency.alpha = 1.0f }
-        }
-    }
-
-    private fun animateCoinSelectionLayout(@ViewUtils.Visibility visibility: Int) {
-        val elevation = if (AndroidUtils.is21orHigher()) {
-            this.elevation
-        } else {
-            0.0f
-        }
-
-        ConstraintSet().apply {
-            layoutAnimationListener = object: Animation.AnimationListener {
-                override fun onAnimationRepeat(animation: Animation?) = Unit
-
-                override fun onAnimationEnd(animation: Animation?) {
-                    if (AndroidUtils.is21orHigher()) {
-                        // Restore elevation
-                        this@ExpandableCurrencyHeader.elevation = elevation
-                    }
-                }
-
-                override fun onAnimationStart(animation: Animation?) {
-                    // Temporarily remove elevation as it interferes with animation
-                    if (AndroidUtils.is21orHigher()) {
-                        this@ExpandableCurrencyHeader.elevation = 0.0f
-                    }
-                }
+            onAnimationEnd { 
+                textview_selected_currency.alpha = 1.0f
+                // Inform parent of currency selection once animation complete to avoid glitches
+                selectionListener(cryptoCurrency)
             }
-            clone(constraint_layout)
-            setVisibility(R.id.linear_layout_coin_selection, visibility)
-            applyTo(constraint_layout)
         }
-
-        TransitionManager.beginDelayedTransition(
-                constraint_layout,
-                ChangeBounds().apply { duration = 300 }
-        )
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -190,6 +209,19 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
             outline.setRect(0, 0, width, height)
         }
 
+    }
+
+    private inner class ExpandAnimation(private val mStartHeight: Int, endHeight: Int) :
+        Animation() {
+        private val mDeltaHeight: Int = endHeight - mStartHeight
+
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+            val lp = content_frame.layoutParams
+            lp.height = (mStartHeight + mDeltaHeight * interpolatedTime).toInt()
+            content_frame.layoutParams = lp
+        }
+
+        override fun willChangeBounds(): Boolean = true
     }
 
 }
