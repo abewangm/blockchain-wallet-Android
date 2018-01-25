@@ -5,10 +5,12 @@ import info.blockchain.wallet.BitcoinCashWallet
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.coin.GenericMetadataWallet
 import info.blockchain.wallet.crypto.DeterministicAccount
+import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
+import org.spongycastle.util.Arrays
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
@@ -16,6 +18,7 @@ import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.util.MetadataUtils
 import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.annotations.Mockable
+import timber.log.Timber
 import java.math.BigInteger
 
 @Mockable
@@ -133,6 +136,21 @@ class BchDataManager(
         return result
     }
 
+    fun getActiveXpubsAndImportedAddresses(): List<String> {
+
+        val result = mutableListOf<String>()
+
+        bchDataStore.bchMetadata?.accounts?.forEachIndexed { i, account ->
+            if (!account.isArchived) {
+                result.add(bchDataStore.bchWallet?.getAccountPubB58(i)!!)
+            }
+        }
+
+        result.addAll(payloadDataManager.legacyAddressStringList)
+
+        return result
+    }
+
     fun updateAllBalances(): Completable {
         val legacyAddresses = payloadDataManager.legacyAddresses
                 .filterNot { it.isWatchOnly || it.tag == LegacyAddress.ARCHIVED_ADDRESS }
@@ -153,18 +171,18 @@ class BchDataManager(
 
     fun getAddressTransactions(address: String, limit: Int, offset: Int) =
             bchDataStore.bchWallet?.getTransactions(
-                    mutableListOf(),//legacy list
+                    null,//legacy list
                     mutableListOf(),//watch-only list
-                    getActiveXpubs(),
+                    getActiveXpubsAndImportedAddresses(),
                     address,
                     limit,
                     offset)
 
     fun getWalletTransactions(limit: Int, offset: Int) =
             bchDataStore.bchWallet?.getTransactions(
-                    mutableListOf(),//legacy list
+                    null,//legacy list
                     mutableListOf(),//watch-only list
-                    getActiveXpubs(),
+                    getActiveXpubsAndImportedAddresses(),
                     null,
                     limit,
                     offset)
@@ -173,7 +191,7 @@ class BchDataManager(
             bchDataStore.bchWallet?.getTransactions(
                     payloadDataManager.legacyAddressStringList,//legacy list
                     mutableListOf(),//watch-only list
-                    getActiveXpubs(),
+                    getActiveXpubsAndImportedAddresses(),
                     null,
                     limit,
                     offset)

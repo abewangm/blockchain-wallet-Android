@@ -53,12 +53,12 @@ class TransactionListDataManager(
 
     internal fun fetchBchTransactions(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> {
 
-        Timber.d("vos fetchBchTransactions itemAccount: "+itemAccount)
         val txs =  when (itemAccount.type) {
             ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> getBchAllTransactionsObservable(limit, offset)
             ItemAccount.TYPE.ALL_LEGACY -> getBchLegacyObservable(limit, offset)
             ItemAccount.TYPE.SINGLE_ACCOUNT -> getBchAccountObservable(itemAccount.address!!, limit, offset)
         }
+
         return txs
     }
 

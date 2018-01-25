@@ -90,14 +90,8 @@ class BalancePresenter @Inject constructor(
 
                 }
                 .subscribe(
-                        {
-                            Timber.d("vos refreshAllObservables subscribe")
-                            /* No-op */
-                        },
-                        {
-                            Timber.d("vos refreshAllObservables FAILURE")
-                            view.setUiState(UiState.FAILURE)
-                        })
+                        { /* No-op */ },
+                        { view.setUiState(UiState.FAILURE) })
     }
 
     private fun getUpdateTickerCompletable(): Completable {
@@ -118,57 +112,52 @@ class BalancePresenter @Inject constructor(
     /**
      * API call - Fetches latest transactions for selected currency and account, and updates UI tx list
      */
-    private fun updateTransactionsListCompletable(account: ItemAccount): Completable =
+    private fun updateTransactionsListCompletable(account: ItemAccount): Completable {
 
-            Completable.fromObservable(
+        return Completable.fromObservable(
 //            getShapeShiftTxNotesObservable()
-                    transactionListDataManager.fetchTransactions(account, 50, 0)
+                transactionListDataManager.fetchTransactions(account, 50, 0)
 //                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
-                            .map {
-                                for (tx in it) {
+                        .map {
+                            for (tx in it) {
 
-                                    when (currencyState.cryptoCurrency) {
-                                        CryptoCurrencies.BTC -> {
-                                            tx.totalDisplayableCrypto = getBtcBalanceString(
-                                                    true,
-                                                    tx.total.toLong())
-                                            tx.totalDisplayableFiat = getBtcBalanceString(
-                                                    false,
-                                                    tx.total.toLong())
-                                        }
-                                        CryptoCurrencies.ETHER -> {
-                                            tx.totalDisplayableCrypto = getEthBalanceString(
-                                                    true,
-                                                    BigDecimal(tx.total))
-                                            tx.totalDisplayableFiat = getEthBalanceString(
-                                                    false,
-                                                    BigDecimal(tx.total))
-                                        }
-                                        CryptoCurrencies.BCH -> {
-                                            tx.totalDisplayableCrypto = getBchBalanceString(
-                                                    true,
-                                                    tx.total.toLong())
-                                            tx.totalDisplayableCrypto = getBchBalanceString(
-                                                    false,
-                                                    tx.total.toLong())
-                                        }
-
+                                when (currencyState.cryptoCurrency) {
+                                    CryptoCurrencies.BTC -> {
+                                        tx.totalDisplayableCrypto = getBtcBalanceString(
+                                                true,
+                                                tx.total.toLong())
+                                        tx.totalDisplayableFiat = getBtcBalanceString(
+                                                false,
+                                                tx.total.toLong())
                                     }
+                                    CryptoCurrencies.ETHER -> {
+                                        tx.totalDisplayableCrypto = getEthBalanceString(
+                                                true,
+                                                BigDecimal(tx.total))
+                                        tx.totalDisplayableFiat = getEthBalanceString(
+                                                false,
+                                                BigDecimal(tx.total))
+                                    }
+                                    CryptoCurrencies.BCH -> {
+                                        tx.totalDisplayableCrypto = getBchBalanceString(
+                                                true,
+                                                tx.total.toLong())
+                                        tx.totalDisplayableCrypto = getBchBalanceString(
+                                                false,
+                                                tx.total.toLong())
+                                    }
+
                                 }
+                            }
 
-                                when {
-                                    it.isEmpty() -> {
-                                        Timber.d("vos UiState.EMPTY")
-                                        view.setUiState(UiState.EMPTY)
-                                    }
-                                    else -> {
-                                        Timber.d("vos UiState.CONTENT")
-                                        view.setUiState(UiState.CONTENT)
-                                    }
-                                }
+                            when {
+                                it.isEmpty() -> { view.setUiState(UiState.EMPTY) }
+                                else -> { view.setUiState(UiState.CONTENT) }
+                            }
 
-                                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, it)
-                            })
+                            view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, it)
+                        })
+    }
     //endregion
 
     //region Currency header
@@ -335,13 +324,15 @@ class BalancePresenter @Inject constructor(
 
         val accounts = bchDataManager.getActiveAccounts()
                 .map {
+
                     val balance = getBchBalanceString(
                             currencyState.isDisplayingCryptoCurrency,
                             bchDataManager.getAddressBalance(it.xpub).toLong())
                     ItemAccount().apply {
                         label = it.label
                         displayBalance = balance
-                        type = ItemAccount.TYPE.ALL_LEGACY
+                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
+                        address = it.xpub
                     }
                 }
 
