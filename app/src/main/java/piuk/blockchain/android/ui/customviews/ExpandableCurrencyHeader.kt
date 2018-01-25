@@ -30,14 +30,14 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         attrs: AttributeSet? = null
 ) : RelativeLayout(context, attrs) {
 
+    private lateinit var selectionListener: (CryptoCurrencies) -> Unit
+
     private var expanded = false
     private var firstOpen = true
-
     private var collapsedHeight: Int = 0
     private var contentHeight: Int = 0
     private var contentWidth: Int = 0
 
-    private lateinit var selectionListener: (CryptoCurrencies) -> Unit
     var selectedCurrency = CryptoCurrencies.BTC
 
     init {
@@ -212,6 +212,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
 
     private inner class ExpandAnimation(private val mStartHeight: Int, endHeight: Int) :
         Animation() {
+
         private val mDeltaHeight: Int = endHeight - mStartHeight
 
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {

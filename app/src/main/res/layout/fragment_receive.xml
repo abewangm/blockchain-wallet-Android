@@ -7,22 +7,43 @@
     android:background="@color/white"
     tools:context=".ui.receive.ReceiveFragment">
 
-    <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader
-        android:id="@+id/currency_header"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top" />
+        android:animateLayoutChanges="true"
+        android:fitsSystemWindows="true"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-    <ScrollView
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="snap"
+            app:titleEnabled="false">
+
+            <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader
+                android:id="@+id/currency_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top" />
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
         android:id="@+id/scrollview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="?attr/actionBarSize"
-        android:layout_marginTop="@dimen/action_bar_height"
         android:animateLayoutChanges="true"
         android:descendantFocusability="beforeDescendants"
         android:focusable="true"
-        android:focusableInTouchMode="true">
+        android:focusableInTouchMode="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/receive_main_content"
@@ -192,7 +213,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider4" />
         </android.support.constraint.ConstraintLayout>
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 
     <piuk.blockchain.android.ui.customviews.NumericKeyboard
         android:id="@+id/custom_keyboard"

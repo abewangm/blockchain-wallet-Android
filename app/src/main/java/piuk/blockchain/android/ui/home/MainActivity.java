@@ -270,16 +270,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         applyFontToNavDrawer();
     }
 
-    // Might be used shortly depending on design review, warning is fine for now
-    public void setToolbarTitle(String title) {
-        setupToolbar(binding.toolbarMain.toolbarGeneral, title);
-    }
-
-    @Nullable
-    public Toolbar getToolbar() {
-        return binding.toolbarMain.toolbarGeneral;
-    }
-
     @SuppressLint("NewApi")
     @Override
     protected void onResume() {
