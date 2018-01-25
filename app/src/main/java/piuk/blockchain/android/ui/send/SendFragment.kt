@@ -64,7 +64,6 @@ import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
-import piuk.blockchain.android.util.helperfunctions.setOnTabSelectedListener
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -118,7 +117,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
         setCustomKeypad()
 
-        setTabs()
+        setupCurrencyHeader()
         handleIncomingArguments()
         setupSendingView()
         setupReceivingView()
@@ -192,48 +191,48 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         // Show bottom nav if applicable
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+            (activity as MainActivity).bottomNavigationView.isBehaviorTranslationEnabled = true
         }
 
         // Resize activity to default
-        scrollView.setPadding(0, 0, 0, 0)
-        val layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        )
-        scrollView.layoutParams = layoutParams
+        scrollView.apply {
+            setPadding(0, 0, 0, 0)
+            layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+            )
+        }
     }
 
     override fun onKeypadOpen() {
         // Hide bottom nav if applicable
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.hideBottomNavigation()
+            (activity as MainActivity).bottomNavigationView.isBehaviorTranslationEnabled = false
         }
     }
 
     override fun onKeypadOpenCompleted() {
         // Resize activity around view
         val translationY = keyboard.height
-        scrollView.setPadding(0, 0, 0, translationY)
-
-        val layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        )
-        scrollView.layoutParams = layoutParams
+        scrollView.apply {
+            setPadding(0, 0, 0, translationY)
+            layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+            )
+        }
     }
 
-    private fun setTabs() {
-        tabs.apply {
-            addTab(tabs.newTab().setText(R.string.bitcoin))
-            addTab(tabs.newTab().setText(R.string.ether))
-            setOnTabSelectedListener {
-                ViewUtils.hideKeyboard(activity)
-                closeKeypad()
-                if (it == 0) {
-                    presenter.onBitcoinChosen()
-                } else {
-                    presenter.onEtherChosen()
-                }
+    private fun setupCurrencyHeader() {
+        ViewUtils.hideKeyboard(activity)
+        closeKeypad()
+        currency_header.setSelectionListener { currency ->
+            when (currency) {
+                CryptoCurrencies.BTC -> presenter?.onBitcoinChosen()
+                CryptoCurrencies.ETHER -> presenter?.onEtherChosen()
+            // TODO: Implement BCH in presenter
+                CryptoCurrencies.BCH -> toast("Not yet implemented")
             }
         }
     }
@@ -249,9 +248,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun finishPage() {
-        listener?.apply {
-            onSendFragmentClose()
-        }
+        listener?.onSendFragmentClose()
     }
 
     private fun startScanActivity(code: Int) {
@@ -264,7 +261,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
         handlingActivityResult = true
 
         if (resultCode != Activity.RESULT_OK) return
@@ -395,7 +391,6 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         amountContainer.amountFiat.hint = "0" + presenter.getDefaultDecimalSeparator() + "00"
         amountContainer.amountFiat.setSelectAllOnFocus(true)
         enableFiatTextChangeListener()
-
     }
 
     private val cryptoTextWatcher = object : TextWatcher {
@@ -501,23 +496,29 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         }
     }
 
-    override fun setTabSelection(tabIndex: Int) {
-        tabs.getTabAt(tabIndex)?.select()
+    override fun setSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currency_header.setCurrentlySelectedCurrency(cryptoCurrency)
     }
 
     private fun handleBackPressed() {
-        if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-            AccessState.getInstance().logout(context)
-            return
-        } else {
-            showToast(R.string.exit_confirm, ToastCustom.TYPE_GENERAL)
-        }
+        when {
+            isKeyboardVisible() -> closeKeypad()
+            currency_header.isExpanded() -> currency_header.close()
+            else -> {
+                if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                    AccessState.getInstance().logout(context)
+                    return
+                } else {
+                    toast(R.string.exit_confirm)
+                }
 
-        backPressed = System.currentTimeMillis()
+                backPressed = System.currentTimeMillis()
+            }
+        }
     }
 
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
-        ToastCustom.makeText(activity, getString(message), ToastCustom.LENGTH_SHORT, toastType)
+        toast(getString(message), toastType)
     }
 
     override fun showSnackbar(message: Int, duration: Int) {

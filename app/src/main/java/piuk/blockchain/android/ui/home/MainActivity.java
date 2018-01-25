@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -368,7 +367,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         if (drawerIsOpen) {
             binding.drawerLayout.closeDrawers();
         } else if (getCurrentFragment() instanceof BalanceFragment) {
-            handleBackPressed();
+            ((BalanceFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof SendFragment) {
             ((SendFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {

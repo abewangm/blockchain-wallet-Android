@@ -68,6 +68,7 @@ public class PinEntryActivity extends BaseAuthActivity implements
         }
 
         binding.viewpager.setOffscreenPageLimit(2);
+        binding.viewpager.addOnPageChangeListener(this);
         binding.viewpager.setAdapter(fragmentPagerAdapter);
     }
 
@@ -111,7 +112,7 @@ public class PinEntryActivity extends BaseAuthActivity implements
 
     @Override
     public void onPageSelected(int position) {
-        pinEntryFragment.clearPinBoxes();
+        pinEntryFragment.resetPinEntry();
     }
 
     @Override

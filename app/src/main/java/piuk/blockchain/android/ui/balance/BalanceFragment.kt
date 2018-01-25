@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
@@ -59,6 +60,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private var progressDialog: MaterialProgressDialog? = null
     private var interactionListener: OnFragmentInteractionListener? = null
     private var spacerDecoration: BottomSpacerDecoration? = null
+    private var backPressed: Long = 0
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_INTENT && activity != null) {
@@ -440,6 +442,21 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         return position - 1
     }
 
+    fun onBackPressed() {
+        if (currency_header.isExpanded()) {
+            currency_header.close()
+        } else {
+            if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                AccessState.getInstance().logout(context)
+                return
+            } else {
+                toast(R.string.exit_confirm)
+            }
+
+            backPressed = System.currentTimeMillis()
+        }
+    }
+
     private fun setShowRefreshing(showRefreshing: Boolean) {
         swipe_container.isRefreshing = showRefreshing
     }
@@ -559,7 +576,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         const val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
         const val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
         const val KEY_TRANSACTION_HASH = "transaction_hash"
+
         private const val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
+        private const val COOL_DOWN_MILLIS = 2 * 1000
 
         @JvmStatic
         fun newInstance(broadcastingPayment: Boolean): BalanceFragment {

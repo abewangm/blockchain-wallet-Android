@@ -608,17 +608,19 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     private fun handleBackPressed() {
-        if (isKeyboardVisible()) {
-            closeKeypad()
-        } else {
-            if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
-                AccessState.getInstance().logout(context)
-                return
-            } else {
-                onExitConfirmToast()
-            }
+        when {
+            isKeyboardVisible() -> closeKeypad()
+            currency_header.isExpanded() -> currency_header.close()
+            else -> {
+                if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                    AccessState.getInstance().logout(context)
+                    return
+                } else {
+                    onExitConfirmToast()
+                }
 
-            backPressed = System.currentTimeMillis()
+                backPressed = System.currentTimeMillis()
+            }
         }
     }
 
@@ -678,6 +680,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         // Show bottom nav if applicable
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+            (activity as MainActivity).bottomNavigationView.isBehaviorTranslationEnabled = true
         }
 
         val height = activity!!.resources.getDimension(R.dimen.action_bar_height).toInt()
@@ -697,6 +700,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         // Hide bottom nav if applicable
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.hideBottomNavigation()
+            (activity as MainActivity).bottomNavigationView.isBehaviorTranslationEnabled = false
         }
     }
 

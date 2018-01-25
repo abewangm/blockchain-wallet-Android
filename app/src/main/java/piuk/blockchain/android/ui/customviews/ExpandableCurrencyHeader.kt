@@ -130,6 +130,12 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         textview_ethereum.gone()
     }
 
+    fun isExpanded() = expanded
+
+    fun close() {
+        if (isExpanded()) closeLayout(null)
+    }
+
     private fun animateLayout(expanding: Boolean) {
         if (expanding) {
             textview_selected_currency.setOnClickListener(null)
@@ -156,13 +162,11 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
             ExpandAnimation(collapsedHeight, contentHeight)
         }
 
-        animation.duration = 300L
+        animation.duration = 250
         animation.setAnimationListener {
             onAnimationEnd {
                 expanded = !expanded
-                if (expanded) {
-                    linear_layout_coin_selection.visible()
-                }
+                if (expanded) linear_layout_coin_selection.visible()
             }
         }
 
@@ -181,9 +185,13 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         }
     }
 
-    private fun closeLayout(cryptoCurrency: CryptoCurrencies) {
+    /**
+     * Pass null as the parameter here to close the view without triggering any [CryptoCurrencies]
+     * change listeners.
+     */
+    private fun closeLayout(cryptoCurrency: CryptoCurrencies?) {
         // Update UI
-        setCurrentlySelectedCurrency(cryptoCurrency)
+        cryptoCurrency?.run { setCurrentlySelectedCurrency(this) }
         // Trigger layout change
         animateLayout(false)
         // Fade in title
@@ -193,7 +201,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
             onAnimationEnd {
                 textview_selected_currency.alpha = 1.0f
                 // Inform parent of currency selection once animation complete to avoid glitches
-                selectionListener(cryptoCurrency)
+                cryptoCurrency?.run { selectionListener(this) }
             }
         }
     }
@@ -210,15 +218,15 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
 
     }
 
-    private inner class ExpandAnimation(private val mStartHeight: Int, endHeight: Int) :
+    private inner class ExpandAnimation(private val startHeight: Int, endHeight: Int) :
         Animation() {
 
-        private val mDeltaHeight: Int = endHeight - mStartHeight
+        private val deltaHeight: Int = endHeight - startHeight
 
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-            val lp = content_frame.layoutParams
-            lp.height = (mStartHeight + mDeltaHeight * interpolatedTime).toInt()
-            content_frame.layoutParams = lp
+            val params = content_frame.layoutParams
+            params.height = (startHeight + deltaHeight * interpolatedTime).toInt()
+            content_frame.layoutParams = params
         }
 
         override fun willChangeBounds(): Boolean = true

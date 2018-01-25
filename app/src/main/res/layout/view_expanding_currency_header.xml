@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/colorPrimary"
-    android:orientation="vertical">
+    android:background="?attr/colorPrimary">
 
     <TextView
         android:id="@+id/textview_selected_currency"
@@ -41,7 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:orientation="vertical"
-            android:paddingBottom="8dp">
+            android:paddingBottom="8dp"
+            tools:ignore="UselessParent">
 
             <TextView
                 android:id="@+id/textview_bitcoin"

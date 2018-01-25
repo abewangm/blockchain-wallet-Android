@@ -122,7 +122,7 @@ class SendPresenter @Inject constructor(
     internal fun onBitcoinChosen() {
         view.showFeePriority()
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
-        view.setTabSelection(0)
+        view.setSelectedCurrency(currencyState.cryptoCurrency)
         view.enableFeeDropdown()
         view.setCryptoMaxLength(17)
         resetState()
@@ -134,7 +134,7 @@ class SendPresenter @Inject constructor(
         view.hideFeePriority()
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         view.setFeePrioritySelection(0)
-        view.setTabSelection(1)
+        view.setSelectedCurrency(currencyState.cryptoCurrency)
         view.disableFeeDropdown()
         view.setCryptoMaxLength(30)
         resetState()
