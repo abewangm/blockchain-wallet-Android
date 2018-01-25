@@ -53,19 +53,15 @@ class BalancePresenter @Inject constructor(
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
 
-        ethDataManager.fetchEthAddress()
+        refreshAllCompletable(getAccountAt(0))
                 .doOnError { Timber.e(it) }
-                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() }
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnSubscribe {
                     onAccountsAdapterSetup()
                     onTxFeedAdapterSetup()
                 }
-                .doOnComplete { refreshAllObservables() }
                 .subscribe(
-                        {
-                            //no-op
-                        },
+                        { /* No-op */ },
                         { Timber.e(it) }
                 )
     }
@@ -73,25 +69,32 @@ class BalancePresenter @Inject constructor(
     /**
      * Do all API calls to reload page
      */
-    internal fun refreshAllObservables() {
+    internal fun refreshAllCompletable(account: ItemAccount): Completable {
 
-        val account = getCurrenctAccount()
-
-        getUpdateTickerCompletable()
+        return getUpdateTickerCompletable()
+                .andThen(updateEthAddress())
                 .andThen(updateBalancesCompletable())
                 .andThen(updateTransactionsListCompletable(account))
+                .doOnError { view.setUiState(UiState.FAILURE) }
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnError { Timber.e(it) }
                 .doOnComplete {
                     refreshBalanceHeader(account)
                     refreshAccountDataSet()
                     setViewType(currencyState.isDisplayingCryptoCurrency)
-
                 }
+    }
+
+    /*
+    Swipe down force refresh
+     */
+    internal fun onRefreshRequested() {
+        refreshAllCompletable(getCurrenctAccount())
+                .doOnError { Timber.e(it) }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
-                        { view.setUiState(UiState.FAILURE) })
+                        { Timber.e(it) }
+                )
     }
 
     private fun getUpdateTickerCompletable(): Completable {
@@ -99,6 +102,14 @@ class BalancePresenter @Inject constructor(
     }
 
     //region api refresh calls
+
+    /**
+     * API call - Update eth address
+     */
+    private fun updateEthAddress() =
+        Completable.fromObservable(ethDataManager.fetchEthAddress()
+                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() })
+
     /**
      * API call - Fetches latest balance for selected currency and updates UI balance
      */
@@ -209,11 +220,6 @@ class BalancePresenter @Inject constructor(
         view.updateAccountsDataSet(accountList)
     }
 
-//    internal fun updateTransactions(cryptoCurrency: CryptoCurrencies) {
-//        val accountList = transactionListDataManager(cryptoCurrency)
-//        view.updateAccountsDataSet(accountList)
-//    }
-
     internal fun onAccountSelected(position: Int) {
 
         val account = getAccounts(currencyState.cryptoCurrency).get(position)
@@ -231,11 +237,16 @@ class BalancePresenter @Inject constructor(
                         { view.setUiState(UiState.FAILURE) })
     }
 
+
+    internal fun getCurrenctAccount(): ItemAccount {
+        return getAccountAt(view.getCurrentAccountPosition())
+    }
+
     /*
     Don't over use this method. It's a bit hacky, but fast enough to work.
      */
-    internal fun getCurrenctAccount(): ItemAccount {
-        return getAccounts(currencyState.cryptoCurrency).get(view.getCurrentAccountPosition())
+    internal fun getAccountAt(position: Int): ItemAccount {
+        return getAccounts(currencyState.cryptoCurrency).get(position)
     }
 
     //region Account Lists
@@ -378,12 +389,6 @@ class BalancePresenter @Inject constructor(
         view.setupTxFeedAdapter(currencyState.isDisplayingCryptoCurrency)
     }
     //endregion
-
-    /*
-    Swipe down force refresh
-     */
-    internal fun onRefreshRequested() {
-    }
 
     /*
     Toggle between fiat - crypto currency
