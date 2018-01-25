@@ -199,15 +199,15 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
             setUpAdapter(isBtc);
         }
 
-        balanceAdapter.onContactsMapChanged(getPresenter().getTransactionDisplayMap());
-        balanceAdapter.setItems(transactions);
-        if (!transactions.isEmpty()) {
-            binding.recyclerView.setVisibility(View.VISIBLE);
-            binding.layoutNoTransactions.setVisibility(View.GONE);
-        } else {
-            binding.recyclerView.setVisibility(View.GONE);
-            binding.layoutNoTransactions.setVisibility(View.VISIBLE);
-        }
+//        balanceAdapter.onContactsMapChanged(getPresenter().getTransactionDisplayMap());
+//        balanceAdapter.setItems(transactions);
+//        if (!transactions.isEmpty()) {
+//            binding.recyclerView.setVisibility(View.VISIBLE);
+//            binding.layoutNoTransactions.setVisibility(View.GONE);
+//        } else {
+//            binding.recyclerView.setVisibility(View.GONE);
+//            binding.layoutNoTransactions.setVisibility(View.VISIBLE);
+//        }
     }
 
     private void setUpAdapter(boolean isBtc) {
@@ -215,24 +215,24 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
         int btcFormat = getPresenter().getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         double btcExchangeRate = ExchangeRateFactory.getInstance().getLastBtcPrice(fiatString);
 
-        balanceAdapter = new TxFeedAdapter(
-                getActivity(),
-                btcExchangeRate,
-                getPresenter().getEthExchangeRate(),
-                isBtc,
-                null,//TODO Check this when dev on Contacts resume
-                new TxFeedClickListener() {
-                    @Override
-                    public void onTransactionClicked(int correctedPosition, int absolutePosition) {
-                        getPresenter().onCompletedTransactionClicked(absolutePosition);
-                    }
-
-                    @Override
-                    public void onValueClicked(boolean isBtc) {
-                        getPresenter().onBtcFormatChanged(isBtc);
-                        balanceAdapter.onViewFormatUpdated(isBtc, btcFormat);
-                    }
-                });
+//        balanceAdapter = new TxFeedAdapter(
+//                getActivity(),
+//                btcExchangeRate,
+//                getPresenter().getEthExchangeRate(),
+//                isBtc,
+//                null,//TODO Check this when dev on Contacts resume
+//                new TxFeedClickListener() {
+//                    @Override
+//                    public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+//                        getPresenter().onCompletedTransactionClicked(absolutePosition);
+//                    }
+//
+//                    @Override
+//                    public void onValueClicked(boolean isBtc) {
+//                        getPresenter().onBtcFormatChanged(isBtc);
+//                        balanceAdapter.onViewFormatUpdated(isBtc, btcFormat);
+//                    }
+//                });
 
         binding.recyclerView.setAdapter(balanceAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));

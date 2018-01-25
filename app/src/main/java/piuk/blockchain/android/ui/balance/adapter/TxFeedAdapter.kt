@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.balance.adapter
 
 import android.app.Activity
-import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
@@ -9,15 +8,15 @@ import kotlin.properties.Delegates
 
 class TxFeedAdapter(
         activity: Activity,
-        btcExchangeRate: Double,
-        ethExchangeRate: Double,
-        showCrypto: Boolean,
-        noteMap: Map<String, String>,
-        listClickListener: TxFeedClickListener
+        showCrypto: Boolean
+//        noteMap: Map<String, String>,
+//        listClickListener: TxFeedClickListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     private val summaryDelegate =
-            DisplayableDelegate<Any>(activity, btcExchangeRate, ethExchangeRate, showCrypto, noteMap, listClickListener)
+            DisplayableDelegate<Any>(activity, showCrypto
+//                    , noteMap, listClickListener
+            )
 
     init {
         // Add all necessary AdapterDelegate objects here
@@ -44,31 +43,10 @@ class TxFeedAdapter(
      * Notifies the adapter that the View format (ie, whether or not to show BTC) has been changed.
      * Will rebuild the entire adapter.
      */
-    fun onViewFormatUpdated(isBtc: Boolean, btcFormat: Int) {
-        summaryDelegate.onViewFormatUpdated(isBtc, btcFormat)
+    fun onViewFormatUpdated(showCrypto: Boolean) {
+        summaryDelegate.onViewFormatUpdated(showCrypto)
         notifyDataSetChanged()
     }
-
-    /**
-     * Notifies the adapter that the Contacts/Transaction map and the Notes/Transaction map have
-     * been updated. Will rebuild the entire adapter.
-     */
-    fun onContactsMapChanged(
-            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
-    ) {
-        summaryDelegate.onContactsMapUpdated(transactionDisplayMap)
-        notifyDataSetChanged()
-    }
-
-    /**
-     * Notifies the adapter that the BTC & ETH exchange rate for the selected currency has been updated.
-     * Will rebuild the entire adapter.
-     */
-    fun onPriceUpdated(lastBtcPrice: Double, lastEthPrice: Double) {
-        summaryDelegate.onPriceUpdated(lastBtcPrice, lastEthPrice)
-        notifyDataSetChanged()
-    }
-
 }
 
 interface TxFeedClickListener {

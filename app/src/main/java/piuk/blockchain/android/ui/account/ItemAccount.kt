@@ -10,7 +10,7 @@ import piuk.blockchain.android.util.annotations.Mockable
 class ItemAccount {
 
     enum class TYPE {
-        ALL_ACCOUNTS_AND_LEGACY, ALL_LEGACY, SINGLE_ACCOUNT, ETHEREUM
+        ALL_ACCOUNTS_AND_LEGACY, ALL_LEGACY, SINGLE_ACCOUNT
     }
 
     var label: String? = null

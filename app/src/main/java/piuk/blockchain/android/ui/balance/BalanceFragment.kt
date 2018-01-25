@@ -3,6 +3,8 @@ package piuk.blockchain.android.ui.balance
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -12,19 +14,19 @@ import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.balance.adapter.ItemAccount2
+import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.adapter.TxFeedAdapter
 import piuk.blockchain.android.ui.balance.adapter.TxFeedClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
-import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
+import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -60,13 +62,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 R.color.product_red_medium
         )
 
-        textview_balance.setOnClickListener { presenter.invertViewType() }
-        currency_header.setSelectionListener { presenter.updateSelectedCurrency(it) }
+        textview_balance.setOnClickListener { presenter.onBalanceClick() }
+        currency_header.setSelectionListener { presenter.onCurrencySelected(it) }
 
         onViewReady()
     }
 
-    override fun setupAccountsAdapter(accounts: List<ItemAccount2>) {
+    override fun setupAccountsAdapter(accounts: List<ItemAccount>) {
 
         if (accountsAdapter == null) {
             accountsAdapter = AccountsAdapter(
@@ -85,20 +87,54 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         })
 
         accounts_spinner.onItemSelectedListener = onItemSelectedListener {
-            presenter.onAccountChosen(it)
+            presenter.onAccountSelected(it)
             recyclerview.scrollToPosition(0)
         }
+    }
 
-        presenter.onAccountChosen(0)
+    override fun setupTxFeedAdapter(isCrypto: Boolean) {
+
+        if (txFeedAdapter == null) {
+            txFeedAdapter = TxFeedAdapter(activity!!, isCrypto)
+        }
+
+        recyclerview.layoutManager = LinearLayoutManager(context)
+        recyclerview.adapter = txFeedAdapter
+        // Disable blinking animations in RecyclerView
+        val animator = recyclerview.itemAnimator
+        if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
     }
 
     override fun selectDefaultAccount() {
         if (accountsAdapter?.isNotEmpty ?: false) accounts_spinner.setSelection(0, false)
     }
 
-    override fun updateAccountsDataSet(accountsList: List<ItemAccount2>) {
+    override fun updateAccountsDataSet(accountsList: List<ItemAccount>) {
         accountsAdapter?.updateAccountList(accountsList)
         handleAccountSpinnerVisibility()
+    }
+
+    override fun updateTransactionDataSet(isCrypto: Boolean, displayObjects: List<Any>) {
+        Timber.d("vos updateTransactionDataSet")
+        //TODO No easy way to just update data set. We are forced to rebuild adapter
+        setupTxFeedAdapter(isCrypto)
+        txFeedAdapter?.items = displayObjects
+
+//        if (spacerDecoration == null) {
+//            spacerDecoration = BottomSpacerDecoration(
+//                    ViewUtils.convertDpToPixel(56f, context).toInt()
+//            )
+//        }
+//        recyclerview?.apply {
+//            removeItemDecoration(spacerDecoration)
+//            addItemDecoration(spacerDecoration)
+//        }
+//
+//        generateLauncherShortcuts()
+    }
+
+    override fun updateTransactionValueType(showCrypto: Boolean) {
+        txFeedAdapter?.onViewFormatUpdated(showCrypto)
     }
 
     fun handleAccountSpinnerVisibility() {
@@ -144,7 +180,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun onTotalBalanceUpdated(balance: String) {
+    override fun updateBalanceHeader(balance: String) {
         textview_balance.text = balance
     }
 
@@ -171,11 +207,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun updateCurrencyType(isBtc: Boolean, btcFormat: Int) {
-//        balanceAdapter?.onViewFormatUpdated(isBtc, btcFormat)
-//        accountsAdapter?.notifyBtcChanged(isBtc, btcFormat)
-    }
-
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
         val bundle = Bundle()
         bundle.putInt(KEY_TRANSACTION_LIST_POSITION, correctedPosition)
@@ -195,6 +226,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
     }
+
+    override fun getCurrentAccountPosition() = accounts_spinner.selectedItemPosition
 
     /**
      * Called from MainActivity

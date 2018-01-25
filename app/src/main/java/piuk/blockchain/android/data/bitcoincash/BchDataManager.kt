@@ -152,10 +152,31 @@ class BchDataManager(
             bchDataStore.bchWallet?.getImportedAddressBalance() ?: BigInteger.ZERO
 
     fun getAddressTransactions(address: String, limit: Int, offset: Int) =
-            bchDataStore.bchWallet?.getTransactions(getActiveXpubs(), address, limit, offset)
+            bchDataStore.bchWallet?.getTransactions(
+                    mutableListOf(),//legacy list
+                    mutableListOf(),//watch-only list
+                    getActiveXpubs(),
+                    address,
+                    limit,
+                    offset)
 
     fun getWalletTransactions(limit: Int, offset: Int) =
-            bchDataStore.bchWallet?.getTransactions(getActiveXpubs(), null, limit, offset)
+            bchDataStore.bchWallet?.getTransactions(
+                    mutableListOf(),//legacy list
+                    mutableListOf(),//watch-only list
+                    getActiveXpubs(),
+                    null,
+                    limit,
+                    offset)
+
+    fun getImportedAddressTransactions(limit: Int, offset: Int) =
+            bchDataStore.bchWallet?.getTransactions(
+                    payloadDataManager.legacyAddressStringList,//legacy list
+                    mutableListOf(),//watch-only list
+                    getActiveXpubs(),
+                    null,
+                    limit,
+                    offset)
 
     /**
      * Returns all non-archived accounts

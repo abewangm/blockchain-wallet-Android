@@ -14,20 +14,18 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ItemBalanceAccountDropdownBinding;
 import piuk.blockchain.android.databinding.SpinnerBalanceHeaderBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.ui.balance.adapter.ItemAccount2;
-import piuk.blockchain.android.util.MonetaryUtil;
 
-class AccountsAdapter extends ArrayAdapter<ItemAccount2> {
+class AccountsAdapter extends ArrayAdapter<ItemAccount> {
 
 //    private boolean isBtc;
 //    private final MonetaryUtil monetaryUtil;
 //    private String fiatUnits;
 //    private double exchangeRate;
-    private List<ItemAccount2> accountList;
+    private List<ItemAccount> accountList;
 
     AccountsAdapter(Context context,
                     int textViewResourceId,
-                    List<ItemAccount2> accountList) {
+                    List<ItemAccount> accountList) {
         super(context, textViewResourceId, accountList);
 //        this.isBtc = isBtc;
 //        this.monetaryUtil = monetaryUtil;
@@ -55,7 +53,7 @@ class AccountsAdapter extends ArrayAdapter<ItemAccount2> {
                     parent,
                     false);
 
-            ItemAccount2 item = getItem(position);
+            ItemAccount item = getItem(position);
 
             binding.accountName.setText(item.getLabel());
             binding.balance.setText(item.getDisplayBalance());
@@ -79,7 +77,7 @@ class AccountsAdapter extends ArrayAdapter<ItemAccount2> {
                     parent,
                     false);
 
-            ItemAccount2 item = getItem(position);
+            ItemAccount item = getItem(position);
 
             binding.text.setText(item.getLabel());
             return binding.getRoot();
@@ -98,7 +96,7 @@ class AccountsAdapter extends ArrayAdapter<ItemAccount2> {
 //        notifyDataSetChanged();
 //    }
 
-    void updateAccountList(List<ItemAccount2> accountList) {
+    void updateAccountList(List<ItemAccount> accountList) {
         this.accountList.clear();
         this.accountList.addAll(accountList);
         notifyDataSetChanged();

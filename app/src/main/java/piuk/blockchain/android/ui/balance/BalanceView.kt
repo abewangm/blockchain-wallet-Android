@@ -1,24 +1,36 @@
 package piuk.blockchain.android.ui.balance
 
-import android.support.annotation.StringRes
-import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.account.ItemAccount
-import piuk.blockchain.android.ui.balance.adapter.ItemAccount2
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.base.View
-import piuk.blockchain.android.ui.customviews.ToastCustom
-import piuk.blockchain.android.util.MonetaryUtil
 
 interface BalanceView : View {
+
+    fun setupAccountsAdapter(accountsList: List<ItemAccount>)
+
+    fun setupTxFeedAdapter(isCrypto: Boolean)
+//                            btcExchangeRate: Double,
+//                           ethExchangeRate: Double,
+//                           isBtc: Boolean,
+//                           txNoteMap: MutableMap<String, String>)
+
+    fun updateTransactionDataSet(isCrypto: Boolean, displayObjects: List<Any>)
+
+    fun updateBalanceHeader(balance: String)
+
+    fun updateAccountsDataSet(accountsList: List<ItemAccount>)
+
+    fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies)
+
+    fun selectDefaultAccount()
+
+    fun setUiState(@UiState.UiStateDef uiState: Int)
+
 
 //    val isContactsEnabled: Boolean
 //
 //    val shouldShowBuy: Boolean
-//
-//    fun onTransactionsUpdated(displayObjects: List<Any>)
-//
-    fun onTotalBalanceUpdated(balance: String)
 //
 //    fun onExchangeRateUpdated(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean, txNoteMap: MutableMap<String, String>)
 //
@@ -36,15 +48,10 @@ interface BalanceView : View {
 //            isBtc: Boolean
 //    )
 //
-    fun setUiState(@UiState.UiStateDef uiState: Int)
-
-    fun updateCurrencyType(isBtc: Boolean, btcFormat: Int)
-//
 //    fun startBuyActivity()
 //
 //    fun startReceiveFragment()
 //
-    fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies)
 //
 //    fun hideAccountSpinner()
 //
@@ -52,9 +59,9 @@ interface BalanceView : View {
 //
 //    fun updateAccountList(accountList: List<ItemAccount>)
 
-    fun setupAccountsAdapter(accountsList: List<ItemAccount2>)
+    fun getCurrentAccountPosition(): Int
 
-    fun updateAccountsDataSet(accountsList: List<ItemAccount2>)
+    fun updateTransactionValueType(showCrypto: Boolean)
 
-    fun selectDefaultAccount()
+
 }

@@ -104,20 +104,20 @@
                 //    override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
                 //        currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
                 //    }
-//
-//    override fun showAccountSpinner() {
-//        if (accountsAdapter?.count ?: 1 > 1) {
-//            layout_spinner.visible()
-//        } else if (accountsAdapter?.count ?: 1 == 1) {
-//            accounts_spinner.setSelection(0, false)
-//            layout_spinner.gone()
-//        }
-//    }
-//
-//    override fun hideAccountSpinner() {
-//        layout_spinner.gone()
-//    }
-//
+                //
+                //    override fun showAccountSpinner() {
+                //        if (accountsAdapter?.count ?: 1 > 1) {
+                //            layout_spinner.visible()
+                //        } else if (accountsAdapter?.count ?: 1 == 1) {
+                //            accounts_spinner.setSelection(0, false)
+                //            layout_spinner.gone()
+                //        }
+                //    }
+                //
+                //    override fun hideAccountSpinner() {
+                //        layout_spinner.gone()
+                //    }
+                //
                 //    override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
                 //        goToTransactionDetail(correctedPosition)
                 //    }
@@ -178,34 +178,34 @@
                 //            recyclerview.scrollToPosition(0)
                 //        }
                 //    }
-//
-//
-//    override fun updateAccountList(accountList: List<ItemAccount>) {
-//
-//        Timber.d("vos updateAccountList: "+accountList.size)
-//        accountsAdapter?.updateAccountList(accountList)
-//        accounts_spinner.visible()
-//    }
-//
+                //
+                //
+                //    override fun updateAccountList(accountList: List<ItemAccount>) {
+                //
+                //        Timber.d("vos updateAccountList: "+accountList.size)
+                //        accountsAdapter?.updateAccountList(accountList)
+                //        accounts_spinner.visible()
+                //    }
+                //
                 //    override fun onTotalBalanceUpdated(balance: String) {
                 //        textview_balance.text = balance
                 //    }
-//
-//    override fun onTransactionsUpdated(displayObjects: List<Any>) {
-//        balanceAdapter?.items = displayObjects
-//
-//        if (spacerDecoration == null) {
-//            spacerDecoration = BottomSpacerDecoration(
-//                    ViewUtils.convertDpToPixel(56f, context).toInt()
-//            )
-//        }
-//        recyclerview?.apply {
-//            removeItemDecoration(spacerDecoration)
-//            addItemDecoration(spacerDecoration)
-//        }
-//
-//        generateLauncherShortcuts()
-//    }
+                //
+                //    override fun onTransactionsUpdated(displayObjects: List<Any>) {
+                //        balanceAdapter?.items = displayObjects
+                //
+                //        if (spacerDecoration == null) {
+                //            spacerDecoration = BottomSpacerDecoration(
+                //                    ViewUtils.convertDpToPixel(56f, context).toInt()
+                //            )
+                //        }
+                //        recyclerview?.apply {
+                //            removeItemDecoration(spacerDecoration)
+                //            addItemDecoration(spacerDecoration)
+                //        }
+                //
+                //        generateLauncherShortcuts()
+                //    }
 //
 //    override fun onExchangeRateUpdated(
 //            btcExchangeRate: Double,
@@ -342,24 +342,24 @@
                 //        setShowRefreshing(false)
                 //        no_transaction_include.gone()
                 //    }
-//
-//    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean, txNoteMap: MutableMap<String, String>) {
-//        balanceAdapter = BalanceAdapter(
-//                activity!!,
-//                btcExchangeRate,
-//                ethExchangeRate,
-//                isBtc,
-//                txNoteMap,
-//                this
-//        )
-//
-//        recyclerview.layoutManager = LinearLayoutManager(context)
-//        recyclerview.adapter = balanceAdapter
-//        // Disable blinking animations in RecyclerView
-//        val animator = recyclerview.itemAnimator
-//        if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
-//    }
-//
+                //
+                //    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean, txNoteMap: MutableMap<String, String>) {
+                //        balanceAdapter = BalanceAdapter(
+                //                activity!!,
+                //                btcExchangeRate,
+                //                ethExchangeRate,
+                //                isBtc,
+                //                txNoteMap,
+                //                this
+                //        )
+                //
+                //        recyclerview.layoutManager = LinearLayoutManager(context)
+                //        recyclerview.adapter = balanceAdapter
+                //        // Disable blinking animations in RecyclerView
+                //        val animator = recyclerview.itemAnimator
+                //        if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
+                //    }
+                //
                 //    private fun goToTransactionDetail(position: Int) {
                 //        val bundle = Bundle()
                 //        bundle.putInt(KEY_TRANSACTION_LIST_POSITION, position)

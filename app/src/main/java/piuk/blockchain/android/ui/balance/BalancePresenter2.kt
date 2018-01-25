@@ -70,30 +70,30 @@
 //        subscribeToEvents()
 //        updateCurrencyUi(currencyState.cryptoCurrency)
 //
-//        ethDataManager.fetchEthAddress()
-//                .doOnError { Timber.e(it) }
-//                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() }
-//                .compose(RxUtil.addObservableToCompositeDisposable(this))
-//                .doOnNext {
-//                    currencyAccountMap.clear()
-//                    currencyAccountMap.putAll(getAllDisplayableAccounts())
-//
-//                    Timber.d("vos Stuff we put in")
-//                    for (item in currencyAccountMap) {
-//                        Timber.d("vos key: "+item.key)
-//                        for(v in item.value) {
-//                            Timber.d("vos value: " + v)
-//                        }
-//                    }
-//
-//                }
-//                .flatMap { getShapeShiftTxNotesObservable() }
-//                .doOnNext { txNoteMap.putAll(it) }
-//                .doOnComplete { setupTransactions() }
-//                .subscribe(
-//                        { updateSelectedCurrency(currencyState.cryptoCurrency) },
-//                        { Timber.e(it) }
-//                )
+                //        ethDataManager.fetchEthAddress()
+                //                .doOnError { Timber.e(it) }
+                //                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() }
+                //                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                //                .doOnNext {
+                //                    currencyAccountMap.clear()
+                //                    currencyAccountMap.putAll(getAllDisplayableAccounts())
+                //
+                //                    Timber.d("vos Stuff we put in")
+                //                    for (item in currencyAccountMap) {
+                //                        Timber.d("vos key: "+item.key)
+                //                        for(v in item.value) {
+                //                            Timber.d("vos value: " + v)
+                //                        }
+                //                    }
+                //
+                //                }
+                //                .flatMap { getShapeShiftTxNotesObservable() }
+                //                .doOnNext { txNoteMap.putAll(it) }
+                //                .doOnComplete { setupTransactions() }
+                //                .subscribe(
+                //                        { updateSelectedCurrency(currencyState.cryptoCurrency) },
+                //                        { Timber.e(it) }
+                //                )
 //    }
 //
 //    override fun onViewDestroyed() {
@@ -214,138 +214,138 @@
                 //
                 //        updateCurrencyUi(cryptoCurrency)
                 //    }
-//
-//    @VisibleForTesting
-//    internal fun getAllDisplayableAccounts(): MutableMap<CryptoCurrencies, MutableList<ItemAccount>> {
-//
-//        val btcList = mutableListOf<ItemAccount>()
-//
-//        val legacyAddresses = payloadDataManager.legacyAddresses
-//                .filter { it.tag != LegacyAddress.ARCHIVED_ADDRESS }
-//
-//        val accounts = payloadDataManager.accounts
-//                .filter { !it.isArchived }
-//                .map {
-//                    val bigIntBalance = payloadDataManager.getAddressBalance(it.xpub)
-//                    ItemAccount().apply {
-//                        label = it.label
-//                        Timber.d("vos label: "+label)
-//
-//                        displayBalance = getBtcBalanceString(
-//                                currencyState.isDisplayingCryptoCurrency,
-//                                bigIntBalance.toLong()
-//                        )
-//                        absoluteBalance = bigIntBalance.toLong()
-//                        address = it.xpub
-//                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
-//                    }
-//                }
-//
-//        // Show "All Accounts" if necessary
-//        if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
-//            val bigIntBalance = payloadDataManager.walletBalance
-//
-//            btcList.add(ItemAccount().apply {
-//                label = stringUtils.getString(R.string.all_accounts)
-//                Timber.d("vos label: "+label)
-//                displayBalance = getBtcBalanceString(
-//                        currencyState.isDisplayingCryptoCurrency,
-//                        bigIntBalance.toLong()
-//                )
-//                absoluteBalance = bigIntBalance.toLong()
-//                type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
-//            })
-//        }
-//
-//        btcList.addAll(accounts)
-//
-//        // Show "Imported Addresses" if wallet contains legacy addresses
-//        if (!legacyAddresses.isEmpty()) {
-//            val bigIntBalance = payloadDataManager.importedAddressesBalance
-//
-//            btcList.add(ItemAccount().apply {
-//                displayBalance = getBtcBalanceString(
-//                        currencyState.isDisplayingCryptoCurrency,
-//                        bigIntBalance.toLong()
-//                )
-//                label = stringUtils.getString(R.string.imported_addresses)
-//                Timber.d("vos label: "+label)
-//                absoluteBalance = bigIntBalance.toLong()
-//                type = ItemAccount.TYPE.ALL_LEGACY
-//            })
-//        }
-//
-//        // Add Ethereum
-//        val ethMutableList = mutableListOf<ItemAccount>()
-//        ethMutableList.add(ItemAccount().apply {
-//            type = ItemAccount.TYPE.ETHEREUM
-//            label = stringUtils.getString(R.string.eth_default_account_label)
-//            Timber.d("vos label: "+label)
-//            absoluteBalance = ethDataManager.getEthResponseModel()?.getTotalBalance()?.toLong() ?: 0L
-//            displayBalance = getEthBalanceString(
-//                    currencyState.isDisplayingCryptoCurrency,
-//                    BigDecimal(ethDataManager.getEthResponseModel()?.getTotalBalance() ?: BigInteger.ZERO)
-//            )
-//        })
-//
-//        val bchList = mutableListOf<ItemAccount>()
-//
-//        val bchAccounts = bchDataManager.getActiveAccounts()
-//                .map {
-//                    val bigIntBalance = bchDataManager.getAddressBalance(it.xpub)
-//                    ItemAccount().apply {
-//                        label = it.label
-//                        Timber.d("vos label: "+label)
-//                        displayBalance = getBtcBalanceString(
-//                                currencyState.isDisplayingCryptoCurrency,
-//                                bigIntBalance.toLong()
-//                        )
-//                        absoluteBalance = bigIntBalance.toLong()
-//                        address = it.xpub
-//                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
-//                    }
-//                }
-//
-//        // Show "All Accounts" if necessary
-//        if (bchAccounts.size > 1 || legacyAddresses.isNotEmpty()) {
-//            val bigIntBalance = bchDataManager.getWalletBalance()
-//
-//            bchList.add(ItemAccount().apply {
-//                label = stringUtils.getString(R.string.bch_all_accounts)
-//                Timber.d("vos label: "+label)
-//                displayBalance = getBtcBalanceString(
-//                        currencyState.isDisplayingCryptoCurrency,
-//                        bigIntBalance.toLong()
-//                )
-//                absoluteBalance = bigIntBalance.toLong()
-//                type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
-//            })
-//        }
-//
-//        bchList.addAll(bchAccounts)
-//
-//        // Show "Imported Addresses" if wallet contains legacy addresses
-//        if (!legacyAddresses.isEmpty()) {
-//            val bigIntBalance = payloadDataManager.importedAddressesBalance
-//
-//            bchList.add(ItemAccount().apply {
-//                displayBalance = getBtcBalanceString(
-//                        currencyState.isDisplayingCryptoCurrency,
-//                        bigIntBalance.toLong()
-//                )
-//                label = stringUtils.getString(R.string.bch_imported_addresses)
-//                absoluteBalance = bigIntBalance.toLong()
-//                type = ItemAccount.TYPE.ALL_LEGACY
-//            })
-//        }
-//
-//        val result = mutableMapOf<CryptoCurrencies, MutableList<ItemAccount>>()
-//        result.put(CryptoCurrencies.BTC, btcList)
-//        result.put(CryptoCurrencies.ETHER, ethMutableList)
-//        result.put(CryptoCurrencies.BCH, bchList)
-//
-//        return result
-//    }
+                //
+                //    @VisibleForTesting
+                //    internal fun getAllDisplayableAccounts(): MutableMap<CryptoCurrencies, MutableList<ItemAccount>> {
+                //
+                //        val btcList = mutableListOf<ItemAccount>()
+                //
+                //        val legacyAddresses = payloadDataManager.legacyAddresses
+                //                .filter { it.tag != LegacyAddress.ARCHIVED_ADDRESS }
+                //
+                //        val accounts = payloadDataManager.accounts
+                //                .filter { !it.isArchived }
+                //                .map {
+                //                    val bigIntBalance = payloadDataManager.getAddressBalance(it.xpub)
+                //                    ItemAccount().apply {
+                //                        label = it.label
+                //                        Timber.d("vos label: "+label)
+                //
+                //                        displayBalance = getBtcBalanceString(
+                //                                currencyState.isDisplayingCryptoCurrency,
+                //                                bigIntBalance.toLong()
+                //                        )
+                //                        absoluteBalance = bigIntBalance.toLong()
+                //                        address = it.xpub
+                //                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
+                //                    }
+                //                }
+                //
+                //        // Show "All Accounts" if necessary
+                //        if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
+                //            val bigIntBalance = payloadDataManager.walletBalance
+                //
+                //            btcList.add(ItemAccount().apply {
+                //                label = stringUtils.getString(R.string.all_accounts)
+                //                Timber.d("vos label: "+label)
+                //                displayBalance = getBtcBalanceString(
+                //                        currencyState.isDisplayingCryptoCurrency,
+                //                        bigIntBalance.toLong()
+                //                )
+                //                absoluteBalance = bigIntBalance.toLong()
+                //                type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+                //            })
+                //        }
+                //
+                //        btcList.addAll(accounts)
+                //
+                //        // Show "Imported Addresses" if wallet contains legacy addresses
+                //        if (!legacyAddresses.isEmpty()) {
+                //            val bigIntBalance = payloadDataManager.importedAddressesBalance
+                //
+                //            btcList.add(ItemAccount().apply {
+                //                displayBalance = getBtcBalanceString(
+                //                        currencyState.isDisplayingCryptoCurrency,
+                //                        bigIntBalance.toLong()
+                //                )
+                //                label = stringUtils.getString(R.string.imported_addresses)
+                //                Timber.d("vos label: "+label)
+                //                absoluteBalance = bigIntBalance.toLong()
+                //                type = ItemAccount.TYPE.ALL_LEGACY
+                //            })
+                //        }
+                //
+                //        // Add Ethereum
+                //        val ethMutableList = mutableListOf<ItemAccount>()
+                //        ethMutableList.add(ItemAccount().apply {
+                //            type = ItemAccount.TYPE.ETHEREUM
+                //            label = stringUtils.getString(R.string.eth_default_account_label)
+                //            Timber.d("vos label: "+label)
+                //            absoluteBalance = ethDataManager.getEthResponseModel()?.getTotalBalance()?.toLong() ?: 0L
+                //            displayBalance = getEthBalanceString(
+                //                    currencyState.isDisplayingCryptoCurrency,
+                //                    BigDecimal(ethDataManager.getEthResponseModel()?.getTotalBalance() ?: BigInteger.ZERO)
+                //            )
+                //        })
+                //
+                //        val bchList = mutableListOf<ItemAccount>()
+                //
+                //        val bchAccounts = bchDataManager.getActiveAccounts()
+                //                .map {
+                //                    val bigIntBalance = bchDataManager.getAddressBalance(it.xpub)
+                //                    ItemAccount().apply {
+                //                        label = it.label
+                //                        Timber.d("vos label: "+label)
+                //                        displayBalance = getBtcBalanceString(
+                //                                currencyState.isDisplayingCryptoCurrency,
+                //                                bigIntBalance.toLong()
+                //                        )
+                //                        absoluteBalance = bigIntBalance.toLong()
+                //                        address = it.xpub
+                //                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
+                //                    }
+                //                }
+                //
+                //        // Show "All Accounts" if necessary
+                //        if (bchAccounts.size > 1 || legacyAddresses.isNotEmpty()) {
+                //            val bigIntBalance = bchDataManager.getWalletBalance()
+                //
+                //            bchList.add(ItemAccount().apply {
+                //                label = stringUtils.getString(R.string.bch_all_accounts)
+                //                Timber.d("vos label: "+label)
+                //                displayBalance = getBtcBalanceString(
+                //                        currencyState.isDisplayingCryptoCurrency,
+                //                        bigIntBalance.toLong()
+                //                )
+                //                absoluteBalance = bigIntBalance.toLong()
+                //                type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+                //            })
+                //        }
+                //
+                //        bchList.addAll(bchAccounts)
+                //
+                //        // Show "Imported Addresses" if wallet contains legacy addresses
+                //        if (!legacyAddresses.isEmpty()) {
+                //            val bigIntBalance = payloadDataManager.importedAddressesBalance
+                //
+                //            bchList.add(ItemAccount().apply {
+                //                displayBalance = getBtcBalanceString(
+                //                        currencyState.isDisplayingCryptoCurrency,
+                //                        bigIntBalance.toLong()
+                //                )
+                //                label = stringUtils.getString(R.string.bch_imported_addresses)
+                //                absoluteBalance = bigIntBalance.toLong()
+                //                type = ItemAccount.TYPE.ALL_LEGACY
+                //            })
+                //        }
+                //
+                //        val result = mutableMapOf<CryptoCurrencies, MutableList<ItemAccount>>()
+                //        result.put(CryptoCurrencies.BTC, btcList)
+                //        result.put(CryptoCurrencies.ETHER, ethMutableList)
+                //        result.put(CryptoCurrencies.BCH, bchList)
+                //
+                //        return result
+                //    }
 //
 //    private fun updateCurrencyUi(cryptoCurrency: CryptoCurrencies) {
 //        when (cryptoCurrency) {
@@ -371,20 +371,20 @@
 //        }
 //    }
 //
-//    private fun getTransactionsListObservable(itemAccount: ItemAccount) =
-//            transactionListDataManager.fetchTransactions(itemAccount, 50, 0)
-//                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
-//                    .doOnNext {
-//                        displayList.removeAll { it is Displayable }
-//                        displayList.addAll(it)
-//
-//                        when {
-//                            displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
-//                            else -> view.setUiState(UiState.CONTENT)
-//                        }
-//                        view.onTransactionsUpdated(displayList)
-//                    }
-//
+                //    private fun getTransactionsListObservable(itemAccount: ItemAccount) =
+                //            transactionListDataManager.fetchTransactions(itemAccount, 50, 0)
+                //                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
+                //                    .doOnNext {
+                //                        displayList.removeAll { it is Displayable }
+                //                        displayList.addAll(it)
+                //
+                //                        when {
+                //                            displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
+                //                            else -> view.setUiState(UiState.CONTENT)
+                //                        }
+                //                        view.onTransactionsUpdated(displayList)
+                //                    }
+                //
                 //    private fun getBalanceObservable(itemAccount: ItemAccount): Observable<Nothing> {
                 //        return if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
                 //            ethDataManager.fetchEthAddress()
@@ -402,34 +402,34 @@
                 //                    }.toObservable<Nothing>()
                 //        }
                 //    }
-//
-//    private fun getUpdateTickerObservable(): Observable<Map<String, PriceDatum>> {
-//        // Remove ETH from list of accounts
-////        val displayableAccounts = mutableListOf<ItemAccount>().apply {
-////            addAll(activeAccountAndAddressList)
-////            removeAt(lastIndex)
-////        }
-//        val displayableAccounts = currencyAccountMap.get(currencyState.cryptoCurrency) ?: mutableListOf()
-//
-//        Timber.d("vos getUpdateTickerObservable")
-//
-//        return exchangeRateFactory.updateTickers()
-//                .doOnComplete {
-//                    view.onAccountsUpdated(
-//                            displayableAccounts,
-//                            getLastBtcPrice(getFiatCurrency()),
-//                            getFiatCurrency(),
-//                            monetaryUtil,
-//                            currencyState.isDisplayingCryptoCurrency
-//                    )
-//                    view.onExchangeRateUpdated(
-//                            exchangeRateFactory.getLastBtcPrice(getFiatCurrency()),
-//                            exchangeRateFactory.getLastEthPrice(getFiatCurrency()),
-//                            currencyState.isDisplayingCryptoCurrency,
-//                            txNoteMap
-//                    )
-//                }
-//    }
+                //
+                //    private fun getUpdateTickerObservable(): Observable<Map<String, PriceDatum>> {
+                //        // Remove ETH from list of accounts
+                ////        val displayableAccounts = mutableListOf<ItemAccount>().apply {
+                ////            addAll(activeAccountAndAddressList)
+                ////            removeAt(lastIndex)
+                ////        }
+                //        val displayableAccounts = currencyAccountMap.get(currencyState.cryptoCurrency) ?: mutableListOf()
+                //
+                //        Timber.d("vos getUpdateTickerObservable")
+                //
+                //        return exchangeRateFactory.updateTickers()
+                //                .doOnComplete {
+                //                    view.onAccountsUpdated(
+                //                            displayableAccounts,
+                //                            getLastBtcPrice(getFiatCurrency()),
+                //                            getFiatCurrency(),
+                //                            monetaryUtil,
+                //                            currencyState.isDisplayingCryptoCurrency
+                //                    )
+                //                    view.onExchangeRateUpdated(
+                //                            exchangeRateFactory.getLastBtcPrice(getFiatCurrency()),
+                //                            exchangeRateFactory.getLastEthPrice(getFiatCurrency()),
+                //                            currencyState.isDisplayingCryptoCurrency,
+                //                            txNoteMap
+                //                    )
+                //                }
+                //    }
 //
 //    private fun storeSwipeReceiveAddresses() {
 //        // Defer to background thread as deriving addresses is quite processor intensive

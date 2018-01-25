@@ -114,12 +114,14 @@ public class DataManagerModule {
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            EthDataManager ethDataManager,
                                                                            BchDataManager bchDataManager,
-                                                                           TransactionListStore transactionListStore) {
+                                                                           TransactionListStore transactionListStore,
+                                                                           CurrencyState currencyState) {
         return new TransactionListDataManager(
                 payloadManager,
                 ethDataManager,
                 bchDataManager,
-                transactionListStore);
+                transactionListStore,
+                currencyState);
     }
 
     @Provides
