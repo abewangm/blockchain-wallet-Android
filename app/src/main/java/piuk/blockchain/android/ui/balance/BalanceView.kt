@@ -13,23 +13,23 @@ interface BalanceView : View {
 
     fun updateTransactionDataSet(isCrypto: Boolean, displayObjects: List<Any>)
 
-    fun updateBalanceHeader(balance: String)
-
     fun updateAccountsDataSet(accountsList: List<ItemAccount>)
 
     fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies)
+
+    fun updateBalanceHeader(balance: String)
 
     fun selectDefaultAccount()
 
     fun setUiState(@UiState.UiStateDef uiState: Int)
 
-    fun getCurrentAccountPosition(): Int?
-
     fun updateTransactionValueType(showCrypto: Boolean)
-
-    fun generateLauncherShortcuts()
 
     fun startReceiveFragmentBtc()
 
     fun startBuyActivity()
+
+    fun getCurrentAccountPosition(): Int?
+
+    fun generateLauncherShortcuts()
 }

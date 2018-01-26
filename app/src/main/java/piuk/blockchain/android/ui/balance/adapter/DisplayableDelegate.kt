@@ -13,19 +13,14 @@ import android.widget.TextView
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import kotlinx.android.synthetic.main.item_balance.view.*
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.DateUtil
-import piuk.blockchain.android.util.MonetaryUtil
-import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
-import java.math.BigDecimal
-import java.text.DecimalFormat
 
 class DisplayableDelegate<in T>(
         activity: Activity,

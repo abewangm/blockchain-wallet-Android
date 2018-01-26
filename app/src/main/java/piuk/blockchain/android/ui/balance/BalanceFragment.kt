@@ -21,6 +21,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
+import piuk.blockchain.android.ui.balance.adapter.AccountsAdapter
 import piuk.blockchain.android.ui.balance.adapter.TxFeedAdapter
 import piuk.blockchain.android.ui.balance.adapter.TxFeedClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
@@ -35,7 +36,6 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
-import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -70,6 +70,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             savedInstanceState: Bundle?
     ) = container?.inflate(R.layout.fragment_balance)
 
+    override fun createPresenter() = balancePresenter
+
+    override fun getMvpView() = this
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -100,7 +104,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         LocalBroadcastManager.getInstance(context!!)
                 .registerReceiver(receiver, IntentFilter(ACTION_INTENT))
     }
-
 
     override fun onPause() {
         super.onPause()
@@ -215,10 +218,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         }
     }
 
-    override fun createPresenter() = balancePresenter
-
-    override fun getMvpView() = this
-
     override fun setUiState(uiState: Int) {
         when (uiState) {
             UiState.FAILURE, UiState.EMPTY -> onEmptyState()
@@ -236,7 +235,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
                 button_get_bitcoin.setOnClickListener {
                     if (shouldShowBuy) {
-                        presenter.getBitcoinClicked()
+                        presenter.onGetBitcoinClicked()
                     } else {
                         startReceiveFragmentBtc()
                     }
@@ -296,7 +295,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                     .sendBroadcast(Intent(MainActivity.ACTION_BUY))
         }
     }
-
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
         val bundle = Bundle()
