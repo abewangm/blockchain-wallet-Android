@@ -6,14 +6,17 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.exchange.BuyDataManager
+import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -48,17 +51,45 @@ class BalancePresenter @Inject constructor(
         private val bchDataManager: BchDataManager
 ) : BasePresenter<BalanceView>() {
 
+    @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
+    @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
+
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
         onAccountsAdapterSetup()
         onTxFeedAdapterSetup()
+        subscribeToEvents()
     }
 
     internal fun onResume() {
         onRefreshRequested()
     }
+
+    override fun onViewDestroyed() {
+        notificationObservable?.let { rxBus.unregister(NotificationPayload::class.java, it) }
+        authEventObservable?.let { rxBus.unregister(AuthEvent::class.java, it) }
+        super.onViewDestroyed()
+    }
+
+    private fun subscribeToEvents() {
+
+        authEventObservable = rxBus.register(AuthEvent::class.java).apply {
+            subscribe({
+                //Clear tx feed
+                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, mutableListOf())
+                transactionListDataManager.clearTransactionList()
+            })
+        }
+
+        notificationObservable = rxBus.register(NotificationPayload::class.java).apply {
+            subscribe({ notificationPayload ->
+                //no-op
+            })
+        }
+    }
+
 
     /**
      * Do all API calls to reload page
@@ -75,6 +106,7 @@ class BalancePresenter @Inject constructor(
                 .doOnComplete {
                     refreshBalanceHeader(account)
                     refreshAccountDataSet()
+                    refreshLauncherShortcuts()
                     setViewType(currencyState.isDisplayingCryptoCurrency)
                 }
     }
@@ -130,7 +162,7 @@ class BalancePresenter @Inject constructor(
         return Completable.fromObservable(
 //            getShapeShiftTxNotesObservable()
                 transactionListDataManager.fetchTransactions(account, 50, 0)
-//                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
+                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
                         .map {
                             for (tx in it) {
 
@@ -162,6 +194,10 @@ class BalancePresenter @Inject constructor(
 
                                 }
                             }
+
+                            //TODO This is to correctly show EMPTY STATE 'Get Ether' etc.
+                            //TODO If update/refresh UI gets cleaned this can be improved. Also this causes a double update and flashy UI
+                            view.updateSelectedCurrency(currencyState.cryptoCurrency)
 
                             when {
                                 it.isEmpty() -> { view.setUiState(UiState.EMPTY) }
@@ -223,6 +259,10 @@ class BalancePresenter @Inject constructor(
     internal fun refreshAccountDataSet() {
         val accountList = getAccounts()
         view.updateAccountsDataSet(accountList)
+    }
+
+    internal fun refreshLauncherShortcuts() {
+        view.generateLauncherShortcuts()
     }
 
     internal fun onAccountSelected(position: Int) {
@@ -477,6 +517,9 @@ class BalancePresenter @Inject constructor(
 
     //endregion
 
+    internal fun areLauncherShortcutsEnabled() =
+            prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
+
     private fun getShapeShiftTxNotesObservable() =
             shapeShiftDataManager.getTradesList()
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -495,5 +538,30 @@ class BalancePresenter @Inject constructor(
                     }
                     .doOnError { Timber.e(it) }
                     .onErrorReturn { mutableMapOf() }
+
+    internal fun getBitcoinClicked() {
+        buyDataManager.canBuy
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({
+                    if (it) {
+                        view.startBuyActivity()
+                    } else {
+                        view.startReceiveFragmentBtc()
+                    }
+                }, { Timber.e(it) })
+    }
+
+    private fun storeSwipeReceiveAddresses() {
+        // Defer to background thread as deriving addresses is quite processor intensive
+        Completable.fromCallable {
+            swipeToReceiveHelper.updateAndStoreBitcoinAddresses()
+            swipeToReceiveHelper.updateAndStoreBitcoinCashAddresses()
+            Void.TYPE
+        }.subscribeOn(Schedulers.computation())
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { /* No-op */ },
+                        { Timber.e(it) })
+    }
 
 }

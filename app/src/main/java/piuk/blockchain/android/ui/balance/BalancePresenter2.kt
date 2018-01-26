@@ -53,8 +53,8 @@
 //        private val bchDataManager: BchDataManager
 //) : BasePresenter<BalanceView>() {
 //
-//    @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
-//    @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
+                //    @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
+                //    @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
 //    @VisibleForTesting var chosenAccount: ItemAccount? = null
 //
 //    @VisibleForTesting val currencyAccountMap: MutableMap<CryptoCurrencies, MutableList<ItemAccount>> = mutableMapOf()
@@ -62,14 +62,14 @@
                 //    private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 //    private var txNoteMap: MutableMap<String, String> = mutableMapOf()
 //
-//    @SuppressLint("VisibleForTests")
-//    override fun onViewReady() {
-//
-//        currencyState.cryptoCurrency = CryptoCurrencies.BTC
-//
-//        subscribeToEvents()
-//        updateCurrencyUi(currencyState.cryptoCurrency)
-//
+                //    @SuppressLint("VisibleForTests")
+                //    override fun onViewReady() {
+                //
+                //        currencyState.cryptoCurrency = CryptoCurrencies.BTC
+                //
+                //        subscribeToEvents()
+                //        updateCurrencyUi(currencyState.cryptoCurrency)
+                //
                 //        ethDataManager.fetchEthAddress()
                 //                .doOnError { Timber.e(it) }
                 //                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() }
@@ -94,14 +94,14 @@
                 //                        { updateSelectedCurrency(currencyState.cryptoCurrency) },
                 //                        { Timber.e(it) }
                 //                )
-//    }
-//
-//    override fun onViewDestroyed() {
-//        notificationObservable?.let { rxBus.unregister(NotificationPayload::class.java, it) }
-//        authEventObservable?.let { rxBus.unregister(AuthEvent::class.java, it) }
-//        super.onViewDestroyed()
-//    }
-//
+                //    }
+                //
+                //    override fun onViewDestroyed() {
+                //        notificationObservable?.let { rxBus.unregister(NotificationPayload::class.java, it) }
+                //        authEventObservable?.let { rxBus.unregister(AuthEvent::class.java, it) }
+                //        super.onViewDestroyed()
+                //    }
+                //
                 //    internal fun onResume() {
                 //        // Here we check the Fiat and Btc formats and let the UI handle any potential updates
                 //        val btcUnitType = getBtcUnitType()
@@ -182,26 +182,26 @@
                 //    }
                 //
                 //    internal fun invertViewType() = setViewType(!currencyState.isDisplayingCryptoCurrency)
-//
-//    internal fun areLauncherShortcutsEnabled() =
-//            prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
-//
-//    internal fun getBitcoinClicked() {
-//        if (view.shouldShowBuy) {
-//            buyDataManager.canBuy
-//                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-//                    .subscribe({
-//                        if (it) {
-//                            view.startBuyActivity()
-//                        } else {
-//                            view.startReceiveFragment()
-//                        }
-//                    }, { Timber.e(it) })
-//        } else {
-//            view.startReceiveFragment()
-//        }
-//    }
-//
+                //
+                //    internal fun areLauncherShortcutsEnabled() =
+                //            prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
+                //
+                //    internal fun getBitcoinClicked() {
+                //        if (view.shouldShowBuy) {
+                //            buyDataManager.canBuy
+                //                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                //                    .subscribe({
+                //                        if (it) {
+                //                            view.startBuyActivity()
+                //                        } else {
+                //                            view.startReceiveFragment()
+                //                        }
+                //                    }, { Timber.e(it) })
+                //        } else {
+                //            view.startReceiveFragment()
+                //        }
+                //    }
+                //
                 //    internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
                 //        currencyState.cryptoCurrency = cryptoCurrency
                 //
@@ -346,31 +346,31 @@
                 //
                 //        return result
                 //    }
-//
-//    private fun updateCurrencyUi(cryptoCurrency: CryptoCurrencies) {
-//        when (cryptoCurrency) {
-//            CryptoCurrencies.BTC -> view.showAccountSpinner()
-//            CryptoCurrencies.ETHER -> view.hideAccountSpinner()
-//            CryptoCurrencies.BCH -> view.showAccountSpinner()
-//        }
-//
-//        view.updateSelectedCurrency(cryptoCurrency)
-//    }
-//
-//    private fun setupTransactions() {
-//        chosenAccount?.let {
-//            Observable.merge(
-//                    getBalanceObservable(it),
-//                    getTransactionsListObservable(it),
-//                    getUpdateTickerObservable()
-//            ).compose(RxUtil.addObservableToCompositeDisposable(this))
-//                    .doOnError { Timber.e(it) }
-//                    .subscribe(
-//                            { /* No-op */ },
-//                            { view.setUiState(UiState.FAILURE) })
-//        }
-//    }
-//
+                //
+                //    private fun updateCurrencyUi(cryptoCurrency: CryptoCurrencies) {
+                //        when (cryptoCurrency) {
+                //            CryptoCurrencies.BTC -> view.showAccountSpinner()
+                //            CryptoCurrencies.ETHER -> view.hideAccountSpinner()
+                //            CryptoCurrencies.BCH -> view.showAccountSpinner()
+                //        }
+                //
+                //        view.updateSelectedCurrency(cryptoCurrency)
+                //    }
+                //
+                //    private fun setupTransactions() {
+                //        chosenAccount?.let {
+                //            Observable.merge(
+                //                    getBalanceObservable(it),
+                //                    getTransactionsListObservable(it),
+                //                    getUpdateTickerObservable()
+                //            ).compose(RxUtil.addObservableToCompositeDisposable(this))
+                //                    .doOnError { Timber.e(it) }
+                //                    .subscribe(
+                //                            { /* No-op */ },
+                //                            { view.setUiState(UiState.FAILURE) })
+                //        }
+                //    }
+                //
                 //    private fun getTransactionsListObservable(itemAccount: ItemAccount) =
                 //            transactionListDataManager.fetchTransactions(itemAccount, 50, 0)
                 //                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
@@ -430,36 +430,36 @@
                 //                    )
                 //                }
                 //    }
-//
-//    private fun storeSwipeReceiveAddresses() {
-//        // Defer to background thread as deriving addresses is quite processor intensive
-//        Completable.fromCallable {
-//            swipeToReceiveHelper.updateAndStoreBitcoinAddresses()
-//            swipeToReceiveHelper.updateAndStoreBitcoinCashAddresses()
-//            Void.TYPE
-//        }.subscribeOn(Schedulers.computation())
-//                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-//                .subscribe(
-//                        { /* No-op */ },
-//                        { Timber.e(it) })
-//    }
-//
-//    private fun subscribeToEvents() {
-//
-//        authEventObservable = rxBus.register(AuthEvent::class.java).apply {
-//            subscribe({
-//                displayList.clear()
-//                transactionListDataManager.clearTransactionList()
-//            })
-//        }
-//
-//        notificationObservable = rxBus.register(NotificationPayload::class.java).apply {
-//            subscribe({ notificationPayload ->
-//                //no-op
-//            })
-//        }
-//    }
-//
+                //
+                //    private fun storeSwipeReceiveAddresses() {
+                //        // Defer to background thread as deriving addresses is quite processor intensive
+                //        Completable.fromCallable {
+                //            swipeToReceiveHelper.updateAndStoreBitcoinAddresses()
+                //            swipeToReceiveHelper.updateAndStoreBitcoinCashAddresses()
+                //            Void.TYPE
+                //        }.subscribeOn(Schedulers.computation())
+                //                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                //                .subscribe(
+                //                        { /* No-op */ },
+                //                        { Timber.e(it) })
+                //    }
+                //
+                //    private fun subscribeToEvents() {
+                //
+                //        authEventObservable = rxBus.register(AuthEvent::class.java).apply {
+                //            subscribe({
+                //                displayList.clear()
+                //                transactionListDataManager.clearTransactionList()
+                //            })
+                //        }
+                //
+                //        notificationObservable = rxBus.register(NotificationPayload::class.java).apply {
+                //            subscribe({ notificationPayload ->
+                //                //no-op
+                //            })
+                //        }
+                //    }
+                //
                 //    private fun getBtcBalanceString(isBtc: Boolean, btcBalance: Long): String {
                 //        val strFiat = getFiatCurrency()
                 //        val fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8)
@@ -487,37 +487,37 @@
                 //            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance.toDouble())} $strFiat"
                 //        }
                 //    }
-//
-//    private fun getLastBtcPrice(fiat: String) = exchangeRateFactory.getLastBtcPrice(fiat)
-//
-//    private fun getLastEthPrice(fiat: String) = exchangeRateFactory.getLastEthPrice(fiat)
-//
+                //
+                //    private fun getLastBtcPrice(fiat: String) = exchangeRateFactory.getLastBtcPrice(fiat)
+                //
+                //    private fun getLastEthPrice(fiat: String) = exchangeRateFactory.getLastEthPrice(fiat)
+                //
                 //    private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
                 //
                 //    private fun getBtcUnitType() =
                 //            prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-//
+                //
                 //    private fun getFiatCurrency() =
                 //            prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
-//
-//    private fun getShapeShiftTxNotesObservable() =
-//            payloadDataManager.metadataNodeFactory
-//                    .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
-//                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-//                    .map {
-//                        val map: MutableMap<String, String> = mutableMapOf()
-//
-//                        for (trade in it.trades) {
-//                            trade.hashIn?.let {
-//                                map.put(it, stringUtils.getString(R.string.shapeshift_deposit_to))
-//                            }
-//                            trade.hashOut?.let {
-//                                map.put(it, stringUtils.getString(R.string.shapeshift_deposit_from))
-//                            }
-//                        }
-//                        return@map map
-//                    }
-//                    .doOnError { Timber.e(it) }
-//                    .onErrorReturn { mutableMapOf() }
-//
-//}
+                //
+                //    private fun getShapeShiftTxNotesObservable() =
+                //            payloadDataManager.metadataNodeFactory
+                //                    .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
+                //                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                //                    .map {
+                //                        val map: MutableMap<String, String> = mutableMapOf()
+                //
+                //                        for (trade in it.trades) {
+                //                            trade.hashIn?.let {
+                //                                map.put(it, stringUtils.getString(R.string.shapeshift_deposit_to))
+                //                            }
+                //                            trade.hashOut?.let {
+                //                                map.put(it, stringUtils.getString(R.string.shapeshift_deposit_from))
+                //                            }
+                //                        }
+                //                        return@map map
+                //                    }
+                //                    .doOnError { Timber.e(it) }
+                //                    .onErrorReturn { mutableMapOf() }
+                //
+                //}

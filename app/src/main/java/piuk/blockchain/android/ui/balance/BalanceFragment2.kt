@@ -48,9 +48,9 @@
 //@Suppress("MemberVisibilityCanPrivate")
 //class BalanceFragment2 : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
 //
-//    override val isContactsEnabled = BuildConfig.CONTACTS_ENABLED
-//    override val shouldShowBuy = AndroidUtils.is19orHigher()
-//
+                //    override val isContactsEnabled = BuildConfig.CONTACTS_ENABLED
+                //    override val shouldShowBuy = AndroidUtils.is19orHigher()
+                //
                 //    @Inject lateinit var balancePresenter: BalancePresenter
                 //    // Adapters
                 //    private var accountsAdapter: BalanceHeaderAdapter? = null
@@ -58,7 +58,7 @@
 //
 //    private var progressDialog: MaterialProgressDialog? = null
                 //    private var interactionListener: OnFragmentInteractionListener? = null
-//    private var spacerDecoration: BottomSpacerDecoration? = null
+                //    private var spacerDecoration: BottomSpacerDecoration? = null
                 //    private val receiver = object : BroadcastReceiver() {
                 //        override fun onReceive(context: Context, intent: Intent) {
                 //            if (intent.action == ACTION_INTENT && activity != null) {
@@ -98,7 +98,7 @@
                 //
                 //        setUiState(UiState.LOADING)
                 //        onViewReady()
-//        presenter.chooseDefaultAccount()
+                //        presenter.chooseDefaultAccount()
                 //    }
                 //
                 //    override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
@@ -206,20 +206,20 @@
                 //
                 //        generateLauncherShortcuts()
                 //    }
-//
-//    override fun onExchangeRateUpdated(
-//            btcExchangeRate: Double,
-//            ethExchangeRate: Double,
-//            isBtc: Boolean,
-//            txNoteMap: MutableMap<String, String>
-//    ) {
-//        if (balanceAdapter == null) {
-//            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc, txNoteMap)
-//        } else {
-//            balanceAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
-//        }
-//    }
-//
+                //
+                //    override fun onExchangeRateUpdated(
+                //            btcExchangeRate: Double,
+                //            ethExchangeRate: Double,
+                //            isBtc: Boolean,
+                //            txNoteMap: MutableMap<String, String>
+                //    ) {
+                //        if (balanceAdapter == null) {
+                //            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc, txNoteMap)
+                //        } else {
+                //            balanceAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
+                //        }
+                //    }
+                //
                 //    override fun onResume() {
                 //        super.onResume()
                 //        presenter.onResume()
@@ -249,19 +249,19 @@
 //
 //    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 //
-//    override fun startBuyActivity() {
-//        activity?.run {
-//            LocalBroadcastManager.getInstance(this)
-//                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
-//        }
-//    }
-//
-//    override fun startReceiveFragment() {
-//        activity?.run {
-//            LocalBroadcastManager.getInstance(this)
-//                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
-//        }
-//    }
+                //    override fun startBuyActivity() {
+                //        activity?.run {
+                //            LocalBroadcastManager.getInstance(this)
+                //                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
+                //        }
+                //    }
+                //
+                //    override fun startReceiveFragment() {
+                //        activity?.run {
+                //            LocalBroadcastManager.getInstance(this)
+                //                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
+                //        }
+                //    }
 //
 //    override fun showProgressDialog() {
 //        progressDialog = MaterialProgressDialog(activity).apply {
@@ -365,20 +365,20 @@
                 //        bundle.putInt(KEY_TRANSACTION_LIST_POSITION, position)
                 //        TransactionDetailActivity.start(activity, bundle)
                 //    }
-//
-//    @TargetApi(Build.VERSION_CODES.M)
-//    private fun generateLauncherShortcuts() {
-//        if (AndroidUtils.is25orHigher() && presenter.areLauncherShortcutsEnabled()) {
-//            val launcherShortcutHelper = LauncherShortcutHelper(
-//                    activity,
-//                    presenter.payloadDataManager,
-//                    activity!!.getSystemService(ShortcutManager::class.java)
-//            )
-//
-//            launcherShortcutHelper.generateReceiveShortcuts()
-//        }
-//    }
-//
+                //
+                //    @TargetApi(Build.VERSION_CODES.M)
+                //    private fun generateLauncherShortcuts() {
+                //        if (AndroidUtils.is25orHigher() && presenter.areLauncherShortcutsEnabled()) {
+                //            val launcherShortcutHelper = LauncherShortcutHelper(
+                //                    activity,
+                //                    presenter.payloadDataManager,
+                //                    activity!!.getSystemService(ShortcutManager::class.java)
+                //            )
+                //
+                //            launcherShortcutHelper.generateReceiveShortcuts()
+                //        }
+                //    }
+                //
 //    private fun showDialog(
 //            @StringRes title: Int,
 //            message: String,

@@ -1,9 +1,12 @@
 package piuk.blockchain.android.ui.balance
 
+import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ShortcutManager
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.LinearLayoutManager
@@ -22,8 +25,11 @@ import piuk.blockchain.android.ui.balance.adapter.TxFeedAdapter
 import piuk.blockchain.android.ui.balance.adapter.TxFeedClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
+import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
 import piuk.blockchain.android.ui.home.MainActivity
+import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
+import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
@@ -35,13 +41,14 @@ import javax.inject.Inject
 @Suppress("MemberVisibilityCanPrivate")
 class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, TxFeedClickListener {
 
-    // Adapters
     private var accountsAdapter: AccountsAdapter? = null
     private var txFeedAdapter: TxFeedAdapter? = null
 
     @Inject lateinit var balancePresenter: BalancePresenter
 
     private var interactionListener: OnFragmentInteractionListener? = null
+    private var spacerDecoration: BottomSpacerDecoration? = null
+    private val shouldShowBuy = AndroidUtils.is19orHigher()
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -162,17 +169,38 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         setupTxFeedAdapter(isCrypto)
         txFeedAdapter?.items = displayObjects
 
-//        if (spacerDecoration == null) {
-//            spacerDecoration = BottomSpacerDecoration(
-//                    ViewUtils.convertDpToPixel(56f, context).toInt()
-//            )
-//        }
-//        recyclerview?.apply {
-//            removeItemDecoration(spacerDecoration)
-//            addItemDecoration(spacerDecoration)
-//        }
-//
-//        generateLauncherShortcuts()
+        addBottomNavigationBarSpace()
+    }
+
+    /**
+     * Adds space to bottom of tx feed recyclerview to make room for bottom navigation bar
+     */
+    internal fun addBottomNavigationBarSpace() {
+        if (spacerDecoration == null) {
+            spacerDecoration = BottomSpacerDecoration(
+                    ViewUtils.convertDpToPixel(56f, context).toInt()
+            )
+        }
+        recyclerview?.apply {
+            removeItemDecoration(spacerDecoration)
+            addItemDecoration(spacerDecoration)
+        }
+    }
+
+    /**
+     * Updates launcher shortcuts with latest receive address
+     */
+    @TargetApi(Build.VERSION_CODES.M)
+    override fun generateLauncherShortcuts() {
+        if (AndroidUtils.is25orHigher() && presenter.areLauncherShortcutsEnabled()) {
+            val launcherShortcutHelper = LauncherShortcutHelper(
+                    activity,
+                    presenter.payloadDataManager,
+                    activity!!.getSystemService(ShortcutManager::class.java)
+            )
+
+            launcherShortcutHelper.generateReceiveShortcuts()
+        }
     }
 
     override fun updateTransactionValueType(showCrypto: Boolean) {
@@ -206,7 +234,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         when (currency_header.selectedCurrency) {
             CryptoCurrencies.BTC -> {
                 button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
-//                button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
+                button_get_bitcoin.setOnClickListener {
+                    if (shouldShowBuy) {
+                        presenter.getBitcoinClicked()
+                    } else {
+                        startReceiveFragmentBtc()
+                    }
+                }
                 description.setText(R.string.transaction_occur_when_bitcoin)
             }
             CryptoCurrencies.ETHER -> {
@@ -235,6 +269,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.gone()
     }
 
+    override fun startReceiveFragmentBtc() {
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
+        }
+    }
+
     private fun startReceiveFragmentEth() {
         activity?.run {
             LocalBroadcastManager.getInstance(this)
@@ -248,6 +289,14 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                     .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
         }
     }
+
+    override fun startBuyActivity() {
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
+        }
+    }
+
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
         val bundle = Bundle()
