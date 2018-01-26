@@ -77,6 +77,7 @@ class SwipeToReceiveHelper(
                         // Likely not initialized yet
                         break
 
+                // STOPSHIP: This is currently broken, fix me
                 val base58Address = Bech32.decode(networkParameterUtils.bitcoinCashParams, receiveAddress)
                 stringBuilder.append(base58Address).append(",")
             }

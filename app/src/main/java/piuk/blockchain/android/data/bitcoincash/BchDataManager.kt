@@ -152,10 +152,12 @@ class BchDataManager(
             bchDataStore.bchWallet?.getImportedAddressBalance() ?: BigInteger.ZERO
 
     fun getAddressTransactions(address: String, limit: Int, offset: Int) =
-            bchDataStore.bchWallet?.getTransactions(getActiveXpubs(), address, limit, offset)
+            bchDataStore.bchWallet!!.getTransactions(getActiveXpubs(), address, limit, offset)
+                    .compose(RxUtil.applySchedulersToCompletable())
 
     fun getWalletTransactions(limit: Int, offset: Int) =
-            bchDataStore.bchWallet?.getTransactions(getActiveXpubs(), null, limit, offset)
+            bchDataStore.bchWallet!!.getTransactions(getActiveXpubs(), null, limit, offset)
+                    .compose(RxUtil.applySchedulersToCompletable())
 
     /**
      * Returns all non-archived accounts
@@ -185,33 +187,33 @@ class BchDataManager(
     fun getReceiveAddressAtPosition(accountIndex: Int, addressIndex: Int): String? =
             bchDataStore.bchWallet?.getReceiveAddressAtPositionBch(accountIndex, addressIndex)
 
-    fun getNextReceiveCashAddress(accountIndex: Int) =
+    fun getNextReceiveCashAddress(accountIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet?.getNextReceiveCashAddress(accountIndex)
+                bchDataStore.bchWallet!!.getNextReceiveCashAddress(accountIndex)
             }
 
-    fun getNextChangeCashAddress(accountIndex: Int) =
+    fun getNextChangeCashAddress(accountIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet?.getNextChangeCashAddress(accountIndex)
+                bchDataStore.bchWallet!!.getNextChangeCashAddress(accountIndex)
             }
 
-    fun getNextChangeCashAddress(accountIndex: Int, addressIndex: Int) =
+    fun getNextChangeCashAddress(accountIndex: Int, addressIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet?.getChangeCashAddressAt(accountIndex, addressIndex)
+                bchDataStore.bchWallet!!.getChangeCashAddressAt(accountIndex, addressIndex)
             }
 
-    fun incrementNextReceiveAddressBch(xpub: String) =
+    fun incrementNextReceiveAddressBch(xpub: String): Completable =
             Completable.fromCallable {
-                bchDataStore.bchWallet?.incrementNextReceiveAddressBch(xpub)
+                bchDataStore.bchWallet!!.incrementNextReceiveAddressBch(xpub)
             }
 
-    fun incrementNextChangeAddressBch(xpub: String) =
+    fun incrementNextChangeAddressBch(xpub: String): Completable =
             Completable.fromCallable {
-                bchDataStore.bchWallet?.incrementNextChangeAddressBch(xpub)
+                bchDataStore.bchWallet!!.incrementNextChangeAddressBch(xpub)
             }
 
     fun isOwnAddress(address: String) =
-            bchDataStore.bchWallet?.isOwnAddress(address)
+            bchDataStore.bchWallet?.isOwnAddress(address) ?: false
 
     /**
      * Converts any Bitcoin Cash address to a label.

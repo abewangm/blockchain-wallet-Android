@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.fasterxml.jackson.databind.ObjectMapper
+import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.contacts.data.Contact
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
@@ -81,7 +82,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     private var textChangeAllowed = true
     private var backPressed: Long = 0
     private var textChangeSubject = PublishSubject.create<String>()
-    private var defaultAccountPosition = -1
+    private var selectedAccountPosition = -1
     private var handlingActivityResult = false
 
     private val intentFilter = IntentFilter(BalanceFragment.ACTION_INTENT)
@@ -95,7 +96,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                     // Update UI with new Address + QR
                     // TODO:
 //                    if (tabs_receive?.selectedTabPosition == 0) {
-//                        presenter.onSelectDefault(defaultAccountPosition)
+//                        presenter.onSelectDefault(selectedAccountPosition)
 //                    }
                 }
             }
@@ -111,7 +112,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         setHasOptionsMenu(true)
 
         arguments?.run {
-            defaultAccountPosition = getInt(ARG_SELECTED_ACCOUNT_POSITION)
+            selectedAccountPosition = getInt(ARG_SELECTED_ACCOUNT_POSITION)
         }
     }
 
@@ -132,24 +133,11 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
         currency_header.setSelectionListener { currency ->
             when (currency) {
-                CryptoCurrencies.BTC -> presenter?.onSelectDefault(defaultAccountPosition)
+                CryptoCurrencies.BTC -> presenter?.onSelectDefault(selectedAccountPosition)
                 CryptoCurrencies.ETHER -> presenter?.onEthSelected()
-                CryptoCurrencies.BCH -> presenter?.onSelectBchDefault(defaultAccountPosition)
+                CryptoCurrencies.BCH -> presenter?.onSelectBchDefault()
             }
         }
-    }
-
-    override fun setSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        currency_header.setCurrentlySelectedCurrency(cryptoCurrency)
-    }
-
-    override fun startContactSelectionActivity() {
-        AccountChooserActivity.startForResult(
-                this,
-                AccountMode.ContactsOnly,
-                REQUEST_CODE_CHOOSE_CONTACT,
-                getString(R.string.from)
-        )
     }
 
     private fun setupToolbar() {
@@ -195,31 +183,26 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         // Receive address
         textview_receiving_address.setOnClickListener { showClipboardWarning() }
 
-        toAddressTextView.setOnClickListener {
+        val toListener: (View) -> Unit = {
+            val currency = CurrencyState.getInstance().cryptoCurrency
             AccountChooserActivity.startForResult(
                     this,
-                    if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
+                    if (currency == CryptoCurrencies.BTC) {
                         AccountMode.Bitcoin
                     } else {
                         AccountMode.BitcoinCash
                     },
-                    REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
+                    if (currency == CryptoCurrencies.BTC) {
+                        REQUEST_CODE_RECEIVE_BITCOIN
+                    } else {
+                        REQUEST_CODE_RECEIVE_BITCOIN_CASH
+                    },
                     getString(R.string.to)
             )
         }
 
-        toArrowImage.setOnClickListener {
-            AccountChooserActivity.startForResult(
-                    this,
-                    if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
-                        AccountMode.Bitcoin
-                    } else {
-                        AccountMode.BitcoinCash
-                    },
-                    REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE,
-                    getString(R.string.to)
-            )
-        }
+        toAddressTextView.setOnClickListener(toListener)
+        toArrowImage.setOnClickListener(toListener)
 
         textChangeSubject.debounce(300, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -369,7 +352,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         super.onResume()
 
         if (!handlingActivityResult)
-            presenter.onResume(defaultAccountPosition)
+            presenter.onResume(selectedAccountPosition)
 
         handlingActivityResult = false
 
@@ -392,7 +375,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         image_qr.setImageBitmap(bitmap)
     }
 
-    override fun displayBitcoinLayout() {
+    private fun displayBitcoinLayout() {
         divider1.visible()
         amount_container.visible()
         divider3.visible()
@@ -413,7 +396,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
     }
 
-    override fun hideBitcoinLayout() {
+    private fun displayEtherLayout() {
         if (custom_keyboard.isVisible) {
             custom_keyboard.hideKeyboard()
         }
@@ -431,6 +414,35 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
     }
 
+    private fun displayBitcoinCashLayout() {
+        if (custom_keyboard.isVisible) {
+            custom_keyboard.hideKeyboard()
+        }
+        divider1.gone()
+        amount_container.gone()
+        divider_to.visible()
+        to_container.visible()
+        divider3.visible()
+    }
+
+    override fun setSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currency_header.setCurrentlySelectedCurrency(cryptoCurrency)
+        when (cryptoCurrency) {
+            CryptoCurrencies.BTC -> displayBitcoinLayout()
+            CryptoCurrencies.ETHER -> displayEtherLayout()
+            CryptoCurrencies.BCH -> displayBitcoinCashLayout()
+        }
+    }
+
+    override fun startContactSelectionActivity() {
+        AccountChooserActivity.startForResult(
+                this,
+                AccountMode.ContactsOnly,
+                REQUEST_CODE_CHOOSE_CONTACT,
+                getString(R.string.from)
+        )
+    }
+
     override fun updateReceiveLabel(label: String) {
         toAddressTextView.text = label
     }
@@ -440,7 +452,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
         // Set receiving account
         if (resultCode == Activity.RESULT_OK
-            && requestCode == REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE
+            && requestCode == REQUEST_CODE_RECEIVE_BITCOIN
             && data != null) {
 
             try {
@@ -452,13 +464,33 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                     is Account -> presenter.onAccountSelected(any)
                     else -> throw IllegalArgumentException("No method for handling $type available")
                 }
-
             } catch (e: ClassNotFoundException) {
                 Timber.e(e)
-                presenter.onSelectDefault(defaultAccountPosition)
+                presenter.onSelectDefault(selectedAccountPosition)
             } catch (e: IOException) {
                 Timber.e(e)
-                presenter.onSelectDefault(defaultAccountPosition)
+                presenter.onSelectDefault(selectedAccountPosition)
+            }
+
+        } else if (resultCode == Activity.RESULT_OK
+            && requestCode == REQUEST_CODE_RECEIVE_BITCOIN_CASH
+            && data != null) {
+
+            try {
+                val type: Class<*> = Class.forName(data.getStringExtra(EXTRA_SELECTED_OBJECT_TYPE))
+                val any = ObjectMapper().readValue(data.getStringExtra(EXTRA_SELECTED_ITEM), type)
+
+                when (any) {
+                    is LegacyAddress -> presenter.onLegacyBchAddressSelected(any)
+                    is GenericMetadataAccount -> presenter.onBchAccountSelected(any)
+                    else -> throw IllegalArgumentException("No method for handling $type available")
+                }
+            } catch (e: ClassNotFoundException) {
+                Timber.e(e)
+                presenter.onSelectBchDefault()
+            } catch (e: IOException) {
+                Timber.e(e)
+                presenter.onSelectBchDefault()
             }
 
             // Choose contact for request
@@ -470,7 +502,6 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                 val contact: Contact = data.getStringExtra(EXTRA_SELECTED_ITEM).toKotlinObject()
                 presenter.selectedContactId = contact.id
                 from_container.fromAddressTextView.text = contact.name
-
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }
@@ -560,7 +591,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                     .create()
 
             dialogView.confirm_cancel.setOnClickListener {
-                presenter.onSelectDefault(defaultAccountPosition)
+                presenter.onSelectDefault(selectedAccountPosition)
                 presenter.setWarnWatchOnlySpend(!dialogView.confirm_dont_ask_again.isChecked)
                 alertDialog.dismiss()
             }
@@ -582,9 +613,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     fun getSelectedAccountPosition(): Int = presenter.getSelectedAccountPosition()
 
-    fun onBackPressed() {
-        handleBackPressed()
-    }
+    fun onBackPressed() = handleBackPressed()
 
     private fun showClipboardWarning() {
         activity?.run {
@@ -734,8 +763,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     companion object {
 
-        private const val REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_RECEIVE = 911
-        private const val REQUEST_CODE_CHOOSE_CONTACT = 912
+        private const val REQUEST_CODE_RECEIVE_BITCOIN = 800
+        private const val REQUEST_CODE_RECEIVE_BITCOIN_CASH = 801
+        private const val REQUEST_CODE_CHOOSE_CONTACT = 802
 
         private const val ARG_SELECTED_ACCOUNT_POSITION = "ARG_SELECTED_ACCOUNT_POSITION"
         private const val COOL_DOWN_MILLIS = 2 * 1000

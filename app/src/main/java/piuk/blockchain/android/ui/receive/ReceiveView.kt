@@ -39,10 +39,6 @@ interface ReceiveView : View {
 
     fun showWatchOnlyWarning()
 
-    fun displayBitcoinLayout()
-
-    fun hideBitcoinLayout()
-
     fun updateReceiveLabel(label: String)
 
     fun showBottomSheet(uri: String)
