@@ -145,7 +145,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun setupTxFeedAdapter(isCrypto: Boolean) {
 
         if (txFeedAdapter == null) {
-            txFeedAdapter = TxFeedAdapter(activity!!, isCrypto)
+            txFeedAdapter = TxFeedAdapter(activity!!, isCrypto, this)
         }
 
         recyclerview.layoutManager = LinearLayoutManager(context)

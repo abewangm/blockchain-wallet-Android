@@ -29,8 +29,8 @@ import java.text.DecimalFormat
 
 class DisplayableDelegate<in T>(
         activity: Activity,
-        private var showCrypto: Boolean
-//        private val listClickListener: TxFeedClickListener
+        private var showCrypto: Boolean,
+        private val listClickListener: TxFeedClickListener
 ) : AdapterDelegate<T> {
 
     private val dateUtil = DateUtil(activity)
@@ -76,17 +76,17 @@ class DisplayableDelegate<in T>(
         viewHolder.watchOnly.visibility = if (tx.watchOnly) View.VISIBLE else View.GONE
         viewHolder.doubleSpend.visibility = if (tx.doubleSpend) View.VISIBLE else View.GONE
 
-//        // TODO: Move this click listener to the ViewHolder to avoid unnecessary object instantiation during binding
-//        viewHolder.result.setOnClickListener {
-//            showCrypto = !showCrypto
-//            listClickListener.onValueClicked(showCrypto)
-//        }
-//
-//        // TODO: Move this click listener to the ViewHolder to avoid unnecessary object instantiation during binding
-//        viewHolder.itemView.setOnClickListener {
-//            listClickListener.onTransactionClicked(
-//                    getRealTxPosition(viewHolder.adapterPosition, items), position)
-//        }
+        // TODO: Move this click listener to the ViewHolder to avoid unnecessary object instantiation during binding
+        viewHolder.result.setOnClickListener {
+            showCrypto = !showCrypto
+            listClickListener.onValueClicked(showCrypto)
+        }
+
+        // TODO: Move this click listener to the ViewHolder to avoid unnecessary object instantiation during binding
+        viewHolder.itemView.setOnClickListener {
+            listClickListener.onTransactionClicked(
+                    getRealTxPosition(viewHolder.adapterPosition, items), position)
+        }
     }
 
     fun onViewFormatUpdated(isBtc: Boolean) {
@@ -157,6 +157,11 @@ class DisplayableDelegate<in T>(
 
     private fun getRequiredConfirmations(tx: Displayable) =
             if (tx.cryptoCurrency == CryptoCurrencies.BTC) CONFIRMATIONS_BTC else CONFIRMATIONS_ETH
+
+    private fun getRealTxPosition(position: Int, items: List<T>): Int {
+        val diff = items.size - items.count { it is Displayable }
+        return position - diff
+    }
 
     private class TxViewHolder internal constructor(
             itemView: View

@@ -8,14 +8,12 @@ import kotlin.properties.Delegates
 
 class TxFeedAdapter(
         activity: Activity,
-        showCrypto: Boolean
-//        noteMap: Map<String, String>,
-//        listClickListener: TxFeedClickListener
+        showCrypto: Boolean,
+        listClickListener: TxFeedClickListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
     private val summaryDelegate =
-            DisplayableDelegate<Any>(activity, showCrypto
-//                    , noteMap, listClickListener
+            DisplayableDelegate<Any>(activity, showCrypto, listClickListener
             )
 
     init {
