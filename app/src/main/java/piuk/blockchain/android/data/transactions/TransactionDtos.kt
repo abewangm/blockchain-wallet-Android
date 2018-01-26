@@ -23,6 +23,7 @@ abstract class Displayable {
     open val isPending: Boolean = false
     open var totalDisplayableCrypto: String? = null
     open var totalDisplayableFiat: String? = null
+    open var note: String? = null
 }
 
 @Mockable

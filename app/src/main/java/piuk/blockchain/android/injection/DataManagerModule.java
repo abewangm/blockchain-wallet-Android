@@ -270,8 +270,9 @@ public class DataManagerModule {
     protected MetadataManager provideMetadataManager(PayloadDataManager payloadDataManager,
                                                      EthDataManager ethDataManager,
                                                      BchDataManager bchDataManager,
+                                                     ShapeShiftDataManager shapeShiftDataManager,
                                                      StringUtils stringUtils) {
-        return new MetadataManager(payloadDataManager, ethDataManager, bchDataManager, stringUtils);
+        return new MetadataManager(payloadDataManager, ethDataManager, bchDataManager, shapeShiftDataManager, stringUtils);
     }
 
     @Provides

@@ -231,7 +231,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         setShowRefreshing(false)
         no_transaction_include.visible()
 
-        when (currency_header.selectedCurrency) {
+        when (presenter.getCurrentCurrency()) {
             CryptoCurrencies.BTC -> {
                 button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
                 button_get_bitcoin.setOnClickListener {

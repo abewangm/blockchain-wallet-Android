@@ -30,12 +30,10 @@ import java.text.DecimalFormat
 class DisplayableDelegate<in T>(
         activity: Activity,
         private var showCrypto: Boolean
-//        private val txNoteMap: Map<String, String>,
 //        private val listClickListener: TxFeedClickListener
 ) : AdapterDelegate<T> {
 
     private val dateUtil = DateUtil(activity)
-    private var transactionDisplayMap = mutableMapOf<String, ContactTransactionDisplayModel>()
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is Displayable
@@ -63,25 +61,11 @@ class DisplayableDelegate<in T>(
             else -> throw IllegalStateException("Tx direction isn't SENT, RECEIVED or TRANSFERRED")
         }
 
-//        transactionDisplayMap[tx.hash]?.apply {
-//            viewHolder.note.text = note
-//            viewHolder.contactName.text = contactName
-//            viewHolder.note.visible()
-//            viewHolder.contactNameLayout.visible()
-//
-//            if (state == FacilitatedTransaction.STATE_PAYMENT_BROADCASTED
-//                    && role == FacilitatedTransaction.ROLE_PR_RECEIVER) {
-//                viewHolder.result.setText(R.string.paid)
-//            }
-//        }
+        tx.note?.let {
+            viewHolder.note.text = it
+            viewHolder.note.visible()
 
-//        txNoteMap[tx.hash]?.let {
-//            viewHolder.note.text = it
-//            viewHolder.note.visible()
-//
-//        } ?: viewHolder.note.gone()
-        viewHolder.note.text = "todo"
-        viewHolder.note.visible()
+        } ?: viewHolder.note.gone()
 
         if (showCrypto) {
             viewHolder.result.text = tx.totalDisplayableCrypto

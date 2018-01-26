@@ -6,6 +6,7 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -21,6 +22,7 @@ import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
+import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
@@ -158,55 +160,127 @@ class BalancePresenter @Inject constructor(
      * API call - Fetches latest transactions for selected currency and account, and updates UI tx list
      */
     private fun updateTransactionsListCompletable(account: ItemAccount): Completable {
-
         return Completable.fromObservable(
-//            getShapeShiftTxNotesObservable()
                 transactionListDataManager.fetchTransactions(account, 50, 0)
-                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
-                        .map {
-                            for (tx in it) {
+                        .doAfterTerminate(this::storeSwipeReceiveAddresses)
+                        .map { txs ->
 
-                                when (currencyState.cryptoCurrency) {
-                                    CryptoCurrencies.BTC -> {
-                                        tx.totalDisplayableCrypto = getBtcBalanceString(
-                                                true,
-                                                tx.total.toLong())
-                                        tx.totalDisplayableFiat = getBtcBalanceString(
-                                                false,
-                                                tx.total.toLong())
-                                    }
-                                    CryptoCurrencies.ETHER -> {
-                                        tx.totalDisplayableCrypto = getEthBalanceString(
-                                                true,
-                                                BigDecimal(tx.total))
-                                        tx.totalDisplayableFiat = getEthBalanceString(
-                                                false,
-                                                BigDecimal(tx.total))
-                                    }
-                                    CryptoCurrencies.BCH -> {
-                                        tx.totalDisplayableCrypto = getBchBalanceString(
-                                                true,
-                                                tx.total.toLong())
-                                        tx.totalDisplayableCrypto = getBchBalanceString(
-                                                false,
-                                                tx.total.toLong())
-                                    }
+                            getShapeShiftTxNotesObservable()
+                                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                                    .subscribe(
+                                            { shapeShiftNotesMap ->
+                                                for (tx in txs) {
 
-                                }
-                            }
+                                                    //Add shapeShift notes
+                                                    shapeShiftNotesMap[tx.hash]?.let {
+                                                        tx.note = it
+                                                    }
 
-                            //TODO This is to correctly show EMPTY STATE 'Get Ether' etc.
-                            //TODO If update/refresh UI gets cleaned this can be improved. Also this causes a double update and flashy UI
-                            view.updateSelectedCurrency(currencyState.cryptoCurrency)
+                                                    when (currencyState.cryptoCurrency) {
+                                                        CryptoCurrencies.BTC -> {
+                                                            tx.totalDisplayableCrypto = getBtcBalanceString(
+                                                                    true,
+                                                                    tx.total.toLong())
+                                                            tx.totalDisplayableFiat = getBtcBalanceString(
+                                                                    false,
+                                                                    tx.total.toLong())
+                                                        }
+                                                        CryptoCurrencies.ETHER -> {
+                                                            tx.totalDisplayableCrypto = getEthBalanceString(
+                                                                    true,
+                                                                    BigDecimal(tx.total))
+                                                            tx.totalDisplayableFiat = getEthBalanceString(
+                                                                    false,
+                                                                    BigDecimal(tx.total))
+                                                        }
+                                                        CryptoCurrencies.BCH -> {
+                                                            tx.totalDisplayableCrypto = getBchBalanceString(
+                                                                    true,
+                                                                    tx.total.toLong())
+                                                            tx.totalDisplayableCrypto = getBchBalanceString(
+                                                                    false,
+                                                                    tx.total.toLong())
+                                                        }
 
-                            when {
-                                it.isEmpty() -> { view.setUiState(UiState.EMPTY) }
-                                else -> { view.setUiState(UiState.CONTENT) }
-                            }
+                                                    }
+                                                }
 
-                            view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, it)
+                                                when {
+                                                    txs.isEmpty() -> {
+                                                        view.setUiState(UiState.EMPTY)
+                                                    }
+                                                    else -> {
+                                                        view.setUiState(UiState.CONTENT)
+                                                    }
+                                                }
+
+                                                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, txs)
+                                            }
+                                            ,
+                                            { Timber.e(it) })
                         })
     }
+
+    //TODO This should replace updateTransactionsListCompletable, but can't get it to work properly
+    private fun updateTransactionsListCompletable2(account: ItemAccount): Completable {
+
+        return Completable.fromObservable(
+                Observable.zip(
+                        getShapeShiftTxNotesObservable(),
+                        transactionListDataManager.fetchBchTransactions(account, 50, 0),
+                        BiFunction { shapeShiftNotesMap: MutableMap<String, String>, txs: List<Displayable> ->
+                            {
+                                for (tx in txs) {
+
+                                    //Add shapeShift notes
+                                    shapeShiftNotesMap[tx.hash]?.let {
+                                        tx.note = it
+                                    }
+
+                                    //Display currencies
+                                    when (currencyState.cryptoCurrency) {
+                                        CryptoCurrencies.BTC -> {
+                                            tx.totalDisplayableCrypto = getBtcBalanceString(
+                                                    true,
+                                                    tx.total.toLong())
+                                            tx.totalDisplayableFiat = getBtcBalanceString(
+                                                    false,
+                                                    tx.total.toLong())
+                                        }
+                                        CryptoCurrencies.ETHER -> {
+                                            tx.totalDisplayableCrypto = getEthBalanceString(
+                                                    true,
+                                                    BigDecimal(tx.total))
+                                            tx.totalDisplayableFiat = getEthBalanceString(
+                                                    false,
+                                                    BigDecimal(tx.total))
+                                        }
+                                        CryptoCurrencies.BCH -> {
+                                            tx.totalDisplayableCrypto = getBchBalanceString(
+                                                    true,
+                                                    tx.total.toLong())
+                                            tx.totalDisplayableCrypto = getBchBalanceString(
+                                                    false,
+                                                    tx.total.toLong())
+                                        }
+
+                                    }
+                                }
+
+                                when {
+                                    txs.isEmpty() -> {
+                                        view.setUiState(UiState.EMPTY)
+                                    }
+                                    else -> {
+                                        view.setUiState(UiState.CONTENT)
+                                    }
+                                }
+
+                                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, txs)
+                            }
+                        }).doAfterTerminate(this::storeSwipeReceiveAddresses))
+    }
+
     //endregion
 
     //region Currency header
@@ -564,4 +638,5 @@ class BalancePresenter @Inject constructor(
                         { Timber.e(it) })
     }
 
+    fun getCurrentCurrency() = currencyState.cryptoCurrency
 }
