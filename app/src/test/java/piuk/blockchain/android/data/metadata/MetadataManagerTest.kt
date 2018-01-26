@@ -13,6 +13,7 @@ import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.util.StringUtils
 
 @Suppress("IllegalIdentifier")
@@ -23,6 +24,7 @@ class MetadataManagerTest : RxTest() {
     private val ethDataManager: EthDataManager = mock()
     private val bchDataManager: BchDataManager = mock()
     private val stringUtils: StringUtils = mock()
+    private val shapeShiftDataManager: ShapeShiftDataManager = mock()
 
     @Before
     override fun setUp() {
@@ -31,6 +33,7 @@ class MetadataManagerTest : RxTest() {
                 payloadDataManager,
                 ethDataManager,
                 bchDataManager,
+                shapeShiftDataManager,
                 stringUtils
         )
     }
@@ -49,6 +52,7 @@ class MetadataManagerTest : RxTest() {
         whenever(stringUtils.getString(any())).thenReturn("label")
         whenever(ethDataManager.initEthereumWallet(key, "label")).thenReturn(Completable.complete())
         whenever(bchDataManager.initBchWallet(key, "label")).thenReturn(Completable.complete())
+        whenever(shapeShiftDataManager.initShapeshiftTradeData(key)).thenReturn(Observable.empty())
         // Act
         val testObserver = subject.attemptMetadataSetup().test()
         // Assert
@@ -58,6 +62,7 @@ class MetadataManagerTest : RxTest() {
         verify(payloadDataManager).metadataNodeFactory
         verify(ethDataManager).initEthereumWallet(key, "label")
         verify(bchDataManager).initBchWallet(key, "label")
+        verify(shapeShiftDataManager).initShapeshiftTradeData(key)
         verifyNoMoreInteractions(payloadDataManager)
     }
 
@@ -77,6 +82,7 @@ class MetadataManagerTest : RxTest() {
         whenever(stringUtils.getString(any())).thenReturn("label")
         whenever(ethDataManager.initEthereumWallet(key, "label")).thenReturn(Completable.complete())
         whenever(bchDataManager.initBchWallet(key, "label")).thenReturn(Completable.complete())
+        whenever(shapeShiftDataManager.initShapeshiftTradeData(key)).thenReturn(Observable.empty())
 
         // Act
         val testObserver = subject.attemptMetadataSetup().test()
@@ -88,6 +94,7 @@ class MetadataManagerTest : RxTest() {
         verify(payloadDataManager).isDoubleEncrypted
         verify(ethDataManager).initEthereumWallet(key, "label")
         verify(bchDataManager).initBchWallet(key, "label")
+        verify(shapeShiftDataManager).initShapeshiftTradeData(key)
     }
 
 
@@ -118,6 +125,7 @@ class MetadataManagerTest : RxTest() {
         whenever(stringUtils.getString(any())).thenReturn("label")
         whenever(ethDataManager.initEthereumWallet(key, "label")).thenReturn(Completable.complete())
         whenever(bchDataManager.initBchWallet(key, "label")).thenReturn(Completable.complete())
+        whenever(shapeShiftDataManager.initShapeshiftTradeData(key)).thenReturn(Observable.empty())
         // Act
         val testObserver = subject.generateAndSetupMetadata("hello").test()
         // Assert
@@ -128,6 +136,7 @@ class MetadataManagerTest : RxTest() {
         verify(payloadDataManager).metadataNodeFactory
         verify(ethDataManager).initEthereumWallet(key, "label")
         verify(bchDataManager).initBchWallet(key, "label")
+        verify(shapeShiftDataManager).initShapeshiftTradeData(key)
         verifyNoMoreInteractions(payloadDataManager)
     }
 }

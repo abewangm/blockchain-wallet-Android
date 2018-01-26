@@ -23,6 +23,8 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
+import piuk.blockchain.android.data.currency.CurrencyState;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel;
 import piuk.blockchain.android.data.stores.TransactionListStore;
@@ -41,6 +43,7 @@ public class TransactionListDataManagerTest extends RxTest {
     @Mock private PayloadManager payloadManager;
     @Mock private EthDataManager ethDataManager;
     @Mock private BchDataManager bchDataManager;
+    @Mock private CurrencyState currencyState;
     private TransactionListStore transactionListStore;
     private TransactionListDataManager subject;
 
@@ -55,7 +58,8 @@ public class TransactionListDataManagerTest extends RxTest {
                 payloadManager,
                 ethDataManager,
                 bchDataManager,
-                transactionListStore);
+                transactionListStore,
+                currencyState);
     }
 
     @Test
@@ -76,6 +80,7 @@ public class TransactionListDataManagerTest extends RxTest {
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
         itemAccount.setType(ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY);
+        when(currencyState.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
         // Act
         TestObserver<List<Displayable>> testObserver = subject.fetchTransactions(itemAccount, 0, 0).test();
         // Assert
@@ -102,6 +107,7 @@ public class TransactionListDataManagerTest extends RxTest {
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
         itemAccount.setType(ItemAccount.TYPE.ALL_LEGACY);
+        when(currencyState.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
         // Act
         TestObserver<List<Displayable>> testObserver = subject.fetchTransactions(itemAccount, 0, 0).test();
         // Assert
@@ -130,6 +136,7 @@ public class TransactionListDataManagerTest extends RxTest {
         itemAccount.setAccountObject(account);
         itemAccount.setType(ItemAccount.TYPE.SINGLE_ACCOUNT);
         itemAccount.setAddress(xPub);
+        when(currencyState.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
         // Act
         TestObserver<List<Displayable>> testObserver =
                 subject.fetchTransactions(itemAccount, 0, 0).test();
@@ -157,8 +164,9 @@ public class TransactionListDataManagerTest extends RxTest {
         when(payloadManager.getImportedAddressesTransactions( 0, 0)).thenReturn(transactionSummaries);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
-        itemAccount.setType(ItemAccount.TYPE.SINGLE_ACCOUNT);
+        itemAccount.setType(ItemAccount.TYPE.ALL_LEGACY);
         itemAccount.setAddress(xPub);
+        when(currencyState.getCryptoCurrency()).thenReturn(CryptoCurrencies.BTC);
         // Act
         TestObserver<List<Displayable>> testObserver =
                 subject.fetchTransactions(itemAccount, 0, 0).test();
@@ -178,8 +186,10 @@ public class TransactionListDataManagerTest extends RxTest {
         when(ethDataManager.getLatestBlock()).thenReturn(Observable.just(latestBlock));
         when(ethDataManager.getEthTransactions()).thenReturn(Observable.just(transaction));
         when(ethDataManager.getEthResponseModel()).thenReturn(ethModel);
+        when(currencyState.getCryptoCurrency()).thenReturn(CryptoCurrencies.ETHER);
         ItemAccount itemAccount = new ItemAccount();
-        itemAccount.setType(ItemAccount.TYPE.ETHEREUM);
+        itemAccount.setType(ItemAccount.TYPE.SINGLE_ACCOUNT);
+        when(currencyState.getCryptoCurrency()).thenReturn(CryptoCurrencies.ETHER);
         // Act
         TestObserver<List<Displayable>> testObserver =
                 subject.fetchTransactions(itemAccount, 0, 0).test();
@@ -297,17 +307,6 @@ public class TransactionListDataManagerTest extends RxTest {
         assertEquals(1_000_000_000_000L, value);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void getBtcBalanceEthereum() throws Exception {
-        // Arrange
-        ItemAccount itemAccount = new ItemAccount();
-        itemAccount.setType(ItemAccount.TYPE.ETHEREUM);
-        // Act
-        subject.getBtcBalance(itemAccount);
-        // Assert
-
-    }
-
     @Test
     public void getBchBalanceAccountTagAll() throws Exception {
         // Arrange
@@ -373,17 +372,6 @@ public class TransactionListDataManagerTest extends RxTest {
         // Assert
         verify(bchDataManager).getAddressBalance(address);
         assertEquals(1_000_000_000_000L, value);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void getBchBalanceEthereum() throws Exception {
-        // Arrange
-        ItemAccount itemAccount = new ItemAccount();
-        itemAccount.setType(ItemAccount.TYPE.ETHEREUM);
-        // Act
-        subject.getBtcBalance(itemAccount);
-        // Assert
-
     }
 
     @Test
