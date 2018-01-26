@@ -1,4 +1,4 @@
-package piuk.blockchain.android.ui.balance;
+package piuk.blockchain.android.ui.balance.adapter;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
@@ -14,27 +14,16 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.ItemBalanceAccountDropdownBinding;
 import piuk.blockchain.android.databinding.SpinnerBalanceHeaderBinding;
 import piuk.blockchain.android.ui.account.ItemAccount;
-import piuk.blockchain.android.util.MonetaryUtil;
 
-class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
+public class AccountsAdapter extends ArrayAdapter<ItemAccount> {
 
-    private boolean isBtc;
-    private final MonetaryUtil monetaryUtil;
-    private String fiatUnits;
-    private double exchangeRate;
+    private List<ItemAccount> accountList;
 
-    BalanceHeaderAdapter(Context context,
-                         int textViewResourceId,
-                         List<ItemAccount> accountList,
-                         boolean isBtc,
-                         MonetaryUtil monetaryUtil,
-                         String fiatUnits,
-                         double exchangeRate) {
+    public AccountsAdapter(Context context,
+                    int textViewResourceId,
+                    List<ItemAccount> accountList) {
         super(context, textViewResourceId, accountList);
-        this.isBtc = isBtc;
-        this.monetaryUtil = monetaryUtil;
-        this.fiatUnits = fiatUnits;
-        this.exchangeRate = exchangeRate;
+        this.accountList = accountList;
     }
 
     @Override
@@ -59,16 +48,7 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
             ItemAccount item = getItem(position);
 
             binding.accountName.setText(item.getLabel());
-
-            if (isBtc) {
-                binding.balance.setText(item.getDisplayBalance());
-            } else {
-                double btcBalance = item.getAbsoluteBalance() / 1e8;
-                double fiatBalance = exchangeRate * btcBalance;
-
-                String balance = monetaryUtil.getFiatFormat(fiatUnits).format(Math.abs(fiatBalance)) + " " + fiatUnits;
-                binding.balance.setText(balance);
-            }
+            binding.balance.setText(item.getDisplayBalance());
 
             return binding.getRoot();
 
@@ -86,16 +66,17 @@ class BalanceHeaderAdapter extends ArrayAdapter<ItemAccount> {
         }
     }
 
-    void notifyBtcChanged(boolean isBtc, int btcFormat) {
-        this.isBtc = isBtc;
-        monetaryUtil.updateUnit(btcFormat);
+    public void updateAccountList(List<ItemAccount> accountList) {
+        this.accountList.clear();
+        this.accountList.addAll(accountList);
         notifyDataSetChanged();
     }
 
-    void notifyFiatUnitsChanged(String fiatUnits, double exchangeRate) {
-        this.fiatUnits = fiatUnits;
-        this.exchangeRate = exchangeRate;
-        notifyDataSetChanged();
+    public boolean isNotEmpty() {
+        return !accountList.isEmpty();
     }
 
+    public boolean showSpinner() {
+        return accountList.size() > 1;
+    }
 }

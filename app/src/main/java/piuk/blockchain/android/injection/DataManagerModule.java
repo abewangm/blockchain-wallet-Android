@@ -114,12 +114,14 @@ public class DataManagerModule {
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            EthDataManager ethDataManager,
                                                                            BchDataManager bchDataManager,
-                                                                           TransactionListStore transactionListStore) {
+                                                                           TransactionListStore transactionListStore,
+                                                                           CurrencyState currencyState) {
         return new TransactionListDataManager(
                 payloadManager,
                 ethDataManager,
                 bchDataManager,
-                transactionListStore);
+                transactionListStore,
+                currencyState);
     }
 
     @Provides
@@ -268,8 +270,9 @@ public class DataManagerModule {
     protected MetadataManager provideMetadataManager(PayloadDataManager payloadDataManager,
                                                      EthDataManager ethDataManager,
                                                      BchDataManager bchDataManager,
+                                                     ShapeShiftDataManager shapeShiftDataManager,
                                                      StringUtils stringUtils) {
-        return new MetadataManager(payloadDataManager, ethDataManager, bchDataManager, stringUtils);
+        return new MetadataManager(payloadDataManager, ethDataManager, bchDataManager, shapeShiftDataManager, stringUtils);
     }
 
     @Provides
@@ -279,10 +282,12 @@ public class DataManagerModule {
                                                    MetadataUtils metadataUtils,
                                                    NetworkParameterUtils networkParameterUtils,
                                                    BlockExplorer blockExplorer,
+                                                   StringUtils stringUtils,
                                                    RxBus rxBus) {
         return new BchDataManager(payloadDataManager, bchDataStore,
                 metadataUtils, networkParameterUtils,
                 blockExplorer,
+                stringUtils,
                 rxBus);
     }
 }

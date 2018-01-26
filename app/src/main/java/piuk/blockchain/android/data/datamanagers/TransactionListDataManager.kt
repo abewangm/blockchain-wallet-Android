@@ -5,14 +5,18 @@ import info.blockchain.wallet.util.FormatsUtil
 import io.reactivex.Observable
 import io.reactivex.Single
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
+import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.stores.TransactionListStore
+import piuk.blockchain.android.data.transactions.BchDisplayable
 import piuk.blockchain.android.data.transactions.BtcDisplayable
 import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.data.transactions.EthDisplayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.util.annotations.Mockable
+import timber.log.Timber
 import java.util.*
 
 @Mockable
@@ -20,25 +24,42 @@ class TransactionListDataManager(
         private val payloadManager: PayloadManager,
         private val ethDataManager: EthDataManager,
         private val bchDataManager: BchDataManager,
-        private val transactionListStore: TransactionListStore
-) {
+        private val transactionListStore: TransactionListStore,
+        private val currencyState: CurrencyState
+        ) {
 
     fun fetchTransactions(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> {
-        val observable: Observable<List<Displayable>> = when (itemAccount.type) {
-            ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> getAllTransactionsObservable(limit, offset)
-            ItemAccount.TYPE.ALL_LEGACY -> getLegacyObservable(limit, offset)
-            ItemAccount.TYPE.ETHEREUM -> getEthereumObservable()
-            else -> if (FormatsUtil.isValidXpub(itemAccount.address)) {
-                getAccountObservable(itemAccount, limit, offset)
-            } else {
-                getLegacyObservable(limit, offset)
-            }
+
+        val observable: Observable<List<Displayable>> = when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> fetchBtcTransactions(itemAccount, limit, offset)
+            CryptoCurrencies.ETHER -> getEthereumObservable()
+            CryptoCurrencies.BCH -> fetchBchTransactions(itemAccount, limit, offset)
         }
 
         return observable.doOnNext { insertTransactionList(it.toMutableList()) }
                 .map { transactionListStore.list }
                 .doOnError { emptyList<Displayable>() }
                 .compose(RxUtil.applySchedulersToObservable())
+    }
+
+    internal fun fetchBtcTransactions(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> {
+
+        return when (itemAccount.type) {
+            ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> getAllTransactionsObservable(limit, offset)
+            ItemAccount.TYPE.ALL_LEGACY -> getLegacyObservable(limit, offset)
+            ItemAccount.TYPE.SINGLE_ACCOUNT -> getAccountObservable(itemAccount.address!!, limit, offset)
+        }
+    }
+
+    internal fun fetchBchTransactions(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> {
+
+        val txs =  when (itemAccount.type) {
+            ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> getBchAllTransactionsObservable(limit, offset)
+            ItemAccount.TYPE.ALL_LEGACY -> getBchLegacyObservable(limit, offset)
+            ItemAccount.TYPE.SINGLE_ACCOUNT -> getBchAccountObservable(itemAccount.address!!, limit, offset)
+        }
+
+        return txs
     }
 
     /**
@@ -77,7 +98,6 @@ class TransactionListDataManager(
             ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> payloadManager.walletBalance.toLong()
             ItemAccount.TYPE.ALL_LEGACY -> payloadManager.importedAddressesBalance.toLong()
             ItemAccount.TYPE.SINGLE_ACCOUNT -> payloadManager.getAddressBalance(itemAccount.address).toLong()
-            else -> throw IllegalArgumentException("You can't get the BTC balance of an ETH account")
         }
     }
 
@@ -93,7 +113,6 @@ class TransactionListDataManager(
                 (bchDataManager.getWalletBalance() + bchDataManager.getImportedAddressBalance()).toLong()
             ItemAccount.TYPE.ALL_LEGACY -> bchDataManager.getImportedAddressBalance().toLong()
             ItemAccount.TYPE.SINGLE_ACCOUNT -> bchDataManager.getAddressBalance(itemAccount.address!!).toLong()
-            else -> throw IllegalArgumentException("You can't get the BCH balance of an ETH account")
         }
     }
 
@@ -159,9 +178,9 @@ class TransactionListDataManager(
                         .map { BtcDisplayable(it) }
             }
 
-    private fun getAccountObservable(itemAccount: ItemAccount, limit: Int, offset: Int): Observable<List<Displayable>> =
+    private fun getAccountObservable(address: String, limit: Int, offset: Int): Observable<List<Displayable>> =
             Observable.fromCallable {
-                payloadManager.getAccountTransactions(itemAccount.address, limit, offset)
+                payloadManager.getAccountTransactions(address, limit, offset)
                         .map { BtcDisplayable(it) }
             }
 
@@ -178,4 +197,21 @@ class TransactionListDataManager(
                         .toObservable()
             }
 
+    private fun getBchAllTransactionsObservable(limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                bchDataManager.getWalletTransactions(limit, offset)!!
+                        .map { BchDisplayable(it) }
+            }
+
+    private fun getBchLegacyObservable(limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                bchDataManager.getImportedAddressTransactions(limit, offset)!!
+                        .map { BchDisplayable(it) }
+            }
+
+    private fun getBchAccountObservable(address: String, limit: Int, offset: Int): Observable<List<Displayable>> =
+            Observable.fromCallable {
+                bchDataManager.getAddressTransactions(address, limit, offset)!!
+                        .map { BchDisplayable(it) }
+            }
 }
