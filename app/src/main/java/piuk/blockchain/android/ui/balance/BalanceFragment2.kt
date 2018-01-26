@@ -57,18 +57,18 @@
                 //    private var balanceAdapter: BalanceAdapter? = null
 //
 //    private var progressDialog: MaterialProgressDialog? = null
-//    private var interactionListener: OnFragmentInteractionListener? = null
+                //    private var interactionListener: OnFragmentInteractionListener? = null
 //    private var spacerDecoration: BottomSpacerDecoration? = null
-//    private val receiver = object : BroadcastReceiver() {
-//        override fun onReceive(context: Context, intent: Intent) {
-//            if (intent.action == ACTION_INTENT && activity != null) {
-//                updateSelectedCurrency(CryptoCurrencies.BTC)
-//                recyclerview?.scrollToPosition(0)
-//                presenter.onViewReady()
-//            }
-//        }
-//    }
-//
+                //    private val receiver = object : BroadcastReceiver() {
+                //        override fun onReceive(context: Context, intent: Intent) {
+                //            if (intent.action == ACTION_INTENT && activity != null) {
+                //                updateSelectedCurrency(CryptoCurrencies.BTC)
+                //                recyclerview?.scrollToPosition(0)
+                //                presenter.onViewReady()
+                //            }
+                //        }
+                //    }
+                //
                 //    init {
                 //        Injector.getInstance().presenterComponent.inject(this)
                 //    }
@@ -220,32 +220,32 @@
 //        }
 //    }
 //
-//    override fun onResume() {
-//        super.onResume()
-//        presenter.onResume()
-//        if (activity is MainActivity) {
-//            (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
-//        }
-//
-//        LocalBroadcastManager.getInstance(context!!)
-//                .registerReceiver(receiver, IntentFilter(ACTION_INTENT))
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
-//        // Fixes issue with Swipe Layout messing with Fragment transitions
-//        swipe_container?.let {
-//            swipe_container.isRefreshing = false
-//            swipe_container.destroyDrawingCache()
-//            swipe_container.clearAnimation()
-//        }
-//    }
-//
-//    override fun onAttach(context: Context?) {
-//        super.onAttach(context)
-//        interactionListener = activity as OnFragmentInteractionListener?
-//    }
+                //    override fun onResume() {
+                //        super.onResume()
+                //        presenter.onResume()
+                //        if (activity is MainActivity) {
+                //            (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+                //        }
+                //
+                //        LocalBroadcastManager.getInstance(context!!)
+                //                .registerReceiver(receiver, IntentFilter(ACTION_INTENT))
+                //    }
+                //
+                //    override fun onPause() {
+                //        super.onPause()
+                //        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+                //        // Fixes issue with Swipe Layout messing with Fragment transitions
+                //        swipe_container?.let {
+                //            swipe_container.isRefreshing = false
+                //            swipe_container.destroyDrawingCache()
+                //            swipe_container.clearAnimation()
+                //        }
+                //    }
+                //
+                //    override fun onAttach(context: Context?) {
+                //        super.onAttach(context)
+                //        interactionListener = activity as OnFragmentInteractionListener?
+                //    }
 //
 //    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 //

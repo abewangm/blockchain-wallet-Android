@@ -52,29 +52,24 @@ class BalancePresenter @Inject constructor(
 
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
+        onAccountsAdapterSetup()
+        onTxFeedAdapterSetup()
+    }
 
-        refreshAllCompletable(getAccountAt(0))
-                .doOnError { Timber.e(it) }
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnSubscribe {
-                    onAccountsAdapterSetup()
-                    onTxFeedAdapterSetup()
-                }
-                .subscribe(
-                        { /* No-op */ },
-                        { Timber.e(it) }
-                )
+    internal fun onResume() {
+        onRefreshRequested()
     }
 
     /**
      * Do all API calls to reload page
      */
     internal fun refreshAllCompletable(account: ItemAccount): Completable {
-
         return getUpdateTickerCompletable()
+                .andThen(updateBchWallet())
                 .andThen(updateEthAddress())
                 .andThen(updateBalancesCompletable())
                 .andThen(updateTransactionsListCompletable(account))
+                //If 1 fails everything is fucked, don't do this
                 .doOnError { view.setUiState(UiState.FAILURE) }
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
                 .doOnComplete {
@@ -85,7 +80,7 @@ class BalancePresenter @Inject constructor(
     }
 
     /*
-    Swipe down force refresh
+    onResume and Swipe down force refresh
      */
     internal fun onRefreshRequested() {
         refreshAllCompletable(getCurrenctAccount())
@@ -109,6 +104,13 @@ class BalancePresenter @Inject constructor(
     private fun updateEthAddress() =
         Completable.fromObservable(ethDataManager.fetchEthAddress()
                 .onExceptionResumeNext { Observable.empty<EthAddressResponse>() })
+
+    /**
+     * API call - Update bitcoincash wallet
+     */
+    private fun updateBchWallet() = bchDataManager.refreshMetadataCompletable()
+            .doOnError{ Timber.e(it) }
+            .compose(RxUtil.applySchedulersToCompletable())
 
     /**
      * API call - Fetches latest balance for selected currency and updates UI balance
@@ -181,7 +183,7 @@ class BalancePresenter @Inject constructor(
         currencyState.cryptoCurrency = cryptoCurrency
 
         //Select default account for this currency
-        val account = getAccounts(cryptoCurrency).get(0)
+        val account = getAccounts().get(0)
 
         updateTransactionsListCompletable(account)
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
@@ -204,11 +206,14 @@ class BalancePresenter @Inject constructor(
     Fetch all active accounts for initial selected currency and set up account adapter
      */
     fun onAccountsAdapterSetup() {
-        view.setupAccountsAdapter(getAccounts(currencyState.cryptoCurrency))
+        view.setupAccountsAdapter(getAccounts())
     }
 
-    internal fun getAccounts(currency: CryptoCurrencies): MutableList<ItemAccount> {
-        return when (currency) {
+    /**
+     * Get accounts based on selected currency
+     */
+    internal fun getAccounts(): MutableList<ItemAccount> {
+        return when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> getBtcAccounts()
             CryptoCurrencies.ETHER -> getEthAccounts()
             CryptoCurrencies.BCH -> getBchAccounts()
@@ -216,13 +221,13 @@ class BalancePresenter @Inject constructor(
     }
 
     internal fun refreshAccountDataSet() {
-        val accountList = getAccounts(currencyState.cryptoCurrency)
+        val accountList = getAccounts()
         view.updateAccountsDataSet(accountList)
     }
 
     internal fun onAccountSelected(position: Int) {
 
-        val account = getAccounts(currencyState.cryptoCurrency).get(position)
+        val account = getAccounts().get(position)
 
         updateTransactionsListCompletable(account)
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
@@ -239,14 +244,14 @@ class BalancePresenter @Inject constructor(
 
 
     internal fun getCurrenctAccount(): ItemAccount {
-        return getAccountAt(view.getCurrentAccountPosition())
+        return getAccountAt(view.getCurrentAccountPosition() ?: 0)
     }
 
     /*
     Don't over use this method. It's a bit hacky, but fast enough to work.
      */
     internal fun getAccountAt(position: Int): ItemAccount {
-        return getAccounts(currencyState.cryptoCurrency).get(position)
+        return getAccounts().get(position)
     }
 
     //region Account Lists

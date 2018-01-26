@@ -585,7 +585,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             balanceFragment = BalanceFragment.newInstance(true);
             paymentMade = false;
         }
-        balanceFragment.updateSelectedCurrency(mainPresenter.getCurrentCryptoCurrency());
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
     }

@@ -1,6 +1,9 @@
 package piuk.blockchain.android.ui.balance
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.LinearLayoutManager
@@ -38,8 +41,20 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     @Inject lateinit var balancePresenter: BalancePresenter
 
+    private var interactionListener: OnFragmentInteractionListener? = null
+
     init {
         Injector.getInstance().presenterComponent.inject(this)
+    }
+
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+
+            if (intent.action == ACTION_INTENT && activity != null) {
+                recyclerview?.scrollToPosition(0)
+                presenter.onRefreshRequested()
+            }
+        }
     }
 
     override fun onCreateView(
@@ -66,6 +81,34 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         currency_header.setSelectionListener { presenter.onCurrencySelected(it) }
 
         onViewReady()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.onResume()
+        if (activity is MainActivity) {
+            (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
+        }
+
+        LocalBroadcastManager.getInstance(context!!)
+                .registerReceiver(receiver, IntentFilter(ACTION_INTENT))
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
+        // Fixes issue with Swipe Layout messing with Fragment transitions
+        swipe_container?.let {
+            swipe_container.isRefreshing = false
+            swipe_container.destroyDrawingCache()
+            swipe_container.clearAnimation()
+        }
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        interactionListener = activity as OnFragmentInteractionListener?
     }
 
     override fun setupAccountsAdapter(accounts: List<ItemAccount>) {
@@ -115,7 +158,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun updateTransactionDataSet(isCrypto: Boolean, displayObjects: List<Any>) {
-        Timber.d("vos updateTransactionDataSet")
         //TODO No easy way to just update data set. We are forced to rebuild adapter
         setupTxFeedAdapter(isCrypto)
         txFeedAdapter?.items = displayObjects
@@ -220,9 +262,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         presenter.setViewType(isBtc)
     }
 
-    /*
-    Called from MainActivity
-     */
     override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
     }

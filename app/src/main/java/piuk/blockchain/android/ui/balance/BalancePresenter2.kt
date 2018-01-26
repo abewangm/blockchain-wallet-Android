@@ -102,27 +102,27 @@
 //        super.onViewDestroyed()
 //    }
 //
-//    internal fun onResume() {
-//        // Here we check the Fiat and Btc formats and let the UI handle any potential updates
-//        val btcUnitType = getBtcUnitType()
-//        monetaryUtil.updateUnit(btcUnitType)
-//        view.onExchangeRateUpdated(
-//                getLastBtcPrice(getFiatCurrency()),
-//                getLastEthPrice(getFiatCurrency()),
-//                currencyState.isDisplayingCryptoCurrency,
-//                txNoteMap
-//        )
-//        view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
-//    }
-//
-//    // TODO: This will need updating for BCH
-//    internal fun chooseDefaultAccount() {
-////        if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) {
-////            onAccountChosen(activeAccountAndAddressList.lastIndex)
-////        } else {
-//            onAccountChosen(0)
-////        }
-//    }
+                //    internal fun onResume() {
+                //        // Here we check the Fiat and Btc formats and let the UI handle any potential updates
+                //        val btcUnitType = getBtcUnitType()
+                //        monetaryUtil.updateUnit(btcUnitType)
+                //        view.onExchangeRateUpdated(
+                //                getLastBtcPrice(getFiatCurrency()),
+                //                getLastEthPrice(getFiatCurrency()),
+                //                currencyState.isDisplayingCryptoCurrency,
+                //                txNoteMap
+                //        )
+                //        view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
+                //    }
+                //
+                //    // TODO: This will need updating for BCH
+                //    internal fun chooseDefaultAccount() {
+                ////        if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) {
+                ////            onAccountChosen(activeAccountAndAddressList.lastIndex)
+                ////        } else {
+                //            onAccountChosen(0)
+                ////        }
+                //    }
                 //
                 //    internal fun onAccountChosen(position: Int) {
                 //

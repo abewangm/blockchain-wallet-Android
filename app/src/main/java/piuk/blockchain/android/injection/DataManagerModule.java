@@ -281,10 +281,12 @@ public class DataManagerModule {
                                                    MetadataUtils metadataUtils,
                                                    NetworkParameterUtils networkParameterUtils,
                                                    BlockExplorer blockExplorer,
+                                                   StringUtils stringUtils,
                                                    RxBus rxBus) {
         return new BchDataManager(payloadDataManager, bchDataStore,
                 metadataUtils, networkParameterUtils,
                 blockExplorer,
+                stringUtils,
                 rxBus);
     }
 }

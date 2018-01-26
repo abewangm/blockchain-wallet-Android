@@ -59,7 +59,7 @@ interface BalanceView : View {
 //
 //    fun updateAccountList(accountList: List<ItemAccount>)
 
-    fun getCurrentAccountPosition(): Int
+    fun getCurrentAccountPosition(): Int?
 
     fun updateTransactionValueType(showCrypto: Boolean)
 
