@@ -21,7 +21,9 @@ abstract class Displayable {
     open val watchOnly: Boolean = false
     open val doubleSpend: Boolean = false
     open val isPending: Boolean = false
-
+    open var totalDisplayableCrypto: String? = null
+    open var totalDisplayableFiat: String? = null
+    open var note: String? = null
 }
 
 @Mockable
@@ -68,6 +70,37 @@ data class BtcDisplayable(
 
     override val cryptoCurrency: CryptoCurrencies
         get() = CryptoCurrencies.BTC
+    override val direction: TransactionSummary.Direction
+        get() = transactionSummary.direction
+    override val timeStamp: Long
+        get() = transactionSummary.time
+    override val total: BigInteger
+        get() = transactionSummary.total
+    override val fee: BigInteger
+        get() = transactionSummary.fee
+    override val hash: String
+        get() = transactionSummary.hash
+    override val inputsMap: HashMap<String, BigInteger>
+        get() = transactionSummary.inputsMap
+    override val outputsMap: HashMap<String, BigInteger>
+        get() = transactionSummary.outputsMap
+    override val confirmations: Int
+        get() = transactionSummary.confirmations
+    override val watchOnly: Boolean
+        get() = transactionSummary.isWatchOnly
+    override val doubleSpend: Boolean
+        get() = transactionSummary.isDoubleSpend
+    override val isPending: Boolean
+        get() = transactionSummary.isPending
+
+}
+@Mockable
+data class BchDisplayable(
+        private val transactionSummary: TransactionSummary
+) : Displayable() {
+
+    override val cryptoCurrency: CryptoCurrencies
+        get() = CryptoCurrencies.BCH
     override val direction: TransactionSummary.Direction
         get() = transactionSummary.direction
     override val timeStamp: Long

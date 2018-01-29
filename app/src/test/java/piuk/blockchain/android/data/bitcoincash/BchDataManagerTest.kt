@@ -26,6 +26,7 @@ import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.util.MetadataUtils
 import piuk.blockchain.android.util.NetworkParameterUtils
+import piuk.blockchain.android.util.StringUtils
 
 @Config(sdk = intArrayOf(23), constants = BuildConfig::class, application = BlockchainTestApplication::class)
 @Suppress("IllegalIdentifier")
@@ -38,6 +39,7 @@ class BchDataManagerTest : RxTest(){
     private val networkParameterUtils: NetworkParameterUtils = mock()
     private val metadatUtils: MetadataUtils = mock()
     private val blockExplorer: BlockExplorer = mock()
+    private val stringUtils: StringUtils = mock()
     private val rxBus = RxBus()
 
     @Before
@@ -52,6 +54,7 @@ class BchDataManagerTest : RxTest(){
                 metadatUtils,
                 networkParameterUtils,
                 blockExplorer,
+                stringUtils,
                 rxBus
         )
     }

@@ -75,6 +75,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override val isContactsEnabled: Boolean = BuildConfig.CONTACTS_ENABLED
     override val locale: Locale = Locale.getDefault()
 
+    @Suppress("MemberVisibilityCanBePrivate")
     @Inject lateinit var receivePresenter: ReceivePresenter
     private var bottomSheetDialog: BottomSheetDialog? = null
     private var listener: OnReceiveFragmentInteractionListener? = null

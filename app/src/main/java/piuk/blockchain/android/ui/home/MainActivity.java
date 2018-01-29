@@ -538,11 +538,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onPaymentInitiated(@NonNull String uri, @NonNull String recipientId, @NonNull String mdid, @NonNull String fctxId) {
-        startContactSendDialog(uri, recipientId, mdid, fctxId);
-    }
-
-    @Override
     public void kickToLauncherPage() {
         startSingleActivity(LauncherActivity.class);
     }
@@ -588,7 +583,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             balanceFragment = BalanceFragment.newInstance(true);
             paymentMade = false;
         }
-        balanceFragment.updateSelectedCurrency(mainPresenter.getCurrentCryptoCurrency());
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
     }

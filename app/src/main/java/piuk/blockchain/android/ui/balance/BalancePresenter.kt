@@ -2,21 +2,16 @@ package piuk.blockchain.android.ui.balance
 
 import android.annotation.SuppressLint
 import android.support.annotation.VisibleForTesting
-import android.view.Display
-import info.blockchain.wallet.contacts.data.FacilitatedTransaction
-import info.blockchain.wallet.contacts.data.PaymentRequest
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.payload.data.LegacyAddress
-import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AuthEvent
-import piuk.blockchain.android.data.contacts.ContactsDataManager
-import piuk.blockchain.android.data.contacts.models.ContactTransactionModel
-import piuk.blockchain.android.data.contacts.models.ContactsEvent
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
@@ -31,7 +26,6 @@ import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
-import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -42,13 +36,11 @@ import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.DecimalFormat
-import java.util.*
 import javax.inject.Inject
 
 class BalancePresenter @Inject constructor(
         private val exchangeRateFactory: ExchangeRateFactory,
         private val transactionListDataManager: TransactionListDataManager,
-        private val contactsDataManager: ContactsDataManager,
         private val ethDataManager: EthDataManager,
         private val swipeToReceiveHelper: SwipeToReceiveHelper,
         internal val payloadDataManager: PayloadDataManager,
@@ -57,316 +49,344 @@ class BalancePresenter @Inject constructor(
         private val prefsUtil: PrefsUtil,
         private val rxBus: RxBus,
         private val currencyState: CurrencyState,
-        private val shapeShiftDataManager: ShapeShiftDataManager
+        private val shapeShiftDataManager: ShapeShiftDataManager,
+        private val bchDataManager: BchDataManager
 ) : BasePresenter<BalanceView>() {
 
-    @VisibleForTesting var contactsEventObservable: Observable<ContactsEvent>? = null
     @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
     @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
-    @VisibleForTesting var chosenAccount: ItemAccount? = null
 
-    @VisibleForTesting val activeAccountAndAddressList: MutableList<ItemAccount> = mutableListOf()
-    private val displayList: MutableList<Any> = mutableListOf()
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
-    private var txNoteMap: MutableMap<String, String> = mutableMapOf()
 
+    //region Life cycle
     @SuppressLint("VisibleForTests")
     override fun onViewReady() {
+        onAccountsAdapterSetup()
+        onTxFeedAdapterSetup()
         subscribeToEvents()
-        updateCurrencyUi(currencyState.cryptoCurrency)
+    }
 
-        ethDataManager.fetchEthAddress()
-                .doOnError { Timber.e(it) }
-                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() }
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .doOnNext {
-                    activeAccountAndAddressList.clear()
-                    activeAccountAndAddressList.addAll(getAllDisplayableAccounts())
-                }
-                .flatMap { getShapeShiftTxNotesObservable() }
-                .doOnNext { txNoteMap.putAll(it) }
-                .doOnComplete { setupTransactions() }
-                .subscribe(
-                        { updateSelectedCurrency(currencyState.cryptoCurrency) },
-                        { Timber.e(it) }
-                )
+    internal fun onResume() {
+        onRefreshRequested()
     }
 
     override fun onViewDestroyed() {
-        contactsEventObservable?.let { rxBus.unregister(ContactsEvent::class.java, it) }
         notificationObservable?.let { rxBus.unregister(NotificationPayload::class.java, it) }
         authEventObservable?.let { rxBus.unregister(AuthEvent::class.java, it) }
         super.onViewDestroyed()
     }
 
-    internal fun onResume() {
-        // Here we check the Fiat and Btc formats and let the UI handle any potential updates
-        val btcUnitType = getBtcUnitType()
-        monetaryUtil.updateUnit(btcUnitType)
-        view.onExchangeRateUpdated(
-                getLastBtcPrice(getFiatCurrency()),
-                getLastEthPrice(getFiatCurrency()),
-                currencyState.isDisplayingCryptoCurrency,
-                txNoteMap
-        )
-        view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
-    }
+    private fun subscribeToEvents() {
 
-    // TODO: This will need updating for BCH
-    internal fun chooseDefaultAccount() {
-        if (currencyState.cryptoCurrency == CryptoCurrencies.ETHER) {
-            onAccountChosen(activeAccountAndAddressList.lastIndex)
-        } else {
-            onAccountChosen(0)
-        }
-    }
-
-    internal fun onAccountChosen(position: Int) {
-        if (position - 1 > activeAccountAndAddressList.size || activeAccountAndAddressList.isEmpty()) {
-            Timber.d("activeAccountAndAddressList.size == 0")
-            return
+        authEventObservable = rxBus.register(AuthEvent::class.java).apply {
+            subscribe({
+                //Clear tx feed
+                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, mutableListOf())
+                transactionListDataManager.clearTransactionList()
+            })
         }
 
-        view.setUiState(UiState.LOADING)
-        chosenAccount = activeAccountAndAddressList[if (position >= 0) position else 0]
-        chosenAccount?.let {
-            Observable.merge(
-                    getBalanceObservable(it),
-                    getTransactionsListObservable(it)
-            ).compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnError { Timber.e(it) }
-                    .subscribe(
-                            { /* No-op */ },
-                            { view.setUiState(UiState.FAILURE) })
+        notificationObservable = rxBus.register(NotificationPayload::class.java).apply {
+            subscribe({ notificationPayload ->
+                //no-op
+            })
         }
     }
+    //endregion
 
+    //region API calls
+    /**
+     * Do all API calls to reload page
+     */
+    private fun refreshAllCompletable(account: ItemAccount): Completable {
+        return getUpdateTickerCompletable()
+                .andThen(updateBchWallet())
+                .andThen(updateEthAddress())
+                .andThen(updateBalancesCompletable())
+                .andThen(updateTransactionsListCompletable(account))
+                //If 1 fails everything is fucked, don't do this
+                .doOnError { view.setUiState(UiState.FAILURE) }
+                .doOnSubscribe { view.setUiState(UiState.LOADING) }
+                .doOnComplete {
+                    refreshBalanceHeader(account)
+                    refreshAccountDataSet()
+                    refreshLauncherShortcuts()
+                    setViewType(currencyState.isDisplayingCryptoCurrency)
+                }
+    }
+
+    /*
+    onResume and Swipe down force refresh
+     */
     internal fun onRefreshRequested() {
-        chosenAccount?.let {
-            Observable.merge(
-                    getBalanceObservable(it),
-                    getTransactionsListObservable(it),
-                    getFacilitatedTransactionsObservable()
-            ).compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnError { Timber.e(it) }
-                    .subscribe(
-                            { /* No-op */ },
-                            { view.setUiState(UiState.FAILURE) })
-        }
+        refreshAllCompletable(getCurrenctAccount())
+                .doOnError { Timber.e(it) }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { /* No-op */ },
+                        { Timber.e(it) }
+                )
     }
 
-    internal fun setViewType(isBtc: Boolean) {
-        currencyState.isDisplayingCryptoCurrency = isBtc
-        view.onViewTypeChanged(isBtc, getBtcUnitType())
-        if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
-            view.onTotalBalanceUpdated(
-                    getEthBalanceString(isBtc, BigDecimal(chosenAccount?.absoluteBalance ?: 0L)))
-        } else {
-            view.onTotalBalanceUpdated(
-                    getBtcBalanceString(isBtc, chosenAccount?.absoluteBalance ?: 0L))
-        }
+    private fun getUpdateTickerCompletable(): Completable {
+        return Completable.fromObservable(exchangeRateFactory.updateTickers())
     }
 
-    internal fun invertViewType() = setViewType(!currencyState.isDisplayingCryptoCurrency)
+    /**
+     * API call - Update eth address
+     */
+    private fun updateEthAddress() =
+        Completable.fromObservable(ethDataManager.fetchEthAddress()
+                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() })
 
-    internal fun areLauncherShortcutsEnabled() =
-            prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
+    /**
+     * API call - Update bitcoincash wallet
+     */
+    private fun updateBchWallet() = bchDataManager.refreshMetadataCompletable()
+            .doOnError{ Timber.e(it) }
+            .compose(RxUtil.applySchedulersToCompletable())
 
-    internal fun onPendingTransactionClicked(fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .compose(RxUtil.addSingleToCompositeDisposable(this))
-                .subscribe({
-                    val transaction = it.facilitatedTransactions[fctxId]
+    /**
+     * API call - Fetches latest balance for selected currency and updates UI balance
+     */
+    private fun updateBalancesCompletable() =
+            when (currencyState.cryptoCurrency) {
+                CryptoCurrencies.BTC -> payloadDataManager.updateAllBalances()
+                CryptoCurrencies.ETHER -> Completable.fromObservable(ethDataManager.fetchEthAddress())
+                CryptoCurrencies.BCH -> bchDataManager.updateAllBalances()
+            }
 
-                    if (transaction == null) {
-                        view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)
-                    } else {
-                        when {
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
-                                // Payment request sent, waiting for address from recipient
-                                view.showWaitingForAddressDialog()
+    /**
+     * API call - Fetches latest transactions for selected currency and account, and updates UI tx list
+     */
+    private fun updateTransactionsListCompletable(account: ItemAccount): Completable {
+        return Completable.fromObservable(
+                transactionListDataManager.fetchTransactions(account, 50, 0)
+                        .doAfterTerminate(this::storeSwipeReceiveAddresses)
+                        .map { txs ->
 
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                                    && transaction.role == FacilitatedTransaction.ROLE_PR_INITIATOR ->
-                                // Payment request sent, waiting for payment
-                                view.showWaitingForPaymentDialog()
+                            getShapeShiftTxNotesObservable()
+                                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                                    .subscribe(
+                                            { shapeShiftNotesMap ->
+                                                for (tx in txs) {
 
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_RECEIVER ->
-                                // Received payment request, need to send address to sender
-                                showSendAddressDialog(
-                                        fctxId,
-                                        transaction.intendedAmount,
-                                        it.name,
-                                        transaction.note
-                                )
+                                                    //Add shapeShift notes
+                                                    shapeShiftNotesMap[tx.hash]?.let {
+                                                        tx.note = it
+                                                    }
 
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                                    && transaction.role == FacilitatedTransaction.ROLE_PR_RECEIVER ->
-                                // Waiting for payment, pay or reject
-                                view.showPayOrDeclineDialog(
-                                        fctxId,
-                                        getBtcBalanceString(true, transaction.intendedAmount),
-                                        it.name,
-                                        transaction.note
-                                )
+                                                    when (currencyState.cryptoCurrency) {
+                                                        CryptoCurrencies.BTC -> {
+                                                            tx.totalDisplayableCrypto = getBtcBalanceString(
+                                                                    true,
+                                                                    tx.total.toLong())
+                                                            tx.totalDisplayableFiat = getBtcBalanceString(
+                                                                    false,
+                                                                    tx.total.toLong())
+                                                        }
+                                                        CryptoCurrencies.ETHER -> {
+                                                            tx.totalDisplayableCrypto = getEthBalanceString(
+                                                                    true,
+                                                                    BigDecimal(tx.total))
+                                                            tx.totalDisplayableFiat = getEthBalanceString(
+                                                                    false,
+                                                                    BigDecimal(tx.total))
+                                                        }
+                                                        CryptoCurrencies.BCH -> {
+                                                            tx.totalDisplayableCrypto = getBchBalanceString(
+                                                                    true,
+                                                                    tx.total.toLong())
+                                                            tx.totalDisplayableFiat = getBchBalanceString(
+                                                                    false,
+                                                                    tx.total.toLong())
+                                                        }
 
-                            transaction.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                                    && transaction.role == FacilitatedTransaction.ROLE_RPR_INITIATOR ->
-                                // Need to send payment to recipient
-                                view.initiatePayment(
-                                        transaction.toBitcoinURI(),
-                                        it.id,
-                                        it.mdid,
-                                        transaction.id
-                                )
+                                                    }
+                                                }
 
-                            else -> view.showTransactionCancelDialog(fctxId)
-                        }
-                    }
-                }, {
-                    Timber.e(it)
-                    view.showToast(
-                            R.string.contacts_not_found_error,
-                            ToastCustom.TYPE_ERROR
-                    )
-                })
+                                                when {
+                                                    txs.isEmpty() -> {
+                                                        view.setUiState(UiState.EMPTY)
+                                                    }
+                                                    else -> {
+                                                        view.setUiState(UiState.CONTENT)
+                                                    }
+                                                }
+
+                                                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, txs)
+                                            }
+                                            ,
+                                            { Timber.e(it) })
+                        })
     }
 
-    internal fun onPaymentRequestAccepted(fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .compose(RxUtil.addSingleToCompositeDisposable(this))
-                .subscribe({
-                    val transaction = it.facilitatedTransactions[fctxId]
-                    if (transaction == null) {
-                        view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR)
-                    } else {
-                        // Need to send payment to recipient
-                        view.initiatePayment(
-                                transaction.toBitcoinURI(),
-                                it.id,
-                                it.mdid,
-                                transaction.id
-                        )
-                    }
-                }, {
-                    Timber.e(it)
-                    view.showToast(
-                            R.string.contacts_not_found_error,
-                            ToastCustom.TYPE_ERROR
-                    )
-                })
+    //TODO This should replace updateTransactionsListCompletable, but can't get it to work properly
+    private fun updateTransactionsListCompletable2(account: ItemAccount): Completable {
+
+        return Completable.fromObservable(
+                Observable.zip(
+                        getShapeShiftTxNotesObservable(),
+                        transactionListDataManager.fetchBchTransactions(account, 50, 0),
+                        BiFunction { shapeShiftNotesMap: MutableMap<String, String>, txs: List<Displayable> ->
+                            {
+                                for (tx in txs) {
+
+                                    //Add shapeShift notes
+                                    shapeShiftNotesMap[tx.hash]?.let {
+                                        tx.note = it
+                                    }
+
+                                    //Display currencies
+                                    when (currencyState.cryptoCurrency) {
+                                        CryptoCurrencies.BTC -> {
+                                            tx.totalDisplayableCrypto = getBtcBalanceString(
+                                                    true,
+                                                    tx.total.toLong())
+                                            tx.totalDisplayableFiat = getBtcBalanceString(
+                                                    false,
+                                                    tx.total.toLong())
+                                        }
+                                        CryptoCurrencies.ETHER -> {
+                                            tx.totalDisplayableCrypto = getEthBalanceString(
+                                                    true,
+                                                    BigDecimal(tx.total))
+                                            tx.totalDisplayableFiat = getEthBalanceString(
+                                                    false,
+                                                    BigDecimal(tx.total))
+                                        }
+                                        CryptoCurrencies.BCH -> {
+                                            tx.totalDisplayableCrypto = getBchBalanceString(
+                                                    true,
+                                                    tx.total.toLong())
+                                            tx.totalDisplayableFiat = getBchBalanceString(
+                                                    false,
+                                                    tx.total.toLong())
+                                        }
+
+                                    }
+                                }
+
+                                when {
+                                    txs.isEmpty() -> {
+                                        view.setUiState(UiState.EMPTY)
+                                    }
+                                    else -> {
+                                        view.setUiState(UiState.CONTENT)
+                                    }
+                                }
+
+                                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, txs)
+                            }
+                        }).doAfterTerminate(this::storeSwipeReceiveAddresses))
+    }
+    //endregion
+
+    //region Incoming UI events
+    /*
+    Currency selected from dropdown
+     */
+    internal fun onCurrencySelected(cryptoCurrency: CryptoCurrencies) {
+        // Set new currency state
+        currencyState.cryptoCurrency = cryptoCurrency
+
+        //Select default account for this currency
+        val account = getAccounts().get(0)
+
+        updateTransactionsListCompletable(account)
+                .doOnSubscribe { view.setUiState(UiState.LOADING) }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError { Timber.e(it) }
+                .doOnComplete {
+                    refreshBalanceHeader(account)
+                    refreshAccountDataSet()
+                    view.selectDefaultAccount()
+                }
+                .subscribe(
+                        { /* No-op */ },
+                        { view.setUiState(UiState.FAILURE) })
     }
 
-    internal fun onPendingTransactionLongClicked(fctxId: String) {
-        contactsDataManager.getFacilitatedTransactions()
-                .filter { it.facilitatedTransaction.id == fctxId }
+    internal fun onGetBitcoinClicked() {
+        buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
-                    val fctx = it.facilitatedTransaction
-
-                    if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                            && fctx.role == FacilitatedTransaction.ROLE_RPR_INITIATOR) {
-                        view.showTransactionCancelDialog(fctxId)
-                    } else if (fctx.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                            && fctx.role == FacilitatedTransaction.ROLE_PR_INITIATOR) {
-                        view.showTransactionCancelDialog(fctxId)
+                    if (it) {
+                        view.startBuyActivity()
+                    } else {
+                        view.startReceiveFragmentBtc()
                     }
                 }, { Timber.e(it) })
     }
 
-    internal fun onAccountChosen(accountPosition: Int, fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .doOnSubscribe { view.showProgressDialog() }
-                .doOnError { view.showToast(R.string.contacts_transaction_not_found_error, ToastCustom.TYPE_ERROR) }
-                .flatMapCompletable { contact ->
-                    val transaction = contact.facilitatedTransactions[fctxId]
+    /*
+    Fetch all active accounts for initial selected currency and set up account adapter
+     */
+    internal fun onAccountsAdapterSetup() {
+        view.setupAccountsAdapter(getAccounts())
+    }
 
-                    val paymentRequest = PaymentRequest().apply {
-                        intendedAmount = transaction?.intendedAmount ?: 0L
-                        id = fctxId
-                    }
+    internal fun onAccountSelected(position: Int) {
 
-                    payloadDataManager.getNextReceiveAddressAndReserve(
-                            payloadDataManager.getPositionOfAccountInActiveList(accountPosition),
-                            "Payment request ${transaction?.id}"
-                    ).doOnNext { paymentRequest.address = it }
-                            .flatMapCompletable {
-                                contactsDataManager.sendPaymentRequestResponse(
-                                        contact.mdid,
-                                        paymentRequest,
-                                        fctxId
-                                )
-                            }
+        val account = getAccounts().get(position)
+
+        updateTransactionsListCompletable(account)
+                .doOnSubscribe { view.setUiState(UiState.LOADING) }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError { Timber.e(it) }
+                .doOnComplete {
+                    refreshBalanceHeader(account)
+                    refreshAccountDataSet()
                 }
-                .doAfterTerminate { view.dismissProgressDialog() }
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnError { Timber.e(it) }
                 .subscribe(
-                        {
-                            view.showToast(R.string.contacts_address_sent_success, ToastCustom.TYPE_OK)
-                            refreshFacilitatedTransactions()
-                        },
-                        { view.showToast(R.string.contacts_address_sent_failed, ToastCustom.TYPE_ERROR) })
+                        { /* No-op */ },
+                        { view.setUiState(UiState.FAILURE) })
     }
 
-    internal fun declineTransaction(fctxId: String) = view.showTransactionDeclineDialog(fctxId)
+    /*
+    Set fiat or crypto currency state
+     */
+    internal fun setViewType(showCrypto: Boolean) {
+        //Set new currency state
+        currencyState.isDisplayingCryptoCurrency = showCrypto
 
-    internal fun confirmDeclineTransaction(fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .flatMapCompletable { contactsDataManager.sendPaymentDeclinedResponse(it.mdid, fctxId) }
-                .doOnError { contactsDataManager.fetchContacts() }
-                .doAfterTerminate(this::refreshFacilitatedTransactions)
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnError { Timber.e(it) }
-                .subscribe(
-                        { view.showToast(R.string.contacts_pending_transaction_decline_success, ToastCustom.TYPE_OK) },
-                        { view.showToast(R.string.contacts_pending_transaction_decline_failure, ToastCustom.TYPE_ERROR) })
+        //Update balance header
+        refreshBalanceHeader(getCurrenctAccount())
+
+        //Update tx list balances
+        view.updateTransactionValueType(showCrypto)
+
+        //Update accounts data set
+        refreshAccountDataSet()
     }
 
-    internal fun confirmCancelTransaction(fctxId: String) {
-        contactsDataManager.getContactFromFctxId(fctxId)
-                .flatMapCompletable { contactsDataManager.sendPaymentCancelledResponse(it.mdid, fctxId) }
-                .doOnError { contactsDataManager.fetchContacts() }
-                .doAfterTerminate(this::refreshFacilitatedTransactions)
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .doOnError { Timber.e(it) }
-                .subscribe(
-                        { view.showToast(R.string.contacts_pending_transaction_cancel_success, ToastCustom.TYPE_OK) },
-                        { view.showToast(R.string.contacts_pending_transaction_cancel_failure, ToastCustom.TYPE_ERROR) })
+    /*
+    Toggle between fiat - crypto currency
+     */
+    internal fun onBalanceClick() = setViewType(!currencyState.isDisplayingCryptoCurrency)
+    //endregion
+
+    //region Update UI
+    private fun refreshBalanceHeader(account: ItemAccount) {
+        view.updateSelectedCurrency(currencyState.cryptoCurrency)
+        view.updateBalanceHeader(account.displayBalance!!)
     }
 
-    internal fun getBitcoinClicked() {
-        if (view.shouldShowBuy) {
-            buyDataManager.canBuy
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .subscribe({
-                        if (it) {
-                            view.startBuyActivity()
-                        } else {
-                            view.startReceiveFragment()
-                        }
-                    }, { Timber.e(it) })
-        } else {
-            view.startReceiveFragment()
-        }
+    private fun refreshAccountDataSet() {
+        val accountList = getAccounts()
+        view.updateAccountsDataSet(accountList)
     }
 
-    internal fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        currencyState.cryptoCurrency = cryptoCurrency
-        when (cryptoCurrency) {
-            CryptoCurrencies.BTC -> onAccountChosen(0)
-            CryptoCurrencies.ETHER -> onAccountChosen(activeAccountAndAddressList.lastIndex)
-            else -> throw IllegalArgumentException("BCH is not currently supported")
-        }
-
-        updateCurrencyUi(cryptoCurrency)
+    private fun refreshLauncherShortcuts() {
+        view.generateLauncherShortcuts()
     }
+    //endregion
 
+    //region Adapter data
+    //region Account Lists
     @VisibleForTesting
-    internal fun getAllDisplayableAccounts(): MutableList<ItemAccount> {
-        val mutableList = mutableListOf<ItemAccount>()
+    fun getBtcAccounts(): MutableList<ItemAccount> {
+        val result = mutableListOf<ItemAccount>()
 
         val legacyAddresses = payloadDataManager.legacyAddresses
                 .filter { it.tag != LegacyAddress.ARCHIVED_ADDRESS }
@@ -374,14 +394,12 @@ class BalancePresenter @Inject constructor(
         val accounts = payloadDataManager.accounts
                 .filter { !it.isArchived }
                 .map {
-                    val bigIntBalance = payloadDataManager.getAddressBalance(it.xpub)
+                    val balance = getBtcBalanceString(
+                            currencyState.isDisplayingCryptoCurrency,
+                            payloadDataManager.getAddressBalance(it.xpub).toLong())
                     ItemAccount().apply {
                         label = it.label
-                        displayBalance = getBtcBalanceString(
-                                currencyState.isDisplayingCryptoCurrency,
-                                bigIntBalance.toLong()
-                        )
-                        absoluteBalance = bigIntBalance.toLong()
+                        displayBalance = balance
                         address = it.xpub
                         type = ItemAccount.TYPE.SINGLE_ACCOUNT
                     }
@@ -391,178 +409,160 @@ class BalancePresenter @Inject constructor(
         if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
             val bigIntBalance = payloadDataManager.walletBalance
 
-            mutableList.add(ItemAccount().apply {
-                label = stringUtils.getString(R.string.all_accounts)
-                displayBalance = getBtcBalanceString(
-                        currencyState.isDisplayingCryptoCurrency,
-                        bigIntBalance.toLong()
-                )
-                absoluteBalance = bigIntBalance.toLong()
-                type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
-            })
+            val balance = getBtcBalanceString(
+                    currencyState.isDisplayingCryptoCurrency,
+                    bigIntBalance.toLong())
+            result.add(
+                    ItemAccount().apply {
+                        label = stringUtils.getString(R.string.all_accounts)
+                        displayBalance = balance
+                        type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+                    })
         }
 
-        mutableList.addAll(accounts)
+        result.addAll(accounts)
 
         // Show "Imported Addresses" if wallet contains legacy addresses
         if (!legacyAddresses.isEmpty()) {
             val bigIntBalance = payloadDataManager.importedAddressesBalance
 
-            mutableList.add(ItemAccount().apply {
-                displayBalance = getBtcBalanceString(
-                        currencyState.isDisplayingCryptoCurrency,
-                        bigIntBalance.toLong()
-                )
-                label = stringUtils.getString(R.string.imported_addresses)
-                absoluteBalance = bigIntBalance.toLong()
-                type = ItemAccount.TYPE.ALL_LEGACY
+            val balance = getBtcBalanceString(
+                    currencyState.isDisplayingCryptoCurrency,
+                    bigIntBalance.toLong())
+
+            result.add(
+                    ItemAccount().apply {
+                        label = stringUtils.getString(R.string.imported_addresses)
+                        displayBalance = balance
+                        type = ItemAccount.TYPE.ALL_LEGACY
+                    })
+        }
+
+        return result
+    }
+
+    @VisibleForTesting
+    fun getEthAccounts(): MutableList<ItemAccount> {
+        val result = mutableListOf<ItemAccount>()
+
+        val balance = getEthBalanceString(
+                currencyState.isDisplayingCryptoCurrency,
+                BigDecimal(ethDataManager.getEthResponseModel()?.getTotalBalance() ?: BigInteger.ZERO)
+        )
+
+        result.add(
+                ItemAccount().apply {
+                    label = stringUtils.getString(R.string.eth_default_account_label)
+                    displayBalance = balance
+                    type = ItemAccount.TYPE.SINGLE_ACCOUNT
+                })
+
+        return result
+    }
+
+    @VisibleForTesting
+    fun getBchAccounts(): MutableList<ItemAccount> {
+        val result = mutableListOf<ItemAccount>()
+
+        val legacyAddresses = payloadDataManager.legacyAddresses
+                .filter { it.tag != LegacyAddress.ARCHIVED_ADDRESS }
+
+        val accounts = bchDataManager.getActiveAccounts()
+                .map {
+
+                    val balance = getBchBalanceString(
+                            currencyState.isDisplayingCryptoCurrency,
+                            bchDataManager.getAddressBalance(it.xpub).toLong())
+                    ItemAccount().apply {
+                        label = it.label
+                        displayBalance = balance
+                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
+                        address = it.xpub
+                    }
+                }
+
+        // Show "All Accounts" if necessary
+        if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
+            val bigIntBalance = bchDataManager.getWalletBalance()
+
+            val balance = getBchBalanceString(
+                    currencyState.isDisplayingCryptoCurrency,
+                    bigIntBalance.toLong())
+            result.add(ItemAccount().apply {
+                label = stringUtils.getString(R.string.bch_all_accounts)
+                displayBalance = balance
+                type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
             })
         }
 
-        // Add Ethereum
-        mutableList.add(ItemAccount().apply {
-            type = ItemAccount.TYPE.ETHEREUM
-            label = stringUtils.getString(R.string.eth_default_account_label)
-            absoluteBalance = ethDataManager.getEthResponseModel()?.getTotalBalance()?.toLong() ?: 0L
-            displayBalance = getEthBalanceString(
+        result.addAll(accounts)
+
+        // Show "Imported Addresses" if wallet contains legacy addresses
+        if (!legacyAddresses.isEmpty()) {
+            val bigIntBalance = bchDataManager.getImportedAddressBalance()
+
+            val balance = getBchBalanceString(
                     currencyState.isDisplayingCryptoCurrency,
-                    BigDecimal(ethDataManager.getEthResponseModel()?.getTotalBalance() ?: BigInteger.ZERO)
-            )
-        })
+                    bigIntBalance.toLong())
 
-        return mutableList
+            result.add(
+                    ItemAccount().apply {
+                        label = stringUtils.getString(R.string.bch_imported_addresses)
+                        displayBalance = balance
+                        type = ItemAccount.TYPE.ALL_LEGACY
+                    })
+        }
+
+        return result
     }
+    //endregion
 
-    private fun showSendAddressDialog(fctxId: String, amount: Long, name: String, note: String?) {
-        val accountNames = payloadDataManager.accounts
-                .filterNot { it.isArchived }
-                .mapTo(ArrayList<String>()) { it.label }
+    //region Transaction List
+    fun onTxFeedAdapterSetup() {
+        view.setupTxFeedAdapter(currencyState.isDisplayingCryptoCurrency)
+    }
+    //endregion
 
-        if (accountNames.size == 1) {
-            // Only one account, ask if you want to send an address
-            view.showSendAddressDialog(
-                    fctxId,
-                    getBtcBalanceString(true, amount),
-                    name,
-                    note
-            )
-        } else {
-            // Show dialog allowing user to select which account they want to use
-            view.showAccountChoiceDialog(
-                    accountNames,
-                    fctxId,
-                    getBtcBalanceString(true, amount),
-                    name,
-                    note
-            )
+    /**
+     * Get accounts based on selected currency
+     */
+    private fun getAccounts(): MutableList<ItemAccount> {
+        return when (currencyState.cryptoCurrency) {
+            CryptoCurrencies.BTC -> getBtcAccounts()
+            CryptoCurrencies.ETHER -> getEthAccounts()
+            CryptoCurrencies.BCH -> getBchAccounts()
         }
     }
 
-    private fun updateCurrencyUi(cryptoCurrency: CryptoCurrencies) {
-        when (cryptoCurrency) {
-            CryptoCurrencies.BTC -> view.showAccountSpinner()
-            CryptoCurrencies.ETHER -> view.hideAccountSpinner()
-            else -> throw IllegalArgumentException("BCH is not currently supported")
-        }
-
-        view.updateSelectedCurrency(cryptoCurrency)
+    private fun getCurrenctAccount(): ItemAccount {
+        return getAccountAt(view.getCurrentAccountPosition() ?: 0)
     }
 
-    private fun setupTransactions() {
-        chosenAccount?.let {
-            Observable.merge(
-                    getBalanceObservable(it),
-                    getTransactionsListObservable(it),
-                    getUpdateTickerObservable(),
-                    getFacilitatedTransactionsObservable()
-            ).compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnError { Timber.e(it) }
-                    .subscribe(
-                            { /* No-op */ },
-                            { view.setUiState(UiState.FAILURE) })
-        }
+    /*
+    Don't over use this method. It's a bit hacky, but fast enough to work.
+     */
+    private fun getAccountAt(position: Int): ItemAccount {
+        return getAccounts()[position]
     }
 
-    private fun getTransactionsListObservable(itemAccount: ItemAccount) =
-            transactionListDataManager.fetchTransactions(itemAccount, 50, 0)
-                    .doAfterTerminate(this::storeSwipeReceiveAddresses)
-                    .doOnNext {
-                        displayList.removeAll { it is Displayable }
-                        displayList.addAll(it)
+    private fun getShapeShiftTxNotesObservable() =
+            shapeShiftDataManager.getTradesList()
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
+                    .map {
+                        val map: MutableMap<String, String> = mutableMapOf()
 
-                        when {
-                            displayList.isEmpty() -> view.setUiState(UiState.EMPTY)
-                            else -> view.setUiState(UiState.CONTENT)
+                        for (trade in it) {
+                            trade.hashIn?.let {
+                                map.put(trade.hashIn, stringUtils.getString(R.string.shapeshift_deposit_to))
+                            }
+                            trade.hashOut?.let {
+                                map.put(trade.hashOut, stringUtils.getString(R.string.shapeshift_deposit_from))
+                            }
                         }
-                        view.onTransactionsUpdated(displayList)
+                        return@map map
                     }
-
-    private fun getBalanceObservable(itemAccount: ItemAccount): Observable<Nothing> {
-        return if (chosenAccount?.type == ItemAccount.TYPE.ETHEREUM) {
-            ethDataManager.fetchEthAddress()
-                    .doOnNext {
-                        val ethBalance = BigDecimal(it.getTotalBalance())
-                        val ethString = getEthBalanceString(currencyState.isDisplayingCryptoCurrency, ethBalance)
-                        view.onTotalBalanceUpdated(ethString)
-                    }.flatMap { Observable.empty<Nothing>() }
-        } else {
-            payloadDataManager.updateAllBalances()
-                    .doOnComplete {
-                        val btcBalance = transactionListDataManager.getBtcBalance(itemAccount)
-                        val balanceTotal = getBtcBalanceString(currencyState.isDisplayingCryptoCurrency, btcBalance)
-                        view.onTotalBalanceUpdated(balanceTotal)
-                    }.toObservable<Nothing>()
-        }
-    }
-
-    private fun getUpdateTickerObservable(): Observable<Map<String, PriceDatum>> {
-        // Remove ETH from list of accounts
-        val displayableAccounts = mutableListOf<ItemAccount>().apply {
-            addAll(activeAccountAndAddressList)
-            removeAt(lastIndex)
-        }
-
-        return exchangeRateFactory.updateTickers()
-                .doOnComplete {
-                    view.onAccountsUpdated(
-                            displayableAccounts,
-                            getLastBtcPrice(getFiatCurrency()),
-                            getFiatCurrency(),
-                            monetaryUtil,
-                            currencyState.isDisplayingCryptoCurrency
-                    )
-                    view.onExchangeRateUpdated(
-                            exchangeRateFactory.getLastBtcPrice(getFiatCurrency()),
-                            exchangeRateFactory.getLastEthPrice(getFiatCurrency()),
-                            currencyState.isDisplayingCryptoCurrency,
-                            txNoteMap
-                    )
-                }
-    }
-
-    private fun getFacilitatedTransactionsObservable() = if (view.isContactsEnabled) {
-        contactsDataManager.fetchContacts()
-                .andThen(contactsDataManager.getContactsWithUnreadPaymentRequests())
-                .toList()
-                .flatMapObservable { contactsDataManager.refreshFacilitatedTransactions() }
-                .toList()
-                .onErrorReturnItem(emptyList())
-                .toObservable()
-                .doOnNext {
-                    handlePendingTransactions(it)
-                    view.onContactsHashMapUpdated(contactsDataManager.getTransactionDisplayMap())
-                }
-    } else {
-        Observable.empty()
-    }
-
-    private fun refreshFacilitatedTransactions() {
-        getFacilitatedTransactionsObservable()
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(
-                        { /* No-op */ },
-                        { Timber.e(it) })
-    }
+                    .doOnError { Timber.e(it) }
+                    .onErrorReturn { mutableMapOf() }
 
     private fun storeSwipeReceiveAddresses() {
         // Defer to background thread as deriving addresses is quite processor intensive
@@ -576,121 +576,64 @@ class BalancePresenter @Inject constructor(
                         { /* No-op */ },
                         { Timber.e(it) })
     }
+    //endregion
 
-    private fun subscribeToEvents() {
-        contactsEventObservable = rxBus.register(ContactsEvent::class.java).apply {
-            subscribe({ refreshFacilitatedTransactions() })
-        }
-
-        authEventObservable = rxBus.register(AuthEvent::class.java).apply {
-            subscribe({
-                displayList.clear()
-                transactionListDataManager.clearTransactionList()
-                contactsDataManager.resetContacts()
-            })
-        }
-
-        notificationObservable = rxBus.register(NotificationPayload::class.java).apply {
-            subscribe({ notificationPayload ->
-                if (notificationPayload.type != null
-                        && notificationPayload.type == NotificationPayload.NotificationType.PAYMENT) {
-                    refreshFacilitatedTransactions()
-                }
-            })
-        }
-    }
-
-    private fun handlePendingTransactions(transactions: List<ContactTransactionModel>) {
-        displayList.removeAll { it !is Display }
-        view.showFctxRequiringAttention(getNumberOfFctxRequiringAttention(transactions))
-        if (transactions.isNotEmpty()) {
-            val reversed = transactions.sortedBy { it.facilitatedTransaction.lastUpdated }.reversed()
-            displayList.add(0, stringUtils.getString(R.string.contacts_pending_transaction))
-            displayList.addAll(1, reversed)
-            displayList.add(reversed.size + 1, stringUtils.getString(R.string.contacts_transaction_history))
-            view.onTransactionsUpdated(displayList)
-            view.setUiState(UiState.CONTENT)
-        } else {
-            view.onTransactionsUpdated(displayList)
-        }
-    }
-
-    private fun getNumberOfFctxRequiringAttention(facilitatedTransactions: List<ContactTransactionModel>): Int {
-        var value = 0
-        facilitatedTransactions
-                .asSequence()
-                .map { it.facilitatedTransaction }
-                .forEach {
-                    if (it.state == FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS
-                            && it.role == FacilitatedTransaction.ROLE_RPR_RECEIVER) {
-                        value++
-                    } else if (it.state == FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT
-                            && (it.role == FacilitatedTransaction.ROLE_RPR_INITIATOR
-                            || it.role == FacilitatedTransaction.ROLE_PR_RECEIVER)) {
-                        value++
-                    }
-                }
-        return value
-    }
-
-    private fun getBtcBalanceString(isBtc: Boolean, btcBalance: Long): String {
+    //region Helper methods
+    private fun getBtcBalanceString(showCrypto: Boolean, btcBalance: Long): String {
         val strFiat = getFiatCurrency()
         val fiatBalance = exchangeRateFactory.getLastBtcPrice(strFiat) * (btcBalance / 1e8)
         var balance = monetaryUtil.getDisplayAmountWithFormatting(btcBalance)
         // Replace 0.0 with 0 to match web
         if (balance == "0.0") balance = "0"
 
-        return if (isBtc) {
+        return if (showCrypto) {
             "$balance ${getBtcDisplayUnits()}"
         } else {
             "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
         }
     }
 
-    private fun getEthBalanceString(isEth: Boolean, ethBalance: BigDecimal): String {
+    private fun getEthBalanceString(showCrypto: Boolean, ethBalance: BigDecimal): String {
         val strFiat = getFiatCurrency()
         val fiatBalance = BigDecimal.valueOf(exchangeRateFactory.getLastEthPrice(strFiat))
                 .multiply(Convert.fromWei(ethBalance, Convert.Unit.ETHER))
         val number = DecimalFormat.getInstance().apply { maximumFractionDigits = 8 }
                 .run { format(Convert.fromWei(ethBalance, Convert.Unit.ETHER)) }
 
-        return if (isEth) {
+        return if (showCrypto) {
             "$number ETH"
         } else {
             "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance.toDouble())} $strFiat"
         }
     }
 
-    private fun getLastBtcPrice(fiat: String) = exchangeRateFactory.getLastBtcPrice(fiat)
+    private fun getBchBalanceString(showCrypto: Boolean, bchBalance: Long): String {
+        val strFiat = getFiatCurrency()
+        val fiatBalance = exchangeRateFactory.getLastBchPrice(strFiat) * (bchBalance / 1e8)
+        var balance = monetaryUtil.getDisplayAmountWithFormatting(bchBalance)
+        // Replace 0.0 with 0 to match web
+        if (balance == "0.0") balance = "0"
 
-    private fun getLastEthPrice(fiat: String) = exchangeRateFactory.getLastEthPrice(fiat)
+        return if (showCrypto) {
+            "$balance ${getBchDisplayUnits()}"
+        } else {
+            "${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)} $strFiat"
+        }
+    }
+
+    private fun getFiatCurrency() =
+        prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
     private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
 
+    private fun getBchDisplayUnits() = monetaryUtil.getBchUnits()[getBtcUnitType()]
+
     private fun getBtcUnitType() =
-            prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+        prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
 
-    private fun getFiatCurrency() =
-            prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+    internal fun areLauncherShortcutsEnabled() =
+            prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
 
-    private fun getShapeShiftTxNotesObservable() =
-            payloadDataManager.metadataNodeFactory
-                    .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .map {
-                        val map: MutableMap<String, String> = mutableMapOf()
-
-                        for (trade in it.trades) {
-                            trade.hashIn?.let {
-                                map.put(it, stringUtils.getString(R.string.shapeshift_deposit_to))
-                            }
-                            trade.hashOut?.let {
-                                map.put(it, stringUtils.getString(R.string.shapeshift_deposit_from))
-                            }
-                        }
-                        return@map map
-                    }
-                    .doOnError { Timber.e(it) }
-                    .onErrorReturn { mutableMapOf() }
-
+    internal fun getCurrentCurrency() = currencyState.cryptoCurrency
+    //endregion
 }

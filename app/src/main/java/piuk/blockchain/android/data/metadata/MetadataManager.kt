@@ -9,6 +9,7 @@ import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
@@ -32,6 +33,7 @@ class MetadataManager(
         private val payloadDataManager: PayloadDataManager,
         private val ethDataManager: EthDataManager,
         private val bchDataManager: BchDataManager,
+        private val shapeShiftDataManager: ShapeShiftDataManager,
         private val stringUtils: StringUtils
 ) {
 
@@ -76,8 +78,9 @@ class MetadataManager(
                 .compose(RxUtil.applySchedulersToCompletable())
     }
 
-    private fun loadMetadataElements(key: DeterministicKey): Completable {
-        return ethDataManager.initEthereumWallet(key, stringUtils.getString(R.string.eth_default_account_label))
-                .andThen(bchDataManager.initBchWallet(key, stringUtils.getString(R.string.bch_default_account_label)))
+    private fun loadMetadataElements(metadataNode: DeterministicKey): Completable {
+        return ethDataManager.initEthereumWallet(metadataNode, stringUtils.getString(R.string.eth_default_account_label))
+                .andThen(bchDataManager.initBchWallet(metadataNode, stringUtils.getString(R.string.bch_default_account_label))
+                        .andThen(Completable.fromObservable(shapeShiftDataManager.initShapeshiftTradeData(metadataNode))))
     }
 }
