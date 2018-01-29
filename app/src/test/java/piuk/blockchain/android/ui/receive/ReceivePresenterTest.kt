@@ -5,6 +5,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.BlockchainFramework
 import info.blockchain.wallet.FrameworkInterface
 import info.blockchain.wallet.api.Environment
+import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
@@ -12,12 +13,12 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should equal to`
+import org.amshove.kluent.`should equal`
 import org.apache.commons.lang3.NotImplementedException
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.params.BitcoinCashMainNetParams
 import org.bitcoinj.params.BitcoinMainNetParams
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
@@ -178,6 +179,7 @@ class ReceivePresenterTest {
         verifyNoMoreInteractions(qrCodeDataManager)
         subject.selectedAccount `should be` null
         subject.selectedAddress `should be` address
+        subject.selectedBchAccount `should be` null
     }
 
     @Test
@@ -205,9 +207,65 @@ class ReceivePresenterTest {
         verifyNoMoreInteractions(qrCodeDataManager)
         subject.selectedAccount `should be` null
         subject.selectedAddress `should be` address
+        subject.selectedBchAccount `should be` null
     }
 
-    @Ignore
+    @Test
+    @Throws(Exception::class)
+    fun `onLegacyAddressSelected BCH with no label`() {
+        // Arrange
+        val address = "1ATy3ktyaYjzZZQQnhvPsuBVheUDYcUP7V"
+        val bech32Address = "bitcoincash:qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val bech32Display = "qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val legacyAddress = LegacyAddress().apply {
+            this.address = address
+        }
+        whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
+                .thenReturn(Observable.empty())
+        whenever(environmentSettings.networkParameters).thenReturn(BitcoinMainNetParams.get())
+        // Act
+        subject.onLegacyBchAddressSelected(legacyAddress)
+        // Assert
+        verify(activity).updateReceiveAddress(bech32Display)
+        verify(activity).updateReceiveLabel(bech32Display)
+        verify(activity).showQrLoading()
+        verifyNoMoreInteractions(activity)
+        verify(qrCodeDataManager).generateQrCode(eq(bech32Address), anyInt())
+        verifyNoMoreInteractions(qrCodeDataManager)
+        subject.selectedAccount `should be` null
+        subject.selectedAddress!! `should equal to` bech32Address
+        subject.selectedBchAccount `should be` null
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onLegacyAddressSelected BCH with label`() {
+        // Arrange
+        val address = "1ATy3ktyaYjzZZQQnhvPsuBVheUDYcUP7V"
+        val bech32Address = "bitcoincash:qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val bech32Display = "qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val label = "BCH LABEL"
+        val legacyAddress = LegacyAddress().apply {
+            this.address = address
+            this.label = label
+        }
+        whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
+                .thenReturn(Observable.empty())
+        whenever(environmentSettings.networkParameters).thenReturn(BitcoinMainNetParams.get())
+        // Act
+        subject.onLegacyBchAddressSelected(legacyAddress)
+        // Assert
+        verify(activity).updateReceiveAddress(bech32Display)
+        verify(activity).updateReceiveLabel(label)
+        verify(activity).showQrLoading()
+        verifyNoMoreInteractions(activity)
+        verify(qrCodeDataManager).generateQrCode(eq(bech32Address), anyInt())
+        verifyNoMoreInteractions(qrCodeDataManager)
+        subject.selectedAccount `should be` null
+        subject.selectedAddress `should equal` bech32Address
+        subject.selectedBchAccount `should be` null
+    }
+
     @Test
     @Throws(Exception::class)
     fun `onAccountSelected success`() {
@@ -221,10 +279,11 @@ class ReceivePresenterTest {
         whenever(payloadDataManager.getNextReceiveAddress(account))
                 .thenReturn(Observable.just(address))
         whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
         subject.onAccountSelected(account)
         // Assert
-//        verify(activity).setSelectedCurrency(0)
+        verify(activity).setSelectedCurrency(CryptoCurrencies.BTC)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
@@ -235,11 +294,14 @@ class ReceivePresenterTest {
         verify(payloadDataManager).getNextReceiveAddress(account)
         verify(payloadDataManager).updateAllTransactions()
         verifyNoMoreInteractions(payloadDataManager)
+        verify(currencyState).cryptoCurrency = CryptoCurrencies.BTC
+        verify(currencyState).cryptoCurrency
+        verifyNoMoreInteractions(currencyState)
         subject.selectedAccount `should be` account
         subject.selectedAddress `should be` address
+        subject.selectedBchAccount `should be` null
     }
 
-    @Ignore
     @Test
     @Throws(Exception::class)
     fun `onAccountSelected address derivation failure`() {
@@ -249,10 +311,11 @@ class ReceivePresenterTest {
         whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         whenever(payloadDataManager.getNextReceiveAddress(account))
                 .thenReturn(Observable.error { Throwable() })
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
         subject.onAccountSelected(account)
         // Assert
-//        verify(activity).setSelectedCurrency(0)
+        verify(activity).setSelectedCurrency(CryptoCurrencies.BTC)
         verify(activity).showQrLoading()
         verify(activity).updateReceiveLabel(label)
         verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
@@ -260,11 +323,14 @@ class ReceivePresenterTest {
         verify(payloadDataManager).updateAllTransactions()
         verify(payloadDataManager).getNextReceiveAddress(account)
         verifyNoMoreInteractions(payloadDataManager)
+        verify(currencyState).cryptoCurrency = CryptoCurrencies.BTC
+        verify(currencyState).cryptoCurrency
+        verifyNoMoreInteractions(currencyState)
         subject.selectedAccount `should be` account
         subject.selectedAddress `should be` null
+        subject.selectedBchAccount `should be` null
     }
 
-    @Ignore
     @Test
     @Throws(Exception::class)
     fun onEthSelected() {
@@ -277,21 +343,120 @@ class ReceivePresenterTest {
         whenever(ethResponse.account).thenReturn(ethAccount)
         whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
                 .thenReturn(Observable.empty())
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         // Act
         subject.onEthSelected()
         // Assert
-//        verify(activity).setSelectedCurrency(1)
-//        verify(activity).hideBitcoinLayout()
+        verify(activity).setSelectedCurrency(CryptoCurrencies.ETHER)
         verify(activity).updateReceiveAddress(ethAccount)
         verify(activity).showQrLoading()
         verifyNoMoreInteractions(activity)
         verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
         verifyNoMoreInteractions(qrCodeDataManager)
+        verify(currencyState).cryptoCurrency = CryptoCurrencies.ETHER
+        verify(currencyState).cryptoCurrency
+        verifyNoMoreInteractions(currencyState)
         subject.selectedAccount `should be` null
         subject.selectedAddress `should be` ethAccount
+        subject.selectedBchAccount `should be` null
     }
 
-    @Ignore
+    @Test
+    @Throws(Exception::class)
+    fun `onBchAccountSelected success`() {
+        // Arrange
+        val address = "bitcoincash:qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val displayAddress = "qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val xPub = "X_PUB"
+        val label = "LABEL"
+        val account = GenericMetadataAccount().apply {
+            this.label = label
+            this.xpub = xPub
+        }
+        whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
+                .thenReturn(Observable.empty())
+        whenever(bchDataManager.updateAllBalances())
+                .thenReturn(Completable.complete())
+        whenever(bchDataManager.getActiveAccounts())
+                .thenReturn(listOf(account))
+        whenever(bchDataManager.getNextReceiveCashAddress(0))
+                .thenReturn(Observable.just(address))
+        whenever(bchDataManager.getWalletTransactions(50, 0))
+                .thenReturn(Observable.just(emptyList()))
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BCH)
+        // Act
+        subject.onBchAccountSelected(account)
+        // Assert
+        verify(activity).setSelectedCurrency(CryptoCurrencies.BCH)
+        verify(activity).updateReceiveAddress(displayAddress)
+        verify(activity).updateReceiveLabel(label)
+        verify(activity, times(2)).showQrLoading()
+        verifyNoMoreInteractions(activity)
+        verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
+        verifyNoMoreInteractions(qrCodeDataManager)
+        verify(bchDataManager).updateAllBalances()
+        verify(bchDataManager).getActiveAccounts()
+        verify(bchDataManager).getNextReceiveCashAddress(0)
+        verify(bchDataManager).getWalletTransactions(50, 0)
+        verifyNoMoreInteractions(payloadDataManager)
+        verify(currencyState).cryptoCurrency = CryptoCurrencies.BCH
+        verify(currencyState).cryptoCurrency
+        verifyNoMoreInteractions(currencyState)
+        subject.selectedAccount `should be` null
+        subject.selectedAddress `should equal` address
+        subject.selectedBchAccount `should be` account
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onSelectBchDefault success`() {
+        // Arrange
+        val address = "bitcoincash:qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val displayAddress = "qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val xPub = "X_PUB"
+        val label = "LABEL"
+        val account = GenericMetadataAccount().apply {
+            this.label = label
+            this.xpub = xPub
+        }
+        whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
+                .thenReturn(Observable.empty())
+        whenever(bchDataManager.getDefaultGenericMetadataAccount()).thenReturn(account)
+        whenever(bchDataManager.updateAllBalances())
+                .thenReturn(Completable.complete())
+        whenever(bchDataManager.getActiveAccounts())
+                .thenReturn(listOf(account))
+        whenever(bchDataManager.getNextReceiveCashAddress(0))
+                .thenReturn(Observable.just(address))
+        whenever(bchDataManager.getWalletTransactions(50, 0))
+                .thenReturn(Observable.just(emptyList()))
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BCH)
+        // Act
+        subject.onSelectBchDefault()
+        // Assert
+        verify(activity).setSelectedCurrency(CryptoCurrencies.BCH)
+        verify(activity).updateReceiveAddress(displayAddress)
+        verify(activity).updateReceiveLabel(label)
+        verify(activity, times(2)).showQrLoading()
+        verifyNoMoreInteractions(activity)
+        verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
+        verifyNoMoreInteractions(qrCodeDataManager)
+        verify(bchDataManager).getDefaultGenericMetadataAccount()
+        verify(bchDataManager).updateAllBalances()
+        verify(bchDataManager).getActiveAccounts()
+        verify(bchDataManager).getNextReceiveCashAddress(0)
+        verify(bchDataManager).getWalletTransactions(50, 0)
+        verifyNoMoreInteractions(payloadDataManager)
+        verify(currencyState).cryptoCurrency = CryptoCurrencies.BCH
+        verify(currencyState).cryptoCurrency
+        verifyNoMoreInteractions(currencyState)
+        subject.selectedAccount `should be` null
+        subject.selectedAddress `should equal` address
+        subject.selectedBchAccount `should be` account
+    }
+
     @Test
     @Throws(Exception::class)
     fun `onSelectDefault account valid account position`() {
@@ -307,15 +472,15 @@ class ReceivePresenterTest {
         whenever(payloadDataManager.getNextReceiveAddress(account))
                 .thenReturn(Observable.just(address))
         whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
         subject.onSelectDefault(accountPosition)
         // Assert
-//        verify(activity).setSelectedCurrency(0)
+        verify(activity).setSelectedCurrency(CryptoCurrencies.BTC)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
         verify(activity, times(2)).showQrLoading()
-//        verify(activity).displayBitcoinLayout()
         verifyNoMoreInteractions(activity)
         verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
         verifyNoMoreInteractions(qrCodeDataManager)
@@ -323,11 +488,14 @@ class ReceivePresenterTest {
         verify(payloadDataManager).getAccount(accountPosition)
         verify(payloadDataManager).updateAllTransactions()
         verifyNoMoreInteractions(payloadDataManager)
+        verify(currencyState).cryptoCurrency = CryptoCurrencies.BTC
+        verify(currencyState).cryptoCurrency
+        verifyNoMoreInteractions(currencyState)
         subject.selectedAccount `should be` account
         subject.selectedAddress `should be` address
+        subject.selectedBchAccount `should be` null
     }
 
-    @Ignore
     @Test
     @Throws(Exception::class)
     fun `onSelectDefault account invalid account position`() {
@@ -343,15 +511,15 @@ class ReceivePresenterTest {
         whenever(payloadDataManager.getNextReceiveAddress(account))
                 .thenReturn(Observable.just(address))
         whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
         subject.onSelectDefault(accountPosition)
         // Assert
-//        verify(activity).setSelectedCurrency(0)
+        verify(activity).setSelectedCurrency(CryptoCurrencies.BTC)
         verify(activity).getBtcAmount()
         verify(activity).updateReceiveAddress(address)
         verify(activity).updateReceiveLabel(label)
         verify(activity, times(2)).showQrLoading()
-//        verify(activity).displayBitcoinLayout()
         verifyNoMoreInteractions(activity)
         verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
         verifyNoMoreInteractions(qrCodeDataManager)
@@ -359,8 +527,12 @@ class ReceivePresenterTest {
         verify(payloadDataManager).updateAllTransactions()
         verify(payloadDataManager).defaultAccount
         verifyNoMoreInteractions(payloadDataManager)
+        verify(currencyState).cryptoCurrency = CryptoCurrencies.BTC
+        verify(currencyState).cryptoCurrency
+        verifyNoMoreInteractions(currencyState)
         subject.selectedAccount `should be` account
         subject.selectedAddress `should be` address
+        subject.selectedBchAccount `should be` null
     }
 
     @Test
@@ -528,14 +700,22 @@ class ReceivePresenterTest {
     fun updateFiatTextField() {
         // Arrange
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn("GBP")
+        whenever(
+                prefsUtil.getValue(
+                        PrefsUtil.KEY_SELECTED_FIAT,
+                        PrefsUtil.DEFAULT_CURRENCY
+                )
+        ).thenReturn("GBP")
         whenever(exchangeRateFactory.getLastBtcPrice("GBP")).thenReturn(2.0)
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
         subject.updateFiatTextField("1.0")
         // Assert
         verify(prefsUtil).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
-        verify(prefsUtil, times(2)).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+        verify(prefsUtil, times(2)).getValue(
+                PrefsUtil.KEY_SELECTED_FIAT,
+                PrefsUtil.DEFAULT_CURRENCY
+        )
         verifyNoMoreInteractions(prefsUtil)
         verify(exchangeRateFactory).getLastBtcPrice("GBP")
         verifyNoMoreInteractions(exchangeRateFactory)
@@ -550,7 +730,12 @@ class ReceivePresenterTest {
     fun updateBtcTextField() {
         // Arrange
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)).thenReturn(0)
-        whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)).thenReturn("GBP")
+        whenever(
+                prefsUtil.getValue(
+                        PrefsUtil.KEY_SELECTED_FIAT,
+                        PrefsUtil.DEFAULT_CURRENCY
+                )
+        ).thenReturn("GBP")
         whenever(exchangeRateFactory.getLastBtcPrice("GBP")).thenReturn(2.0)
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act

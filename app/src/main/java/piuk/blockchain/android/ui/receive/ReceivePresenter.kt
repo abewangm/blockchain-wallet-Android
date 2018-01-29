@@ -137,7 +137,7 @@ class ReceivePresenter @Inject internal constructor(
 
         selectedAddress = bech32
         view.updateReceiveAddress(bech32Display)
-        generateQrCode(bech32Display)
+        generateQrCode(bech32)
     }
 
     internal fun onAccountSelected(account: Account) {
@@ -183,7 +183,6 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     internal fun onSelectBchDefault() {
-        currencyState.cryptoCurrency = CryptoCurrencies.BCH
         compositeDisposable.clear()
         onBchAccountSelected(bchDataManager.getDefaultGenericMetadataAccount()!!)
     }
@@ -217,7 +216,6 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     internal fun onSelectDefault(defaultAccountPosition: Int) {
-        currencyState.cryptoCurrency = CryptoCurrencies.BTC
         compositeDisposable.clear()
         onAccountSelected(
                 if (defaultAccountPosition > -1) {
