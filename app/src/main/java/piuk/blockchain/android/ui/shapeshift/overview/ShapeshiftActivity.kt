@@ -91,9 +91,9 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
 
     override fun onStateUpdated(shapeshiftState: ShapeShiftState) = when (shapeshiftState) {
         is ShapeShiftState.Data -> onData(shapeshiftState)
-        is ShapeShiftState.Empty -> onEmptyLayout()
-        is ShapeShiftState.Error -> onError()
-        is ShapeShiftState.Loading -> onLoading()
+        ShapeShiftState.Empty -> onEmptyLayout()
+        ShapeShiftState.Error -> onError()
+        ShapeShiftState.Loading -> onLoading()
     }
 
     override fun onTradeUpdate(trade: Trade, tradeResponse: TradeStatusResponse) {

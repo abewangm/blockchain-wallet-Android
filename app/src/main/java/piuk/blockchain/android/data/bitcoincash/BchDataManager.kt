@@ -5,13 +5,11 @@ import info.blockchain.wallet.BitcoinCashWallet
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.coin.GenericMetadataWallet
 import info.blockchain.wallet.crypto.DeterministicAccount
-import info.blockchain.wallet.metadata.MetadataNodeFactory
 import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
-import org.spongycastle.util.Arrays
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
@@ -21,7 +19,7 @@ import piuk.blockchain.android.util.MetadataUtils
 import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
-import timber.log.Timber
+import piuk.blockchain.android.util.annotations.WebRequest
 import java.math.BigInteger
 
 @Mockable
@@ -61,7 +59,7 @@ class BchDataManager(
      * Refreshes bitcoincash metadata. Useful if another platform performed any changes to wallet state.
      * At this point metadataNodeFactory.metadata node will exist.
      */
-    fun refreshMetadataCompletable() =
+    fun refreshMetadataCompletable(): Completable =
             Completable.fromObservable(
                     payloadDataManager.metadataNodeFactory
                             .map { initBchWallet(it.metadataNode, stringUtils.getString(R.string.bch_default_account_label)) })
@@ -102,14 +100,14 @@ class BchDataManager(
 
     internal fun getMetadataAccounts(defaultLabel: String, startingAccountIndex: Int, accountTotal: Int): ArrayList<GenericMetadataAccount> {
         val bchAccounts = arrayListOf<GenericMetadataAccount>()
-        for (i in (startingAccountIndex + 1)..accountTotal) {
-            val name: String
-            when (i) {
-                in 2..accountTotal -> name = defaultLabel + " " + i
-                else -> name = defaultLabel
-            }
-            bchAccounts.add(GenericMetadataAccount(name, false))
-        }
+        ((startingAccountIndex + 1)..accountTotal)
+                .map {
+                    when (it) {
+                        in 2..accountTotal -> defaultLabel + " " + it
+                        else -> defaultLabel
+                    }
+                }
+                .forEach { bchAccounts.add(GenericMetadataAccount(it, false)) }
 
         return bchAccounts
     }
@@ -195,8 +193,9 @@ class BchDataManager(
     fun getImportedAddressBalance(): BigInteger =
             bchDataStore.bchWallet?.getImportedAddressBalance() ?: BigInteger.ZERO
 
-    fun getAddressTransactions(address: String, limit: Int, offset: Int) =
-            bchDataStore.bchWallet?.getTransactions(
+    @WebRequest
+    fun getAddressTransactions(address: String, limit: Int, offset: Int): MutableList<TransactionSummary> =
+            bchDataStore.bchWallet!!.getTransactions(
                     null,//legacy list
                     mutableListOf(),//watch-only list
                     getActiveXpubsAndImportedAddresses(),
@@ -204,8 +203,9 @@ class BchDataManager(
                     limit,
                     offset)
 
-    fun getWalletTransactions(limit: Int, offset: Int) =
-            bchDataStore.bchWallet?.getTransactions(
+    @WebRequest
+    fun getWalletTransactions(limit: Int, offset: Int): MutableList<TransactionSummary> =
+            bchDataStore.bchWallet!!.getTransactions(
                     null,//legacy list
                     mutableListOf(),//watch-only list
                     getActiveXpubsAndImportedAddresses(),
@@ -213,8 +213,9 @@ class BchDataManager(
                     limit,
                     offset)
 
-    fun getImportedAddressTransactions(limit: Int, offset: Int) =
-            bchDataStore.bchWallet?.getTransactions(
+    @WebRequest
+    fun getImportedAddressTransactions(limit: Int, offset: Int): MutableList<TransactionSummary> =
+            bchDataStore.bchWallet!!.getTransactions(
                     payloadDataManager.legacyAddressStringList,//legacy list
                     mutableListOf(),//watch-only list
                     getActiveXpubsAndImportedAddresses(),
@@ -251,33 +252,33 @@ class BchDataManager(
     fun getReceiveAddressAtPosition(accountIndex: Int, addressIndex: Int): String? =
             bchDataStore.bchWallet?.getReceiveAddressAtPositionBch(accountIndex, addressIndex)
 
-    fun getNextReceiveCashAddress(accountIndex: Int) =
+    fun getNextReceiveCashAddress(accountIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet?.getNextReceiveCashAddress(accountIndex)
+                bchDataStore.bchWallet!!.getNextReceiveCashAddress(accountIndex)
             }
 
-    fun getNextChangeCashAddress(accountIndex: Int) =
+    fun getNextChangeCashAddress(accountIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet?.getNextChangeCashAddress(accountIndex)
+                bchDataStore.bchWallet!!.getNextChangeCashAddress(accountIndex)
             }
 
-    fun getNextChangeCashAddress(accountIndex: Int, addressIndex: Int) =
+    fun getNextChangeCashAddress(accountIndex: Int, addressIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet?.getChangeCashAddressAt(accountIndex, addressIndex)
+                bchDataStore.bchWallet!!.getChangeCashAddressAt(accountIndex, addressIndex)
             }
 
-    fun incrementNextReceiveAddressBch(xpub: String) =
+    fun incrementNextReceiveAddressBch(xpub: String): Completable =
             Completable.fromCallable {
-                bchDataStore.bchWallet?.incrementNextReceiveAddressBch(xpub)
+                bchDataStore.bchWallet!!.incrementNextReceiveAddressBch(xpub)
             }
 
-    fun incrementNextChangeAddressBch(xpub: String) =
+    fun incrementNextChangeAddressBch(xpub: String): Completable =
             Completable.fromCallable {
-                bchDataStore.bchWallet?.incrementNextChangeAddressBch(xpub)
+                bchDataStore.bchWallet!!.incrementNextChangeAddressBch(xpub)
             }
 
     fun isOwnAddress(address: String) =
-            bchDataStore.bchWallet?.isOwnAddress(address)
+            bchDataStore.bchWallet?.isOwnAddress(address) ?: false
 
     /**
      * Converts any Bitcoin Cash address to a label.

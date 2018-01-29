@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
@@ -34,20 +35,24 @@ import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
-class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, TxFeedClickListener {
+class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView,
+    TxFeedClickListener {
 
     private var accountsAdapter: AccountsAdapter? = null
     private var txFeedAdapter: TxFeedAdapter? = null
 
+    @Suppress("MemberVisibilityCanBePrivate")
     @Inject lateinit var balancePresenter: BalancePresenter
 
     private var interactionListener: OnFragmentInteractionListener? = null
     private var spacerDecoration: BottomSpacerDecoration? = null
+    private var backPressed: Long = 0
     private val shouldShowBuy = AndroidUtils.is19orHigher()
 
     init {
@@ -129,8 +134,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                     R.layout.spinner_balance_header,
                     accounts
             ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
-
-            accounts_spinner.adapter = accountsAdapter
         }
 
         handleAccountSpinnerVisibility()
@@ -146,7 +149,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun setupTxFeedAdapter(isCrypto: Boolean) {
-
         if (txFeedAdapter == null) {
             txFeedAdapter = TxFeedAdapter(activity!!, isCrypto, this)
         }
@@ -159,7 +161,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun selectDefaultAccount() {
-        if (accountsAdapter?.isNotEmpty ?: false) accounts_spinner.setSelection(0, false)
+        if (accountsAdapter?.isNotEmpty == true) accounts_spinner.setSelection(0, false)
     }
 
     override fun updateAccountsDataSet(accountsList: List<ItemAccount>) {
@@ -178,7 +180,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     /**
      * Adds space to bottom of tx feed recyclerview to make room for bottom navigation bar
      */
-    internal fun addBottomNavigationBarSpace() {
+    private fun addBottomNavigationBarSpace() {
         if (spacerDecoration == null) {
             spacerDecoration = BottomSpacerDecoration(
                     ViewUtils.convertDpToPixel(56f, context).toInt()
@@ -210,8 +212,27 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         txFeedAdapter?.onViewFormatUpdated(showCrypto)
     }
 
-    fun handleAccountSpinnerVisibility() {
-        if (accountsAdapter?.showSpinner() ?: false) {
+    fun onBackPressed() {
+        if (currency_header.isExpanded()) {
+            currency_header.close()
+        } else {
+            if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                AccessState.getInstance().logout(context)
+                return
+            } else {
+                toast(R.string.exit_confirm)
+            }
+
+            backPressed = System.currentTimeMillis()
+        }
+    }
+
+    private fun setShowRefreshing(showRefreshing: Boolean) {
+        swipe_container.isRefreshing = showRefreshing
+    }
+
+    private fun handleAccountSpinnerVisibility() {
+        if (accountsAdapter?.showSpinner() == true) {
             layout_spinner.visible()
         } else {
             layout_spinner.gone()
@@ -252,15 +273,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 button_get_bitcoin.setOnClickListener { startReceiveFragmentBch() }
                 description.setText(R.string.transaction_occur_when_bitcoin_cash)
             }
+            else -> throw IllegalArgumentException("Cryptocurrency ${presenter.getCurrentCurrency().unit} not supported")
         }
     }
 
     override fun updateBalanceHeader(balance: String) {
         textview_balance.text = balance
-    }
-
-    private fun setShowRefreshing(showRefreshing: Boolean) {
-        swipe_container.isRefreshing = showRefreshing
     }
 
     private fun onContentLoaded() {
@@ -336,7 +354,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         const val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
         const val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
         const val KEY_TRANSACTION_HASH = "transaction_hash"
+
         private const val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
+        private const val COOL_DOWN_MILLIS = 2 * 1000
 
         @JvmStatic
         fun newInstance(broadcastingPayment: Boolean): BalanceFragment {

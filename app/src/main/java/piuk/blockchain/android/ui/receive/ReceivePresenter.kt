@@ -1,14 +1,18 @@
 package piuk.blockchain.android.ui.receive
 
 import android.support.annotation.VisibleForTesting
+import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.util.FormatsUtil
+import io.reactivex.Completable
 import org.bitcoinj.core.Address
+import org.bitcoinj.core.CashAddress
 import org.bitcoinj.core.Coin
 import org.bitcoinj.uri.BitcoinURI
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager
@@ -37,6 +41,7 @@ class ReceivePresenter @Inject internal constructor(
         private val payloadDataManager: PayloadDataManager,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val ethDataStore: EthDataStore,
+        private val bchDataManager: BchDataManager,
         private val environmentSettings: EnvironmentSettings,
         private val currencyState: CurrencyState
 ) : BasePresenter<ReceiveView>() {
@@ -47,8 +52,15 @@ class ReceivePresenter @Inject internal constructor(
     @VisibleForTesting internal var selectedAddress: String? = null
     @VisibleForTesting internal var selectedContactId: String? = null
     @VisibleForTesting internal var selectedAccount: Account? = null
+    @VisibleForTesting internal var selectedBchAccount: GenericMetadataAccount? = null
     internal val currencyHelper by unsafeLazy {
-        ReceiveCurrencyHelper(monetaryUtil, Locale.getDefault(), prefsUtil, exchangeRateFactory, currencyState)
+        ReceiveCurrencyHelper(
+                monetaryUtil,
+                Locale.getDefault(),
+                prefsUtil,
+                exchangeRateFactory,
+                currencyState
+        )
     }
 
     override fun onViewReady() {
@@ -65,7 +77,8 @@ class ReceivePresenter @Inject internal constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onSelectDefault(defaultAccountPosition)
             CryptoCurrencies.ETHER -> onEthSelected()
-            else -> throw IllegalArgumentException("BCH is not currently supported")
+            CryptoCurrencies.BCH -> onSelectBchDefault()
+            else -> throw IllegalArgumentException("${currencyState.cryptoCurrency.unit} is not currently supported")
         }
     }
 
@@ -85,6 +98,7 @@ class ReceivePresenter @Inject internal constructor(
         }
 
         selectedAccount = null
+        selectedBchAccount = null
         view.updateReceiveLabel(
                 if (!legacyAddress.label.isNullOrEmpty()) {
                     legacyAddress.label
@@ -100,14 +114,42 @@ class ReceivePresenter @Inject internal constructor(
         }
     }
 
+    internal fun onLegacyBchAddressSelected(legacyAddress: LegacyAddress) {
+        // Here we are assuming that the legacy address is in Base58. This may change in the future
+        // if we decide to allow importing BECH32 paper wallets.
+        val address =
+                Address.fromBase58(environmentSettings.networkParameters, legacyAddress.address)
+        val bech32 = CashAddress.encode("bitcoincash", CashAddress.P2PKH, address.hash160)
+        val bech32Display = bech32.removeBchUri()
+
+        if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
+            view.showWatchOnlyWarning()
+        }
+
+        selectedAccount = null
+        selectedBchAccount = null
+        view.updateReceiveLabel(
+                if (!legacyAddress.label.isNullOrEmpty()) {
+                    legacyAddress.label
+                } else {
+                    bech32Display
+                }
+        )
+
+        selectedAddress = bech32
+        view.updateReceiveAddress(bech32Display)
+        generateQrCode(bech32Display)
+    }
+
     internal fun onAccountSelected(account: Account) {
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
-        view.setTabSelection(0)
+        view.setSelectedCurrency(currencyState.cryptoCurrency)
         selectedAccount = account
+        selectedBchAccount = null
         view.updateReceiveLabel(account.label)
-        view.showQrLoading()
+
         payloadDataManager.updateAllTransactions()
-                .doOnError { Timber.wtf(it) }
+                .doOnSubscribe { view.showQrLoading() }
                 .onErrorComplete()
                 .andThen(payloadDataManager.getNextReceiveAddress(account))
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -116,6 +158,7 @@ class ReceivePresenter @Inject internal constructor(
                     view.updateReceiveAddress(it)
                     generateQrCode(getBitcoinUri(it, view.getBtcAmount()))
                 }
+                .doOnError { Timber.e(it) }
                 .subscribe(
                         { /* No-op */ },
                         { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
@@ -124,9 +167,9 @@ class ReceivePresenter @Inject internal constructor(
     internal fun onEthSelected() {
         currencyState.cryptoCurrency = CryptoCurrencies.ETHER
         compositeDisposable.clear()
-        view.setTabSelection(1)
-        view.hideBitcoinLayout()
+        view.setSelectedCurrency(currencyState.cryptoCurrency)
         selectedAccount = null
+        selectedBchAccount = null
         // This can be null at this stage for some reason - TODO investigate thoroughly
         val account: String? = ethDataStore.ethAddressResponse?.getAddressResponse()?.account
         if (account != null) {
@@ -140,10 +183,40 @@ class ReceivePresenter @Inject internal constructor(
         }
     }
 
+    internal fun onSelectBchDefault() {
+        currencyState.cryptoCurrency = CryptoCurrencies.BCH
+        compositeDisposable.clear()
+        onBchAccountSelected(bchDataManager.getDefaultGenericMetadataAccount()!!)
+    }
+
+    internal fun onBchAccountSelected(account: GenericMetadataAccount) {
+        currencyState.cryptoCurrency = CryptoCurrencies.BCH
+        view.setSelectedCurrency(currencyState.cryptoCurrency)
+        selectedAccount = null
+        selectedBchAccount = account
+        view.updateReceiveLabel(account.label)
+        val position = bchDataManager.getActiveAccounts().indexOf(account)
+
+        bchDataManager.updateAllBalances()
+                .doOnSubscribe { view.showQrLoading() }
+                .andThen(Completable.fromCallable { bchDataManager.getWalletTransactions(50, 0) })
+                .onErrorComplete()
+                .andThen(bchDataManager.getNextReceiveCashAddress(position))
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnNext {
+                    selectedAddress = it
+                    view.updateReceiveAddress(it.removeBchUri())
+                    generateQrCode(it)
+                }
+                .doOnError { Timber.e(it) }
+                .subscribe(
+                        { /* No-op */ },
+                        { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
+    }
+
     internal fun onSelectDefault(defaultAccountPosition: Int) {
         currencyState.cryptoCurrency = CryptoCurrencies.BTC
         compositeDisposable.clear()
-        view.displayBitcoinLayout()
         onAccountSelected(
                 if (defaultAccountPosition > -1) {
                     payloadDataManager.getAccount(defaultAccountPosition)
@@ -209,7 +282,7 @@ class ReceivePresenter @Inject internal constructor(
             when {
                 FormatsUtil.isValidBitcoinAddress(it) ->
                     view.showBottomSheet(getBitcoinUri(it, view.getBtcAmount()))
-                FormatsUtil.isValidEthereumAddress(it) ->
+                FormatsUtil.isValidEthereumAddress(it) || FormatsUtil.isValidBitcoinCashAddress(it) ->
                     view.showBottomSheet(it)
                 else ->
                     throw IllegalStateException("Unknown address format $selectedAddress")
@@ -220,7 +293,8 @@ class ReceivePresenter @Inject internal constructor(
     internal fun updateFiatTextField(bitcoin: String) {
         var amount = bitcoin
         if (amount.isEmpty()) amount = "0"
-        val btcAmount = currencyHelper.getUndenominatedAmount(currencyHelper.getDoubleAmount(amount))
+        val btcAmount =
+                currencyHelper.getUndenominatedAmount(currencyHelper.getDoubleAmount(amount))
         val fiatAmount = currencyHelper.lastPrice * btcAmount
         view.updateFiatTextField(currencyHelper.getFormattedFiatString(fiatAmount))
     }
@@ -319,10 +393,12 @@ class ReceivePresenter @Inject internal constructor(
 
     private fun shouldWarnWatchOnly() = prefsUtil.getValue(KEY_WARN_WATCH_ONLY_SPEND, true)
 
+    private fun String.removeBchUri(): String = this.replace("bitcoincash:", "")
+
     companion object {
 
         @VisibleForTesting const val KEY_WARN_WATCH_ONLY_SPEND = "warn_watch_only_spend"
-        private val DIMENSION_QR_CODE = 600
+        private const val DIMENSION_QR_CODE = 600
 
     }
 

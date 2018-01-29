@@ -385,7 +385,7 @@ class BalancePresenter @Inject constructor(
     //region Adapter data
     //region Account Lists
     @VisibleForTesting
-    private fun getBtcAccounts(): MutableList<ItemAccount> {
+    fun getBtcAccounts(): MutableList<ItemAccount> {
         val result = mutableListOf<ItemAccount>()
 
         val legacyAddresses = payloadDataManager.legacyAddresses
@@ -442,7 +442,7 @@ class BalancePresenter @Inject constructor(
     }
 
     @VisibleForTesting
-    private fun getEthAccounts(): MutableList<ItemAccount> {
+    fun getEthAccounts(): MutableList<ItemAccount> {
         val result = mutableListOf<ItemAccount>()
 
         val balance = getEthBalanceString(
@@ -461,7 +461,7 @@ class BalancePresenter @Inject constructor(
     }
 
     @VisibleForTesting
-    private fun getBchAccounts(): MutableList<ItemAccount> {
+    fun getBchAccounts(): MutableList<ItemAccount> {
         val result = mutableListOf<ItemAccount>()
 
         val legacyAddresses = payloadDataManager.legacyAddresses
@@ -542,7 +542,7 @@ class BalancePresenter @Inject constructor(
     Don't over use this method. It's a bit hacky, but fast enough to work.
      */
     private fun getAccountAt(position: Int): ItemAccount {
-        return getAccounts().get(position)
+        return getAccounts()[position]
     }
 
     private fun getShapeShiftTxNotesObservable() =

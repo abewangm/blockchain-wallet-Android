@@ -89,7 +89,6 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         setupToolbar()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
-            ViewUtils.setElevation((activity as MainActivity).appBar, 100f)
         }
         LocalBroadcastManager.getInstance(context!!)
                 .registerReceiver(receiver, IntentFilter(BalanceFragment.ACTION_INTENT))

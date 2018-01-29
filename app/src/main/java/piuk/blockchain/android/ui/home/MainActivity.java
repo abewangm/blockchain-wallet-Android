@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -168,16 +167,20 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                         // This is a bit of a hack to allow the selection of the correct button
                         // On the bottom nav bar, but without starting the fragment again
                         startSendFragment(null, null);
+                        ViewUtils.setElevation(binding.appbarLayout, 0f);
                     }
                     break;
                 case 1:
                     startDashboardFragment();
+                    ViewUtils.setElevation(binding.appbarLayout, 4f);
                     break;
                 case 2:
                     onStartBalanceFragment(paymentMade);
+                    ViewUtils.setElevation(binding.appbarLayout, 0f);
                     break;
                 case 3:
                     startReceiveFragment();
+                    ViewUtils.setElevation(binding.appbarLayout, 0f);
                     break;
             }
         }
@@ -264,11 +267,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         handleIncomingIntent();
         applyFontToNavDrawer();
-    }
-
-    @Nullable
-    public AppBarLayout getAppBar() {
-        return binding.appbarLayout;
     }
 
     @SuppressLint("NewApi")
@@ -369,7 +367,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         if (drawerIsOpen) {
             binding.drawerLayout.closeDrawers();
         } else if (getCurrentFragment() instanceof BalanceFragment) {
-            handleBackPressed();
+            ((BalanceFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof SendFragment) {
             ((SendFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {

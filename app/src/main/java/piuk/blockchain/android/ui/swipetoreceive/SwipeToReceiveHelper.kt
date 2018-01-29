@@ -3,7 +3,8 @@ package piuk.blockchain.android.ui.swipetoreceive
 import info.blockchain.api.data.Balance
 import io.reactivex.Observable
 import io.reactivex.Single
-import org.bitcoinj.core.Bech32
+import org.bitcoinj.core.Address
+import org.bitcoinj.core.CashAddress
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
@@ -15,7 +16,6 @@ import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import java.math.BigInteger
-import java.nio.charset.Charset
 import java.util.*
 
 @Mockable
@@ -44,7 +44,8 @@ class SwipeToReceiveHelper(
             val stringBuilder = StringBuilder()
 
             for (i in 0 until numOfAddresses) {
-                val receiveAddress = payloadDataManager.getReceiveAddressAtPosition(defaultAccount, i) ?:
+                val receiveAddress =
+                        payloadDataManager.getReceiveAddressAtPosition(defaultAccount, i) ?:
                         // Likely not initialized yet
                         break
 
@@ -73,12 +74,14 @@ class SwipeToReceiveHelper(
             val stringBuilder = StringBuilder()
 
             for (i in 0 until numOfAddresses) {
-                val receiveAddress = bchDataManager.getReceiveAddressAtPosition(defaultAccountPosition, i) ?:
+                val receiveAddress =
+                        bchDataManager.getReceiveAddressAtPosition(defaultAccountPosition, i) ?:
                         // Likely not initialized yet
                         break
 
-                val base58Address = Bech32.decode(networkParameterUtils.bitcoinCashParams, receiveAddress)
-                stringBuilder.append(base58Address).append(",")
+                // TODO: This is completely broken
+                val base32Address = CashAddress.decode(receiveAddress)
+                stringBuilder.append(base32Address).append(",")
             }
 
             storeBitcoinCashAddresses(stringBuilder.toString())
@@ -127,9 +130,14 @@ class SwipeToReceiveHelper(
                     for ((address, value) in map) {
                         val balance = value.finalBalance
                         if (balance.compareTo(BigInteger.ZERO) == 0) {
-                            return@map Bech32.encode(
+                            val base58 = Address.fromBase58(
                                     networkParameterUtils.bitcoinCashParams,
-                                    address.toByteArray(Charset.forName("utf8"))
+                                    address
+                            )
+                            return@map CashAddress.encode(
+                                    "bitcoincash",
+                                    CashAddress.P2PKH,
+                                    base58.hash160
                             )
                         }
                     }
@@ -190,7 +198,8 @@ class SwipeToReceiveHelper(
      */
     fun getEthAccountName(): String = stringUtils.getString(R.string.eth_default_account_label)
 
-    private fun getIfSwipeEnabled(): Boolean = prefsUtil.getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true)
+    private fun getIfSwipeEnabled(): Boolean =
+            prefsUtil.getValue(PrefsUtil.KEY_SWIPE_TO_RECEIVE_ENABLED, true)
 
     private fun getBalanceOfAddresses(addresses: List<String>): Observable<HashMap<String, Balance>> =
             payloadDataManager.getBalanceOfAddresses(addresses)
