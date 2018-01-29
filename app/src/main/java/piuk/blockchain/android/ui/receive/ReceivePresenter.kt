@@ -149,7 +149,6 @@ class ReceivePresenter @Inject internal constructor(
 
         payloadDataManager.updateAllTransactions()
                 .doOnSubscribe { view.showQrLoading() }
-                .doOnError { Timber.wtf(it) }
                 .onErrorComplete()
                 .andThen(payloadDataManager.getNextReceiveAddress(account))
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -158,6 +157,7 @@ class ReceivePresenter @Inject internal constructor(
                     view.updateReceiveAddress(it)
                     generateQrCode(getBitcoinUri(it, view.getBtcAmount()))
                 }
+                .doOnError { Timber.e(it) }
                 .subscribe(
                         { /* No-op */ },
                         { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
@@ -199,7 +199,6 @@ class ReceivePresenter @Inject internal constructor(
         bchDataManager.updateAllBalances()
                 .doOnSubscribe { view.showQrLoading() }
                 .andThen(bchDataManager.getWalletTransactions(50, 0))
-                .doOnError { Timber.wtf(it) }
                 .onErrorComplete()
                 .andThen(bchDataManager.getNextReceiveCashAddress(position))
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -208,6 +207,7 @@ class ReceivePresenter @Inject internal constructor(
                     view.updateReceiveAddress(it.removeBchUri())
                     generateQrCode(it)
                 }
+                .doOnError { Timber.e(it) }
                 .subscribe(
                         { /* No-op */ },
                         { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })

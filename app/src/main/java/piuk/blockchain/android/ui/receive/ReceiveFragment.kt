@@ -387,12 +387,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             button_request.visible()
         }
 
-        if (!presenter.shouldShowDropdown()) {
-            to_container.gone()
-            divider_to.gone()
-        } else {
+        if (presenter.shouldShowDropdown()) {
             to_container.visible()
             divider_to.visible()
+        } else {
+            to_container.gone()
+            divider_to.gone()
         }
     }
 
@@ -420,9 +420,14 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
         divider1.gone()
         amount_container.gone()
-        divider_to.visible()
-        to_container.visible()
-        divider3.visible()
+
+        if (presenter.shouldShowDropdown()) {
+            to_container.visible()
+            divider_to.visible()
+        } else {
+            to_container.gone()
+            divider_to.gone()
+        }
     }
 
     override fun setSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
