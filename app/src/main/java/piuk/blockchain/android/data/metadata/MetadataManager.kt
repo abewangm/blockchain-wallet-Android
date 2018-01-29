@@ -2,7 +2,6 @@ package piuk.blockchain.android.data.metadata
 
 import info.blockchain.wallet.exceptions.InvalidCredentialsException
 import io.reactivex.Completable
-import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
@@ -12,7 +11,6 @@ import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
-import timber.log.Timber
 
 /**
  * Manages metadata nodes/keys derived from a user's wallet credentials.
