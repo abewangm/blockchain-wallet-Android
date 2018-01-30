@@ -26,6 +26,7 @@ import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
+import piuk.blockchain.android.ui.receive.WalletAccountHelper
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
 import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
@@ -50,7 +51,8 @@ class BalancePresenter @Inject constructor(
         private val rxBus: RxBus,
         private val currencyState: CurrencyState,
         private val shapeShiftDataManager: ShapeShiftDataManager,
-        private val bchDataManager: BchDataManager
+        private val bchDataManager: BchDataManager,
+        private val walletAccountHelper: WalletAccountHelper
 ) : BasePresenter<BalanceView>() {
 
     @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
@@ -104,7 +106,6 @@ class BalancePresenter @Inject constructor(
                 .andThen(updateEthAddress())
                 .andThen(updateBalancesCompletable())
                 .andThen(updateTransactionsListCompletable(account))
-                //If 1 fails everything is fucked, don't do this
                 .doOnError { view.setUiState(UiState.FAILURE) }
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
                 .doOnComplete {
@@ -144,7 +145,7 @@ class BalancePresenter @Inject constructor(
      */
     private fun updateBchWallet() = bchDataManager.refreshMetadataCompletable()
             .doOnError{ Timber.e(it) }
-            .compose(RxUtil.applySchedulersToCompletable())
+//            .compose(RxUtil.applySchedulersToCompletable())
 
     /**
      * API call - Fetches latest balance for selected currency and updates UI balance
@@ -219,66 +220,6 @@ class BalancePresenter @Inject constructor(
                                             ,
                                             { Timber.e(it) })
                         })
-    }
-
-    //TODO This should replace updateTransactionsListCompletable, but can't get it to work properly
-    private fun updateTransactionsListCompletable2(account: ItemAccount): Completable {
-
-        return Completable.fromObservable(
-                Observable.zip(
-                        getShapeShiftTxNotesObservable(),
-                        transactionListDataManager.fetchBchTransactions(account, 50, 0),
-                        BiFunction { shapeShiftNotesMap: MutableMap<String, String>, txs: List<Displayable> ->
-                            {
-                                for (tx in txs) {
-
-                                    //Add shapeShift notes
-                                    shapeShiftNotesMap[tx.hash]?.let {
-                                        tx.note = it
-                                    }
-
-                                    //Display currencies
-                                    when (currencyState.cryptoCurrency) {
-                                        CryptoCurrencies.BTC -> {
-                                            tx.totalDisplayableCrypto = getBtcBalanceString(
-                                                    true,
-                                                    tx.total.toLong())
-                                            tx.totalDisplayableFiat = getBtcBalanceString(
-                                                    false,
-                                                    tx.total.toLong())
-                                        }
-                                        CryptoCurrencies.ETHER -> {
-                                            tx.totalDisplayableCrypto = getEthBalanceString(
-                                                    true,
-                                                    BigDecimal(tx.total))
-                                            tx.totalDisplayableFiat = getEthBalanceString(
-                                                    false,
-                                                    BigDecimal(tx.total))
-                                        }
-                                        CryptoCurrencies.BCH -> {
-                                            tx.totalDisplayableCrypto = getBchBalanceString(
-                                                    true,
-                                                    tx.total.toLong())
-                                            tx.totalDisplayableFiat = getBchBalanceString(
-                                                    false,
-                                                    tx.total.toLong())
-                                        }
-
-                                    }
-                                }
-
-                                when {
-                                    txs.isEmpty() -> {
-                                        view.setUiState(UiState.EMPTY)
-                                    }
-                                    else -> {
-                                        view.setUiState(UiState.CONTENT)
-                                    }
-                                }
-
-                                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, txs)
-                            }
-                        }).doAfterTerminate(this::storeSwipeReceiveAddresses))
     }
     //endregion
 
@@ -383,156 +324,15 @@ class BalancePresenter @Inject constructor(
     //endregion
 
     //region Adapter data
-    //region Account Lists
-    @VisibleForTesting
-    fun getBtcAccounts(): MutableList<ItemAccount> {
-        val result = mutableListOf<ItemAccount>()
 
-        val legacyAddresses = payloadDataManager.legacyAddresses
-                .filter { it.tag != LegacyAddress.ARCHIVED_ADDRESS }
-
-        val accounts = payloadDataManager.accounts
-                .filter { !it.isArchived }
-                .map {
-                    val balance = getBtcBalanceString(
-                            currencyState.isDisplayingCryptoCurrency,
-                            payloadDataManager.getAddressBalance(it.xpub).toLong())
-                    ItemAccount().apply {
-                        label = it.label
-                        displayBalance = balance
-                        address = it.xpub
-                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
-                    }
-                }
-
-        // Show "All Accounts" if necessary
-        if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
-            val bigIntBalance = payloadDataManager.walletBalance
-
-            val balance = getBtcBalanceString(
-                    currencyState.isDisplayingCryptoCurrency,
-                    bigIntBalance.toLong())
-            result.add(
-                    ItemAccount().apply {
-                        label = stringUtils.getString(R.string.all_accounts)
-                        displayBalance = balance
-                        type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
-                    })
-        }
-
-        result.addAll(accounts)
-
-        // Show "Imported Addresses" if wallet contains legacy addresses
-        if (!legacyAddresses.isEmpty()) {
-            val bigIntBalance = payloadDataManager.importedAddressesBalance
-
-            val balance = getBtcBalanceString(
-                    currencyState.isDisplayingCryptoCurrency,
-                    bigIntBalance.toLong())
-
-            result.add(
-                    ItemAccount().apply {
-                        label = stringUtils.getString(R.string.imported_addresses)
-                        displayBalance = balance
-                        type = ItemAccount.TYPE.ALL_LEGACY
-                    })
-        }
-
-        return result
-    }
-
-    @VisibleForTesting
-    fun getEthAccounts(): MutableList<ItemAccount> {
-        val result = mutableListOf<ItemAccount>()
-
-        val balance = getEthBalanceString(
-                currencyState.isDisplayingCryptoCurrency,
-                BigDecimal(ethDataManager.getEthResponseModel()?.getTotalBalance() ?: BigInteger.ZERO)
-        )
-
-        result.add(
-                ItemAccount().apply {
-                    label = stringUtils.getString(R.string.eth_default_account_label)
-                    displayBalance = balance
-                    type = ItemAccount.TYPE.SINGLE_ACCOUNT
-                })
-
-        return result
-    }
-
-    @VisibleForTesting
-    fun getBchAccounts(): MutableList<ItemAccount> {
-        val result = mutableListOf<ItemAccount>()
-
-        val legacyAddresses = payloadDataManager.legacyAddresses
-                .filter { it.tag != LegacyAddress.ARCHIVED_ADDRESS }
-
-        val accounts = bchDataManager.getActiveAccounts()
-                .map {
-
-                    val balance = getBchBalanceString(
-                            currencyState.isDisplayingCryptoCurrency,
-                            bchDataManager.getAddressBalance(it.xpub).toLong())
-                    ItemAccount().apply {
-                        label = it.label
-                        displayBalance = balance
-                        type = ItemAccount.TYPE.SINGLE_ACCOUNT
-                        address = it.xpub
-                    }
-                }
-
-        // Show "All Accounts" if necessary
-        if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
-            val bigIntBalance = bchDataManager.getWalletBalance()
-
-            val balance = getBchBalanceString(
-                    currencyState.isDisplayingCryptoCurrency,
-                    bigIntBalance.toLong())
-            result.add(ItemAccount().apply {
-                label = stringUtils.getString(R.string.bch_all_accounts)
-                displayBalance = balance
-                type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
-            })
-        }
-
-        result.addAll(accounts)
-
-        // Show "Imported Addresses" if wallet contains legacy addresses
-        if (!legacyAddresses.isEmpty()) {
-            val bigIntBalance = bchDataManager.getImportedAddressBalance()
-
-            val balance = getBchBalanceString(
-                    currencyState.isDisplayingCryptoCurrency,
-                    bigIntBalance.toLong())
-
-            result.add(
-                    ItemAccount().apply {
-                        label = stringUtils.getString(R.string.bch_imported_addresses)
-                        displayBalance = balance
-                        type = ItemAccount.TYPE.ALL_LEGACY
-                    })
-        }
-
-        return result
-    }
-    //endregion
-
-    //region Transaction List
     fun onTxFeedAdapterSetup() {
         view.setupTxFeedAdapter(currencyState.isDisplayingCryptoCurrency)
     }
-    //endregion
 
     /**
      * Get accounts based on selected currency
      */
-    private fun getAccounts(): MutableList<ItemAccount> {
-        return when (currencyState.cryptoCurrency) {
-            CryptoCurrencies.BTC -> getBtcAccounts()
-            CryptoCurrencies.ETHER -> getEthAccounts()
-            CryptoCurrencies.BCH -> getBchAccounts()
-        }
-    }
+    private fun getAccounts() = walletAccountHelper.getAccountItemsForOverview().toMutableList()
 
     private fun getCurrenctAccount(): ItemAccount {
         return getAccountAt(view.getCurrentAccountPosition() ?: 0)

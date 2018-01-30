@@ -776,9 +776,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     private int getSelectedAccountFromFragments() {
-        if (getCurrentFragment() instanceof BalanceFragment) {
-            return ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
-        } else if (getCurrentFragment() instanceof ReceiveFragment) {
+        if (getCurrentFragment() instanceof ReceiveFragment) {
             return ((ReceiveFragment) getCurrentFragment()).getSelectedAccountPosition();
         } else {
             return -1;
