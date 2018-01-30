@@ -17,6 +17,7 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -87,7 +88,9 @@ class WalletAccountHelper(
                         getAccountAbsoluteBalance(it),
                         it,
                         it.xpub
-                )
+                ).apply {
+                    type = ItemAccount.TYPE.SINGLE_ACCOUNT
+                }
             }
     }
 
@@ -107,7 +110,9 @@ class WalletAccountHelper(
                         getAccountAbsoluteBalance(it),
                         it,
                         it.xpub
-                )
+                ).apply {
+                    type = ItemAccount.TYPE.SINGLE_ACCOUNT
+                }
             }
     }
 
@@ -362,4 +367,146 @@ class WalletAccountHelper(
         )
     }
 
+    /**
+     * Returns a list of [ItemAccount] objects containing both HD accounts and [LegacyAddress]
+     * objects, eg from importing accounts.
+     *
+     * @return Returns a list of [ItemAccount] objects
+     */
+    fun getAccountItemsForOverview(): List<ItemAccount> = when (currencyState.cryptoCurrency) {
+        CryptoCurrencies.BTC -> mutableListOf<ItemAccount>().apply {
+
+            val legacyAddresses = getLegacyAddresses()
+            val accounts = getHdAccounts()
+
+            // Create "All Accounts" if necessary
+            if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
+                add(getBtcWalletAccountItem())
+            }
+
+            accounts.forEach {
+                it.displayBalance = it.displayBalance!!
+                        .removePrefix("(")
+                        .removeSuffix(")")
+            }
+
+            addAll(accounts)
+
+            // Create consolidated "Imported Addresses"
+            if (!legacyAddresses.isEmpty()) {
+                add(getBtcImportedAddressesAccountItem())
+            }
+        }.toList()
+        CryptoCurrencies.BCH -> mutableListOf<ItemAccount>().apply {
+
+            val legacyAddresses = getLegacyBchAddresses()
+            val accounts = getHdBchAccounts()
+
+            // Create "All Accounts" if necessary
+            if (accounts.size > 1 || legacyAddresses.isNotEmpty()) {
+                add(getBchWalletAccountItem())
+            }
+
+            accounts.forEach {
+                it.displayBalance = it.displayBalance!!
+                        .removePrefix("(")
+                        .removeSuffix(")")
+            }
+
+            addAll(accounts)
+
+            // Create consolidated "Imported Addresses"
+            if (!legacyAddresses.isEmpty()) {
+                add(getBchImportedAddressesAccountItem())
+            }
+        }
+        else -> {
+            var ethList = getEthAccount().toList()
+
+            ethList.forEach {
+                it.displayBalance = it.displayBalance!!
+                        .removePrefix("(")
+                        .removeSuffix(")")
+            }
+            ethList
+        }
+    }
+
+    private fun getBtcWalletAccountItem(): ItemAccount {
+        val bigIntBalance = payloadManager.walletBalance
+
+        return ItemAccount().apply {
+            label = stringUtils.getString(R.string.all_accounts)
+            absoluteBalance = bigIntBalance.toLong()
+            displayBalance = getBtcBalanceString(
+                    currencyState.isDisplayingCryptoCurrency,
+                    bigIntBalance.toLong())
+            type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+        }
+    }
+
+    private fun getBchWalletAccountItem(): ItemAccount {
+        val bigIntBalance = bchDataManager.getWalletBalance()
+
+        return ItemAccount().apply {
+            label = stringUtils.getString(R.string.bch_all_accounts)
+            absoluteBalance = bigIntBalance.toLong()
+            displayBalance = getBchBalanceString(
+                    currencyState.isDisplayingCryptoCurrency,
+                    bigIntBalance.toLong())
+            type = ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+        }
+    }
+
+    private fun getBtcImportedAddressesAccountItem(): ItemAccount {
+        val bigIntBalance = payloadManager.importedAddressesBalance
+
+        return ItemAccount().apply {
+            label = stringUtils.getString(R.string.imported_addresses)
+            absoluteBalance = bigIntBalance.toLong()
+            displayBalance = getBtcBalanceString(
+                    currencyState.isDisplayingCryptoCurrency,
+                    bigIntBalance.toLong())
+            type = ItemAccount.TYPE.ALL_LEGACY
+        }
+    }
+
+    private fun getBchImportedAddressesAccountItem(): ItemAccount {
+        val bigIntBalance = bchDataManager.getImportedAddressBalance()
+
+        return ItemAccount().apply {
+            label = stringUtils.getString(R.string.bch_imported_addresses)
+            absoluteBalance = bigIntBalance.toLong()
+            displayBalance = getBchBalanceString(
+                    currencyState.isDisplayingCryptoCurrency,
+                    bigIntBalance.toLong())
+            type = ItemAccount.TYPE.ALL_LEGACY
+        }
+    }
+
+    private fun getBtcBalanceString(showCrypto: Boolean, btcBalance: Long): String {
+        val fiatBalance = exchangeRateFactory.getLastBtcPrice(fiatUnit) * (btcBalance / 1e8)
+        var balance = monetaryUtil.getDisplayAmountWithFormatting(btcBalance)
+        // Replace 0.0 with 0 to match web
+        if (balance == "0.0") balance = "0"
+
+        return if (showCrypto) {
+            "$balance ${btcUnit}"
+        } else {
+            "${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit"
+        }
+    }
+
+    private fun getBchBalanceString(showCrypto: Boolean, bchBalance: Long): String {
+        val fiatBalance = exchangeRateFactory.getLastBchPrice(fiatUnit) * (bchBalance / 1e8)
+        var balance = monetaryUtil.getDisplayAmountWithFormatting(bchBalance)
+        // Replace 0.0 with 0 to match web
+        if (balance == "0.0") balance = "0"
+
+        return if (showCrypto) {
+            "$balance ${bchUnit}"
+        } else {
+            "${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit"
+        }
+    }
 }
