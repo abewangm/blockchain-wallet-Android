@@ -89,7 +89,7 @@ class BalancePresenter @Inject constructor(
         }
 
         notificationObservable = rxBus.register(NotificationPayload::class.java).apply {
-            subscribe({ notificationPayload ->
+            subscribe({
                 //no-op
             })
         }
@@ -129,6 +129,7 @@ class BalancePresenter @Inject constructor(
                 )
     }
 
+    @VisibleForTesting
     internal fun getUpdateTickerCompletable(): Completable {
         return Completable.fromObservable(exchangeRateFactory.updateTickers())
     }
@@ -136,6 +137,8 @@ class BalancePresenter @Inject constructor(
     /**
      * API call - Update eth address
      */
+
+    @VisibleForTesting
     internal fun updateEthAddress() =
         Completable.fromObservable(ethDataManager.fetchEthAddress()
                 .onExceptionResumeNext { Observable.empty<EthAddressResponse>() })
@@ -143,17 +146,21 @@ class BalancePresenter @Inject constructor(
     /**
      * API call - Update bitcoincash wallet
      */
+
+    @VisibleForTesting
     internal fun updateBchWallet() = bchDataManager.refreshMetadataCompletable()
             .doOnError{ Timber.e(it) }
 
     /**
      * API call - Fetches latest balance for selected currency and updates UI balance
      */
+    @VisibleForTesting
     internal fun updateBalancesCompletable() =
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> payloadDataManager.updateAllBalances()
                 CryptoCurrencies.ETHER -> ethDataManager.fetchEthAddressCompletable()
                 CryptoCurrencies.BCH -> bchDataManager.updateAllBalances()
+                else -> throw IllegalArgumentException("${currencyState.cryptoCurrency.unit} is not currently supported")
             }
 
     /**
@@ -201,7 +208,7 @@ class BalancePresenter @Inject constructor(
                                                                     false,
                                                                     tx.total.toLong())
                                                         }
-
+                                                        else -> throw IllegalArgumentException("${currencyState.cryptoCurrency.unit} is not currently supported")
                                                     }
                                                 }
 

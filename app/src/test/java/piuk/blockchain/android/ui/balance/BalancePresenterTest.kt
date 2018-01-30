@@ -212,7 +212,6 @@ class BalancePresenterTest {
     @Throws(Exception::class)
     fun updateBchWallet() {
         // Arrange
-        val abc: EthAddressResponseMap = mock()
         whenever(bchDataManager.refreshMetadataCompletable()).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.updateBchWallet().test()

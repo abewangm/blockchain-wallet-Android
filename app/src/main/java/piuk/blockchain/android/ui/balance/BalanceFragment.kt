@@ -125,13 +125,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun shouldShowBuy() = AndroidUtils.is19orHigher()
 
-    override fun setupAccountsAdapter(accounts: List<ItemAccount>) {
+    override fun setupAccountsAdapter(accountsList: List<ItemAccount>) {
 
         if (accountsAdapter == null) {
             accountsAdapter = AccountsAdapter(
                     context,
                     R.layout.spinner_balance_header,
-                    accounts
+                    accountsList
             ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
         }
 
