@@ -17,6 +17,7 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -503,7 +504,7 @@ class WalletAccountHelper(
         if (balance == "0.0") balance = "0"
 
         return if (showCrypto) {
-            "$balance ${btcUnit}"
+            "$balance ${bchUnit}"
         } else {
             "${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit"
         }

@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.balance
 
 import com.nhaarman.mockito_kotlin.*
+import info.blockchain.wallet.ethereum.data.EthAddressResponseMap
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.`should equal to`
@@ -13,6 +14,7 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
+import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.notifications.models.NotificationPayload
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -105,34 +107,7 @@ class BalancePresenterTest {
     @Test
     @Throws(Exception::class)
     fun onResume() {
-        // Arrange
-//        whenever(view.getCurrentAccountPosition()).thenReturn(0)
-//        val account: ItemAccount = mock()
-//        whenever(walletAccountHelper.getAccountItemsForOverview()).thenReturn(mutableListOf(account))
-//        whenever(account.displayBalance).thenReturn("0.052 BTC")
-//
-//        whenever(exchangeRateFactory.updateTickers()).thenReturn(Observable.empty())
-//        whenever(bchDataManager.refreshMetadataCompletable()).thenReturn(Completable.complete())
-//        whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.empty())
-//        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
-//        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
-//        whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
-//        whenever(transactionListDataManager.fetchTransactions(any(), any(), any()))
-//                .thenReturn(Observable.empty())
-//
-//        // Act
-//        subject.onResume()
-//
-//        // Assert
-//        verify(view).setUiState(UiState.LOADING)
-//
-//        //Tx
-//        verify(swipeToReceiveHelper).updateAndStoreBitcoinAddresses()
-//        verify(swipeToReceiveHelper).updateAndStoreBitcoinCashAddresses()
-//
-//        verify(view).updateBalanceHeader("0.052 BTC")
-//        verify(view).updateAccountsDataSet(mutableListOf(account))
-//        verify(view).generateLauncherShortcuts()
+        // Child function onRefreshRequested
     }
 
     @Test
@@ -181,5 +156,159 @@ class BalancePresenterTest {
         verify(view).generateLauncherShortcuts()
         verify(view).updateTransactionValueType(true)
 
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun updateBalancesCompletable() {
+        // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
+        // Act
+        subject.updateBalancesCompletable()
+        // Assert
+        verify(payloadDataManager).updateAllBalances()
+
+        // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
+        // Act
+        subject.updateBalancesCompletable()
+        // Assert
+        verify(ethDataManager).fetchEthAddressCompletable()
+
+        // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BCH)
+        // Act
+        subject.updateBalancesCompletable()
+        // Assert
+        verify(bchDataManager).updateAllBalances()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun getUpdateTickerCompletable() {
+        // Arrange
+        whenever(exchangeRateFactory.updateTickers()).thenReturn(Observable.just(mutableMapOf()))
+        // Act
+        val testObserver = subject.getUpdateTickerCompletable().test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun updateEthAddress() {
+        // Arrange
+        val abc: EthAddressResponseMap = mock()
+        whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(CombinedEthModel(abc)))
+        // Act
+        val testObserver = subject.updateEthAddress().test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun updateBchWallet() {
+        // Arrange
+        val abc: EthAddressResponseMap = mock()
+        whenever(bchDataManager.refreshMetadataCompletable()).thenReturn(Completable.complete())
+        // Act
+        val testObserver = subject.updateBchWallet().test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onGetBitcoinClicked API less than 19 canBuy returns true`() {
+        // Arrange
+        whenever(buyDataManager.canBuy).thenReturn(Observable.just(true))
+        whenever(view.shouldShowBuy()).thenReturn(false)
+        // Act
+        subject.onGetBitcoinClicked()
+        // Assert
+        verify(buyDataManager).canBuy
+        verifyNoMoreInteractions(buyDataManager)
+        verify(view).shouldShowBuy()
+        verify(view).startReceiveFragmentBtc()
+        verifyNoMoreInteractions(view)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onGetBitcoinClicked API less than 19 canBuy returns false`() {
+        // Arrange
+        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
+        whenever(view.shouldShowBuy()).thenReturn(false)
+        // Act
+        subject.onGetBitcoinClicked()
+        // Assert
+        verify(buyDataManager).canBuy
+        verifyNoMoreInteractions(buyDataManager)
+        verify(view).startReceiveFragmentBtc()
+        verifyNoMoreInteractions(view)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onGetBitcoinClicked canBuy returns true`() {
+        // Arrange
+        whenever(buyDataManager.canBuy).thenReturn(Observable.just(true))
+        whenever(view.shouldShowBuy()).thenReturn(true)
+        // Act
+        subject.onGetBitcoinClicked()
+        // Assert
+        verify(buyDataManager).canBuy
+        verifyNoMoreInteractions(buyDataManager)
+        verify(view).shouldShowBuy()
+        verify(view).startBuyActivity()
+        verifyNoMoreInteractions(view)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onGetBitcoinClicked canBuy returns false`() {
+        // Arrange
+        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
+        whenever(view.shouldShowBuy()).thenReturn(true)
+        // Act
+        subject.onGetBitcoinClicked()
+        // Assert
+        verify(buyDataManager).canBuy
+        verifyNoMoreInteractions(buyDataManager)
+        verify(view).startReceiveFragmentBtc()
+        verifyNoMoreInteractions(view)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun refreshBalanceHeader() {
+        // Arrange
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
+        val account: ItemAccount = mock()
+        val value = "0.052 BTC"
+        whenever(account.displayBalance).thenReturn(value)
+        // Act
+        subject.refreshBalanceHeader(account)
+        // Assert
+        verify(view).updateSelectedCurrency(CryptoCurrencies.BTC)
+        verify(view).updateBalanceHeader(value)
+        verifyNoMoreInteractions(view)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun refreshAccountDataSet() {
+        // Arrange
+        val mockList = mutableListOf<ItemAccount>()
+        whenever(walletAccountHelper.getAccountItemsForOverview()).thenReturn(mockList)
+        // Act
+        subject.refreshAccountDataSet()
+        // Assert
+        verify(view).updateAccountsDataSet(mockList)
+        verifyNoMoreInteractions(view)
     }
 }

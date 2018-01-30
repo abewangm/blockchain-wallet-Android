@@ -129,38 +129,37 @@ class BalancePresenter @Inject constructor(
                 )
     }
 
-    private fun getUpdateTickerCompletable(): Completable {
+    internal fun getUpdateTickerCompletable(): Completable {
         return Completable.fromObservable(exchangeRateFactory.updateTickers())
     }
 
     /**
      * API call - Update eth address
      */
-    private fun updateEthAddress() =
+    internal fun updateEthAddress() =
         Completable.fromObservable(ethDataManager.fetchEthAddress()
                 .onExceptionResumeNext { Observable.empty<EthAddressResponse>() })
 
     /**
      * API call - Update bitcoincash wallet
      */
-    private fun updateBchWallet() = bchDataManager.refreshMetadataCompletable()
+    internal fun updateBchWallet() = bchDataManager.refreshMetadataCompletable()
             .doOnError{ Timber.e(it) }
-//            .compose(RxUtil.applySchedulersToCompletable())
 
     /**
      * API call - Fetches latest balance for selected currency and updates UI balance
      */
-    private fun updateBalancesCompletable() =
+    internal fun updateBalancesCompletable() =
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> payloadDataManager.updateAllBalances()
-                CryptoCurrencies.ETHER -> Completable.fromObservable(ethDataManager.fetchEthAddress())
+                CryptoCurrencies.ETHER -> ethDataManager.fetchEthAddressCompletable()
                 CryptoCurrencies.BCH -> bchDataManager.updateAllBalances()
             }
 
     /**
      * API call - Fetches latest transactions for selected currency and account, and updates UI tx list
      */
-    private fun updateTransactionsListCompletable(account: ItemAccount): Completable {
+    internal fun updateTransactionsListCompletable(account: ItemAccount): Completable {
         return Completable.fromObservable(
                 transactionListDataManager.fetchTransactions(account, 50, 0)
                         .doAfterTerminate(this::storeSwipeReceiveAddresses)
@@ -252,7 +251,7 @@ class BalancePresenter @Inject constructor(
         buyDataManager.canBuy
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
-                    if (it) {
+                    if (it && view.shouldShowBuy()) {
                         view.startBuyActivity()
                     } else {
                         view.startReceiveFragmentBtc()
@@ -308,12 +307,12 @@ class BalancePresenter @Inject constructor(
     //endregion
 
     //region Update UI
-    private fun refreshBalanceHeader(account: ItemAccount) {
+    internal fun refreshBalanceHeader(account: ItemAccount) {
         view.updateSelectedCurrency(currencyState.cryptoCurrency)
-        view.updateBalanceHeader(account.displayBalance!!)
+        view.updateBalanceHeader(account.displayBalance ?: "")
     }
 
-    private fun refreshAccountDataSet() {
+    internal fun refreshAccountDataSet() {
         val accountList = getAccounts()
         view.updateAccountsDataSet(accountList)
     }

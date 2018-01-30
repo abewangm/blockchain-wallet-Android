@@ -986,52 +986,52 @@
 //        verify(view).onTransactionsUpdated(any())
 //        verifyNoMoreInteractions(view)
 //    }
-//
-//    @Test
-//    @Throws(Exception::class)
-//    fun `getBitcoinClicked API less than 19`() {
-//        // Arrange
-//        whenever(view.shouldShowBuy).thenReturn(false)
-//        // Act
-//        subject.getBitcoinClicked()
-//        // Assert
-//        verify(view).startReceiveFragment()
-//        verify(view).shouldShowBuy
-//        verifyNoMoreInteractions(view)
-//        verifyZeroInteractions(buyDataManager)
-//    }
-//
-//    @Test
-//    @Throws(Exception::class)
-//    fun `getBitcoinClicked canBuy returns true`() {
-//        // Arrange
-//        whenever(buyDataManager.canBuy).thenReturn(Observable.just(true))
-//        whenever(view.shouldShowBuy).thenReturn(true)
-//        // Act
-//        subject.getBitcoinClicked()
-//        // Assert
-//        verify(buyDataManager).canBuy
-//        verifyNoMoreInteractions(buyDataManager)
-//        verify(view).startBuyActivity()
-//        verify(view).shouldShowBuy
-//        verifyNoMoreInteractions(view)
-//    }
-//
-//    @Test
-//    @Throws(Exception::class)
-//    fun `getBitcoinClicked canBuy returns false`() {
-//        // Arrange
-//        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
-//        whenever(view.shouldShowBuy).thenReturn(true)
-//        // Act
-//        subject.getBitcoinClicked()
-//        // Assert
-//        verify(buyDataManager).canBuy
-//        verifyNoMoreInteractions(buyDataManager)
-//        verify(view).startReceiveFragment()
-//        verify(view).shouldShowBuy
-//        verifyNoMoreInteractions(view)
-//    }
+                //
+                //    @Test
+                //    @Throws(Exception::class)
+                //    fun `getBitcoinClicked API less than 19`() {
+                //        // Arrange
+                //        whenever(view.shouldShowBuy).thenReturn(false)
+                //        // Act
+                //        subject.getBitcoinClicked()
+                //        // Assert
+                //        verify(view).startReceiveFragment()
+                //        verify(view).shouldShowBuy
+                //        verifyNoMoreInteractions(view)
+                //        verifyZeroInteractions(buyDataManager)
+                //    }
+                //
+                //    @Test
+                //    @Throws(Exception::class)
+                //    fun `getBitcoinClicked canBuy returns true`() {
+                //        // Arrange
+                //        whenever(buyDataManager.canBuy).thenReturn(Observable.just(true))
+                //        whenever(view.shouldShowBuy).thenReturn(true)
+                //        // Act
+                //        subject.getBitcoinClicked()
+                //        // Assert
+                //        verify(buyDataManager).canBuy
+                //        verifyNoMoreInteractions(buyDataManager)
+                //        verify(view).startBuyActivity()
+                //        verify(view).shouldShowBuy
+                //        verifyNoMoreInteractions(view)
+                //    }
+                //
+                //    @Test
+                //    @Throws(Exception::class)
+                //    fun `getBitcoinClicked canBuy returns false`() {
+                //        // Arrange
+                //        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
+                //        whenever(view.shouldShowBuy).thenReturn(true)
+                //        // Act
+                //        subject.getBitcoinClicked()
+                //        // Assert
+                //        verify(buyDataManager).canBuy
+                //        verifyNoMoreInteractions(buyDataManager)
+                //        verify(view).startReceiveFragment()
+                //        verify(view).shouldShowBuy
+                //        verifyNoMoreInteractions(view)
+                //    }
 //
 //    @Test
 //    @Throws(Exception::class)

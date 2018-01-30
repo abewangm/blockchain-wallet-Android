@@ -51,7 +51,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private var interactionListener: OnFragmentInteractionListener? = null
     private var spacerDecoration: BottomSpacerDecoration? = null
     private var backPressed: Long = 0
-    private val shouldShowBuy = AndroidUtils.is19orHigher()
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -123,6 +122,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         super.onAttach(context)
         interactionListener = activity as OnFragmentInteractionListener?
     }
+
+    override fun shouldShowBuy() = AndroidUtils.is19orHigher()
 
     override fun setupAccountsAdapter(accounts: List<ItemAccount>) {
 
@@ -258,7 +259,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             CryptoCurrencies.BTC -> {
                 button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
                 button_get_bitcoin.setOnClickListener {
-                    if (shouldShowBuy) {
+                    if (shouldShowBuy()) {
                         presenter.onGetBitcoinClicked()
                     } else {
                         startReceiveFragmentBtc()
@@ -282,6 +283,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun updateBalanceHeader(balance: String) {
         textview_balance.text = balance
+        textview_balance.visible()
     }
 
     private fun onContentLoaded() {
