@@ -224,24 +224,25 @@ class TransactionListDataManager(
             limit: Int,
             offset: Int
     ): Observable<List<Displayable>> =
-            Observable.fromCallable {
-                bchDataManager.getWalletTransactions(limit, offset)
-                        .map { BchDisplayable(it) }
-            }
+            bchDataManager.getWalletTransactions(limit, offset)
+                    .mapList { BchDisplayable(it) }
 
     private fun getBchLegacyObservable(limit: Int, offset: Int): Observable<List<Displayable>> =
-            Observable.fromCallable {
-                bchDataManager.getImportedAddressTransactions(limit, offset)
-                        .map { BchDisplayable(it) }
-            }
+            bchDataManager.getImportedAddressTransactions(limit, offset)
+                    .mapList { BchDisplayable(it) }
 
     private fun getBchAccountObservable(
             address: String,
             limit: Int,
             offset: Int
     ): Observable<List<Displayable>> =
-            Observable.fromCallable {
-                bchDataManager.getAddressTransactions(address, limit, offset)
-                        .map { BchDisplayable(it) }
-            }
+            bchDataManager.getAddressTransactions(address, limit, offset)
+                    .mapList { BchDisplayable(it) }
+
+    private fun <T, R> Observable<List<T>>.mapList(func: (T) -> R): Observable<List<R>> {
+        return flatMapIterable { list ->
+            list.map { func(it) }
+        }.toList().toObservable()
+    }
+
 }

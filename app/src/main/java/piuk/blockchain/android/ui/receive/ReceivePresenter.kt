@@ -5,7 +5,6 @@ import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.util.FormatsUtil
-import io.reactivex.Completable
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.CashAddress
 import org.bitcoinj.core.Coin
@@ -138,7 +137,7 @@ class ReceivePresenter @Inject internal constructor(
 
         selectedAddress = bech32
         view.updateReceiveAddress(bech32Display)
-        generateQrCode(bech32Display)
+        generateQrCode(bech32)
     }
 
     internal fun onAccountSelected(account: Account) {
@@ -184,7 +183,6 @@ class ReceivePresenter @Inject internal constructor(
     }
 
     internal fun onSelectBchDefault() {
-        currencyState.cryptoCurrency = CryptoCurrencies.BCH
         compositeDisposable.clear()
         onBchAccountSelected(bchDataManager.getDefaultGenericMetadataAccount()!!)
     }
@@ -195,13 +193,15 @@ class ReceivePresenter @Inject internal constructor(
         selectedAccount = null
         selectedBchAccount = account
         view.updateReceiveLabel(account.label)
-        val position = bchDataManager.getActiveAccounts().indexOf(account)
+        val position = bchDataManager.getActiveAccounts().indexOfFirst { it.xpub == account.xpub }
 
         bchDataManager.updateAllBalances()
                 .doOnSubscribe { view.showQrLoading() }
-                .andThen(Completable.fromCallable { bchDataManager.getWalletTransactions(50, 0) })
-                .onErrorComplete()
-                .andThen(bchDataManager.getNextReceiveCashAddress(position))
+                .andThen(
+                        bchDataManager.getWalletTransactions(50, 0)
+                                .onErrorReturn { emptyList() }
+                )
+                .flatMap { bchDataManager.getNextReceiveCashAddress(position) }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnNext {
                     selectedAddress = it
@@ -211,11 +211,11 @@ class ReceivePresenter @Inject internal constructor(
                 .doOnError { Timber.e(it) }
                 .subscribe(
                         { /* No-op */ },
-                        { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) })
+                        { view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR) }
+                )
     }
 
     internal fun onSelectDefault(defaultAccountPosition: Int) {
-        currencyState.cryptoCurrency = CryptoCurrencies.BTC
         compositeDisposable.clear()
         onAccountSelected(
                 if (defaultAccountPosition > -1) {

@@ -62,7 +62,13 @@ class BchDataManager(
     fun refreshMetadataCompletable(): Completable =
             Completable.fromObservable(
                     payloadDataManager.metadataNodeFactory
-                            .map { initBchWallet(it.metadataNode, stringUtils.getString(R.string.bch_default_account_label)) })
+                            .map {
+                                initBchWallet(
+                                        it.metadataNode,
+                                        stringUtils.getString(R.string.bch_default_account_label)
+                                )
+                            }
+            )
 
     private fun fetchOrCreateBchMetadata(
             metadataKey: DeterministicKey,
@@ -89,20 +95,22 @@ class BchDataManager(
             // Create
             val bchAccounts = getMetadataAccounts(defaultLabel, 0, accountTotal)
 
-            bchDataStore.bchMetadata = GenericMetadataWallet()
-
-            bchDataStore.bchMetadata?.run {
+            bchDataStore.bchMetadata = GenericMetadataWallet().apply {
                 accounts = bchAccounts
                 isHasSeen = true
             }
         }
     }
 
-    internal fun getMetadataAccounts(defaultLabel: String, startingAccountIndex: Int, accountTotal: Int): ArrayList<GenericMetadataAccount> {
+    private fun getMetadataAccounts(
+            defaultLabel: String,
+            startingAccountIndex: Int,
+            accountTotal: Int
+    ): ArrayList<GenericMetadataAccount> {
         val bchAccounts = arrayListOf<GenericMetadataAccount>()
         ((startingAccountIndex + 1)..accountTotal)
                 .map {
-                    when (it) {
+                    return@map when (it) {
                         in 2..accountTotal -> defaultLabel + " " + it
                         else -> defaultLabel
                     }
@@ -125,11 +133,9 @@ class BchDataManager(
                     ""
             )
 
-            var i = 0
-            payloadDataManager.accounts.forEach {
+            payloadDataManager.accounts.forEachIndexed { i, account ->
                 bchDataStore.bchWallet?.addAccount()
-                walletMetadata.accounts[i].xpub = it.xpub
-                i++
+                walletMetadata.accounts[i].xpub = account.xpub
             }
         } else {
 
@@ -138,11 +144,9 @@ class BchDataManager(
                     networkParameterUtils.bitcoinCashParams
             )
 
-            var i = 0
-            payloadDataManager.accounts.forEach {
-                bchDataStore.bchWallet?.addWatchOnlyAccount(it.xpub)
-                walletMetadata.accounts[i].xpub = it.xpub
-                i++
+            payloadDataManager.accounts.forEachIndexed { i, account ->
+                bchDataStore.bchWallet?.addWatchOnlyAccount(account.xpub)
+                walletMetadata.accounts[i].xpub = account.xpub
             }
         }
     }
@@ -193,35 +197,27 @@ class BchDataManager(
     fun getImportedAddressBalance(): BigInteger =
             bchDataStore.bchWallet?.getImportedAddressBalance() ?: BigInteger.ZERO
 
-    @WebRequest
-    fun getAddressTransactions(address: String, limit: Int, offset: Int): MutableList<TransactionSummary> =
-            bchDataStore.bchWallet!!.getTransactions(
-                    null,//legacy list
-                    mutableListOf(),//watch-only list
-                    getActiveXpubsAndImportedAddresses(),
-                    address,
-                    limit,
-                    offset)
+    fun getAddressTransactions(
+            address: String,
+            limit: Int,
+            offset: Int
+    ): Observable<List<TransactionSummary>> =
+            rxPinning.call<List<TransactionSummary>> {
+                Observable.fromCallable { fetchAddressTransactions(address, limit, offset) }
+            }.compose(RxUtil.applySchedulersToObservable())
 
-    @WebRequest
-    fun getWalletTransactions(limit: Int, offset: Int): MutableList<TransactionSummary> =
-            bchDataStore.bchWallet!!.getTransactions(
-                    null,//legacy list
-                    mutableListOf(),//watch-only list
-                    getActiveXpubsAndImportedAddresses(),
-                    null,
-                    limit,
-                    offset)
+    fun getWalletTransactions(limit: Int, offset: Int): Observable<List<TransactionSummary>> =
+            rxPinning.call<List<TransactionSummary>> {
+                Observable.fromCallable { fetchWalletTransactions(limit, offset) }
+            }.compose(RxUtil.applySchedulersToObservable())
 
-    @WebRequest
-    fun getImportedAddressTransactions(limit: Int, offset: Int): MutableList<TransactionSummary> =
-            bchDataStore.bchWallet!!.getTransactions(
-                    payloadDataManager.legacyAddressStringList,//legacy list
-                    mutableListOf(),//watch-only list
-                    getActiveXpubsAndImportedAddresses(),
-                    null,
-                    limit,
-                    offset)
+    fun getImportedAddressTransactions(
+            limit: Int,
+            offset: Int
+    ): Observable<List<TransactionSummary>> =
+            rxPinning.call<List<TransactionSummary>> {
+                Observable.fromCallable { fetchImportedAddressTransactions(limit, offset) }
+            }.compose(RxUtil.applySchedulersToObservable())
 
     /**
      * Returns all non-archived accounts
@@ -291,4 +287,48 @@ class BchDataManager(
 
         return bchDataStore.bchMetadata?.accounts?.find { it.xpub == xpub }?.label
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Web requests that require wrapping in Observables
+    ///////////////////////////////////////////////////////////////////////////
+
+    @WebRequest
+    private fun fetchAddressTransactions(
+            address: String,
+            limit: Int,
+            offset: Int
+    ): MutableList<TransactionSummary> =
+            bchDataStore.bchWallet!!.getTransactions(
+                    null,//legacy list
+                    mutableListOf(),//watch-only list
+                    getActiveXpubsAndImportedAddresses(),
+                    address,
+                    limit,
+                    offset
+            )
+
+    @WebRequest
+    private fun fetchWalletTransactions(limit: Int, offset: Int): MutableList<TransactionSummary> =
+            bchDataStore.bchWallet!!.getTransactions(
+                    null,//legacy list
+                    mutableListOf(),//watch-only list
+                    getActiveXpubsAndImportedAddresses(),
+                    null,
+                    limit,
+                    offset
+            )
+
+    @WebRequest
+    private fun fetchImportedAddressTransactions(
+            limit: Int,
+            offset: Int
+    ): MutableList<TransactionSummary> =
+            bchDataStore.bchWallet!!.getTransactions(
+                    payloadDataManager.legacyAddressStringList,//legacy list
+                    mutableListOf(),//watch-only list
+                    getActiveXpubsAndImportedAddresses(),
+                    null,
+                    limit,
+                    offset
+            )
 }
