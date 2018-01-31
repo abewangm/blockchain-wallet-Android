@@ -16,8 +16,10 @@ import android.view.View
 import android.widget.EditText
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jakewharton.rxbinding2.widget.RxTextView
+import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.ethereum.EthereumAccount
 import info.blockchain.wallet.payload.data.Account
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -46,10 +48,11 @@ import java.text.DecimalFormatSymbols
 import java.util.*
 import javax.inject.Inject
 
-class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(), NewExchangeView,
-        NumericKeyboardCallback {
+class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresenter>(),
+    NewExchangeView,
+    NumericKeyboardCallback {
 
-    @Suppress("MemberVisibilityCanPrivate", "unused")
+    @Suppress("MemberVisibilityCanBePrivate", "unused")
     @Inject lateinit var newExchangePresenter: NewExchangePresenter
 
     override val locale: Locale = Locale.getDefault()
@@ -58,8 +61,10 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     private val btcSymbol = CryptoCurrencies.BTC.symbol.toUpperCase()
     private val ethSymbol = CryptoCurrencies.ETHER.symbol.toUpperCase()
+    private val bchSymbol = CryptoCurrencies.BCH.symbol.toUpperCase()
     private val compositeDisposable = CompositeDisposable()
-    private val defaultDecimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator.toString()
+    private val defaultDecimalSeparator =
+            DecimalFormatSymbols.getInstance().decimalSeparator.toString()
     private val editTexts by unsafeLazy {
         listOf(edittext_from_crypto, edittext_to_crypto, edittext_to_fiat, edittext_from_fiat)
     }
@@ -108,6 +113,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
 
     override fun updateUi(
             fromCurrency: CryptoCurrencies,
+            toCurrency: CryptoCurrencies,
             fromLabel: String,
             toLabel: String,
             fiatHint: String
@@ -124,7 +130,13 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         when (fromCurrency) {
             CryptoCurrencies.BTC -> showFromBtc()
             CryptoCurrencies.ETHER -> showFromEth()
-            CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not supported")
+            CryptoCurrencies.BCH -> showFromBch()
+        }
+
+        when (toCurrency) {
+            CryptoCurrencies.BTC -> showToBtc()
+            CryptoCurrencies.ETHER -> showToEth()
+            CryptoCurrencies.BCH -> showToBch()
         }
     }
 
@@ -150,8 +162,12 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
 
-            val clazz = Class.forName(data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
-            val any = ObjectMapper().readValue(data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), clazz)
+            val clazz =
+                    Class.forName(data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_OBJECT_TYPE))
+            val any = ObjectMapper().readValue(
+                    data.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM),
+                    clazz
+            )
             when (any) {
                 is Account -> {
                     when (requestCode) {
@@ -168,6 +184,15 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                             presenter.onFromEthSelected()
                         REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
                             presenter.onToEthSelected()
+                        else -> throw IllegalArgumentException("Unknown request code $requestCode")
+                    }
+                }
+                is GenericMetadataAccount -> {
+                    when (requestCode) {
+                        REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND ->
+                            presenter.onFromBchAccountChanged(any)
+                        REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND ->
+                            presenter.onToBchAccountChanged(any)
                         else -> throw IllegalArgumentException("Unknown request code $requestCode")
                     }
                 }
@@ -261,6 +286,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                 .setTitle(R.string.shapeshift_no_funds_title)
                 .setMessage(R.string.shapeshift_no_funds_message)
                 .setCancelable(false)
+                // TODO: Add BCH button and update Strings
                 .setNeutralButton(android.R.string.cancel) { _, _ -> finish() }
                 .setNegativeButton(R.string.onboarding_get_bitcoin) { _, _ ->
                     if (canBuy) {
@@ -342,10 +368,10 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
             it.key.setOnClickListener { clearEditTexts() }
             return@map getTextWatcherObservable(it.key, it.value)
         }.map {
-            // Resume if any formatting errors occur
-            it.onErrorResumeNext(it).subscribe()
-            // Dispose subscriptions onDestroy as strong reference held to View
-        }.forEach { compositeDisposable.addAll(it) }
+                    // Resume if any formatting errors occur
+                    it.onErrorResumeNext(it).subscribe()
+                    // Dispose subscriptions onDestroy as strong reference held to View
+                }.forEach { compositeDisposable.addAll(it) }
     }
 
     private fun setupKeypad() {
@@ -359,30 +385,46 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         }
     }
 
-    private fun getTextWatcherObservable(editText: EditText, publishSubject: PublishSubject<String>) =
-            RxTextView.textChanges(editText)
-                    // Logging
-                    .doOnError(Timber::e)
-                    .doOnTerminate { Timber.wtf("Text watcher terminated unexpectedly $editText") }
-                    // Skip first event emitted when subscribing
-                    .skip(1)
-                    // Convert to String
-                    .map { it.toString() }
-                    // Ignore elements emitted by non-user events (ie presenter updates) and those
-                    // emitted from changes to paired EditText (ie edit fiat, edit crypto)
-                    .doOnNext { if (currentFocus == editText) publishSubject.onNext(it) }
-                    // Scheduling
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
+    private fun getTextWatcherObservable(
+            editText: EditText,
+            publishSubject: PublishSubject<String>
+    ): Observable<String> = RxTextView.textChanges(editText)
+            // Logging
+            .doOnError(Timber::e)
+            .doOnTerminate { Timber.wtf("Text watcher terminated unexpectedly $editText") }
+            // Skip first event emitted when subscribing
+            .skip(1)
+            // Convert to String
+            .map { it.toString() }
+            // Ignore elements emitted by non-user events (ie presenter updates) and those
+            // emitted from changes to paired EditText (ie edit fiat, edit crypto)
+            .doOnNext { if (currentFocus == editText) publishSubject.onNext(it) }
+            // Scheduling
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
 
     private fun showFromBtc() {
         textview_unit_from.text = btcSymbol
-        textview_unit_to.text = ethSymbol
     }
 
     private fun showFromEth() {
         textview_unit_from.text = ethSymbol
+    }
+
+    private fun showFromBch() {
+        textview_unit_from.text = bchSymbol
+    }
+
+    private fun showToBtc() {
         textview_unit_to.text = btcSymbol
+    }
+
+    private fun showToEth() {
+        textview_unit_to.text = ethSymbol
+    }
+
+    private fun showToBch() {
+        textview_unit_to.text = bchSymbol
     }
 
     private fun isKeyboardVisible(): Boolean = shapeshift_keyboard.isVisible

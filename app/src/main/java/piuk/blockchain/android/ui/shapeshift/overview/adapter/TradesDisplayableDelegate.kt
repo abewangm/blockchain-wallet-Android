@@ -4,8 +4,6 @@ import android.app.Activity
 import android.support.annotation.ColorRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.text.Spannable
-import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
@@ -123,14 +121,13 @@ class TradesDisplayableDelegate<in T>(
         val displayAmount: String
 
         if (showCrypto) {
-
-            var cryptoAmount = when (cryptoCurrency.toUpperCase()) {
+            val crypto = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
                 CryptoCurrencies.BTC.symbol -> btcFormat.format(cryptoAmount)
                 else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
 
-            displayAmount = "$cryptoAmount $cryptoCurrency"
+            displayAmount = "$crypto $cryptoCurrency"
         } else {
 
             val fiatAmount = when (cryptoCurrency.toUpperCase()) {
@@ -139,7 +136,7 @@ class TradesDisplayableDelegate<in T>(
                 else -> BigDecimal.ZERO//Coin type not specified
             }
 
-            val unit = getPreferedFiatUnit();
+            val unit = getPreferedFiatUnit()
             displayAmount = "${monetaryUtil.getFiatFormat(unit).format(fiatAmount.abs())} $unit"
         }
 

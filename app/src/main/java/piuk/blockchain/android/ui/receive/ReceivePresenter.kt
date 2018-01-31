@@ -117,7 +117,7 @@ class ReceivePresenter @Inject internal constructor(
         // Here we are assuming that the legacy address is in Base58. This may change in the future
         // if we decide to allow importing BECH32 paper wallets.
         val address =
-                Address.fromBase58(environmentSettings.networkParameters, legacyAddress.address)
+                Address.fromBase58(environmentSettings.bitcoinNetworkParameters, legacyAddress.address)
         val bech32 = CashAddress.encode("bitcoincash", CashAddress.P2PKH, address.hash160)
         val bech32Display = bech32.removeBchUri()
 
@@ -316,7 +316,7 @@ class ReceivePresenter @Inject internal constructor(
 
         return if (amountBigInt != BigInteger.ZERO) {
             BitcoinURI.convertToBitcoinURI(
-                    Address.fromBase58(environmentSettings.networkParameters, address),
+                    Address.fromBase58(environmentSettings.bitcoinNetworkParameters, address),
                     Coin.valueOf(amountBigInt.toLong()),
                     "",
                     ""

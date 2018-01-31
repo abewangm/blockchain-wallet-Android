@@ -815,6 +815,7 @@
     <string name="shapeshift_getting_information_failed">Loading ShapeShift information failed</string>
     <string name="shapeshift_btc">Bitcoin</string>
     <string name="shapeshift_eth">Ether</string>
+    <string name="shapeshift_bch">Bitcoin Cash</string>
     <string name="shapeshift_switch_currency_description">Invert currency pair</string>
     <string name="shapeshift_getting_fees_failed">Error fetching fees</string>
     <string name="shapeshift_fetching_unspent_outputs_failed">Error fetching unspent outputs</string>

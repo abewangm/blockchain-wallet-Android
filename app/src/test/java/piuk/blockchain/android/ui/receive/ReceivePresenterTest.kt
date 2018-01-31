@@ -222,7 +222,7 @@ class ReceivePresenterTest {
         }
         whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
                 .thenReturn(Observable.empty())
-        whenever(environmentSettings.networkParameters).thenReturn(BitcoinMainNetParams.get())
+        whenever(environmentSettings.bitcoinNetworkParameters).thenReturn(BitcoinMainNetParams.get())
         // Act
         subject.onLegacyBchAddressSelected(legacyAddress)
         // Assert
@@ -251,7 +251,7 @@ class ReceivePresenterTest {
         }
         whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
                 .thenReturn(Observable.empty())
-        whenever(environmentSettings.networkParameters).thenReturn(BitcoinMainNetParams.get())
+        whenever(environmentSettings.bitcoinNetworkParameters).thenReturn(BitcoinMainNetParams.get())
         // Act
         subject.onLegacyBchAddressSelected(legacyAddress)
         // Assert

@@ -92,7 +92,7 @@ class SendDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun getUnspentOutputs() {
+    fun `getUnspentOutputs BTC`() {
         // Arrange
         val address = "ADDRESS"
         val mockUnspentOutputs: UnspentOutputs = mock()
@@ -105,6 +105,24 @@ class SendDataManagerTest : RxTest() {
         testObserver.assertNoErrors()
         testObserver.values()[0] shouldEqual mockUnspentOutputs
         verify(mockPaymentService).getUnspentOutputs(address)
+        verifyNoMoreInteractions(mockPaymentService)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getUnspentOutputs BCH`() {
+        // Arrange
+        val address = "ADDRESS"
+        val mockUnspentOutputs: UnspentOutputs = mock()
+        whenever(mockPaymentService.getUnspentBchOutputs(address))
+                .thenReturn(Observable.just(mockUnspentOutputs))
+        // Act
+        val testObserver = subject.getUnspentBchOutputs(address).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.values()[0] shouldEqual mockUnspentOutputs
+        verify(mockPaymentService).getUnspentBchOutputs(address)
         verifyNoMoreInteractions(mockPaymentService)
     }
 

@@ -16,6 +16,7 @@ import dagger.Module;
 import dagger.Provides;
 import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
@@ -181,8 +182,8 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected SendDataManager provideSendDataManager(RxBus rxBus) {
-        return new SendDataManager(new PaymentService(new Payment()), rxBus);
+    protected SendDataManager provideSendDataManager(EnvironmentSettings environmentSettings, RxBus rxBus) {
+        return new SendDataManager(new PaymentService(environmentSettings, new Payment()), rxBus);
     }
 
     @Provides
