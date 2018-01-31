@@ -223,7 +223,7 @@ class SendPresenter @Inject constructor(
                 .map { pendingTransaction.changeAddress = it }
                 .flatMap { getBtcKeys() }
                 .flatMap {
-                    sendDataManager.submitPayment(pendingTransaction.unspentOutputBundle,
+                    sendDataManager.submitBtcPayment(pendingTransaction.unspentOutputBundle,
                             it,
                             pendingTransaction.receivingAddress,
                             pendingTransaction.changeAddress,

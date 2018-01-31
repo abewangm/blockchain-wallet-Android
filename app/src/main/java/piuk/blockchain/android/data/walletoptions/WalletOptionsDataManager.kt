@@ -69,6 +69,8 @@ class WalletOptionsDataManager(
 
     fun getBchFee(): Int = walletOptionsState.walletOptionsSource.value.bchFeePerByte
 
+    fun getShapeShiftLimit(): Int = walletOptionsState.walletOptionsSource.value.shapeshift.upperLimit
+
     /**
      * Mobile info retrieved from wallet-options.json based on wallet setting
      */

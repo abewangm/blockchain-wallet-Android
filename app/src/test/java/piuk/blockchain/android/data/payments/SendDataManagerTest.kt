@@ -34,7 +34,7 @@ class SendDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun submitPayment() {
+    fun `submitPayment BTC`() {
         // Arrange
         val mockOutputBundle: SpendableUnspentOutputs = mock()
         val mockKeys = listOf(mock<ECKey>())
@@ -43,29 +43,82 @@ class SendDataManagerTest : RxTest() {
         val mockFee: BigInteger = mock()
         val mockAmount: BigInteger = mock()
         val txHash = "TX_HASH"
-        whenever(mockPaymentService.submitPayment(mockOutputBundle,
-                mockKeys,
-                toAddress,
-                changeAddress,
-                mockFee,
-                mockAmount)).thenReturn(Observable.just(txHash))
+        whenever(
+                mockPaymentService.submitPayment(
+                        mockOutputBundle,
+                        mockKeys,
+                        toAddress,
+                        changeAddress,
+                        mockFee,
+                        mockAmount
+                )
+        ).thenReturn(Observable.just(txHash))
         // Act
-        val testObserver = subject.submitPayment(mockOutputBundle,
+        val testObserver = subject.submitBtcPayment(
+                mockOutputBundle,
                 mockKeys,
                 toAddress,
                 changeAddress,
                 mockFee,
-                mockAmount).test()
+                mockAmount
+        ).test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         testObserver.values()[0] shouldEqual txHash
-        verify(mockPaymentService).submitPayment(mockOutputBundle,
+        verify(mockPaymentService).submitPayment(
+                mockOutputBundle,
                 mockKeys,
                 toAddress,
                 changeAddress,
                 mockFee,
-                mockAmount)
+                mockAmount
+        )
+        verifyNoMoreInteractions(mockPaymentService)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `submitPayment BCH`() {
+        // Arrange
+        val mockOutputBundle: SpendableUnspentOutputs = mock()
+        val mockKeys = listOf(mock<ECKey>())
+        val toAddress = "TO_ADDRESS"
+        val changeAddress = "CHANGE_ADDRESS"
+        val mockFee: BigInteger = mock()
+        val mockAmount: BigInteger = mock()
+        val txHash = "TX_HASH"
+        whenever(
+                mockPaymentService.submitBchPayment(
+                        mockOutputBundle,
+                        mockKeys,
+                        toAddress,
+                        changeAddress,
+                        mockFee,
+                        mockAmount
+                )
+        ).thenReturn(Observable.just(txHash))
+        // Act
+        val testObserver = subject.submitBchPayment(
+                mockOutputBundle,
+                mockKeys,
+                toAddress,
+                changeAddress,
+                mockFee,
+                mockAmount
+        ).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.values()[0] shouldEqual txHash
+        verify(mockPaymentService).submitBchPayment(
+                mockOutputBundle,
+                mockKeys,
+                toAddress,
+                changeAddress,
+                mockFee,
+                mockAmount
+        )
         verifyNoMoreInteractions(mockPaymentService)
     }
 

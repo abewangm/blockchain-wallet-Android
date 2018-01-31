@@ -16,6 +16,7 @@ import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.answers.Logging
 import piuk.blockchain.android.data.answers.ShapeShiftEvent
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -39,6 +40,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         private val payloadDataManager: PayloadDataManager,
         private val sendDataManager: SendDataManager,
         private val ethDataManager: EthDataManager,
+        private val bchDataManager: BchDataManager,
         private val stringUtils: StringUtils
 ) : BasePresenter<ShapeShiftConfirmationView>() {
 
@@ -98,7 +100,14 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                             depositAmount,
                             gasLimit
                     )
-                    CryptoCurrencies.BCH -> throw IllegalArgumentException("BCH not yet supported")
+                    CryptoCurrencies.BCH -> sendBchTransaction(
+                            xPub,
+                            depositAddress,
+                            changeAddress,
+                            depositAmount,
+                            transactionFee,
+                            feePerKb
+                    )
                 }
             }
         }
@@ -153,13 +162,13 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
             payloadDataManager.decryptHDWallet(verifiedSecondPassword)
         }
 
-        getUnspentApiResponse(xPub)
+        getUnspentBtcApiResponse(xPub)
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .map { sendDataManager.getSpendableCoins(it, satoshis, feePerKb) }
                 .flatMap { unspent ->
                     getBitcoinKeys(account, unspent)
                             .flatMap {
-                                sendDataManager.submitPayment(
+                                sendDataManager.submitBtcPayment(
                                         unspent,
                                         it,
                                         depositAddress,
@@ -210,6 +219,51 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 )
     }
 
+    private fun sendBchTransaction(
+            xPub: String,
+            depositAddress: String,
+            changeAddress: String,
+            depositAmount: BigDecimal,
+            transactionFee: BigInteger,
+            feePerKb: BigInteger
+    ) {
+        // Address wil be in Base58 (ie legacy Bitcoin) format here
+        require(FormatsUtil.isValidBitcoinAddress(depositAddress)) { "Attempting to send BCH to a non-BCH address" }
+
+        // Use BTC accounts + keys for signing
+        val account = payloadDataManager.getAccountForXPub(xPub)
+        val satoshis = depositAmount.multiply(BigDecimal.valueOf(BTC_DEC)).toBigInteger()
+
+        if (payloadDataManager.isDoubleEncrypted) {
+            payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+        }
+
+        getUnspentBchApiResponse(xPub)
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
+                .map { sendDataManager.getSpendableCoins(it, satoshis, feePerKb) }
+                .flatMap { unspent ->
+                    getBitcoinKeys(account, unspent)
+                            .flatMap {
+                                sendDataManager.submitBchPayment(
+                                        unspent,
+                                        it,
+                                        depositAddress,
+                                        changeAddress,
+                                        transactionFee,
+                                        satoshis
+                                )
+                            }
+                }
+                .flatMapCompletable { updateMetadata(it) }
+                .doOnTerminate { view.dismissProgressDialog() }
+                .doOnError(Timber::e)
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { handleSuccess(depositAddress) },
+                        { handleFailure() }
+                )
+    }
+
     private fun handleSuccess(depositAddress: String) {
         view.launchProgressPage(depositAddress)
         Logging.logCustom(
@@ -234,9 +288,18 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         )
     }
 
-    private fun getUnspentApiResponse(address: String): Observable<UnspentOutputs> {
+    private fun getUnspentBtcApiResponse(address: String): Observable<UnspentOutputs> {
         return if (payloadDataManager.getAddressBalance(address).toLong() > 0) {
             sendDataManager.getUnspentOutputs(address)
+                    .compose(RxUtil.applySchedulersToObservable())
+        } else {
+            Observable.error(Throwable("No funds - skipping call to unspent API"))
+        }
+    }
+
+    private fun getUnspentBchApiResponse(address: String): Observable<UnspentOutputs> {
+        return if (bchDataManager.getAddressBalance(address).toLong() > 0) {
+            sendDataManager.getUnspentBchOutputs(address)
                     .compose(RxUtil.applySchedulersToObservable())
         } else {
             Observable.error(Throwable("No funds - skipping call to unspent API"))

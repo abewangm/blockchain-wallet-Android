@@ -37,7 +37,6 @@ import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
-import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
@@ -348,7 +347,7 @@ public class AccountEditPresenter extends BasePresenter<AccountEditView> {
         }
 
         getCompositeDisposable().add(
-                sendDataManager.submitPayment(pendingTransaction.unspentOutputBundle,
+                sendDataManager.submitBtcPayment(pendingTransaction.unspentOutputBundle,
                         keys,
                         pendingTransaction.receivingAddress,
                         changeAddress,

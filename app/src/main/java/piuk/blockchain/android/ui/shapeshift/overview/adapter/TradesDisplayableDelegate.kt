@@ -27,6 +27,7 @@ class TradesDisplayableDelegate<in T>(
         activity: Activity,
         private var btcExchangeRate: Double,
         private var ethExchangeRate: Double,
+        private var bchExchangeRate: Double,
         private var showCrypto: Boolean,
         private val listClickListener: TradesListClickListener
 ) : AdapterDelegate<T> {
@@ -133,17 +134,18 @@ class TradesDisplayableDelegate<in T>(
             val fiatAmount = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(ethExchangeRate))
                 CryptoCurrencies.BTC.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(btcExchangeRate))
+                CryptoCurrencies.BCH.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(bchExchangeRate))
                 else -> BigDecimal.ZERO//Coin type not specified
             }
 
-            val unit = getPreferedFiatUnit()
+            val unit = getPreferredFiatUnit()
             displayAmount = "${monetaryUtil.getFiatFormat(unit).format(fiatAmount.abs())} $unit"
         }
 
         return displayAmount
     }
 
-    private fun getPreferedFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+    private fun getPreferredFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
     private class TradeViewHolder internal constructor(
             itemView: View

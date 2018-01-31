@@ -117,7 +117,10 @@ class ReceivePresenter @Inject internal constructor(
         // Here we are assuming that the legacy address is in Base58. This may change in the future
         // if we decide to allow importing BECH32 paper wallets.
         val address =
-                Address.fromBase58(environmentSettings.bitcoinNetworkParameters, legacyAddress.address)
+                Address.fromBase58(
+                        environmentSettings.bitcoinNetworkParameters,
+                        legacyAddress.address
+                )
         val bech32 = CashAddress.encode("bitcoincash", CashAddress.P2PKH, address.hash160)
         val bech32Display = bech32.removeBchUri()
 
@@ -201,12 +204,16 @@ class ReceivePresenter @Inject internal constructor(
                         bchDataManager.getWalletTransactions(50, 0)
                                 .onErrorReturn { emptyList() }
                 )
-                .flatMap { bchDataManager.getNextReceiveCashAddress(position) }
+                .flatMap { bchDataManager.getNextReceiveAddress(position) }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnNext {
-                    selectedAddress = it
-                    view.updateReceiveAddress(it.removeBchUri())
-                    generateQrCode(it)
+                    val address =
+                            Address.fromBase58(environmentSettings.bitcoinNetworkParameters, it)
+                    val bech32 =
+                            CashAddress.encode("bitcoincash", CashAddress.P2PKH, address.hash160)
+                    selectedAddress = bech32
+                    view.updateReceiveAddress(bech32.removeBchUri())
+                    generateQrCode(bech32)
                 }
                 .doOnError { Timber.e(it) }
                 .subscribe(

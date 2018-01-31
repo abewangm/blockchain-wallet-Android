@@ -799,13 +799,13 @@ class NewExchangePresenter @Inject constructor(
     private fun getBchReceiveAddress(): Observable<String> {
         val position =
                 bchDataManager.getActiveAccounts().indexOfFirst { it.xpub == bchAccount!!.xpub }
-        return bchDataManager.getNextReceiveCashAddress(position)
+        return bchDataManager.getNextReceiveAddress(position)
     }
 
     private fun getBchChangeAddress(): Observable<String> {
         val position =
                 bchDataManager.getActiveAccounts().indexOfFirst { it.xpub == bchAccount!!.xpub }
-        return bchDataManager.getNextChangeCashAddress(position)
+        return bchDataManager.getNextChangeAddress(position)
     }
     //endregion
 
@@ -882,7 +882,6 @@ class NewExchangePresenter @Inject constructor(
      * @param amount The amount to be checked against in Ether or BTC (no sub-units)
      * @return An [Observable] wrapping a [BigDecimal]
      */
-    // TODO: Update to use max amount from WalletOptions
     private fun getRegionalMaxAmount(fee: BigDecimal, amount: BigDecimal): Observable<BigDecimal> {
         return settingsDataManager.settings.map {
             val rate = when {
@@ -890,7 +889,7 @@ class NewExchangePresenter @Inject constructor(
                 else -> getExchangeRates("EUR", toCurrency, fromCurrency).fromRate
             }
 
-            val limit = BigDecimal.valueOf(500.00)
+            val limit = walletOptionsDataManager.getShapeShiftLimit().toBigDecimal()
             // Multiply to get fiat amount
             val fiatAmount = amount.multiply(rate)
             if (fiatAmount >= limit) {

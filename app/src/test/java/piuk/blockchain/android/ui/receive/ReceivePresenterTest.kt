@@ -365,8 +365,9 @@ class ReceivePresenterTest {
     @Throws(Exception::class)
     fun `onBchAccountSelected success`() {
         // Arrange
-        val address = "bitcoincash:qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
-        val displayAddress = "qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val address = "1ATy3ktyaYjzZZQQnhvPsuBVheUDYcUP7V"
+        val bech32Address = "bitcoincash:qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val bech32Display = "qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
         val xPub = "X_PUB"
         val label = "LABEL"
         val account = GenericMetadataAccount().apply {
@@ -379,7 +380,7 @@ class ReceivePresenterTest {
                 .thenReturn(Completable.complete())
         whenever(bchDataManager.getActiveAccounts())
                 .thenReturn(listOf(account))
-        whenever(bchDataManager.getNextReceiveCashAddress(0))
+        whenever(bchDataManager.getNextReceiveAddress(0))
                 .thenReturn(Observable.just(address))
         whenever(bchDataManager.getWalletTransactions(50, 0))
                 .thenReturn(Observable.just(emptyList()))
@@ -389,22 +390,22 @@ class ReceivePresenterTest {
         subject.onBchAccountSelected(account)
         // Assert
         verify(activity).setSelectedCurrency(CryptoCurrencies.BCH)
-        verify(activity).updateReceiveAddress(displayAddress)
+        verify(activity).updateReceiveAddress(bech32Display)
         verify(activity).updateReceiveLabel(label)
         verify(activity, times(2)).showQrLoading()
         verifyNoMoreInteractions(activity)
-        verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
+        verify(qrCodeDataManager).generateQrCode(eq(bech32Address), anyInt())
         verifyNoMoreInteractions(qrCodeDataManager)
         verify(bchDataManager).updateAllBalances()
         verify(bchDataManager).getActiveAccounts()
-        verify(bchDataManager).getNextReceiveCashAddress(0)
+        verify(bchDataManager).getNextReceiveAddress(0)
         verify(bchDataManager).getWalletTransactions(50, 0)
         verifyNoMoreInteractions(payloadDataManager)
         verify(currencyState).cryptoCurrency = CryptoCurrencies.BCH
         verify(currencyState).cryptoCurrency
         verifyNoMoreInteractions(currencyState)
         subject.selectedAccount `should be` null
-        subject.selectedAddress `should equal` address
+        subject.selectedAddress `should equal` bech32Address
         subject.selectedBchAccount `should be` account
     }
 
@@ -412,8 +413,9 @@ class ReceivePresenterTest {
     @Throws(Exception::class)
     fun `onSelectBchDefault success`() {
         // Arrange
-        val address = "bitcoincash:qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
-        val displayAddress = "qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val address = "1ATy3ktyaYjzZZQQnhvPsuBVheUDYcUP7V"
+        val bech32Address = "bitcoincash:qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
+        val bech32Display = "qpna9wa3akewwj4umm0asx6jnt70hrdxpycrd7gy6u"
         val xPub = "X_PUB"
         val label = "LABEL"
         val account = GenericMetadataAccount().apply {
@@ -427,7 +429,7 @@ class ReceivePresenterTest {
                 .thenReturn(Completable.complete())
         whenever(bchDataManager.getActiveAccounts())
                 .thenReturn(listOf(account))
-        whenever(bchDataManager.getNextReceiveCashAddress(0))
+        whenever(bchDataManager.getNextReceiveAddress(0))
                 .thenReturn(Observable.just(address))
         whenever(bchDataManager.getWalletTransactions(50, 0))
                 .thenReturn(Observable.just(emptyList()))
@@ -437,23 +439,23 @@ class ReceivePresenterTest {
         subject.onSelectBchDefault()
         // Assert
         verify(activity).setSelectedCurrency(CryptoCurrencies.BCH)
-        verify(activity).updateReceiveAddress(displayAddress)
+        verify(activity).updateReceiveAddress(bech32Display)
         verify(activity).updateReceiveLabel(label)
         verify(activity, times(2)).showQrLoading()
         verifyNoMoreInteractions(activity)
-        verify(qrCodeDataManager).generateQrCode(anyString(), anyInt())
+        verify(qrCodeDataManager).generateQrCode(eq(bech32Address), anyInt())
         verifyNoMoreInteractions(qrCodeDataManager)
         verify(bchDataManager).getDefaultGenericMetadataAccount()
         verify(bchDataManager).updateAllBalances()
         verify(bchDataManager).getActiveAccounts()
-        verify(bchDataManager).getNextReceiveCashAddress(0)
+        verify(bchDataManager).getNextReceiveAddress(0)
         verify(bchDataManager).getWalletTransactions(50, 0)
         verifyNoMoreInteractions(payloadDataManager)
         verify(currencyState).cryptoCurrency = CryptoCurrencies.BCH
         verify(currencyState).cryptoCurrency
         verifyNoMoreInteractions(currencyState)
         subject.selectedAccount `should be` null
-        subject.selectedAddress `should equal` address
+        subject.selectedAddress `should equal` bech32Address
         subject.selectedBchAccount `should be` account
     }
 

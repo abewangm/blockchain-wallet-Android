@@ -5,15 +5,10 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.coin.GenericMetadataAccount;
-import info.blockchain.wallet.ethereum.EthereumWallet;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.prices.data.PriceDatum;
-
-import org.bitcoinj.crypto.DeterministicKey;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -220,6 +215,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                             getView().hideProgressDialog();
 
                             initPrompts(getView().getActivityContext());
+                    // TODO: 31/01/2018 This needs to be called after all balances are updated
+                    // Receive address chain on BCH is wrong, currently 0
                             storeSwipeReceiveAddresses();
 
                             rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
