@@ -223,7 +223,7 @@ class SendPresenter @Inject constructor(
                 .map { pendingTransaction.changeAddress = it }
                 .flatMap { getBtcKeys() }
                 .flatMap {
-                    sendDataManager.submitPayment(pendingTransaction.unspentOutputBundle,
+                    sendDataManager.submitBtcPayment(pendingTransaction.unspentOutputBundle,
                             it,
                             pendingTransaction.receivingAddress,
                             pendingTransaction.changeAddress,
@@ -1015,7 +1015,7 @@ class SendPresenter @Inject constructor(
     }
 
     internal fun spendFromWatchOnlyBIP38(pw: String, scanData: String) {
-        sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.networkParameters)
+        sendDataManager.getEcKeyFromBip38(pw, scanData, environmentSettings.bitcoinNetworkParameters)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
                     val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
@@ -1025,12 +1025,13 @@ class SendPresenter @Inject constructor(
 
     private fun setTempLegacyAddressPrivateKey(legacyAddress: LegacyAddress, key: ECKey?) {
         if (key != null && key.hasPrivKey() && legacyAddress.address == key.toAddress(
-                environmentSettings.networkParameters).toString()) {
+                environmentSettings.bitcoinNetworkParameters
+            ).toString()) {
 
             //Create copy, otherwise pass by ref will override private key in wallet payload
             val tempLegacyAddress = LegacyAddress()
             tempLegacyAddress.setPrivateKeyFromBytes(key.privKeyBytes)
-            tempLegacyAddress.address = key.toAddress(environmentSettings.networkParameters).toString()
+            tempLegacyAddress.address = key.toAddress(environmentSettings.bitcoinNetworkParameters).toString()
             tempLegacyAddress.label = legacyAddress.label
             tempLegacyAddress.tag = PendingTransaction.WATCH_ONLY_SPEND_TAG
             pendingTransaction.sendingObject.accountObject = tempLegacyAddress

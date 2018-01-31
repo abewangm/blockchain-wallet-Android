@@ -159,7 +159,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
     @Override
     public NetworkParameters getBitcoinParams() {
-        return environmentSettings.getNetworkParameters();
+        return environmentSettings.getBitcoinNetworkParameters();
     }
 
     @Override

@@ -250,22 +250,56 @@ class BchDataManager(
         return bchDataStore.bchMetadata?.accounts?.get(getDefaultAccountPosition())
     }
 
+    /**
+     * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
+     * from the next valid unused address. For example, the passing 5 as the position will generate
+     * an address which correlates with the next available address + 5 positions.
+     *
+     * @param accountIndex  The index of the [Account] you wish to generate an address from
+     * @param addressIndex Represents how many positions on the chain beyond what is already used that
+     * you wish to generate
+     * @return A Bitcoin Cash receive address in Base58 format
+     */
     fun getReceiveAddressAtPosition(accountIndex: Int, addressIndex: Int): String? =
-            bchDataStore.bchWallet?.getReceiveAddressAtPositionBch(accountIndex, addressIndex)
+            bchDataStore.bchWallet?.getReceiveAddressAtPosition(accountIndex, addressIndex)
 
-    fun getNextReceiveCashAddress(accountIndex: Int): Observable<String> =
+    /**
+     * Generates a Base58 Bitcoin Cash receive address for an account at a given position. The
+     * address returned will be the next unused in the chain.
+     *
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @return A Bitcoin Cash receive address in Base58 format
+     */
+    fun getNextReceiveAddress(accountIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet!!.getNextReceiveCashAddress(accountIndex)
+                bchDataStore.bchWallet!!.getNextReceiveAddress(accountIndex)
             }
 
-    fun getNextChangeCashAddress(accountIndex: Int): Observable<String> =
+    /**
+     * Generates a Base58 Bitcoin Cash change address for an account at a given position. The
+     * address returned will be the next unused in the chain.
+     *
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @return A Bitcoin Cash change address in Base58 format
+     */
+    fun getNextChangeAddress(accountIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet!!.getNextChangeCashAddress(accountIndex)
+                bchDataStore.bchWallet!!.getNextChangeAddress(accountIndex)
             }
 
-    fun getNextChangeCashAddress(accountIndex: Int, addressIndex: Int): Observable<String> =
+    /**
+     * Allows you to generate a BCH change address at an arbitrary number of positions on the chain
+     * from the next valid unused address. For example, the passing 5 as the position will generate
+     * an address which correlates with the next available address + 5 positions.
+     *
+     * @param accountIndex  The index of the [Account] you wish to generate an address from
+     * @param addressIndex Represents how many positions on the chain beyond what is already used that
+     * you wish to generate
+     * @return A Bitcoin Cash change address in Base58 format
+     */
+    fun getChangeAddressAtPosition(accountIndex: Int, addressIndex: Int): Observable<String> =
             Observable.fromCallable {
-                bchDataStore.bchWallet!!.getChangeCashAddressAt(accountIndex, addressIndex)
+                bchDataStore.bchWallet!!.getChangeAddressAtPosition(accountIndex, addressIndex)
             }
 
     fun incrementNextReceiveAddressBch(xpub: String): Completable =

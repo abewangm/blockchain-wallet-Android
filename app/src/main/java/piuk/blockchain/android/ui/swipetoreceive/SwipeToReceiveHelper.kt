@@ -62,7 +62,6 @@ class SwipeToReceiveHelper(
      * account name in SharedPrefs. Only stores addresses if enabled in SharedPrefs. This should be
      * called on a Computation thread as it can take up to 2 seconds on a mid-range device.
      */
-    // TODO: When this is currently called, there are no addresses stored in multiaddress
     fun updateAndStoreBitcoinCashAddresses() {
         if (getIfSwipeEnabled()) {
             val numOfAddresses = 5
@@ -80,9 +79,7 @@ class SwipeToReceiveHelper(
                         // Likely not initialized yet
                         break
 
-                // TODO: This is completely broken
-                val base32Address = CashAddress.decode(receiveAddress)
-                stringBuilder.append(base32Address).append(",")
+                stringBuilder.append(receiveAddress).append(",")
             }
 
             storeBitcoinCashAddresses(stringBuilder.toString())

@@ -176,7 +176,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
     void importBip38Address(String data, String password) {
         getView().showProgressDialog(R.string.please_wait);
         try {
-            BIP38PrivateKey bip38 = BIP38PrivateKey.fromBase58(environmentSettings.getNetworkParameters(), data);
+            BIP38PrivateKey bip38 = BIP38PrivateKey.fromBase58(environmentSettings.getBitcoinNetworkParameters(), data);
             ECKey key = bip38.decrypt(password);
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {

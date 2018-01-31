@@ -42,16 +42,20 @@ class WalletOptionsDataManager(
         initWalletOptionsReplaySubjects()
         initSettingsReplaySubjects(guid, sharedKey)
 
-        return Observable.zip(walletOptionsState.walletOptionsSource, walletOptionsState.walletSettingsSource,
+        return Observable.zip(walletOptionsState.walletOptionsSource,
+                walletOptionsState.walletSettingsSource,
                 BiFunction({ options, settings ->
                     isShapeshiftAllowed(options, settings)
-                }))
+                })
+        )
     }
 
     private fun isShapeshiftAllowed(options: WalletOptions, settings: Settings): Boolean {
 
         val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT) ?: false }
-        val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode) ?: false }
+        val blacklistedCountry = options.shapeshift.countriesBlacklist.let {
+            it?.contains(settings.countryCode) ?: false
+        }
 
         return isShapeShiftAllowed && !blacklistedCountry
     }
@@ -59,8 +63,13 @@ class WalletOptionsDataManager(
     fun isInUsa(): Observable<Boolean> =
             walletOptionsState.walletSettingsSource.map { it.countryCode == "US" }
 
-    fun isStateWhitelisted(state: String): Observable<Boolean> = walletOptionsState.walletOptionsSource
-            .map { it.shapeshift.statesWhitelist.let { it?.contains(state) ?: true } }
+    fun isStateWhitelisted(state: String): Observable<Boolean> =
+            walletOptionsState.walletOptionsSource
+                    .map { it.shapeshift.statesWhitelist.let { it?.contains(state) ?: true } }
+
+    fun getBchFee(): Int = walletOptionsState.walletOptionsSource.value.bchFeePerByte
+
+    fun getShapeShiftLimit(): Int = walletOptionsState.walletOptionsSource.value.shapeshift.upperLimit
 
     /**
      * Mobile info retrieved from wallet-options.json based on wallet setting
@@ -133,7 +142,7 @@ class WalletOptionsDataManager(
     }
 
     companion object {
-        private val SHOW_SHAPESHIFT = "showShapeshift"
+        private const val SHOW_SHAPESHIFT = "showShapeshift"
     }
 
 }

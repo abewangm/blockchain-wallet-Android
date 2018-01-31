@@ -94,6 +94,7 @@ data class BtcDisplayable(
         get() = transactionSummary.isPending
 
 }
+
 @Mockable
 data class BchDisplayable(
         private val transactionSummary: TransactionSummary

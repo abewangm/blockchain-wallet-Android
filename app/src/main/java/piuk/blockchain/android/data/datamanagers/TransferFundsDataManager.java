@@ -21,7 +21,6 @@ import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver;
 import piuk.blockchain.android.data.rxjava.RxUtil;
-import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
@@ -141,7 +140,7 @@ public class TransferFundsDataManager {
                 List<ECKey> keys = new ArrayList<>();
                 keys.add(payloadDataManager.getAddressECKey(legacyAddress, secondPassword));
 
-                sendDataManager.submitPayment(
+                sendDataManager.submitBtcPayment(
                         pendingTransaction.unspentOutputBundle,
                         keys,
                         receivingAddress,

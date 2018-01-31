@@ -263,7 +263,7 @@ public class AccountEditPresenterTest {
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(payloadDataManager.getAddressECKey(legacyAddress, null))
                 .thenReturn(mock(ECKey.class));
-        when(sendDataManager.submitPayment(
+        when(sendDataManager.submitBtcPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 isNull(),
@@ -297,7 +297,7 @@ public class AccountEditPresenterTest {
         when(payloadDataManager.getWallet()).thenReturn(mockPayload);
         when(payloadDataManager.getAddressECKey(eq(legacyAddress), anyString()))
                 .thenReturn(mock(ECKey.class));
-        when(sendDataManager.submitPayment(
+        when(sendDataManager.submitBtcPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 isNull(),
