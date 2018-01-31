@@ -397,6 +397,11 @@ public class PayloadDataManager {
         return getWallet() != null ? getWallet().getLegacyAddressStringList() : Collections.emptyList();
     }
 
+    @NonNull
+    public List<String> getWatchOnlyAddressStringList() {
+        return getWallet() != null ? getWallet().getWatchOnlyAddressStringList() : Collections.emptyList();
+    }
+
     /**
      * Returns the balance of an address. If the address isn't found in the address map object, the
      * method will return {@link BigInteger#ZERO} instead of a null object.

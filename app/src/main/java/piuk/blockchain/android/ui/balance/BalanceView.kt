@@ -32,4 +32,6 @@ interface BalanceView : View {
     fun getCurrentAccountPosition(): Int?
 
     fun generateLauncherShortcuts()
+
+    fun shouldShowBuy(): Boolean
 }

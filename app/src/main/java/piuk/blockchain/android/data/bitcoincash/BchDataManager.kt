@@ -20,6 +20,7 @@ import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
+import timber.log.Timber
 import java.math.BigInteger
 
 @Mockable
@@ -178,6 +179,10 @@ class BchDataManager(
 
         return result
     }
+
+    fun getLegacyAddressStringList() = payloadDataManager.legacyAddressStringList
+
+    fun getWatchOnlyAddressStringList() = payloadDataManager.watchOnlyAddressStringList
 
     fun updateAllBalances(): Completable {
         val legacyAddresses = payloadDataManager.legacyAddresses
@@ -365,4 +370,7 @@ class BchDataManager(
                     limit,
                     offset
             )
+
+    fun getXpubFromAddress(address: String) =
+        bchDataStore.bchWallet!!.getXpubFromAddress(address)
 }

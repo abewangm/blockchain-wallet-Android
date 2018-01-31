@@ -33,11 +33,9 @@ import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
-import piuk.blockchain.android.util.extensions.toast
-import piuk.blockchain.android.util.extensions.visible
+import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
+import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -53,7 +51,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private var interactionListener: OnFragmentInteractionListener? = null
     private var spacerDecoration: BottomSpacerDecoration? = null
     private var backPressed: Long = 0
-    private val shouldShowBuy = AndroidUtils.is19orHigher()
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -126,15 +123,19 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         interactionListener = activity as OnFragmentInteractionListener?
     }
 
-    override fun setupAccountsAdapter(accounts: List<ItemAccount>) {
+    override fun shouldShowBuy() = AndroidUtils.is19orHigher()
+
+    override fun setupAccountsAdapter(accountsList: List<ItemAccount>) {
 
         if (accountsAdapter == null) {
             accountsAdapter = AccountsAdapter(
                     context,
                     R.layout.spinner_balance_header,
-                    accounts
+                    accountsList
             ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
         }
+
+        accounts_spinner.adapter = accountsAdapter
 
         handleAccountSpinnerVisibility()
 
@@ -243,7 +244,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         when (uiState) {
             UiState.FAILURE, UiState.EMPTY -> onEmptyState()
             UiState.CONTENT -> onContentLoaded()
-            UiState.LOADING -> setShowRefreshing(true)
+            UiState.LOADING -> {
+                textview_balance.invisible()
+                setShowRefreshing(true)
+            }
         }
     }
 
@@ -255,7 +259,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             CryptoCurrencies.BTC -> {
                 button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
                 button_get_bitcoin.setOnClickListener {
-                    if (shouldShowBuy) {
+                    if (shouldShowBuy()) {
                         presenter.onGetBitcoinClicked()
                     } else {
                         startReceiveFragmentBtc()
@@ -279,10 +283,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun updateBalanceHeader(balance: String) {
         textview_balance.text = balance
+        textview_balance.visible()
     }
 
     private fun onContentLoaded() {
         setShowRefreshing(false)
+        textview_balance.visible()
         no_transaction_include.gone()
     }
 
@@ -332,22 +338,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun getCurrentAccountPosition() = accounts_spinner.selectedItemPosition
-
-    /**
-     * Called from MainActivity
-     * Position is offset to account for first item being "All Wallets". If returned result is -1,
-     * [SendFragment] and [ReceiveFragment] can safely ignore and choose the defaults
-     * instead.
-     */
-    fun getSelectedAccountPosition(): Int {
-        var position = accounts_spinner.selectedItemPosition
-        if (position >= accounts_spinner.count - 1) {
-            // End of list is imported addresses, ignore
-            position = 0
-        }
-
-        return position - 1
-    }
 
     companion object {
 
