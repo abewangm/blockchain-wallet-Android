@@ -23,12 +23,14 @@ import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
 import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.transactions.BchDisplayable;
 import piuk.blockchain.android.data.transactions.BtcDisplayable;
 import piuk.blockchain.android.data.transactions.Displayable;
 import piuk.blockchain.android.data.transactions.EthDisplayable;
@@ -64,6 +66,7 @@ public class TransactionDetailPresenterTest extends RxTest {
     @Mock ExchangeRateFactory exchangeRateFactory;
     @Mock ContactsDataManager contactsDataManager;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) EthDataManager ethDataManager;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) BchDataManager bchDataManager;
 
     @Before
     public void setUp() throws Exception {
@@ -81,7 +84,8 @@ public class TransactionDetailPresenterTest extends RxTest {
                 transactionListDataManager,
                 exchangeRateFactory,
                 contactsDataManager,
-                ethDataManager);
+                ethDataManager,
+                bchDataManager);
         subject.initView(activity);
     }
 
@@ -485,6 +489,20 @@ public class TransactionDetailPresenterTest extends RxTest {
         verify(activity).showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void updateTransactionNoteBchSuccess() throws Exception {
+        // Arrange
+        Displayable displayable = mock(BtcDisplayable.class);
+        when(displayable.getHash()).thenReturn("hash");
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BCH);
+        subject.displayable = displayable;
+        when(ethDataManager.updateTransactionNotes(anyString(), anyString()))
+                .thenReturn(Completable.complete());
+        // Act
+        subject.updateTransactionNote("note");
+        // Assert
+    }
+
     @Test
     public void getTransactionNoteBtc() throws Exception {
         // Arrange
@@ -513,6 +531,19 @@ public class TransactionDetailPresenterTest extends RxTest {
         // Assert
         assertEquals("note", value);
         verify(ethDataManager).getTransactionNotes("hash");
+    }
+
+    @Test
+    public void getTransactionNoteBch() throws Exception {
+        // Arrange
+        Displayable displayable = mock(BchDisplayable.class);
+        when(displayable.getHash()).thenReturn("hash");
+        when(displayable.getCryptoCurrency()).thenReturn(CryptoCurrencies.BCH);
+        subject.displayable = displayable;
+        // Act
+        String value = subject.getTransactionNote();
+        // Assert
+        assertEquals("", value);
     }
 
     @Test

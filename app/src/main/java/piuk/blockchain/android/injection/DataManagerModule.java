@@ -187,8 +187,9 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager) {
-        return new TransactionHelper(payloadDataManager);
+    protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager,
+                                                         BchDataManager bchDataManager) {
+        return new TransactionHelper(payloadDataManager, bchDataManager);
     }
 
     @Provides
