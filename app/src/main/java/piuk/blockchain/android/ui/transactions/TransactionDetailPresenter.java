@@ -46,6 +46,7 @@ import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_HASH;
 import static piuk.blockchain.android.ui.balance.BalanceFragment.KEY_TRANSACTION_LIST_POSITION;
@@ -261,6 +262,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
             } else {
                 label = bchDataManager.getLabelFromBchAddress(item.getKey());
                 unit = getDisplayUnitsBch();
+                if (label == null) label = item.getKey();
             }
 
             TransactionDetailModel transactionDetailModel = new TransactionDetailModel(
@@ -305,6 +307,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
                 unit = getDisplayUnitsBtc();
             } else {
                 label = bchDataManager.getLabelFromBchAddress(item.getKey());
+                if (label == null) label = item.getKey();
                 unit = getDisplayUnitsBch();
             }
 
