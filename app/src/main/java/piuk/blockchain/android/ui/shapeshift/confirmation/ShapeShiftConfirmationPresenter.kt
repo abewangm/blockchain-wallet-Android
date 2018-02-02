@@ -231,6 +231,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         require(FormatsUtil.isValidBitcoinAddress(depositAddress)) { "Attempting to send BCH to a non-BCH address" }
 
         // Use BTC accounts + keys for signing
+        // TODO: This will cause issues if we change the derivation path in the future
         val account = payloadDataManager.getAccountForXPub(xPub)
         val satoshis = depositAmount.multiply(BigDecimal.valueOf(BTC_DEC)).toBigInteger()
 

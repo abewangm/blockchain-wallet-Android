@@ -313,7 +313,6 @@ public class TransactionListDataManagerTest extends RxTest {
         Account account = new Account();
         BigInteger balance = BigInteger.valueOf(1_000_000_000_000L);
         when(bchDataManager.getWalletBalance()).thenReturn(balance);
-        when(bchDataManager.getImportedAddressBalance()).thenReturn(balance);
         ItemAccount itemAccount = new ItemAccount();
         itemAccount.setAccountObject(account);
         itemAccount.setType(ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY);
@@ -321,7 +320,7 @@ public class TransactionListDataManagerTest extends RxTest {
         long value = subject.getBchBalance(itemAccount);
         // Assert
         verify(bchDataManager).getWalletBalance();
-        assertEquals(1_000_000_000_000L + 1_000_000_000_000L, value);
+        assertEquals(1_000_000_000_000L, value);
     }
 
     @Test

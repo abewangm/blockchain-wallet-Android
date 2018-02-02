@@ -199,6 +199,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                 else -> throw IllegalArgumentException("Unsupported class type $clazz")
             }
 
+            clearError()
+            clearEditTexts()
         }
     }
 

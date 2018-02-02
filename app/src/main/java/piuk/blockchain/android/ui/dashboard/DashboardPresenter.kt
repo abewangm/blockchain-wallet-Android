@@ -172,8 +172,7 @@ class DashboardPresenter @Inject constructor(
                                                 )
                                         )
 
-                                val totalDouble = btcFiat.plus(ethFiat.toDouble())
-
+                                val totalDouble = btcFiat.plus(ethFiat.toDouble()).plus(bchFiat)
                                 val totalString = getFormattedCurrencyString(totalDouble)
 
                                 view.updatePieChartState(
