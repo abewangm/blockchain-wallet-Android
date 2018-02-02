@@ -102,12 +102,12 @@ class AccountChooserPresenterTest {
     fun `onViewReady mode ShapeShift`() {
         // Arrange
         whenever(activity.accountMode).thenReturn(AccountMode.ShapeShift)
-        val itemAccount0 = ItemAccount("", "", null, null, null, null)
-        val itemAccount1 = ItemAccount("", "", null, null, null, null)
-        val itemAccount2 = ItemAccount("", "", null, null, null, null)
+        val itemAccount0 = ItemAccount("")
+        val itemAccount1 = ItemAccount("")
+        val itemAccount2 = ItemAccount("")
         whenever(walletAccountHelper.getHdAccounts())
                 .thenReturn(listOf(itemAccount0, itemAccount1, itemAccount2))
-        val itemAccount3 = ItemAccount("", "", null, null, null, null)
+        val itemAccount3 = ItemAccount("")
         whenever(walletAccountHelper.getEthAccount())
                 .thenReturn(Arrays.asList(itemAccount3))
         whenever(walletAccountHelper.getHdBchAccounts())
