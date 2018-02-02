@@ -870,5 +870,9 @@
     <string name="bch_all_accounts">All Bitcoin Cash Wallets</string>
     <string name="bch_imported_addresses">Imported Bitcoin Cash Addresses</string>
     <string name="transaction_detail_verify_blockchair">Verify on Blockchair.com</string>
+    <string name="bch_to_field_helper">Enter bitcoin cash address or select</string>
+    <string name="bch_to_field_helper_no_dropdown">Enter bitcoin cash address</string>
+    <string name="bch_address_warning">Are you sure this is a Bitcoin Cash address?</string>
+    <string name="bch_address_warning_subtext">Sending funds to a bitcoin address by accident will result in loss of funds.</string>
 
 </resources>

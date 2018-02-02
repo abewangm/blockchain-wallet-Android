@@ -16,6 +16,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.Transformation
 import android.widget.RelativeLayout
+import android.widget.TextView
 import kotlinx.android.synthetic.main.view_expanding_currency_header.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
@@ -37,34 +38,18 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
     private var collapsedHeight: Int = 0
     private var contentHeight: Int = 0
     private var contentWidth: Int = 0
-
-    var selectedCurrency = CryptoCurrencies.BTC
+    private var selectedCurrency = CryptoCurrencies.BTC
 
     init {
         // Inflate layout
         LayoutInflater.from(getContext())
                 .inflate(R.layout.view_expanding_currency_header, this, true)
         // Add compound drawables manually to avoid inflation errors on <21
-        textview_bitcoin.setCompoundDrawablesWithIntrinsicBounds(
-                AppCompatResources.getDrawable(context, R.drawable.vector_bitcoin),
-                null,
-                null,
-                null
-        )
-        textview_ethereum.setCompoundDrawablesWithIntrinsicBounds(
-                AppCompatResources.getDrawable(context, R.drawable.vector_eth),
-                null,
-                null,
-                null
-        )
-        textview_bitcoin_cash.setCompoundDrawablesWithIntrinsicBounds(
-                AppCompatResources.getDrawable(context, R.drawable.vector_bitcoin_cash),
-                null,
-                null,
-                null
-        )
-        // Select Bitcoin by default but without triggering callback
-        updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
+        textview_bitcoin.setRightDrawable(R.drawable.vector_bitcoin)
+        textview_ethereum.setRightDrawable(R.drawable.vector_eth)
+        textview_bitcoin_cash.setRightDrawable(R.drawable.vector_bitcoin_cash)
+        // Hide selector on first load
+        textview_selected_currency.invisible()
     }
 
     override fun onFinishInflate() {
@@ -112,17 +97,14 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
     }
 
     fun setCurrentlySelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        // Prevent selecting the same thing twice needlessly
-        if (selectedCurrency != cryptoCurrency) {
-            selectedCurrency = cryptoCurrency
-            when (selectedCurrency) {
-                CryptoCurrencies.BTC ->
-                    updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
-                CryptoCurrencies.ETHER ->
-                    updateCurrencyUi(R.drawable.vector_eth, R.string.ethereum)
-                CryptoCurrencies.BCH ->
-                    updateCurrencyUi(R.drawable.vector_bitcoin_cash, R.string.bitcoin_cash)
-            }
+        selectedCurrency = cryptoCurrency
+        when (selectedCurrency) {
+            CryptoCurrencies.BTC ->
+                updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
+            CryptoCurrencies.ETHER ->
+                updateCurrencyUi(R.drawable.vector_eth, R.string.ethereum)
+            CryptoCurrencies.BCH ->
+                updateCurrencyUi(R.drawable.vector_bitcoin_cash, R.string.bitcoin_cash)
         }
     }
 
@@ -182,6 +164,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
                     ContextCompat.getDrawable(context, R.drawable.ic_arrow_drop_down_grey600_24dp),
                     null
             )
+            visible()
         }
     }
 
@@ -204,6 +187,15 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
                 cryptoCurrency?.run { selectionListener(this) }
             }
         }
+    }
+
+    private fun TextView.setRightDrawable(@DrawableRes drawable: Int) {
+        setCompoundDrawablesWithIntrinsicBounds(
+                AppCompatResources.getDrawable(context, drawable),
+                null,
+                null,
+                null
+        )
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

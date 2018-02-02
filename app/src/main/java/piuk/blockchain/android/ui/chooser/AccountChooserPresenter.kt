@@ -218,7 +218,7 @@ class AccountChooserPresenter @Inject internal constructor(
                                         null,
                                         null,
                                         it,
-                                        null
+                                        it.xpub
                                 )
                             }
                         }

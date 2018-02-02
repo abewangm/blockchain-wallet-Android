@@ -7,14 +7,19 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxPinning;
 import piuk.blockchain.android.data.rxjava.RxUtil;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 
 public class FeeDataManager {
 
     private final RxPinning rxPinning;
     private FeeApi feeApi;
 
-    public FeeDataManager(FeeApi feeApi, RxBus rxBus) {
+    //Bitcoin cash fees are temporarily getched from wallet-options until an endpoint can be provided
+    private WalletOptionsDataManager walletOptionsDataManager;
+
+    public FeeDataManager(FeeApi feeApi, WalletOptionsDataManager walletOptionsDataManager, RxBus rxBus) {
         this.feeApi = feeApi;
+        this.walletOptionsDataManager = walletOptionsDataManager;
         rxPinning = new RxPinning(rxBus);
     }
 
@@ -38,5 +43,22 @@ public class FeeDataManager {
     public Observable<FeeOptions> getEthFeeOptions() {
         return rxPinning.call(() -> feeApi.getEthFeeOptions())
                 .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Returns a {@link FeeOptions} object which contains a "regular" fee
+     * option, both listed in Satoshis/byte.
+     *
+     * @return An {@link Observable} wrapping a {@link FeeOptions} object
+     */
+    public Observable<FeeOptions> getBchFeeOptions() {
+        return Observable.just(createBchFeeOptions());
+    }
+
+    private FeeOptions createBchFeeOptions() {
+        FeeOptions feeOptions = new FeeOptions();
+        feeOptions.setRegularFee(walletOptionsDataManager.getBchFee());
+        feeOptions.setPriorityFee(walletOptionsDataManager.getBchFee());
+        return feeOptions;
     }
 }

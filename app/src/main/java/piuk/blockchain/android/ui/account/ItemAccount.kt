@@ -1,8 +1,5 @@
 package piuk.blockchain.android.ui.account
 
-import info.blockchain.wallet.ethereum.EthereumAccount
-import info.blockchain.wallet.payload.data.Account
-import info.blockchain.wallet.payload.data.LegacyAddress
 import piuk.blockchain.android.util.annotations.Mockable
 
 @Suppress("LeakingThis")
@@ -19,6 +16,7 @@ class ItemAccount {
     var absoluteBalance: Long? = null
 
     //TODO Get rid of this Any
+    //Ultimately this is used to sign txs
     var accountObject: Any? = null
 
     //Address/Xpub to fetch balance/tx list
@@ -27,15 +25,6 @@ class ItemAccount {
 
     constructor() {
         // Empty constructor for serialization
-    }
-
-    fun getAddressString(): String {
-        return when (accountObject) {
-            is Account -> (accountObject as Account).xpub
-            is LegacyAddress -> (accountObject as LegacyAddress).address
-            is EthereumAccount -> (accountObject as EthereumAccount).address
-            else -> throw IllegalArgumentException("accountObject's type is invalid, most likely null")
-        }
     }
 
     override fun toString(): String {
@@ -49,7 +38,7 @@ class ItemAccount {
             tag: String?,
             absoluteBalance: Long?,
             accountObject: Any? = null,
-            address: String?,
+            address: String,
             type: TYPE = TYPE.SINGLE_ACCOUNT
     ) {
         this.label = label

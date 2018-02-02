@@ -152,6 +152,17 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     }
 
     @Override
+    public void setWarning(String warning) {
+        binding.layoutWarning.setVisibility(View.VISIBLE);
+        binding.textviewWarning.setText(warning);
+    }
+
+    @Override
+    public void setWarningSubText(String warningSubText) {
+        binding.textviewWarningSub.setText(warningSubText);
+    }
+
+    @Override
     public void setUiState(int uiState) {
         switch (uiState) {
             case UiState.LOADING:
