@@ -231,8 +231,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             when (currency) {
                 CryptoCurrencies.BTC -> presenter?.onBitcoinChosen()
                 CryptoCurrencies.ETHER -> presenter?.onEtherChosen()
-            // TODO: Implement BCH in presenter
-                CryptoCurrencies.BCH -> toast("Not yet implemented")
+                CryptoCurrencies.BCH -> presenter?.onBitcoinCashChosen()
             }
         }
     }
@@ -271,8 +270,11 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                     EventService.EVENT_TX_INPUT_FROM_QR
             )
             SCAN_PRIVX -> presenter.handlePrivxScan(data?.getStringExtra(CaptureActivity.SCAN_RESULT))
-            REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND -> presenter.selectReceivingAccount(data)
-            REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND -> presenter.selectSendingAccount(data)
+            REQUEST_CODE_BTC_SENDING -> presenter.selectSendingAccountBtc(data)
+            REQUEST_CODE_BTC_RECEIVING -> presenter.selectReceivingAccountBtc(data)
+
+            REQUEST_CODE_BCH_SENDING -> presenter.selectSendingAccountBch(data)
+            REQUEST_CODE_BCH_RECEIVING -> presenter.selectReceivingAccountBch(data)
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
@@ -318,6 +320,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 .subscribe(IgnorableDefaultObserver())
 
         toContainer.toArrow.setOnClickListener {
+            val currency = CurrencyState.getInstance().cryptoCurrency
             AccountChooserActivity.startForResult(
                     this,
                     if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
@@ -325,7 +328,11 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                     } else {
                         AccountMode.BitcoinCash
                     },
-                    REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND,
+                    if (currency == CryptoCurrencies.BTC) {
+                        REQUEST_CODE_BTC_RECEIVING
+                    } else {
+                        REQUEST_CODE_BCH_RECEIVING
+                    },
                     getString(R.string.to)
             )
         }
@@ -458,6 +465,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     private fun startFromFragment() {
+        val currency = CurrencyState.getInstance().cryptoCurrency
         AccountChooserActivity.startForResult(
                 this,
                 if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
@@ -465,7 +473,11 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 } else {
                     AccountMode.BitcoinCash
                 },
-                REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND,
+                if (currency == CryptoCurrencies.BTC) {
+                    REQUEST_CODE_BTC_SENDING
+                } else {
+                    REQUEST_CODE_BCH_SENDING
+                },
                 getString(R.string.from)
         )
     }
@@ -1016,8 +1028,10 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         private const val ARGUMENT_CONTACT_ID = "contact_id"
         private const val ARGUMENT_CONTACT_MDID = "contact_mdid"
         private const val ARGUMENT_FCTX_ID = "fctx_id"
-        private const val REQUEST_CODE_CHOOSE_RECEIVING_ACCOUNT_FROM_SEND = 911
-        private const val REQUEST_CODE_CHOOSE_SENDING_ACCOUNT_FROM_SEND = 912
+        private const val REQUEST_CODE_BTC_RECEIVING = 911
+        private const val REQUEST_CODE_BTC_SENDING = 912
+        private const val REQUEST_CODE_BCH_RECEIVING = 913
+        private const val REQUEST_CODE_BCH_SENDING = 914
 
         fun newInstance(
                 scanData: String?,

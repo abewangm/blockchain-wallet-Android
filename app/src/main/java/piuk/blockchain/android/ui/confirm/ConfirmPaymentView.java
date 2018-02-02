@@ -29,4 +29,8 @@ interface ConfirmPaymentView extends View {
     void closeDialog();
 
     void setContactNote(String contactNote);
+
+    void setWarning(String warning);
+
+    void setWarningSubText(String warningSubText);
 }

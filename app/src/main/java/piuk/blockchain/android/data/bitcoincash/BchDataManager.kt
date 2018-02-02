@@ -1,6 +1,7 @@
 package piuk.blockchain.android.data.bitcoincash
 
 import info.blockchain.api.blockexplorer.BlockExplorer
+import info.blockchain.api.data.UnspentOutput
 import info.blockchain.wallet.BitcoinCashWallet
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.coin.GenericMetadataWallet
@@ -9,6 +10,7 @@ import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
+import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -149,6 +151,25 @@ class BchDataManager(
                 bchDataStore.bchWallet?.addWatchOnlyAccount(account.xpub)
                 walletMetadata.accounts[i].xpub = account.xpub
             }
+        }
+    }
+
+    /**
+     * Restore bitcoin cash wallet from mnemonic.
+     */
+    fun decryptWatchOnlyWallet(mnemonic: List<String>) {
+
+        bchDataStore.bchWallet = BitcoinCashWallet.restore(
+                blockExplorer,
+                networkParameterUtils.bitcoinCashParams,
+                BitcoinCashWallet.BITCOIN_COIN_PATH,
+                mnemonic,
+                ""
+        )
+
+        payloadDataManager.accounts.forEachIndexed { i, account ->
+            bchDataStore.bchWallet?.addAccount()
+            bchDataStore.bchMetadata!!.accounts[i].xpub = account.xpub
         }
     }
 
@@ -302,14 +323,14 @@ class BchDataManager(
                 bchDataStore.bchWallet!!.getChangeAddressAtPosition(accountIndex, addressIndex)
             }
 
-    fun incrementNextReceiveAddressBch(xpub: String): Completable =
+    fun incrementNextReceiveAddress(xpub: String): Completable =
             Completable.fromCallable {
-                bchDataStore.bchWallet!!.incrementNextReceiveAddressBch(xpub)
+                bchDataStore.bchWallet!!.incrementNextReceiveAddress(xpub)
             }
 
-    fun incrementNextChangeAddressBch(xpub: String): Completable =
+    fun incrementNextChangeAddress(xpub: String): Completable =
             Completable.fromCallable {
-                bchDataStore.bchWallet!!.incrementNextChangeAddressBch(xpub)
+                bchDataStore.bchWallet!!.incrementNextChangeAddress(xpub)
             }
 
     fun isOwnAddress(address: String) =
@@ -373,4 +394,11 @@ class BchDataManager(
 
     fun getXpubFromAddress(address: String) =
         bchDataStore.bchWallet!!.getXpubFromAddress(address)
+
+    fun getHDKeysForSigning(account: DeterministicAccount,
+                            unspentOutputs: List<UnspentOutput>) =
+            bchDataStore.bchWallet!!.getHDKeysForSigning(account, unspentOutputs)
+
+    fun getAcc() =
+        bchDataStore.bchWallet!!.accounts
 }
