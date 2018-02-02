@@ -8,6 +8,7 @@ public class DynamicFeeCache {
 
     private FeeOptions btcFeeOptions;
     private FeeOptions ethFeeOptions;
+    private FeeOptions bchFeeOptions;
 
     public DynamicFeeCache() {
         // No-op
@@ -29,5 +30,14 @@ public class DynamicFeeCache {
 
     public void setEthFeeOptions(FeeOptions ethFeeOptions) {
         this.ethFeeOptions = ethFeeOptions;
+    }
+
+    @Nullable
+    public FeeOptions getBchFeeOptions() {
+        return bchFeeOptions;
+    }
+
+    public void setBchFeeOptions(FeeOptions bchFeeOptions) {
+        this.bchFeeOptions = bchFeeOptions;
     }
 }

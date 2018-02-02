@@ -20,6 +20,7 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.*
 
+@Suppress("IllegalIdentifier")
 class ReceiveCurrencyHelperTest {
 
     private lateinit var subject: ReceiveCurrencyHelper
@@ -48,7 +49,7 @@ class ReceiveCurrencyHelperTest {
                 .thenReturn(1)
         whenever(monetaryUtil.getBtcUnit(1)).thenReturn("mBTC")
         // Act
-        val value = subject.btcUnit
+        val value = subject.cryptoUnit
         // Assert
         value `should equal to` "mBTC"
     }
@@ -59,7 +60,7 @@ class ReceiveCurrencyHelperTest {
         // Arrange
         whenever(monetaryUtil.getEthUnit(0)).thenReturn("ETH")
         // Act
-        val value = subject.ethUnit
+        val value = subject.cryptoUnit
         // Assert
         value `should equal to` "ETH"
     }

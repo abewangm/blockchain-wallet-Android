@@ -363,7 +363,7 @@ class WalletAccountHelper(
                 null,
                 0,
                 ethAccount,
-                ethAccount?.address
+                ethAccount?.address!!
         )
     }
 

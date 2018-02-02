@@ -270,6 +270,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .doOnNext(btcFeeOptions -> dynamicFeeCache.setBtcFeeOptions(btcFeeOptions))
                 .flatMap(ignored -> feeDataManager.getEthFeeOptions())
                 .doOnNext(ethFeeOptions -> dynamicFeeCache.setEthFeeOptions(ethFeeOptions))
+                .flatMap(ignored -> feeDataManager.getBchFeeOptions())
+                .doOnNext(bchFeeOptions -> dynamicFeeCache.setBchFeeOptions(bchFeeOptions))
                 .compose(RxUtil.applySchedulersToObservable())
                 .flatMap(feeOptions -> exchangeRateFactory.updateTickers());
     }
