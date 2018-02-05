@@ -39,7 +39,7 @@ class MetadataManager(
         return initMetadataNodesObservable(null)
     }
 
-    fun generateAndSetupMetadata(secondPassword: String): Completable {
+    fun generateAndSetupMetadata(secondPassword: String?): Completable {
         payloadDataManager.generateNodes(secondPassword)
         return initMetadataNodesObservable(secondPassword)
     }

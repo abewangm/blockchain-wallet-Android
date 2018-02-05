@@ -29,6 +29,7 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
@@ -55,10 +56,13 @@ class WebSocketHandler extends WebSocketListener {
     private static final int STATUS_CODE_NORMAL_CLOSURE = 1000;
 
     private boolean stoppedDeliberately = false;
-    private String[] xpubs;
-    private String[] addrs;
+    private String[] xpubsBtc;
+    private String[] addrsBtc;
+    private String[] xpubsBch;
+    private String[] addrsBch;
     private String ethAccount;
     private EthDataManager ethDataManager;
+    private BchDataManager bchDataManager;
     private NotificationManager notificationManager;
     private String guid;
     private HashSet<String> subHashSet = new HashSet<>();
@@ -67,7 +71,7 @@ class WebSocketHandler extends WebSocketListener {
     private MonetaryUtil monetaryUtil;
     private Context context;
     private OkHttpClient okHttpClient;
-    private WebSocket btcConnection, ethConnection;
+    private WebSocket btcConnection, ethConnection, bchConnection;
     private boolean connected;
     private PayloadDataManager payloadDataManager;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -77,12 +81,15 @@ class WebSocketHandler extends WebSocketListener {
                             OkHttpClient okHttpClient,
                             PayloadDataManager payloadDataManager,
                             EthDataManager ethDataManager,
+                            BchDataManager bchDataManager,
                             NotificationManager notificationManager,
                             EnvironmentSettings environmentSettings,
                             MonetaryUtil monetaryUtil,
                             String guid,
-                            String[] xpubs,
-                            String[] addrs,
+                            String[] xpubsBtc,
+                            String[] addrsBtc,
+                            String[] xpubsBch,
+                            String[] addrsBch,
                             String ethAccount,
                             RxBus rxBus) {
 
@@ -90,36 +97,60 @@ class WebSocketHandler extends WebSocketListener {
         this.okHttpClient = okHttpClient;
         this.payloadDataManager = payloadDataManager;
         this.ethDataManager = ethDataManager;
+        this.bchDataManager = bchDataManager;
         this.notificationManager = notificationManager;
         this.environmentSettings = environmentSettings;
         this.monetaryUtil = monetaryUtil;
         this.guid = guid;
-        this.xpubs = xpubs;
-        this.addrs = addrs;
+        this.xpubsBtc = xpubsBtc;
+        this.addrsBtc = addrsBtc;
+        this.xpubsBch = xpubsBch;
+        this.addrsBch = addrsBch;
         this.ethAccount = ethAccount;
         this.rxBus = rxBus;
     }
 
-    public void subscribeToXpub(String xpub) {
+    ///////////////////////////////////////////////////////////////////////////
+    // Bitcoin
+    ///////////////////////////////////////////////////////////////////////////
+    public void subscribeToXpubBtc(String xpub) {
         if (xpub != null && !xpub.isEmpty()) {
             sendToBtcConnection("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
         }
     }
 
-    public void subscribeToAddress(String address) {
+    public void subscribeToAddressBtc(String address) {
         if (address != null && !address.isEmpty()) {
             sendToBtcConnection("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Ethereum
+    ///////////////////////////////////////////////////////////////////////////
     private void subscribeToEthAccount(String ethAddress) {
         if (ethAddress != null && !ethAddress.isEmpty()) {
             sendToEthConnection("{\"op\":\"account_sub\", \"account\":\"" + ethAddress + "\"}");
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Bitcoin Cash
+    ///////////////////////////////////////////////////////////////////////////
+    public void subscribeToXpubBch(String xpub) {
+        if (xpub != null && !xpub.isEmpty()) {
+            sendToBchConnection("{\"op\":\"xpub_sub\", \"xpub\":\"" + xpub + "\"}");
+        }
+    }
+
+    public void subscribeToAddressBch(String address) {
+        if (address != null && !address.isEmpty()) {
+            sendToBchConnection("{\"op\":\"addr_sub\", \"addr\":\"" + address + "\"}");
+        }
+    }
+
     /**
-     * Starts listening for updates to subscribed xpubs and addresses. Will attempt reconnection
+     * Starts listening for updates to subscribed xpubsBtc and addresses. Will attempt reconnection
      * every 5 seconds if it cannot connect immediately.
      */
     public void start() {
@@ -143,8 +174,8 @@ class WebSocketHandler extends WebSocketListener {
         if (isConnected()) {
             btcConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
             ethConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
-            btcConnection = null;
-            ethConnection = null;
+            bchConnection.close(STATUS_CODE_NORMAL_CLOSURE, "Websocket deliberately stopped");
+            btcConnection = ethConnection = bchConnection = null;
         }
     }
 
@@ -176,19 +207,32 @@ class WebSocketHandler extends WebSocketListener {
         }
     }
 
+    private void sendToBchConnection(String message) {
+        // Make sure each message is only sent once per socket lifetime
+        if (!subHashSet.contains(message)) {
+            try {
+                if (isConnected()) {
+                    bchConnection.send(message);
+                    subHashSet.add(message);
+                }
+            } catch (Exception e) {
+                Timber.e(e, "Send to BCH websocket failed");
+            }
+        }
+    }
+
     private void subscribe() {
         if (guid == null) {
             return;
         }
         sendToBtcConnection("{\"op\":\"wallet_sub\",\"guid\":\"" + guid + "\"}");
+        sendToBchConnection("{\"op\":\"wallet_sub\",\"guid\":\"" + guid + "\"}");
 
-        for (String xpub : xpubs) {
-            subscribeToXpub(xpub);
-        }
+        for (String xpub : xpubsBtc) subscribeToXpubBtc(xpub);
+        for (String addr : addrsBtc) subscribeToAddressBtc(addr);
 
-        for (String addr : addrs) {
-            subscribeToAddress(addr);
-        }
+        for (String xpub : xpubsBch) subscribeToXpubBch(xpub);
+        for (String addr : addrsBch) subscribeToAddressBch(addr);
 
         subscribeToEthAccount(ethAccount);
     }
@@ -198,7 +242,7 @@ class WebSocketHandler extends WebSocketListener {
             compositeDisposable.add(
                     getReconnectionObservable()
                             .subscribe(
-                                    value -> Timber.d("attemptReconnection: " + value),
+                                    value -> Timber.d("attemptReconnection: %s", value),
                                     throwable -> Timber.e(throwable, "Attempt reconnection failed")));
         }
     }
@@ -210,7 +254,7 @@ class WebSocketHandler extends WebSocketListener {
     }
 
     private boolean isConnected() {
-        return btcConnection != null && ethConnection != null && connected;
+        return btcConnection != null && ethConnection != null && bchConnection != null && connected;
     }
 
     private void updateBalancesAndTransactions() {
@@ -236,8 +280,14 @@ class WebSocketHandler extends WebSocketListener {
                 .addHeader("Origin", "https://blockchain.info")
                 .build();
 
+        Request bchRequest = new Request.Builder()
+                .url(environmentSettings.getBchWebsocketUrl())
+                .addHeader("Origin", "https://blockchain.info")
+                .build();
+
         btcConnection = okHttpClient.newWebSocket(btcRequest, this);
         ethConnection = okHttpClient.newWebSocket(ethRequest, this);
+        bchConnection = okHttpClient.newWebSocket(bchRequest, this);
     }
 
     @Override
@@ -251,11 +301,12 @@ class WebSocketHandler extends WebSocketListener {
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         super.onMessage(webSocket, text);
+        Timber.d(text);
         if (payloadDataManager.getWallet() != null) {
             JSONObject jsonObject;
             try {
                 jsonObject = new JSONObject(text);
-                attemptParseMessage(text, jsonObject);
+                attemptParseBtcMessage(text, jsonObject);
             } catch (JSONException je) {
                 Timber.e(je);
             }
@@ -325,7 +376,7 @@ class WebSocketHandler extends WebSocketListener {
 
     // TODO: 20/09/2017 Here we should probably parse this info into objects rather than doing it manually
     // TODO: 20/09/2017 Get a list of all possible payloads construct objects
-    private void attemptParseMessage(String message, JSONObject jsonObject) {
+    private void attemptParseBtcMessage(String message, JSONObject jsonObject) {
         try {
             String op = (String) jsonObject.get("op");
             if (op.equals("utx") && jsonObject.has("x")) {
@@ -428,7 +479,7 @@ class WebSocketHandler extends WebSocketListener {
                 attemptParseEthMessage(message);
             }
         } catch (Exception e) {
-            Timber.e(e, "attemptParseMessage");
+            Timber.e(e, "attemptParseBtcMessage");
         }
     }
 
@@ -455,6 +506,10 @@ class WebSocketHandler extends WebSocketListener {
     private Observable<CombinedEthModel> downloadEthTransactions() {
         return ethDataManager.fetchEthAddress()
                 .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    private Completable downloadBchTransactions() {
+        return bchDataManager.updateAllBalances();
     }
 
     private void triggerNotification(String title, String marquee, String text) {

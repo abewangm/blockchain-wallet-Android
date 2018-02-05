@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.fragment_swipe_to_receive.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.balance.BalanceFragment
@@ -26,7 +27,8 @@ import piuk.blockchain.android.util.helperfunctions.setOnPageChangeListener
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
-class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(), SwipeToReceiveView {
+class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(),
+    SwipeToReceiveView {
 
     @Inject lateinit var swipeToReceivePresenter: SwipeToReceivePresenter
 
@@ -63,7 +65,8 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
             viewpager_icons.currentItem = viewpager_icons.currentItem + 1
         }
 
-        val adapter = ImageAdapter(context!!,
+        val adapter = ImageAdapter(
+                context!!,
                 listOf(
                         R.drawable.vector_bitcoin,
                         R.drawable.vector_eth,
@@ -81,7 +84,10 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
                     when (it) {
                         0 -> imageview_left_arrow.invisible()
-                        1 -> listOf(imageview_left_arrow, imageview_right_arrow).forEach { it.visible() }
+                        1 -> listOf(
+                                imageview_left_arrow,
+                                imageview_right_arrow
+                        ).forEach { it.visible() }
                         2 -> imageview_right_arrow.invisible()
                     }
                 }
@@ -91,16 +97,26 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
         onViewReady()
     }
 
-    override fun displayReceiveAddress(address: String) {
+    override fun displayReceiveAddress(cryptoCurrency: CryptoCurrencies, address: String) {
         textview_address.text = address
 
         // Register address as the one we're interested in via broadcast
-        val intent = Intent(WebSocketService.ACTION_INTENT).apply { putExtra("address", address) }
-        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+        val intent = Intent(WebSocketService.ACTION_INTENT).apply {
+            when (cryptoCurrency) {
+                CryptoCurrencies.BTC -> putExtra(WebSocketService.EXTRA_BITCOIN_ADDRESS, address)
+                CryptoCurrencies.BCH -> putExtra(WebSocketService.EXTRA_BITCOIN_CASH_ADDRESS, address)
+                CryptoCurrencies.ETHER -> Unit
+            }
+        }
+        // No need to post ETH events as it should already have happened elsewhere
+        if (cryptoCurrency != CryptoCurrencies.ETHER) {
+            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+        }
 
         // Listen for corresponding broadcasts
         LocalBroadcastManager.getInstance(context!!).registerReceiver(
-                broadcastReceiver, IntentFilter(BalanceFragment.ACTION_INTENT))
+                broadcastReceiver, IntentFilter(BalanceFragment.ACTION_INTENT)
+        )
     }
 
     override fun displayReceiveAccount(accountName: String) {
@@ -160,7 +176,8 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
                     .setMessage(R.string.receive_address_to_clipboard)
                     .setCancelable(false)
                     .setPositiveButton(R.string.yes, { _, _ ->
-                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard =
+                                getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("Send address", textview_address.text)
                         toast(R.string.copied_to_clipboard)
                         clipboard.primaryClip = clip
@@ -195,6 +212,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
         override fun destroyItem(container: ViewGroup, position: Int, any: Any) {
             container.removeView(any as LinearLayout)
         }
+
     }
 
 }

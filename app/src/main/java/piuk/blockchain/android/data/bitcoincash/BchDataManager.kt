@@ -10,7 +10,6 @@ import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
-import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -22,7 +21,6 @@ import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
-import timber.log.Timber
 import java.math.BigInteger
 
 @Mockable
@@ -201,9 +199,9 @@ class BchDataManager(
         return result
     }
 
-    fun getLegacyAddressStringList() = payloadDataManager.legacyAddressStringList
+    fun getLegacyAddressStringList(): List<String> = payloadDataManager.legacyAddressStringList
 
-    fun getWatchOnlyAddressStringList() = payloadDataManager.watchOnlyAddressStringList
+    fun getWatchOnlyAddressStringList(): List<String> = payloadDataManager.watchOnlyAddressStringList
 
     fun updateAllBalances(): Completable {
         val legacyAddresses = payloadDataManager.legacyAddresses

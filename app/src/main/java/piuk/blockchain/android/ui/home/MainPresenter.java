@@ -215,9 +215,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                             getView().hideProgressDialog();
 
                             initPrompts(getView().getActivityContext());
-                    // TODO: 31/01/2018 This needs to be called after all balances are updated
-                    // Receive address chain on BCH is wrong, currently 0
-                            storeSwipeReceiveAddresses();
 
                             rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
 
@@ -252,17 +249,6 @@ public class MainPresenter extends BasePresenter<MainView> {
     private void logException(Throwable throwable) {
         Logging.INSTANCE.logException(throwable);
         getView().showMetadataNodeFailure();
-    }
-
-    private void storeSwipeReceiveAddresses() {
-        // Defer to background thread as deriving addresses is quite processor intensive
-        Completable.fromCallable(() -> {
-            swipeToReceiveHelper.updateAndStoreBitcoinAddresses();
-            swipeToReceiveHelper.updateAndStoreBitcoinCashAddresses();
-            return Void.TYPE;
-        }).subscribeOn(Schedulers.computation())
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .subscribe(() -> { /* No-op*/ }, Timber::e);
     }
 
     private Observable<Map<String, PriceDatum>> feesCompletable() {
@@ -435,10 +421,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
                     .subscribe(() -> appUtil.restartApp(), Throwable::printStackTrace);
         }
-    }
-
-    CryptoCurrencies getCurrentCryptoCurrency() {
-        return currencyState.getCryptoCurrency();
     }
 
     void setCryptoCurrency(CryptoCurrencies cryptoCurrency) {

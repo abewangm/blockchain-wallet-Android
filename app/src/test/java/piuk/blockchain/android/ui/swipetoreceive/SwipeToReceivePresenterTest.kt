@@ -91,7 +91,7 @@ class SwipeToReceivePresenterTest {
         verify(activity).displayReceiveAccount("Account")
         verify(activity).displayQrCode(bitmap)
         verify(activity).setUiState(UiState.CONTENT)
-        verify(activity).displayReceiveAddress("addr0")
+        verify(activity).displayReceiveAddress(CryptoCurrencies.BTC, "addr0")
         verifyNoMoreInteractions(activity)
     }
 
@@ -119,7 +119,7 @@ class SwipeToReceivePresenterTest {
         verify(activity).displayReceiveAccount("Account")
         verify(activity).displayQrCode(bitmap)
         verify(activity).setUiState(UiState.CONTENT)
-        verify(activity).displayReceiveAddress("addr0")
+        verify(activity).displayReceiveAddress(CryptoCurrencies.ETHER, "addr0")
         verifyNoMoreInteractions(activity)
     }
 
@@ -147,7 +147,7 @@ class SwipeToReceivePresenterTest {
         verify(activity).displayReceiveAccount("Account")
         verify(activity).displayQrCode(bitmap)
         verify(activity).setUiState(UiState.CONTENT)
-        verify(activity).displayReceiveAddress("addr0")
+        verify(activity).displayReceiveAddress(CryptoCurrencies.BCH, "addr0")
         verifyNoMoreInteractions(activity)
     }
 
