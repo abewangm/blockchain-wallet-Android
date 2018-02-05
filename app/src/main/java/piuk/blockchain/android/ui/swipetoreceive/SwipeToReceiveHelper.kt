@@ -4,7 +4,6 @@ import info.blockchain.api.data.Balance
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.bitcoinj.core.Address
-import org.bitcoinj.core.CashAddress
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
@@ -128,15 +127,10 @@ class SwipeToReceiveHelper(
                     for ((address, value) in map) {
                         val balance = value.finalBalance
                         if (balance.compareTo(BigInteger.ZERO) == 0) {
-                            val base58 = Address.fromBase58(
+                            return@map Address.fromBase58(
                                     environmentSettings.bitcoinCashNetworkParameters,
                                     address
-                            )
-                            return@map CashAddress.encode(
-                                    environmentSettings.bitcoinCashNetworkParameters.segwitAddressPrefix,
-                                    CashAddress.P2PKH,
-                                    base58.hash160
-                            )
+                            ).toCashAddress()
                         }
                     }
                     return@map ""
