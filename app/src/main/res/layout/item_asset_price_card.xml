@@ -86,10 +86,12 @@
             app:layout_constraintTop_toBottomOf="@id/textview_price">
 
             <ImageView
+                android:id="@+id/imageview_chart_icon"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:contentDescription="@string/dashboard_see_charts"
-                app:srcCompat="@drawable/vector_chart" />
+                android:tint="@color/primary_blue_accent"
+                tools:src="@drawable/vector_bitcoin" />
 
             <TextView
                 android:layout_width="wrap_content"

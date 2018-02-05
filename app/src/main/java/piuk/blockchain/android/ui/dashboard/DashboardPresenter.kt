@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.dashboard
 
+import android.support.annotation.DrawableRes
 import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
 import org.web3j.utils.Convert
@@ -94,15 +95,18 @@ class DashboardPresenter @Inject constructor(
                             val list = listOf(
                                     AssetPriceCardState.Data(
                                             getBtcPriceString(),
-                                            CryptoCurrencies.BTC
+                                            CryptoCurrencies.BTC,
+                                            R.drawable.vector_bitcoin
                                     ),
                                     AssetPriceCardState.Data(
                                             getEthPriceString(),
-                                            CryptoCurrencies.ETHER
+                                            CryptoCurrencies.ETHER,
+                                            R.drawable.vector_eth
                                     ),
                                     AssetPriceCardState.Data(
                                             getBchPriceString(),
-                                            CryptoCurrencies.BCH
+                                            CryptoCurrencies.BCH,
+                                            R.drawable.vector_bitcoin_cash
                                     )
                             )
 
@@ -455,7 +459,8 @@ sealed class AssetPriceCardState(val currency: CryptoCurrencies) {
 
     data class Data(
             val priceString: String,
-            val cryptoCurrency: CryptoCurrencies
+            val cryptoCurrency: CryptoCurrencies,
+            @DrawableRes val icon: Int
     ) : AssetPriceCardState(cryptoCurrency)
 
     class Loading(val cryptoCurrency: CryptoCurrencies) : AssetPriceCardState(cryptoCurrency)
