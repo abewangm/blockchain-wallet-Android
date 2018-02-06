@@ -119,10 +119,6 @@ class ShapeShiftPresenter @Inject constructor(
                             pollForStatus(trades)
                             val sortedTrades = trades.sortedWith(compareBy<Trade> { it.timestamp })
                                     .reversed()
-                                    // TODO: Remove me when BCH added otherwise you won't see any transactions
-                                    .filterNot {
-                                        it.quote?.pair?.contains("bch", ignoreCase = true) ?: false
-                                    }
                             view.onStateUpdated(ShapeShiftState.Data(sortedTrades))
                         }
                     }

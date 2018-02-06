@@ -4,13 +4,12 @@ import info.blockchain.api.data.Balance
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.bitcoinj.core.Address
-import org.bitcoinj.core.CashAddress
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
@@ -25,7 +24,7 @@ class SwipeToReceiveHelper(
         private val ethDataManager: EthDataManager,
         private val bchDataManager: BchDataManager,
         private val stringUtils: StringUtils,
-        private val networkParameterUtils: NetworkParameterUtils
+        private val environmentSettings: EnvironmentSettings
 ) {
 
     /**
@@ -128,15 +127,10 @@ class SwipeToReceiveHelper(
                     for ((address, value) in map) {
                         val balance = value.finalBalance
                         if (balance.compareTo(BigInteger.ZERO) == 0) {
-                            val base58 = Address.fromBase58(
-                                    networkParameterUtils.bitcoinCashParams,
+                            return@map Address.fromBase58(
+                                    environmentSettings.bitcoinCashNetworkParameters,
                                     address
-                            )
-                            return@map CashAddress.encode(
-                                    "bitcoincash",
-                                    CashAddress.P2PKH,
-                                    base58.hash160
-                            )
+                            ).toCashAddress()
                         }
                     }
                     return@map ""

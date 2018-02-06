@@ -10,7 +10,6 @@ import org.amshove.kluent.`should equal`
 import org.bitcoinj.params.BitcoinCashMainNetParams
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyList
@@ -21,6 +20,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import piuk.blockchain.android.R
 import piuk.blockchain.android.RxTest
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -29,7 +29,6 @@ import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.Companion.
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.Companion.KEY_SWIPE_RECEIVE_BCH_ACCOUNT_NAME
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.Companion.KEY_SWIPE_RECEIVE_BCH_ADDRESSES
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper.Companion.KEY_SWIPE_RECEIVE_ETH_ADDRESS
-import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import java.math.BigInteger
@@ -43,14 +42,15 @@ class SwipeToReceiveHelperTest : RxTest() {
     private val stringUtils: StringUtils = mock()
     private val ethDataManager: EthDataManager = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
     private val bchDataManager: BchDataManager = mock()
-    private val networkParameterUtils: NetworkParameterUtils = mock()
+    private val environmentSettings: EnvironmentSettings = mock()
 
     @Before
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
 
-        whenever(networkParameterUtils.bitcoinCashParams).thenReturn(BitcoinCashMainNetParams.get())
+        whenever(environmentSettings.bitcoinCashNetworkParameters)
+                .thenReturn(BitcoinCashMainNetParams.get())
 
         subject = SwipeToReceiveHelper(
                 payloadDataManager,
@@ -58,7 +58,7 @@ class SwipeToReceiveHelperTest : RxTest() {
                 ethDataManager,
                 bchDataManager,
                 stringUtils,
-                networkParameterUtils
+                environmentSettings
         )
     }
 
@@ -82,7 +82,6 @@ class SwipeToReceiveHelperTest : RxTest() {
         verify(prefsUtil).setValue(KEY_SWIPE_RECEIVE_ADDRESSES, "address,address,address,address,address,")
     }
 
-    @Ignore("Currently our implementation of BECH32 for BCH fails")
     @Test
     @Throws(Exception::class)
     fun updateAndStoreBitcoinCashAddresses() {
@@ -94,7 +93,7 @@ class SwipeToReceiveHelperTest : RxTest() {
         whenever(bchDataManager.getDefaultAccountPosition()).thenReturn(0)
         whenever(mockAccount.label).thenReturn("BCH Account")
         whenever(bchDataManager.getReceiveAddressAtPosition(eq(0), anyInt()))
-                .thenReturn("bitcoincash:qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a")
+                .thenReturn("1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu")
         // Act
         subject.updateAndStoreBitcoinCashAddresses()
         // Assert
@@ -129,11 +128,11 @@ class SwipeToReceiveHelperTest : RxTest() {
         val balance2 = Balance().apply { finalBalance = BigInteger.valueOf(-10L) }
         val balance3 = Balance().apply { finalBalance = BigInteger.valueOf(0L) }
         val balance4 = Balance().apply { finalBalance = BigInteger.valueOf(0L) }
-        map.put("addr0", balance0)
-        map.put("addr1", balance1)
-        map.put("addr2", balance2)
-        map.put("addr3", balance3)
-        map.put("addr4", balance4)
+        map["addr0"] = balance0
+        map["addr1"] = balance1
+        map["addr2"] = balance2
+        map["addr3"] = balance3
+        map["addr4"] = balance4
         whenever(payloadDataManager.getBalanceOfAddresses(anyList()))
                 .thenReturn(Observable.just(map))
         whenever(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, ""))
@@ -156,11 +155,11 @@ class SwipeToReceiveHelperTest : RxTest() {
         val balance2 = Balance().apply { finalBalance = BigInteger.valueOf(-10L) }
         val balance3 = Balance().apply { finalBalance = BigInteger.valueOf(1L) }
         val balance4 = Balance().apply { finalBalance = BigInteger.valueOf(1_000_000_000_000L) }
-        map.put("addr0", balance0)
-        map.put("addr1", balance1)
-        map.put("addr2", balance2)
-        map.put("addr3", balance3)
-        map.put("addr4", balance4)
+        map["addr0"] = balance0
+        map["addr1"] = balance1
+        map["addr2"] = balance2
+        map["addr3"] = balance3
+        map["addr4"] = balance4
         whenever(payloadDataManager.getBalanceOfAddresses(anyList()))
                 .thenReturn(Observable.just(map))
         whenever(prefsUtil.getValue(KEY_SWIPE_RECEIVE_ADDRESSES, ""))
@@ -173,7 +172,6 @@ class SwipeToReceiveHelperTest : RxTest() {
         testObserver.assertValue("")
     }
 
-    @Ignore("Currently our implementation of BECH32 for BCH fails")
     @Test
     @Throws(Exception::class)
     fun `getNextAvailableBCHAddressSingle Valid`() {
@@ -184,24 +182,23 @@ class SwipeToReceiveHelperTest : RxTest() {
         val balance2 = Balance().apply { finalBalance = BigInteger.valueOf(-10L) }
         val balance3 = Balance().apply { finalBalance = BigInteger.valueOf(0L) }
         val balance4 = Balance().apply { finalBalance = BigInteger.valueOf(0L) }
-        map.put("1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu", balance0)
-        map.put("1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR", balance1)
-        map.put("16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb", balance2)
-        map.put("3CWFddi6m4ndiGyKqzYvsFYagqDLPVMTzC", balance3)
-        map.put("3LDsS579y7sruadqu11beEJoTjdFiFCdX4", balance4)
+        map["1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu"] = balance0
+        map["1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR"] = balance1
+        map["16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb"] = balance2
+        map["1DJk1Feuabguw5CW9CGQRQ3U1pp5Pbn3HK"] = balance3
+        map["1ATy3ktyaYjzZZQQnhvPsuBVheUDYcUP7V"] = balance4
         whenever(payloadDataManager.getBalanceOfBchAddresses(anyList()))
                 .thenReturn(Observable.just(map))
         whenever(prefsUtil.getValue(KEY_SWIPE_RECEIVE_BCH_ADDRESSES, ""))
-                .thenReturn("1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu,1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR,16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb,3CWFddi6m4ndiGyKqzYvsFYagqDLPVMTzC,3LDsS579y7sruadqu11beEJoTjdFiFCdX4")
+                .thenReturn("1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu,1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR,16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb,1DJk1Feuabguw5CW9CGQRQ3U1pp5Pbn3HK,1ATy3ktyaYjzZZQQnhvPsuBVheUDYcUP7V")
         // Act
         val testObserver = subject.getNextAvailableBitcoinCashAddressSingle().test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.assertValue("bitcoincash:ppm2qsznhks23z7629mms6s4cwef74vcwvn0h829pq")
+        testObserver.assertValue("bitcoincash:qzr0c757kuat5zh2nradx0wd5edz33avqqpae2pxhv")
     }
 
-    @Ignore("Currently our implementation of BECH32 for BCH fails")
     @Test
     @Throws(Exception::class)
     fun `getNextAvailableBCHAddressSingle All Used`() {
@@ -212,15 +209,15 @@ class SwipeToReceiveHelperTest : RxTest() {
         val balance2 = Balance().apply { finalBalance = BigInteger.valueOf(-10L) }
         val balance3 = Balance().apply { finalBalance = BigInteger.valueOf(1L) }
         val balance4 = Balance().apply { finalBalance = BigInteger.valueOf(1_000_000_000_000L) }
-        map.put("1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu", balance0)
-        map.put("1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR", balance1)
-        map.put("16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb", balance2)
-        map.put("3CWFddi6m4ndiGyKqzYvsFYagqDLPVMTzC", balance3)
-        map.put("3LDsS579y7sruadqu11beEJoTjdFiFCdX4", balance4)
+        map["1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu"] = balance0
+        map["1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR"] = balance1
+        map["16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb"] = balance2
+        map["1DJk1Feuabguw5CW9CGQRQ3U1pp5Pbn3HK"] = balance3
+        map["1ATy3ktyaYjzZZQQnhvPsuBVheUDYcUP7V"] = balance4
         whenever(payloadDataManager.getBalanceOfBchAddresses(anyList()))
                 .thenReturn(Observable.just(map))
         whenever(prefsUtil.getValue(KEY_SWIPE_RECEIVE_BCH_ADDRESSES, ""))
-                .thenReturn("1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu,1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR,16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb,3CWFddi6m4ndiGyKqzYvsFYagqDLPVMTzC,3LDsS579y7sruadqu11beEJoTjdFiFCdX4")
+                .thenReturn("1BpEi6DfDAUFd7GtittLSdBeYJvcoaVggu,1KXrWXciRDZUpQwQmuM1DbwsKDLYAYsVLR,16w1D5WRVKJuZUsSRzdLp9w3YGcgoxDXb,1DJk1Feuabguw5CW9CGQRQ3U1pp5Pbn3HK,1ATy3ktyaYjzZZQQnhvPsuBVheUDYcUP7V")
         // Act
         val testObserver = subject.getNextAvailableBitcoinCashAddressSingle().test()
         // Assert

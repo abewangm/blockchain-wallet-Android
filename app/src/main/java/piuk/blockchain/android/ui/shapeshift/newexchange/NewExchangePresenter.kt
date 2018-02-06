@@ -586,9 +586,9 @@ class NewExchangePresenter @Inject constructor(
                 .doOnSubscribe { feeOptions = dynamicFeeCache.ethFeeOptions!! }
                 .doOnNext { dynamicFeeCache.ethFeeOptions = it }
 
-        CryptoCurrencies.BCH -> feeDataManager.btcFeeOptions
-                .doOnSubscribe { feeOptions = dynamicFeeCache.btcFeeOptions!! }
-                .doOnNext { dynamicFeeCache.btcFeeOptions = it }
+        CryptoCurrencies.BCH -> feeDataManager.bchFeeOptions
+                .doOnSubscribe { feeOptions = dynamicFeeCache.bchFeeOptions!! }
+                .doOnNext { dynamicFeeCache.bchFeeOptions = it }
     }
 
     private fun getMarketInfoObservable(
@@ -657,10 +657,9 @@ class NewExchangePresenter @Inject constructor(
                                                         ),
                                                         feePerKb = BigInteger.valueOf(
                                                                 when (fromCurrency) {
-                                                                    CryptoCurrencies.BTC -> feeOptions?.priorityFee
+                                                                    CryptoCurrencies.BTC, CryptoCurrencies.BCH -> feeOptions?.priorityFee
                                                                             ?: 0 * 1000L
                                                                     CryptoCurrencies.ETHER -> 0L
-                                                                    CryptoCurrencies.BCH -> walletOptionsDataManager.getBchFee() * 1000L
                                                                 }
                                                         )
                                                 )
@@ -701,7 +700,7 @@ class NewExchangePresenter @Inject constructor(
         CryptoCurrencies.ETHER -> getFeeForEthPaymentObservable()
         CryptoCurrencies.BCH -> getFeeForBchPaymentObservable(
                 amountToSend,
-                BigInteger.valueOf(walletOptionsDataManager.getBchFee() * 1000L)
+                BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
         )
     }.doOnError { view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR) }
             .onErrorReturn { BigInteger.ZERO }
@@ -859,7 +858,7 @@ class NewExchangePresenter @Inject constructor(
                     .map { unspentOutputs ->
                         val sweepBundle = sendDataManager.getMaximumAvailable(
                                 unspentOutputs,
-                                BigInteger.valueOf(walletOptionsDataManager.getBchFee() * 1000L)
+                                BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
                         )
                         val sweepableAmount =
                                 BigDecimal(sweepBundle.left).divide(BigDecimal.valueOf(1e8))

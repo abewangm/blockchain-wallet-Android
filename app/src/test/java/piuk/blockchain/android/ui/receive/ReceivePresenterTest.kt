@@ -222,7 +222,8 @@ class ReceivePresenterTest {
         }
         whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
                 .thenReturn(Observable.empty())
-        whenever(environmentSettings.bitcoinNetworkParameters).thenReturn(BitcoinMainNetParams.get())
+        whenever(environmentSettings.bitcoinCashNetworkParameters)
+                .thenReturn(BitcoinCashMainNetParams.get())
         // Act
         subject.onLegacyBchAddressSelected(legacyAddress)
         // Assert
@@ -251,7 +252,8 @@ class ReceivePresenterTest {
         }
         whenever(qrCodeDataManager.generateQrCode(anyString(), anyInt()))
                 .thenReturn(Observable.empty())
-        whenever(environmentSettings.bitcoinNetworkParameters).thenReturn(BitcoinMainNetParams.get())
+        whenever(environmentSettings.bitcoinCashNetworkParameters)
+                .thenReturn(BitcoinCashMainNetParams.get())
         // Act
         subject.onLegacyBchAddressSelected(legacyAddress)
         // Assert
@@ -386,6 +388,8 @@ class ReceivePresenterTest {
                 .thenReturn(Observable.just(emptyList()))
         whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BCH)
+        whenever(environmentSettings.bitcoinCashNetworkParameters)
+                .thenReturn(BitcoinCashMainNetParams.get())
         // Act
         subject.onBchAccountSelected(account)
         // Assert
@@ -435,6 +439,8 @@ class ReceivePresenterTest {
                 .thenReturn(Observable.just(emptyList()))
         whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BCH)
+        whenever(environmentSettings.bitcoinCashNetworkParameters)
+                .thenReturn(BitcoinCashMainNetParams.get())
         // Act
         subject.onSelectBchDefault()
         // Assert

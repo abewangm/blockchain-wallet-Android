@@ -264,11 +264,11 @@ class MonetaryUtil(unit: Int) {
         const val MILLI_BTC = 1
         const val MICRO_BTC = 2
 
-        private val MILLI_DOUBLE = 1000.0
-        private val MICRO_DOUBLE = 1000000.0
-        private val MILLI_LONG = 1000L
-        private val MICRO_LONG = 1000000L
-        private val BTC_DEC = 1e8
+        private const val MILLI_DOUBLE = 1000.0
+        private const val MICRO_DOUBLE = 1000000.0
+        private const val MILLI_LONG = 1000L
+        private const val MICRO_LONG = 1000000L
+        private const val BTC_DEC = 1e8
         private val BTC_UNITS = arrayOf("BTC", "mBTC", "bits")
 
         /**

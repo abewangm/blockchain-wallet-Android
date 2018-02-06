@@ -125,6 +125,7 @@ class TradesDisplayableDelegate<in T>(
             val crypto = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
                 CryptoCurrencies.BTC.symbol -> btcFormat.format(cryptoAmount)
+                CryptoCurrencies.BCH.symbol -> btcFormat.format(cryptoAmount)
                 else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
 
