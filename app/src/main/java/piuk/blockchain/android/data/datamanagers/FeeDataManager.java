@@ -14,7 +14,7 @@ public class FeeDataManager {
     private final RxPinning rxPinning;
     private FeeApi feeApi;
 
-    //Bitcoin cash fees are temporarily getched from wallet-options until an endpoint can be provided
+    //Bitcoin cash fees are temporarily fetched from wallet-options until an endpoint can be provided
     private WalletOptionsDataManager walletOptionsDataManager;
 
     public FeeDataManager(FeeApi feeApi, WalletOptionsDataManager walletOptionsDataManager, RxBus rxBus) {
