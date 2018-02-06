@@ -68,7 +68,6 @@ class DashboardPresenter @Inject constructor(
 
     override fun onViewReady() {
         view.notifyItemAdded(displayList, 0)
-        updateAllBalances()
         updatePrices()
 
         // Triggers various updates to the page once all metadata is loaded
@@ -145,6 +144,11 @@ class DashboardPresenter @Inject constructor(
         ethDataManager.fetchEthAddress()
                 .flatMapCompletable { ethAddressResponse ->
                     payloadDataManager.updateAllBalances()
+                            .andThen(
+                                    payloadDataManager.updateAllTransactions()
+                                            .doOnError { Timber.e(it) }
+                                            .onErrorComplete()
+                            )
                             .andThen(
                                     bchDataManager.updateAllBalances()
                                             .doOnError { Timber.e(it) }
@@ -339,7 +343,10 @@ class DashboardPresenter @Inject constructor(
         bchDataManager.getWalletTransactions(50, 0)
                 .flatMapCompletable { getSwipeToReceiveCompletable() }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .subscribe({ /* No-op*/ }, { Timber.e(it) })
+                .subscribe(
+                        { view.startWebsocketService() },
+                        { Timber.e(it) }
+                )
     }
 
     private fun getSwipeToReceiveCompletable(): Completable =

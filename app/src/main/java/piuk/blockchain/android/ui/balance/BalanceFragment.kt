@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.include_no_transaction_message.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.adapter.AccountsAdapter
@@ -35,7 +36,6 @@ import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.*
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
-import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -341,7 +341,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     companion object {
 
-        const val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
+        const val ACTION_INTENT = WebSocketService.ACTION_INTENT
         const val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
         const val KEY_TRANSACTION_HASH = "transaction_hash"
 

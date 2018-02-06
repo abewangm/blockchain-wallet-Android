@@ -16,10 +16,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.fragment_swipe_to_receive.*
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.util.extensions.*
@@ -30,6 +28,7 @@ import javax.inject.Inject
 class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(),
     SwipeToReceiveView {
 
+    @Suppress("MemberVisibilityCanBePrivate")
     @Inject lateinit var swipeToReceivePresenter: SwipeToReceivePresenter
 
     init {
@@ -38,7 +37,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == BalanceFragment.ACTION_INTENT) {
+            if (intent.action == WebSocketService.ACTION_INTENT) {
                 // Update UI with new Address + QR
                 presenter?.currencyPosition = presenter?.currencyPosition ?: 0
             }
@@ -97,34 +96,16 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
         onViewReady()
     }
 
-    override fun displayReceiveAddress(cryptoCurrency: CryptoCurrencies, address: String) {
+    override fun displayReceiveAddress(address: String) {
         textview_address.text = address
-
-        // Register address as the one we're interested in via broadcast
-        val intent = Intent(WebSocketService.ACTION_INTENT).apply {
-            when (cryptoCurrency) {
-                CryptoCurrencies.BTC -> putExtra(WebSocketService.EXTRA_BITCOIN_ADDRESS, address)
-                CryptoCurrencies.BCH -> putExtra(WebSocketService.EXTRA_BITCOIN_CASH_ADDRESS, address)
-                CryptoCurrencies.ETHER -> Unit
-            }
-        }
-        // No need to post ETH events as it should already have happened elsewhere
-        if (cryptoCurrency != CryptoCurrencies.ETHER) {
-            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
-        }
-
-        // Listen for corresponding broadcasts
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(
-                broadcastReceiver, IntentFilter(BalanceFragment.ACTION_INTENT)
-        )
     }
 
     override fun displayReceiveAccount(accountName: String) {
-        textview_account?.text = accountName
+        textview_account.text = accountName
     }
 
     override fun displayCoinType(requestString: String) {
-        textview_request_currency?.text = requestString
+        textview_request_currency.text = requestString
     }
 
     override fun setUiState(uiState: Int) {
@@ -142,7 +123,19 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     override fun onStop() {
         super.onStop()
-        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
+        context?.run {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        context?.run {
+            LocalBroadcastManager.getInstance(this).registerReceiver(
+                    broadcastReceiver,
+                    IntentFilter(WebSocketService.ACTION_INTENT)
+            )
+        }
     }
 
     override fun createPresenter() = swipeToReceivePresenter

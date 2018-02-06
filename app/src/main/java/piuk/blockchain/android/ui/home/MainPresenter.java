@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.home;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.api.WalletApi;
@@ -17,15 +16,12 @@ import java.util.NoSuchElementException;
 
 import javax.inject.Inject;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthService;
-import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactsEvent;
@@ -43,22 +39,16 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
-import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
-import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.StringUtils;
 import timber.log.Timber;
 
 public class MainPresenter extends BasePresenter<MainView> {
 
-    private OSUtil osUtil;
-    private SwipeToReceiveHelper swipeToReceiveHelper;
     private Observable<NotificationPayload> notificationObservable;
     private PrefsUtil prefs;
     private AppUtil appUtil;
@@ -67,7 +57,6 @@ public class MainPresenter extends BasePresenter<MainView> {
     private PayloadDataManager payloadDataManager;
     private ContactsDataManager contactsDataManager;
     private Context applicationContext;
-    private StringUtils stringUtils;
     private SettingsDataManager settingsDataManager;
     private BuyDataManager buyDataManager;
     private DynamicFeeCache dynamicFeeCache;
@@ -80,7 +69,6 @@ public class MainPresenter extends BasePresenter<MainView> {
     private CurrencyState currencyState;
     private WalletOptionsDataManager walletOptionsDataManager;
     private MetadataManager metadataManager;
-    private BchDataManager bchDataManager;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -90,7 +78,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                   PayloadDataManager payloadDataManager,
                   ContactsDataManager contactsDataManager,
                   Context applicationContext,
-                  StringUtils stringUtils,
                   SettingsDataManager settingsDataManager,
                   BuyDataManager buyDataManager,
                   DynamicFeeCache dynamicFeeCache,
@@ -100,11 +87,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                   EnvironmentSettings environmentSettings,
                   PromptManager promptManager,
                   EthDataManager ethDataManager,
-                  SwipeToReceiveHelper swipeToReceiveHelper,
                   CurrencyState currencyState,
                   WalletOptionsDataManager walletOptionsDataManager,
-                  MetadataManager metadataManager,
-                  BchDataManager bchDataManager) {
+                  MetadataManager metadataManager) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -113,7 +98,6 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.payloadDataManager = payloadDataManager;
         this.contactsDataManager = contactsDataManager;
         this.applicationContext = applicationContext;
-        this.stringUtils = stringUtils;
         this.settingsDataManager = settingsDataManager;
         this.buyDataManager = buyDataManager;
         this.dynamicFeeCache = dynamicFeeCache;
@@ -123,12 +107,9 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.environmentSettings = environmentSettings;
         this.promptManager = promptManager;
         this.ethDataManager = ethDataManager;
-        this.swipeToReceiveHelper = swipeToReceiveHelper;
         this.currencyState = currencyState;
         this.walletOptionsDataManager = walletOptionsDataManager;
         this.metadataManager = metadataManager;
-        this.bchDataManager = bchDataManager;
-        osUtil = new OSUtil(applicationContext);
     }
 
     private void initPrompts(Context context) {
@@ -153,8 +134,6 @@ public class MainPresenter extends BasePresenter<MainView> {
             // activity, which handles all login/auth/corruption scenarios itself
             getView().kickToLauncherPage();
         } else {
-
-            startWebSocketService();
             logEvents();
 
             getView().showProgressDialog(R.string.please_wait);
@@ -320,19 +299,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                         .subscribe(
                                 o -> { /* No-op */ },
                                 Throwable::printStackTrace));
-    }
-
-    private void startWebSocketService() {
-        Intent intent = new Intent(applicationContext, WebSocketService.class);
-
-        if (!osUtil.isServiceRunning(WebSocketService.class)) {
-            applicationContext.startService(intent);
-        } else {
-            // Restarting this here ensures re-subscription after app restart - the service may remain
-            // running, but the subscription to the WebSocket won't be restarted unless onCreate called
-            applicationContext.stopService(intent);
-            applicationContext.startService(intent);
-        }
     }
 
     private void logEvents() {

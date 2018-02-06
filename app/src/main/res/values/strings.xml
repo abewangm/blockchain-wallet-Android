@@ -184,6 +184,7 @@
 
     <string name="received_bitcoin">Received Bitcoin</string>
     <string name="received_ethereum">Received Ether</string>
+    <string name="received_bitcoin_cash">Received Bitcoin Cash</string>
 
     <string-array name="mnemonic_word_requests">
         <item>first word</item>

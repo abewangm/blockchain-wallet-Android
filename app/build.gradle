@@ -205,7 +205,9 @@ dependencies {
     implementation libraries.rxAndroid
     implementation libraries.rxBinding
     implementation libraries.rxFingerprint
-    implementation libraries.retrofit
+    implementation (libraries.retrofit) {
+        exclude module: 'okhttp'
+    }
     implementation libraries.retrofitJacksonConverter
     implementation libraries.retrofitRxJavaAdapter
     implementation libraries.okHttp
