@@ -381,6 +381,11 @@ class SendPresenter @Inject constructor(
             //TODO(accountObject should rather contain keys for signing, not metadata)
             val account = pendingTransaction.sendingObject.accountObject as GenericMetadataAccount
 
+            if (payloadDataManager.isDoubleEncrypted) {
+                payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+                bchDataManager.decryptWatchOnlyWallet(payloadDataManager.mnemonic)
+            }
+
             val hdAccountList = bchDataManager.getAcc()
             var acc = hdAccountList.find { it.node.serializePubB58(environmentSettings.bitcoinCashNetworkParameters) == account.xpub }
 
@@ -388,10 +393,6 @@ class SendPresenter @Inject constructor(
                 throw HDWalletException("No matching private key found for ${account.xpub}")
             }
 
-            if (payloadDataManager.isDoubleEncrypted) {
-                payloadDataManager.decryptHDWallet(verifiedSecondPassword)
-                bchDataManager.decryptWatchOnlyWallet(payloadDataManager.mnemonic)
-            }
             Observable.just(bchDataManager.getHDKeysForSigning(acc, pendingTransaction.unspentOutputBundle.spendableOutputs))
         } else {
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
