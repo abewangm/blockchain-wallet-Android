@@ -39,6 +39,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.databinding.ActivityAccountsBinding;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.account.adapter.AccountAdapter;
@@ -100,6 +101,12 @@ public class AccountActivity extends BaseMvpActivity<AccountView, AccountPresent
         binding = DataBindingUtil.setContentView(this, R.layout.activity_accounts);
 
         setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.addresses);
+        binding.currencyHeader.hideEthereum();
+        binding.currencyHeader.setCurrentlySelectedCurrency(CryptoCurrencies.BTC);
+        binding.currencyHeader.setSelectionListener(cryptoCurrencies -> {
+            // TODO: 06/02/2018
+            return null;
+        });
 
         binding.accountsList.setLayoutManager(new AccountLayoutManager());
         binding.accountsList.setHasFixedSize(true);
@@ -155,7 +162,7 @@ public class AccountActivity extends BaseMvpActivity<AccountView, AccountPresent
     @Thunk
     void importAddress() {
         if (ContextCompat.checkSelfPermission(AccountActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            PermissionUtil.requestCameraPermissionFromActivity(binding.mainLayout, AccountActivity.this);
+            PermissionUtil.requestCameraPermissionFromActivity(binding.getRoot(), AccountActivity.this);
         } else {
             onScanButtonClicked();
         }
