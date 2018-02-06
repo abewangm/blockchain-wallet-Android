@@ -9,7 +9,6 @@ import info.blockchain.api.data.UnspentOutputs
 import info.blockchain.wallet.api.WalletApi
 import info.blockchain.wallet.api.data.FeeOptions
 import info.blockchain.wallet.coin.GenericMetadataAccount
-import info.blockchain.wallet.crypto.DeterministicAccount
 import info.blockchain.wallet.ethereum.EthereumAccount
 import info.blockchain.wallet.exceptions.HDWalletException
 import info.blockchain.wallet.multiaddress.TransactionSummary

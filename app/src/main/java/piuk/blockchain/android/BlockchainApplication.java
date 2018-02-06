@@ -15,11 +15,11 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 
-import org.bitcoinj.core.NetworkParameters;
-
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.Environment;
+
+import org.bitcoinj.core.NetworkParameters;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 

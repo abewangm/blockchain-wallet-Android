@@ -199,6 +199,8 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                 else -> throw IllegalArgumentException("Unsupported class type $clazz")
             }
 
+            clearError()
+            clearEditTexts()
         }
     }
 
@@ -285,9 +287,11 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.shapeshift_no_funds_title)
                 .setMessage(R.string.shapeshift_no_funds_message)
-                .setCancelable(false)
-                // TODO: Add BCH button and update Strings
-                .setNeutralButton(android.R.string.cancel) { _, _ -> finish() }
+                .setCancelable(true)
+                .setNeutralButton(R.string.onboarding_get_bitcoin_cash) { _, _ ->
+                    LocalBroadcastManager.getInstance(this)
+                            .sendBroadcastSync(Intent(MainActivity.ACTION_RECEIVE_BCH))
+                }
                 .setNegativeButton(R.string.onboarding_get_bitcoin) { _, _ ->
                     if (canBuy) {
                         LocalBroadcastManager.getInstance(this)
@@ -303,6 +307,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                             .sendBroadcastSync(Intent(MainActivity.ACTION_RECEIVE_ETH))
                     finish()
                 }
+                .setOnCancelListener { finish() }
                 .show()
     }
 

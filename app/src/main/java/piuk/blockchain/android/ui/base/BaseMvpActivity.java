@@ -44,6 +44,7 @@ public abstract class BaseMvpActivity<VIEW extends View, PRESENTER extends BaseP
     protected void onDestroy() {
         super.onDestroy();
         presenter.onViewDestroyed();
+        presenter = null;
     }
 
     protected void onViewReady() {

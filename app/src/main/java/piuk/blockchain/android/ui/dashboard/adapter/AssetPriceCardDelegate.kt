@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -46,6 +47,7 @@ class AssetPriceCardDelegate<in T>(
         internal var progressBar: ProgressBar = itemView.progress_bar
         internal var error: TextView = itemView.textview_error
         internal var button: LinearLayout = itemView.button_see_charts
+        internal var imageView: ImageView = itemView.imageview_chart_icon
 
         internal fun bind(state: AssetPriceCardState, context: Context) {
             button.setOnClickListener { assetSelector.invoke(state.currency) }
@@ -67,6 +69,7 @@ class AssetPriceCardDelegate<in T>(
             progressBar.gone()
             error.gone()
             price.text = data.priceString
+            imageView.setImageResource(data.icon)
         }
 
         private fun renderLoading() {

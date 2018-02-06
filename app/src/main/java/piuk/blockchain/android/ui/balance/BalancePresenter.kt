@@ -3,10 +3,8 @@ package piuk.blockchain.android.ui.balance
 import android.annotation.SuppressLint
 import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
-import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
@@ -22,7 +20,6 @@ import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
-import piuk.blockchain.android.data.transactions.Displayable
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.base.UiState
@@ -35,7 +32,6 @@ import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.text.DecimalFormat
 import javax.inject.Inject
 
@@ -59,6 +55,7 @@ class BalancePresenter @Inject constructor(
     @VisibleForTesting var authEventObservable: Observable<AuthEvent>? = null
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
+    private var shortcutsGenerated = false
 
     //region Life cycle
     @SuppressLint("VisibleForTests")
@@ -111,7 +108,10 @@ class BalancePresenter @Inject constructor(
                 .doOnComplete {
                     refreshBalanceHeader(account)
                     refreshAccountDataSet()
-                    refreshLauncherShortcuts()
+                    if (!shortcutsGenerated) {
+                        shortcutsGenerated = true
+                        refreshLauncherShortcuts()
+                    }
                     setViewType(currencyState.isDisplayingCryptoCurrency)
                 }
     }
@@ -275,7 +275,7 @@ class BalancePresenter @Inject constructor(
 
     internal fun onAccountSelected(position: Int) {
 
-        val account = getAccounts().get(position)
+        val account = getAccounts()[position]
 
         updateTransactionsListCompletable(account)
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
@@ -348,7 +348,7 @@ class BalancePresenter @Inject constructor(
     Don't over use this method. It's a bit hacky, but fast enough to work.
      */
     private fun getAccountAt(position: Int): ItemAccount {
-        return getAccounts()[position]
+        return getAccounts()[if (position < 0) 0 else position]
     }
 
     private fun getShapeShiftTxNotesObservable() =

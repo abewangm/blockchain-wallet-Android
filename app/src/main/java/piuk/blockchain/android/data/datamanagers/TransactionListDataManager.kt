@@ -125,8 +125,7 @@ class TransactionListDataManager(
      * @return A BCH value as a long.
      */
     fun getBchBalance(itemAccount: ItemAccount): Long = when (itemAccount.type) {
-        ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY ->
-            (bchDataManager.getWalletBalance() + bchDataManager.getImportedAddressBalance()).toLong()
+        ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY -> bchDataManager.getWalletBalance().toLong()
         ItemAccount.TYPE.ALL_LEGACY -> bchDataManager.getImportedAddressBalance().toLong()
         ItemAccount.TYPE.SINGLE_ACCOUNT -> bchDataManager.getAddressBalance(itemAccount.address!!).toLong()
     }

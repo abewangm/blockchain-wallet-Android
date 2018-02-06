@@ -171,13 +171,13 @@ public class DataManagerModule {
                                                                EthDataManager ethDataManager,
                                                                BchDataManager bchDataManager,
                                                                StringUtils stringUtils,
-                                                               NetworkParameterUtils networkParameterUtils) {
+                                                               EnvironmentSettings environmentSettings) {
         return new SwipeToReceiveHelper(payloadDataManager,
                 prefsUtil,
                 ethDataManager,
                 bchDataManager,
                 stringUtils,
-                networkParameterUtils);
+                environmentSettings);
     }
 
     @Provides

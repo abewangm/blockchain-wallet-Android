@@ -58,6 +58,7 @@ public class FeeDataManager {
     private FeeOptions createBchFeeOptions() {
         FeeOptions feeOptions = new FeeOptions();
         feeOptions.setRegularFee(walletOptionsDataManager.getBchFee());
+        feeOptions.setPriorityFee(walletOptionsDataManager.getBchFee());
         return feeOptions;
     }
 }
