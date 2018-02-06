@@ -1410,7 +1410,7 @@ class SendPresenter @Inject constructor(
                 null,
                 null,
                 legacyAddress,
-                cashAddress
+                legacyAddress.address
         )
 
         view.updateSendingAddress(label)
