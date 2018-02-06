@@ -122,7 +122,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onBitcoinChosen()
             CryptoCurrencies.ETHER -> onEtherChosen()
-            CryptoCurrencies.BCH -> onBitcoinChosen()
+            CryptoCurrencies.BCH -> onBitcoinCashChosen()
             else -> throw IllegalArgumentException("${currencyState.cryptoCurrency} is not currently supported")
         }
     }
@@ -309,6 +309,8 @@ class SendPresenter @Inject constructor(
 
     private fun submitBchTransaction() {
         view.showProgressDialog(R.string.app_name)
+
+        pendingTransaction.receivingAddress = getFullBitcoinCashAddressFormat(pendingTransaction.receivingAddress)
 
         getBchChangeAddress()!!
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
@@ -634,16 +636,19 @@ class SendPresenter @Inject constructor(
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> if (FormatsUtil.isValidBitcoinAddress(address)) pendingTransaction.receivingAddress = address
                 CryptoCurrencies.ETHER -> if (FormatsUtil.isValidEthereumAddress(address)) pendingTransaction.receivingAddress = address
-                CryptoCurrencies.BCH -> if (FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, address)
-                || FormatsUtil.isValidBitcoinAddress(address))
-                    pendingTransaction.receivingAddress = addBitcoincashPrefix(address)
+                CryptoCurrencies.BCH -> {
+                    if (FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, address)
+                            || FormatsUtil.isValidBitcoinAddress(address))
+                        pendingTransaction.receivingAddress = address
+                }
                 else -> throw IllegalArgumentException("${currencyState.cryptoCurrency} is not currently supported")
             }
         }
     }
 
-    private fun addBitcoincashPrefix(cashAddress: String): String {
-        return if (FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, cashAddress)) {
+    private fun getFullBitcoinCashAddressFormat(cashAddress: String): String {
+        return if (!cashAddress.startsWith(environmentSettings.bitcoinCashNetworkParameters.bech32AddressPrefix) &&
+                FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, cashAddress)) {
             environmentSettings.bitcoinCashNetworkParameters.bech32AddressPrefix +
                     environmentSettings.bitcoinCashNetworkParameters.bech32AddressSeparator.toChar() +
                     cashAddress
@@ -719,8 +724,6 @@ class SendPresenter @Inject constructor(
             }
             else -> throw IllegalArgumentException("${currencyState.cryptoCurrency} is not currently supported")
         }
-
-        Timber.d("vos details: "+details.toString())
 
         return details
     }
@@ -1223,8 +1226,8 @@ class SendPresenter @Inject constructor(
 
         scanData = FormatsUtil.getURIFromPoorlyFormedBIP21(scanData)
 
-        if (FormatsUtil.isValidBitcoinAddress(scanData)) {
-            onBitcoinChosen()
+        if (FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, scanData)) {
+            onBitcoinCashChosen()
             address = scanData
         } else if (FormatsUtil.isBitcoinUri(scanData)) {
             onBitcoinChosen()
@@ -1247,8 +1250,16 @@ class SendPresenter @Inject constructor(
             onEtherChosen()
             address = scanData
             view?.updateCryptoAmount("")
+        } else if (FormatsUtil.isValidBitcoinAddress(scanData)) {
+            if (currencyState.cryptoCurrency == CryptoCurrencies.BTC) {
+                onBitcoinChosen()
+                address = scanData
+            } else {
+                onBitcoinCashChosen()
+                address = scanData
+            }
         } else {
-            view.showSnackbar(R.string.invalid_bitcoin_address, Snackbar.LENGTH_LONG)
+            view.showSnackbar(R.string.invalid_address, Snackbar.LENGTH_LONG)
             return
         }
 
