@@ -261,9 +261,16 @@ class WebSocketHandler {
         return btcConnection != null && ethConnection != null && bchConnection != null && connected;
     }
 
-    private void updateBalancesAndTransactions() {
+    private void updateBtcBalancesAndTransactions() {
         payloadDataManager.updateAllBalances()
                 .andThen(payloadDataManager.updateAllTransactions())
+                .doOnComplete(this::sendBroadcast)
+                .subscribe(new IgnorableDefaultObserver<>());
+    }
+
+    private void updateBchBalancesAndTransactions() {
+        bchDataManager.updateAllBalances()
+                .andThen(bchDataManager.getWalletTransactions(50, 0))
                 .doOnComplete(this::sendBroadcast)
                 .subscribe(new IgnorableDefaultObserver<>());
     }
@@ -415,7 +422,7 @@ class WebSocketHandler {
                     triggerNotification(title, marquee, text);
                 }
 
-                updateBalancesAndTransactions();
+                updateBtcBalancesAndTransactions();
 
             } else if (op.equals("on_change")) {
                 final String localChecksum = payloadDataManager.getPayloadChecksum();
@@ -522,6 +529,8 @@ class WebSocketHandler {
 
                     triggerNotification(title, marquee, text);
                 }
+
+                updateBchBalancesAndTransactions();
             }
         } catch (Exception e) {
             Timber.e(e, "attemptParseBtcMessage");
@@ -543,7 +552,7 @@ class WebSocketHandler {
             payloadDataManager.initializeAndDecrypt(
                     payloadDataManager.getWallet().getSharedKey(),
                     payloadDataManager.getWallet().getGuid(),
-                    payloadDataManager.getTempPassword()).subscribe(this::updateBalancesAndTransactions);
+                    payloadDataManager.getTempPassword()).subscribe(this::updateBtcBalancesAndTransactions);
             return Void.TYPE;
         }).compose(RxUtil.applySchedulersToCompletable());
     }
