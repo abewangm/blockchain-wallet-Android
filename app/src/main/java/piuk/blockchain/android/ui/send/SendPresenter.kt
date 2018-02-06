@@ -168,7 +168,7 @@ class SendPresenter @Inject constructor(
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
         resetAccountList()
-        selectDefaultSendingAccount()
+        selectDefaultOrFirstFundedSendingAccount()
         view.hideMaxAvailable()
         clearCryptoAmount()
         clearReceivingAddress()
@@ -781,8 +781,8 @@ class SendPresenter @Inject constructor(
         view.updateCryptoCurrency(currencyHelper.cryptoUnit)
     }
 
-    private fun selectDefaultSendingAccount() {
-        val accountItem = walletAccountHelper.getDefaultAccount()
+    fun selectDefaultOrFirstFundedSendingAccount() {
+        val accountItem = walletAccountHelper.getDefaultOrFirstFundedAccount()
         view.updateSendingAddress(accountItem.label ?: accountItem.address!!)
         pendingTransaction.sendingObject = accountItem
     }
@@ -795,7 +795,7 @@ class SendPresenter @Inject constructor(
             }
             view.updateSendingAddress(label!!)
         } else {
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         }
     }
 
@@ -1541,10 +1541,10 @@ class SendPresenter @Inject constructor(
             }
         } catch (e: ClassNotFoundException) {
             Timber.e(e)
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         } catch (e: IOException) {
             Timber.e(e)
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         }
     }
 
@@ -1560,10 +1560,10 @@ class SendPresenter @Inject constructor(
             }
         } catch (e: ClassNotFoundException) {
             Timber.e(e)
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         } catch (e: IOException) {
             Timber.e(e)
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         }
     }
 
