@@ -425,4 +425,7 @@ class BchDataManager(
 
     fun getAcc() =
         bchDataStore.bchWallet!!.accounts
+
+    fun subtractAmountFromAddressBalance(account: String, amount: BigInteger) =
+            bchDataStore.bchWallet!!.subtractAmountFromAddressBalance(account, amount)
 }

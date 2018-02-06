@@ -328,16 +328,16 @@ class SendPresenter @Inject constructor(
                             pendingTransaction.bigIntAmount)
                 }
                 .subscribe({ hash ->
-//                    Logging.logCustom(PaymentSentEvent()
-//                            .putSuccess(true)
-//                            .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.BCH)
-//                            .putCurrencyType(CryptoCurrencies.BCH))
+                    Logging.logCustom(PaymentSentEvent()
+                            .putSuccess(true)
+                            .putAmountForRange(pendingTransaction.bigIntAmount, CryptoCurrencies.BCH)
+                            .putCurrencyType(CryptoCurrencies.BCH))
 
-//                    clearBchUnspentResponseCache()
+                    clearBchUnspentResponseCache()
                     view.dismissProgressDialog()
                     view.dismissConfirmationDialog()
-//                    insertBtcPlaceHolderTransaction(hash, pendingTransaction)
-//                    incrementBchReceiveAddress()
+                    insertBtcPlaceHolderTransaction(hash, pendingTransaction)
+                    incrementBchReceiveAddress()
                     handleSuccessfulPayment(hash, CryptoCurrencies.BCH)
                 }) {
                     Timber.e(it)
@@ -506,7 +506,7 @@ class SendPresenter @Inject constructor(
             val account = pendingTransaction.sendingObject.accountObject as Account
             payloadDataManager.incrementChangeAddress(account)
             payloadDataManager.incrementReceiveAddress(account)
-            updateInternalBalances()
+            updateInternalBtcBalances()
         }
     }
 
@@ -515,7 +515,7 @@ class SendPresenter @Inject constructor(
             val account = pendingTransaction.sendingObject.accountObject as GenericMetadataAccount
             bchDataManager.incrementNextChangeAddress(account.xpub)
             bchDataManager.incrementNextReceiveAddress(account.xpub)
-            updateInternalBalances()
+            updateInternalBchBalances()
         }
     }
 
@@ -539,7 +539,7 @@ class SendPresenter @Inject constructor(
     /**
      * Update balance immediately after spend - until refresh from server
      */
-    private fun updateInternalBalances() {
+    private fun updateInternalBtcBalances() {
         try {
             val totalSent = pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee)
             if (pendingTransaction.isHD(currencyState.cryptoCurrency)) {
@@ -548,6 +548,24 @@ class SendPresenter @Inject constructor(
             } else {
                 val address = pendingTransaction.sendingObject.accountObject as LegacyAddress
                 payloadDataManager.subtractAmountFromAddressBalance(address.address, totalSent.toLong())
+            }
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+    }
+
+    /**
+     * Update balance immediately after spend - until refresh from server
+     */
+    private fun updateInternalBchBalances() {
+        try {
+            val totalSent = pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee)
+            if (pendingTransaction.isHD(currencyState.cryptoCurrency)) {
+                val account = pendingTransaction.sendingObject.accountObject as GenericMetadataAccount
+                bchDataManager.subtractAmountFromAddressBalance(account.xpub, totalSent)
+            } else {
+                val address = pendingTransaction.sendingObject.accountObject as LegacyAddress
+                bchDataManager.subtractAmountFromAddressBalance(address.address, totalSent)
             }
         } catch (e: Exception) {
             Timber.e(e)
