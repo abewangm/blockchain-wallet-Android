@@ -633,7 +633,7 @@
     <string name="payment_request">Permintaan Pembayaran</string>
     <string name="restoring_wallet">Memulihkan dompet.</string>
     <string name="support_leaving_app_warning">Ini akan meninggalkan aplikasi dan membawa Anda ke peramban Anda. Lanjutkan?</string>
-    <string name="addresses">Alamat Bitcoin </string>
+    <string name="addresses_bitcoin">Alamat Bitcoin </string>
     <string name="merchant_map">Peta Pedagang Bitcoin </string>
     <string name="received_ethereum">Menerima Ether</string>
     <string name="transaction_occur_when_bitcoin">Transaksi terjadi ketika Anda menerima dan mengirim bitcoin.</string>

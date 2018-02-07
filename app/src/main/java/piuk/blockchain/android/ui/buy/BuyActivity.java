@@ -211,7 +211,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
         int message = R.string.please_wait;
 
         int year = YearClass.get(this);
-        if (year < 2013) {
+        if (year < 2014) {
             // Phone too slow, show performance warning
             message = R.string.onboarding_buy_performance_warning;
         }

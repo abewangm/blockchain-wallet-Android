@@ -29,8 +29,9 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 import piuk.blockchain.android.util.AppUtil;
@@ -57,6 +58,7 @@ public class AccountPresenterTest {
     private AccountPresenter subject;
     @Mock private AccountView activity;
     @Mock private PayloadDataManager payloadDataManager;
+    @Mock private BchDataManager bchDataManager;
     @Mock private TransferFundsDataManager fundsDataManager;
     @Mock private PrefsUtil prefsUtil;
     @Mock private AppUtil appUtil;
@@ -68,11 +70,13 @@ public class AccountPresenterTest {
         MockitoAnnotations.initMocks(this);
 
         subject = new AccountPresenter(payloadDataManager,
+                bchDataManager,
                 fundsDataManager,
                 prefsUtil,
                 appUtil,
                 privateKeyFactory,
                 environmentSettings);
+
         subject.initView(activity);
     }
 

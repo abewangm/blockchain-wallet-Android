@@ -632,7 +632,7 @@
     <string name="payment_request">Solicitação de Pagamento</string>
     <string name="restoring_wallet">Restaurando carteira.</string>
     <string name="support_leaving_app_warning">Isso fará você sair do app e abrirá o seu navegador. Deseja continuar?</string>
-    <string name="addresses">Endereços Bitcoin</string>
+    <string name="addresses_bitcoin">Endereços Bitcoin</string>
     <string name="merchant_map">Mapa de Comerciantes de Bitcoin</string>
     <string name="received_ethereum">Recebeu Ether</string>
     <string name="transaction_occur_when_bitcoin">As transações ocorrem quando você recebe e envia bitcoins.</string>

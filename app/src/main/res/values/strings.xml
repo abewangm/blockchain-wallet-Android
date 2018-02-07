@@ -165,7 +165,9 @@
     <string name="change_pin_code">Change PIN</string>
     <string name="enter_current_pin">Please enter current PIN.</string>
 
-    <string name="addresses">Bitcoin Addresses</string>
+    <string name="addresses_bitcoin">Bitcoin Addresses</string>
+    <string name="addresses_bitcoin_cash">Bitcoin Cash Addresses</string>
+    <string name="drawer_addresses">Addresses</string>
     <string name="create_new">Create New</string>
     <string name="import_address">Import Address</string>
     <string name="wallets">Wallets</string>
