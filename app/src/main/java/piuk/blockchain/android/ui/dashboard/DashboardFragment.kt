@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseAuthActivity
@@ -24,6 +25,7 @@ import piuk.blockchain.android.ui.dashboard.adapter.DashboardDelegateAdapter
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.home.MainActivity.*
 import piuk.blockchain.android.util.AndroidUtils
+import piuk.blockchain.android.util.OSUtil
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
@@ -151,6 +153,21 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         }
     }
 
+    override fun startWebsocketService() {
+        context?.run {
+            val intent = Intent(this, WebSocketService::class.java)
+
+            if (!OSUtil(this).isServiceRunning(WebSocketService::class.java)) {
+                applicationContext.startService(intent)
+            } else {
+                // Restarting this here ensures re-subscription after app restart - the service may remain
+                // running, but the subscription to the WebSocket won't be restarted unless onCreate called
+                applicationContext.stopService(intent)
+                applicationContext.startService(intent)
+            }
+        }
+    }
+
     override fun createPresenter() = dashboardPresenter
 
     override fun getMvpView() = this
@@ -168,7 +185,8 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     private fun setupToolbar() {
         if ((activity as AppCompatActivity).supportActionBar != null) {
             (activity as BaseAuthActivity).setupToolbar(
-                    (activity as MainActivity).supportActionBar, R.string.dashboard_title)
+                    (activity as MainActivity).supportActionBar, R.string.dashboard_title
+            )
         }
     }
 

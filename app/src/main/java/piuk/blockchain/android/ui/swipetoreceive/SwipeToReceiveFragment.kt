@@ -18,7 +18,6 @@ import kotlinx.android.synthetic.main.fragment_swipe_to_receive.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
-import piuk.blockchain.android.ui.balance.BalanceFragment
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.util.extensions.*
@@ -26,8 +25,10 @@ import piuk.blockchain.android.util.helperfunctions.setOnPageChangeListener
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
-class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(), SwipeToReceiveView {
+class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePresenter>(),
+    SwipeToReceiveView {
 
+    @Suppress("MemberVisibilityCanBePrivate")
     @Inject lateinit var swipeToReceivePresenter: SwipeToReceivePresenter
 
     init {
@@ -36,7 +37,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == BalanceFragment.ACTION_INTENT) {
+            if (intent.action == WebSocketService.ACTION_INTENT) {
                 // Update UI with new Address + QR
                 presenter?.currencyPosition = presenter?.currencyPosition ?: 0
             }
@@ -63,7 +64,8 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
             viewpager_icons.currentItem = viewpager_icons.currentItem + 1
         }
 
-        val adapter = ImageAdapter(context!!,
+        val adapter = ImageAdapter(
+                context!!,
                 listOf(
                         R.drawable.vector_bitcoin,
                         R.drawable.vector_eth,
@@ -81,7 +83,10 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
                     when (it) {
                         0 -> imageview_left_arrow.invisible()
-                        1 -> listOf(imageview_left_arrow, imageview_right_arrow).forEach { it.visible() }
+                        1 -> listOf(
+                                imageview_left_arrow,
+                                imageview_right_arrow
+                        ).forEach { it.visible() }
                         2 -> imageview_right_arrow.invisible()
                     }
                 }
@@ -93,22 +98,14 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     override fun displayReceiveAddress(address: String) {
         textview_address.text = address
-
-        // Register address as the one we're interested in via broadcast
-        val intent = Intent(WebSocketService.ACTION_INTENT).apply { putExtra("address", address) }
-        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
-
-        // Listen for corresponding broadcasts
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(
-                broadcastReceiver, IntentFilter(BalanceFragment.ACTION_INTENT))
     }
 
     override fun displayReceiveAccount(accountName: String) {
-        textview_account?.text = accountName
+        textview_account.text = accountName
     }
 
     override fun displayCoinType(requestString: String) {
-        textview_request_currency?.text = requestString
+        textview_request_currency.text = requestString
     }
 
     override fun setUiState(uiState: Int) {
@@ -126,7 +123,19 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
 
     override fun onStop() {
         super.onStop()
-        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
+        context?.run {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        context?.run {
+            LocalBroadcastManager.getInstance(this).registerReceiver(
+                    broadcastReceiver,
+                    IntentFilter(WebSocketService.ACTION_INTENT)
+            )
+        }
     }
 
     override fun createPresenter() = swipeToReceivePresenter
@@ -160,7 +169,8 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
                     .setMessage(R.string.receive_address_to_clipboard)
                     .setCancelable(false)
                     .setPositiveButton(R.string.yes, { _, _ ->
-                        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard =
+                                getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("Send address", textview_address.text)
                         toast(R.string.copied_to_clipboard)
                         clipboard.primaryClip = clip
@@ -195,6 +205,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
         override fun destroyItem(container: ViewGroup, position: Int, any: Any) {
             container.removeView(any as LinearLayout)
         }
+
     }
 
 }

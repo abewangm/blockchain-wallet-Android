@@ -51,7 +51,7 @@ class EthDataManager(
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
-    fun fetchEthAddressCompletable() = Completable.fromObservable(fetchEthAddress())
+    fun fetchEthAddressCompletable(): Completable = Completable.fromObservable(fetchEthAddress())
 
     /**
      * Returns the user's ETH account object if previously fetched.

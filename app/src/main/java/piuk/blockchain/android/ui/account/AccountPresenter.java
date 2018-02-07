@@ -39,8 +39,6 @@ import timber.log.Timber;
 public class AccountPresenter extends BasePresenter<AccountView> {
 
     public static final String KEY_WARN_TRANSFER_ALL = "WARN_TRANSFER_ALL";
-    private static final String KEY_XPUB = "xpub";
-    private static final String KEY_ADDRESS = "address";
 
     private PayloadDataManager payloadDataManager;
     private TransferFundsDataManager fundsDataManager;
@@ -114,7 +112,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
                             getView().dismissProgressDialog();
                             getView().showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
                             Intent intent = new Intent(WebSocketService.ACTION_INTENT);
-                            intent.putExtra(KEY_XPUB, account.getXpub());
+                            intent.putExtra(WebSocketService.EXTRA_X_PUB_BTC, account.getXpub());
                             getView().broadcastIntent(intent);
                             getView().onUpdateAccountsList();
 
@@ -147,7 +145,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
                             getView().dismissProgressDialog();
                             getView().showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK);
                             Intent intent = new Intent(WebSocketService.ACTION_INTENT);
-                            intent.putExtra(KEY_ADDRESS, address.getAddress());
+                            intent.putExtra(WebSocketService.EXTRA_BITCOIN_ADDRESS, address.getAddress());
                             getView().broadcastIntent(intent);
                             getView().onUpdateAccountsList();
                         }, throwable -> {
@@ -180,7 +178,7 @@ public class AccountPresenter extends BasePresenter<AccountView> {
             ECKey key = bip38.decrypt(password);
             handlePrivateKey(key, doubleEncryptionPassword);
         } catch (Exception e) {
-            Timber.e("importBip38Address: ", e);
+            Timber.e(e);
             getView().showToast(R.string.bip38_error, ToastCustom.TYPE_ERROR);
         } finally {
             getView().dismissProgressDialog();

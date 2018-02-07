@@ -2,7 +2,9 @@ package piuk.blockchain.android.ui.dashboard
 
 import android.support.annotation.DrawableRes
 import android.support.annotation.VisibleForTesting
+import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
@@ -66,7 +68,6 @@ class DashboardPresenter @Inject constructor(
 
     override fun onViewReady() {
         view.notifyItemAdded(displayList, 0)
-        updateAllBalances()
         updatePrices()
 
         // Triggers various updates to the page once all metadata is loaded
@@ -144,6 +145,11 @@ class DashboardPresenter @Inject constructor(
                 .flatMapCompletable { ethAddressResponse ->
                     payloadDataManager.updateAllBalances()
                             .andThen(
+                                    payloadDataManager.updateAllTransactions()
+                                            .doOnError { Timber.e(it) }
+                                            .onErrorComplete()
+                            )
+                            .andThen(
                                     bchDataManager.updateAllBalances()
                                             .doOnError { Timber.e(it) }
                                             .onErrorComplete()
@@ -193,7 +199,9 @@ class DashboardPresenter @Inject constructor(
                                                 // Formatted Amount Strings
                                                 bitcoinAmountString = getBtcBalanceString(btcBalance),
                                                 etherAmountString = getEthBalanceString(ethBalance),
-                                                bitcoinCashAmountString = getBchBalanceString(bchBalance),
+                                                bitcoinCashAmountString = getBchBalanceString(
+                                                        bchBalance
+                                                ),
                                                 // Total
                                                 totalValueString = totalString
                                         )
@@ -202,7 +210,7 @@ class DashboardPresenter @Inject constructor(
                 }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
-                        { /* No-op*/ },
+                        { storeSwipeToReceiveAddresses() },
                         { Timber.e(it) }
                 )
     }
@@ -330,6 +338,25 @@ class DashboardPresenter @Inject constructor(
     private fun setOnboardingComplete(completed: Boolean) {
         prefsUtil.setValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, completed)
     }
+
+    private fun storeSwipeToReceiveAddresses() {
+        bchDataManager.getWalletTransactions(50, 0)
+                .flatMapCompletable { getSwipeToReceiveCompletable() }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        { view.startWebsocketService() },
+                        { Timber.e(it) }
+                )
+    }
+
+    private fun getSwipeToReceiveCompletable(): Completable =
+            // Defer to background thread as deriving addresses is quite processor intensive
+            Completable.fromCallable {
+                swipeToReceiveHelper.updateAndStoreBitcoinAddresses()
+                swipeToReceiveHelper.updateAndStoreBitcoinCashAddresses()
+            }.subscribeOn(Schedulers.computation())
+                    // Ignore failure
+                    .onErrorComplete()
 
     ///////////////////////////////////////////////////////////////////////////
     // Units

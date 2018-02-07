@@ -16,20 +16,17 @@ class EnvironmentSettings {
         return BuildConfig.DEBUG || BuildConfig.DOGFOOD
     }
 
-    val environment: Environment
-        get() = Environment.fromString(BuildConfig.ENVIRONMENT)
+    val environment: Environment = Environment.fromString(BuildConfig.ENVIRONMENT)
 
-    val explorerUrl: String
-        get() = BuildConfig.EXPLORER_URL
+    val explorerUrl: String = BuildConfig.EXPLORER_URL
 
-    val apiUrl: String
-        get() = BuildConfig.API_URL
+    val apiUrl: String = BuildConfig.API_URL
 
-    val btcWebsocketUrl: String
-        get() = BuildConfig.BITCOIN_WEBSOCKET_URL
+    val btcWebsocketUrl: String = BuildConfig.BITCOIN_WEBSOCKET_URL
 
-    val ethWebsocketUrl: String
-        get() = BuildConfig.ETHEREUM_WEBSOCKET_URL
+    val ethWebsocketUrl: String = BuildConfig.ETHEREUM_WEBSOCKET_URL
+
+    val bchWebsocketUrl: String = BuildConfig.BITCOIN_CASH_WEBSOCKET_URL
 
     val bitcoinNetworkParameters: NetworkParameters
         get() = when (environment) {
