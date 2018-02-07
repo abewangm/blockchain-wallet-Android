@@ -73,6 +73,8 @@ public class PendingTransaction {
         receivingAddress = null;
         bigIntFee = null;
         bigIntAmount = null;
+        warningText = null;
+        warningSubText = null;
     }
 
     @Override

@@ -6,7 +6,6 @@ import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.util.FormatsUtil
 import org.bitcoinj.core.Address
-import org.bitcoinj.core.CashAddress
 import org.bitcoinj.core.Coin
 import org.bitcoinj.uri.BitcoinURI
 import piuk.blockchain.android.R
@@ -117,15 +116,10 @@ class ReceivePresenter @Inject internal constructor(
         // Here we are assuming that the legacy address is in Base58. This may change in the future
         // if we decide to allow importing BECH32 paper wallets.
         val address = Address.fromBase58(
-                environmentSettings.bitcoinNetworkParameters,
+                environmentSettings.bitcoinCashNetworkParameters,
                 legacyAddress.address
         )
-        val bech32 = CashAddress.encode(
-                environmentSettings.bitcoinCashNetworkParameters.segwitAddressPrefix,
-                // STOPSHIP: Here we cannot assume that the address is P2PKH
-                CashAddress.P2PKH,
-                address.hash160
-        )
+        val bech32 = address.toCashAddress()
         val bech32Display = bech32.removeBchUri()
 
         if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
@@ -212,13 +206,8 @@ class ReceivePresenter @Inject internal constructor(
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnNext {
                     val address =
-                            Address.fromBase58(environmentSettings.bitcoinNetworkParameters, it)
-                    val bech32 =
-                            CashAddress.encode(
-                                    environmentSettings.bitcoinCashNetworkParameters.segwitAddressPrefix,
-                                    CashAddress.P2PKH,
-                                    address.hash160
-                            )
+                            Address.fromBase58(environmentSettings.bitcoinCashNetworkParameters, it)
+                    val bech32 = address.toCashAddress()
                     selectedAddress = bech32
                     view.updateReceiveAddress(bech32.removeBchUri())
                     generateQrCode(bech32)
@@ -297,7 +286,7 @@ class ReceivePresenter @Inject internal constructor(
             when {
                 FormatsUtil.isValidBitcoinAddress(it) ->
                     view.showBottomSheet(getBitcoinUri(it, view.getBtcAmount()))
-                FormatsUtil.isValidEthereumAddress(it) || FormatsUtil.isValidBitcoinCashAddress(it) ->
+                FormatsUtil.isValidEthereumAddress(it) || FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, it) ->
                     view.showBottomSheet(it)
                 else ->
                     throw IllegalStateException("Unknown address format $selectedAddress")

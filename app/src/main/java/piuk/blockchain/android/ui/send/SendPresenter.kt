@@ -23,6 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
 import org.apache.commons.lang3.tuple.Pair
+import org.bitcoinj.core.Address
 import org.bitcoinj.core.ECKey
 import org.web3j.protocol.core.methods.request.RawTransaction
 import org.web3j.utils.Convert
@@ -121,7 +122,7 @@ class SendPresenter @Inject constructor(
         when (currencyState.cryptoCurrency) {
             CryptoCurrencies.BTC -> onBitcoinChosen()
             CryptoCurrencies.ETHER -> onEtherChosen()
-            CryptoCurrencies.BCH -> onBitcoinChosen()
+            CryptoCurrencies.BCH -> onBitcoinCashChosen()
             else -> throw IllegalArgumentException("${currencyState.cryptoCurrency} is not currently supported")
         }
     }
@@ -167,7 +168,7 @@ class SendPresenter @Inject constructor(
         absoluteSuggestedFee = BigInteger.ZERO
         view.updateFeeAmount("")
         resetAccountList()
-        selectDefaultSendingAccount()
+        selectDefaultOrFirstFundedSendingAccount()
         view.hideMaxAvailable()
         clearCryptoAmount()
         clearReceivingAddress()
@@ -215,7 +216,7 @@ class SendPresenter @Inject constructor(
                         }, { Timber.e(it) })
             }
             CryptoCurrencies.BCH -> {
-                validateBitcoinCashAddress()
+                isValidBitcoincashAddress()
                         .map {
                             if (!it) {
                                 // Warn user if address is in base58 format since this might be a btc address
@@ -309,6 +310,8 @@ class SendPresenter @Inject constructor(
     private fun submitBchTransaction() {
         view.showProgressDialog(R.string.app_name)
 
+        pendingTransaction.receivingAddress = getFullBitcoinCashAddressFormat(pendingTransaction.receivingAddress)
+
         getBchChangeAddress()!!
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnError {
@@ -353,7 +356,6 @@ class SendPresenter @Inject constructor(
                 }
     }
 
-
     private fun getBtcKeys(): Observable<MutableList<ECKey?>>? {
         return if (pendingTransaction.isHD(currencyState.cryptoCurrency)) {
             val account = pendingTransaction.sendingObject.accountObject as Account
@@ -379,6 +381,11 @@ class SendPresenter @Inject constructor(
             //TODO(accountObject should rather contain keys for signing, not metadata)
             val account = pendingTransaction.sendingObject.accountObject as GenericMetadataAccount
 
+            if (payloadDataManager.isDoubleEncrypted) {
+                payloadDataManager.decryptHDWallet(verifiedSecondPassword)
+                bchDataManager.decryptWatchOnlyWallet(payloadDataManager.mnemonic)
+            }
+
             val hdAccountList = bchDataManager.getAcc()
             var acc = hdAccountList.find { it.node.serializePubB58(environmentSettings.bitcoinCashNetworkParameters) == account.xpub }
 
@@ -386,10 +393,6 @@ class SendPresenter @Inject constructor(
                 throw HDWalletException("No matching private key found for ${account.xpub}")
             }
 
-            if (payloadDataManager.isDoubleEncrypted) {
-                payloadDataManager.decryptHDWallet(verifiedSecondPassword)
-                bchDataManager.decryptWatchOnlyWallet(payloadDataManager.mnemonic)
-            }
             Observable.just(bchDataManager.getHDKeysForSigning(acc, pendingTransaction.unspentOutputBundle.spendableOutputs))
         } else {
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
@@ -417,10 +420,11 @@ class SendPresenter @Inject constructor(
         return if (pendingTransaction.isHD(currencyState.cryptoCurrency)) {
             val account = pendingTransaction.sendingObject.accountObject as GenericMetadataAccount
             val position = bchDataManager.getActiveAccounts().indexOfFirst { it.xpub == account.xpub }
-            bchDataManager.getNextChangeAddress(position)
+            bchDataManager.getNextChangeCashAddress(position)
         } else {
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
-            Observable.just(legacyAddress.address)
+            Observable.just(Address.fromBase58(environmentSettings.bitcoinCashNetworkParameters,
+                    legacyAddress.address).toCashAddress())
         }
     }
 
@@ -505,7 +509,7 @@ class SendPresenter @Inject constructor(
             val account = pendingTransaction.sendingObject.accountObject as Account
             payloadDataManager.incrementChangeAddress(account)
             payloadDataManager.incrementReceiveAddress(account)
-            updateInternalBalances()
+            updateInternalBtcBalances()
         }
     }
 
@@ -514,7 +518,7 @@ class SendPresenter @Inject constructor(
             val account = pendingTransaction.sendingObject.accountObject as GenericMetadataAccount
             bchDataManager.incrementNextChangeAddress(account.xpub)
             bchDataManager.incrementNextReceiveAddress(account.xpub)
-            updateInternalBalances()
+            updateInternalBchBalances()
         }
     }
 
@@ -538,7 +542,7 @@ class SendPresenter @Inject constructor(
     /**
      * Update balance immediately after spend - until refresh from server
      */
-    private fun updateInternalBalances() {
+    private fun updateInternalBtcBalances() {
         try {
             val totalSent = pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee)
             if (pendingTransaction.isHD(currencyState.cryptoCurrency)) {
@@ -547,6 +551,24 @@ class SendPresenter @Inject constructor(
             } else {
                 val address = pendingTransaction.sendingObject.accountObject as LegacyAddress
                 payloadDataManager.subtractAmountFromAddressBalance(address.address, totalSent.toLong())
+            }
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+    }
+
+    /**
+     * Update balance immediately after spend - until refresh from server
+     */
+    private fun updateInternalBchBalances() {
+        try {
+            val totalSent = pendingTransaction.bigIntAmount.add(pendingTransaction.bigIntFee)
+            if (pendingTransaction.isHD(currencyState.cryptoCurrency)) {
+                val account = pendingTransaction.sendingObject.accountObject as GenericMetadataAccount
+                bchDataManager.subtractAmountFromAddressBalance(account.xpub, totalSent)
+            } else {
+                val address = pendingTransaction.sendingObject.accountObject as LegacyAddress
+                bchDataManager.subtractAmountFromAddressBalance(address.address, totalSent)
             }
         } catch (e: Exception) {
             Timber.e(e)
@@ -615,9 +637,24 @@ class SendPresenter @Inject constructor(
             when (currencyState.cryptoCurrency) {
                 CryptoCurrencies.BTC -> if (FormatsUtil.isValidBitcoinAddress(address)) pendingTransaction.receivingAddress = address
                 CryptoCurrencies.ETHER -> if (FormatsUtil.isValidEthereumAddress(address)) pendingTransaction.receivingAddress = address
-                CryptoCurrencies.BCH -> if (FormatsUtil.isValidBitcoinCashAddress(address)) pendingTransaction.receivingAddress = address
+                CryptoCurrencies.BCH -> {
+                    if (FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, address)
+                            || FormatsUtil.isValidBitcoinAddress(address))
+                        pendingTransaction.receivingAddress = address
+                }
                 else -> throw IllegalArgumentException("${currencyState.cryptoCurrency} is not currently supported")
             }
+        }
+    }
+
+    private fun getFullBitcoinCashAddressFormat(cashAddress: String): String {
+        return if (!cashAddress.startsWith(environmentSettings.bitcoinCashNetworkParameters.bech32AddressPrefix) &&
+                FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, cashAddress)) {
+            environmentSettings.bitcoinCashNetworkParameters.bech32AddressPrefix +
+                    environmentSettings.bitcoinCashNetworkParameters.bech32AddressSeparator.toChar() +
+                    cashAddress
+        } else {
+            cashAddress
         }
     }
 
@@ -672,8 +709,6 @@ class SendPresenter @Inject constructor(
             }
             CryptoCurrencies.BCH -> {
 
-                Timber.d("vos pendingTransaction: "+pendingTransaction.toString())
-
                 details.cryptoTotal = currencyHelper.getTextFromSatoshis(pendingTransaction.total.toLong(), getDefaultDecimalSeparator())
                 details.cryptoAmount = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntAmount.toLong(), getDefaultDecimalSeparator())
                 details.cryptoFee = currencyHelper.getTextFromSatoshis(pendingTransaction.bigIntFee.toLong(), getDefaultDecimalSeparator())
@@ -690,8 +725,6 @@ class SendPresenter @Inject constructor(
             }
             else -> throw IllegalArgumentException("${currencyState.cryptoCurrency} is not currently supported")
         }
-
-        Timber.d("vos details: "+details.toString())
 
         return details
     }
@@ -749,8 +782,8 @@ class SendPresenter @Inject constructor(
         view.updateCryptoCurrency(currencyHelper.cryptoUnit)
     }
 
-    private fun selectDefaultSendingAccount() {
-        val accountItem = walletAccountHelper.getDefaultAccount()
+    fun selectDefaultOrFirstFundedSendingAccount() {
+        val accountItem = walletAccountHelper.getDefaultOrFirstFundedAccount()
         view.updateSendingAddress(accountItem.label ?: accountItem.address!!)
         pendingTransaction.sendingObject = accountItem
     }
@@ -763,7 +796,7 @@ class SendPresenter @Inject constructor(
             }
             view.updateSendingAddress(label!!)
         } else {
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         }
     }
 
@@ -1194,8 +1227,8 @@ class SendPresenter @Inject constructor(
 
         scanData = FormatsUtil.getURIFromPoorlyFormedBIP21(scanData)
 
-        if (FormatsUtil.isValidBitcoinAddress(scanData)) {
-            onBitcoinChosen()
+        if (FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, scanData)) {
+            onBitcoinCashChosen()
             address = scanData
         } else if (FormatsUtil.isBitcoinUri(scanData)) {
             onBitcoinChosen()
@@ -1218,8 +1251,16 @@ class SendPresenter @Inject constructor(
             onEtherChosen()
             address = scanData
             view?.updateCryptoAmount("")
+        } else if (FormatsUtil.isValidBitcoinAddress(scanData)) {
+            if (currencyState.cryptoCurrency == CryptoCurrencies.BTC) {
+                onBitcoinChosen()
+                address = scanData
+            } else {
+                onBitcoinCashChosen()
+                address = scanData
+            }
         } else {
-            view.showSnackbar(R.string.invalid_bitcoin_address, Snackbar.LENGTH_LONG)
+            view.showSnackbar(R.string.invalid_address, Snackbar.LENGTH_LONG)
             return
         }
 
@@ -1324,25 +1365,6 @@ class SendPresenter @Inject constructor(
         calculateSpendableAmounts(false, "0")
     }
 
-    private fun onSendingBchAccountSelected(account: GenericMetadataAccount) {
-        var label = account.label
-        if (label.isNullOrEmpty()) {
-            label = account.xpub
-        }
-
-        pendingTransaction.sendingObject = ItemAccount(
-                label,
-                null,
-                null,
-                null,
-                account,
-                account.xpub
-        )
-
-        view.updateSendingAddress(label)
-        calculateSpendableAmounts(false, "0")
-    }
-
     private fun onReceivingBtcLegacyAddressSelected(legacyAddress: LegacyAddress) {
         var label = legacyAddress.label
         if (label.isNullOrEmpty()) {
@@ -1365,6 +1387,89 @@ class SendPresenter @Inject constructor(
             view.showWatchOnlyWarning(legacyAddress.address)
         }
     }
+
+    private fun onSendingBchLegacyAddressSelected(legacyAddress: LegacyAddress) {
+
+        var cashAddress = legacyAddress.address;
+
+        if (!FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, legacyAddress.address) &&
+                FormatsUtil.isValidBitcoinAddress(legacyAddress.address)) {
+            cashAddress = Address.fromBase58(
+                    environmentSettings.bitcoinCashNetworkParameters,
+                    legacyAddress.address).toCashAddress()
+        }
+
+        var label = legacyAddress.label
+        if (label.isNullOrEmpty()) {
+            label = cashAddress.removeBchUri()
+        }
+
+        pendingTransaction.sendingObject = ItemAccount(
+                label,
+                null,
+                null,
+                null,
+                legacyAddress,
+                legacyAddress.address
+        )
+
+        view.updateSendingAddress(label)
+        calculateSpendableAmounts(false, "0")
+    }
+
+    private fun onSendingBchAccountSelected(account: GenericMetadataAccount) {
+        var label = account.label
+        if (label.isNullOrEmpty()) {
+            label = account.xpub
+        }
+
+        pendingTransaction.sendingObject = ItemAccount(
+                label,
+                null,
+                null,
+                null,
+                account,
+                account.xpub
+        )
+
+        view.updateSendingAddress(label)
+        calculateSpendableAmounts(false, "0")
+    }
+
+    private fun onReceivingBchLegacyAddressSelected(legacyAddress: LegacyAddress) {
+
+        var cashAddress = legacyAddress.address;
+
+        if (!FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, legacyAddress.address) &&
+                FormatsUtil.isValidBitcoinAddress(legacyAddress.address)) {
+            cashAddress = Address.fromBase58(
+                    environmentSettings.bitcoinCashNetworkParameters,
+                    legacyAddress.address).toCashAddress()
+        }
+
+        var label = legacyAddress.label
+        if (label.isNullOrEmpty()) {
+            label = cashAddress.removeBchUri()
+        }
+
+        pendingTransaction.receivingObject = ItemAccount(
+                label,
+                null,
+                null,
+                null,
+                legacyAddress,
+                cashAddress
+        )
+        pendingTransaction.receivingAddress = cashAddress
+
+        view.updateReceivingAddress(label)
+
+        if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
+            view.showWatchOnlyWarning(cashAddress)
+        }
+    }
+
+    private fun String.removeBchUri(): String = this.replace("bitcoincash:", "")
 
     private fun shouldWarnWatchOnly(): Boolean =
             prefsUtil.getValue(PREF_WARN_WATCH_ONLY_SPEND, true)
@@ -1417,7 +1522,7 @@ class SendPresenter @Inject constructor(
 
         val position = bchDataManager.getActiveAccounts().indexOfFirst { it.xpub == account.xpub }
 
-        bchDataManager.getNextReceiveAddress(position)
+        bchDataManager.getNextReceiveCashAddress(position)
                 .doOnNext { pendingTransaction.receivingAddress = it }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({
@@ -1437,10 +1542,10 @@ class SendPresenter @Inject constructor(
             }
         } catch (e: ClassNotFoundException) {
             Timber.e(e)
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         } catch (e: IOException) {
             Timber.e(e)
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         }
     }
 
@@ -1450,16 +1555,16 @@ class SendPresenter @Inject constructor(
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
 
             when (any) {
-                is LegacyAddress -> onSendingBtcLegacyAddressSelected(any)
+                is LegacyAddress -> onSendingBchLegacyAddressSelected(any)
                 is GenericMetadataAccount -> onSendingBchAccountSelected(any)
                 else -> throw IllegalArgumentException("No method for handling $type available")
             }
         } catch (e: ClassNotFoundException) {
             Timber.e(e)
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         } catch (e: IOException) {
             Timber.e(e)
-            selectDefaultSendingAccount()
+            selectDefaultOrFirstFundedSendingAccount()
         }
     }
 
@@ -1486,7 +1591,7 @@ class SendPresenter @Inject constructor(
             val any = ObjectMapper().readValue(data?.getStringExtra(AccountChooserActivity.EXTRA_SELECTED_ITEM), type)
 
             when (any) {
-                is LegacyAddress -> onReceivingBtcLegacyAddressSelected(any)
+                is LegacyAddress -> onReceivingBchLegacyAddressSelected(any)
                 is GenericMetadataAccount -> onReceivingBchAccountSelected(any)
                 else -> throw IllegalArgumentException("No method for handling $type available")
             }
@@ -1560,8 +1665,8 @@ class SendPresenter @Inject constructor(
         return Pair.of(validated, errorMessage)
     }
 
-    private fun validateBitcoinCashAddress() =
-            Observable.just(!FormatsUtil.isValidBitcoinCashAddress(pendingTransaction.receivingAddress))
+    private fun isValidBitcoincashAddress() =
+            Observable.just(FormatsUtil.isValidBitcoinCashAddress(environmentSettings.bitcoinCashNetworkParameters, pendingTransaction.receivingAddress))
 
     private fun validateBitcoinCashTransaction(): Pair<Boolean, Int> {
         var validated = true

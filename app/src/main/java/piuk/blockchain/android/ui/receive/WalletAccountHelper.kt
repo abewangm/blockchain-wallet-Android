@@ -51,6 +51,7 @@ class WalletAccountHelper(
     }
     private val btcExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastBtcPrice(fiatUnit) }
     private val ethExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastEthPrice(fiatUnit) }
+    private val bchExchangeRate: Double by unsafeLazy { exchangeRateFactory.getLastBchPrice(fiatUnit) }
 
     /**
      * Returns a list of [ItemAccount] objects containing both HD accounts and [LegacyAddress]
@@ -206,6 +207,13 @@ class WalletAccountHelper(
         else -> throw IllegalArgumentException("Cryptocurrency ${currencyState.cryptoCurrency.unit} not yet supported")
     }
 
+    fun getDefaultOrFirstFundedAccount(): ItemAccount = when (currencyState.cryptoCurrency) {
+        CryptoCurrencies.BTC -> getDefaultOrFirstFundedBtcAccount()
+        CryptoCurrencies.BCH -> getDefaultOrFirstFundedBchAccount()
+        CryptoCurrencies.ETHER -> getDefaultEthAccount()
+        else -> throw IllegalArgumentException("Cryptocurrency ${currencyState.cryptoCurrency.unit} not yet supported")
+    }
+
     fun getEthAccount() = mutableListOf<ItemAccount>().apply {
         add(getDefaultEthAccount())
     }
@@ -327,11 +335,55 @@ class WalletAccountHelper(
         )
     }
 
+    private fun getDefaultOrFirstFundedBtcAccount(): ItemAccount {
+
+        var account = payloadManager.payload.hdWallets[0].accounts[payloadManager.payload.hdWallets[0].defaultAccountIdx]
+
+        if (getAccountAbsoluteBalance(account) <= 0L)
+            for (funded in payloadManager.payload.hdWallets[0].accounts) {
+                if(!funded.isArchived && getAccountAbsoluteBalance(funded) > 0L) {
+                    account = funded
+                    break
+                }
+            }
+
+        return ItemAccount(
+                account.label,
+                getAccountBalance(account, btcExchangeRate, fiatUnit, btcUnit),
+                null,
+                getAccountAbsoluteBalance(account),
+                account,
+                account.xpub
+        )
+    }
+
     private fun getDefaultBchAccount(): ItemAccount {
         val account = bchDataManager.getDefaultGenericMetadataAccount()!!
         return ItemAccount(
                 account.label,
-                getAccountBalanceBch(account, btcExchangeRate, fiatUnit, btcUnit),
+                getAccountBalanceBch(account, bchExchangeRate, fiatUnit, bchUnit),
+                null,
+                getAccountAbsoluteBalance(account),
+                account,
+                account.xpub
+        )
+    }
+
+    private fun getDefaultOrFirstFundedBchAccount(): ItemAccount {
+
+        var account = bchDataManager.getDefaultGenericMetadataAccount()!!
+
+        if(getAccountAbsoluteBalance(account) <= 0L)
+            for (funded in bchDataManager.getActiveAccounts()) {
+                if(getAccountAbsoluteBalance(funded) > 0L) {
+                    account = funded
+                    break
+                }
+            }
+
+        return ItemAccount(
+                account.label,
+                getAccountBalanceBch(account, bchExchangeRate, fiatUnit, bchUnit),
                 null,
                 getAccountAbsoluteBalance(account),
                 account,
