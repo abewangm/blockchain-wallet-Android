@@ -295,6 +295,18 @@ class BchDataManager(
             }
 
     /**
+     * Generates a bech32 Bitcoin Cash receive address for an account at a given position. The
+     * address returned will be the next unused in the chain.
+     *
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @return A Bitcoin Cash receive address in bech32 format
+     */
+    fun getNextReceiveCashAddress(accountIndex: Int): Observable<String> =
+            Observable.fromCallable {
+                bchDataStore.bchWallet!!.getNextReceiveCashAddress(accountIndex)
+            }
+
+    /**
      * Generates a Base58 Bitcoin Cash change address for an account at a given position. The
      * address returned will be the next unused in the chain.
      *
@@ -304,6 +316,18 @@ class BchDataManager(
     fun getNextChangeAddress(accountIndex: Int): Observable<String> =
             Observable.fromCallable {
                 bchDataStore.bchWallet!!.getNextChangeAddress(accountIndex)
+            }
+
+    /**
+     * Generates a bech32 Bitcoin Cash change address for an account at a given position. The
+     * address returned will be the next unused in the chain.
+     *
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @return A Bitcoin Cash change address in bech32 format
+     */
+    fun getNextChangeCashAddress(accountIndex: Int): Observable<String> =
+            Observable.fromCallable {
+                bchDataStore.bchWallet!!.getNextChangeCashAddress(accountIndex)
             }
 
     /**
@@ -399,4 +423,7 @@ class BchDataManager(
 
     fun getAcc() =
         bchDataStore.bchWallet!!.accounts
+
+    fun subtractAmountFromAddressBalance(account: String, amount: BigInteger) =
+            bchDataStore.bchWallet!!.subtractAmountFromAddressBalance(account, amount)
 }

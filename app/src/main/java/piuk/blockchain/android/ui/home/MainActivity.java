@@ -760,7 +760,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.setCurrentItem(0);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
         SendFragment sendFragment =
-                SendFragment.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
+                SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
         addFragmentToBackStack(sendFragment);
     }
 
@@ -821,7 +821,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.removeOnTabSelectedListener();
         binding.bottomNavigation.setCurrentItem(0);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
-        addFragmentToBackStack(SendFragment.Companion.newInstance(uri, recipientId, mdid, fctxId));
+        addFragmentToBackStack(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
     }
 
     @Override

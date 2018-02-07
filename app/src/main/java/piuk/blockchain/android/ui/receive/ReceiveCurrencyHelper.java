@@ -65,7 +65,7 @@ public class ReceiveCurrencyHelper {
         switch (currencyState.getCryptoCurrency()){
             case BTC: return getBtcUnit();
             case ETHER: return getEthUnit();
-            case BCH: return monetaryUtil.getBchUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+            case BCH: return getBchUnit();
             default: throw new IllegalArgumentException(currencyState.getCryptoCurrency()+" not supported.");
         }
     }

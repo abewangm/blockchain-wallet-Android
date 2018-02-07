@@ -432,14 +432,8 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
 
     private fun handleIncomingArguments() {
         if (arguments != null) {
-            // TODO: This doesn't currently work; it gets reset by onViewReady which is called
-            // after this method. Not worth fixing for this release.
-            presenter.selectSendingBtcAccount(
-                    arguments!!.getInt(
-                            ARGUMENT_SELECTED_ACCOUNT_POSITION,
-                            -1
-                    )
-            )
+
+            presenter.selectDefaultOrFirstFundedSendingAccount()
 
             val scanData = arguments!!.getString(ARGUMENT_SCAN_DATA)
             val metricInputFlag = arguments!!.getString(ARGUMENT_SCAN_DATA_ADDRESS_INPUT_ROUTE)
@@ -1033,6 +1027,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
         private const val REQUEST_CODE_BCH_RECEIVING = 913
         private const val REQUEST_CODE_BCH_SENDING = 914
 
+        @JvmStatic
         fun newInstance(
                 scanData: String?,
                 scanRoute: String?,
@@ -1047,6 +1042,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
             return fragment
         }
 
+        @JvmStatic
         fun newInstance(
                 uri: String,
                 contactId: String,
