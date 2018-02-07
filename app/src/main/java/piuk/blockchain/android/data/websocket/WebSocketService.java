@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -29,12 +30,16 @@ import piuk.blockchain.android.util.annotations.Thunk;
 
 public class WebSocketService extends Service {
 
-    public static final String ACTION_INTENT = "info.blockchain.wallet.WebSocketService.SUBSCRIBE_TO_ADDRESS";
-    public static final String BITCOIN_ADDRESS = "address";
-    public static final String X_PUB = "x_pub";
+    public static final String ACTION_INTENT = "piuk.blockchain.android.action.SUBSCRIBE_TO_ADDRESS";
+    public static final String EXTRA_BITCOIN_ADDRESS = "piuk.blockchain.android.extras.EXTRA_BITCOIN_ADDRESS";
+    public static final String EXTRA_X_PUB_BTC = "piuk.blockchain.android.extras.EXTRA_X_PUB_BTC";
+    public static final String EXTRA_BITCOIN_CASH_ADDRESS = "piuk.blockchain.android.extras.EXTRA_BITCOIN_CASH_ADDRESS";
+    public static final String EXTRA_X_PUB_BCH = "piuk.blockchain.android.extras.EXTRA_X_PUB_BCH";
+
     private final IBinder binder = new LocalBinder();
     @Inject protected PayloadDataManager payloadDataManager;
     @Inject protected EthDataManager ethDataManager;
+    @Inject protected BchDataManager bchDataManager;
     @Inject protected PrefsUtil prefsUtil;
     @Inject protected NotificationManager notificationManager;
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
@@ -46,11 +51,17 @@ public class WebSocketService extends Service {
         @Override
         public void onReceive(Context context, final Intent intent) {
             if (intent.getAction().equals(ACTION_INTENT)) {
-                if (intent.hasExtra(BITCOIN_ADDRESS) && webSocketHandler != null) {
-                    webSocketHandler.subscribeToAddress(intent.getStringExtra(BITCOIN_ADDRESS));
+                if (intent.hasExtra(EXTRA_BITCOIN_ADDRESS) && webSocketHandler != null) {
+                    webSocketHandler.subscribeToAddressBtc(intent.getStringExtra(EXTRA_BITCOIN_ADDRESS));
                 }
-                if (intent.hasExtra(X_PUB) && webSocketHandler != null) {
-                    webSocketHandler.subscribeToXpub(intent.getStringExtra(X_PUB));
+                if (intent.hasExtra(EXTRA_X_PUB_BTC) && webSocketHandler != null) {
+                    webSocketHandler.subscribeToXpubBtc(intent.getStringExtra(EXTRA_X_PUB_BTC));
+                }
+                if (intent.hasExtra(EXTRA_BITCOIN_CASH_ADDRESS) && webSocketHandler != null) {
+                    webSocketHandler.subscribeToAddressBch(intent.getStringExtra(EXTRA_BITCOIN_CASH_ADDRESS));
+                }
+                if (intent.hasExtra(EXTRA_X_PUB_BCH) && webSocketHandler != null) {
+                    webSocketHandler.subscribeToXpubBch(intent.getStringExtra(EXTRA_X_PUB_BCH));
                 }
             }
         }
@@ -77,34 +88,37 @@ public class WebSocketService extends Service {
                 okHttpClient,
                 payloadDataManager,
                 ethDataManager,
+                bchDataManager,
                 notificationManager,
                 new EnvironmentSettings(),
                 new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
                 prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
-                getXpubs(),
-                getAddresses(),
+                getXpubsBtc(),
+                getAddressesBtc(),
+                getXpubsBch(),
+                getAddressesBch(),
                 getEthAccount(),
                 rxBus);
 
         webSocketHandler.start();
     }
 
-    private String[] getXpubs() {
+    private String[] getXpubsBtc() {
         int nbAccounts = 0;
         if (payloadDataManager.getWallet() != null) {
             if (payloadDataManager.getWallet().isUpgraded()) {
                 try {
                     nbAccounts = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().size();
-                } catch (java.lang.IndexOutOfBoundsException e) {
+                } catch (IndexOutOfBoundsException e) {
                     nbAccounts = 0;
                 }
             }
 
             final String[] xpubs = new String[nbAccounts];
             for (int i = 0; i < nbAccounts; i++) {
-                String s = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(i).getXpub();
-                if (s != null && !s.isEmpty()) {
-                    xpubs[i] = s;
+                String xPub = payloadDataManager.getWallet().getHdWallets().get(0).getAccounts().get(i).getXpub();
+                if (xPub != null && !xPub.isEmpty()) {
+                    xpubs[i] = xPub;
                 }
             }
             return xpubs;
@@ -113,14 +127,14 @@ public class WebSocketService extends Service {
         }
     }
 
-    private String[] getAddresses() {
+    private String[] getAddressesBtc() {
         if (payloadDataManager.getWallet() != null) {
             int nbLegacy = payloadDataManager.getWallet().getLegacyAddressList().size();
             final String[] addrs = new String[nbLegacy];
             for (int i = 0; i < nbLegacy; i++) {
-                String s = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
-                if (s != null && !s.isEmpty()) {
-                    addrs[i] = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
+                String address = payloadDataManager.getWallet().getLegacyAddressList().get(i).getAddress();
+                if (address != null && !address.isEmpty()) {
+                    addrs[i] = address;
                 }
             }
 
@@ -128,6 +142,51 @@ public class WebSocketService extends Service {
         } else if (!swipeToReceiveHelper.getBitcoinReceiveAddresses().isEmpty()) {
             final String[] addrs = new String[swipeToReceiveHelper.getBitcoinReceiveAddresses().size()];
             final List<String> receiveAddresses = swipeToReceiveHelper.getBitcoinReceiveAddresses();
+            for (int i = 0; i < receiveAddresses.size(); i++) {
+                final String address = receiveAddresses.get(i);
+                addrs[i] = address;
+            }
+            return addrs;
+        } else {
+            return new String[0];
+        }
+    }
+
+    private String[] getXpubsBch() {
+        int nbAccounts = 0;
+        if (payloadDataManager.getWallet() != null) {
+            if (payloadDataManager.getWallet().isUpgraded()) {
+                nbAccounts = bchDataManager.getActiveXpubs().size();
+            }
+
+            final String[] xpubs = new String[nbAccounts];
+            for (int i = 0; i < nbAccounts; i++) {
+                String xPub = bchDataManager.getActiveXpubs().get(i);
+                if (xPub != null && !xPub.isEmpty()) {
+                    xpubs[i] = xPub;
+                }
+            }
+            return xpubs;
+        } else {
+            return new String[0];
+        }
+    }
+
+    private String[] getAddressesBch() {
+        if (payloadDataManager.getWallet() != null) {
+            int nbLegacy = bchDataManager.getLegacyAddressStringList().size();
+            final String[] addrs = new String[nbLegacy];
+            for (int i = 0; i < nbLegacy; i++) {
+                String address = bchDataManager.getLegacyAddressStringList().get(i);
+                if (address != null && !address.isEmpty()) {
+                    addrs[i] = address;
+                }
+            }
+
+            return addrs;
+        } else if (!swipeToReceiveHelper.getBitcoinCashReceiveAddresses().isEmpty()) {
+            final String[] addrs = new String[swipeToReceiveHelper.getBitcoinCashReceiveAddresses().size()];
+            final List<String> receiveAddresses = swipeToReceiveHelper.getBitcoinCashReceiveAddresses();
             for (int i = 0; i < receiveAddresses.size(); i++) {
                 final String address = receiveAddresses.get(i);
                 addrs[i] = address;

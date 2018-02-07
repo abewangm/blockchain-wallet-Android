@@ -26,4 +26,7 @@ interface DashboardView : View {
     fun startBitcoinCashReceive()
 
     fun scrollToTop()
+
+    fun startWebsocketService()
+
 }

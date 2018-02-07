@@ -36,7 +36,12 @@ class SwipeToReceivePresenterTest {
         // Arrange
         whenever(swipeToReceiveHelper.getBitcoinReceiveAddresses()).thenReturn(emptyList())
         whenever(swipeToReceiveHelper.getBitcoinAccountName()).thenReturn("Bitcoin account")
-        whenever(stringUtils.getFormattedString(R.string.swipe_receive_request, CryptoCurrencies.BTC.unit))
+        whenever(
+                stringUtils.getFormattedString(
+                        R.string.swipe_receive_request,
+                        CryptoCurrencies.BTC.unit
+                )
+        )
                 .thenReturn("BTC")
         // Act
         subject.onViewReady()
@@ -56,7 +61,12 @@ class SwipeToReceivePresenterTest {
         whenever(swipeToReceiveHelper.getBitcoinAccountName()).thenReturn("Account")
         whenever(swipeToReceiveHelper.getNextAvailableBitcoinAddressSingle())
                 .thenReturn(Single.just(""))
-        whenever(stringUtils.getFormattedString(R.string.swipe_receive_request, CryptoCurrencies.BTC.unit))
+        whenever(
+                stringUtils.getFormattedString(
+                        R.string.swipe_receive_request,
+                        CryptoCurrencies.BTC.unit
+                )
+        )
                 .thenReturn("BTC")
         // Act
         subject.onViewReady()
