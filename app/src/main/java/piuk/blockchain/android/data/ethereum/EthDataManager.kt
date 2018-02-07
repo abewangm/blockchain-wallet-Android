@@ -10,6 +10,8 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.functions.BiFunction
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.DeterministicKey
 import org.spongycastle.util.encoders.Hex
@@ -18,7 +20,9 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
+import timber.log.Timber
 import java.math.BigInteger
 import java.util.*
 
@@ -27,6 +31,7 @@ class EthDataManager(
         private val payloadManager: PayloadManager,
         private val ethAccountApi: EthAccountApi,
         private val ethDataStore: EthDataStore,
+        private val walletOptionsDataManager: WalletOptionsDataManager,
         rxBus: RxBus
 ) {
 
@@ -96,15 +101,34 @@ class EthDataManager(
 
         val lastTxHash = ethDataStore.ethWallet?.lastTransactionHash
 
-        return fetchEthAddress().flatMapIterable { it.getTransactions() }
-                .filter { list -> list.hash == lastTxHash }
-                .toList()
-                .flatMapObservable {
-                    val originalSize = ethDataStore.ethAddressResponse?.getTransactions()?.size ?: 0
+        //default 10min
+        val lastTxTimestamp = Math.max(ethDataStore.ethWallet?.lastTransactionTimestamp ?: 0L, 600L)
 
-                    Observable.just(lastTxHash != null && originalSize != 0 && it.size == 0)
-                }
+        // No previous transactions
+        if (lastTxHash == null ||
+                ethDataStore.ethAddressResponse?.getTransactions()?.size
+                ?: 0 == 0) return Observable.just(false)
+
+        return Observable.zip(
+                hasMatchingTx(lastTxHash),
+                isTransactionDropped(lastTxTimestamp),
+                BiFunction({hasMatch: Boolean, isDropped: Boolean ->
+                    hasMatch && !isDropped
+                }))
     }
+
+    /*
+    If x time passed and transaction was not successfully mined, the last transaction will be
+    deemed dropped and the account will be allowed to create a new transaction.
+     */
+    private fun isTransactionDropped(lastTxTimestamp: Long) = walletOptionsDataManager.getLastEthTransactionFuse()
+                .map { System.currentTimeMillis() > lastTxTimestamp + (it * 1000) }
+
+    private fun hasMatchingTx(lastTxHash: String) =
+            fetchEthAddress().flatMapIterable { it.getTransactions() }
+                    .filter { list -> list.hash == lastTxHash }
+                    .toList()
+                    .flatMapObservable { Observable.just(it.size > 0) }
 
     /**
      * Returns a [EthLatestBlock] object which contains information about the most recently
@@ -203,14 +227,15 @@ class EthDataManager(
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
-    fun setLastTxHashObservable(txHash: String): Observable<String> = rxPinning.call<String> {
-        Observable.fromCallable { setLastTxHash(txHash) }
+    fun setLastTxHashObservable(txHash: String, timestamp: Long): Observable<String> = rxPinning.call<String> {
+        Observable.fromCallable { setLastTxHash(txHash, timestamp) }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
     @Throws(Exception::class)
-    private fun setLastTxHash(txHash: String): String {
+    private fun setLastTxHash(txHash: String, timestamp: Long): String {
         ethDataStore.ethWallet!!.lastTransactionHash = txHash
+        ethDataStore.ethWallet!!.lastTransactionTimestamp = timestamp
         ethDataStore.ethWallet!!.save()
 
         return txHash
