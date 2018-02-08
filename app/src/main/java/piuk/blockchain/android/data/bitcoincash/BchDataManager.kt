@@ -134,6 +134,7 @@ class BchDataManager(
                     ""
             )
 
+            // BCH Metadata does not store xpub - get from btc wallet since PATH is the same
             payloadDataManager.accounts.forEachIndexed { i, account ->
                 bchDataStore.bchWallet?.addAccount()
                 walletMetadata.accounts[i].xpub = account.xpub
@@ -145,6 +146,8 @@ class BchDataManager(
                     networkParameterUtils.bitcoinCashParams
             )
 
+            // NB! A watch-only account xpub != account xpub, then do however derive the same addresses.
+            // Only use this [DeterministicAccount] to derive receive/change addresses. Don't use xpub as multiaddr etc parameter.
             payloadDataManager.accounts.forEachIndexed { i, account ->
                 bchDataStore.bchWallet?.addWatchOnlyAccount(account.xpub)
                 walletMetadata.accounts[i].xpub = account.xpub
@@ -177,7 +180,7 @@ class BchDataManager(
 
         bchDataStore.bchMetadata?.accounts?.forEachIndexed { i, account ->
             if (!account.isArchived) {
-                result.add(bchDataStore.bchWallet?.getAccountPubB58(i)!!)
+                result.add(account.xpub)
             }
         }
 
@@ -190,7 +193,7 @@ class BchDataManager(
 
         bchDataStore.bchMetadata?.accounts?.forEachIndexed { i, account ->
             if (!account.isArchived) {
-                result.add(bchDataStore.bchWallet?.getAccountPubB58(i)!!)
+                result.add(account.xpub)
             }
         }
 
