@@ -48,6 +48,7 @@ class ReceiveCurrencyHelperTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(1)
         whenever(monetaryUtil.getBtcUnit(1)).thenReturn("mBTC")
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
         val value = subject.cryptoUnit
         // Assert
@@ -59,6 +60,7 @@ class ReceiveCurrencyHelperTest {
     fun getEthUnit() {
         // Arrange
         whenever(monetaryUtil.getEthUnit(0)).thenReturn("ETH")
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         // Act
         val value = subject.cryptoUnit
         // Assert
