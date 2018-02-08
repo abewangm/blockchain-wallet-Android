@@ -185,6 +185,7 @@ class WalletAccountHelperTest {
         whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         whenever(ethDataManager.getEthWallet()?.account).thenReturn(ethAccount)
+        whenever(ethAccount.address).thenReturn("address")
         whenever(ethDataManager.getEthResponseModel()).thenReturn(combinedEthModel)
         whenever(combinedEthModel.getTotalBalance()).thenReturn(BigInteger.valueOf(1234567890L))
         // Act
@@ -256,6 +257,7 @@ class WalletAccountHelperTest {
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         whenever(ethDataManager.getEthWallet()?.account).thenReturn(ethAccount)
+        whenever(ethAccount.address).thenReturn("address")
         whenever(ethDataManager.getEthResponseModel()).thenReturn(combinedEthModel)
         whenever(combinedEthModel.getTotalBalance()).thenReturn(BigInteger.valueOf(1234567890L))
         // Act

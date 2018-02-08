@@ -696,6 +696,7 @@ class ReceivePresenterTest {
     @Throws(Exception::class)
     fun `onShowBottomSheetSelected unknown`() {
         // Arrange
+        whenever(environmentSettings.bitcoinCashNetworkParameters).thenReturn(BitcoinCashMainNetParams.get())
         subject.selectedAddress = "I am not a valid address"
         // Act
         subject.onShowBottomSheetSelected()

@@ -211,7 +211,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                     return@flatMap ethDataManager.signEthTransaction(it, ecKey)
                 }
                 .flatMap { ethDataManager.pushEthTx(it) }
-                .flatMap { ethDataManager.setLastTxHashObservable(it) }
+                .flatMap { ethDataManager.setLastTxHashObservable(it, System.currentTimeMillis()) }
                 .flatMapCompletable { updateMetadata(it) }
                 .subscribe(
                         { handleSuccess(depositAddress) },

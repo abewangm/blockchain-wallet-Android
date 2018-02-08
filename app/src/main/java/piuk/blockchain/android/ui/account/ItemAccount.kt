@@ -38,7 +38,7 @@ class ItemAccount {
             tag: String?,
             absoluteBalance: Long?,
             accountObject: Any? = null,
-            address: String,
+            address: String?,
             type: TYPE = TYPE.SINGLE_ACCOUNT
     ) {
         this.label = label

@@ -141,6 +141,11 @@ class WalletOptionsDataManager(
         return result
     }
 
+    fun getLastEthTransactionFuse(): Observable<Long> {
+        return walletOptionsState.walletOptionsSource
+                .map { return@map it.ethereum.lastTxFuse }
+    }
+
     companion object {
         private const val SHOW_SHAPESHIFT = "showShapeshift"
     }
