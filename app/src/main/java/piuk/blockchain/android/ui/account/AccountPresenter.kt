@@ -49,20 +49,14 @@ class AccountPresenter @Inject internal constructor(
         MonetaryUtil(getBtcFormat())
     }
 
-    private val btcAccounts: List<Account> = payloadDataManager.accounts
-    private val bchAccounts: List<GenericMetadataAccount> = bchDataManager.getActiveAccounts()
-    private val legacyAddresses: List<LegacyAddress> = payloadDataManager.legacyAddresses
-    private val defaultBtcIndex: Int = payloadDataManager.defaultAccountIndex
-    private val defaultBchIndex: Int = bchDataManager.getDefaultAccountPosition()
-
     internal var doubleEncryptionPassword: String? = null
     internal var cryptoCurrency: CryptoCurrencies by Delegates.observable(CryptoCurrencies.BTC) { _, _, new ->
         check(new != CryptoCurrencies.ETHER) { "Ether not a supported cryptocurrency on this page" }
         onViewReady()
     }
     internal val accountSize = when (cryptoCurrency) {
-        CryptoCurrencies.BTC -> btcAccounts.size
-        CryptoCurrencies.BCH -> bchAccounts.size
+        CryptoCurrencies.BTC -> getBtcAccounts().size
+        CryptoCurrencies.BCH -> getBchAccounts().size
         CryptoCurrencies.ETHER -> throw IllegalStateException("Ether not a supported cryptocurrency on this page")
     }
 
@@ -111,7 +105,7 @@ class AccountPresenter @Inject internal constructor(
         payloadDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
-                .doOnTerminate { view.dismissProgressDialog() }
+                .doAfterTerminate { view.dismissProgressDialog() }
                 .doOnError { Timber.e(it) }
                 .subscribe(
                         {
@@ -155,7 +149,7 @@ class AccountPresenter @Inject internal constructor(
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.saving_address) }
                 .doOnError { Timber.e(it) }
-                .doOnTerminate { view.dismissProgressDialog() }
+                .doAfterTerminate { view.dismissProgressDialog() }
                 .subscribe(
                         {
                             view.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK)
@@ -206,7 +200,11 @@ class AccountPresenter @Inject internal constructor(
      *
      * @param data The address to be imported
      */
-    internal fun onAddressScanned(data: String) {
+    internal fun onAddressScanned(data: String?) {
+        if (data == null) {
+            view.showToast(R.string.privkey_error, ToastCustom.TYPE_ERROR)
+            return
+        }
         try {
             val format = privateKeyFactory.getFormat(data)
             if (format != null) {
@@ -336,9 +334,9 @@ class AccountPresenter @Inject internal constructor(
         // Create New Wallet button at top position
         accountsAndImportedList.add(AccountItem(AccountItem.TYPE_CREATE_NEW_WALLET_BUTTON))
 
-        val defaultAccount = btcAccounts[defaultBtcIndex]
+        val defaultAccount = getBtcAccounts()[getDefaultBtcIndex()]
 
-        for (account in btcAccounts) {
+        for (account in getBtcAccounts()) {
             val balance = getBtcAccountBalance(account.xpub)
             var label: String? = account.label
 
@@ -364,7 +362,7 @@ class AccountPresenter @Inject internal constructor(
         // Import Address button at first position after wallets
         accountsAndImportedList.add(AccountItem(AccountItem.TYPE_IMPORT_ADDRESS_BUTTON))
 
-        for (legacyAddress in legacyAddresses) {
+        for (legacyAddress in getLegacyAddresses()) {
             var label: String? = legacyAddress.label
             val address: String = legacyAddress.address ?: ""
             val balance = getBtcAddressBalance(address)
@@ -398,9 +396,9 @@ class AccountPresenter @Inject internal constructor(
         // Create New Wallet button at top position, non-clickable
         accountsAndImportedList.add(AccountItem(AccountItem.TYPE_WALLET_HEADER))
 
-        val defaultAccount = bchAccounts[defaultBchIndex]
+        val defaultAccount = getBchAccounts()[getDefaultBchIndex()]
 
-        for ((position, account) in bchAccounts.withIndex()) {
+        for ((position, account) in getBchAccounts().withIndex()) {
             val balance = getBchAccountBalance(account.xpub)
             var label: String? = account.label
 
@@ -425,7 +423,7 @@ class AccountPresenter @Inject internal constructor(
         // Import Address header, non clickable
         accountsAndImportedList.add(AccountItem(AccountItem.TYPE_LEGACY_HEADER))
 
-        val total = legacyAddresses
+        val total = getLegacyAddresses()
                 .map { getBalanceFromBchAddress(it.address) }
                 .sum()
 
@@ -437,6 +435,19 @@ class AccountPresenter @Inject internal constructor(
         return accountsAndImportedList
     }
 
+    //region Convenience functions
+    private fun getBtcAccounts(): List<Account> = payloadDataManager.accounts
+
+    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getActiveAccounts()
+
+    private fun getLegacyAddresses(): List<LegacyAddress> = payloadDataManager.legacyAddresses
+
+    private fun getDefaultBtcIndex(): Int = payloadDataManager.defaultAccountIndex
+
+    private fun getDefaultBchIndex(): Int = bchDataManager.getDefaultAccountPosition()
+    //endregion
+
+    //region Balance and formatting functions
     private fun getBtcAccountBalance(xpub: String): String {
         val amount = getBalanceFromBtcAddress(xpub)
         val unit = monetaryUtil.getBtcUnits()[getBtcFormat()]
@@ -474,6 +485,7 @@ class AccountPresenter @Inject internal constructor(
 
     private fun getBalanceFromBchAddress(address: String): Long =
             bchDataManager.getAddressBalance(address).toLong()
+    //endregion
 
     companion object {
 
