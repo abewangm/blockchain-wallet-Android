@@ -68,7 +68,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         content_frame.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
         textview_selected_currency.measure(View.MeasureSpec.UNSPECIFIED, heightMeasureSpec)
         collapsedHeight = textview_selected_currency.measuredHeight
-        contentWidth = content_frame.measuredWidth
+        contentWidth = content_frame.measuredWidth + textview_selected_currency.measuredWidth
         contentHeight = content_frame.measuredHeight
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)

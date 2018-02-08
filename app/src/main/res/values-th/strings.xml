@@ -632,7 +632,7 @@
     <string name="payment_request">คำร้องขอการชำระเงิน</string>
     <string name="restoring_wallet">กำลังกู้คืนกระเป๋าเงิน</string>
     <string name="support_leaving_app_warning">การทำเช่นนี้จะเป็นการออกจากแอปและนำคุณไปยังเบราว์เซอร์ของคุณ ดำเนินการต่อ?</string>
-    <string name="addresses">ที่อยู่ Bitcoin </string>
+    <string name="addresses_bitcoin">ที่อยู่ Bitcoin </string>
     <string name="merchant_map">แอปผู้ค้า Bitcoin </string>
     <string name="received_ethereum">Ether ที่ได้รับ</string>
     <string name="transaction_occur_when_bitcoin">ธุรกรรมจะเกิดขึ้นเมื่อคุณได้รับและส่ง bitcoin</string>

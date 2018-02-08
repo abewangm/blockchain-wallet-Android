@@ -1,25 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
-        android:id="@+id/main_layout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linear_layout_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <!-- HEADER LAYOUT -->
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
+
+        <include layout="@layout/toolbar_general" />
+
+        <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader
+            android:id="@+id/currency_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="4dp"
+            android:fitsSystemWindows="true" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview_accounts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:background="@color/white"
+        android:clipToPadding="false"
+        android:paddingTop="4dp"
+        tools:listitem="@layout/item_accounts_row" />
 
-        <include
-            android:id="@+id/toolbar_container"
-            layout="@layout/toolbar_general" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/accountsList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="4dp"
-            android:background="@color/white"
-            android:clipToPadding="false"
-            tools:listitem="@layout/item_accounts_row" />
-
-    </LinearLayout>
-</layout>
+</LinearLayout>

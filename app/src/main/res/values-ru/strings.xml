@@ -632,7 +632,7 @@
     <string name="payment_request">Запрос платежа</string>
     <string name="restoring_wallet">Восстановление кошелька.</string>
     <string name="support_leaving_app_warning">Это действие оставит приложение и перенаправит вас в браузер. Продолжить?</string>
-    <string name="addresses">Bitcoin адреса</string>
+    <string name="addresses_bitcoin">Bitcoin адреса</string>
     <string name="merchant_map">Карта Bitcoin Merchant</string>
     <string name="received_ethereum">Получить Ether</string>
     <string name="transaction_occur_when_bitcoin">Транзакции осуществляются, когда вы получаете и отправляете bitcoin.</string>

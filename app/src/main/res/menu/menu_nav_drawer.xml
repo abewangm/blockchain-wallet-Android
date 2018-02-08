@@ -20,7 +20,7 @@
     <item
         android:id="@+id/nav_addresses"
         android:icon="@drawable/vector_wallet"
-        android:title="@string/addresses" />
+        android:title="@string/drawer_addresses" />
 
     <item
         android:id="@+id/nav_contacts"
