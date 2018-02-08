@@ -80,14 +80,18 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         setContentView(R.layout.activity_accounts)
         setupToolbar(toolbar_general, R.string.drawer_addresses)
 
-        currency_header.hideEthereum()
-        currency_header.setCurrentlySelectedCurrency(presenter.cryptoCurrency)
-        currency_header.setSelectionListener { presenter.cryptoCurrency = it }
+        with(currency_header) {
+            hideEthereum()
+            setCurrentlySelectedCurrency(presenter.cryptoCurrency)
+            setSelectionListener { presenter.cryptoCurrency = it }
+        }
 
-        recyclerview_accounts.layoutManager = LinearLayoutManager(this)
-        recyclerview_accounts.itemAnimator = null
-        recyclerview_accounts.setHasFixedSize(true)
-        recyclerview_accounts.adapter = accountsAdapter
+        with(recyclerview_accounts) {
+            layoutManager = LinearLayoutManager(this)
+            itemAnimator = null
+            setHasFixedSize(true)
+            adapter = accountsAdapter
+        }
 
         onViewReady()
     }
