@@ -87,7 +87,7 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         }
 
         with(recyclerview_accounts) {
-            layoutManager = LinearLayoutManager(this)
+            layoutManager = LinearLayoutManager(this@AccountActivity)
             itemAnimator = null
             setHasFixedSize(true)
             adapter = accountsAdapter
