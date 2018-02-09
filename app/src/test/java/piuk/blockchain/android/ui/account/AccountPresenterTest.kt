@@ -35,6 +35,7 @@ import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.account.AccountPresenter.Companion.KEY_WARN_TRANSFER_ALL
 import piuk.blockchain.android.ui.customviews.ToastCustom
@@ -56,6 +57,7 @@ class AccountPresenterTest {
     private val activity: AccountView = mock()
     private val payloadDataManager: PayloadDataManager = mock()
     private val bchDataManager: BchDataManager = mock()
+    private val metadataManager: MetadataManager = mock()
     private val fundsDataManager: TransferFundsDataManager = mock()
     private val prefsUtil: PrefsUtil = mock()
     private val appUtil: AppUtil = mock()
@@ -70,6 +72,7 @@ class AccountPresenterTest {
         subject = AccountPresenter(
                 payloadDataManager,
                 bchDataManager,
+                metadataManager,
                 fundsDataManager,
                 prefsUtil,
                 appUtil,
@@ -175,9 +178,15 @@ class AccountPresenterTest {
         // Arrange
         whenever(payloadDataManager.createNewAccount(anyString(), isNull<String>()))
                 .thenReturn(Observable.just(Account()))
+        whenever(bchDataManager.serializeForSaving()).thenReturn("")
+        whenever(metadataManager.saveToMetadata(any(), anyInt())).thenReturn(Completable.complete())
         // Act
         subject.createNewAccount("")
         // Assert
+        verify(payloadDataManager).createNewAccount(anyString(), isNull())
+        verify(bchDataManager).createAccount()
+        verify(bchDataManager).serializeForSaving()
+        verify(metadataManager).saveToMetadata(any(), anyInt())
         verify(activity).showProgressDialog(anyInt())
         verify(activity).dismissProgressDialog()
         verify(activity).showToast(anyInt(), eq(ToastCustom.TYPE_OK))
