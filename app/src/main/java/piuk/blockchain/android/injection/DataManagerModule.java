@@ -62,7 +62,6 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.BackupWalletUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MetadataUtils;
-import piuk.blockchain.android.util.NetworkParameterUtils;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -291,14 +290,14 @@ public class DataManagerModule {
     protected BchDataManager provideBchDataManager(PayloadDataManager payloadDataManager,
                                                    BchDataStore bchDataStore,
                                                    MetadataUtils metadataUtils,
-                                                   NetworkParameterUtils networkParameterUtils,
+                                                   EnvironmentSettings environmentSettings,
                                                    BlockExplorer blockExplorer,
                                                    StringUtils stringUtils,
                                                    RxBus rxBus) {
         return new BchDataManager(payloadDataManager,
                 bchDataStore,
                 metadataUtils,
-                networkParameterUtils,
+                environmentSettings,
                 blockExplorer,
                 stringUtils,
                 rxBus);

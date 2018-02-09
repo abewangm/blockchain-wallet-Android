@@ -14,10 +14,10 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import piuk.blockchain.android.RxTest
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.util.MetadataUtils
-import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.StringUtils
 
 class BchDataManagerTest : RxTest() {
@@ -26,7 +26,7 @@ class BchDataManagerTest : RxTest() {
 
     private val payloadDataManager: PayloadDataManager = mock()
     private var bchDataStore: BchDataStore = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
-    private val networkParameterUtils: NetworkParameterUtils = mock()
+    private val environmentSettings: EnvironmentSettings = mock()
     private val metadataUtils: MetadataUtils = mock()
     private val blockExplorer: BlockExplorer = mock()
     private val stringUtils: StringUtils = mock()
@@ -36,13 +36,15 @@ class BchDataManagerTest : RxTest() {
     override fun setUp() {
         super.setUp()
 
-        whenever(networkParameterUtils.bitcoinCashParams).thenReturn(BitcoinCashMainNetParams.get())
+        whenever(environmentSettings.bitcoinCashNetworkParameters).thenReturn(
+                BitcoinCashMainNetParams.get()
+        )
 
         subject = BchDataManager(
                 payloadDataManager,
                 bchDataStore,
                 metadataUtils,
-                networkParameterUtils,
+                environmentSettings,
                 blockExplorer,
                 stringUtils,
                 rxBus
@@ -69,7 +71,6 @@ class BchDataManagerTest : RxTest() {
 
         //restoreBchWallet
         whenever(payloadDataManager.isDoubleEncrypted).thenReturn(false)
-        whenever(networkParameterUtils.bitcoinCashParams).thenReturn(BitcoinCashMainNetParams.get())
         whenever(payloadDataManager.mnemonic).thenReturn(split("all all all all all all all all all all all all"))
 
         val metadata: Metadata = mock()
@@ -95,7 +96,6 @@ class BchDataManagerTest : RxTest() {
         // Arrange
         val key: DeterministicKey = mock()
         whenever(payloadDataManager.isDoubleEncrypted).thenReturn(false)
-        whenever(networkParameterUtils.bitcoinCashParams).thenReturn(BitcoinCashMainNetParams.get())
         whenever(payloadDataManager.mnemonic).thenReturn(split("all all all all all all all all all all all all"))
 
         val metadata: Metadata = mock()
@@ -123,7 +123,6 @@ class BchDataManagerTest : RxTest() {
         whenever(payloadDataManager.isDoubleEncrypted).thenReturn(true)
         val mnemonic: List<String> = mock()
         whenever(payloadDataManager.mnemonic).thenReturn(mnemonic)
-        whenever(networkParameterUtils.bitcoinCashParams).thenReturn(BitcoinCashMainNetParams.get())
 
         val metadata: Metadata = mock()
         whenever(metadataUtils.getMetadataNode(org.amshove.kluent.any(), org.amshove.kluent.any()))
@@ -151,7 +150,6 @@ class BchDataManagerTest : RxTest() {
         whenever(payloadDataManager.isDoubleEncrypted).thenReturn(true)
         val mnemonic: List<String> = mock()
         whenever(payloadDataManager.mnemonic).thenReturn(mnemonic)
-        whenever(networkParameterUtils.bitcoinCashParams).thenReturn(BitcoinCashMainNetParams.get())
 
         val metadata: Metadata = mock()
         whenever(metadataUtils.getMetadataNode(org.amshove.kluent.any(), org.amshove.kluent.any()))

@@ -12,12 +12,12 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.util.MetadataUtils
-import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
@@ -28,7 +28,7 @@ class BchDataManager(
         private val payloadDataManager: PayloadDataManager,
         private val bchDataStore: BchDataStore,
         private val metadataUtils: MetadataUtils,
-        private val networkParameterUtils: NetworkParameterUtils,
+        private val environmentSettings: EnvironmentSettings,
         private val blockExplorer: BlockExplorer,
         private val stringUtils: StringUtils,
         rxBus: RxBus
@@ -134,7 +134,7 @@ class BchDataManager(
         if (!payloadDataManager.isDoubleEncrypted) {
             bchDataStore.bchWallet = BitcoinCashWallet.restore(
                     blockExplorer,
-                    networkParameterUtils.bitcoinCashParams,
+                    environmentSettings.bitcoinCashNetworkParameters,
                     BitcoinCashWallet.BITCOIN_COIN_PATH,
                     payloadDataManager.mnemonic,
                     ""
@@ -149,7 +149,7 @@ class BchDataManager(
 
             bchDataStore.bchWallet = BitcoinCashWallet.createWatchOnly(
                     blockExplorer,
-                    networkParameterUtils.bitcoinCashParams
+                    environmentSettings.bitcoinCashNetworkParameters
             )
 
             // NB! A watch-only account xpub != account xpub, then do however derive the same addresses.
@@ -168,7 +168,7 @@ class BchDataManager(
 
         bchDataStore.bchWallet = BitcoinCashWallet.restore(
                 blockExplorer,
-                networkParameterUtils.bitcoinCashParams,
+                environmentSettings.bitcoinCashNetworkParameters,
                 BitcoinCashWallet.BITCOIN_COIN_PATH,
                 mnemonic,
                 ""

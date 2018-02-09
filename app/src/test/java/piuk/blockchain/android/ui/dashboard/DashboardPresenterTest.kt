@@ -1,6 +1,12 @@
 package piuk.blockchain.android.ui.dashboard
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.anyOrNull
+import com.nhaarman.mockito_kotlin.atLeastOnce
+import com.nhaarman.mockito_kotlin.eq
+import com.nhaarman.mockito_kotlin.times
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
+import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -18,8 +24,13 @@ import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.home.models.MetadataEvent
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.AppUtil
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
 import java.math.BigInteger
+import java.util.*
 
 class DashboardPresenterTest {
 
@@ -57,6 +68,10 @@ class DashboardPresenterTest {
         )
 
         subject.initView(view)
+
+        whenever(view.locale).thenReturn(Locale.US)
+        whenever(bchDataManager.getWalletTransactions(50, 0))
+                .thenReturn(Observable.just(emptyList()))
     }
 
     @Test
@@ -71,6 +86,7 @@ class DashboardPresenterTest {
         val combinedEthModel: CombinedEthModel = mock()
         whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         val btcBalance = 21_000_000_000L
         whenever(transactionListDataManager.getBtcBalance(any())).thenReturn(btcBalance)
         val ethBalance = 22_000_000_000L
@@ -94,24 +110,27 @@ class DashboardPresenterTest {
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
         verify(view, atLeastOnce()).notifyItemUpdated(any(), any())
         verify(view, atLeastOnce()).locale
-        verifyNoMoreInteractions(view)
+        verify(view, atLeastOnce()).updatePieChartState(any())
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
         verify(prefsUtil, atLeastOnce()).getValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, false)
         verifyNoMoreInteractions(prefsUtil)
         verify(swipeToReceiveHelper).storeEthAddress()
+        verify(swipeToReceiveHelper).updateAndStoreBitcoinAddresses()
+        verify(swipeToReceiveHelper).updateAndStoreBitcoinCashAddresses()
         verifyNoMoreInteractions(swipeToReceiveHelper)
-        verify(ethDataManager, times(2)).fetchEthAddress()
+        verify(ethDataManager).fetchEthAddress()
         verifyNoMoreInteractions(ethDataManager)
-        verify(payloadDataManager, times(2)).updateAllBalances()
+        verify(payloadDataManager).updateAllBalances()
+        verify(payloadDataManager).updateAllTransactions()
         verifyNoMoreInteractions(payloadDataManager)
-        verify(transactionListDataManager, times(2)).getBtcBalance(any())
-        verify(transactionListDataManager, times(2)).getBchBalance(any())
+        verify(transactionListDataManager).getBtcBalance(any())
+        verify(transactionListDataManager).getBchBalance(any())
         verifyNoMoreInteractions(transactionListDataManager)
         verify(exchangeRateFactory, times(3)).getLastBtcPrice("USD")
-        verify(exchangeRateFactory, times(2)).getLastEthPrice("USD")
-        verify(exchangeRateFactory, times(2)).getLastBchPrice("USD")
+        verify(exchangeRateFactory, times(3)).getLastEthPrice("USD")
+        verify(exchangeRateFactory, times(3)).getLastBchPrice("USD")
         verify(exchangeRateFactory).updateTickers()
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(bchDataManager, atLeastOnce()).updateAllBalances()
@@ -130,6 +149,7 @@ class DashboardPresenterTest {
         val combinedEthModel: CombinedEthModel = mock()
         whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         val btcBalance = 21_000_000_000L
         whenever(transactionListDataManager.getBtcBalance(any())).thenReturn(btcBalance)
         val ethBalance = 22_000_000_000L
@@ -150,7 +170,8 @@ class DashboardPresenterTest {
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
         verify(view, atLeastOnce()).notifyItemUpdated(any(), any())
         verify(view, atLeastOnce()).locale
-        verifyNoMoreInteractions(view)
+        verify(view, atLeastOnce()).updatePieChartState(any())
+        verify(view, atLeastOnce()).scrollToTop()
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
@@ -160,13 +181,14 @@ class DashboardPresenterTest {
         verify(ethDataManager).fetchEthAddress()
         verifyNoMoreInteractions(ethDataManager)
         verify(payloadDataManager).updateAllBalances()
+        verify(payloadDataManager).updateAllTransactions()
         verifyNoMoreInteractions(payloadDataManager)
         verify(transactionListDataManager).getBtcBalance(any())
         verify(transactionListDataManager).getBchBalance(any())
         verifyNoMoreInteractions(transactionListDataManager)
-        verify(exchangeRateFactory, times(3)).getLastBtcPrice("USD")
-        verify(exchangeRateFactory).getLastEthPrice("USD")
-        verify(exchangeRateFactory).getLastBchPrice("USD")
+        verify(exchangeRateFactory, times(4)).getLastBtcPrice("USD")
+        verify(exchangeRateFactory, times(3)).getLastEthPrice("USD")
+        verify(exchangeRateFactory, times(3)).getLastBchPrice("USD")
         verify(exchangeRateFactory).updateTickers()
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(buyDataManager).canBuy
@@ -186,6 +208,7 @@ class DashboardPresenterTest {
         val combinedEthModel: CombinedEthModel = mock()
         whenever(ethDataManager.fetchEthAddress()).thenReturn(Observable.just(combinedEthModel))
         whenever(payloadDataManager.updateAllBalances()).thenReturn(Completable.complete())
+        whenever(payloadDataManager.updateAllTransactions()).thenReturn(Completable.complete())
         val btcBalance = 21_000_000_000L
         whenever(transactionListDataManager.getBtcBalance(any())).thenReturn(btcBalance)
         val ethBalance = 22_000_000_000L
@@ -207,6 +230,8 @@ class DashboardPresenterTest {
         verify(view, atLeastOnce()).notifyItemAdded(any(), eq(0))
         verify(view, atLeastOnce()).notifyItemUpdated(any(), any())
         verify(view, atLeastOnce()).locale
+        verify(view, atLeastOnce()).startWebsocketService()
+        verify(view, atLeastOnce()).updatePieChartState(any())
         verifyNoMoreInteractions(view)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
         verify(prefsUtil, atLeastOnce()).getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
@@ -215,18 +240,21 @@ class DashboardPresenterTest {
         verify(prefsUtil, atLeastOnce()).setValue(DashboardPresenter.BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
         verifyNoMoreInteractions(prefsUtil)
         verify(swipeToReceiveHelper).storeEthAddress()
+        verify(swipeToReceiveHelper).updateAndStoreBitcoinAddresses()
+        verify(swipeToReceiveHelper).updateAndStoreBitcoinCashAddresses()
         verifyNoMoreInteractions(swipeToReceiveHelper)
-        verify(ethDataManager, times(2)).fetchEthAddress()
+        verify(ethDataManager).fetchEthAddress()
         verifyNoMoreInteractions(ethDataManager)
-        verify(payloadDataManager, times(2)).updateAllBalances()
+        verify(payloadDataManager).updateAllBalances()
+        verify(payloadDataManager).updateAllTransactions()
         verify(payloadDataManager).wallet
         verifyNoMoreInteractions(payloadDataManager)
-        verify(transactionListDataManager, times(2)).getBtcBalance(any())
-        verify(transactionListDataManager, times(2)).getBchBalance(any())
+        verify(transactionListDataManager).getBtcBalance(any())
+        verify(transactionListDataManager).getBchBalance(any())
         verifyNoMoreInteractions(transactionListDataManager)
         verify(exchangeRateFactory, times(3)).getLastBtcPrice("USD")
-        verify(exchangeRateFactory, times(2)).getLastEthPrice("USD")
-        verify(exchangeRateFactory, times(2)).getLastBchPrice("USD")
+        verify(exchangeRateFactory, times(3)).getLastEthPrice("USD")
+        verify(exchangeRateFactory, times(3)).getLastBchPrice("USD")
         verify(exchangeRateFactory).updateTickers()
         verifyNoMoreInteractions(exchangeRateFactory)
         verify(bchDataManager, atLeastOnce()).updateAllBalances()
