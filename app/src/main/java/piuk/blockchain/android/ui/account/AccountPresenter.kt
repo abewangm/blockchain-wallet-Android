@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.account
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.coin.GenericMetadataAccount
@@ -97,7 +98,7 @@ class AccountPresenter @Inject internal constructor(
      * @param accountLabel A label for the account to be created
      */
     internal fun createNewAccount(accountLabel: String) {
-        if (LabelUtil.isExistingLabel(payloadDataManager, accountLabel)) {
+        if (LabelUtil.isExistingLabel(payloadDataManager, bchDataManager, accountLabel)) {
             view.showToast(R.string.label_name_match, ToastCustom.TYPE_ERROR)
             return
         }
@@ -180,6 +181,7 @@ class AccountPresenter @Inject internal constructor(
      * @param data     The address to be imported
      * @param password The BIP38 encryption passphrase
      */
+    @SuppressLint("VisibleForTests")
     internal fun importBip38Address(data: String, password: String) {
         view.showProgressDialog(R.string.please_wait)
         try {
@@ -278,6 +280,7 @@ class AccountPresenter @Inject internal constructor(
         return addressCopy
     }
 
+    @SuppressLint("VisibleForTests")
     private fun importNonBip38Address(format: String, data: String, secondPassword: String?) {
         payloadDataManager.getKeyFromImportedData(format, data)
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
@@ -353,7 +356,7 @@ class AccountPresenter @Inject internal constructor(
                             account.isArchived,
                             false,
                             defaultAccount.xpub == account.xpub,
-                            AccountItem.TYPE_ACCOUNT
+                            AccountItem.TYPE_ACCOUNT_BTC
                     )
             )
             correctedPosition++
@@ -381,7 +384,7 @@ class AccountPresenter @Inject internal constructor(
                             legacyAddress.tag == LegacyAddress.ARCHIVED_ADDRESS,
                             legacyAddress.isWatchOnly,
                             false,
-                            AccountItem.TYPE_ACCOUNT
+                            AccountItem.TYPE_ACCOUNT_BTC
                     )
             )
             correctedPosition++
@@ -415,7 +418,7 @@ class AccountPresenter @Inject internal constructor(
                             account.isArchived,
                             false,
                             defaultAccount.xpub == account.xpub,
-                            AccountItem.TYPE_ACCOUNT
+                            AccountItem.TYPE_ACCOUNT_BCH
                     )
             )
         }
@@ -438,7 +441,7 @@ class AccountPresenter @Inject internal constructor(
     //region Convenience functions
     private fun getBtcAccounts(): List<Account> = payloadDataManager.accounts
 
-    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getActiveAccounts()
+    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getAccounts()
 
     private fun getLegacyAddresses(): List<LegacyAddress> = payloadDataManager.legacyAddresses
 

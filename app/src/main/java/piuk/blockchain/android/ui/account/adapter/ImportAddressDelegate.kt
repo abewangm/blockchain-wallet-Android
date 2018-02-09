@@ -41,8 +41,8 @@ class ImportAddressDelegate<in T>(
     private class HeaderViewHolder internal constructor(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
 
-        private var header: TextView = itemView.header_name
-        private var plus: ImageView = itemView.imageview_plus
+        private val header: TextView = itemView.header_name
+        private val plus: ImageView = itemView.imageview_plus
 
         internal fun bind(item: AccountItem, listener: AccountHeadersListener) {
 

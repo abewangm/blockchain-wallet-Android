@@ -8,6 +8,7 @@ import android.support.annotation.VisibleForTesting
 import android.view.View
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
+import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
 import info.blockchain.wallet.payment.Payment
@@ -22,13 +23,16 @@ import org.bitcoinj.crypto.BIP38PrivateKey
 import org.bitcoinj.params.BitcoinMainNetParams
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.cache.DynamicFeeCache
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.ui.account.AccountEditActivity.Companion.EXTRA_ACCOUNT_INDEX
 import piuk.blockchain.android.ui.account.AccountEditActivity.Companion.EXTRA_ADDRESS_INDEX
+import piuk.blockchain.android.ui.account.AccountEditActivity.Companion.EXTRA_CRYPTOCURRENCY
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.PendingTransaction
@@ -48,10 +52,12 @@ import java.math.BigInteger
 import java.util.*
 import javax.inject.Inject
 
+// TODO: This page is pretty nasty and could do with a proper refactor
 class AccountEditPresenter @Inject internal constructor(
         private val prefsUtil: PrefsUtil,
         private val stringUtils: StringUtils,
         private val payloadDataManager: PayloadDataManager,
+        private val bchDataManager: BchDataManager,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val sendDataManager: SendDataManager,
         private val privateKeyFactory: PrivateKeyFactory,
@@ -69,36 +75,33 @@ class AccountEditPresenter @Inject internal constructor(
 
     @VisibleForTesting internal var legacyAddress: LegacyAddress? = null
     @VisibleForTesting internal var account: Account? = null
+    @VisibleForTesting internal var bchAccount: GenericMetadataAccount? = null
     @VisibleForTesting internal var secondPassword: String? = null
     @VisibleForTesting internal var pendingTransaction: PendingTransaction? = null
     private var accountIndex: Int = 0
 
-    // Can't archive default account
-    private val isArchivable: Boolean
-        get() {
-            val payload = payloadDataManager.wallet
-            val hdWallet = payload!!.hdWallets[0]
-
-            val defaultIndex = hdWallet.defaultAccountIdx
-            val defaultAccount = hdWallet.accounts[defaultIndex]
-
-            return defaultAccount !== account
-        }
-
     override fun onViewReady() {
         val intent = view.activityIntent
 
-        val accountIndex = intent.getIntExtra(EXTRA_ACCOUNT_INDEX, -1)
+        accountIndex = intent.getIntExtra(EXTRA_ACCOUNT_INDEX, -1)
         val addressIndex = intent.getIntExtra(EXTRA_ADDRESS_INDEX, -1)
+        val cryptoCurrency: CryptoCurrencies =
+                intent.getSerializableExtra(EXTRA_CRYPTOCURRENCY) as CryptoCurrencies
 
+        check(accountIndex >= 0 || addressIndex >= 0) { "Both accountIndex and addressIndex are less than 0" }
+        check(cryptoCurrency != CryptoCurrencies.ETHER) { "Ether is not supported on this page" }
+
+        if (cryptoCurrency == CryptoCurrencies.BTC) {
+            renderBtc(accountIndex, addressIndex)
+        } else {
+            renderBch(accountIndex)
+        }
+    }
+
+    private fun renderBtc(accountIndex: Int, addressIndex: Int) {
         if (accountIndex >= 0) {
             // V3
-            val accounts = payloadDataManager.wallet!!.hdWallets[0].accounts
-
-            val accountClone = ArrayList<Account>(accounts.size)
-            accountClone.addAll(accounts)
-
-            account = accountClone[accountIndex]
+            account = payloadDataManager.accounts[accountIndex]
             with(accountModel) {
                 label = account!!.label
                 labelHeader = stringUtils.getString(R.string.name)
@@ -106,14 +109,13 @@ class AccountEditPresenter @Inject internal constructor(
                 xpubDescriptionVisibility = View.VISIBLE
                 xpubText = stringUtils.getString(R.string.extended_public_key)
                 transferFundsVisibility = View.GONE
-                setArchive(account!!.isArchived)
-                setDefault(isDefault(account))
+                setArchive(account!!.isArchived, ::isArchivableBtc)
+                setDefault(isDefaultBtc(account))
             }
 
         } else if (addressIndex >= 0) {
             // V2
-            val legacy = payloadDataManager.legacyAddresses
-            legacyAddress = legacy[addressIndex]
+            legacyAddress = payloadDataManager.legacyAddresses[addressIndex]
             var label: String? = legacyAddress!!.label
             if (label.isNullOrEmpty()) {
                 label = legacyAddress!!.address
@@ -124,7 +126,7 @@ class AccountEditPresenter @Inject internal constructor(
                 xpubDescriptionVisibility = View.GONE
                 xpubText = stringUtils.getString(R.string.address)
                 defaultAccountVisibility = View.GONE//No default for V2
-                setArchive(legacyAddress!!.tag == LegacyAddress.ARCHIVED_ADDRESS)
+                setArchive(legacyAddress!!.tag == LegacyAddress.ARCHIVED_ADDRESS, ::isArchivableBtc)
 
                 if (legacyAddress!!.isWatchOnly) {
                     scanPrivateKeyVisibility = View.VISIBLE
@@ -152,7 +154,21 @@ class AccountEditPresenter @Inject internal constructor(
         }
     }
 
-    fun areLauncherShortcutsEnabled(): Boolean =
+    private fun renderBch(accountIndex: Int) {
+        bchAccount = bchDataManager.getAccounts()[accountIndex]
+        with(accountModel) {
+            label = bchAccount!!.label
+            labelHeader = stringUtils.getString(R.string.name)
+            scanPrivateKeyVisibility = View.GONE
+            xpubDescriptionVisibility = View.VISIBLE
+            xpubText = stringUtils.getString(R.string.extended_public_key)
+            transferFundsVisibility = View.GONE
+            setArchive(bchAccount!!.isArchived, ::isArchivableBch)
+            setDefault(isDefaultBch(bchAccount))
+        }
+    }
+
+    internal fun areLauncherShortcutsEnabled(): Boolean =
             prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
 
     private fun setDefault(isDefault: Boolean) {
@@ -172,23 +188,13 @@ class AccountEditPresenter @Inject internal constructor(
         }
     }
 
-    private fun isDefault(account: Account?): Boolean {
-        val defaultIndex = payloadDataManager.defaultAccountIndex
-        val accounts = payloadDataManager.accounts
+    private fun isDefaultBtc(account: Account?): Boolean =
+            payloadDataManager.defaultAccount === account
 
-        for ((accountIndex, acc) in accounts.withIndex()) {
-            if (acc.xpub == account!!.xpub) {
-                this.accountIndex = accountIndex//sets this account index
-                if (accountIndex == defaultIndex) {//this is current default already
-                    return true
-                }
-            }
+    private fun isDefaultBch(account: GenericMetadataAccount?): Boolean =
+            bchDataManager.getDefaultGenericMetadataAccount() === account
 
-        }
-        return false
-    }
-
-    private fun setArchive(isArchived: Boolean) {
+    private fun setArchive(isArchived: Boolean, archivable: () -> Boolean) {
         if (isArchived) {
             with(accountModel) {
                 archiveHeader = stringUtils.getString(R.string.unarchive)
@@ -198,19 +204,19 @@ class AccountEditPresenter @Inject internal constructor(
                 archiveClickable = true
 
                 labelAlpha = 0.5f
-                labelClickable = false
                 xpubAlpha = 0.5f
-                xpubClickable = false
                 xprivAlpha = 0.5f
-                xprivClickable = false
                 defaultAlpha = 0.5f
-                defaultClickable = false
                 transferFundsAlpha = 0.5f
+                labelClickable = false
+                xpubClickable = false
+                xprivClickable = false
+                defaultClickable = false
                 transferFundsClickable = false
             }
         } else {
             // Don't allow archiving of default account
-            if (isArchivable) {
+            if (archivable()) {
                 with(accountModel) {
                     archiveAlpha = 1.0f
                     archiveVisibility = View.VISIBLE
@@ -229,14 +235,14 @@ class AccountEditPresenter @Inject internal constructor(
             with(accountModel) {
                 archiveHeader = stringUtils.getString(R.string.archive)
                 labelAlpha = 1.0f
-                labelClickable = true
                 xpubAlpha = 1.0f
-                xpubClickable = true
                 xprivAlpha = 1.0f
-                xprivClickable = true
                 defaultAlpha = 1.0f
-                defaultClickable = true
                 transferFundsAlpha = 1.0f
+                labelClickable = true
+                xpubClickable = true
+                xprivClickable = true
+                defaultClickable = true
                 transferFundsClickable = true
             }
         }
@@ -249,7 +255,7 @@ class AccountEditPresenter @Inject internal constructor(
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doAfterTerminate { view.dismissProgressDialog() }
                 .doOnError { Timber.e(it) }
-                .doOnNext { pending -> pendingTransaction = pending }
+                .doOnNext { pendingTransaction = it }
                 .subscribe(
                         { pendingTransaction ->
                             if (pendingTransaction != null
@@ -362,7 +368,7 @@ class AccountEditPresenter @Inject internal constructor(
                 .subscribe(
                         {
                             legacyAddress.tag = LegacyAddress.ARCHIVED_ADDRESS
-                            setArchive(true)
+                            setArchive(true, ::isArchivableBtc)
 
                             view.showTransactionSuccess()
 
@@ -393,34 +399,43 @@ class AccountEditPresenter @Inject internal constructor(
     }
 
     internal fun updateAccountLabel(newLabel: String) {
-        var labelCopy = newLabel
-        labelCopy = labelCopy.trim { it <= ' ' }
+        val labelCopy = newLabel.trim { it <= ' ' }
+
+        val walletSync: Completable
 
         if (!labelCopy.isEmpty()) {
-            val finalNewLabel = labelCopy
             val revertLabel: String
 
-            if (LabelUtil.isExistingLabel(payloadDataManager, labelCopy)) {
+            if (LabelUtil.isExistingLabel(payloadDataManager, bchDataManager, labelCopy)) {
                 view.showToast(R.string.label_name_match, ToastCustom.TYPE_ERROR)
                 return
             }
 
-            if (account != null) {
-                revertLabel = account!!.label ?: ""
-                account!!.label = finalNewLabel
-            } else {
-                revertLabel = legacyAddress!!.label ?: ""
-                legacyAddress!!.label = finalNewLabel
+            when {
+                account != null -> {
+                    revertLabel = account!!.label ?: ""
+                    account!!.label = labelCopy
+                    walletSync = payloadDataManager.syncPayloadWithServer()
+                }
+                legacyAddress != null -> {
+                    revertLabel = legacyAddress!!.label ?: ""
+                    legacyAddress!!.label = labelCopy
+                    walletSync = payloadDataManager.syncPayloadWithServer()
+                }
+                else -> {
+                    revertLabel = bchAccount!!.label ?: ""
+                    bchAccount!!.label = labelCopy
+                    walletSync = bchDataManager.saveUpdatedWallet()
+                }
             }
 
-            payloadDataManager.syncPayloadWithServer()
-                    .compose(RxUtil.addCompletableToCompositeDisposable(this))
+            walletSync.compose(RxUtil.addCompletableToCompositeDisposable(this))
                     .doOnError { Timber.e(it) }
                     .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                     .doAfterTerminate { view.dismissProgressDialog() }
                     .subscribe(
                             {
-                                accountModel.label = finalNewLabel
+                                accountModel.label = labelCopy
                                 view.setActivityResult(Activity.RESULT_OK)
                             },
                             { revertLabelAndShowError(revertLabel) }
@@ -429,6 +444,13 @@ class AccountEditPresenter @Inject internal constructor(
             view.showToast(R.string.label_cant_be_empty, ToastCustom.TYPE_ERROR)
         }
     }
+
+    // Can't archive default account
+    private fun isArchivableBtc(): Boolean = payloadDataManager.defaultAccount !== account
+
+    // Can't archive default account
+    private fun isArchivableBch(): Boolean =
+            bchDataManager.getDefaultGenericMetadataAccount() !== bchAccount
 
     private fun revertLabelAndShowError(revertLabel: String) {
         // Remote save not successful - revert
@@ -448,18 +470,31 @@ class AccountEditPresenter @Inject internal constructor(
 
     @Suppress("UNUSED_PARAMETER")
     fun onClickDefault(view: View) {
-        val revertDefault = payloadDataManager.defaultAccountIndex
-        payloadDataManager.wallet!!.hdWallets[0].defaultAccountIdx = accountIndex
+        val revertDefault: Int
+        val walletSync: Completable
 
-        getView().showProgressDialog(R.string.please_wait)
+        if (account != null) {
+            revertDefault = payloadDataManager.defaultAccountIndex
+            walletSync = payloadDataManager.syncPayloadWithServer()
+            payloadDataManager.wallet!!.hdWallets[0].defaultAccountIdx = accountIndex
+        } else {
+            revertDefault = bchDataManager.getDefaultAccountPosition()
+            walletSync = bchDataManager.saveUpdatedWallet()
+            bchDataManager.setDefaultAccountPosition(accountIndex)
+        }
 
-        payloadDataManager.syncPayloadWithServer()
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+        walletSync.compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnSubscribe { getView().showProgressDialog(R.string.please_wait) }
                 .doOnError { Timber.e(it) }
                 .doAfterTerminate { getView().dismissProgressDialog() }
                 .subscribe(
                         {
-                            setDefault(isDefault(account))
+                            if (account != null) {
+                                setDefault(isDefaultBtc(account))
+                            } else {
+                                setDefault(isDefaultBch(bchAccount))
+                            }
+
                             updateSwipeToReceiveAddresses()
                             getView().updateAppShortcuts()
                             getView().setActivityResult(Activity.RESULT_OK)
@@ -505,7 +540,7 @@ class AccountEditPresenter @Inject internal constructor(
 
     @Suppress("UNUSED_PARAMETER")
     fun onClickShowXpub(view: View) {
-        if (account != null) {
+        if (account != null || bchAccount != null) {
             getView().showXpubSharingWarning()
         } else {
             showAddressDetails()
@@ -529,7 +564,7 @@ class AccountEditPresenter @Inject internal constructor(
         return if (account != null) {
             account!!.isArchived = !account!!.isArchived
             account!!.isArchived
-        } else {
+        } else if (legacyAddress != null) {
             if (legacyAddress!!.tag == LegacyAddress.ARCHIVED_ADDRESS) {
                 legacyAddress!!.tag = LegacyAddress.NORMAL_ADDRESS
                 false
@@ -537,6 +572,9 @@ class AccountEditPresenter @Inject internal constructor(
                 legacyAddress!!.tag = LegacyAddress.ARCHIVED_ADDRESS
                 true
             }
+        } else {
+            bchAccount!!.isArchived = !bchAccount!!.isArchived
+            bchAccount!!.isArchived
         }
     }
 
@@ -619,17 +657,25 @@ class AccountEditPresenter @Inject internal constructor(
         var qrString: String? = null
         var bitmap: Bitmap? = null
 
-        if (account != null) {
-            heading = stringUtils.getString(R.string.extended_public_key)
-            note = stringUtils.getString(R.string.scan_this_code)
-            copy = stringUtils.getString(R.string.copy_xpub)
-            qrString = account!!.xpub
-
-        } else if (legacyAddress != null) {
-            heading = stringUtils.getString(R.string.address)
-            note = legacyAddress!!.address
-            copy = stringUtils.getString(R.string.copy_address)
-            qrString = legacyAddress!!.address
+        when {
+            account != null -> {
+                heading = stringUtils.getString(R.string.extended_public_key)
+                note = stringUtils.getString(R.string.scan_this_code)
+                copy = stringUtils.getString(R.string.copy_xpub)
+                qrString = account!!.xpub
+            }
+            legacyAddress != null -> {
+                heading = stringUtils.getString(R.string.address)
+                note = legacyAddress!!.address
+                copy = stringUtils.getString(R.string.copy_address)
+                qrString = legacyAddress!!.address
+            }
+            bchAccount != null -> {
+                heading = stringUtils.getString(R.string.extended_public_key)
+                note = stringUtils.getString(R.string.scan_this_code)
+                copy = stringUtils.getString(R.string.copy_xpub)
+                qrString = bchAccount!!.xpub
+            }
         }
 
         val qrCodeDimension = 260
@@ -664,19 +710,31 @@ class AccountEditPresenter @Inject internal constructor(
     }
 
     internal fun archiveAccount() {
-        view.showProgressDialog(R.string.please_wait)
-
         val isArchived = toggleArchived()
-        payloadDataManager.syncPayloadWithServer()
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+        val walletSync: Completable
+        val updateTransactions: Completable
+        val archivable: () -> Boolean
+
+        if (account != null || legacyAddress != null) {
+            walletSync = payloadDataManager.syncPayloadWithServer()
+            archivable = ::isArchivableBtc
+            updateTransactions = payloadDataManager.updateAllTransactions()
+        } else {
+            walletSync = bchDataManager.saveUpdatedWallet()
+            archivable = ::isArchivableBch
+            updateTransactions =
+                    Completable.fromObservable(bchDataManager.getWalletTransactions(50, 50))
+        }
+
+        walletSync.compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnError { Timber.e(it) }
                 .doAfterTerminate { view.dismissProgressDialog() }
                 .subscribe(
                         {
-                            payloadDataManager.updateAllTransactions()
-                                    .subscribe(IgnorableDefaultObserver<Any>())
+                            updateTransactions.subscribe(IgnorableDefaultObserver<Any>())
 
-                            setArchive(isArchived)
+                            setArchive(isArchived, archivable)
                             view.setActivityResult(Activity.RESULT_OK)
                         },
                         { view.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR) }

@@ -1,5 +1,6 @@
 package piuk.blockchain.android.ui.account.adapter
 
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
 import piuk.blockchain.android.util.extensions.autoNotify
@@ -44,5 +45,6 @@ interface AccountHeadersListener {
 
     fun onImportAddressClicked()
 
-    fun onAccountClicked(correctedPosition: Int)
+    fun onAccountClicked(cryptoCurrency: CryptoCurrencies, correctedPosition: Int)
+
 }

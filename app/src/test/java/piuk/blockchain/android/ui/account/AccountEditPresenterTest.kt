@@ -38,10 +38,13 @@ import piuk.blockchain.android.BlockchainTestApplication
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.cache.DynamicFeeCache
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.ui.account.AccountEditActivity.Companion.EXTRA_ACCOUNT_INDEX
+import piuk.blockchain.android.ui.account.AccountEditActivity.Companion.EXTRA_CRYPTOCURRENCY
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.PendingTransaction
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
@@ -63,6 +66,7 @@ class AccountEditPresenterTest {
     private lateinit var subject: AccountEditPresenter
     private val view: AccountEditView = mock()
     private val payloadDataManager: PayloadDataManager = mock()
+    private val bchDataManager: BchDataManager = mock()
     private val prefsUtil: PrefsUtil = mock()
     private val stringUtils: StringUtils = mock()
     private val exchangeRateFactory: ExchangeRateFactory = mock()
@@ -82,6 +86,7 @@ class AccountEditPresenterTest {
                 prefsUtil,
                 stringUtils,
                 payloadDataManager,
+                bchDataManager,
                 exchangeRateFactory,
                 sendDataManager,
                 privateKeyFactory,
@@ -106,23 +111,22 @@ class AccountEditPresenterTest {
         assertEquals(newModel, subject.accountModel)
     }
 
-
     @Test
     @Throws(Exception::class)
     fun onViewReadyV3() {
         // Arrange
-        val intent = Intent()
-        intent.putExtra(EXTRA_ACCOUNT_INDEX, 0)
+        val intent = Intent().apply {
+            putExtra(EXTRA_ACCOUNT_INDEX, 0)
+            putExtra(EXTRA_CRYPTOCURRENCY, CryptoCurrencies.BTC)
+        }
         whenever(view.activityIntent).thenReturn(intent)
-        val mockPayload: Wallet = mock(defaultAnswer = RETURNS_DEEP_STUBS)
         val importedAccount: Account = mock()
         whenever(importedAccount.xpub).thenReturn("")
         val account: Account = mock()
         whenever(account.xpub).thenReturn("")
         whenever(account.label).thenReturn("")
-        whenever(mockPayload.hdWallets[0].accounts)
-                .thenReturn(Arrays.asList(account, importedAccount))
-        whenever(payloadDataManager.wallet).thenReturn(mockPayload)
+        whenever(payloadDataManager.accounts).thenReturn(listOf(account, importedAccount))
+        whenever(payloadDataManager.defaultAccount).thenReturn(mock())
         whenever(stringUtils.getString(anyInt())).thenReturn("string resource")
         // Act
         subject.onViewReady()
@@ -139,19 +143,19 @@ class AccountEditPresenterTest {
     @Throws(Exception::class)
     fun onViewReadyV3Archived() {
         // Arrange
-        val intent = Intent()
-        intent.putExtra(EXTRA_ACCOUNT_INDEX, 0)
+        val intent = Intent().apply {
+            putExtra(EXTRA_ACCOUNT_INDEX, 0)
+            putExtra(EXTRA_CRYPTOCURRENCY, CryptoCurrencies.BTC)
+        }
         whenever(view.activityIntent).thenReturn(intent)
-        val mockPayload: Wallet = mock(defaultAnswer = RETURNS_DEEP_STUBS)
         val importedAccount: Account = mock()
         whenever(importedAccount.xpub).thenReturn("")
         val account: Account = mock()
         whenever(account.xpub).thenReturn("")
         whenever(account.label).thenReturn("")
         whenever(account.isArchived).thenReturn(true)
-        whenever(mockPayload.hdWallets[0].accounts)
-                .thenReturn(Arrays.asList(account, importedAccount))
-        whenever(payloadDataManager.wallet).thenReturn(mockPayload)
+        whenever(payloadDataManager.accounts).thenReturn(listOf(account, importedAccount))
+        whenever(payloadDataManager.defaultAccount).thenReturn(mock())
         whenever(stringUtils.getString(anyInt())).thenReturn("string resource")
         // Act
         subject.onViewReady()

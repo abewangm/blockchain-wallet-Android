@@ -114,6 +114,14 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         else -> super.onOptionsItemSelected(item)
     }
 
+    override fun onBackPressed() {
+        if (currency_header.isExpanded()) {
+            currency_header.close()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     override fun startScanForResult() {
         Intent(this, CaptureActivity::class.java).apply {
             putExtra(Intents.Scan.FORMATS, EnumSet.allOf(BarcodeFormat::class.java))
@@ -129,8 +137,8 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         importAddress()
     }
 
-    override fun onAccountClicked(correctedPosition: Int) {
-        onRowClick(correctedPosition)
+    override fun onAccountClicked(cryptoCurrency: CryptoCurrencies, correctedPosition: Int) {
+        onRowClick(cryptoCurrency, correctedPosition)
     }
 
     private fun importAddress() {
@@ -144,15 +152,22 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         }
     }
 
-    private fun onRowClick(position: Int) {
+    private fun onRowClick(cryptoCurrency: CryptoCurrencies, position: Int) {
         AccountEditActivity.startForResult(
                 this,
-                if (position < presenter.accountSize) position else -1,
+                getAccountPosition(cryptoCurrency, position),
                 if (position >= presenter.accountSize) position - presenter.accountSize else -1,
-                // TODO: Pass Currency here
-                CryptoCurrencies.BTC,
+                cryptoCurrency,
                 EDIT_ACTIVITY_REQUEST_CODE
         )
+    }
+
+    private fun getAccountPosition(cryptoCurrency: CryptoCurrencies, position: Int): Int {
+        return if (cryptoCurrency == CryptoCurrencies.BTC) {
+            if (position < presenter.accountSize) position else -1
+        } else {
+            return position
+        }
     }
 
     private fun onScanButtonClicked() {

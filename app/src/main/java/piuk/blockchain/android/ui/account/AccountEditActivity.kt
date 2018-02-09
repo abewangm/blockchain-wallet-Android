@@ -22,7 +22,6 @@ import android.text.InputType
 import android.view.View
 import android.widget.ImageView
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.connectivity.ConnectivityStatus
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.websocket.WebSocketService
@@ -109,18 +108,10 @@ class AccountEditActivity : BaseMvpActivity<AccountEditView, AccountEditPresente
                 .setView(ViewUtils.getAlertDialogPaddedView(this, etLabel))
                 .setCancelable(false)
                 .setPositiveButton(R.string.save_name) { _, _ ->
-                    if (!ConnectivityStatus.hasConnectivity(this)) {
-                        onConnectivityLost()
-                    } else {
-                        presenter.updateAccountLabel(etLabel.text.toString())
-                    }
+                    presenter.updateAccountLabel(etLabel.getTextString())
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
-    }
-
-    private fun onConnectivityLost() {
-        toast(R.string.check_connectivity_exit, ToastCustom.TYPE_ERROR)
     }
 
     override fun showToast(@StringRes message: Int, @ToastCustom.ToastType type: String) {
@@ -205,13 +196,7 @@ class AccountEditActivity : BaseMvpActivity<AccountEditView, AccountEditPresente
                 .setTitle(title)
                 .setMessage(message)
                 .setCancelable(false)
-                .setPositiveButton(R.string.yes) { _, _ ->
-                    if (!ConnectivityStatus.hasConnectivity(this)) {
-                        onConnectivityLost()
-                    } else {
-                        presenter.archiveAccount()
-                    }
-                }
+                .setPositiveButton(R.string.yes) { _, _ -> presenter.archiveAccount() }
                 .setNegativeButton(R.string.no, null)
                 .show()
     }
