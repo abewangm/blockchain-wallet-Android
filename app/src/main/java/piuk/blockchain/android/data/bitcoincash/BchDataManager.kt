@@ -104,7 +104,8 @@ class BchDataManager(
                 isHasSeen = true
             }
 
-            // TODO: We don't actually ever store the wallet here
+            // TODO: This will be moved out to MetadataManager in future
+            bchMetadataNode.putMetadata(bchDataStore.bchMetadata!!.toJson())
         }
     }
 

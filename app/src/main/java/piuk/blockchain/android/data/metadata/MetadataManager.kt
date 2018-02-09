@@ -41,14 +41,11 @@ class MetadataManager(
 ) {
     private val rxPinning = RxPinning(rxBus)
 
-    fun attemptMetadataSetup(): Completable {
-        return initMetadataNodesObservable(null)
-    }
+    fun attemptMetadataSetup(): Completable = initMetadataNodesObservable(null)
 
-    fun generateAndSetupMetadata(secondPassword: String?): Completable {
-        payloadDataManager.generateNodes(secondPassword)
-        return initMetadataNodesObservable(secondPassword)
-    }
+    fun generateAndSetupMetadata(secondPassword: String?): Completable =
+            payloadDataManager.generateNodes(secondPassword)
+                    .andThen(initMetadataNodesObservable(secondPassword))
 
     fun saveToMetadata(data: String, metadataType: Int): Completable = rxPinning.call {
         payloadDataManager.metadataNodeFactory.flatMapCompletable {
@@ -87,6 +84,7 @@ class MetadataManager(
                 .compose(RxUtil.applySchedulersToCompletable())
     }
 
+    // TODO: Remove me and dependencies; DataManagers can be responsible for their own initialisation
     private fun loadMetadataElements(metadataNode: DeterministicKey): Completable = rxPinning.call {
         ethDataManager.initEthereumWallet(
                 metadataNode,
