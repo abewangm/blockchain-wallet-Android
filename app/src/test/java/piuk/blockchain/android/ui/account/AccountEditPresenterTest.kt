@@ -41,6 +41,7 @@ import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.cache.DynamicFeeCache
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.ui.account.AccountEditActivity.Companion.EXTRA_ACCOUNT_INDEX
@@ -67,6 +68,7 @@ class AccountEditPresenterTest {
     private val view: AccountEditView = mock()
     private val payloadDataManager: PayloadDataManager = mock()
     private val bchDataManager: BchDataManager = mock()
+    private val metadataManager: MetadataManager = mock()
     private val prefsUtil: PrefsUtil = mock()
     private val stringUtils: StringUtils = mock()
     private val exchangeRateFactory: ExchangeRateFactory = mock()
@@ -87,6 +89,7 @@ class AccountEditPresenterTest {
                 stringUtils,
                 payloadDataManager,
                 bchDataManager,
+                metadataManager,
                 exchangeRateFactory,
                 sendDataManager,
                 privateKeyFactory,
@@ -248,7 +251,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -267,7 +269,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -315,7 +316,6 @@ class AccountEditPresenterTest {
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
         verify(view).showTransactionSuccess()
-
         verify(accountEditModel).transferFundsVisibility = anyInt()
         verify(view).setActivityResult(anyInt())
     }
@@ -351,7 +351,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -373,7 +372,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -385,7 +383,6 @@ class AccountEditPresenterTest {
         // Act
         subject.updateAccountLabel("    ")
         // Assert
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -417,7 +414,6 @@ class AccountEditPresenterTest {
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
         verify(accountEditModel).label = "old label"
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -474,7 +470,6 @@ class AccountEditPresenterTest {
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -591,7 +586,6 @@ class AccountEditPresenterTest {
         // Act
         subject.handleIncomingScanIntent(intent)
         // Assert
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -628,7 +622,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -690,13 +683,14 @@ class AccountEditPresenterTest {
         subject.account = Account()
         whenever(payloadDataManager.syncPayloadWithServer())
                 .thenReturn(Completable.error(Throwable()))
+        whenever(payloadDataManager.updateAllTransactions())
+                .thenReturn(Completable.complete())
         // Act
         subject.archiveAccount()
         // Assert
         verify(payloadDataManager).syncPayloadWithServer()
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
     }
 
@@ -710,7 +704,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
         verify(view).dismissProgressDialog()
     }
@@ -728,7 +721,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
         verify(view).dismissProgressDialog()
     }
@@ -749,7 +741,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).showProgressDialog(anyInt())
         verify(view).dismissProgressDialog()
-
         verify(view).showToast(anyInt(), eq(ToastCustom.TYPE_ERROR))
         verify(view).dismissProgressDialog()
     }
@@ -866,7 +857,6 @@ class AccountEditPresenterTest {
         // Assert
         verify(view).setActivityResult(anyInt())
         verify(view).sendBroadcast(anyString(), anyString())
-
         verify(view).privateKeyImportMismatch()
     }
 

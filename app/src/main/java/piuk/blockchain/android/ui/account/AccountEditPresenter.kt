@@ -8,6 +8,7 @@ import android.support.annotation.VisibleForTesting
 import android.view.View
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
+import info.blockchain.wallet.BitcoinCashWallet
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
@@ -26,6 +27,7 @@ import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.cache.DynamicFeeCache
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.IgnorableDefaultObserver
@@ -58,6 +60,7 @@ class AccountEditPresenter @Inject internal constructor(
         private val stringUtils: StringUtils,
         private val payloadDataManager: PayloadDataManager,
         private val bchDataManager: BchDataManager,
+        private val metadataManager: MetadataManager,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val sendDataManager: SendDataManager,
         private val privateKeyFactory: PrivateKeyFactory,
@@ -425,7 +428,10 @@ class AccountEditPresenter @Inject internal constructor(
                 else -> {
                     revertLabel = bchAccount!!.label ?: ""
                     bchAccount!!.label = labelCopy
-                    walletSync = bchDataManager.saveUpdatedWallet()
+                    walletSync = metadataManager.saveToMetadata(
+                            bchDataManager.serializeForSaving(),
+                            BitcoinCashWallet.METADATA_TYPE_EXTERNAL
+                    )
                 }
             }
 
@@ -479,7 +485,10 @@ class AccountEditPresenter @Inject internal constructor(
             payloadDataManager.wallet!!.hdWallets[0].defaultAccountIdx = accountIndex
         } else {
             revertDefault = bchDataManager.getDefaultAccountPosition()
-            walletSync = bchDataManager.saveUpdatedWallet()
+            walletSync = metadataManager.saveToMetadata(
+                    bchDataManager.serializeForSaving(),
+                    BitcoinCashWallet.METADATA_TYPE_EXTERNAL
+            )
             bchDataManager.setDefaultAccountPosition(accountIndex)
         }
 
@@ -720,7 +729,10 @@ class AccountEditPresenter @Inject internal constructor(
             archivable = ::isArchivableBtc
             updateTransactions = payloadDataManager.updateAllTransactions()
         } else {
-            walletSync = bchDataManager.saveUpdatedWallet()
+            walletSync = metadataManager.saveToMetadata(
+                    bchDataManager.serializeForSaving(),
+                    BitcoinCashWallet.METADATA_TYPE_EXTERNAL
+            )
             archivable = ::isArchivableBch
             updateTransactions =
                     Completable.fromObservable(bchDataManager.getWalletTransactions(50, 50))

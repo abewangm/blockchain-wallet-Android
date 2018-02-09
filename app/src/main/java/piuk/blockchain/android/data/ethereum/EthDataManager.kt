@@ -10,7 +10,6 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException
 import info.blockchain.wallet.payload.PayloadManager
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.DeterministicKey
@@ -22,7 +21,6 @@ import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
-import timber.log.Timber
 import java.math.BigInteger
 import java.util.*
 
@@ -105,24 +103,25 @@ class EthDataManager(
         val lastTxTimestamp = Math.max(ethDataStore.ethWallet?.lastTransactionTimestamp ?: 0L, 600L)
 
         // No previous transactions
-        if (lastTxHash == null ||
-                ethDataStore.ethAddressResponse?.getTransactions()?.size
-                ?: 0 == 0) return Observable.just(false)
+        if (lastTxHash == null || ethDataStore.ethAddressResponse?.getTransactions()?.size ?: 0 == 0)
+            return Observable.just(false)
 
         return Observable.zip(
                 hasMatchingTx(lastTxHash),
                 isTransactionDropped(lastTxTimestamp),
-                BiFunction({hasMatch: Boolean, isDropped: Boolean ->
+                BiFunction({ hasMatch: Boolean, isDropped: Boolean ->
                     hasMatch && !isDropped
-                }))
+                })
+        )
     }
 
     /*
     If x time passed and transaction was not successfully mined, the last transaction will be
     deemed dropped and the account will be allowed to create a new transaction.
      */
-    private fun isTransactionDropped(lastTxTimestamp: Long) = walletOptionsDataManager.getLastEthTransactionFuse()
-                .map { System.currentTimeMillis() > lastTxTimestamp + (it * 1000) }
+    private fun isTransactionDropped(lastTxTimestamp: Long) =
+            walletOptionsDataManager.getLastEthTransactionFuse()
+                    .map { System.currentTimeMillis() > lastTxTimestamp + (it * 1000) }
 
     private fun hasMatchingTx(lastTxHash: String) =
             fetchEthAddress().flatMapIterable { it.getTransactions() }
@@ -169,7 +168,7 @@ class EthDataManager(
         Completable.fromCallable {
             if (ethDataStore.ethWallet != null) {
                 ethDataStore.ethWallet?.let {
-                    it.txNotes.put(hash, note)
+                    it.txNotes[hash] = note
                     it.save()
                 }
                 return@fromCallable Void.TYPE
@@ -185,16 +184,14 @@ class EthDataManager(
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Completable]
      */
-    fun initEthereumWallet(
-            metadataNode: DeterministicKey,
-            defaultLabel: String
-    ): Completable = rxPinning.call {
-        Completable.fromCallable {
-            ethDataStore.ethWallet = fetchOrCreateEthereumWallet(metadataNode, defaultLabel)
-            return@fromCallable Void.TYPE
+    fun initEthereumWallet(metadataNode: DeterministicKey, defaultLabel: String): Completable =
+            rxPinning.call {
+                Completable.fromCallable {
+                    ethDataStore.ethWallet = fetchOrCreateEthereumWallet(metadataNode, defaultLabel)
+                    return@fromCallable Void.TYPE
 
-        }.compose(RxUtil.applySchedulersToCompletable())
-    }
+                }.compose(RxUtil.applySchedulersToCompletable())
+            }
 
     /**
      * @param gasPrice Represents the fee the sender is willing to pay for gas. One unit of gas
@@ -227,10 +224,11 @@ class EthDataManager(
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
-    fun setLastTxHashObservable(txHash: String, timestamp: Long): Observable<String> = rxPinning.call<String> {
-        Observable.fromCallable { setLastTxHash(txHash, timestamp) }
-                .compose(RxUtil.applySchedulersToObservable())
-    }
+    fun setLastTxHashObservable(txHash: String, timestamp: Long): Observable<String> =
+            rxPinning.call<String> {
+                Observable.fromCallable { setLastTxHash(txHash, timestamp) }
+                        .compose(RxUtil.applySchedulersToObservable())
+            }
 
     @Throws(Exception::class)
     private fun setLastTxHash(txHash: String, timestamp: Long): String {

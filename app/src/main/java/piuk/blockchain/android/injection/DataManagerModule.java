@@ -274,8 +274,16 @@ public class DataManagerModule {
                                                      EthDataManager ethDataManager,
                                                      BchDataManager bchDataManager,
                                                      ShapeShiftDataManager shapeShiftDataManager,
-                                                     StringUtils stringUtils) {
-        return new MetadataManager(payloadDataManager, ethDataManager, bchDataManager, shapeShiftDataManager, stringUtils);
+                                                     StringUtils stringUtils,
+                                                     MetadataUtils metadataUtils,
+                                                     RxBus rxBus) {
+        return new MetadataManager(payloadDataManager,
+                ethDataManager,
+                bchDataManager,
+                shapeShiftDataManager,
+                stringUtils,
+                metadataUtils,
+                rxBus);
     }
 
     @Provides
@@ -287,8 +295,10 @@ public class DataManagerModule {
                                                    BlockExplorer blockExplorer,
                                                    StringUtils stringUtils,
                                                    RxBus rxBus) {
-        return new BchDataManager(payloadDataManager, bchDataStore,
-                metadataUtils, networkParameterUtils,
+        return new BchDataManager(payloadDataManager,
+                bchDataStore,
+                metadataUtils,
+                networkParameterUtils,
                 blockExplorer,
                 stringUtils,
                 rxBus);
