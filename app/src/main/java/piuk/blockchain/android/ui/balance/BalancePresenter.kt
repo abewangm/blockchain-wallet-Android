@@ -65,10 +65,6 @@ class BalancePresenter @Inject constructor(
         subscribeToEvents()
     }
 
-    internal fun onResume() {
-        onRefreshRequested()
-    }
-
     override fun onViewDestroyed() {
         notificationObservable?.let { rxBus.unregister(NotificationPayload::class.java, it) }
         authEventObservable?.let { rxBus.unregister(AuthEvent::class.java, it) }

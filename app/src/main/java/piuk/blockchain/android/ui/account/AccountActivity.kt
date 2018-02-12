@@ -8,6 +8,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.os.Bundle
 import android.support.annotation.StringRes
 import android.support.v4.content.ContextCompat
@@ -19,6 +20,7 @@ import android.text.InputFilter
 import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.widget.CheckBox
 import com.google.zxing.BarcodeFormat
 import info.blockchain.wallet.payload.data.LegacyAddress
@@ -115,11 +117,28 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
     }
 
     override fun onBackPressed() {
-        if (currency_header.isExpanded()) {
+        if (currency_header.isOpen()) {
             currency_header.close()
         } else {
             super.onBackPressed()
         }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_DOWN) {
+            // Notify touchOutsideViewListeners if user tapped outside a given view
+            if (currency_header != null) {
+                val viewRect = Rect()
+                currency_header.getGlobalVisibleRect(viewRect)
+                if (!viewRect.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                    if (currency_header.isOpen()) {
+                        currency_header.close()
+                        return false
+                    }
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun startScanForResult() {

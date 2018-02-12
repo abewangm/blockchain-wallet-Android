@@ -162,28 +162,26 @@ class PieChartDelegate<in T>(
     }
 
     private fun configureChart(empty: Boolean) {
-        if (empty || firstRender) {
-            firstRender = false
-            viewHolder?.chart?.apply {
-                setDrawCenterText(true)
-                setCenterTextTypeface(typefaceRegular)
-                setCenterTextColor(ContextCompat.getColor(context, R.color.primary_gray_dark))
-                setCenterTextSize(16f)
+        viewHolder?.chart?.apply {
+            setDrawCenterText(true)
+            setCenterTextTypeface(typefaceRegular)
+            setCenterTextColor(ContextCompat.getColor(context, R.color.primary_gray_dark))
+            setCenterTextSize(16f)
 
-                isDrawHoleEnabled = true
-                setHoleColor(Color.TRANSPARENT)
-                holeRadius = 70f
+            isDrawHoleEnabled = true
+            setHoleColor(Color.TRANSPARENT)
+            holeRadius = 70f
 
-                animateY(1000, Easing.EasingOption.EaseInOutQuad)
-                isRotationEnabled = false
-                legend.isEnabled = false
-                description.isEnabled = false
-                setDrawEntryLabels(false)
+            if (firstRender) animateY(1000, Easing.EasingOption.EaseInOutQuad)
+            isRotationEnabled = false
+            legend.isEnabled = false
+            description.isEnabled = false
+            setDrawEntryLabels(false)
 
-                setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
-                if (!empty) marker = ValueMarker(context, R.layout.item_pie_chart_marker)
-            }
+            setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
+            if (!empty) marker = ValueMarker(context, R.layout.item_pie_chart_marker)
         }
+        firstRender = false
     }
 
     private inner class ValueMarker(

@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
@@ -31,6 +32,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -45,7 +47,11 @@ import org.jetbrains.annotations.NotNull;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -74,6 +80,7 @@ import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragmen
 import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.customviews.callbacks.OnTouchOutsideViewListener;
 import piuk.blockchain.android.ui.dashboard.DashboardFragment;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
@@ -142,6 +149,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;
     private boolean initialized;
+    // Fragment callbacks for currency header
+    private Set<View> touchOutsideViews = new HashSet<>();
+    private List<OnTouchOutsideViewListener> touchOutsideViewListeners = new ArrayList<>();
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -911,4 +921,31 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void onSendFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
     }
+
+    public void setOnTouchOutsideViewListener(View view,
+                                              OnTouchOutsideViewListener onTouchOutsideViewListener) {
+        touchOutsideViews.add(view);
+        touchOutsideViewListeners.add(onTouchOutsideViewListener);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(final MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            for (View view : touchOutsideViews) {
+                // Notify touchOutsideViewListeners if user tapped outside a given view
+                Rect viewRect = new Rect();
+                view.getGlobalVisibleRect(viewRect);
+                if (!viewRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+                    for (OnTouchOutsideViewListener listener : touchOutsideViewListeners) {
+                        // TODO: 12/02/2018 If the currency header is open here, return false
+                        // This isn't possible with multiple listeners though
+                        listener.onTouchOutside(view, ev);
+                    }
+                }
+            }
+
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
 }

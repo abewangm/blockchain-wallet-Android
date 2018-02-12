@@ -2,7 +2,12 @@ package piuk.blockchain.android.ui.receive
 
 import android.Manifest
 import android.app.Activity
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -19,6 +24,7 @@ import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -54,6 +60,7 @@ import piuk.blockchain.android.ui.chooser.AccountMode
 import piuk.blockchain.android.ui.contacts.IntroducingContactsPromptDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.ui.customviews.callbacks.OnTouchOutsideViewListener
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.util.EditTextFormatUtil
 import piuk.blockchain.android.util.PermissionUtil
@@ -125,6 +132,15 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        activity?.apply {
+            (activity as MainActivity).setOnTouchOutsideViewListener(currency_header,
+                    object : OnTouchOutsideViewListener {
+                        override fun onTouchOutside(view: View, event: MotionEvent) {
+                            currency_header.close()
+                        }
+                    })
+        }
 
         onViewReady()
         setupLayout()
@@ -645,7 +661,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     private fun handleBackPressed() {
         when {
             isKeyboardVisible() -> closeKeypad()
-            currency_header.isExpanded() -> currency_header.close()
+            currency_header.isOpen() -> currency_header.close()
             else -> {
                 if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
                     AccessState.getInstance().logout(context)
