@@ -8,6 +8,7 @@ import org.spongycastle.util.encoders.Hex;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.exchange.models.ExchangeData;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
@@ -44,8 +45,8 @@ public class BuyDataManager {
         Observable<Settings> walletSettingsStream = settingsDataManager.getSettings();
         walletSettingsStream.subscribeWith(buyConditions.walletSettingsSource);
 
-        Observable<Boolean> coinifyWhitelistedStream = exchangeService.hasCoinifyAccount();
-        coinifyWhitelistedStream.subscribeWith(buyConditions.coinifyWhitelistedSource);
+        Observable<ExchangeData> exchangeDataStream = exchangeService.getExchangeMetaData();
+        exchangeDataStream.subscribeWith(buyConditions.exchangeDataSource);
     }
 
     public synchronized Observable<Boolean> getCanBuy() {
@@ -72,8 +73,8 @@ public class BuyDataManager {
      * @return An {@link Observable} wrapping a boolean value
      */
     private Observable<Boolean> isCoinifyAllowed() {
-        return Observable.zip(isInCoinifyCountry(), buyConditions.coinifyWhitelistedSource,
-                (coinifyCountry, whiteListed) -> coinifyCountry || whiteListed);
+        return Observable.zip(isInCoinifyCountry(), buyConditions.exchangeDataSource,
+                (coinifyCountry, exchangeData) -> coinifyCountry || exchangeData.getCoinify().getUser() != 0);
     }
 
     /**

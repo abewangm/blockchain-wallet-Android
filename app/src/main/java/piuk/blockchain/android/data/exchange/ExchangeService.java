@@ -152,7 +152,7 @@ public class ExchangeService {
         ).compose(RxUtil.applySchedulersToObservable());
     }
 
-    Observable<Boolean> hasCoinifyAccount() {
+    Observable<ExchangeData> getExchangeMetaData() {
         return getExchangeData()
                 .flatMap(metadata -> Observable
                         .fromCallable(() -> {
@@ -161,12 +161,12 @@ public class ExchangeService {
                         })
                         .compose(RxUtil.applySchedulersToObservable()))
                 .map(exchangeData -> {
-                    if (exchangeData.isEmpty()) return false;
+                    if (exchangeData.isEmpty()) return null;
 
                     ObjectMapper mapper = new ObjectMapper();
                     ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
 
-                    return data.getCoinify().getUser() != 0;
+                    return data;
                 });
     }
 
