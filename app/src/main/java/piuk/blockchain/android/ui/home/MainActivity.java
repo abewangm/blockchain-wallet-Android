@@ -29,7 +29,6 @@ import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -89,6 +88,7 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 
@@ -109,6 +109,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final String ACTION_RECEIVE_BCH = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE_BCH";
     public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
     public static final String ACTION_SHAPESHIFT = "info.blockchain.wallet.ui.BalanceFragment.SHAPESHIFT";
+    public static final String ACTION_BTC_BALANCE = "info.blockchain.wallet.ui.BalanceFragment.ACTION_BTC_BALANCE";
+    public static final String ACTION_ETH_BALANCE = "info.blockchain.wallet.ui.BalanceFragment.ACTION_ETH_BALANCE";
+    public static final String ACTION_BCH_BALANCE = "info.blockchain.wallet.ui.BalanceFragment.ACTION_BCH_BALANCE";
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
@@ -133,7 +136,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
-    private boolean paymentMade = false;
+    @Thunk boolean paymentMade = false;
     private Typeface typeface;
     private BalanceFragment balanceFragment;
     private FrontendJavascriptManager frontendJavascriptManager;
@@ -155,6 +158,21 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                 BuyActivity.start(MainActivity.this);
             } else if (intent.getAction().equals(ACTION_SHAPESHIFT) && getActivity() != null) {
                 ShapeShiftActivity.start(MainActivity.this);
+            } else if (intent.getAction().equals(ACTION_BTC_BALANCE)) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.BTC);
+                // This forces the balance page to reload
+                paymentMade = true;
+                binding.bottomNavigation.setCurrentItem(2);
+            } else if (intent.getAction().equals(ACTION_ETH_BALANCE)) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.ETHER);
+                // This forces the balance page to reload
+                paymentMade = true;
+                binding.bottomNavigation.setCurrentItem(2);
+            } else if (intent.getAction().equals(ACTION_BCH_BALANCE)) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.BCH);
+                // This forces the balance page to reload
+                paymentMade = true;
+                binding.bottomNavigation.setCurrentItem(2);
             }
         }
     };
@@ -203,12 +221,18 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         IntentFilter filterReceiveEth = new IntentFilter(ACTION_RECEIVE_ETH);
         IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
         IntentFilter filterShapeshift = new IntentFilter(ACTION_SHAPESHIFT);
+        IntentFilter filterBtcBalance = new IntentFilter(ACTION_BTC_BALANCE);
+        IntentFilter filterEthBalance = new IntentFilter(ACTION_ETH_BALANCE);
+        IntentFilter filterBchBalance = new IntentFilter(ACTION_BCH_BALANCE);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveEth);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterShapeshift);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBtcBalance);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterEthBalance);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBchBalance);
 
         appUtil = new AppUtil(this);
         balanceFragment = BalanceFragment.newInstance(false);
@@ -655,14 +679,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     public void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails) {
-        Log.d(TAG, "setWebViewLoginDetails: called");
+        Timber.d("setWebViewLoginDetails: called");
         this.webViewLoginDetails = webViewLoginDetails;
         checkTradesIfReady();
     }
 
     @Override
     public void onFrontendInitialized() {
-        Log.d(TAG, "onFrontendInitialized: called");
+        Timber.d("onFrontendInitialized: called");
         initialized = true;
         checkTradesIfReady();
     }
@@ -681,12 +705,12 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public void onReceiveValue(String value) {
-        Log.d(TAG, "onReceiveValue: " + value);
+        Timber.d("onReceiveValue: %s", value);
     }
 
     @Override
     public void onShowTx(String txHash) {
-        Log.d(TAG, "onShowTx: " + txHash);
+        Timber.d("onShowTx: %s", txHash);
     }
 
     private void applyFontToMenuItem(MenuItem menuItem) {
