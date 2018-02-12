@@ -89,7 +89,7 @@ public class BuyDataManager {
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
                         .map(settings ->
-                                walletOptions.getPartners().getCoinify().getCountries().contains(settings.getCountryCode())
+                                walletOptions.getPartners().getSfox().getCountries().contains(settings.getCountryCode())
                                         && walletOptions.getPartners().getSfox().getStates().contains(settings.getState())));
     }
 
