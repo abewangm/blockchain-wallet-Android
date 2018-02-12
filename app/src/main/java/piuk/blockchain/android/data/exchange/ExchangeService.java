@@ -161,7 +161,47 @@ public class ExchangeService {
                         })
                         .compose(RxUtil.applySchedulersToObservable()))
                 .map(exchangeData -> {
-                    if (exchangeData.isEmpty()) return null;
+
+                    exchangeData = "{\n" +
+                            "  \"coinify\": {\n" +
+                            "    \"user\": 1137,\n" +
+                            "    \"offline_token\": \"uCUevN5R/7yEBFP90ME3R6+1pcJurI2z/ZTN5dt6uP1RryRLtOD6DaGzIqK9FyGT\",\n" +
+                            "    \"auto_login\": true,\n" +
+                            "    \"trades\": [\n" +
+                            "      {\n" +
+                            "        \"id\": 2559,\n" +
+                            "        \"state\": \"completed\",\n" +
+                            "        \"tx_hash\": \"f02c6c063bcb066f09ee317f0e1895d583cc7c41e66dd9a83d52078695351188\",\n" +
+                            "        \"confirmed\": true,\n" +
+                            "        \"is_buy\": true,\n" +
+                            "        \"account_index\": 1,\n" +
+                            "        \"receive_index\": 40\n" +
+                            "      },\n" +
+                            "      {\n" +
+                            "        \"id\": 6411,\n" +
+                            "        \"state\": \"completed\",\n" +
+                            "        \"tx_hash\": \"39c49510083f1a02b60fc26131d553a489b356b2f882ff037e0ab0d8c5f59cf0\",\n" +
+                            "        \"confirmed\": true,\n" +
+                            "        \"is_buy\": true,\n" +
+                            "        \"account_index\": 1,\n" +
+                            "        \"receive_index\": 55\n" +
+                            "      }\n" +
+                            "    ]\n" +
+                            "  },\n" +
+                            "  \"sfox\": {\n" +
+                            "    \"has_seen\": false,\n" +
+                            "    \"auto_login\": true,\n" +
+                            "    \"user\": \"riri\",\n" +
+                            "    \"trades\": []\n" +
+                            "  },\n" +
+                            "  \"unocoin\": {\n" +
+                            "    \"auto_login\": true,\n" +
+                            "    \"trades\": []\n" +
+                            "  }\n" +
+                            "}";
+
+
+                    if (exchangeData.isEmpty()) return new ExchangeData();
 
                     ObjectMapper mapper = new ObjectMapper();
                     ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
