@@ -108,6 +108,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         currency_header.setSelectionListener { presenter.onCurrencySelected(it) }
 
         onViewReady()
+
+        presenter.onRefreshRequested()
     }
 
     override fun onResume() {

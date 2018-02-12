@@ -93,6 +93,7 @@ class BalancePresenter @Inject constructor(
     /**
      * Do all API calls to reload page
      */
+    @SuppressLint("VisibleForTests")
     private fun refreshAllCompletable(account: ItemAccount): Completable {
         return getUpdateTickerCompletable()
                 .andThen(updateBchWallet())

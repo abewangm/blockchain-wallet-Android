@@ -100,12 +100,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT) {
-                presenter?.let {
+                presenter?.apply {
                     // Update UI with new Address + QR
-                    // TODO:
-//                    if (tabs_receive?.selectedTabPosition == 0) {
-//                        presenter.onSelectDefault(selectedAccountPosition)
-//                    }
+                    onResume(selectedAccountPosition)
                 }
             }
         }
@@ -437,6 +434,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
         }
         divider1.gone()
         amount_container.gone()
+        divider3.visible()
 
         if (presenter.shouldShowDropdown()) {
             to_container.visible()
