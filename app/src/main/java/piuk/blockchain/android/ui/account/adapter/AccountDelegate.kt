@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import kotlinx.android.synthetic.main.item_accounts_row.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.account.AccountItem
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.extensions.getContext
@@ -33,7 +34,8 @@ class AccountDelegate<in T>(
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             if (items[position] is AccountItem) {
-                (items[position] as AccountItem).type == AccountItem.TYPE_ACCOUNT
+                (items[position] as AccountItem).type == AccountItem.TYPE_ACCOUNT_BTC
+                        || (items[position] as AccountItem).type == AccountItem.TYPE_ACCOUNT_BCH
                         || (items[position] as AccountItem).type == AccountItem.TYPE_LEGACY_SUMMARY
             } else {
                 false
@@ -43,10 +45,10 @@ class AccountDelegate<in T>(
             itemView: View
     ) : RecyclerView.ViewHolder(itemView) {
 
-        private var title: TextView = itemView.my_account_row_label
-        private var address: TextView = itemView.my_account_row_address
-        private var amount: TextView = itemView.my_account_row_amount
-        private var tag: TextView = itemView.my_account_row_tag
+        private val title: TextView = itemView.my_account_row_label
+        private val address: TextView = itemView.my_account_row_address
+        private val amount: TextView = itemView.my_account_row_amount
+        private val tag: TextView = itemView.my_account_row_tag
 
         internal fun bind(accountItem: AccountItem, listener: AccountHeadersListener) {
 
@@ -68,7 +70,14 @@ class AccountDelegate<in T>(
             } else {
                 // Normal account view
                 itemView.setOnClickListener {
-                    listener.onAccountClicked(accountItem.correctedPosition)
+                    listener.onAccountClicked(
+                            if (accountItem.type == AccountItem.TYPE_ACCOUNT_BCH) {
+                                CryptoCurrencies.BCH
+                            } else {
+                                CryptoCurrencies.BTC
+                            },
+                            accountItem.correctedPosition
+                    )
                 }
 
                 title.text = accountItem.label

@@ -53,7 +53,7 @@ public class AccountEditModel extends BaseObservable {
         return transferFundsVisibility;
     }
 
-    public void setTransferFundsVisibility(@ViewUtils.Visibility int visibility) {
+    void setTransferFundsVisibility(@ViewUtils.Visibility int visibility) {
         transferFundsVisibility = visibility;
         notifyPropertyChanged(BR.transferFundsVisibility);
     }
@@ -63,17 +63,17 @@ public class AccountEditModel extends BaseObservable {
         return transferFundsAlpha;
     }
 
-    public void setTransferFundsAlpha(@FloatRange(from = 0.0, to = 1.0) float transferFundsAlpha) {
+    void setTransferFundsAlpha(@FloatRange(from = 0.0, to = 1.0) float transferFundsAlpha) {
         this.transferFundsAlpha = transferFundsAlpha;
         notifyPropertyChanged(BR.transferFundsAlpha);
     }
 
     @Bindable
-    public boolean getTransferFundsClickable() {
+    boolean getTransferFundsClickable() {
         return transferFundsClickable;
     }
 
-    public void setTransferFundsClickable(boolean transferFundsClickable) {
+    void setTransferFundsClickable(boolean transferFundsClickable) {
         this.transferFundsClickable = transferFundsClickable;
         notifyPropertyChanged(BR.transferFundsClickable);
     }
@@ -83,7 +83,7 @@ public class AccountEditModel extends BaseObservable {
         return labelHeader;
     }
 
-    public void setLabelHeader(String labelHeader) {
+    void setLabelHeader(String labelHeader) {
         this.labelHeader = labelHeader;
         notifyPropertyChanged(BR.labelHeader);
     }
@@ -93,7 +93,7 @@ public class AccountEditModel extends BaseObservable {
         return labelAlpha;
     }
 
-    public void setLabelAlpha(@FloatRange(from = 0.0, to = 1.0) float labelAlpha) {
+    void setLabelAlpha(@FloatRange(from = 0.0, to = 1.0) float labelAlpha) {
         this.labelAlpha = labelAlpha;
         notifyPropertyChanged(BR.labelAlpha);
     }
@@ -103,7 +103,7 @@ public class AccountEditModel extends BaseObservable {
         return labelClickable;
     }
 
-    public void setLabelClickable(boolean labelClickable) {
+    void setLabelClickable(boolean labelClickable) {
         this.labelClickable = labelClickable;
         notifyPropertyChanged(BR.labelClickable);
     }
@@ -123,7 +123,7 @@ public class AccountEditModel extends BaseObservable {
         return defaultAccountVisibility;
     }
 
-    public void setDefaultAccountVisibility(@ViewUtils.Visibility int visibility) {
+    void setDefaultAccountVisibility(@ViewUtils.Visibility int visibility) {
         defaultAccountVisibility = visibility;
         notifyPropertyChanged(BR.defaultAccountVisibility);
     }
@@ -133,7 +133,7 @@ public class AccountEditModel extends BaseObservable {
         return defaultText;
     }
 
-    public void setDefaultText(String defaultText) {
+    void setDefaultText(String defaultText) {
         this.defaultText = defaultText;
         notifyPropertyChanged(BR.defaultText);
     }
@@ -143,7 +143,7 @@ public class AccountEditModel extends BaseObservable {
         return defaultTextColor;
     }
 
-    public void setDefaultTextColor(@ColorRes int defaultTextColor) {
+    void setDefaultTextColor(@ColorRes int defaultTextColor) {
         this.defaultTextColor = ContextCompat.getColor(context, defaultTextColor);
         notifyPropertyChanged(BR.defaultTextColor);
     }
@@ -153,7 +153,7 @@ public class AccountEditModel extends BaseObservable {
         return defaultAlpha;
     }
 
-    public void setDefaultAlpha(@FloatRange(from = 0.0, to = 1.0) float defaultAlpha) {
+    void setDefaultAlpha(@FloatRange(from = 0.0, to = 1.0) float defaultAlpha) {
         this.defaultAlpha = defaultAlpha;
         notifyPropertyChanged(BR.defaultAlpha);
     }
@@ -163,7 +163,7 @@ public class AccountEditModel extends BaseObservable {
         return defaultClickable;
     }
 
-    public void setDefaultClickable(boolean defaultClickable) {
+    void setDefaultClickable(boolean defaultClickable) {
         this.defaultClickable = defaultClickable;
         notifyPropertyChanged(BR.defaultClickable);
     }
@@ -173,7 +173,7 @@ public class AccountEditModel extends BaseObservable {
         return scanPrivateKeyVisibility;
     }
 
-    public void setScanPrivateKeyVisibility(@ViewUtils.Visibility int visibility) {
+    void setScanPrivateKeyVisibility(@ViewUtils.Visibility int visibility) {
         scanPrivateKeyVisibility = visibility;
         notifyPropertyChanged(BR.scanPrivateKeyVisibility);
     }
@@ -183,7 +183,7 @@ public class AccountEditModel extends BaseObservable {
         return xprivAlpha;
     }
 
-    public void setXprivAlpha(@FloatRange(from = 0.0, to = 1.0) float xprivAlpha) {
+    void setXprivAlpha(@FloatRange(from = 0.0, to = 1.0) float xprivAlpha) {
         this.xprivAlpha = xprivAlpha;
         notifyPropertyChanged(BR.xprivAlpha);
     }
@@ -193,7 +193,7 @@ public class AccountEditModel extends BaseObservable {
         return xprivClickable;
     }
 
-    public void setXprivClickable(boolean xprivClickable) {
+    void setXprivClickable(boolean xprivClickable) {
         this.xprivClickable = xprivClickable;
         notifyPropertyChanged(BR.xprivClickable);
     }
@@ -203,7 +203,7 @@ public class AccountEditModel extends BaseObservable {
         return xpubText;
     }
 
-    public void setXpubText(String xpubText) {
+    void setXpubText(String xpubText) {
         this.xpubText = xpubText;
         notifyPropertyChanged(BR.xpubText);
     }
@@ -213,7 +213,7 @@ public class AccountEditModel extends BaseObservable {
         return xpubDescriptionVisibility;
     }
 
-    public void setXpubDescriptionVisibility(int xpubDescriptionVisibility) {
+    void setXpubDescriptionVisibility(int xpubDescriptionVisibility) {
         this.xpubDescriptionVisibility = xpubDescriptionVisibility;
         notifyPropertyChanged(BR.xpubDescriptionVisibility);
     }
@@ -223,7 +223,7 @@ public class AccountEditModel extends BaseObservable {
         return xpubAlpha;
     }
 
-    public void setXpubAlpha(@FloatRange(from = 0.0, to = 1.0) float xpubAlpha) {
+    void setXpubAlpha(@FloatRange(from = 0.0, to = 1.0) float xpubAlpha) {
         this.xpubAlpha = xpubAlpha;
         notifyPropertyChanged(BR.xpubAlpha);
     }
@@ -233,7 +233,7 @@ public class AccountEditModel extends BaseObservable {
         return xpubClickable;
     }
 
-    public void setXpubClickable(boolean xpubClickable) {
+    void setXpubClickable(boolean xpubClickable) {
         this.xpubClickable = xpubClickable;
         notifyPropertyChanged(BR.xpubClickable);
     }
@@ -243,7 +243,7 @@ public class AccountEditModel extends BaseObservable {
         return archiveVisibility;
     }
 
-    public void setArchiveVisibility(@ViewUtils.Visibility int visibility) {
+    void setArchiveVisibility(@ViewUtils.Visibility int visibility) {
         archiveVisibility = visibility;
         notifyPropertyChanged(BR.archiveVisibility);
     }
@@ -253,7 +253,7 @@ public class AccountEditModel extends BaseObservable {
         return archiveHeader;
     }
 
-    public void setArchiveHeader(String archiveHeader) {
+    void setArchiveHeader(String archiveHeader) {
         this.archiveHeader = archiveHeader;
         notifyPropertyChanged(BR.archiveHeader);
     }
@@ -263,7 +263,7 @@ public class AccountEditModel extends BaseObservable {
         return archiveText;
     }
 
-    public void setArchiveText(String archiveText) {
+    void setArchiveText(String archiveText) {
         this.archiveText = archiveText;
         notifyPropertyChanged(BR.archiveText);
     }
@@ -273,7 +273,7 @@ public class AccountEditModel extends BaseObservable {
         return archiveAlpha;
     }
 
-    public void setArchiveAlpha(@FloatRange(from = 0.0, to = 1.0) float archiveAlpha) {
+    void setArchiveAlpha(@FloatRange(from = 0.0, to = 1.0) float archiveAlpha) {
         this.archiveAlpha = archiveAlpha;
         notifyPropertyChanged(BR.archiveAlpha);
     }
@@ -283,7 +283,7 @@ public class AccountEditModel extends BaseObservable {
         return archiveClickable;
     }
 
-    public void setArchiveClickable(boolean archiveClickable) {
+    void setArchiveClickable(boolean archiveClickable) {
         this.archiveClickable = archiveClickable;
         notifyPropertyChanged(BR.archiveClickable);
     }

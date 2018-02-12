@@ -62,7 +62,6 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.BackupWalletUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MetadataUtils;
-import piuk.blockchain.android.util.NetworkParameterUtils;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -274,8 +273,16 @@ public class DataManagerModule {
                                                      EthDataManager ethDataManager,
                                                      BchDataManager bchDataManager,
                                                      ShapeShiftDataManager shapeShiftDataManager,
-                                                     StringUtils stringUtils) {
-        return new MetadataManager(payloadDataManager, ethDataManager, bchDataManager, shapeShiftDataManager, stringUtils);
+                                                     StringUtils stringUtils,
+                                                     MetadataUtils metadataUtils,
+                                                     RxBus rxBus) {
+        return new MetadataManager(payloadDataManager,
+                ethDataManager,
+                bchDataManager,
+                shapeShiftDataManager,
+                stringUtils,
+                metadataUtils,
+                rxBus);
     }
 
     @Provides
@@ -283,12 +290,14 @@ public class DataManagerModule {
     protected BchDataManager provideBchDataManager(PayloadDataManager payloadDataManager,
                                                    BchDataStore bchDataStore,
                                                    MetadataUtils metadataUtils,
-                                                   NetworkParameterUtils networkParameterUtils,
+                                                   EnvironmentSettings environmentSettings,
                                                    BlockExplorer blockExplorer,
                                                    StringUtils stringUtils,
                                                    RxBus rxBus) {
-        return new BchDataManager(payloadDataManager, bchDataStore,
-                metadataUtils, networkParameterUtils,
+        return new BchDataManager(payloadDataManager,
+                bchDataStore,
+                metadataUtils,
+                environmentSettings,
                 blockExplorer,
                 stringUtils,
                 rxBus);

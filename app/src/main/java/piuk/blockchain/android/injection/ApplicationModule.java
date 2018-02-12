@@ -19,7 +19,6 @@ import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.MetadataUtils;
-import piuk.blockchain.android.util.NetworkParameterUtils;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -104,11 +103,6 @@ public class ApplicationModule {
     @Provides
     protected CurrencyState provideCurrencyState() {
         return CurrencyState.getInstance();
-    }
-
-    @Provides
-    protected NetworkParameterUtils provideParamsUtils() {
-        return new NetworkParameterUtils();
     }
 
     @Provides

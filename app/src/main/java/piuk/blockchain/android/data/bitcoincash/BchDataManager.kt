@@ -12,12 +12,12 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.util.MetadataUtils
-import piuk.blockchain.android.util.NetworkParameterUtils
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
@@ -28,7 +28,7 @@ class BchDataManager(
         private val payloadDataManager: PayloadDataManager,
         private val bchDataStore: BchDataStore,
         private val metadataUtils: MetadataUtils,
-        private val networkParameterUtils: NetworkParameterUtils,
+        private val environmentSettings: EnvironmentSettings,
         private val blockExplorer: BlockExplorer,
         private val stringUtils: StringUtils,
         rxBus: RxBus
@@ -47,17 +47,18 @@ class BchDataManager(
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Completable]
      */
-    fun initBchWallet(metadataNode: DeterministicKey, defaultLabel: String) = rxPinning.call {
-        Completable.fromCallable {
-            fetchOrCreateBchMetadata(metadataNode, defaultLabel)
-            restoreBchWallet(bchDataStore.bchMetadata!!)
-            return@fromCallable Void.TYPE
+    fun initBchWallet(metadataNode: DeterministicKey, defaultLabel: String): Completable =
+            rxPinning.call {
+                Completable.fromCallable {
+                    fetchOrCreateBchMetadata(metadataNode, defaultLabel)
+                    restoreBchWallet(bchDataStore.bchMetadata!!)
+                    return@fromCallable Void.TYPE
 
-        }.compose(RxUtil.applySchedulersToCompletable())
-    }
+                }.compose(RxUtil.applySchedulersToCompletable())
+            }
 
     /**
-     * Refreshes bitcoincash metadata. Useful if another platform performed any changes to wallet state.
+     * Refreshes bitcoin cash metadata. Useful if another platform performed any changes to wallet state.
      * At this point metadataNodeFactory.metadata node will exist.
      */
     fun refreshMetadataCompletable(): Completable =
@@ -70,6 +71,8 @@ class BchDataManager(
                                 )
                             }
             )
+
+    fun serializeForSaving(): String = bchDataStore.bchMetadata!!.toJson()
 
     private fun fetchOrCreateBchMetadata(
             metadataKey: DeterministicKey,
@@ -100,6 +103,9 @@ class BchDataManager(
                 accounts = bchAccounts
                 isHasSeen = true
             }
+
+            // TODO: This will be moved out to MetadataManager in future
+            bchMetadataNode.putMetadata(bchDataStore.bchMetadata!!.toJson())
         }
     }
 
@@ -128,7 +134,7 @@ class BchDataManager(
         if (!payloadDataManager.isDoubleEncrypted) {
             bchDataStore.bchWallet = BitcoinCashWallet.restore(
                     blockExplorer,
-                    networkParameterUtils.bitcoinCashParams,
+                    environmentSettings.bitcoinCashNetworkParameters,
                     BitcoinCashWallet.BITCOIN_COIN_PATH,
                     payloadDataManager.mnemonic,
                     ""
@@ -143,7 +149,7 @@ class BchDataManager(
 
             bchDataStore.bchWallet = BitcoinCashWallet.createWatchOnly(
                     blockExplorer,
-                    networkParameterUtils.bitcoinCashParams
+                    environmentSettings.bitcoinCashNetworkParameters
             )
 
             // NB! A watch-only account xpub != account xpub, then do however derive the same addresses.
@@ -162,7 +168,7 @@ class BchDataManager(
 
         bchDataStore.bchWallet = BitcoinCashWallet.restore(
                 blockExplorer,
-                networkParameterUtils.bitcoinCashParams,
+                environmentSettings.bitcoinCashNetworkParameters,
                 BitcoinCashWallet.BITCOIN_COIN_PATH,
                 mnemonic,
                 ""
@@ -174,37 +180,38 @@ class BchDataManager(
         }
     }
 
-    fun getActiveXpubs(): List<String> {
+    /**
+     * Adds a [GenericMetadataAccount] to the BCH wallet. The wallet will have to be saved at this
+     * point. This assumes that a new [info.blockchain.wallet.payload.data.Account] has already
+     * been added to the user's Payload, otherwise xPubs could get out of sync.
+     */
+    fun createAccount() {
+        bchDataStore.bchWallet!!.addAccount()
+        val defaultLabel = stringUtils.getString(R.string.bch_default_account_label)
+        val count = bchDataStore.bchWallet!!.accountTotal
+        bchDataStore.bchMetadata!!.addAccount(
+                GenericMetadataAccount(
+                        """$defaultLabel $count""",
+                        false
+                )
+        )
 
-        val result = mutableListOf<String>()
-
-        bchDataStore.bchMetadata?.accounts?.forEachIndexed { i, account ->
-            if (!account.isArchived) {
-                result.add(account.xpub)
-            }
+        payloadDataManager.accounts.forEachIndexed { i, account ->
+            bchDataStore.bchMetadata!!.accounts[i].xpub = account.xpub
         }
-
-        return result
     }
 
-    fun getActiveXpubsAndImportedAddresses(): List<String> {
+    fun getActiveXpubs(): List<String> =
+            bchDataStore.bchMetadata?.accounts?.filterNot { it.isArchived }?.map { it.xpub }
+                    ?: emptyList()
 
-        val result = mutableListOf<String>()
-
-        bchDataStore.bchMetadata?.accounts?.forEachIndexed { i, account ->
-            if (!account.isArchived) {
-                result.add(account.xpub)
-            }
-        }
-
-        result.addAll(payloadDataManager.legacyAddressStringList)
-
-        return result
-    }
+    fun getActiveXpubsAndImportedAddresses(): List<String> = getActiveXpubs().toMutableList()
+            .apply { addAll(getLegacyAddressStringList()) }
 
     fun getLegacyAddressStringList(): List<String> = payloadDataManager.legacyAddressStringList
 
-    fun getWatchOnlyAddressStringList(): List<String> = payloadDataManager.watchOnlyAddressStringList
+    fun getWatchOnlyAddressStringList(): List<String> =
+            payloadDataManager.watchOnlyAddressStringList
 
     fun updateAllBalances(): Completable {
         val legacyAddresses = payloadDataManager.legacyAddresses
@@ -251,33 +258,31 @@ class BchDataManager(
      * @return Generic account data that contains label and xpub/address
      */
     fun getActiveAccounts(): List<GenericMetadataAccount> {
+        return getAccounts().filterNot { it.isArchived }
+    }
 
-        val active = mutableListOf<GenericMetadataAccount>()
-
-        bchDataStore.bchMetadata?.accounts?.forEach {
-            if (!it.isArchived) {
-                active.add(it)
-            }
-        }
-
-        return active
+    fun getAccounts(): List<GenericMetadataAccount> {
+        return bchDataStore.bchMetadata?.accounts ?: emptyList()
     }
 
     fun getDefaultAccountPosition(): Int = bchDataStore.bchMetadata?.defaultAcccountIdx ?: 0
 
+    fun setDefaultAccountPosition(position: Int) {
+        bchDataStore.bchMetadata!!.defaultAcccountIdx = position
+    }
+
     fun getDefaultDeterministicAccount(): DeterministicAccount? =
             bchDataStore.bchWallet?.accounts?.get(getDefaultAccountPosition())
 
-    fun getDefaultGenericMetadataAccount(): GenericMetadataAccount? {
-        return bchDataStore.bchMetadata?.accounts?.get(getDefaultAccountPosition())
-    }
+    fun getDefaultGenericMetadataAccount(): GenericMetadataAccount? =
+            bchDataStore.bchMetadata?.accounts?.get(getDefaultAccountPosition())
 
     /**
      * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
-     * @param accountIndex  The index of the [Account] you wish to generate an address from
+     * @param accountIndex  The index of the [GenericMetadataAccount] you wish to generate an address from
      * @param addressIndex Represents how many positions on the chain beyond what is already used that
      * you wish to generate
      * @return A Bitcoin Cash receive address in Base58 format
@@ -358,8 +363,7 @@ class BchDataManager(
                 bchDataStore.bchWallet!!.incrementNextChangeAddress(xpub)
             }
 
-    fun isOwnAddress(address: String) =
-            bchDataStore.bchWallet?.isOwnAddress(address) ?: false
+    fun isOwnAddress(address: String) = bchDataStore.bchWallet?.isOwnAddress(address) ?: false
 
     /**
      * Converts any Bitcoin Cash address to a label.
@@ -418,15 +422,16 @@ class BchDataManager(
             )
 
     fun getXpubFromAddress(address: String) =
-        bchDataStore.bchWallet!!.getXpubFromAddress(address)
+            bchDataStore.bchWallet!!.getXpubFromAddress(address)
 
-    fun getHDKeysForSigning(account: DeterministicAccount,
-                            unspentOutputs: List<UnspentOutput>) =
-            bchDataStore.bchWallet!!.getHDKeysForSigning(account, unspentOutputs)
+    fun getHDKeysForSigning(
+            account: DeterministicAccount,
+            unspentOutputs: List<UnspentOutput>
+    ) = bchDataStore.bchWallet!!.getHDKeysForSigning(account, unspentOutputs)
 
-    fun getAcc() =
-        bchDataStore.bchWallet!!.accounts
+    fun getAcc(): List<DeterministicAccount> = bchDataStore.bchWallet!!.accounts
 
     fun subtractAmountFromAddressBalance(account: String, amount: BigInteger) =
             bchDataStore.bchWallet!!.subtractAmountFromAddressBalance(account, amount)
+
 }

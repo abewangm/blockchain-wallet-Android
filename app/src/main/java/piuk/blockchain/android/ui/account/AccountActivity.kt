@@ -2,7 +2,11 @@ package piuk.blockchain.android.ui.account
 
 import android.Manifest
 import android.app.Activity
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.annotation.StringRes
@@ -21,6 +25,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress
 import kotlinx.android.synthetic.main.activity_accounts.*
 import kotlinx.android.synthetic.main.toolbar_general.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.AccountPresenter.Companion.ADDRESS_LABEL_MAX_LENGTH
 import piuk.blockchain.android.ui.account.AccountPresenter.Companion.KEY_WARN_TRANSFER_ALL
@@ -57,13 +62,6 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
                 // Check if we need to hide/show the transfer funds icon in the Toolbar
                 presenter.checkTransferableLegacyFunds(false, false)
             }
-        }
-    }
-    private val addressLabelEditText by unsafeLazy {
-        AppCompatEditText(this).apply {
-            inputType = InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            filters = arrayOf<InputFilter>(InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH))
-            setHint(R.string.name)
         }
     }
 
@@ -116,6 +114,14 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         else -> super.onOptionsItemSelected(item)
     }
 
+    override fun onBackPressed() {
+        if (currency_header.isExpanded()) {
+            currency_header.close()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     override fun startScanForResult() {
         Intent(this, CaptureActivity::class.java).apply {
             putExtra(Intents.Scan.FORMATS, EnumSet.allOf(BarcodeFormat::class.java))
@@ -131,8 +137,8 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         importAddress()
     }
 
-    override fun onAccountClicked(correctedPosition: Int) {
-        onRowClick(correctedPosition)
+    override fun onAccountClicked(cryptoCurrency: CryptoCurrencies, correctedPosition: Int) {
+        onRowClick(cryptoCurrency, correctedPosition)
     }
 
     private fun importAddress() {
@@ -146,14 +152,22 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         }
     }
 
-    private fun onRowClick(position: Int) {
-        Intent(this, AccountEditActivity::class.java).apply {
-            if (position >= presenter.accountSize) {
-                putExtra("address_index", position - presenter.accountSize)
-            } else {
-                putExtra("account_index", position)
-            }
-        }.run { startActivityForResult(this, EDIT_ACTIVITY_REQUEST_CODE) }
+    private fun onRowClick(cryptoCurrency: CryptoCurrencies, position: Int) {
+        AccountEditActivity.startForResult(
+                this,
+                getAccountPosition(cryptoCurrency, position),
+                if (position >= presenter.accountSize) position - presenter.accountSize else -1,
+                cryptoCurrency,
+                EDIT_ACTIVITY_REQUEST_CODE
+        )
+    }
+
+    private fun getAccountPosition(cryptoCurrency: CryptoCurrencies, position: Int): Int {
+        return if (cryptoCurrency == CryptoCurrencies.BTC) {
+            if (position < presenter.accountSize) position else -1
+        } else {
+            return position
+        }
     }
 
     private fun onScanButtonClicked() {
@@ -183,7 +197,11 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
     }
 
     private fun promptForAccountLabel() {
-        val editText = addressLabelEditText
+        val editText = AppCompatEditText(this).apply {
+            inputType = InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            filters = arrayOf<InputFilter>(InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH))
+            setHint(R.string.name)
+        }
 
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.label)
@@ -265,7 +283,11 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
     }
 
     override fun showRenameImportedAddressDialog(address: LegacyAddress) {
-        val editText = addressLabelEditText
+        val editText = AppCompatEditText(this).apply {
+            inputType = InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            filters = arrayOf<InputFilter>(InputFilter.LengthFilter(ADDRESS_LABEL_MAX_LENGTH))
+            setHint(R.string.name)
+        }
 
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setTitle(R.string.app_name)

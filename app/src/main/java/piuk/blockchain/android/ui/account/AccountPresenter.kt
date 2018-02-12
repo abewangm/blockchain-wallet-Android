@@ -1,7 +1,9 @@
 package piuk.blockchain.android.ui.account
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.support.annotation.VisibleForTesting
+import info.blockchain.wallet.BitcoinCashWallet
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.exceptions.DecryptionException
 import info.blockchain.wallet.exceptions.PayloadException
@@ -21,6 +23,7 @@ import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.websocket.WebSocketService
@@ -38,6 +41,7 @@ import kotlin.properties.Delegates
 class AccountPresenter @Inject internal constructor(
         private val payloadDataManager: PayloadDataManager,
         private val bchDataManager: BchDataManager,
+        private val metadataManager: MetadataManager,
         private val fundsDataManager: TransferFundsDataManager,
         private val prefsUtil: PrefsUtil,
         private val appUtil: AppUtil,
@@ -97,23 +101,32 @@ class AccountPresenter @Inject internal constructor(
      * @param accountLabel A label for the account to be created
      */
     internal fun createNewAccount(accountLabel: String) {
-        if (LabelUtil.isExistingLabel(payloadDataManager, accountLabel)) {
+        if (LabelUtil.isExistingLabel(payloadDataManager, bchDataManager, accountLabel)) {
             view.showToast(R.string.label_name_match, ToastCustom.TYPE_ERROR)
             return
         }
 
         payloadDataManager.createNewAccount(accountLabel, doubleEncryptionPassword)
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnNext {
+                    val intent = Intent(WebSocketService.ACTION_INTENT).apply {
+                        putExtra(WebSocketService.EXTRA_X_PUB_BTC, it.xpub)
+                    }
+                    view.broadcastIntent(intent)
+                }
+                .flatMapCompletable {
+                    bchDataManager.createAccount()
+                    metadataManager.saveToMetadata(
+                            bchDataManager.serializeForSaving(),
+                            BitcoinCashWallet.METADATA_TYPE_EXTERNAL
+                    )
+                }
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doAfterTerminate { view.dismissProgressDialog() }
                 .doOnError { Timber.e(it) }
                 .subscribe(
                         {
                             view.showToast(R.string.remote_save_ok, ToastCustom.TYPE_OK)
-                            val intent = Intent(WebSocketService.ACTION_INTENT).apply {
-                                putExtra(WebSocketService.EXTRA_X_PUB_BTC, it.xpub)
-                            }
-                            view.broadcastIntent(intent)
                             onViewReady()
 
                             Logging.logCustom(CreateAccountEvent(payloadDataManager.accounts.size))
@@ -180,6 +193,7 @@ class AccountPresenter @Inject internal constructor(
      * @param data     The address to be imported
      * @param password The BIP38 encryption passphrase
      */
+    @SuppressLint("VisibleForTests")
     internal fun importBip38Address(data: String, password: String) {
         view.showProgressDialog(R.string.please_wait)
         try {
@@ -278,6 +292,7 @@ class AccountPresenter @Inject internal constructor(
         return addressCopy
     }
 
+    @SuppressLint("VisibleForTests")
     private fun importNonBip38Address(format: String, data: String, secondPassword: String?) {
         payloadDataManager.getKeyFromImportedData(format, data)
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
@@ -353,7 +368,7 @@ class AccountPresenter @Inject internal constructor(
                             account.isArchived,
                             false,
                             defaultAccount.xpub == account.xpub,
-                            AccountItem.TYPE_ACCOUNT
+                            AccountItem.TYPE_ACCOUNT_BTC
                     )
             )
             correctedPosition++
@@ -381,7 +396,7 @@ class AccountPresenter @Inject internal constructor(
                             legacyAddress.tag == LegacyAddress.ARCHIVED_ADDRESS,
                             legacyAddress.isWatchOnly,
                             false,
-                            AccountItem.TYPE_ACCOUNT
+                            AccountItem.TYPE_ACCOUNT_BTC
                     )
             )
             correctedPosition++
@@ -415,7 +430,7 @@ class AccountPresenter @Inject internal constructor(
                             account.isArchived,
                             false,
                             defaultAccount.xpub == account.xpub,
-                            AccountItem.TYPE_ACCOUNT
+                            AccountItem.TYPE_ACCOUNT_BCH
                     )
             )
         }
@@ -438,7 +453,7 @@ class AccountPresenter @Inject internal constructor(
     //region Convenience functions
     private fun getBtcAccounts(): List<Account> = payloadDataManager.accounts
 
-    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getActiveAccounts()
+    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getAccounts()
 
     private fun getLegacyAddresses(): List<LegacyAddress> = payloadDataManager.legacyAddresses
 

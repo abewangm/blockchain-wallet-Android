@@ -24,7 +24,11 @@ import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.home.models.MetadataEvent
 import piuk.blockchain.android.ui.onboarding.OnboardingPagerContent
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.AppUtil
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.math.BigDecimal
@@ -67,6 +71,7 @@ class DashboardPresenter @Inject constructor(
     @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
+        // TODO: This won't be called if the page is re-added after loading initially
         view.notifyItemAdded(displayList, 0)
         updatePrices()
 
@@ -243,18 +248,16 @@ class DashboardPresenter @Inject constructor(
         }
     }
 
-    private fun getOnboardingStatusObservable(): Observable<Boolean> {
-        return if (isOnboardingComplete()) {
-            Observable.just(false)
-        } else {
-            buyDataManager.canBuy
-                    .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .doOnNext { displayList.removeAll { it is OnboardingModel } }
-                    .doOnNext { displayList.add(0, getOnboardingPages(it)) }
-                    .doOnNext { view.notifyItemAdded(displayList, 0) }
-                    .doOnNext { view.scrollToTop() }
-                    .doOnError { Timber.e(it) }
-        }
+    private fun getOnboardingStatusObservable(): Observable<Boolean> = if (isOnboardingComplete()) {
+        Observable.just(false)
+    } else {
+        buyDataManager.canBuy
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doOnNext { displayList.removeAll { it is OnboardingModel } }
+                .doOnNext { displayList.add(0, getOnboardingPages(it)) }
+                .doOnNext { view.notifyItemAdded(displayList, 0) }
+                .doOnNext { view.scrollToTop() }
+                .doOnError { Timber.e(it) }
     }
 
     private fun checkLatestAnnouncement() {
