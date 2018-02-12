@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
+import android.view.ViewGroup
 import kotlinx.android.synthetic.main.activity_graphs.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.charts.TimeSpan
@@ -29,8 +30,14 @@ class ChartsActivity : BaseAuthActivity(), TimeSpanUpdateListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_graphs)
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        val adapter = ChartsFragmentPagerAdapter(supportFragmentManager, bitcoin, ether, bitcoinCash)
+        val adapter = ChartsFragmentPagerAdapter(
+                supportFragmentManager,
+                bitcoin,
+                ether,
+                bitcoinCash
+        )
 
         viewpager.run {
             offscreenPageLimit = 3
