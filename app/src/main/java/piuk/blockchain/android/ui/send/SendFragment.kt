@@ -3,7 +3,11 @@ package piuk.blockchain.android.ui.send
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -23,6 +27,7 @@ import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -56,6 +61,7 @@ import piuk.blockchain.android.ui.confirm.ConfirmPaymentDialog
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.NumericKeyboardCallback
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import piuk.blockchain.android.ui.customviews.callbacks.OnTouchOutsideViewListener
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.home.MainActivity.SCAN_URI
 import piuk.blockchain.android.ui.zxing.CaptureActivity
@@ -63,7 +69,12 @@ import piuk.blockchain.android.util.AppRate
 import piuk.blockchain.android.util.AppUtil
 import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.extensions.getTextString
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.invisible
+import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.extensions.visible
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -113,7 +124,15 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        activity!!.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+        activity?.apply {
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+            (activity as MainActivity).setOnTouchOutsideViewListener(currency_header,
+                    object : OnTouchOutsideViewListener {
+                        override fun onTouchOutside(view: View, event: MotionEvent) {
+                            currency_header.close()
+                        }
+                    })
+        }
 
         setCustomKeypad()
 
@@ -509,7 +528,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     private fun handleBackPressed() {
         when {
             isKeyboardVisible() -> closeKeypad()
-            currency_header.isExpanded() -> currency_header.close()
+            currency_header.isOpen() -> currency_header.close()
             else -> {
                 if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
                     AccessState.getInstance().logout(context)

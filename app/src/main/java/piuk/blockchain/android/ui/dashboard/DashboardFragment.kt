@@ -44,15 +44,10 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         DashboardDelegateAdapter(
                 context!!,
                 { ChartsActivity.start(context!!, it) },
-                {
-                    when (it) {
-                        CryptoCurrencies.BTC -> TODO("Launch balance page")
-                        CryptoCurrencies.ETHER -> TODO("Launch balance page")
-                        CryptoCurrencies.BCH -> TODO("Launch balance page")
-                    }
-                }
+                { startBalance(it) }
         )
     }
+
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == BalanceFragment.ACTION_INTENT && activity != null) {
@@ -140,17 +135,11 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun showToast(message: Int, toastType: String) = toast(message, toastType)
 
     override fun startBuyActivity() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
-        }
+        broadcastIntent(MainActivity.ACTION_BUY)
     }
 
     override fun startBitcoinCashReceive() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
-        }
+        broadcastIntent(ACTION_RECEIVE_BCH)
     }
 
     override fun startWebsocketService() {
@@ -171,6 +160,23 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
     override fun createPresenter() = dashboardPresenter
 
     override fun getMvpView() = this
+
+    private fun startBalance(cryptoCurrency: CryptoCurrencies) {
+        val action =  when (cryptoCurrency) {
+            CryptoCurrencies.BTC -> MainActivity.ACTION_BTC_BALANCE
+            CryptoCurrencies.ETHER -> MainActivity.ACTION_ETH_BALANCE
+            CryptoCurrencies.BCH -> MainActivity.ACTION_BCH_BALANCE
+        }
+
+        broadcastIntent(action)
+    }
+
+    private fun broadcastIntent(action: String) {
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(action))
+        }
+    }
 
     /**
      * Inserts a spacer into the last position in the list
