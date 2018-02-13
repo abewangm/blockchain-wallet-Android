@@ -71,16 +71,30 @@ class DashboardPresenter @Inject constructor(
     @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
-        // TODO: This won't be called if the page is re-added after loading initially
         view.notifyItemAdded(displayList, 0)
         updatePrices()
 
+        val observable = when (firstRun) {
+            true -> metadataObservable
+            false -> Observable.just(MetadataEvent.SETUP_COMPLETE)
+                    .compose(RxUtil.applySchedulersToObservable())
+                    // If data is present, update with cached data
+                    // Data updates run anyway but this makes the UI nicer to look at whilst loading
+                    .doOnNext {
+                        cachedData?.run { view.updatePieChartState(this) }
+                    }
+        }
+
+        firstRun = false
+
         // Triggers various updates to the page once all metadata is loaded
-        metadataObservable.flatMap { getOnboardingStatusObservable() }
-                .doOnNext { swipeToReceiveHelper.storeEthAddress() }
-                .doOnNext { updateAllBalances() }
-                .doOnNext { checkLatestAnnouncement() }
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
+        observable.flatMap { getOnboardingStatusObservable() }
+                // Clears subscription after single event
+                .firstOrError()
+                .doOnSuccess { swipeToReceiveHelper.storeEthAddress() }
+                .doOnSuccess { updateAllBalances() }
+                .doOnSuccess { checkLatestAnnouncement() }
+                .compose(RxUtil.addSingleToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
                         { Timber.e(it) }
@@ -190,27 +204,25 @@ class DashboardPresenter @Inject constructor(
                                 val totalDouble = btcFiat.plus(ethFiat.toDouble()).plus(bchFiat)
                                 val totalString = getFormattedCurrencyString(totalDouble)
 
-                                view.updatePieChartState(
-                                        PieChartsState.Data(
-                                                fiatSymbol = getCurrencySymbol(),
-                                                // Amounts in Fiat
-                                                bitcoinValue = BigDecimal.valueOf(btcFiat),
-                                                etherValue = ethFiat,
-                                                bitcoinCashValue = BigDecimal.valueOf(bchFiat),
-                                                // Formatted fiat value Strings
-                                                bitcoinValueString = getBtcFiatString(btcBalance),
-                                                etherValueString = getEthFiatString(ethBalance),
-                                                bitcoinCashValueString = getBchFiatString(bchBalance),
-                                                // Formatted Amount Strings
-                                                bitcoinAmountString = getBtcBalanceString(btcBalance),
-                                                etherAmountString = getEthBalanceString(ethBalance),
-                                                bitcoinCashAmountString = getBchBalanceString(
-                                                        bchBalance
-                                                ),
-                                                // Total
-                                                totalValueString = totalString
-                                        )
-                                )
+                                cachedData = PieChartsState.Data(
+                                        fiatSymbol = getCurrencySymbol(),
+                                        // Amounts in Fiat
+                                        bitcoinValue = BigDecimal.valueOf(btcFiat),
+                                        etherValue = ethFiat,
+                                        bitcoinCashValue = BigDecimal.valueOf(bchFiat),
+                                        // Formatted fiat value Strings
+                                        bitcoinValueString = getBtcFiatString(btcBalance),
+                                        etherValueString = getEthFiatString(ethBalance),
+                                        bitcoinCashValueString = getBchFiatString(bchBalance),
+                                        // Formatted Amount Strings
+                                        bitcoinAmountString = getBtcBalanceString(btcBalance),
+                                        etherAmountString = getEthBalanceString(ethBalance),
+                                        bitcoinCashAmountString = getBchBalanceString(
+                                                bchBalance
+                                        ),
+                                        // Total
+                                        totalValueString = totalString
+                                ).also { view.updatePieChartState(it) }
                             }
                 }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
@@ -452,6 +464,21 @@ class DashboardPresenter @Inject constructor(
     private fun getLastBchPrice(fiat: String) = exchangeRateFactory.getLastBchPrice(fiat)
 
     companion object {
+
+        /**
+         * This field stores whether or not the presenter has been run for the first time across
+         * all instances. This allows the page to load without a metadata set-up event, which won't
+         * be present if the the page is being returned to.
+         */
+        @VisibleForTesting var firstRun = true
+
+        /**
+         * This is intended to be a temporary solution to caching data on this page. In future,
+         * I intend to organise the MainActivity fragment backstack so that the DashboardFragment
+         * is never killed intentionally. However, this could introduce a lot of bugs so this will
+         * do for now.
+         */
+        private var cachedData: PieChartsState.Data? = null
 
         @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED =
                 "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"

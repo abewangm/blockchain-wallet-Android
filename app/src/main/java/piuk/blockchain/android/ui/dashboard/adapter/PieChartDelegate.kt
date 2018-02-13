@@ -25,7 +25,11 @@ import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.dashboard.PieChartsState
-import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.invisible
+import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
 import java.math.BigDecimal
@@ -45,16 +49,17 @@ class PieChartDelegate<in T>(
     private var bitcoinValue = BigDecimal.ZERO
     private var etherValue = BigDecimal.ZERO
     private var bitcoinCashValue = BigDecimal.ZERO
+    private var firstRender = true
 
     private val typefaceRegular by unsafeLazy {
         TypefaceUtils.load(context.assets, "fonts/Montserrat-Regular.ttf")
     }
 
-    override fun isForViewType(items: List<T>, position: Int): Boolean
-            = items[position] is PieChartsState
+    override fun isForViewType(items: List<T>, position: Int): Boolean =
+            items[position] is PieChartsState
 
-    override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder
-            = PieChartViewHolder(parent.inflate(R.layout.item_pie_chart), coinSelector)
+    override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
+            PieChartViewHolder(parent.inflate(R.layout.item_pie_chart), coinSelector)
 
     override fun onBindViewHolder(
             items: List<T>,
@@ -67,8 +72,8 @@ class PieChartDelegate<in T>(
 
     internal fun updateChartState(pieChartsState: PieChartsState) = when (pieChartsState) {
         is PieChartsState.Data -> renderData(pieChartsState)
-        is PieChartsState.Error -> renderError()
-        is PieChartsState.Loading -> renderLoading()
+        PieChartsState.Error -> renderError()
+        PieChartsState.Loading -> renderLoading()
     }
 
     private fun renderLoading() {
@@ -100,6 +105,9 @@ class PieChartDelegate<in T>(
 
         val isEmpty = (data.bitcoinValue + data.etherValue + data.bitcoinCashValue)
                 .compareTo(BigDecimal.ZERO) == 0
+        // Prevent issue where chart won't render if NOT first fun AND data has recently gone from
+        // empty to non-empty.
+        if (isEmpty) firstRender = true
         configureChart(isEmpty)
 
         val entries = getEntries(isEmpty, data)
@@ -164,7 +172,7 @@ class PieChartDelegate<in T>(
             setHoleColor(Color.TRANSPARENT)
             holeRadius = 70f
 
-            animateY(1000, Easing.EasingOption.EaseInOutQuad)
+            if (firstRender) animateY(1000, Easing.EasingOption.EaseInOutQuad)
             isRotationEnabled = false
             legend.isEnabled = false
             description.isEnabled = false
@@ -173,6 +181,7 @@ class PieChartDelegate<in T>(
             setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
             if (!empty) marker = ValueMarker(context, R.layout.item_pie_chart_marker)
         }
+        firstRender = false
     }
 
     private inner class ValueMarker(
@@ -198,9 +207,15 @@ class PieChartDelegate<in T>(
             // Rounded for comparison as at some point in the stack we're truncating full BigDecimals
             // to doubles and then converting them back again
             coin.text = when (amount.setScale(2, RoundingMode.HALF_UP)) {
-                bitcoinValue.setScale(2, RoundingMode.HALF_UP) -> context.getString(R.string.bitcoin)
+                bitcoinValue.setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                ) -> context.getString(R.string.bitcoin)
                 etherValue.setScale(2, RoundingMode.HALF_UP) -> context.getString(R.string.ether)
-                bitcoinCashValue.setScale(2, RoundingMode.HALF_UP) -> context.getString(R.string.bitcoin_cash)
+                bitcoinCashValue.setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                ) -> context.getString(R.string.bitcoin_cash)
                 else -> ""
             }
 

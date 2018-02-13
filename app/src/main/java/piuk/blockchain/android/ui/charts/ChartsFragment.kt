@@ -81,8 +81,8 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
 
     override fun updateChartState(state: ChartsState) = when (state) {
         is ChartsState.Data -> showData(state)
-        is ChartsState.Loading -> showLoading()
-        is ChartsState.Error -> showError()
+        ChartsState.Loading -> showLoading()
+        ChartsState.Error -> showError()
         is ChartsState.TimeSpanUpdated -> showTimeSpanSelected(state.timeSpan)
     }
 

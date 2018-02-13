@@ -112,10 +112,10 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         textview_ethereum.gone()
     }
 
-    fun isExpanded() = expanded
+    fun isOpen() = expanded
 
     fun close() {
-        if (isExpanded()) closeLayout(null)
+        if (isOpen()) closeLayout(null)
     }
 
     private fun animateLayout(expanding: Boolean) {

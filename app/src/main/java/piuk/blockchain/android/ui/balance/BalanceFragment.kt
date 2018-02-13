@@ -29,12 +29,17 @@ import piuk.blockchain.android.ui.balance.adapter.TxFeedClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
+import piuk.blockchain.android.ui.customviews.callbacks.OnTouchOutsideViewListener
 import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.ViewUtils
-import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.invisible
+import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import javax.inject.Inject
 
@@ -79,6 +84,15 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        activity?.apply {
+            (activity as MainActivity).setOnTouchOutsideViewListener(currency_header,
+                    object : OnTouchOutsideViewListener {
+                        override fun onTouchOutside(view: View, event: MotionEvent) {
+                            currency_header.close()
+                        }
+                    })
+        }
+
         swipe_container.setProgressViewEndTarget(
                 false,
                 ViewUtils.convertDpToPixel(72F + 20F, context).toInt()
@@ -94,11 +108,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         currency_header.setSelectionListener { presenter.onCurrencySelected(it) }
 
         onViewReady()
+
+        presenter.onRefreshRequested()
     }
 
     override fun onResume() {
         super.onResume()
-        presenter.onResume()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
         }
@@ -214,7 +229,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     fun onBackPressed() {
-        if (currency_header.isExpanded()) {
+        if (currency_header.isOpen()) {
             currency_header.close()
         } else {
             if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
