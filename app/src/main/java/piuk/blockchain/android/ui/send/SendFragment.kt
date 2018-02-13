@@ -484,7 +484,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
                 if (CurrencyState.getInstance().cryptoCurrency == CryptoCurrencies.BTC) {
                     AccountMode.Bitcoin
                 } else {
-                    AccountMode.BitcoinCash
+                    AccountMode.BitcoinCashSend
                 },
                 if (currency == CryptoCurrencies.BTC) {
                     REQUEST_CODE_BTC_SENDING
