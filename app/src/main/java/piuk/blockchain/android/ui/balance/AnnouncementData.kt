@@ -10,5 +10,6 @@ data class AnnouncementData(
         @DrawableRes val image: Int,
         val emoji: String?,
         val closeFunction: () -> Unit,
-        val linkFunction: () -> Unit
+        val linkFunction: () -> Unit,
+        val prefsKey: String
 )

@@ -238,12 +238,15 @@ class DashboardPresenter @Inject constructor(
         view.scrollToTop()
     }
 
-    private fun dismissAnnouncement() {
-        prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
-        if (displayList.any { it is AnnouncementData }) {
-            displayList.removeAll { it is AnnouncementData }
-            view.notifyItemRemoved(displayList, 0)
-        }
+    private fun dismissAnnouncement(prefKey: String) {
+        prefsUtil.setValue(prefKey, true)
+        displayList.filterIsInstance<AnnouncementData>()
+                .forEachIndexed { index, any ->
+                    if (any.prefsKey.equals(prefKey)) {
+                        displayList.remove(any)
+                        view.notifyItemRemoved(displayList, index)
+                    }
+                }
     }
 
     private fun getOnboardingStatusObservable(): Observable<Boolean> = if (isOnboardingComplete()) {
@@ -262,39 +265,39 @@ class DashboardPresenter @Inject constructor(
         // If user hasn't completed onboarding, ignore announcements
         if (isOnboardingComplete()) {
 
-            if (!prefsUtil.getValue(
-                            BITCOIN_CASH_ANNOUNCEMENT_DISMISSED,
-                            false)) {
-                prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
+            val bchPrefKey = BITCOIN_CASH_ANNOUNCEMENT_DISMISSED
+            if (!prefsUtil.getValue(bchPrefKey, false)) {
+                prefsUtil.setValue(bchPrefKey, true)
 
-                val announcementData = AnnouncementData(
+                var announcementData = AnnouncementData(
                         title = R.string.bitcoin_cash,
                         description = R.string.onboarding_bitcoin_cash_description,
                         link = R.string.onboarding_cta,
                         image = R.drawable.vector_bch_onboarding,
                         emoji = "\uD83C\uDF89",
-                        closeFunction = { dismissAnnouncement() },
-                        linkFunction = { view.startBitcoinCashReceive() }
+                        closeFunction = { dismissAnnouncement(bchPrefKey) },
+                        linkFunction = { view.startBitcoinCashReceive() },
+                        prefsKey = bchPrefKey
                 )
                 showAnnouncement(0, announcementData)
             }
 
+            val buyPrefKey = SFOX_ANNOUNCEMENT_DISMISSED
             buyDataManager.canBuy
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe({
-                        if (it && !prefsUtil.getValue(
-                                        SFOX_ANNOUNCEMENT_DISMISSED,
-                                        false)) {
-                            prefsUtil.setValue(SFOX_ANNOUNCEMENT_DISMISSED, true)
+                        if (it && !prefsUtil.getValue(buyPrefKey,false)) {
+                            prefsUtil.setValue(buyPrefKey, true)
 
                             val announcementData = AnnouncementData(
-                                    title = R.string.announcement_sfox_cta,
-                                    description = R.string.announcement_sfox_description,
-                                    link = R.string.onboarding_cta,
-                                    image = R.drawable.vector_bch_onboarding,
+                                    title = R.string.announcement_trading_cta,
+                                    description = R.string.announcement_trading_description,
+                                    link = R.string.announcement_trading_link,
+                                    image = R.drawable.vector_buy_onboarding,
                                     emoji = null,
-                                    closeFunction = { dismissAnnouncement() },
-                                    linkFunction = { view.startBuyActivity() }
+                                    closeFunction = { dismissAnnouncement(buyPrefKey) },
+                                    linkFunction = { view.startBuyActivity() },
+                                    prefsKey = buyPrefKey
                             )
                             showAnnouncement(1, announcementData)
                         }
