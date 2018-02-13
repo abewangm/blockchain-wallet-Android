@@ -1,20 +1,14 @@
 package piuk.blockchain.android.ui.dashboard
 
-import com.nhaarman.mockito_kotlin.anyOrNull
-import com.nhaarman.mockito_kotlin.atLeastOnce
-import com.nhaarman.mockito_kotlin.eq
-import com.nhaarman.mockito_kotlin.times
-import com.nhaarman.mockito_kotlin.verify
-import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
-import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.Scheduler
 import org.amshove.kluent.any
 import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
+import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.datamanagers.TransactionListDataManager
 import piuk.blockchain.android.data.ethereum.EthDataManager
@@ -25,22 +19,12 @@ import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.home.models.MetadataEvent
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
-import piuk.blockchain.android.util.AppUtil
-import piuk.blockchain.android.util.ExchangeRateFactory
-import piuk.blockchain.android.util.MonetaryUtil
-import piuk.blockchain.android.util.PrefsUtil
-import piuk.blockchain.android.util.StringUtils
+import piuk.blockchain.android.util.*
 import java.math.BigInteger
 import java.util.*
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.disposables.Disposable
-import io.reactivex.internal.schedulers.ExecutorScheduler
-import io.reactivex.plugins.RxJavaPlugins
-import java.util.concurrent.TimeUnit
-
 
 @Suppress("IllegalIdentifier")
-class DashboardPresenterTest {
+class DashboardPresenterTest: RxTest(){
 
     private lateinit var subject: DashboardPresenter
     private val prefsUtil: PrefsUtil = mock()
@@ -58,9 +42,8 @@ class DashboardPresenterTest {
     private val walletOptionsDataManager: WalletOptionsDataManager = mock()
 
     @Before
-    fun setUp() {
-
-        setUpRxSchedulers()
+    override fun setUp() {
+        super.setUp()
 
         subject = DashboardPresenter(
                 prefsUtil,
@@ -82,29 +65,6 @@ class DashboardPresenterTest {
         whenever(view.locale).thenReturn(Locale.US)
         whenever(bchDataManager.getWalletTransactions(50, 0))
                 .thenReturn(Observable.just(emptyList()))
-    }
-
-    /*
-    Avoid RuntimeException when using 'observeOn(AndroidSchedulers.mainThread()'
-     */
-    fun setUpRxSchedulers() {
-        val immediate = object : Scheduler() {
-
-            override fun createWorker(): Worker {
-                return ExecutorScheduler.ExecutorWorker{ it.run() }
-            }
-
-            override fun scheduleDirect(run: Runnable, delay: Long, unit: TimeUnit): Disposable {
-                // this prevents StackOverflowErrors when scheduling with a delay
-                return super.scheduleDirect(run, 0, unit)
-            }
-        }
-
-        RxJavaPlugins.setInitIoSchedulerHandler({ scheduler -> immediate })
-        RxJavaPlugins.setInitComputationSchedulerHandler({ scheduler -> immediate })
-        RxJavaPlugins.setInitNewThreadSchedulerHandler({ scheduler -> immediate })
-        RxJavaPlugins.setInitSingleSchedulerHandler({ scheduler -> immediate })
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler { scheduler -> immediate }
     }
 
     @Test
