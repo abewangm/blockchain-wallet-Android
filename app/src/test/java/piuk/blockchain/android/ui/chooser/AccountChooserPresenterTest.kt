@@ -158,6 +158,26 @@ class AccountChooserPresenterTest {
         val itemAccount2 = ItemAccount()
         whenever(walletAccountHelper.getHdBchAccounts())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
+        // Act
+        subject.onViewReady()
+        // Assert
+        verify(walletAccountHelper).getHdBchAccounts()
+        val captor = argumentCaptor<List<ItemAccount>>()
+        verify(activity).updateUi(captor.capture())
+        // Value includes 1 header, 3 accounts
+        captor.firstValue.size shouldEqual 4
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `onViewReady mode bitcoin cash send`() {
+        // Arrange
+        whenever(activity.accountMode).thenReturn(AccountMode.BitcoinCashSend)
+        val itemAccount0 = ItemAccount()
+        val itemAccount1 = ItemAccount()
+        val itemAccount2 = ItemAccount()
+        whenever(walletAccountHelper.getHdBchAccounts())
+                .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         whenever(walletAccountHelper.getLegacyBchAddresses())
                 .thenReturn(Arrays.asList(itemAccount0, itemAccount1, itemAccount2))
         // Act
@@ -167,7 +187,7 @@ class AccountChooserPresenterTest {
         verify(walletAccountHelper).getLegacyBchAddresses()
         val captor = argumentCaptor<List<ItemAccount>>()
         verify(activity).updateUi(captor.capture())
-        // Value includes 3 headers, 3 accounts, 3 legacy addresses
+        // Value includes 2 headers, 3 accounts, 3 legacy addresses
         captor.firstValue.size shouldEqual 8
     }
 

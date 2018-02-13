@@ -47,6 +47,7 @@ class AccountChooserPresenter @Inject internal constructor(
             AccountMode.Bitcoin -> loadBitcoinOnly()
             AccountMode.BitcoinSummary -> loadBitcoinSummary()
             AccountMode.BitcoinCash -> loadBitcoinCashOnly()
+            AccountMode.BitcoinCashSend -> loadBitcoinCashSend()
             AccountMode.BitcoinCashSummary -> loadBitcoinCashSummary()
         }
     }
@@ -63,6 +64,16 @@ class AccountChooserPresenter @Inject internal constructor(
     }
 
     private fun loadBitcoinCashOnly() {
+        itemAccounts.add(ItemAccount(stringUtils.getString(R.string.wallets)))
+        parseBchAccountList()
+                .compose(RxUtil.addSingleToCompositeDisposable(this))
+                .subscribe(
+                        { view.updateUi(itemAccounts) },
+                        { Timber.e(it) }
+                )
+    }
+
+    private fun loadBitcoinCashSend() {
         itemAccounts.add(ItemAccount(stringUtils.getString(R.string.wallets)))
         parseBchAccountList()
                 .compose(RxUtil.addSingleToCompositeDisposable(this))
