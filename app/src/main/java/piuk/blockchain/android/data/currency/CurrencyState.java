@@ -4,7 +4,7 @@ import piuk.blockchain.android.util.PrefsUtil;
 
 public class CurrencyState {
 
-    private static CurrencyState instance;
+    private static CurrencyState INSTANCE;
 
     private PrefsUtil prefs;
     private CryptoCurrencies cryptoCurrency;
@@ -15,9 +15,9 @@ public class CurrencyState {
     }
 
     public static CurrencyState getInstance() {
-        if (instance == null)
-            instance = new CurrencyState();
-        return instance;
+        if (INSTANCE == null)
+            INSTANCE = new CurrencyState();
+        return INSTANCE;
     }
 
     public void init(PrefsUtil prefs) {

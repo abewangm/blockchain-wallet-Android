@@ -9,11 +9,9 @@ import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.util.americanStatesMap
-import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import javax.inject.Inject
 
-@Mockable
 class ShapeShiftStateSelectionPresenter @Inject constructor(
         private val walletOptionsDataManager: WalletOptionsDataManager,
         private val shapeShiftDataManager: ShapeShiftDataManager

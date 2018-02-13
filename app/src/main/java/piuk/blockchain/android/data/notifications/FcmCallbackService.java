@@ -39,7 +39,7 @@ public class FcmCallbackService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // Check if message contains a data payload.
         if (!remoteMessage.getData().isEmpty()) {
-            Timber.d("Message data payload: " + remoteMessage.getData());
+            Timber.d("Message data payload: %s", remoteMessage.getData());
 
             // Parse data, emit events
             NotificationPayload payload = new NotificationPayload(remoteMessage.getData());
