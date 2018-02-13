@@ -93,7 +93,7 @@ class DashboardPresenter @Inject constructor(
                 .firstOrError()
                 .doOnSuccess { swipeToReceiveHelper.storeEthAddress() }
                 .doOnSuccess { updateAllBalances() }
-                .doOnSuccess { checkLatestAnnouncement() }
+                .doOnSuccess { checkLatestAnnouncements() }
                 .compose(RxUtil.addSingleToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
@@ -232,32 +232,21 @@ class DashboardPresenter @Inject constructor(
                 )
     }
 
-    private fun showAnnouncement() {
-        // Don't add the announcement if there already is one
-        if (displayList.none { it is AnnouncementData }) {
-            // In the future, the announcement data may be parsed from an endpoint. For now, here is fine
-            val announcementData = AnnouncementData(
-                    title = R.string.bitcoin_cash,
-                    description = R.string.onboarding_bitcoin_cash_description,
-                    link = R.string.onboarding_cta,
-                    image = R.drawable.vector_bch_onboarding,
-                    emoji = "\uD83C\uDF89",
-                    closeFunction = { dismissAnnouncement() },
-                    linkFunction = { view.startBitcoinCashReceive() }
-            )
-
-            displayList.add(0, announcementData)
-            view.notifyItemAdded(displayList, 0)
-            view.scrollToTop()
-        }
+    private fun showAnnouncement(index: Int, announcementData: AnnouncementData) {
+        displayList.add(index, announcementData)
+        view.notifyItemAdded(displayList, index)
+        view.scrollToTop()
     }
 
-    private fun dismissAnnouncement() {
-        prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
-        if (displayList.any { it is AnnouncementData }) {
-            displayList.removeAll { it is AnnouncementData }
-            view.notifyItemRemoved(displayList, 0)
-        }
+    private fun dismissAnnouncement(prefKey: String) {
+        prefsUtil.setValue(prefKey, true)
+        displayList.filterIsInstance<AnnouncementData>()
+                .forEachIndexed { index, any ->
+                    if (any.prefsKey.equals(prefKey)) {
+                        displayList.remove(any)
+                        view.notifyItemRemoved(displayList, index)
+                    }
+                }
     }
 
     private fun getOnboardingStatusObservable(): Observable<Boolean> = if (isOnboardingComplete()) {
@@ -272,23 +261,49 @@ class DashboardPresenter @Inject constructor(
                 .doOnError { Timber.e(it) }
     }
 
-    private fun checkLatestAnnouncement() {
+    private fun checkLatestAnnouncements() {
         // If user hasn't completed onboarding, ignore announcements
-        if (isOnboardingComplete() && !prefsUtil.getValue(
-                    BITCOIN_CASH_ANNOUNCEMENT_DISMISSED,
-                    false
-            )) {
-            prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
+        if (isOnboardingComplete()) {
 
-            walletOptionsDataManager.showShapeshift(
-                    payloadDataManager.wallet.guid,
-                    payloadDataManager.wallet.sharedKey
-            )
+            val bchPrefKey = BITCOIN_CASH_ANNOUNCEMENT_DISMISSED
+            if (!prefsUtil.getValue(bchPrefKey, false)) {
+                prefsUtil.setValue(bchPrefKey, true)
+
+                var announcementData = AnnouncementData(
+                        title = R.string.bitcoin_cash,
+                        description = R.string.onboarding_bitcoin_cash_description,
+                        link = R.string.onboarding_cta,
+                        image = R.drawable.vector_bch_onboarding,
+                        emoji = "\uD83C\uDF89",
+                        closeFunction = { dismissAnnouncement(bchPrefKey) },
+                        linkFunction = { view.startBitcoinCashReceive() },
+                        prefsKey = bchPrefKey
+                )
+                showAnnouncement(0, announcementData)
+            }
+
+            val buyPrefKey = SFOX_ANNOUNCEMENT_DISMISSED
+            buyDataManager.canBuy
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .subscribe(
-                            { if (it) showAnnouncement() },
-                            { Timber.e(it) }
-                    )
+                    .subscribe({
+                        if (it && !prefsUtil.getValue(buyPrefKey,false)) {
+                            prefsUtil.setValue(buyPrefKey, true)
+
+                            val announcementData = AnnouncementData(
+                                    title = R.string.announcement_trading_cta,
+                                    description = R.string.announcement_trading_description,
+                                    link = R.string.announcement_trading_link,
+                                    image = R.drawable.vector_buy_onboarding,
+                                    emoji = null,
+                                    closeFunction = { dismissAnnouncement(buyPrefKey) },
+                                    linkFunction = { view.startBuyActivity() },
+                                    prefsKey = buyPrefKey
+                            )
+                            showAnnouncement(1, announcementData)
+                        }
+                    }, {
+                        Timber.e(it)
+                    })
         }
     }
 
@@ -482,6 +497,9 @@ class DashboardPresenter @Inject constructor(
 
         @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED =
                 "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"
+
+        @VisibleForTesting const val SFOX_ANNOUNCEMENT_DISMISSED =
+                "SFOX_ANNOUNCEMENT_DISMISSED"
 
     }
 }
