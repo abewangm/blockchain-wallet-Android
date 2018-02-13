@@ -79,7 +79,7 @@ class DashboardPresenter @Inject constructor(
         metadataObservable.flatMap { getOnboardingStatusObservable() }
                 .doOnNext { swipeToReceiveHelper.storeEthAddress() }
                 .doOnNext { updateAllBalances() }
-                .doOnNext { checkLatestAnnouncement() }
+                .doOnNext { checkLatestAnnouncements() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
@@ -220,24 +220,13 @@ class DashboardPresenter @Inject constructor(
                 )
     }
 
-    private fun showAnnouncement() {
-        // Don't add the announcement if there already is one
-        if (displayList.none { it is AnnouncementData }) {
-            // In the future, the announcement data may be parsed from an endpoint. For now, here is fine
-            val announcementData = AnnouncementData(
-                    title = R.string.bitcoin_cash,
-                    description = R.string.onboarding_bitcoin_cash_description,
-                    link = R.string.onboarding_cta,
-                    image = R.drawable.vector_bch_onboarding,
-                    emoji = "\uD83C\uDF89",
-                    closeFunction = { dismissAnnouncement() },
-                    linkFunction = { view.startBitcoinCashReceive() }
-            )
-
-            displayList.add(0, announcementData)
-            view.notifyItemAdded(displayList, 0)
+    private fun showAnnouncement(index: Int, announcementData: AnnouncementData) {
+//         Don't add the announcement if there already is one
+//        if (displayList.none { it is AnnouncementData }) {
+            displayList.add(index, announcementData)
+            view.notifyItemAdded(displayList, index)
             view.scrollToTop()
-        }
+//        }
     }
 
     private fun dismissAnnouncement() {
@@ -260,23 +249,49 @@ class DashboardPresenter @Inject constructor(
                 .doOnError { Timber.e(it) }
     }
 
-    private fun checkLatestAnnouncement() {
+    private fun checkLatestAnnouncements() {
         // If user hasn't completed onboarding, ignore announcements
-        if (isOnboardingComplete() && !prefsUtil.getValue(
-                    BITCOIN_CASH_ANNOUNCEMENT_DISMISSED,
-                    false
-            )) {
-            prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
+        if (isOnboardingComplete()) {
 
-            walletOptionsDataManager.showShapeshift(
-                    payloadDataManager.wallet.guid,
-                    payloadDataManager.wallet.sharedKey
-            )
+            if (!prefsUtil.getValue(
+                            BITCOIN_CASH_ANNOUNCEMENT_DISMISSED,
+                            false)) {
+                prefsUtil.setValue(BITCOIN_CASH_ANNOUNCEMENT_DISMISSED, true)
+
+                val announcementData = AnnouncementData(
+                        title = R.string.bitcoin_cash,
+                        description = R.string.onboarding_bitcoin_cash_description,
+                        link = R.string.onboarding_cta,
+                        image = R.drawable.vector_bch_onboarding,
+                        emoji = "\uD83C\uDF89",
+                        closeFunction = { dismissAnnouncement() },
+                        linkFunction = { view.startBitcoinCashReceive() }
+                )
+                showAnnouncement(0, announcementData)
+            }
+
+            buyDataManager.canBuy
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .subscribe(
-                            { if (it) showAnnouncement() },
-                            { Timber.e(it) }
-                    )
+                    .subscribe({
+                        if (it && !prefsUtil.getValue(
+                                        SFOX_ANNOUNCEMENT_DISMISSED,
+                                        false)) {
+                            prefsUtil.setValue(SFOX_ANNOUNCEMENT_DISMISSED, true)
+
+                            val announcementData = AnnouncementData(
+                                    title = R.string.announcement_sfox_cta,
+                                    description = R.string.announcement_sfox_description,
+                                    link = R.string.onboarding_cta,
+                                    image = R.drawable.vector_bch_onboarding,
+                                    emoji = null,
+                                    closeFunction = { dismissAnnouncement() },
+                                    linkFunction = { view.startBuyActivity() }
+                            )
+                            showAnnouncement(1, announcementData)
+                        }
+                    }, {
+                        Timber.e(it)
+                    })
         }
     }
 
@@ -455,6 +470,9 @@ class DashboardPresenter @Inject constructor(
 
         @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED =
                 "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"
+
+        @VisibleForTesting const val SFOX_ANNOUNCEMENT_DISMISSED =
+                "SFOX_ANNOUNCEMENT_DISMISSED"
 
     }
 }
