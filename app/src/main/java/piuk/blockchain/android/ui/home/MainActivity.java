@@ -624,6 +624,8 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         }
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
+
+        balanceFragment.refreshSelectedCurrency();
     }
 
     public AHBottomNavigation getBottomNavigationView() {
