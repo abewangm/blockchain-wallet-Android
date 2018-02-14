@@ -1260,6 +1260,7 @@ class SendPresenter @Inject constructor(
                 address = scanData
             }
         } else {
+            onBitcoinChosen()
             view.showSnackbar(R.string.invalid_address, Snackbar.LENGTH_LONG)
             return
         }
