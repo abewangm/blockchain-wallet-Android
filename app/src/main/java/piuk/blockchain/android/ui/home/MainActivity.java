@@ -797,6 +797,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private void startSendFragment(@Nullable String scanData, @Nullable String scanRoute) {
         binding.bottomNavigation.removeOnTabSelectedListener();
         binding.bottomNavigation.setCurrentItem(0);
+        ViewUtils.setElevation(binding.appbarLayout, 0f);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
         SendFragment sendFragment =
                 SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
