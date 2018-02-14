@@ -164,6 +164,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             } else if (intent.getAction().equals(ACTION_RECEIVE_ETH) && getActivity() != null) {
                 getPresenter().setCryptoCurrency(CryptoCurrencies.ETHER);
                 binding.bottomNavigation.setCurrentItem(3);
+            } else if (intent.getAction().equals(ACTION_RECEIVE_BCH) && getActivity() != null) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.BCH);
+                binding.bottomNavigation.setCurrentItem(3);
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 BuyActivity.start(MainActivity.this);
             } else if (intent.getAction().equals(ACTION_SHAPESHIFT) && getActivity() != null) {
@@ -229,6 +232,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         IntentFilter filterSend = new IntentFilter(ACTION_SEND);
         IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
         IntentFilter filterReceiveEth = new IntentFilter(ACTION_RECEIVE_ETH);
+        IntentFilter filterReceiveBch = new IntentFilter(ACTION_RECEIVE_BCH);
         IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
         IntentFilter filterShapeshift = new IntentFilter(ACTION_SHAPESHIFT);
         IntentFilter filterBtcBalance = new IntentFilter(ACTION_BTC_BALANCE);
@@ -239,6 +243,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveEth);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveBch);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterShapeshift);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBtcBalance);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterEthBalance);

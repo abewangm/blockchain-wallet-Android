@@ -74,7 +74,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         super.onViewCreated(view, savedInstanceState)
 
         recycler_view?.apply {
-            layoutManager = LinearLayoutManager(activity)
+            layoutManager = LayoutManager(context)
             this.adapter = dashboardAdapter
         }
 
@@ -205,4 +205,7 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
 
     }
 
+    private inner class LayoutManager(context: Context) : LinearLayoutManager(context) {
+        override fun supportsPredictiveItemAnimations() = false
+    }
 }
