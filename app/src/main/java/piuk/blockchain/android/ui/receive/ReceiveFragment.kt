@@ -636,6 +636,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     fun onBackPressed() = handleBackPressed()
 
     private fun showClipboardWarning() {
+        val address = textview_receiving_address.text
         activity?.run {
             AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
@@ -644,10 +645,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
                     .setPositiveButton(R.string.yes) { _, _ ->
                         val clipboard =
                                 getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText(
-                                "Send address",
-                                textview_receiving_address.text
-                        )
+                        val clip = ClipData.newPlainText("Send address", address)
                         toast(R.string.copied_to_clipboard)
                         clipboard.primaryClip = clip
                     }

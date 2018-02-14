@@ -235,17 +235,16 @@ class BalancePresenter @Inject constructor(
         currencyState.cryptoCurrency = cryptoCurrency
 
         //Select default account for this currency
-        val account = getAccounts().get(0)
+        val account = getAccounts()[0]
 
         updateTransactionsListCompletable(account)
+                .doOnSubscribe { view.setDropdownVisibility(getAccounts().size > 1) }
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
+                .doOnSubscribe { refreshBalanceHeader(account) }
+                .doOnSubscribe { refreshAccountDataSet() }
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnError { Timber.e(it) }
-                .doOnComplete {
-                    refreshBalanceHeader(account)
-                    refreshAccountDataSet()
-                    view.selectDefaultAccount()
-                }
+                .doOnComplete { view.selectDefaultAccount() }
                 .subscribe(
                         { /* No-op */ },
                         { view.setUiState(UiState.FAILURE) })
