@@ -3,7 +3,6 @@ package piuk.blockchain.android.ui.balance.adapter
 import android.app.Activity
 import piuk.blockchain.android.ui.adapters.AdapterDelegatesManager
 import piuk.blockchain.android.ui.adapters.DelegationAdapter
-import piuk.blockchain.android.util.extensions.autoNotify
 import kotlin.properties.Delegates
 
 class TxFeedAdapter(
@@ -12,9 +11,7 @@ class TxFeedAdapter(
         listClickListener: TxFeedClickListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
-    private val summaryDelegate =
-            DisplayableDelegate<Any>(activity, showCrypto, listClickListener
-            )
+    private val summaryDelegate = DisplayableDelegate<Any>(activity, showCrypto, listClickListener)
 
     init {
         // Add all necessary AdapterDelegate objects here
@@ -24,11 +21,10 @@ class TxFeedAdapter(
     }
 
     /**
-     * Observes the items list and automatically notifies the adapter of changes to the data based
-     * on the comparison we make here, which is a simple equality check.
+     * Observes the items list and automatically notifies the adapter of changes to the data
      */
     override var items: List<Any> by Delegates.observable(emptyList()) { _, oldList, newList ->
-        autoNotify(oldList, newList) { o, n -> o == n }
+        if (newList != oldList) notifyDataSetChanged()
     }
 
     /**

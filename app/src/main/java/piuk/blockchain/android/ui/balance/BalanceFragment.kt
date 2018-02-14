@@ -164,13 +164,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun setupTxFeedAdapter(isCrypto: Boolean) {
         if (txFeedAdapter == null) {
             txFeedAdapter = TxFeedAdapter(activity!!, isCrypto, this)
-        }
 
-        recyclerview.layoutManager = LayoutManager(context!!)
-        recyclerview.adapter = txFeedAdapter
-        // Disable blinking animations in RecyclerView
-        val animator = recyclerview.itemAnimator
-        if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
+            recyclerview.layoutManager = LayoutManager(context!!)
+            recyclerview.adapter = txFeedAdapter
+            // Disable blinking animations in RecyclerView
+            val animator = recyclerview.itemAnimator
+            if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
+        }
     }
 
     override fun selectDefaultAccount() {
@@ -188,10 +188,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     override fun updateTransactionDataSet(isCrypto: Boolean, displayObjects: List<Any>) {
-        //TODO No easy way to just update data set. We are forced to rebuild adapter
         setupTxFeedAdapter(isCrypto)
-        txFeedAdapter?.items = displayObjects
-
+        txFeedAdapter!!.items = displayObjects
         addBottomNavigationBarSpace()
     }
 
@@ -303,33 +301,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.gone()
     }
 
-    override fun startReceiveFragmentBtc() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
-        }
-    }
+    override fun startReceiveFragmentBtc() = broadcastIntent(MainActivity.ACTION_RECEIVE)
 
-    private fun startReceiveFragmentEth() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
-        }
-    }
+    private fun startReceiveFragmentEth() = broadcastIntent(MainActivity.ACTION_RECEIVE_ETH)
 
-    private fun startReceiveFragmentBch() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
-        }
-    }
+    private fun startReceiveFragmentBch() = broadcastIntent(MainActivity.ACTION_RECEIVE_BCH)
 
-    override fun startBuyActivity() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
-        }
-    }
+    override fun startBuyActivity() = broadcastIntent(MainActivity.ACTION_BUY)
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
         val bundle = Bundle()
@@ -346,6 +324,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
+    }
+
+    private fun broadcastIntent(action: String) {
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(action))
+        }
     }
 
     override fun getCurrentAccountPosition() = accounts_spinner.selectedItemPosition

@@ -76,7 +76,10 @@ class BalancePresenter @Inject constructor(
         authEventObservable = rxBus.register(AuthEvent::class.java).apply {
             subscribe({
                 //Clear tx feed
-                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, mutableListOf())
+                view.updateTransactionDataSet(
+                        currencyState.isDisplayingCryptoCurrency,
+                        mutableListOf()
+                )
                 transactionListDataManager.clearTransactionList()
             })
         }
@@ -102,6 +105,7 @@ class BalancePresenter @Inject constructor(
                 .andThen(updateTransactionsListCompletable(account))
                 .doOnError { view.setUiState(UiState.FAILURE) }
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
+                .doOnSubscribe { view.setDropdownVisibility(getAccounts().size > 1) }
                 .doOnComplete {
                     refreshBalanceHeader(account)
                     refreshAccountDataSet()
@@ -137,8 +141,8 @@ class BalancePresenter @Inject constructor(
 
     @VisibleForTesting
     internal fun updateEthAddress() =
-        Completable.fromObservable(ethDataManager.fetchEthAddress()
-                .onExceptionResumeNext { Observable.empty<EthAddressResponse>() })
+            Completable.fromObservable(ethDataManager.fetchEthAddress()
+                    .onExceptionResumeNext { Observable.empty<EthAddressResponse>() })
 
     /**
      * API call - Update bitcoincash wallet
@@ -146,7 +150,7 @@ class BalancePresenter @Inject constructor(
 
     @VisibleForTesting
     internal fun updateBchWallet() = bchDataManager.refreshMetadataCompletable()
-            .doOnError{ Timber.e(it) }
+            .doOnError { Timber.e(it) }
 
     /**
      * API call - Fetches latest balance for selected currency and updates UI balance
@@ -182,43 +186,54 @@ class BalancePresenter @Inject constructor(
 
                                                     when (currencyState.cryptoCurrency) {
                                                         CryptoCurrencies.BTC -> {
-                                                            tx.totalDisplayableCrypto = getBtcBalanceString(
-                                                                    true,
-                                                                    tx.total.toLong())
-                                                            tx.totalDisplayableFiat = getBtcBalanceString(
-                                                                    false,
-                                                                    tx.total.toLong())
+                                                            tx.totalDisplayableCrypto =
+                                                                    getBtcBalanceString(
+                                                                            true,
+                                                                            tx.total.toLong()
+                                                                    )
+                                                            tx.totalDisplayableFiat =
+                                                                    getBtcBalanceString(
+                                                                            false,
+                                                                            tx.total.toLong()
+                                                                    )
                                                         }
                                                         CryptoCurrencies.ETHER -> {
-                                                            tx.totalDisplayableCrypto = getEthBalanceString(
-                                                                    true,
-                                                                    BigDecimal(tx.total))
-                                                            tx.totalDisplayableFiat = getEthBalanceString(
-                                                                    false,
-                                                                    BigDecimal(tx.total))
+                                                            tx.totalDisplayableCrypto =
+                                                                    getEthBalanceString(
+                                                                            true,
+                                                                            BigDecimal(tx.total)
+                                                                    )
+                                                            tx.totalDisplayableFiat =
+                                                                    getEthBalanceString(
+                                                                            false,
+                                                                            BigDecimal(tx.total)
+                                                                    )
                                                         }
                                                         CryptoCurrencies.BCH -> {
-                                                            tx.totalDisplayableCrypto = getBchBalanceString(
-                                                                    true,
-                                                                    tx.total.toLong())
-                                                            tx.totalDisplayableFiat = getBchBalanceString(
-                                                                    false,
-                                                                    tx.total.toLong())
+                                                            tx.totalDisplayableCrypto =
+                                                                    getBchBalanceString(
+                                                                            true,
+                                                                            tx.total.toLong()
+                                                                    )
+                                                            tx.totalDisplayableFiat =
+                                                                    getBchBalanceString(
+                                                                            false,
+                                                                            tx.total.toLong()
+                                                                    )
                                                         }
                                                         else -> throw IllegalArgumentException("${currencyState.cryptoCurrency.unit} is not currently supported")
                                                     }
                                                 }
 
                                                 when {
-                                                    txs.isEmpty() -> {
-                                                        view.setUiState(UiState.EMPTY)
-                                                    }
-                                                    else -> {
-                                                        view.setUiState(UiState.CONTENT)
-                                                    }
+                                                    txs.isEmpty() -> view.setUiState(UiState.EMPTY)
+                                                    else -> view.setUiState(UiState.CONTENT)
                                                 }
 
-                                                view.updateTransactionDataSet(currencyState.isDisplayingCryptoCurrency, txs)
+                                                view.updateTransactionDataSet(
+                                                        currencyState.isDisplayingCryptoCurrency,
+                                                        txs
+                                                )
                                             }
                                             ,
                                             { Timber.e(it) })
@@ -355,10 +370,16 @@ class BalancePresenter @Inject constructor(
 
                         for (trade in it) {
                             trade.hashIn?.let {
-                                map.put(trade.hashIn, stringUtils.getString(R.string.shapeshift_deposit_to))
+                                map.put(
+                                        trade.hashIn,
+                                        stringUtils.getString(R.string.shapeshift_deposit_to)
+                                )
                             }
                             trade.hashOut?.let {
-                                map.put(trade.hashOut, stringUtils.getString(R.string.shapeshift_deposit_from))
+                                map.put(
+                                        trade.hashOut,
+                                        stringUtils.getString(R.string.shapeshift_deposit_from)
+                                )
                             }
                         }
                         return@map map
@@ -424,14 +445,14 @@ class BalancePresenter @Inject constructor(
     }
 
     private fun getFiatCurrency() =
-        prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+            prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
     private fun getBtcDisplayUnits() = monetaryUtil.getBtcUnits()[getBtcUnitType()]
 
     private fun getBchDisplayUnits() = monetaryUtil.getBchUnits()[getBtcUnitType()]
 
     private fun getBtcUnitType() =
-        prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+            prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
 
     internal fun areLauncherShortcutsEnabled() =
             prefsUtil.getValue(PrefsUtil.KEY_RECEIVE_SHORTCUTS_ENABLED, true)
