@@ -339,7 +339,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     override fun getBtcAmount() = amountCrypto.getTextString()
 
     override fun updateReceiveAddress(address: String) {
-        textview_receiving_address.text = address
+        if (!isRemoving) {
+            textview_receiving_address.text = address
+        }
     }
 
     override fun hideContactsIntroduction() {
@@ -383,10 +385,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun showQrCode(bitmap: Bitmap?) {
-        progressbar.invisible()
-        image_qr.visible()
-        textview_receiving_address.visible()
-        image_qr.setImageBitmap(bitmap)
+        if (!isRemoving) {
+            progressbar.invisible()
+            image_qr.visible()
+            textview_receiving_address.visible()
+            image_qr.setImageBitmap(bitmap)
+        }
     }
 
     private fun displayBitcoinLayout() {

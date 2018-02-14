@@ -108,6 +108,8 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
         }
     }
 
+    fun getCurrentlySelectedCurrency() = selectedCurrency
+
     fun hideEthereum() {
         textview_ethereum.gone()
     }

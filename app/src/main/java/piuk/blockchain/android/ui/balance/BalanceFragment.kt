@@ -41,6 +41,7 @@ import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
+import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -110,6 +111,14 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         onViewReady()
 
         presenter.onRefreshRequested()
+    }
+
+    fun refreshSelectedCurrency() {
+        currency_header?.getCurrentlySelectedCurrency()?.run {
+            if (presenter.getCurrentCurrency() != this) {
+                presenter.onCurrencySelected(presenter.getCurrentCurrency())
+            }
+        }
     }
 
     override fun onResume() {
