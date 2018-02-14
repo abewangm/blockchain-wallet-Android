@@ -1,11 +1,15 @@
 package piuk.blockchain.android.ui.auth
 
 import android.content.Context
+import android.support.v7.app.AlertDialog
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
 import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.api.Environment
+import io.reactivex.Observable
+import org.amshove.kluent.mock
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
@@ -22,8 +26,10 @@ class LandingPresenterTest {
     private val mockContext: Context = mock()
 
     private var appUtil: AppUtil = mock()
-    private var environmentSettings: EnvironmentSettings = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
-    private var promptManager: PromptManager = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+    private var environmentSettings: EnvironmentSettings =
+            mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+    private var promptManager: PromptManager =
+            mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
 
     @Before
     fun setUp() {
@@ -64,12 +70,12 @@ class LandingPresenterTest {
     @Throws(Exception::class)
     fun initPreLoginPrompts() {
         //Arrange
-
+        whenever(promptManager.getPreLoginPrompts(any()))
+                .thenReturn(Observable.just(listOf(mock(AlertDialog::class))))
         //Act
         subject.initPreLoginPrompts(mockContext)
         //Assert
-        val testObserver = promptManager.getPreLoginPrompts(mockContext).test()
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
+        verify(promptManager).getPreLoginPrompts(mockContext)
+        verify(mockActivity).showWarningPrompt(any())
     }
 }

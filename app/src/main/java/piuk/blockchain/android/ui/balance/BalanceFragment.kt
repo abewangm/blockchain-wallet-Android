@@ -36,8 +36,8 @@ import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.goneIf
 import piuk.blockchain.android.util.extensions.inflate
-import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
@@ -57,6 +57,10 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     private var interactionListener: OnFragmentInteractionListener? = null
     private var spacerDecoration: BottomSpacerDecoration? = null
     private var backPressed: Long = 0
+    private val itemSelectedListener = onItemSelectedListener {
+        presenter.onAccountSelected(it)
+        recyclerview.scrollToPosition(0)
+    }
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
@@ -64,7 +68,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-
             if (intent.action == ACTION_INTENT && activity != null) {
                 recyclerview?.scrollToPosition(0)
                 presenter.onRefreshRequested()
@@ -86,7 +89,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         super.onViewCreated(view, savedInstanceState)
 
         activity?.apply {
-            (activity as MainActivity).setOnTouchOutsideViewListener(currency_header,
+            (activity as MainActivity).setOnTouchOutsideViewListener(app_bar,
                     object : OnTouchOutsideViewListener {
                         override fun onTouchOutside(view: View, event: MotionEvent) {
                             currency_header.close()
@@ -150,7 +153,6 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     override fun shouldShowBuy() = AndroidUtils.is19orHigher()
 
     override fun setupAccountsAdapter(accountsList: List<ItemAccount>) {
-
         if (accountsAdapter == null) {
             accountsAdapter = AccountsAdapter(
                     context,
@@ -159,46 +161,44 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
         }
 
-        accounts_spinner.adapter = accountsAdapter
-
-        handleAccountSpinnerVisibility()
-
-        accounts_spinner.setOnTouchListener({ _, event ->
-            event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
-        })
-
-        accounts_spinner.onItemSelectedListener = onItemSelectedListener {
-            presenter.onAccountSelected(it)
-            recyclerview.scrollToPosition(0)
+        accounts_spinner.apply {
+            adapter = accountsAdapter
+            onItemSelectedListener = itemSelectedListener
+            setOnTouchListener { _, event ->
+                event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
+            }
         }
     }
 
     override fun setupTxFeedAdapter(isCrypto: Boolean) {
         if (txFeedAdapter == null) {
             txFeedAdapter = TxFeedAdapter(activity!!, isCrypto, this)
-        }
 
-        recyclerview.layoutManager = LinearLayoutManager(context)
-        recyclerview.adapter = txFeedAdapter
-        // Disable blinking animations in RecyclerView
-        val animator = recyclerview.itemAnimator
-        if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
+            recyclerview.layoutManager = LayoutManager(context!!)
+            recyclerview.adapter = txFeedAdapter
+            // Disable blinking animations in RecyclerView
+            val animator = recyclerview.itemAnimator
+            if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
+        }
     }
 
     override fun selectDefaultAccount() {
-        if (accountsAdapter?.isNotEmpty == true) accounts_spinner.setSelection(0, false)
+        if (accountsAdapter?.isNotEmpty == true) {
+            accounts_spinner.apply {
+                onItemSelectedListener = null
+                setSelection(0, false)
+                onItemSelectedListener = itemSelectedListener
+            }
+        }
     }
 
     override fun updateAccountsDataSet(accountsList: List<ItemAccount>) {
         accountsAdapter?.updateAccountList(accountsList)
-        handleAccountSpinnerVisibility()
     }
 
     override fun updateTransactionDataSet(isCrypto: Boolean, displayObjects: List<Any>) {
-        //TODO No easy way to just update data set. We are forced to rebuild adapter
         setupTxFeedAdapter(isCrypto)
-        txFeedAdapter?.items = displayObjects
-
+        txFeedAdapter!!.items = displayObjects
         addBottomNavigationBarSpace()
     }
 
@@ -256,12 +256,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         swipe_container.isRefreshing = showRefreshing
     }
 
-    private fun handleAccountSpinnerVisibility() {
-        if (accountsAdapter?.showSpinner() == true) {
-            layout_spinner.visible()
-        } else {
-            layout_spinner.gone()
-        }
+    override fun setDropdownVisibility(visible: Boolean) {
+        layout_spinner.goneIf { !visible }
     }
 
     override fun setUiState(uiState: Int) {
@@ -269,7 +265,7 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             UiState.FAILURE, UiState.EMPTY -> onEmptyState()
             UiState.CONTENT -> onContentLoaded()
             UiState.LOADING -> {
-                textview_balance.invisible()
+                textview_balance.text = ""
                 setShowRefreshing(true)
             }
         }
@@ -307,42 +303,20 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun updateBalanceHeader(balance: String) {
         textview_balance.text = balance
-        textview_balance.visible()
     }
 
     private fun onContentLoaded() {
         setShowRefreshing(false)
-        textview_balance.visible()
         no_transaction_include.gone()
     }
 
-    override fun startReceiveFragmentBtc() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
-        }
-    }
+    override fun startReceiveFragmentBtc() = broadcastIntent(MainActivity.ACTION_RECEIVE)
 
-    private fun startReceiveFragmentEth() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
-        }
-    }
+    private fun startReceiveFragmentEth() = broadcastIntent(MainActivity.ACTION_RECEIVE_ETH)
 
-    private fun startReceiveFragmentBch() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
-        }
-    }
+    private fun startReceiveFragmentBch() = broadcastIntent(MainActivity.ACTION_RECEIVE_BCH)
 
-    override fun startBuyActivity() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
-        }
-    }
+    override fun startBuyActivity() = broadcastIntent(MainActivity.ACTION_BUY)
 
     override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
         val bundle = Bundle()
@@ -359,6 +333,13 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
 
     override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
         currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
+    }
+
+    private fun broadcastIntent(action: String) {
+        activity?.run {
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(action))
+        }
     }
 
     override fun getCurrentAccountPosition() = accounts_spinner.selectedItemPosition
@@ -386,4 +367,9 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     interface OnFragmentInteractionListener {
         fun resetNavigationDrawer()
     }
+
+    private inner class LayoutManager(context: Context) : LinearLayoutManager(context) {
+        override fun supportsPredictiveItemAnimations() = false
+    }
+
 }

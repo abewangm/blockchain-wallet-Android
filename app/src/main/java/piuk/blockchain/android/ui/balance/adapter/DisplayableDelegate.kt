@@ -1,7 +1,6 @@
 package piuk.blockchain.android.ui.balance.adapter
 
 import android.app.Activity
-import android.graphics.Color
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.v4.content.ContextCompat
@@ -19,6 +18,7 @@ import piuk.blockchain.android.ui.adapters.AdapterDelegate
 import piuk.blockchain.android.util.DateUtil
 import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.goneIf
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
 
@@ -46,7 +46,6 @@ class DisplayableDelegate<in T>(
         val viewHolder = holder as TxViewHolder
         val tx = items[position] as Displayable
 
-        viewHolder.result.setTextColor(Color.WHITE)
         viewHolder.timeSince.text = dateUtil.formatted(tx.timeStamp)
 
         when (tx.direction) {
@@ -68,8 +67,8 @@ class DisplayableDelegate<in T>(
             viewHolder.result.text = tx.totalDisplayableFiat
         }
 
-        viewHolder.watchOnly.visibility = if (tx.watchOnly) View.VISIBLE else View.GONE
-        viewHolder.doubleSpend.visibility = if (tx.doubleSpend) View.VISIBLE else View.GONE
+        viewHolder.watchOnly.goneIf { !tx.watchOnly }
+        viewHolder.doubleSpend.goneIf { !tx.doubleSpend }
 
         // TODO: Move this click listener to the ViewHolder to avoid unnecessary object instantiation during binding
         viewHolder.result.setOnClickListener {
@@ -80,7 +79,8 @@ class DisplayableDelegate<in T>(
         // TODO: Move this click listener to the ViewHolder to avoid unnecessary object instantiation during binding
         viewHolder.itemView.setOnClickListener {
             listClickListener.onTransactionClicked(
-                    getRealTxPosition(viewHolder.adapterPosition, items), position)
+                    getRealTxPosition(viewHolder.adapterPosition, items), position
+            )
         }
     }
 
@@ -93,55 +93,65 @@ class DisplayableDelegate<in T>(
 
     private fun displayTransferred(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.MOVED)
-        viewHolder.result.setBackgroundResource(getColorForConfirmations(
-                tx,
-                R.drawable.rounded_view_transferred_50,
-                R.drawable.rounded_view_transferred
-        ))
+        viewHolder.result.setBackgroundResource(
+                getColorForConfirmations(
+                        tx,
+                        R.drawable.rounded_view_transferred_50,
+                        R.drawable.rounded_view_transferred
+                )
+        )
 
         viewHolder.direction.setTextColor(
-                getResolvedColor(viewHolder, getColorForConfirmations(
+                getResolvedColor(
+                        viewHolder, getColorForConfirmations(
                         tx,
                         R.color.product_gray_transferred_50,
                         R.color.product_gray_transferred
-                ))
+                )
+                )
         )
     }
 
     private fun displayReceived(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.RECEIVED)
-        viewHolder.result.setBackgroundResource(getColorForConfirmations(
-                tx,
-                R.drawable.rounded_view_green_50,
-                R.drawable.rounded_view_green
-        ))
+        viewHolder.result.setBackgroundResource(
+                getColorForConfirmations(
+                        tx,
+                        R.drawable.rounded_view_green_50,
+                        R.drawable.rounded_view_green
+                )
+        )
 
         viewHolder.direction.setTextColor(
-                getResolvedColor(viewHolder, getColorForConfirmations(
+                getResolvedColor(
+                        viewHolder, getColorForConfirmations(
                         tx,
                         R.color.product_green_received_50,
                         R.color.product_green_received
-                ))
+                )
+                )
         )
     }
 
     private fun displaySent(viewHolder: TxViewHolder, tx: Displayable) {
         viewHolder.direction.setText(R.string.SENT)
-        viewHolder.result.setBackgroundResource(getColorForConfirmations(
-                tx,
-                R.drawable.rounded_view_red_50,
-                R.drawable.rounded_view_red
-        ))
+        viewHolder.result.setBackgroundResource(
+                getColorForConfirmations(
+                        tx,
+                        R.drawable.rounded_view_red_50,
+                        R.drawable.rounded_view_red
+                )
+        )
 
         viewHolder.direction.setTextColor(
-                getResolvedColor(viewHolder, getColorForConfirmations(
+                getResolvedColor(
+                        viewHolder, getColorForConfirmations(
                         tx,
                         R.color.product_red_sent_50,
                         R.color.product_red_sent
-                ))
+                )
+                )
         )
-
-
     }
 
     private fun getColorForConfirmations(

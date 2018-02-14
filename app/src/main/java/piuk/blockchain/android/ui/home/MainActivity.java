@@ -47,11 +47,9 @@ import org.jetbrains.annotations.NotNull;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -150,8 +148,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private WebViewLoginDetails webViewLoginDetails;
     private boolean initialized;
     // Fragment callbacks for currency header
-    private Set<View> touchOutsideViews = new HashSet<>();
-    private List<OnTouchOutsideViewListener> touchOutsideViewListeners = new ArrayList<>();
+    private Map<View, OnTouchOutsideViewListener> touchOutsideViews = new HashMap<>();
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -932,23 +929,18 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     public void setOnTouchOutsideViewListener(View view,
                                               OnTouchOutsideViewListener onTouchOutsideViewListener) {
-        touchOutsideViews.add(view);
-        touchOutsideViewListeners.add(onTouchOutsideViewListener);
+        touchOutsideViews.put(view, onTouchOutsideViewListener);
     }
 
     @Override
     public boolean dispatchTouchEvent(final MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            for (View view : touchOutsideViews) {
+            for (View view : touchOutsideViews.keySet()) {
                 // Notify touchOutsideViewListeners if user tapped outside a given view
                 Rect viewRect = new Rect();
                 view.getGlobalVisibleRect(viewRect);
                 if (!viewRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
-                    for (OnTouchOutsideViewListener listener : touchOutsideViewListeners) {
-                        // TODO: 12/02/2018 If the currency header is open here, return false
-                        // This isn't possible with multiple listeners though
-                        listener.onTouchOutside(view, ev);
-                    }
+                    touchOutsideViews.get(view).onTouchOutside(view, ev);
                 }
             }
 

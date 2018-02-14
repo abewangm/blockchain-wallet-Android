@@ -1,7 +1,7 @@
 package piuk.blockchain.android.ui.shapeshift.confirmation
 
+import android.support.annotation.VisibleForTesting
 import info.blockchain.api.data.UnspentOutputs
-import info.blockchain.wallet.ethereum.EthereumAccount
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payment.SpendableUnspentOutputs
 import info.blockchain.wallet.shapeshift.data.Quote
@@ -19,6 +19,7 @@ import piuk.blockchain.android.data.answers.ShapeShiftEvent
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.ethereum.EthDataManager
+import piuk.blockchain.android.data.ethereum.EthereumAccountWrapper
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.payments.SendDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -41,10 +42,12 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         private val sendDataManager: SendDataManager,
         private val ethDataManager: EthDataManager,
         private val bchDataManager: BchDataManager,
-        private val stringUtils: StringUtils
+        private val stringUtils: StringUtils,
+        private val ethereumAccountWrapper: EthereumAccountWrapper
 ) : BasePresenter<ShapeShiftConfirmationView>() {
 
-    private val decimalFormat by unsafeLazy {
+    @VisibleForTesting
+    internal val decimalFormat by unsafeLazy {
         DecimalFormat.getNumberInstance(view.locale).apply {
             minimumIntegerDigits = 1
             minimumFractionDigits = 1
@@ -204,7 +207,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                         payloadDataManager.decryptHDWallet(verifiedSecondPassword)
                     }
 
-                    val ecKey = EthereumAccount.deriveECKey(
+                    val ecKey = ethereumAccountWrapper.deriveECKey(
                             payloadDataManager.wallet.hdWallets[0].masterKey,
                             0
                     )
@@ -309,21 +312,21 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
 
     private fun createEthTransaction(
             gasPrice: BigInteger,
-            withdrawalAddress: String,
-            withdrawalAmount: BigDecimal,
+            depositAddress: String,
+            depositAmount: BigDecimal,
             gasLimit: BigInteger
     ): Observable<RawTransaction> {
-        require(FormatsUtil.isValidEthereumAddress(withdrawalAddress)) { "Attempting to send ETH to a non-ETH address" }
+        require(FormatsUtil.isValidEthereumAddress(depositAddress)) { "Attempting to send ETH to a non-ETH address" }
 
         return Observable.just(ethDataManager.getEthResponseModel()!!.getNonce())
                 .map {
                     ethDataManager.createEthTransaction(
                             nonce = it,
-                            to = withdrawalAddress,
+                            to = depositAddress,
                             gasPrice = gasPrice,
                             gasLimit = gasLimit,
                             weiValue = Convert.toWei(
-                                    withdrawalAmount,
+                                    depositAmount,
                                     Convert.Unit.ETHER
                             ).toBigInteger()
                     )
@@ -341,7 +344,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private fun updateDeposit(fromCurrency: CryptoCurrencies, depositAmount: BigDecimal) {
         val label =
                 stringUtils.getFormattedString(R.string.shapeshift_deposit_title, fromCurrency.unit)
-        val amount = "${depositAmount.toLocalisedString()} ${fromCurrency.symbol.toUpperCase()}"
+        val amount = "${depositAmount.toLocalisedString()} ${fromCurrency.symbol}"
 
         view.updateDeposit(label, amount)
     }
@@ -349,7 +352,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     private fun updateReceive(toCurrency: CryptoCurrencies, receiveAmount: BigDecimal) {
         val label =
                 stringUtils.getFormattedString(R.string.shapeshift_receive_title, toCurrency.unit)
-        val amount = "${receiveAmount.toLocalisedString()} ${toCurrency.symbol.toUpperCase()}"
+        val amount = "${receiveAmount.toLocalisedString()} ${toCurrency.symbol}"
 
         view.updateReceive(label, amount)
     }
@@ -362,7 +365,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
         val label = stringUtils.getFormattedString(R.string.shapeshift_total_title, toCurrency.unit)
         val fee = getFeeForCurrency(toCurrency, transactionFee)
         val totalSent = depositAmount.plus(fee)
-        val amount = "${totalSent.toLocalisedString()} ${toCurrency.symbol.toUpperCase()}"
+        val amount = "${totalSent.toLocalisedString()} ${toCurrency.symbol}"
 
         view.updateTotalAmount(label, amount)
     }

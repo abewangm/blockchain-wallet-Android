@@ -9,11 +9,9 @@ import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.util.americanStatesMap
-import piuk.blockchain.android.util.annotations.Mockable
 import timber.log.Timber
 import javax.inject.Inject
 
-@Mockable
 class ShapeShiftStateSelectionPresenter @Inject constructor(
         private val walletOptionsDataManager: WalletOptionsDataManager,
         private val shapeShiftDataManager: ShapeShiftDataManager
@@ -33,7 +31,6 @@ class ShapeShiftStateSelectionPresenter @Inject constructor(
                     if (whitelisted) {
                         shapeShiftDataManager.setState(State(state, stateCode))
                                 .doOnComplete { view.finishActivityWithResult(Activity.RESULT_OK) }
-                                .doOnError { view.finishActivityWithResult(Activity.RESULT_CANCELED) }
                     } else {
                         view.onError(R.string.shapeshift_unavailable_in_state)
                         Completable.complete()

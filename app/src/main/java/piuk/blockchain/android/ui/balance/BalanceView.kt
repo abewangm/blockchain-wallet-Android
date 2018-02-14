@@ -34,4 +34,7 @@ interface BalanceView : View {
     fun generateLauncherShortcuts()
 
     fun shouldShowBuy(): Boolean
+
+    fun setDropdownVisibility(visible: Boolean)
+
 }
