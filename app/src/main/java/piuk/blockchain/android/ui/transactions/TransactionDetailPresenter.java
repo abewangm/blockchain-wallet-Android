@@ -314,7 +314,9 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
                 unit = getDisplayUnitsBtc();
             } else {
                 label = bchDataManager.getLabelFromBchAddress(item.getKey());
-                if (label == null) label = item.getKey();
+                if (label == null) label = FormatsUtil.toShortCashAddress(
+                        environmentSettings.getBitcoinCashNetworkParameters(),
+                        item.getKey());
                 unit = getDisplayUnitsBch();
             }
 
