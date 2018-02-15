@@ -53,7 +53,7 @@ public class BaseAuthActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        lockScreenOrientation();
 
         compositeDisposable = new CompositeDisposable();
 
@@ -68,6 +68,13 @@ public class BaseAuthActivity extends AppCompatActivity {
                                 showAlertDialog(getString(R.string.ssl_no_connection), false);
                             }
                         }));
+    }
+
+    /**
+     * Allows you to disable Portrait orientation lock on a per-Activity basis.
+     */
+    protected void lockScreenOrientation() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     /**
