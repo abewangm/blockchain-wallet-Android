@@ -2,6 +2,8 @@ package piuk.blockchain.android.injection;
 
 import android.util.Log;
 
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
@@ -161,5 +163,14 @@ public class ApiModule {
                 .addConverterFactory(converterFactory)
                 .addCallAdapterFactory(rxJavaCallFactory)
                 .build();
+    }
+
+    @Provides
+    @Singleton
+    protected BlockExplorer provideBlockExplorer(@Named("explorer") Retrofit explorerRetrofit,
+                                                 @Named("api") Retrofit apiRetrofit) {
+        return new BlockExplorer(explorerRetrofit,
+                apiRetrofit,
+                BlockchainFramework.getApiCode());
     }
 }

@@ -19,6 +19,8 @@ public class PaymentConfirmationDetails implements Parcelable {
     public String fiatSymbol;
     public boolean isLargeTransaction;
     public boolean hasConsumedAmounts;
+    public String warningText;
+    public String warningSubtext;
 
     public PaymentConfirmationDetails() {
         // Default empty constructor
@@ -39,6 +41,8 @@ public class PaymentConfirmationDetails implements Parcelable {
         fiatSymbol = in.readString();
         isLargeTransaction = in.readByte() != 0x00;
         hasConsumedAmounts = in.readByte() != 0x00;
+        warningText = in.readString();
+        warningSubtext = in.readString();
     }
 
     public static final Creator<PaymentConfirmationDetails> CREATOR = new Creator<PaymentConfirmationDetails>() {
@@ -74,6 +78,8 @@ public class PaymentConfirmationDetails implements Parcelable {
         dest.writeString(fiatSymbol);
         dest.writeByte((byte) (isLargeTransaction ? 0x01 : 0x00));
         dest.writeByte((byte) (hasConsumedAmounts ? 0x01 : 0x00));
+        dest.writeString(warningText);
+        dest.writeString(warningSubtext);
     }
 
     @Override
@@ -93,6 +99,8 @@ public class PaymentConfirmationDetails implements Parcelable {
                 ", fiatSymbol='" + fiatSymbol + '\'' +
                 ", isLargeTransaction=" + isLargeTransaction +
                 ", hasConsumedAmounts=" + hasConsumedAmounts +
+                ", warningText=" + warningText +
+                ", warningSubtext=" + warningSubtext +
                 '}';
     }
 

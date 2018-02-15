@@ -43,7 +43,11 @@ class FingerprintDialog : BaseDialogFragment<FingerprintView, FingerprintPresent
         setStyle(AppCompatDialogFragment.STYLE_NORMAL, android.R.style.Theme_Material_Light_Dialog)
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View? {
         dialog.apply {
             setTitle(getString(R.string.fingerprint_login_title))
             setCancelable(false)
@@ -51,10 +55,10 @@ class FingerprintDialog : BaseDialogFragment<FingerprintView, FingerprintPresent
             setOnKeyListener(BackButtonListener(authCallback!!))
         }
 
-        return inflater!!.inflate(R.layout.dialog_fingerprint, container, false)
+        return inflater.inflate(R.layout.dialog_fingerprint, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         button_cancel.setOnClickListener { authCallback!!.onCanceled() }
@@ -83,14 +87,14 @@ class FingerprintDialog : BaseDialogFragment<FingerprintView, FingerprintPresent
     }
 
     override fun setStatusTextColor(@ColorRes color: Int) {
-        textview_status.setTextColor(ContextCompat.getColor(context, color))
+        textview_status.setTextColor(ContextCompat.getColor(context!!, color))
     }
 
     override fun setIcon(@DrawableRes drawable: Int) {
         icon_fingerprint.setImageResource(drawable)
     }
 
-    override fun getBundle(): Bundle = arguments
+    override fun getBundle(): Bundle = arguments!!
 
     override fun onAuthenticated(data: String?) {
         textview_status.removeCallbacks(resetErrorTextRunnable)
@@ -114,13 +118,13 @@ class FingerprintDialog : BaseDialogFragment<FingerprintView, FingerprintPresent
 
     override fun getMvpView() = this
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         // This is to fix a long-standing bug in the Android framework
     }
 
     private val resetErrorTextRunnable = Runnable {
-        if (context != null) {
-            textview_status.setTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
+        context?.run {
+            textview_status.setTextColor(ContextCompat.getColor(this, R.color.primary_gray_medium))
             textview_status.text = getString(R.string.fingerprint_hint)
             icon_fingerprint.setImageResource(R.drawable.ic_fingerprint_logo)
         }
@@ -139,15 +143,15 @@ class FingerprintDialog : BaseDialogFragment<FingerprintView, FingerprintPresent
     ) : DialogInterface.OnKeyListener {
 
         override fun onKey(dialog: DialogInterface, keyCode: Int, event: KeyEvent): Boolean {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return if (keyCode == KeyEvent.KEYCODE_BACK) {
                 if (event.action != KeyEvent.ACTION_DOWN) {
-                    return true
+                    true
                 } else {
                     fingerprintAuthCallback.onCanceled()
-                    return true
+                    true
                 }
             } else {
-                return false
+                false
             }
         }
     }

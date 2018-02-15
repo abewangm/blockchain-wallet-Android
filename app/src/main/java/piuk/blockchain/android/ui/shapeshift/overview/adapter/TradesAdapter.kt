@@ -13,11 +13,19 @@ class TradesAdapter(
         activity: Activity,
         btcExchangeRate: Double,
         ethExchangeRate: Double,
+        bchExchangeRate: Double,
         showCrypto: Boolean,
         listClickListener: TradesListClickListener
 ) : DelegationAdapter<Any>(AdapterDelegatesManager(), emptyList()) {
 
-    private val tradesDelegate = TradesDisplayableDelegate<Any>(activity, btcExchangeRate, ethExchangeRate, showCrypto, listClickListener)
+    private val tradesDelegate = TradesDisplayableDelegate<Any>(
+            activity,
+            btcExchangeRate,
+            ethExchangeRate,
+            bchExchangeRate,
+            showCrypto,
+            listClickListener
+    )
 
     init {
         // Add all necessary AdapterDelegate objects here
@@ -72,8 +80,10 @@ class TradesAdapter(
 
     fun updateTrade(trade: Trade, tradeResponse: TradeStatusResponse) {
 
-        val matchingTrade = items.filterIsInstance(Trade::class.java).find { it.quote.deposit == tradeResponse.address }
-        matchingTrade?.quote?.withdrawalAmount = trade.quote.withdrawalAmount ?: tradeResponse.incomingCoin ?: BigDecimal.ZERO
+        val matchingTrade = items.filterIsInstance(Trade::class.java)
+                .find { it.quote.deposit == tradeResponse.address }
+        matchingTrade?.quote?.withdrawalAmount = trade.quote.withdrawalAmount ?:
+                tradeResponse.incomingCoin ?: BigDecimal.ZERO
         matchingTrade?.quote?.pair = tradeResponse.pair ?: trade.quote.pair
 
         notifyDataSetChanged()

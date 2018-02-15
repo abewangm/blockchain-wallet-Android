@@ -166,7 +166,7 @@
     <string name="enter_current_pin">请输入当前PIN.</string>
 
     <string name="my_addresses">地址</string>
-    <string name="addresses">地址</string>
+    <string name="addresses_bitcoin">地址</string>
     <string name="create_new">新建地址</string>
     <string name="import_address">导入地址</string>
     <string name="wallets">钱包</string>

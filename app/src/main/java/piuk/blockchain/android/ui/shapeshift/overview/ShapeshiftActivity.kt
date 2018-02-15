@@ -18,12 +18,12 @@ import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesAdapter
 import piuk.blockchain.android.ui.shapeshift.overview.adapter.TradesListClickListener
 import piuk.blockchain.android.ui.shapeshift.stateselection.ShapeShiftStateSelectionActivity
 import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 import javax.inject.Inject
 
-class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(), ShapeShiftView, TradesListClickListener {
+class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(), ShapeShiftView,
+        TradesListClickListener {
 
     @Suppress("MemberVisibilityCanPrivate")
     @Inject lateinit var shapeshiftPresenter: ShapeShiftPresenter
@@ -53,7 +53,8 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == ShapeShiftStateSelectionActivity.STATE_SELECTION_REQUEST_CODE &&
-                resultCode == Activity.RESULT_OK) {
+            resultCode == Activity.RESULT_OK
+        ) {
             //State whitelisted - Reload
             onViewReady()
         } else {
@@ -62,11 +63,17 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
 
     }
 
-    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean) {
+    private fun setUpRecyclerView(
+            btcExchangeRate: Double,
+            ethExchangeRate: Double,
+            bchExchangeRate: Double,
+            isBtc: Boolean
+    ) {
         tradesAdapter = TradesAdapter(
                 this,
                 btcExchangeRate,
                 ethExchangeRate,
+                bchExchangeRate,
                 isBtc,
                 this
         )
@@ -80,10 +87,11 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     override fun onExchangeRateUpdated(
             btcExchangeRate: Double,
             ethExchangeRate: Double,
+            bchExchangeRate: Double,
             isBtc: Boolean
     ) {
         if (tradesAdapter == null) {
-            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc)
+            setUpRecyclerView(btcExchangeRate, ethExchangeRate, bchExchangeRate, isBtc)
         } else {
             tradesAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
         }
@@ -91,9 +99,9 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
 
     override fun onStateUpdated(shapeshiftState: ShapeShiftState) = when (shapeshiftState) {
         is ShapeShiftState.Data -> onData(shapeshiftState)
-        is ShapeShiftState.Empty -> onEmptyLayout()
-        is ShapeShiftState.Error -> onError()
-        is ShapeShiftState.Loading -> onLoading()
+        ShapeShiftState.Empty -> onEmptyLayout()
+        ShapeShiftState.Error -> onError()
+        ShapeShiftState.Loading -> onLoading()
     }
 
     override fun onTradeUpdate(trade: Trade, tradeResponse: TradeStatusResponse) {
@@ -151,7 +159,10 @@ class ShapeShiftActivity : BaseMvpActivity<ShapeShiftView, ShapeShiftPresenter>(
     }
 
     override fun showStateSelection() {
-        ShapeShiftStateSelectionActivity.start(this, ShapeShiftStateSelectionActivity.STATE_SELECTION_REQUEST_CODE)
+        ShapeShiftStateSelectionActivity.start(
+                this,
+                ShapeShiftStateSelectionActivity.STATE_SELECTION_REQUEST_CODE
+        )
     }
 
     companion object {

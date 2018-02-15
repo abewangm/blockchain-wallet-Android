@@ -630,7 +630,7 @@
     <string name="payment_request">Запит платежу</string>
     <string name="restoring_wallet">Відновлення гаманця.</string>
     <string name="support_leaving_app_warning">Це призведе до залишення програми і перенесе вас у браузер. Продовжити?</string>
-    <string name="addresses">Bitcoin адреси</string>
+    <string name="addresses_bitcoin">Bitcoin адреси</string>
     <string name="merchant_map">Мапа Bitcoin Merchant</string>
     <string name="received_ethereum">Отриманий Ether</string>
     <string name="transaction_occur_when_bitcoin">Коли ви отримуєте чи відправляєте bitcoin, це відображається у транзакціях.</string>

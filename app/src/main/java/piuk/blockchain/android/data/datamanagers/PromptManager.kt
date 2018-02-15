@@ -17,14 +17,14 @@ import piuk.blockchain.android.ui.settings.SettingsFragment
 import piuk.blockchain.android.ui.settings.SettingsFragment.EXTRA_SHOW_ADD_EMAIL_DIALOG
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.RootUtil
+import piuk.blockchain.android.util.annotations.Mockable
 
-open class PromptManager(
+@Mockable
+class PromptManager(
         private val prefsUtil: PrefsUtil,
         private val payloadDataManager: PayloadDataManager,
         private val transactionListDataManager: TransactionListDataManager
 ) {
-
-    private val ONE_MONTH = 28 * 24 * 60 * 60 * 1000L
 
     fun getPreLoginPrompts(context: Context): Observable<List<AlertDialog>> {
         val list = mutableListOf<AlertDialog>()
@@ -34,7 +34,10 @@ open class PromptManager(
         return Observable.fromArray(list)
     }
 
-    fun getCustomPrompts(context: Context, settings: Settings): Observable<List<AppCompatDialogFragment>> {
+    fun getCustomPrompts(
+            context: Context,
+            settings: Settings
+    ): Observable<List<AppCompatDialogFragment>> {
         val list = mutableListOf<AppCompatDialogFragment>()
 
         if (isBackedUpReminderAllowed()) list.add(getBackupCustomDialog(context))
@@ -162,7 +165,8 @@ open class PromptManager(
                 R.drawable.vector_email,
                 R.string.security_centre_add_email_positive_button,
                 true,
-                false)
+                false
+        )
         securityPromptDialog.setPositiveButtonListener {
             securityPromptDialog.dismiss()
             val bundle = Bundle()
@@ -182,7 +186,8 @@ open class PromptManager(
                 R.drawable.vector_mobile,
                 R.string.enable,
                 true,
-                true)
+                true
+        )
         securityPromptDialog.setPositiveButtonListener {
             securityPromptDialog.dismiss()
             if (securityPromptDialog.isChecked) {
@@ -210,7 +215,8 @@ open class PromptManager(
                 R.drawable.vector_lock,
                 R.string.security_centre_backup_positive_button,
                 true,
-                isLastBackupReminder())
+                isLastBackupReminder()
+        )
         securityPromptDialog.setPositiveButtonListener {
             securityPromptDialog.dismiss()
             if (securityPromptDialog.isChecked) {
@@ -227,5 +233,11 @@ open class PromptManager(
         }
 
         return securityPromptDialog
+    }
+
+    companion object {
+
+        private const val ONE_MONTH = 28 * 24 * 60 * 60 * 1000L
+
     }
 }

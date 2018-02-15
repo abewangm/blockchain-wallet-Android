@@ -1,10 +1,10 @@
 package piuk.blockchain.android.util;
 
-import android.support.annotation.NonNull;
-
+import info.blockchain.wallet.coin.GenericMetadataAccount;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 
 public final class LabelUtil {
@@ -18,13 +18,22 @@ public final class LabelUtil {
      * imported {@link LegacyAddress}. Please note that this method ignores casing.
      *
      * @param payloadDataManager The current {@link PayloadDataManager}
+     * @param bchDataManager     The current {@link BchDataManager}
      * @param newLabel           The label to be checked
      * @return A boolean, where true represents the label not being unique
      */
-    public static boolean isExistingLabel(@NonNull PayloadDataManager payloadDataManager,
-                                          @NonNull String newLabel) {
+    public static boolean isExistingLabel(PayloadDataManager payloadDataManager,
+                                          BchDataManager bchDataManager,
+                                          String newLabel) {
 
         for (Account account : payloadDataManager.getAccounts()) {
+            if (account.getLabel() != null
+                    && account.getLabel().equalsIgnoreCase(newLabel)) {
+                return true;
+            }
+        }
+
+        for (GenericMetadataAccount account : bchDataManager.getAccounts()) {
             if (account.getLabel() != null
                     && account.getLabel().equalsIgnoreCase(newLabel)) {
                 return true;

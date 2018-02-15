@@ -29,8 +29,8 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.databinding.FragmentContactDetailBinding;
 import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter;
-import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener;
+import piuk.blockchain.android.ui.balance.adapter.TxFeedAdapter;
+import piuk.blockchain.android.ui.balance.adapter.TxFeedClickListener;
 import piuk.blockchain.android.ui.base.BaseFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -47,7 +47,7 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
     private static final String ARGUMENT_CONTACT_ID = "contact_id";
 
     @Inject ContactDetailPresenter contactDetailPresenter;
-    @Thunk BalanceAdapter balanceAdapter;
+    @Thunk TxFeedAdapter balanceAdapter;
     private FragmentContactDetailBinding binding;
     private MaterialProgressDialog progressDialog;
     private OnFragmentInteractionListener listener;
@@ -199,15 +199,15 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
             setUpAdapter(isBtc);
         }
 
-        balanceAdapter.onContactsMapChanged(getPresenter().getTransactionDisplayMap());
-        balanceAdapter.setItems(transactions);
-        if (!transactions.isEmpty()) {
-            binding.recyclerView.setVisibility(View.VISIBLE);
-            binding.layoutNoTransactions.setVisibility(View.GONE);
-        } else {
-            binding.recyclerView.setVisibility(View.GONE);
-            binding.layoutNoTransactions.setVisibility(View.VISIBLE);
-        }
+//        balanceAdapter.onContactsMapChanged(getPresenter().getTransactionDisplayMap());
+//        balanceAdapter.setItems(transactions);
+//        if (!transactions.isEmpty()) {
+//            binding.recyclerView.setVisibility(View.VISIBLE);
+//            binding.layoutNoTransactions.setVisibility(View.GONE);
+//        } else {
+//            binding.recyclerView.setVisibility(View.GONE);
+//            binding.layoutNoTransactions.setVisibility(View.VISIBLE);
+//        }
     }
 
     private void setUpAdapter(boolean isBtc) {
@@ -215,34 +215,24 @@ public class ContactDetailFragment extends BaseFragment<ContactDetailView, Conta
         int btcFormat = getPresenter().getPrefsUtil().getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
         double btcExchangeRate = ExchangeRateFactory.getInstance().getLastBtcPrice(fiatString);
 
-        balanceAdapter = new BalanceAdapter(
-                getActivity(),
-                btcExchangeRate,
-                getPresenter().getEthExchangeRate(),
-                isBtc,
-                null,//TODO Check this when dev on Contacts resume
-                new BalanceListClickListener() {
-                    @Override
-                    public void onTransactionClicked(int correctedPosition, int absolutePosition) {
-                        getPresenter().onCompletedTransactionClicked(absolutePosition);
-                    }
-
-                    @Override
-                    public void onValueClicked(boolean isBtc) {
-                        getPresenter().onBtcFormatChanged(isBtc);
-                        balanceAdapter.onViewFormatUpdated(isBtc, btcFormat);
-                    }
-
-                    @Override
-                    public void onFctxClicked(@NonNull String fctxId) {
-                        getPresenter().onTransactionClicked(fctxId);
-                    }
-
-                    @Override
-                    public void onFctxLongClicked(@NonNull String fctxId) {
-                        getPresenter().onTransactionLongClicked(fctxId);
-                    }
-                });
+//        balanceAdapter = new TxFeedAdapter(
+//                getActivity(),
+//                btcExchangeRate,
+//                getPresenter().getEthExchangeRate(),
+//                isBtc,
+//                null,//TODO Check this when dev on Contacts resume
+//                new TxFeedClickListener() {
+//                    @Override
+//                    public void onTransactionClicked(int correctedPosition, int absolutePosition) {
+//                        getPresenter().onCompletedTransactionClicked(absolutePosition);
+//                    }
+//
+//                    @Override
+//                    public void onValueClicked(boolean isBtc) {
+//                        getPresenter().onBtcFormatChanged(isBtc);
+//                        balanceAdapter.onViewFormatUpdated(isBtc, btcFormat);
+//                    }
+//                });
 
         binding.recyclerView.setAdapter(balanceAdapter);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));

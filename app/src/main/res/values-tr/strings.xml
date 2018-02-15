@@ -632,7 +632,7 @@
     <string name="payment_request">Ödeme Talebi</string>
     <string name="restoring_wallet">Cüzdan kurtarılıyor.</string>
     <string name="support_leaving_app_warning">Bu işlem uygulamadan çıkacak ve sizi web tarayıcısına götürecektir. Devam?</string>
-    <string name="addresses">Bitcoin Adresleri</string>
+    <string name="addresses_bitcoin">Bitcoin Adresleri</string>
     <string name="merchant_map">Bitcoin Satıcı Haritası</string>
     <string name="received_ethereum">Ether Alındı</string>
     <string name="transaction_occur_when_bitcoin">İşlemler, bitcoin aldığınızda ve gönderdiğinizde oluşur.</string>

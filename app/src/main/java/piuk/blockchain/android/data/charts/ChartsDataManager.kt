@@ -102,10 +102,17 @@ class ChartsDataManager(private val historicPriceApi: PriceApi, rxBus: RxBus) {
             TimeSpan.DAY -> Scale.FIFTEEN_MINUTES
         }
 
+        var proposedStartTime = getStartTimeForTimeSpan(timeSpan, cryptoCurrency)
+        // It's possible that the selected start time is before the currency existed, so check here
+        // and show ALL_TIME instead if that's the case.
+        if (proposedStartTime < getFirstMeasurement(cryptoCurrency)) {
+            proposedStartTime = getStartTimeForTimeSpan(TimeSpan.ALL_TIME, cryptoCurrency)
+        }
+
         return historicPriceApi.getHistoricPriceSeries(
                 cryptoCurrency.symbol,
                 fiatCurrency,
-                getStartTimeForTimeSpan(timeSpan, cryptoCurrency),
+                proposedStartTime,
                 scale
         ).flatMapIterable { it }
                 .filter { it.price != null }
