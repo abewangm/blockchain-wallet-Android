@@ -35,7 +35,7 @@ public class ReceiveCurrencyHelper {
     }
 
     /**
-     * Get saved BTC unit - BTC, mBits or bits
+     * Get saved BTC unit - BTC, mBTC or bits
      *
      * @return The saved BTC unit
      */
@@ -43,15 +43,30 @@ public class ReceiveCurrencyHelper {
         return monetaryUtil.getBtcUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
 
+    /**
+     * Get saved ETH unit
+     *
+     * @return The saved ETH unit
+     */
     public String getEthUnit() {
         return monetaryUtil.getEthUnit(MonetaryUtil.UNIT_ETH);
     }
 
+    /**
+     * Get saved BCH unit - BCH, mBCH or bits
+     *
+     * @return The saved BCH unit
+     */
+    public String getBchUnit() {
+        return monetaryUtil.getBchUnit(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
+    }
+
     public String getCryptoUnit() {
-        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
-            return getBtcUnit();
-        } else {
-            return getEthUnit();
+        switch (currencyState.getCryptoCurrency()){
+            case BTC: return getBtcUnit();
+            case ETHER: return getEthUnit();
+            case BCH: return getBchUnit();
+            default: throw new IllegalArgumentException(currencyState.getCryptoCurrency()+" not supported.");
         }
     }
 
@@ -70,10 +85,11 @@ public class ReceiveCurrencyHelper {
      * @return A double exchange rate
      */
     public double getLastPrice() {
-        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
-            return exchangeRateFactory.getLastBtcPrice(getFiatUnit());
-        } else {
-            return exchangeRateFactory.getLastEthPrice(getFiatUnit());
+        switch (currencyState.getCryptoCurrency()){
+            case BTC: return exchangeRateFactory.getLastBtcPrice(getFiatUnit());
+            case ETHER: return exchangeRateFactory.getLastEthPrice(getFiatUnit());
+            case BCH: return exchangeRateFactory.getLastBchPrice(getFiatUnit());
+            default: throw new IllegalArgumentException(currencyState.getCryptoCurrency()+" not supported.");
         }
     }
 

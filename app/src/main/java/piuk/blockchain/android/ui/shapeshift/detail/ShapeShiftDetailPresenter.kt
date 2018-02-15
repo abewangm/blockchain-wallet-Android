@@ -123,14 +123,16 @@ class ShapeShiftDetailPresenter @Inject constructor(
 
     //region View Updates
     private fun updateDeposit(fromCurrency: CryptoCurrencies, depositAmount: BigDecimal) {
-        val label = stringUtils.getFormattedString(R.string.shapeshift_deposit_title, fromCurrency.unit)
+        val label =
+                stringUtils.getFormattedString(R.string.shapeshift_deposit_title, fromCurrency.unit)
         val amount = "${depositAmount.toLocalisedString()} ${fromCurrency.symbol.toUpperCase()}"
 
         view.updateDeposit(label, amount)
     }
 
     private fun updateReceive(toCurrency: CryptoCurrencies, receiveAmount: BigDecimal) {
-        val label = stringUtils.getFormattedString(R.string.shapeshift_receive_title, toCurrency.unit)
+        val label =
+                stringUtils.getFormattedString(R.string.shapeshift_receive_title, toCurrency.unit)
         val amount = "${receiveAmount.toLocalisedString()} ${toCurrency.symbol.toUpperCase()}"
 
         view.updateReceive(label, amount)
@@ -242,7 +244,11 @@ class ShapeShiftDetailPresenter @Inject constructor(
 
     private fun getToFromPair(pair: String): ToFromPair = when (pair.toLowerCase()) {
         ShapeShiftPairs.ETH_BTC -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.ETHER)
+        ShapeShiftPairs.ETH_BCH -> ToFromPair(CryptoCurrencies.BCH, CryptoCurrencies.ETHER)
         ShapeShiftPairs.BTC_ETH -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BTC)
+        ShapeShiftPairs.BTC_BCH -> ToFromPair(CryptoCurrencies.BCH, CryptoCurrencies.BTC)
+        ShapeShiftPairs.BCH_BTC -> ToFromPair(CryptoCurrencies.BTC, CryptoCurrencies.BCH)
+        ShapeShiftPairs.BCH_ETH -> ToFromPair(CryptoCurrencies.ETHER, CryptoCurrencies.BCH)
         else -> throw IllegalStateException("Attempt to get invalid pair $pair")
     }
 

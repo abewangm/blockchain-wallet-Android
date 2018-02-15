@@ -632,7 +632,7 @@
     <string name="payment_request">Požadavek na platbu</string>
     <string name="restoring_wallet">Obnovování peněženky.</string>
     <string name="support_leaving_app_warning">Toto opustí aplikaci a vezme vás do prohlížeče. Pokračovat?</string>
-    <string name="addresses">Adresy bitcoinu</string>
+    <string name="addresses_bitcoin">Adresy bitcoinu</string>
     <string name="received_ethereum">Přijat ether</string>
     <string name="transaction_occur_when_bitcoin">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
     <string name="transaction_occur_when_eth">K transakcím dochází při příjmu a odesílání ether.</string>

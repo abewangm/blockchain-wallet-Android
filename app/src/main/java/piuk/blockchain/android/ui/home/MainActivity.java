@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
@@ -29,9 +30,9 @@ import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -47,6 +48,8 @@ import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -75,6 +78,7 @@ import piuk.blockchain.android.ui.contacts.payments.ContactConfirmRequestFragmen
 import piuk.blockchain.android.ui.contacts.success.ContactRequestSuccessFragment;
 import piuk.blockchain.android.ui.customviews.MaterialProgressDialog;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.customviews.callbacks.OnTouchOutsideViewListener;
 import piuk.blockchain.android.ui.dashboard.DashboardFragment;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
 import piuk.blockchain.android.ui.pairingcode.PairingCodeActivity;
@@ -89,6 +93,7 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
 
@@ -106,8 +111,12 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public static final String ACTION_SEND = "info.blockchain.wallet.ui.BalanceFragment.SEND";
     public static final String ACTION_RECEIVE = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE";
     public static final String ACTION_RECEIVE_ETH = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE_ETH";
+    public static final String ACTION_RECEIVE_BCH = "info.blockchain.wallet.ui.BalanceFragment.RECEIVE_BCH";
     public static final String ACTION_BUY = "info.blockchain.wallet.ui.BalanceFragment.BUY";
     public static final String ACTION_SHAPESHIFT = "info.blockchain.wallet.ui.BalanceFragment.SHAPESHIFT";
+    public static final String ACTION_BTC_BALANCE = "info.blockchain.wallet.ui.BalanceFragment.ACTION_BTC_BALANCE";
+    public static final String ACTION_ETH_BALANCE = "info.blockchain.wallet.ui.BalanceFragment.ACTION_ETH_BALANCE";
+    public static final String ACTION_BCH_BALANCE = "info.blockchain.wallet.ui.BalanceFragment.ACTION_BCH_BALANCE";
 
     private static final String SUPPORT_URI = "https://support.blockchain.com/";
     private static final int REQUEST_BACKUP = 2225;
@@ -132,12 +141,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private AppUtil appUtil;
     private long backPressed;
     private Toolbar toolbar;
-    private boolean paymentMade = false;
+    @Thunk boolean paymentMade = false;
     private Typeface typeface;
     private BalanceFragment balanceFragment;
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;
     private boolean initialized;
+    // Fragment callbacks for currency header
+    private Map<View, OnTouchOutsideViewListener> touchOutsideViews = new HashMap<>();
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -150,10 +161,28 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             } else if (intent.getAction().equals(ACTION_RECEIVE_ETH) && getActivity() != null) {
                 getPresenter().setCryptoCurrency(CryptoCurrencies.ETHER);
                 binding.bottomNavigation.setCurrentItem(3);
+            } else if (intent.getAction().equals(ACTION_RECEIVE_BCH) && getActivity() != null) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.BCH);
+                binding.bottomNavigation.setCurrentItem(3);
             } else if (intent.getAction().equals(ACTION_BUY) && getActivity() != null) {
                 BuyActivity.start(MainActivity.this);
             } else if (intent.getAction().equals(ACTION_SHAPESHIFT) && getActivity() != null) {
                 ShapeShiftActivity.start(MainActivity.this);
+            } else if (intent.getAction().equals(ACTION_BTC_BALANCE)) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.BTC);
+                // This forces the balance page to reload
+                paymentMade = true;
+                binding.bottomNavigation.setCurrentItem(2);
+            } else if (intent.getAction().equals(ACTION_ETH_BALANCE)) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.ETHER);
+                // This forces the balance page to reload
+                paymentMade = true;
+                binding.bottomNavigation.setCurrentItem(2);
+            } else if (intent.getAction().equals(ACTION_BCH_BALANCE)) {
+                getPresenter().setCryptoCurrency(CryptoCurrencies.BCH);
+                // This forces the balance page to reload
+                paymentMade = true;
+                binding.bottomNavigation.setCurrentItem(2);
             }
         }
     };
@@ -166,16 +195,20 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                         // This is a bit of a hack to allow the selection of the correct button
                         // On the bottom nav bar, but without starting the fragment again
                         startSendFragment(null, null);
+                        ViewUtils.setElevation(binding.appbarLayout, 0f);
                     }
                     break;
                 case 1:
                     startDashboardFragment();
+                    ViewUtils.setElevation(binding.appbarLayout, 4f);
                     break;
                 case 2:
                     onStartBalanceFragment(paymentMade);
+                    ViewUtils.setElevation(binding.appbarLayout, 0f);
                     break;
                 case 3:
                     startReceiveFragment();
+                    ViewUtils.setElevation(binding.appbarLayout, 0f);
                     break;
             }
         }
@@ -196,31 +229,39 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         IntentFilter filterSend = new IntentFilter(ACTION_SEND);
         IntentFilter filterReceive = new IntentFilter(ACTION_RECEIVE);
         IntentFilter filterReceiveEth = new IntentFilter(ACTION_RECEIVE_ETH);
+        IntentFilter filterReceiveBch = new IntentFilter(ACTION_RECEIVE_BCH);
         IntentFilter filterBuy = new IntentFilter(ACTION_BUY);
         IntentFilter filterShapeshift = new IntentFilter(ACTION_SHAPESHIFT);
+        IntentFilter filterBtcBalance = new IntentFilter(ACTION_BTC_BALANCE);
+        IntentFilter filterEthBalance = new IntentFilter(ACTION_ETH_BALANCE);
+        IntentFilter filterBchBalance = new IntentFilter(ACTION_BCH_BALANCE);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterSend);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceive);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBuy);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveEth);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterReceiveBch);
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterShapeshift);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBtcBalance);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterEthBalance);
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filterBchBalance);
 
         appUtil = new AppUtil(this);
         balanceFragment = BalanceFragment.newInstance(false);
 
         binding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
                 // No-op
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
                 drawerIsOpen = true;
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
                 drawerIsOpen = false;
             }
 
@@ -231,11 +272,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         });
 
         // Set up toolbar
-        toolbar = findViewById(R.id.toolbar_general);
+        toolbar = findViewById(R.id.toolbar_main);
         toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.vector_menu));
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        ViewUtils.setElevation(toolbar, 0F);
 
         // Notify Presenter that page is setup
         onViewReady();
@@ -363,7 +403,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         if (drawerIsOpen) {
             binding.drawerLayout.closeDrawers();
         } else if (getCurrentFragment() instanceof BalanceFragment) {
-            handleBackPressed();
+            ((BalanceFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof SendFragment) {
             ((SendFragment) getCurrentFragment()).onBackPressed();
         } else if (getCurrentFragment() instanceof ReceiveFragment) {
@@ -534,11 +574,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     @Override
-    public void onPaymentInitiated(@NonNull String uri, @NonNull String recipientId, @NonNull String mdid, @NonNull String fctxId) {
-        startContactSendDialog(uri, recipientId, mdid, fctxId);
-    }
-
-    @Override
     public void kickToLauncherPage() {
         startSingleActivity(LauncherActivity.class);
     }
@@ -584,9 +619,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
             balanceFragment = BalanceFragment.newInstance(true);
             paymentMade = false;
         }
-        balanceFragment.updateSelectedCurrency(mainPresenter.getCurrentCryptoCurrency());
         replaceFragmentWithAnimation(balanceFragment);
         toolbar.setTitle("");
+
+        balanceFragment.refreshSelectedCurrency();
     }
 
     public AHBottomNavigation getBottomNavigationView() {
@@ -657,14 +693,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     public void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails) {
-        Log.d(TAG, "setWebViewLoginDetails: called");
+        Timber.d("setWebViewLoginDetails: called");
         this.webViewLoginDetails = webViewLoginDetails;
         checkTradesIfReady();
     }
 
     @Override
     public void onFrontendInitialized() {
-        Log.d(TAG, "onFrontendInitialized: called");
+        Timber.d("onFrontendInitialized: called");
         initialized = true;
         checkTradesIfReady();
     }
@@ -683,12 +719,12 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public void onReceiveValue(String value) {
-        Log.d(TAG, "onReceiveValue: " + value);
+        Timber.d("onReceiveValue: %s", value);
     }
 
     @Override
     public void onShowTx(String txHash) {
-        Log.d(TAG, "onShowTx: " + txHash);
+        Timber.d("onShowTx: %s", txHash);
     }
 
     private void applyFontToMenuItem(MenuItem menuItem) {
@@ -760,9 +796,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private void startSendFragment(@Nullable String scanData, @Nullable String scanRoute) {
         binding.bottomNavigation.removeOnTabSelectedListener();
         binding.bottomNavigation.setCurrentItem(0);
+        ViewUtils.setElevation(binding.appbarLayout, 0f);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
         SendFragment sendFragment =
-                SendFragment.Companion.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
+                SendFragment.newInstance(scanData, scanRoute, getSelectedAccountFromFragments());
         addFragmentToBackStack(sendFragment);
     }
 
@@ -778,9 +815,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     private int getSelectedAccountFromFragments() {
-        if (getCurrentFragment() instanceof BalanceFragment) {
-            return ((BalanceFragment) getCurrentFragment()).getSelectedAccountPosition();
-        } else if (getCurrentFragment() instanceof ReceiveFragment) {
+        if (getCurrentFragment() instanceof ReceiveFragment) {
             return ((ReceiveFragment) getCurrentFragment()).getSelectedAccountPosition();
         } else {
             return -1;
@@ -825,7 +860,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.removeOnTabSelectedListener();
         binding.bottomNavigation.setCurrentItem(0);
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
-        addFragmentToBackStack(SendFragment.Companion.newInstance(uri, recipientId, mdid, fctxId));
+        addFragmentToBackStack(SendFragment.newInstance(uri, recipientId, mdid, fctxId));
     }
 
     @Override
@@ -864,7 +899,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     ViewUtils.hideKeyboard(this);
-                    getPresenter().generateMetadataHDNodeAndEthereumWallet(editText.getText().toString());
+                    getPresenter().generateAndSetupMetadata(editText.getText().toString());
                 })
                 .create()
                 .show();
@@ -891,4 +926,26 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void onSendFragmentClose() {
         binding.bottomNavigation.setCurrentItem(1);
     }
+
+    public void setOnTouchOutsideViewListener(View view,
+                                              OnTouchOutsideViewListener onTouchOutsideViewListener) {
+        touchOutsideViews.put(view, onTouchOutsideViewListener);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(final MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            for (View view : touchOutsideViews.keySet()) {
+                // Notify touchOutsideViewListeners if user tapped outside a given view
+                Rect viewRect = new Rect();
+                view.getGlobalVisibleRect(viewRect);
+                if (!viewRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+                    touchOutsideViews.get(view).onTouchOutside(view, ev);
+                }
+            }
+
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
 }

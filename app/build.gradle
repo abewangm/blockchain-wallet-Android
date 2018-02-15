@@ -15,7 +15,7 @@ buildProperties {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.1'
+    buildToolsVersion '27.0.3'
     dexOptions.javaMaxHeapSize "3g"
 
     defaultConfig {
@@ -82,6 +82,7 @@ android {
             buildConfigProperty "API_URL", buildProperties.secrets['prodApiServer']
             buildConfigProperty "BITCOIN_WEBSOCKET_URL", buildProperties.secrets['prodBtcWebsocket']
             buildConfigProperty "ETHEREUM_WEBSOCKET_URL", buildProperties.secrets['prodEthWebsocket']
+            buildConfigProperty "BITCOIN_CASH_WEBSOCKET_URL", buildProperties.secrets['prodBchWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_prod"'
         }
         envDev {
@@ -90,6 +91,7 @@ android {
             buildConfigProperty "API_URL", buildProperties.secrets['devApiServer']
             buildConfigProperty "BITCOIN_WEBSOCKET_URL", buildProperties.secrets['devBtcWebsocket']
             buildConfigProperty "ETHEREUM_WEBSOCKET_URL", buildProperties.secrets['devEthWebsocket']
+            buildConfigProperty "BITCOIN_CASH_WEBSOCKET_URL", buildProperties.secrets['devBchWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_dev"'
             versionNameSuffix '-dev'
         }
@@ -99,6 +101,7 @@ android {
             buildConfigProperty "API_URL", buildProperties.secrets['stagingApiServer']
             buildConfigProperty "BITCOIN_WEBSOCKET_URL", buildProperties.secrets['stagingBtcWebsocket']
             buildConfigProperty "ETHEREUM_WEBSOCKET_URL", buildProperties.secrets['stagingEthWebsocket']
+            buildConfigProperty "BITCOIN_CASH_WEBSOCKET_URL", buildProperties.secrets['stagingBchWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_staging"'
             versionNameSuffix '-staging'
         }
@@ -108,6 +111,7 @@ android {
             buildConfigProperty "API_URL", buildProperties.secrets['testnetApiServer']
             buildConfigProperty "BITCOIN_WEBSOCKET_URL", buildProperties.secrets['testnetBtcWebsocket']
             buildConfigProperty "ETHEREUM_WEBSOCKET_URL", buildProperties.secrets['testnetEthWebsocket']
+            buildConfigProperty "BITCOIN_CASH_WEBSOCKET_URL", buildProperties.secrets['testnetBchWebsocket']
             buildConfigField "String", "ENVIRONMENT", '"env_testnet"'
             versionNameSuffix '-testnet'
         }
@@ -166,7 +170,9 @@ afterEvaluate {
 dependencies {
     // Blockchain libraries
     implementation files('libs/MyWalletHD.jar')
-    implementation files('libs/api-client-0.1.15-SNAPSHOT.jar')
+    implementation files('libs/api-client-0.1.16-SNAPSHOT.jar')
+    // Bitcoinj
+    implementation files('libs/bitcoinj-core-0.15-SNAPSHOT.jar')
     // Kotlin
     implementation libraries.kotlin
     // Support Libs
@@ -185,18 +191,23 @@ dependencies {
     implementation libraries.firebaseMessaging
     implementation libraries.googlePlayServicesBase
     // Utils
-    implementation libraries.bitcoinj
     implementation libraries.web3j
     implementation libraries.commonsCodec
     implementation libraries.commonsLang
     implementation libraries.urlBuilder
     implementation libraries.yearclass
+    // Bitcoinj dependencies
+    implementation libraries.protobuf
+    implementation libraries.findbugs
+    implementation libraries.guava
     // Networking and Core libs
     implementation libraries.rxJava
     implementation libraries.rxAndroid
     implementation libraries.rxBinding
     implementation libraries.rxFingerprint
-    implementation libraries.retrofit
+    implementation (libraries.retrofit) {
+        exclude module: 'okhttp'
+    }
     implementation libraries.retrofitJacksonConverter
     implementation libraries.retrofitRxJavaAdapter
     implementation libraries.okHttp

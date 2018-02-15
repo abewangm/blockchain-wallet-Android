@@ -227,6 +227,18 @@ public class PayloadService {
     }
 
     /**
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their Bitcoin cash
+     * addresses.
+     *
+     * @param addresses A List of Bitcoin Cash addresses as Strings
+     * @return A {@link LinkedHashMap}
+     */
+    @WebRequest
+    Observable<LinkedHashMap<String, Balance>> getBalanceOfBchAddresses(List<String> addresses) {
+        return Observable.fromCallable(() -> payloadManager.getBalanceOfBchAddresses(addresses));
+    }
+
+    /**
      * Derives new {@link Account} from the master seed
      *
      * @param accountLabel   A label for the account

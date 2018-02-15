@@ -1,23 +1,17 @@
 package piuk.blockchain.android.ui.dashboard
 
 import android.support.annotation.StringRes
-import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import java.util.*
 
 interface DashboardView : View {
 
     val shouldShowBuy: Boolean
 
-    fun updateChartState(chartsState: ChartsState)
+    val locale: Locale
 
-    fun updateEthBalance(balance: String)
-
-    fun updateBtcBalance(balance: String)
-
-    fun updateTotalBalance(balance: String)
-
-    fun updateCryptoCurrencyPrice(price: String)
+    fun updatePieChartState(chartsState: PieChartsState)
 
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 
@@ -25,9 +19,14 @@ interface DashboardView : View {
 
     fun notifyItemRemoved(displayItems: MutableList<Any>, position: Int)
 
+    fun notifyItemUpdated(displayItems: MutableList<Any>, positions: List<Int>)
+
     fun startBuyActivity()
 
-    fun startShapeShiftActivity()
+    fun startBitcoinCashReceive()
 
-    fun updateDashboardSelectedCurrency(cryptoCurrency: CryptoCurrencies)
+    fun scrollToTop()
+
+    fun startWebsocketService()
+
 }

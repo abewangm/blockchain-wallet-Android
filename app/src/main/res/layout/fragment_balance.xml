@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:fitsSystemWindows="true">
 
     <!-- HEADER LAYOUT -->
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="128dp"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
         android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay">
 
@@ -18,62 +20,59 @@
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:elevation="0dp"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="snap|scroll|exitUntilCollapsed"
             app:titleEnabled="false">
 
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tabs"
-                fontPath="fonts/Montserrat-Regular.ttf"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_gravity="bottom"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:tabContentStart="72dp"
-                app:tabGravity="fill"
-                app:tabIndicatorColor="@android:color/white"
-                app:tabIndicatorHeight="4dp"
-                app:tabMode="fixed" />
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/balance_layout"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/primary_navy_medium"
-                app:layout_collapseMode="parallax"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:elevation="4dp"
+                android:orientation="vertical"
+                app:layout_collapseMode="pin">
 
                 <TextView
                     android:id="@+id/textview_balance"
-                    fontPath="fonts/Montserrat-Light.ttf"
+                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:textColor="@color/white"
-                    android:textSize="32sp"
+                    android:textSize="24sp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:ignore="MissingPrefix"
                     tools:text="1.03252623 BTC" />
 
-                <Spinner
-                    android:id="@+id/accounts_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/textview_balance"
-                    android:spinnerMode="dropdown"
-                    android:theme="@style/SpinnerWhite"
-                    android:visibility="invisible"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textview_balance"
-                    tools:text="All wallets" />
+                <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader
+                    android:id="@+id/currency_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-            </android.support.constraint.ConstraintLayout>
+                <FrameLayout
+                    android:id="@+id/layout_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/primary_gray_lightest"
+                    android:elevation="4dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <Spinner
+                        android:id="@+id/accounts_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:spinnerMode="dropdown"
+                        android:theme="@style/SpinnerBlack"
+                        tools:layout_height="36dp"
+                        tools:text="All wallets" />
+
+                </FrameLayout>
+
+            </LinearLayout>
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 

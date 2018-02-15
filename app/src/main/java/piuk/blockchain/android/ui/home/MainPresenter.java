@@ -1,18 +1,13 @@
 package piuk.blockchain.android.ui.home;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.ethereum.EthereumWallet;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.prices.data.PriceDatum;
-
-import org.bitcoinj.crypto.DeterministicKey;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -21,9 +16,7 @@ import java.util.NoSuchElementException;
 
 import javax.inject.Inject;
 
-import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.Logging;
@@ -38,6 +31,7 @@ import piuk.blockchain.android.data.datamanagers.FeeDataManager;
 import piuk.blockchain.android.data.datamanagers.PromptManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
+import piuk.blockchain.android.data.metadata.MetadataManager;
 import piuk.blockchain.android.data.notifications.models.NotificationPayload;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
@@ -45,22 +39,16 @@ import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
-import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
-import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import piuk.blockchain.android.util.StringUtils;
 import timber.log.Timber;
 
 public class MainPresenter extends BasePresenter<MainView> {
 
-    private OSUtil osUtil;
-    private SwipeToReceiveHelper swipeToReceiveHelper;
     private Observable<NotificationPayload> notificationObservable;
     private PrefsUtil prefs;
     private AppUtil appUtil;
@@ -69,7 +57,6 @@ public class MainPresenter extends BasePresenter<MainView> {
     private PayloadDataManager payloadDataManager;
     private ContactsDataManager contactsDataManager;
     private Context applicationContext;
-    private StringUtils stringUtils;
     private SettingsDataManager settingsDataManager;
     private BuyDataManager buyDataManager;
     private DynamicFeeCache dynamicFeeCache;
@@ -81,6 +68,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private EthDataManager ethDataManager;
     private CurrencyState currencyState;
     private WalletOptionsDataManager walletOptionsDataManager;
+    private MetadataManager metadataManager;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -90,7 +78,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                   PayloadDataManager payloadDataManager,
                   ContactsDataManager contactsDataManager,
                   Context applicationContext,
-                  StringUtils stringUtils,
                   SettingsDataManager settingsDataManager,
                   BuyDataManager buyDataManager,
                   DynamicFeeCache dynamicFeeCache,
@@ -100,9 +87,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                   EnvironmentSettings environmentSettings,
                   PromptManager promptManager,
                   EthDataManager ethDataManager,
-                  SwipeToReceiveHelper swipeToReceiveHelper,
                   CurrencyState currencyState,
-                  WalletOptionsDataManager walletOptionsDataManager) {
+                  WalletOptionsDataManager walletOptionsDataManager,
+                  MetadataManager metadataManager) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -111,7 +98,6 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.payloadDataManager = payloadDataManager;
         this.contactsDataManager = contactsDataManager;
         this.applicationContext = applicationContext;
-        this.stringUtils = stringUtils;
         this.settingsDataManager = settingsDataManager;
         this.buyDataManager = buyDataManager;
         this.dynamicFeeCache = dynamicFeeCache;
@@ -121,10 +107,9 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.environmentSettings = environmentSettings;
         this.promptManager = promptManager;
         this.ethDataManager = ethDataManager;
-        this.swipeToReceiveHelper = swipeToReceiveHelper;
         this.currencyState = currencyState;
         this.walletOptionsDataManager = walletOptionsDataManager;
-        osUtil = new OSUtil(applicationContext);
+        this.metadataManager = metadataManager;
     }
 
     private void initPrompts(Context context) {
@@ -149,8 +134,6 @@ public class MainPresenter extends BasePresenter<MainView> {
             // activity, which handles all login/auth/corruption scenarios itself
             getView().kickToLauncherPage();
         } else {
-
-            startWebSocketService();
             logEvents();
 
             getView().showProgressDialog(R.string.please_wait);
@@ -204,22 +187,13 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     void initMetadataElements() {
-        initMetadataNodesObservable()
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
-                .flatMapCompletable(metadataNodeFactory -> {
-                    //Initialise contacts
-                    //contactsDataManager.initContactsService(metadataNodeFactory.getMetadataNode(), metadataNodeFactory.getSharedMetadataNode());
-                    //payloadDataManager.registerMdid()
-                    //contactsDataManager.publishXpub()
-                    return Completable.complete();
-                })
+        metadataManager.attemptMetadataSetup()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .andThen(feesCompletable())
                 .doAfterTerminate(() -> {
                             getView().hideProgressDialog();
 
                             initPrompts(getView().getActivityContext());
-                            storeSwipeReceiveAddresses();
 
                             rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
 
@@ -236,7 +210,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                     } else {
                         getView().setBuySellEnabled(false);
                     }
-//                    initContactsService();
                 }, throwable -> {
                     //noinspection StatementWithEmptyBody
                     if (throwable instanceof InvalidCredentialsException || throwable instanceof HDWalletException) {
@@ -257,37 +230,13 @@ public class MainPresenter extends BasePresenter<MainView> {
         getView().showMetadataNodeFailure();
     }
 
-    private void storeSwipeReceiveAddresses() {
-        // Defer to background thread as deriving addresses is quite processor intensive
-        Completable.fromCallable(() -> {
-            swipeToReceiveHelper.updateAndStoreBitcoinAddresses();
-            return Void.TYPE;
-        }).subscribeOn(Schedulers.computation())
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .subscribe(() -> { /* No-op*/ }, Timber::e);
-    }
-
-    private Observable<MetadataNodeFactory> initMetadataNodesObservable() {
-        return payloadDataManager.loadNodes()
-                .flatMap(loaded -> {
-                    if (loaded) {
-                        return payloadDataManager.getMetadataNodeFactory();
-                    } else {
-                        if (!payloadManager.getPayload().isDoubleEncryption()) {
-                            return payloadDataManager.generateNodes(null)
-                                    .andThen(payloadDataManager.getMetadataNodeFactory());
-                        } else {
-                            throw new InvalidCredentialsException("Payload is double encrypted");
-                        }
-                    }
-                });
-    }
-
     private Observable<Map<String, PriceDatum>> feesCompletable() {
         return feeDataManager.getBtcFeeOptions()
                 .doOnNext(btcFeeOptions -> dynamicFeeCache.setBtcFeeOptions(btcFeeOptions))
                 .flatMap(ignored -> feeDataManager.getEthFeeOptions())
                 .doOnNext(ethFeeOptions -> dynamicFeeCache.setEthFeeOptions(ethFeeOptions))
+                .flatMap(ignored -> feeDataManager.getBchFeeOptions())
+                .doOnNext(bchFeeOptions -> dynamicFeeCache.setBchFeeOptions(bchFeeOptions))
                 .compose(RxUtil.applySchedulersToObservable())
                 .flatMap(feeOptions -> exchangeRateFactory.updateTickers());
     }
@@ -350,19 +299,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                         .subscribe(
                                 o -> { /* No-op */ },
                                 Throwable::printStackTrace));
-    }
-
-    private void startWebSocketService() {
-        Intent intent = new Intent(applicationContext, WebSocketService.class);
-
-        if (!osUtil.isServiceRunning(WebSocketService.class)) {
-            applicationContext.startService(intent);
-        } else {
-            // Restarting this here ensures re-subscription after app restart - the service may remain
-            // running, but the subscription to the WebSocket won't be restarted unless onCreate called
-            applicationContext.stopService(intent);
-            applicationContext.startService(intent);
-        }
     }
 
     private void logEvents() {
@@ -442,31 +378,15 @@ public class MainPresenter extends BasePresenter<MainView> {
         }
     }
 
-    /**
-     * Initialises ethereum wallet.
-     */
-    private Observable<EthereumWallet> ethWalletObservable(DeterministicKey hdNode) {
-        return ethDataManager.initEthereumWallet(hdNode,
-                stringUtils.getString(R.string.eth_default_account_label));
-    }
-
-    void generateMetadataHDNodeAndEthereumWallet(@Nullable String secondPassword) {
+    void generateAndSetupMetadata(@Nullable String secondPassword) {
         if (!payloadDataManager.validateSecondPassword(secondPassword)) {
             getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
             getView().showSecondPasswordDialog();
         } else {
-            payloadDataManager.generateNodes(secondPassword)
+            metadataManager.generateAndSetupMetadata(secondPassword)
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                    .andThen(payloadDataManager.getMetadataNodeFactory())
-                    .flatMap(metadataNodeFactory -> ethWalletObservable(metadataNodeFactory.getMetadataNode()))
-                    .subscribe(
-                            ethereumWallet -> appUtil.restartApp(),
-                            Throwable::printStackTrace);
+                    .subscribe(() -> appUtil.restartApp(), Throwable::printStackTrace);
         }
-    }
-
-    CryptoCurrencies getCurrentCryptoCurrency() {
-        return currencyState.getCryptoCurrency();
     }
 
     void setCryptoCurrency(CryptoCurrencies cryptoCurrency) {

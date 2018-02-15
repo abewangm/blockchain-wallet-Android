@@ -632,7 +632,7 @@
     <string name="payment_request">Yêu cầu Thanh toán</string>
     <string name="restoring_wallet">Khôi phục ví.</string>
     <string name="support_leaving_app_warning">Thao tác này sẽ thoát ứng dụng và đưa bạn đến trình duyệt. Tiếp tục?</string>
-    <string name="addresses">Địa chỉ Bitcoin</string>
+    <string name="addresses_bitcoin">Địa chỉ Bitcoin</string>
     <string name="merchant_map">Bản đồ Cổng thanh toán Bitcoin</string>
     <string name="received_ethereum">Đã nhận Ether</string>
     <string name="transaction_occur_when_bitcoin">Các giao dịch xuất hiện khi bạn nhận và gửi bitcoin.</string>

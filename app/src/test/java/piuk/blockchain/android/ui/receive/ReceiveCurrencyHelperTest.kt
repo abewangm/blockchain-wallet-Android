@@ -20,6 +20,7 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.*
 
+@Suppress("IllegalIdentifier")
 class ReceiveCurrencyHelperTest {
 
     private lateinit var subject: ReceiveCurrencyHelper
@@ -47,8 +48,9 @@ class ReceiveCurrencyHelperTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
                 .thenReturn(1)
         whenever(monetaryUtil.getBtcUnit(1)).thenReturn("mBTC")
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BTC)
         // Act
-        val value = subject.btcUnit
+        val value = subject.cryptoUnit
         // Assert
         value `should equal to` "mBTC"
     }
@@ -58,8 +60,9 @@ class ReceiveCurrencyHelperTest {
     fun getEthUnit() {
         // Arrange
         whenever(monetaryUtil.getEthUnit(0)).thenReturn("ETH")
+        whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.ETHER)
         // Act
-        val value = subject.ethUnit
+        val value = subject.cryptoUnit
         // Assert
         value `should equal to` "ETH"
     }

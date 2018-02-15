@@ -210,6 +210,43 @@
                         </LinearLayout>
                     </FrameLayout>
 
+                    <LinearLayout
+                        android:id="@+id/layoutWarning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:padding="8dp"
+                        android:visibility="gone"
+                        android:background="@color/secondary_yellow_medium"
+                        android:orientation="vertical"
+                        tools:visibility="visible">
+
+                        <TextView
+                            fontPath="fonts/Montserrat-SemiBold.ttf"
+                            android:id="@+id/textviewWarning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/bch_address_warning"
+                            android:textColor="@color/black"
+                            android:textSize="14sp"
+                            tools:ignore="MissingPrefix" />
+
+                        <TextView
+                            fontPath="fonts/Montserrat-Regular.ttf"
+                            android:id="@+id/textviewWarningSub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/bch_address_warning_subtext"
+                            android:textColor="@color/black"
+                            android:textSize="14sp"
+                            tools:ignore="MissingPrefix" />
+
+                    </LinearLayout>
+
                     <Button
                         android:id="@+id/button_send"
                         style="@style/ButtonStyle"

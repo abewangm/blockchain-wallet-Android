@@ -630,7 +630,7 @@
     <string name="payment_request">결제 요청</string>
     <string name="restoring_wallet">지갑 복구 중.</string>
     <string name="support_leaving_app_warning">이렇게 하면 앱에서 나가 브라우저로 돌아가게 됩니다. 계속합니까?</string>
-    <string name="addresses">비트코인 주소</string>
+    <string name="addresses_bitcoin">비트코인 주소</string>
     <string name="merchant_map">비트코인 머천트 맵</string>
     <string name="received_ethereum">에테르 받음</string>
     <string name="transaction_occur_when_bitcoin">비트코인을 받거나 보낼 때 거래가 생깁니다.</string>
