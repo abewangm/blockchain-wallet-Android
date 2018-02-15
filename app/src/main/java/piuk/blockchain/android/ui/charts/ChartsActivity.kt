@@ -54,6 +54,8 @@ class ChartsActivity : BaseAuthActivity(), TimeSpanUpdateListener {
         button_close.setOnClickListener { finish() }
     }
 
+    override fun lockScreenOrientation() = Unit
+
     override fun onTimeSpanUpdated(timeSpan: TimeSpan) {
         listOf(bitcoin, ether, bitcoinCash).forEach { it.onTimeSpanUpdated(timeSpan) }
     }

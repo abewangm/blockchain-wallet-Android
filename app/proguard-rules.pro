@@ -163,3 +163,20 @@
 # MPAndroidChart
 -keep class com.github.mikephil.charting.** { *; }
 -dontwarn io.realm.**
+
+# Guava (official)
+## Not yet defined: follow https://github.com/google/guava/issues/2117
+# Guava (unofficial)
+## https://github.com/google/guava/issues/2926#issuecomment-325455128
+## https://stackoverflow.com/questions/9120338/proguard-configuration-for-guava-with-obfuscation-and-optimization
+-dontwarn com.google.common.base.**
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn com.google.j2objc.annotations.**
+-dontwarn com.google.errorprone.annotations.CanIgnoreReturnValue
+-dontwarn com.google.errorprone.annotations.concurrent.LazyInit
+-dontwarn com.google.errorprone.annotations.ForOverride
+-dontwarn java.lang.ClassValue
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+# Added for guava 23.5-android
+-dontwarn afu.org.checkerframework.**
+-dontwarn org.checkerframework.**

@@ -26,7 +26,7 @@ ext.versions = [
 
         protobuf        : '2.6.1',
         findbugs        : '2.0.1',
-        guava           : '23.5-android',
+        guava           : '24.0-android',
 
         charts          : '3.0.3',
         calligraphy     : '2.2.0',
