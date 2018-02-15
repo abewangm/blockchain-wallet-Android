@@ -633,7 +633,6 @@
     <string name="restoring_wallet">Wallet wiederherstellen.</string>
     <string name="support_leaving_app_warning">Damit verlassen Sie die App und werden zu Ihrem Browser weitergeleitet. Weiter?</string>
     <string name="addresses_bitcoin">Bitcoin-Adresse</string>
-    <string name="merchant_map">Bitcoin-Händler-Karte</string>
     <string name="received_ethereum">Erhielt Ether</string>
     <string name="transaction_occur_when_bitcoin">Transaktionen erfolgen durch den Empfang und Versand von Bitcoins.</string>
     <string name="transaction_occur_when_eth">Transaktionen erfolgen durch den Empfang und Versand von Ether.</string>

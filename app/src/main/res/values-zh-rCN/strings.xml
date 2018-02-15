@@ -165,7 +165,6 @@
     <string name="change_pin_code">更改PIN</string>
     <string name="enter_current_pin">请输入当前PIN.</string>
 
-    <string name="my_addresses">地址</string>
     <string name="addresses_bitcoin">地址</string>
     <string name="create_new">新建地址</string>
     <string name="import_address">导入地址</string>
@@ -209,7 +208,6 @@
     <string name="check_email_to_auth_login">请检查您的电子邮件以批准这次登录尝试.</string>
     <string name="transaction_fee">交易手续费</string>
     <string name="your_transactions">没有交易</string>
-    <string name="transaction_occur_when">当您接收和发送比特币时会产生交易</string>
     <string name="click">点击</string>
     <string name="to_start_sending_and_receiving_btc">开始发送和接收比特币</string>
 
@@ -602,7 +600,6 @@
     <string name="contacts_broadcasting_payment">我们刚刚通知您的联系人你已经向他们发送了比特币，请等待。</string>
     <string name="contacts_payment_sent_success">支付已发送！我们已经通知您的联系人，让他们知道您已经完成了交易。</string>
     <string name="contacts_payment_sent_failed_message">通知您的联系人您已经发送给他们一笔支付的过程出现错误。请检查您的连接并重试。</string>
-    <string name="contacts_register_nodes_failure">我们无法帮您连接联系人服务。请重试以启用完整功能。</string>
     <string name="contacts_too_much_sent">看起来您发送的比特币要多于请求的数量。如果你希望，你可以请求您的联系人返回一部分。我们还未标记这笔支付为完成。</string>
     <string name="contacts_too_little_sent">看起来您发送的比特币要少于请求的数量。您的联系人将仍旧能够接收到您发送的比特币，但是我们还未标记这笔支付为完成。</string>
     <string name="contacts_second_password_prompt">要使用此服务，我们要求您输入第二个密码。您只需输入此一次即可使用联系人功能。</string>
