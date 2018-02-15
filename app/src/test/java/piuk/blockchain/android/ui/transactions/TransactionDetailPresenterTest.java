@@ -23,6 +23,7 @@ import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.RxTest;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
@@ -67,6 +68,7 @@ public class TransactionDetailPresenterTest extends RxTest {
     @Mock ContactsDataManager contactsDataManager;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) EthDataManager ethDataManager;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) BchDataManager bchDataManager;
+    @Mock EnvironmentSettings environmentSettings;
 
     @Before
     public void setUp() throws Exception {
@@ -85,7 +87,8 @@ public class TransactionDetailPresenterTest extends RxTest {
                 exchangeRateFactory,
                 contactsDataManager,
                 ethDataManager,
-                bchDataManager);
+                bchDataManager,
+                environmentSettings);
         subject.initView(activity);
     }
 

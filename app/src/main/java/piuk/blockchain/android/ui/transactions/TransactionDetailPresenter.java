@@ -27,9 +27,11 @@ import java.util.TreeMap;
 
 import javax.inject.Inject;
 
+import info.blockchain.wallet.util.FormatsUtil;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel;
@@ -68,6 +70,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
     private ContactsDataManager contactsDataManager;
     private EthDataManager ethDataManager;
     private BchDataManager bchDataManager;
+    private EnvironmentSettings environmentSettings;
 
     private String fiatType;
 
@@ -82,7 +85,8 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
                                       ExchangeRateFactory exchangeRateFactory,
                                       ContactsDataManager contactsDataManager,
                                       EthDataManager ethDataManager,
-                                      BchDataManager bchDataManager) {
+                                      BchDataManager bchDataManager,
+                                      EnvironmentSettings environmentSettings) {
 
         this.transactionHelper = transactionHelper;
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
@@ -95,6 +99,7 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
         this.contactsDataManager = contactsDataManager;
         this.ethDataManager = ethDataManager;
         this.bchDataManager = bchDataManager;
+        this.environmentSettings = environmentSettings;
     }
 
     @Override
@@ -262,7 +267,9 @@ public class TransactionDetailPresenter extends BasePresenter<TransactionDetailV
             } else {
                 label = bchDataManager.getLabelFromBchAddress(item.getKey());
                 unit = getDisplayUnitsBch();
-                if (label == null) label = item.getKey();
+                if (label == null) label = FormatsUtil.toShortCashAddress(
+                        environmentSettings.getBitcoinCashNetworkParameters(),
+                        item.getKey());
             }
 
             TransactionDetailModel transactionDetailModel = new TransactionDetailModel(
