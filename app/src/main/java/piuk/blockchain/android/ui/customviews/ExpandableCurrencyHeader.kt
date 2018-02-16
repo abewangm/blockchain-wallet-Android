@@ -102,7 +102,7 @@ class ExpandableCurrencyHeader @JvmOverloads constructor(
             CryptoCurrencies.BTC ->
                 updateCurrencyUi(R.drawable.vector_bitcoin, R.string.bitcoin)
             CryptoCurrencies.ETHER ->
-                updateCurrencyUi(R.drawable.vector_eth, R.string.ethereum)
+                updateCurrencyUi(R.drawable.vector_eth, R.string.ether)
             CryptoCurrencies.BCH ->
                 updateCurrencyUi(R.drawable.vector_bitcoin_cash, R.string.bitcoin_cash)
         }
