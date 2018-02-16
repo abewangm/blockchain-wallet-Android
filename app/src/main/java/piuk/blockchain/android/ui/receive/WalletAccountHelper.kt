@@ -17,7 +17,6 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -106,7 +105,7 @@ class WalletAccountHelper(
             .map {
                 ItemAccount(
                         it.label,
-                        getAccountBalanceBch(it, btcExchangeRate, fiatUnit, bchUnit),
+                        getAccountBalanceBch(it, bchExchangeRate, fiatUnit, bchUnit),
                         null,
                         getAccountAbsoluteBalance(it),
                         it,
@@ -175,7 +174,7 @@ class WalletAccountHelper(
 
             ItemAccount(
                     labelOrAddress,
-                    getBchAddressBalance(it, btcExchangeRate, fiatUnit, bchUnit),
+                    getBchAddressBalance(it, bchExchangeRate, fiatUnit, bchUnit),
                     tag,
                     getAddressAbsoluteBalance(it),
                     it,
@@ -394,7 +393,8 @@ class WalletAccountHelper(
     private fun getDefaultEthAccount(): ItemAccount {
         val ethModel = ethDataManager.getEthResponseModel()
         val ethAccount = ethDataManager.getEthWallet()!!.account
-        val amount = Convert.fromWei(ethModel?.getTotalBalance().toString(), Convert.Unit.ETHER)
+        val balance = ethModel?.getTotalBalance()?.toString() ?: "0.0"
+        val amount = Convert.fromWei(balance, Convert.Unit.ETHER)
         amount.setScale(8, RoundingMode.HALF_DOWN)
 
         val displayString = if (currencyState.isDisplayingCryptoCurrency) {
@@ -473,7 +473,7 @@ class WalletAccountHelper(
             }
         }
         else -> {
-            var ethList = getEthAccount().toList()
+            val ethList = getEthAccount().toList()
 
             ethList.forEach {
                 it.displayBalance = it.displayBalance!!
@@ -543,7 +543,7 @@ class WalletAccountHelper(
         if (balance == "0.0") balance = "0"
 
         return if (showCrypto) {
-            "$balance ${btcUnit}"
+            "$balance $btcUnit"
         } else {
             "${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit"
         }
@@ -556,7 +556,7 @@ class WalletAccountHelper(
         if (balance == "0.0") balance = "0"
 
         return if (showCrypto) {
-            "$balance ${bchUnit}"
+            "$balance $bchUnit"
         } else {
             "${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit"
         }

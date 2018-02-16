@@ -246,7 +246,16 @@ public class TransactionDetailActivity extends BaseMvpActivity<TransactionDetail
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_share:
-                String url = getPresenter().getTransactionType() == CryptoCurrencies.BTC ? BTC_URL : ETH_URL;
+                String url;
+                CryptoCurrencies transactionType = getPresenter().getTransactionType();
+                if (transactionType == CryptoCurrencies.BTC) {
+                    url = BTC_URL;
+                } else if (transactionType == CryptoCurrencies.ETHER){
+                    url = ETH_URL;
+                } else if (transactionType == CryptoCurrencies.BCH) {
+                    url = BCH_URL;
+                } else throw new IllegalArgumentException("Unknown currency type " + transactionType.getUnit());
+
                 Intent shareIntent = new Intent();
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_TEXT, url + getPresenter().getTransactionHash());

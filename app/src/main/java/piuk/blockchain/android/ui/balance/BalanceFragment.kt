@@ -41,7 +41,6 @@ import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
-import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
@@ -143,6 +142,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             swipe_container.destroyDrawingCache()
             swipe_container.clearAnimation()
         }
+
+        currency_header?.close()
     }
 
     override fun onAttach(context: Context?) {

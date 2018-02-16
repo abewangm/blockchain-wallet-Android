@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
@@ -934,17 +933,18 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
     @Override
     public boolean dispatchTouchEvent(final MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            for (View view : touchOutsideViews.keySet()) {
-                // Notify touchOutsideViewListeners if user tapped outside a given view
-                Rect viewRect = new Rect();
-                view.getGlobalVisibleRect(viewRect);
-                if (!viewRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
-                    touchOutsideViews.get(view).onTouchOutside(view, ev);
-                }
-            }
-
-        }
+        // TODO: 16/02/2018 This is currently broken, revisit in the future
+//        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+//            for (View view : touchOutsideViews.keySet()) {
+//                // Notify touchOutsideViewListeners if user tapped outside a given view
+//                Rect viewRect = new Rect();
+//                view.getGlobalVisibleRect(viewRect);
+//                if (!viewRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+//                    touchOutsideViews.get(view).onTouchOutside(view, ev);
+//                }
+//            }
+//
+//        }
         return super.dispatchTouchEvent(ev);
     }
 

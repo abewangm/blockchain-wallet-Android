@@ -264,12 +264,13 @@ class DashboardPresenter @Inject constructor(
     private fun checkLatestAnnouncements() {
         // If user hasn't completed onboarding, ignore announcements
         if (isOnboardingComplete()) {
+            displayList.removeAll { it is AnnouncementData }
 
             val bchPrefKey = BITCOIN_CASH_ANNOUNCEMENT_DISMISSED
             if (!prefsUtil.getValue(bchPrefKey, false)) {
                 prefsUtil.setValue(bchPrefKey, true)
 
-                var announcementData = AnnouncementData(
+                val announcementData = AnnouncementData(
                         title = R.string.bitcoin_cash,
                         description = R.string.onboarding_bitcoin_cash_description,
                         link = R.string.onboarding_cta,
@@ -285,25 +286,25 @@ class DashboardPresenter @Inject constructor(
             val buyPrefKey = SFOX_ANNOUNCEMENT_DISMISSED
             buyDataManager.canBuy
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .subscribe({
-                        if (it && !prefsUtil.getValue(buyPrefKey,false)) {
-                            prefsUtil.setValue(buyPrefKey, true)
+                    .subscribe(
+                            {
+                                if (it && !prefsUtil.getValue(buyPrefKey, false)) {
+                                    prefsUtil.setValue(buyPrefKey, true)
 
-                            val announcementData = AnnouncementData(
-                                    title = R.string.announcement_trading_cta,
-                                    description = R.string.announcement_trading_description,
-                                    link = R.string.announcement_trading_link,
-                                    image = R.drawable.vector_buy_onboarding,
-                                    emoji = null,
-                                    closeFunction = { dismissAnnouncement(buyPrefKey) },
-                                    linkFunction = { view.startBuyActivity() },
-                                    prefsKey = buyPrefKey
-                            )
-                            showAnnouncement(1, announcementData)
-                        }
-                    }, {
-                        Timber.e(it)
-                    })
+                                    val announcementData = AnnouncementData(
+                                            title = R.string.announcement_trading_cta,
+                                            description = R.string.announcement_trading_description,
+                                            link = R.string.announcement_trading_link,
+                                            image = R.drawable.vector_buy_onboarding,
+                                            emoji = null,
+                                            closeFunction = { dismissAnnouncement(buyPrefKey) },
+                                            linkFunction = { view.startBuyActivity() },
+                                            prefsKey = buyPrefKey
+                                    )
+                                    showAnnouncement(1, announcementData)
+                                }
+                            }, { Timber.e(it) }
+                    )
         }
     }
 

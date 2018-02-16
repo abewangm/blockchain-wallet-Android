@@ -1,6 +1,11 @@
 package piuk.blockchain.android.ui.swipetoreceive
 
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -20,7 +25,11 @@ import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
-import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.inflate
+import piuk.blockchain.android.util.extensions.invisible
+import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.setOnPageChangeListener
 import javax.inject.Inject
 
@@ -163,6 +172,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
     }
 
     private fun showClipboardWarning() {
+        val address = textview_address.text
         activity?.run {
             AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setTitle(R.string.app_name)
@@ -171,7 +181,7 @@ class SwipeToReceiveFragment : BaseFragment<SwipeToReceiveView, SwipeToReceivePr
                     .setPositiveButton(R.string.yes, { _, _ ->
                         val clipboard =
                                 getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText("Send address", textview_address.text)
+                        val clip = ClipData.newPlainText("Send address", address)
                         toast(R.string.copied_to_clipboard)
                         clipboard.primaryClip = clip
                     })

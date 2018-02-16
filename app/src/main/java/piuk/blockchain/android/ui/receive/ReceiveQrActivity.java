@@ -53,6 +53,11 @@ public class ReceiveQrActivity extends BaseMvpActivity<ReceiveQrView, ReceiveQrP
     }
 
     @Override
+    protected void lockScreenOrientation() {
+        // No-op
+    }
+
+    @Override
     public void setAddressInfo(String addressInfo) {
         address.setText(addressInfo);
     }
