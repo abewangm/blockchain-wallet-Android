@@ -105,7 +105,7 @@ class WalletAccountHelper(
             .map {
                 ItemAccount(
                         it.label,
-                        getAccountBalanceBch(it, btcExchangeRate, fiatUnit, bchUnit),
+                        getAccountBalanceBch(it, bchExchangeRate, fiatUnit, bchUnit),
                         null,
                         getAccountAbsoluteBalance(it),
                         it,
@@ -174,7 +174,7 @@ class WalletAccountHelper(
 
             ItemAccount(
                     labelOrAddress,
-                    getBchAddressBalance(it, btcExchangeRate, fiatUnit, bchUnit),
+                    getBchAddressBalance(it, bchExchangeRate, fiatUnit, bchUnit),
                     tag,
                     getAddressAbsoluteBalance(it),
                     it,
@@ -473,7 +473,7 @@ class WalletAccountHelper(
             }
         }
         else -> {
-            var ethList = getEthAccount().toList()
+            val ethList = getEthAccount().toList()
 
             ethList.forEach {
                 it.displayBalance = it.displayBalance!!
@@ -543,7 +543,7 @@ class WalletAccountHelper(
         if (balance == "0.0") balance = "0"
 
         return if (showCrypto) {
-            "$balance ${btcUnit}"
+            "$balance $btcUnit"
         } else {
             "${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit"
         }
@@ -556,7 +556,7 @@ class WalletAccountHelper(
         if (balance == "0.0") balance = "0"
 
         return if (showCrypto) {
-            "$balance ${bchUnit}"
+            "$balance $bchUnit"
         } else {
             "${monetaryUtil.getFiatFormat(fiatUnit).format(fiatBalance)} $fiatUnit"
         }
