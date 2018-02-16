@@ -22,6 +22,7 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthService;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactsEvent;
@@ -41,6 +42,7 @@ import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.dashboard.DashboardPresenter;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -66,6 +68,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private EnvironmentSettings environmentSettings;
     private PromptManager promptManager;
     private EthDataManager ethDataManager;
+    private BchDataManager bchDataManager;
     private CurrencyState currencyState;
     private WalletOptionsDataManager walletOptionsDataManager;
     private MetadataManager metadataManager;
@@ -87,6 +90,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                   EnvironmentSettings environmentSettings,
                   PromptManager promptManager,
                   EthDataManager ethDataManager,
+                  BchDataManager bchDataManager,
                   CurrencyState currencyState,
                   WalletOptionsDataManager walletOptionsDataManager,
                   MetadataManager metadataManager) {
@@ -107,6 +111,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.environmentSettings = environmentSettings;
         this.promptManager = promptManager;
         this.ethDataManager = ethDataManager;
+        this.bchDataManager = bchDataManager;
         this.currencyState = currencyState;
         this.walletOptionsDataManager = walletOptionsDataManager;
         this.metadataManager = metadataManager;
@@ -266,6 +271,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         accessState.setPIN(null);
         buyDataManager.wipe();
         ethDataManager.clearEthAccountDetails();
+        bchDataManager.clearBchAccountDetails();
+        DashboardPresenter.onLogout();
     }
 
     PayloadManager getPayloadManager() {
