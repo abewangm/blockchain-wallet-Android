@@ -87,7 +87,7 @@ public class ExchangeService {
 
         return getPendingTradeAddresses()
                 .doOnNext(address ->
-                        Timber.d("watchPendingTrades: watching receive address: " + address))
+                        Timber.d("watchPendingTrades: watching receive address: %s", address))
                 .flatMap(address -> receiveEvents
                         .filter(event -> event.getAddress().equals(address))
                         .map(WebSocketReceiveEvent::getHash));
@@ -164,9 +164,8 @@ public class ExchangeService {
                     if (exchangeData.isEmpty()) return new ExchangeData();
 
                     ObjectMapper mapper = new ObjectMapper();
-                    ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
 
-                    return data;
+                    return mapper.readValue(exchangeData, ExchangeData.class);
                 });
     }
 

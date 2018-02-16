@@ -17,7 +17,6 @@ import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
-import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -394,7 +393,8 @@ class WalletAccountHelper(
     private fun getDefaultEthAccount(): ItemAccount {
         val ethModel = ethDataManager.getEthResponseModel()
         val ethAccount = ethDataManager.getEthWallet()!!.account
-        val amount = Convert.fromWei(ethModel?.getTotalBalance().toString(), Convert.Unit.ETHER)
+        val balance = ethModel?.getTotalBalance()?.toString() ?: "0.0"
+        val amount = Convert.fromWei(balance, Convert.Unit.ETHER)
         amount.setScale(8, RoundingMode.HALF_DOWN)
 
         val displayString = if (currencyState.isDisplayingCryptoCurrency) {

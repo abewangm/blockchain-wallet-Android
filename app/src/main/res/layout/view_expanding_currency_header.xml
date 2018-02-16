@@ -51,7 +51,7 @@
             <TextView
                 android:id="@+id/textview_ethereum"
                 style="@style/CryptoCurrencySelectorTextView"
-                android:text="@string/ethereum"
+                android:text="@string/ether"
                 tools:drawableLeft="@drawable/vector_eth" />
 
             <TextView
