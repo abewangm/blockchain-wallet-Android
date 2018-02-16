@@ -56,6 +56,8 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
     @Suppress("MemberVisibilityCanBePrivate")
     @Inject lateinit var accountPresenter: AccountPresenter
 
+    override val locale: Locale = Locale.getDefault()
+
     private val prefsUtil: PrefsUtil by unsafeLazy { PrefsUtil(this) }
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
