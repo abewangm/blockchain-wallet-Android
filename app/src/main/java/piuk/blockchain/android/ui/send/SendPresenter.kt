@@ -1673,8 +1673,13 @@ class SendPresenter @Inject constructor(
         var validated = true
         var errorMessage = R.string.unexpected_error
 
+
+        if (pendingTransaction.receivingAddress.isNullOrEmpty()) {
+            errorMessage = R.string.bch_invalid_address
+            validated = false
+
             //Same amount validation as bitcoin
-        if (pendingTransaction.bigIntAmount == null || !isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
+        } else if (pendingTransaction.bigIntAmount == null || !isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
             errorMessage = R.string.invalid_amount
             validated = false
 
