@@ -15,7 +15,6 @@ import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.AnnouncementData
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -47,11 +46,10 @@ class DashboardPresenter @Inject constructor(
         private val appUtil: AppUtil,
         private val buyDataManager: BuyDataManager,
         private val rxBus: RxBus,
-        private val swipeToReceiveHelper: SwipeToReceiveHelper,
-        private val walletOptionsDataManager: WalletOptionsDataManager
+        private val swipeToReceiveHelper: SwipeToReceiveHelper
 ) : BasePresenter<DashboardView>() {
 
-    private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
+    private lateinit var monetaryUtil: MonetaryUtil
     private val displayList by unsafeLazy {
         mutableListOf<Any>(
                 stringUtils.getString(R.string.dashboard_balances),
@@ -71,6 +69,7 @@ class DashboardPresenter @Inject constructor(
     @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
+        monetaryUtil = MonetaryUtil(getBtcUnitType())
         view.notifyItemAdded(displayList, 0)
         updatePrices()
 
@@ -242,7 +241,7 @@ class DashboardPresenter @Inject constructor(
         prefsUtil.setValue(prefKey, true)
         displayList.filterIsInstance<AnnouncementData>()
                 .forEachIndexed { index, any ->
-                    if (any.prefsKey.equals(prefKey)) {
+                    if (any.prefsKey == prefKey) {
                         displayList.remove(any)
                         view.notifyItemRemoved(displayList, index)
                     }
