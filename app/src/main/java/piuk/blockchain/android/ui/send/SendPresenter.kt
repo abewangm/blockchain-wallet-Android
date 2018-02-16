@@ -53,7 +53,11 @@ import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.EditTextFormatUtil
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.io.IOException
@@ -387,11 +391,8 @@ class SendPresenter @Inject constructor(
             }
 
             val hdAccountList = bchDataManager.getAcc()
-            var acc = hdAccountList.find { it.node.serializePubB58(environmentSettings.bitcoinCashNetworkParameters) == account.xpub }
-
-            if (acc == null) {
-                throw HDWalletException("No matching private key found for ${account.xpub}")
-            }
+            val acc = hdAccountList.find { it.node.serializePubB58(environmentSettings.bitcoinCashNetworkParameters) == account.xpub }
+                    ?: throw HDWalletException("No matching private key found for ${account.xpub}")
 
             Observable.just(bchDataManager.getHDKeysForSigning(acc, pendingTransaction.unspentOutputBundle.spendableOutputs))
         } else {
@@ -585,7 +586,7 @@ class SendPresenter @Inject constructor(
         }
 
         val outputs = HashMap<String, BigInteger>()
-        outputs.put(pendingTransaction.displayableReceivingLabel, pendingTransaction.bigIntAmount)
+        outputs[pendingTransaction.displayableReceivingLabel] = pendingTransaction.bigIntAmount
 
         val tx = TransactionSummary()
         tx.direction = TransactionSummary.Direction.SENT
@@ -664,7 +665,7 @@ class SendPresenter @Inject constructor(
         val details = PaymentConfirmationDetails()
 
         details.fromLabel = pendingTransaction.sendingObject.label
-        details.toLabel = pendingTransaction.displayableReceivingLabel
+        details.toLabel = pendingTransaction.displayableReceivingLabel.removeBchUri()
 
         details.cryptoUnit = currencyHelper.cryptoUnit
         details.fiatUnit = currencyHelper.fiatUnit
@@ -1268,7 +1269,7 @@ class SendPresenter @Inject constructor(
         if (address != "") {
             pendingTransaction.receivingObject = null
             pendingTransaction.receivingAddress = address
-            view.updateReceivingAddress(address)
+            view.updateReceivingAddress(address.removeBchUri())
         }
     }
 
@@ -1463,7 +1464,7 @@ class SendPresenter @Inject constructor(
         )
         pendingTransaction.receivingAddress = cashAddress
 
-        view.updateReceivingAddress(label)
+        view.updateReceivingAddress(label.removeBchUri())
 
         if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
             view.showWatchOnlyWarning(cashAddress)
@@ -1790,7 +1791,7 @@ class SendPresenter @Inject constructor(
 
     companion object {
 
-        private val PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend"
+        private const val PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend"
 
     }
 }
