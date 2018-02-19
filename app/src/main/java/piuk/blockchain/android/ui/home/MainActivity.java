@@ -698,7 +698,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         WebView buyWebView = new WebView(this);
         buyWebView.setWebViewClient(new WebViewClient());
         buyWebView.getSettings().setJavaScriptEnabled(true);
-        buyWebView.loadUrl(getPresenter().getCurrentServerUrl() + "wallet/#/intermediate");
+        buyWebView.loadUrl(getPresenter().getCurrentServerUrl());
 
         frontendJavascriptManager = new FrontendJavascriptManager(this, buyWebView);
         buyWebView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);

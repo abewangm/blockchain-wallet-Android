@@ -324,7 +324,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     String getCurrentServerUrl() {
-        return environmentSettings.getExplorerUrl();
+        return walletOptionsDataManager.getBuyWebviewWalletLink();
     }
 
     // Usage commented out for now
