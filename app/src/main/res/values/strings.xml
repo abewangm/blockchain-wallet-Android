@@ -882,7 +882,7 @@
     <!--Buy & Sell-->
     <string name="announcement_trading_cta">The wait is over</string>
     <string name="announcement_trading_description">Buy and sell bitcoin directly from your Blockchain wallet. Start by creating an account in the Buy &amp; Sell tab</string>
-    <string name="announcement_trading_link">Create account</string>
+    <string name="announcement_trading_link">Get started</string>
 
 
 </resources>
