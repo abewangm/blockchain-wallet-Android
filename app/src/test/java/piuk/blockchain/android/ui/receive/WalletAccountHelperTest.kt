@@ -1,6 +1,10 @@
 package piuk.blockchain.android.ui.receive
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.atLeastOnce
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
+import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.ethereum.EthereumAccount
 import info.blockchain.wallet.payload.PayloadManager
@@ -9,9 +13,12 @@ import info.blockchain.wallet.payload.data.AddressBook
 import info.blockchain.wallet.payload.data.LegacyAddress
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should equal`
+import org.bitcoinj.params.BitcoinCashMainNetParams
+import org.bitcoinj.params.BitcoinMainNetParams
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
@@ -33,6 +40,7 @@ class WalletAccountHelperTest {
     private val currencyState: CurrencyState = mock()
     private val ethDataManager: EthDataManager = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
     private val bchDataManager: BchDataManager = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+    private val environmentSettings: EnvironmentSettings = mock()
 
     @Before
     fun setUp() {
@@ -43,8 +51,14 @@ class WalletAccountHelperTest {
                 exchangeRateFactory,
                 currencyState,
                 ethDataManager,
-                bchDataManager
+                bchDataManager,
+                environmentSettings
         )
+
+        whenever(environmentSettings.bitcoinCashNetworkParameters)
+                .thenReturn(BitcoinCashMainNetParams.get())
+        whenever(environmentSettings.bitcoinNetworkParameters)
+                .thenReturn(BitcoinMainNetParams.get())
     }
 
     @Test
@@ -87,7 +101,8 @@ class WalletAccountHelperTest {
         // Arrange
         val label = "LABEL"
         val xPub = "X_PUB"
-        val address = "ADDRESS"
+        // Must be valid or conversion to BECH32 will fail
+        val address = "17MgvXUa6tPsh3KMRWAPYBuDwbtCBF6Py5"
         val account = GenericMetadataAccount().apply {
             this.label = label
             this.xpub = xPub
@@ -100,9 +115,9 @@ class WalletAccountHelperTest {
         whenever(bchDataManager.getAddressBalance(address)).thenReturn(BigInteger.TEN)
         whenever(payloadManager.payload.legacyAddressList).thenReturn(mutableListOf(legacyAddress))
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
-            .thenReturn(0)
+                .thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-            .thenReturn("GBP")
+                .thenReturn("GBP")
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BCH)
         // Act
         val result = subject.getAccountItems()
@@ -159,11 +174,11 @@ class WalletAccountHelperTest {
             this.xpub = xPub
         }
         whenever(bchDataManager.getActiveAccounts())
-            .thenReturn(mutableListOf(archivedAccount, account))
+                .thenReturn(mutableListOf(archivedAccount, account))
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
-            .thenReturn(0)
+                .thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-            .thenReturn("GBP")
+                .thenReturn("GBP")
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BCH)
         // Act
         val result = subject.getAccountItems()
@@ -298,9 +313,9 @@ class WalletAccountHelperTest {
         whenever(currencyState.cryptoCurrency).thenReturn(CryptoCurrencies.BCH)
         whenever(bchDataManager.getDefaultGenericMetadataAccount()).thenReturn(bchAccount)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
-            .thenReturn(0)
+                .thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
-            .thenReturn("GBP")
+                .thenReturn("GBP")
         // Act
         val result = subject.getDefaultAccount()
         // Assert

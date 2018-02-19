@@ -78,7 +78,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
                 accountViewHolder.balance.setText(itemAccount.getDisplayBalance());
 
                 if (accountObject != null && accountObject instanceof LegacyAddress) {
-                    accountViewHolder.address.setText(((LegacyAddress) accountObject).getAddress());
+                    accountViewHolder.address.setText(itemAccount.getAddress());
                     if (((LegacyAddress) accountObject).isWatchOnly()) {
                         accountViewHolder.tag.setText(holder.itemView.getContext().getString(R.string.watch_only));
                         accountViewHolder.tag.setVisibility(View.VISIBLE);
