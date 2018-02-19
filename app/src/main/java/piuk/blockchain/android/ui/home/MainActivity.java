@@ -43,6 +43,7 @@ import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
 import org.jetbrains.annotations.NotNull;
 
+import info.blockchain.wallet.util.FormatsUtil;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -447,7 +448,26 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     }
 
     private void doScanInput(String strResult, String scanRoute) {
-        startSendFragment(strResult, scanRoute);
+
+        if (getCurrentFragment() instanceof DashboardFragment
+                && FormatsUtil.isValidBitcoinAddress(strResult)) {
+            new AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle(R.string.confirm_currency)
+                    .setMessage(R.string.confirm_currency_message)
+                    .setCancelable(true)
+                    .setPositiveButton(R.string.bitcoin_cash, (dialog, which) -> {
+                        getPresenter().setCryptoCurrency(CryptoCurrencies.BCH);
+                        startSendFragment(strResult, scanRoute);
+                    })
+                    .setNegativeButton(R.string.bitcoin, (dialog, which) -> {
+                        getPresenter().setCryptoCurrency(CryptoCurrencies.BTC);
+                        startSendFragment(strResult, scanRoute);
+                    })
+                    .create()
+                    .show();
+        } else {
+            startSendFragment(strResult, scanRoute);
+        }
     }
 
     public void selectDrawerItem(MenuItem menuItem) {
