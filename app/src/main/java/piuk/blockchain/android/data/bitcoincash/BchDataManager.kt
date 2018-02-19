@@ -49,12 +49,17 @@ class BchDataManager(
      */
     fun initBchWallet(metadataNode: DeterministicKey, defaultLabel: String): Completable =
             rxPinning.call {
-                Completable.fromCallable {
+                Observable.fromCallable {
                     fetchOrCreateBchMetadata(metadataNode, defaultLabel)
                     restoreBchWallet(bchDataStore.bchMetadata!!)
-                    return@fromCallable Void.TYPE
-
-                }.compose(RxUtil.applySchedulersToCompletable())
+                    correctBtcOffsetIfNeed(stringUtils.getString(R.string.default_wallet_name))
+                }.flatMapCompletable {
+                            if (it) {
+                                payloadDataManager.syncPayloadWithServer()
+                            } else {
+                                Completable.complete()
+                            }
+                        }.compose(RxUtil.applySchedulersToCompletable())
             }
 
     /**
@@ -62,15 +67,11 @@ class BchDataManager(
      * At this point metadataNodeFactory.metadata node will exist.
      */
     fun refreshMetadataCompletable(): Completable =
-            Completable.fromObservable(
-                    payloadDataManager.metadataNodeFactory
-                            .map {
-                                initBchWallet(
-                                        it.metadataNode,
-                                        stringUtils.getString(R.string.bch_default_account_label)
-                                )
-                            }
-            )
+            payloadDataManager.metadataNodeFactory
+                    .flatMapCompletable {
+                        initBchWallet(it.metadataNode,
+                                stringUtils.getString(R.string.bch_default_account_label))
+                    }
 
     fun serializeForSaving(): String = bchDataStore.bchMetadata!!.toJson()
 
@@ -159,6 +160,42 @@ class BchDataManager(
                 walletMetadata.accounts[i].xpub = account.xpub
             }
         }
+    }
+
+    /**
+     * Create more btc accounts to catch up to BCH stored in metadata if required.
+     *
+     * BCH metadata might have more accounts than a restored BTC wallet. When a BTC wallet is restored
+     * from mnemonic we will only look ahead 5 accounts to see if the account contains any transactions.
+     *
+     * @param Default bitcoin account label
+     * @return Boolean value to indicate if bitcoin wallet payload needs to sync to the server
+     */
+    fun correctBtcOffsetIfNeed(defaultBtcLabel: String): Boolean {
+
+        val startingAccountIndex = payloadDataManager.accounts.size
+        val accountTotal = bchDataStore.bchMetadata?.accounts?.size?.minus(startingAccountIndex)
+                ?: 0
+
+        if (accountTotal > 0) {
+            (startingAccountIndex..accountTotal!!)
+                    .map {
+                        return@map defaultBtcLabel + " " + it
+                    }
+                    .forEachIndexed { i, s ->
+
+                        val accountIndex = i + startingAccountIndex
+                        val accountNumber = i + startingAccountIndex + 1
+
+                        val acc = payloadDataManager.wallet.hdWallets[0].addAccount(defaultBtcLabel + " " + accountNumber)
+
+                        bchDataStore.bchMetadata!!.accounts[accountIndex]?.apply {
+                            this.xpub = acc.xpub
+                        }
+                    }
+        }
+
+        return accountTotal > 0
     }
 
     /**

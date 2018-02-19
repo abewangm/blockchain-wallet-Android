@@ -65,6 +65,7 @@ import java.io.UnsupportedEncodingException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -1195,9 +1196,7 @@ class SendPresenter @Inject constructor(
 
         //Format for display
         if (!currencyState.isDisplayingCryptoCurrency) {
-            val fiatBalance = currencyHelper.lastPrice * availableEth.toLong()
-
-            val fiatBalanceFormatted = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit).format(fiatBalance)
+            val fiatBalanceFormatted = currencyHelper.getFormattedFiatStringFromCrypto(availableEth.toDouble())
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $fiatBalanceFormatted ${currencyHelper.fiatUnit}")
         } else {
             val number = currencyHelper.getFormattedEthString(availableEth)
