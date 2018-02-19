@@ -1,6 +1,12 @@
 package piuk.blockchain.android.ui.dashboard
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.anyOrNull
+import com.nhaarman.mockito_kotlin.atLeastOnce
+import com.nhaarman.mockito_kotlin.eq
+import com.nhaarman.mockito_kotlin.times
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
+import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.prices.data.PriceDatum
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -16,10 +22,13 @@ import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
 import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
-import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.home.models.MetadataEvent
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.AppUtil
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
 import java.math.BigInteger
 import java.util.*
 
@@ -39,7 +48,6 @@ class DashboardPresenterTest: RxTest(){
     private val rxBus: RxBus = mock()
     private val swipeToReceiveHelper: SwipeToReceiveHelper = mock()
     private val view: DashboardView = mock()
-    private val walletOptionsDataManager: WalletOptionsDataManager = mock()
 
     @Before
     override fun setUp() {
@@ -56,8 +64,7 @@ class DashboardPresenterTest: RxTest(){
                 appUtil,
                 buyDataManager,
                 rxBus,
-                swipeToReceiveHelper,
-                walletOptionsDataManager
+                swipeToReceiveHelper
         )
 
         subject.initView(view)
