@@ -220,8 +220,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
     @Thunk
     void showError(int errorCode) {
         // TODO: 05/08/2016 Decide if we should alert users here or not
-        Timber.e("Security Provider install failed with recoverable error: " +
-                GoogleApiAvailability.getInstance().getErrorString(errorCode));
+        Timber.e("Security Provider install failed with recoverable error: %s", GoogleApiAvailability.getInstance().getErrorString(errorCode));
     }
 
     /**
