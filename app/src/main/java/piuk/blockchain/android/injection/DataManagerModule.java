@@ -99,14 +99,16 @@ public class DataManagerModule {
                                                              ExchangeRateFactory exchangeRateFactory,
                                                              CurrencyState currencyState,
                                                              EthDataManager ethDataManager,
-                                                             BchDataManager bchDataManager) {
+                                                             BchDataManager bchDataManager,
+                                                             EnvironmentSettings environmentSettings) {
         return new WalletAccountHelper(payloadManager,
                 stringUtils,
                 prefsUtil,
                 exchangeRateFactory,
                 currencyState,
                 ethDataManager,
-                bchDataManager);
+                bchDataManager,
+                environmentSettings);
     }
 
     @Provides

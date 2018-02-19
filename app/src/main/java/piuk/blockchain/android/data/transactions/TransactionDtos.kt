@@ -37,6 +37,7 @@ data class EthDisplayable(
         get() = CryptoCurrencies.ETHER
     override val direction: TransactionSummary.Direction
         get() = when {
+            combinedEthModel.getAccounts()[0] == ethTransaction.to -> TransactionSummary.Direction.TRANSFERRED
             combinedEthModel.getAccounts().contains(ethTransaction.from) -> TransactionSummary.Direction.SENT
             else -> TransactionSummary.Direction.RECEIVED
         }

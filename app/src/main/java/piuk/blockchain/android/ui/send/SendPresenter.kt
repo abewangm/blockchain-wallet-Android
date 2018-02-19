@@ -474,7 +474,8 @@ class SendPresenter @Inject constructor(
         val feeGwei = BigDecimal.valueOf(feeOptions!!.regularFee)
         val feeWei = Convert.toWei(feeGwei, Convert.Unit.GWEI)
 
-        return Observable.just(ethDataManager.getEthResponseModel()!!.getNonce())
+        return ethDataManager.fetchEthAddress()
+                .map { ethDataManager.getEthResponseModel()!!.getNonce() }
                 .map {
                     ethDataManager.createEthTransaction(
                             nonce = it,

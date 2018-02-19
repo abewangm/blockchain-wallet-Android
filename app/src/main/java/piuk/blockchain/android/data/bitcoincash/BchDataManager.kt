@@ -167,7 +167,7 @@ class BchDataManager(
      *
      * BCH metadata might have more accounts than a restored BTC wallet. When a BTC wallet is restored
      * from mnemonic we will only look ahead 5 accounts to see if the account contains any transactions.
-     * 
+     *
      * @param Default bitcoin account label
      * @return Boolean value to indicate if bitcoin wallet payload needs to sync to the server
      */

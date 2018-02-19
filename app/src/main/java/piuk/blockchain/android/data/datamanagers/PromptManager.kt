@@ -42,7 +42,10 @@ class PromptManager(
 
         if (isBackedUpReminderAllowed()) list.add(getBackupCustomDialog(context))
         if (is2FAReminderAllowed(settings)) list.add(get2FACustomDialog(context))
-        if (isVerifyEmailReminderAllowed(settings)) list.add(getVerifyEmailCustomDialog(context))
+        if (isVerifyEmailReminderAllowed(settings)) {
+            storeTimeOfLastSecurityPrompt()
+            list.add(getVerifyEmailCustomDialog(context))
+        }
 
         return Observable.fromArray(list)
     }
@@ -92,7 +95,9 @@ class PromptManager(
     }
 
     private fun isVerifyEmailReminderAllowed(settings: Settings): Boolean {
-        return !isFirstRun() && !settings.isEmailVerified && !settings.email.isEmpty()
+        val isCorrectTime = getTimeOfLastSecurityPrompt() == 0L
+                || System.currentTimeMillis() - getTimeOfLastSecurityPrompt() >= ONE_MONTH
+        return !isFirstRun() && !settings.isEmailVerified && !settings.email.isEmpty() && isCorrectTime
     }
 
     private fun is2FAReminderAllowed(settings: Settings): Boolean {
