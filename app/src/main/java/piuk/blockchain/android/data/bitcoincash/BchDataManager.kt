@@ -21,7 +21,9 @@ import piuk.blockchain.android.util.MetadataUtils
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
+import timber.log.Timber
 import java.math.BigInteger
+import java.util.*
 
 @Mockable
 class BchDataManager(
@@ -86,12 +88,14 @@ class BchDataManager(
 
         val accountTotal = payloadDataManager.accounts.size
 
+        val metaData: GenericMetadataWallet
+
         if (walletJson != null) {
             //Fetch wallet
-            bchDataStore.bchMetadata = GenericMetadataWallet.fromJson(walletJson)
+            metaData = GenericMetadataWallet.fromJson(walletJson)
 
             //Sanity check (Add missing metadata accounts)
-            bchDataStore.bchMetadata?.accounts?.run {
+            metaData?.accounts?.run {
                 val bchAccounts = getMetadataAccounts(defaultLabel, size, accountTotal)
                 addAll(bchAccounts)
             }
@@ -100,14 +104,35 @@ class BchDataManager(
             // Create
             val bchAccounts = getMetadataAccounts(defaultLabel, 0, accountTotal)
 
-            bchDataStore.bchMetadata = GenericMetadataWallet().apply {
+            metaData = GenericMetadataWallet().apply {
                 accounts = bchAccounts
                 isHasSeen = true
             }
 
             // TODO: This will be moved out to MetadataManager in future
-            bchMetadataNode.putMetadata(bchDataStore.bchMetadata!!.toJson())
+            bchMetadataNode.putMetadata(metaData.toJson())
         }
+
+        if (bchDataStore.bchMetadata == null || !listContentEquals(bchDataStore.bchMetadata!!.accounts, metaData.accounts)) {
+            bchDataStore.bchMetadata = metaData
+        } else {
+            // metadata list unchanged
+        }
+    }
+
+    fun listContentEquals(listA: MutableList<GenericMetadataAccount>, listB: MutableList<GenericMetadataAccount>): Boolean {
+
+        listA.forEach{ accountA ->
+            val filteredItems = listB.filter { accountB ->
+                (accountB.label == accountA.label) && (accountB.isArchived == accountA.isArchived)
+            }
+
+            if (filteredItems.size == 0) {
+                return false
+            }
+        }
+
+        return true
     }
 
     private fun getMetadataAccounts(
@@ -297,12 +322,12 @@ class BchDataManager(
      * @return Generic account data that contains label and xpub/address
      */
     fun getActiveAccounts(): List<GenericMetadataAccount> {
-        return getAccounts().filterNot { it.isArchived }
+        return getAccountMetadataList().filterNot { it.isArchived }
     }
 
-    fun getAccounts(): List<GenericMetadataAccount> {
-        return bchDataStore.bchMetadata?.accounts ?: emptyList()
-    }
+    fun getAccountMetadataList(): List<GenericMetadataAccount> =bchDataStore.bchMetadata?.accounts ?: emptyList()
+
+    fun getAccountList(): List<DeterministicAccount> = bchDataStore.bchWallet!!.accounts
 
     fun getDefaultAccountPosition(): Int = bchDataStore.bchMetadata?.defaultAcccountIdx ?: 0
 
@@ -314,7 +339,7 @@ class BchDataManager(
             bchDataStore.bchWallet?.accounts?.get(getDefaultAccountPosition())
 
     fun getDefaultGenericMetadataAccount(): GenericMetadataAccount? =
-            bchDataStore.bchMetadata?.accounts?.get(getDefaultAccountPosition())
+            getAccountMetadataList()?.get(getDefaultAccountPosition())
 
     /**
      * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
@@ -467,8 +492,6 @@ class BchDataManager(
             account: DeterministicAccount,
             unspentOutputs: List<UnspentOutput>
     ) = bchDataStore.bchWallet!!.getHDKeysForSigning(account, unspentOutputs)
-
-    fun getAcc(): List<DeterministicAccount> = bchDataStore.bchWallet!!.accounts
 
     fun subtractAmountFromAddressBalance(account: String, amount: BigInteger) =
             bchDataStore.bchWallet!!.subtractAmountFromAddressBalance(account, amount)

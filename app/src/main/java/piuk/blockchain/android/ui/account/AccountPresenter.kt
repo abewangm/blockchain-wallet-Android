@@ -460,7 +460,7 @@ class AccountPresenter @Inject internal constructor(
     //region Convenience functions
     private fun getBtcAccounts(): List<Account> = payloadDataManager.accounts
 
-    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getAccounts()
+    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getAccountMetadataList()
 
     private fun getLegacyAddresses(): List<LegacyAddress> = payloadDataManager.legacyAddresses
 
