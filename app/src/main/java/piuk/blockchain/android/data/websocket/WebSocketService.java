@@ -83,6 +83,15 @@ public class WebSocketService extends Service {
         IntentFilter filter = new IntentFilter(ACTION_INTENT);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(receiver, filter);
 
+        int btcUnit = prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC);
+        /*
+         * Sanity check for odd issue on rooted devices. This is an odd bug to do with how Android
+         * handles Shared Prefs + multiprocess apps, i.e. this Service runs in a different context
+         * to Prefs and that somehow breaks Prefs if not configured with
+         * setSharedPreferencesMode(Context.MODE_MULTI_PROCESS).
+         */
+        if (btcUnit > 2 || btcUnit < 0) btcUnit = 0;
+
         webSocketHandler = new WebSocketHandler(
                 getApplicationContext(),
                 okHttpClient,
@@ -91,7 +100,7 @@ public class WebSocketService extends Service {
                 bchDataManager,
                 notificationManager,
                 new EnvironmentSettings(),
-                new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)),
+                new MonetaryUtil(btcUnit),
                 prefsUtil.getValue(PrefsUtil.KEY_GUID, ""),
                 getXpubsBtc(),
                 getAddressesBtc(),

@@ -699,13 +699,17 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun updateWarning(message: String) {
-        arbitraryWarning.visible()
-        arbitraryWarning.text = message
+        arbitraryWarning?.apply {
+            visible()
+            text = message
+        }
     }
 
     override fun clearWarning() {
-        arbitraryWarning.gone()
-        arbitraryWarning.text = ""
+        arbitraryWarning?.apply {
+            gone()
+            text = ""
+        }
     }
 
     override fun updateFeeAmount(fee: String) {
