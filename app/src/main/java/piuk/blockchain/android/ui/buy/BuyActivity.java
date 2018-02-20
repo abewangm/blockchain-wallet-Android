@@ -102,7 +102,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
         });
         binding.webview.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
         binding.webview.getSettings().setJavaScriptEnabled(true);
-        binding.webview.loadUrl(getPresenter().getCurrentServerUrl() + "wallet/#/intermediate");
+        binding.webview.loadUrl(getPresenter().getCurrentServerUrl());
         onViewReady();
     }
 
