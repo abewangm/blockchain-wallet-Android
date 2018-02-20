@@ -24,6 +24,7 @@ import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
+import java.util.*
 import javax.inject.Inject
 
 class ConfirmFundsTransferDialogFragment :
@@ -31,6 +32,7 @@ class ConfirmFundsTransferDialogFragment :
     ConfirmFundsTransferView {
 
     @Inject lateinit var confirmFundsTransferPresenter: ConfirmFundsTransferPresenter
+    override val locale: Locale = Locale.getDefault()
 
     private var progressDialog: MaterialProgressDialog? = null
 
@@ -161,8 +163,8 @@ class ConfirmFundsTransferDialogFragment :
         activity?.run {
             val intent = Intent(BalanceFragment.ACTION_INTENT)
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
-            dismiss()
         }
+        dismiss()
     }
 
     override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
