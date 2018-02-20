@@ -3,8 +3,11 @@ package piuk.blockchain.android.ui.backup.transfer
 import android.support.annotation.StringRes
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import java.util.*
 
 interface ConfirmFundsTransferView : View {
+
+    val locale: Locale
 
     fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String)
 
