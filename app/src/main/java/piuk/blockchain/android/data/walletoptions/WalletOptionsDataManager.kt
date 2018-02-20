@@ -73,9 +73,11 @@ class WalletOptionsDataManager(
 
     fun getShapeShiftLimit(): Int = walletOptionsState.walletOptionsSource.value.shapeshift.upperLimit
 
-    fun getBuyWebviewWalletLink(): String =
-            (walletOptionsState.walletOptionsSource.value.buyWebviewWalletLink ?:
-            environmentSettings.explorerUrl+"wallet") + "/#/intermediate"
+    fun getBuyWebviewWalletLink(): String {
+        initWalletOptionsReplaySubjects()
+        return (walletOptionsState.walletOptionsSource.value.buyWebviewWalletLink ?:
+        environmentSettings.explorerUrl+"wallet") + "/#/intermediate"
+    }
 
     /**
      * Mobile info retrieved from wallet-options.json based on wallet setting
