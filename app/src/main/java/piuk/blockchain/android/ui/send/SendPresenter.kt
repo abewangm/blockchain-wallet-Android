@@ -65,7 +65,6 @@ import java.io.UnsupportedEncodingException
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
-import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -391,7 +390,7 @@ class SendPresenter @Inject constructor(
                 bchDataManager.decryptWatchOnlyWallet(payloadDataManager.mnemonic)
             }
 
-            val hdAccountList = bchDataManager.getAcc()
+            val hdAccountList = bchDataManager.getAccountList()
             val acc = hdAccountList.find { it.node.serializePubB58(environmentSettings.bitcoinCashNetworkParameters) == account.xpub }
                     ?: throw HDWalletException("No matching private key found for ${account.xpub}")
 
@@ -1051,6 +1050,13 @@ class SendPresenter @Inject constructor(
             feePerKb: BigInteger
     ) {
 
+        if (pendingTransaction.sendingObject == null
+                || pendingTransaction.sendingObject.address == null) {
+            // This shouldn't happen, but handle case anyway in case of low memory scenario
+            onBitcoinCashChosen()
+            return
+        }
+
         val address = pendingTransaction.sendingObject.address!!
 
         getUnspentApiResponse(address)
@@ -1085,6 +1091,13 @@ class SendPresenter @Inject constructor(
             amountToSendText: String?,
             feePerKb: BigInteger
     ) {
+
+        if (pendingTransaction.sendingObject == null
+                || pendingTransaction.sendingObject.address == null) {
+            // This shouldn't happen, but handle case anyway in case of low memory scenario
+            onBitcoinCashChosen()
+            return
+        }
 
         val address = pendingTransaction.sendingObject.address!!
 
