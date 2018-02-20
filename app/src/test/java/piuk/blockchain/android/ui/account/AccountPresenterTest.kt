@@ -179,6 +179,7 @@ class AccountPresenterTest {
         subject.checkTransferableLegacyFunds(true, true)
         // Assert
         verify(activity).onSetTransferLegacyFundsMenuItemVisible(false)
+        verify(activity).dismissProgressDialog()
         verifyNoMoreInteractions(activity)
     }
 
@@ -490,6 +491,8 @@ class AccountPresenterTest {
         val legacyAddress = LegacyAddress()
         whenever(payloadDataManager.setKeyForLegacyAddress(mockECKey, null))
                 .thenReturn(Observable.just(legacyAddress))
+        whenever(fundsDataManager.transferableFundTransactionListForDefaultAccount)
+                .thenReturn(Observable.empty())
         // Act
         subject.handlePrivateKey(mockECKey, null)
         // Assert

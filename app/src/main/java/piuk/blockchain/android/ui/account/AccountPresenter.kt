@@ -71,6 +71,11 @@ class AccountPresenter @Inject internal constructor(
 
     override fun onViewReady() {
         view.updateAccountList(getDisplayList())
+        if (cryptoCurrency == CryptoCurrencies.BCH) {
+            view.onSetTransferLegacyFundsMenuItemVisible(false)
+        } else {
+            checkTransferableLegacyFunds(false, false)
+        }
     }
 
     /**
@@ -80,6 +85,7 @@ class AccountPresenter @Inject internal constructor(
     internal fun checkTransferableLegacyFunds(isAutoPopup: Boolean, showWarningDialog: Boolean) {
         fundsDataManager.transferableFundTransactionListForDefaultAccount
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doAfterTerminate { view.dismissProgressDialog() }
                 .doOnError { Timber.e(it) }
                 .subscribe(
                         { triple ->
@@ -94,7 +100,6 @@ class AccountPresenter @Inject internal constructor(
                             } else {
                                 view.onSetTransferLegacyFundsMenuItemVisible(false)
                             }
-                            view.dismissProgressDialog()
                         },
                         { view.onSetTransferLegacyFundsMenuItemVisible(false) }
                 )
