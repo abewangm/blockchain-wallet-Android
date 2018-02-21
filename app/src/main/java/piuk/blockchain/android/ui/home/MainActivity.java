@@ -918,7 +918,7 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     ViewUtils.hideKeyboard(this);
-                    getPresenter().generateAndSetupMetadata(editText.getText().toString());
+                    getPresenter().decryptAndSetupMetadata(editText.getText().toString());
                 })
                 .create()
                 .show();

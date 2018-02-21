@@ -21,7 +21,6 @@ import piuk.blockchain.android.util.MetadataUtils
 import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.annotations.WebRequest
-import timber.log.Timber
 import java.math.BigInteger
 import java.util.*
 
@@ -113,8 +112,6 @@ class BchDataManager(
                 } else {
                     // metadata list unchanged
                 }
-
-                Timber.d("vos 2")
 
                 needsSave
             }.map {

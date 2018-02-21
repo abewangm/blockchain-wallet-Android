@@ -139,7 +139,7 @@ public class ContactsListActivity extends BaseMvpActivity<ContactsListView, Cont
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.contacts_second_password_prompt)
                 .setView(frameLayout)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().initContactsService(editText.getText().toString()))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> getPresenter().decryptHDWalletAndinitContactsService(editText.getText().toString()))
                 .create()
                 .show();
     }

@@ -423,12 +423,12 @@ public class MainPresenter extends BasePresenter<MainView> {
         }
     }
 
-    void generateAndSetupMetadata(@Nullable String secondPassword) {
+    void decryptAndSetupMetadata(String secondPassword) {
         if (!payloadDataManager.validateSecondPassword(secondPassword)) {
             getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
             getView().showSecondPasswordDialog();
         } else {
-            metadataManager.generateAndSetupMetadata(secondPassword)
+            metadataManager.decryptAndSetupMetadata(secondPassword)
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
                     .subscribe(() -> appUtil.restartApp(), Throwable::printStackTrace);
         }

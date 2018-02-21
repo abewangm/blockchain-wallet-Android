@@ -34,15 +34,17 @@ class MetadataManager(
 ) {
     private val rxPinning = RxPinning(rxBus)
 
-    fun attemptMetadataSetup(): Observable<MetadataNodeFactory> = initMetadataNodesObservable(null)
+    fun attemptMetadataSetup() = initMetadataNodesObservable()
 
-    fun generateAndSetupMetadata(secondPassword: String?): Completable =
-            payloadDataManager.generateNodes(secondPassword)
-                    .andThen(Completable.fromObservable(initMetadataNodesObservable(secondPassword)))
+    fun decryptAndSetupMetadata(secondPassword: String): Completable {
+        payloadDataManager.decryptHDWallet(secondPassword)
+        return payloadDataManager.generateNodes()
+                .andThen(Completable.fromObservable(initMetadataNodesObservable()))
+    }
 
     fun fetchMetadata(metadataType: Int): Observable<Optional<String>> = rxPinning.call<Optional<String>> {
         payloadDataManager.metadataNodeFactory.map { nodeFactory ->
-            metadataUtils.getMetadataNode(nodeFactory.metadataNode, metadataType).metadata2
+            metadataUtils.getMetadataNode(nodeFactory.metadataNode, metadataType).metadataOptional
         }
     }.compose(RxUtil.applySchedulersToObservable<Optional<String>>())
 
@@ -59,7 +61,7 @@ class MetadataManager(
      *
      * @throws InvalidCredentialsException If nodes/keys cannot be derived because wallet is double encrypted
      */
-    private fun initMetadataNodesObservable(secondPassword: String?): Observable<MetadataNodeFactory> = rxPinning.call<MetadataNodeFactory> {
+    private fun initMetadataNodesObservable(): Observable<MetadataNodeFactory> = rxPinning.call<MetadataNodeFactory> {
         payloadDataManager.loadNodes()
                 .map { loaded ->
                     if (!loaded) {
@@ -74,7 +76,7 @@ class MetadataManager(
                 }
                 .flatMap { needsGeneration ->
                     if (needsGeneration) {
-                        payloadDataManager.generateAndReturnNodes(secondPassword)
+                        payloadDataManager.generateAndReturnNodes()
                     } else {
                         payloadDataManager.metadataNodeFactory
                     }
