@@ -14,6 +14,7 @@ import org.junit.Test
 import org.mockito.Mockito
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.util.MetadataUtils
@@ -32,6 +33,7 @@ class BchDataManagerTest : RxTest() {
     private val metadataUtils: MetadataUtils = mock()
     private val blockExplorer: BlockExplorer = mock()
     private val stringUtils: StringUtils = mock()
+    private val metadataManager: MetadataManager = mock()
     private val rxBus = RxBus()
 
     @Before
@@ -49,6 +51,7 @@ class BchDataManagerTest : RxTest() {
                 environmentSettings,
                 blockExplorer,
                 stringUtils,
+                metadataManager,
                 rxBus
         )
     }

@@ -3,9 +3,12 @@ package piuk.blockchain.android.ui.home;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import org.bitcoinj.crypto.DeterministicKey;
+
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.prices.data.PriceDatum;
 
@@ -16,6 +19,7 @@ import java.util.NoSuchElementException;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -39,6 +43,7 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -47,6 +52,7 @@ import piuk.blockchain.android.ui.home.models.MetadataEvent;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
 import piuk.blockchain.android.util.PrefsUtil;
+import piuk.blockchain.android.util.StringUtils;
 import timber.log.Timber;
 
 public class MainPresenter extends BasePresenter<MainView> {
@@ -72,6 +78,8 @@ public class MainPresenter extends BasePresenter<MainView> {
     private CurrencyState currencyState;
     private WalletOptionsDataManager walletOptionsDataManager;
     private MetadataManager metadataManager;
+    private StringUtils stringUtils;
+    private ShapeShiftDataManager shapeShiftDataManager;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -93,7 +101,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                   BchDataManager bchDataManager,
                   CurrencyState currencyState,
                   WalletOptionsDataManager walletOptionsDataManager,
-                  MetadataManager metadataManager) {
+                  MetadataManager metadataManager,
+                  StringUtils stringUtils,
+                  ShapeShiftDataManager shapeShiftDataManager) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -115,6 +125,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.currencyState = currencyState;
         this.walletOptionsDataManager = walletOptionsDataManager;
         this.metadataManager = metadataManager;
+        this.stringUtils = stringUtils;
+        this.shapeShiftDataManager = shapeShiftDataManager;
     }
 
     private void initPrompts(Context context) {
@@ -193,8 +205,15 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     void initMetadataElements() {
         metadataManager.attemptMetadataSetup()
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .flatMapCompletable(metadataNodeFactory ->
+                        // TODO: 21/02/2018  eth and ss metadata extraction
+                    ethCompletable(metadataNodeFactory.getMetadataNode())
+                            .mergeWith(shapeshiftCompletable(metadataNodeFactory.getMetadataNode()))
+                )
+                .andThen(bchCompletable())
                 .andThen(feesCompletable())
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doAfterTerminate(() -> {
                             getView().hideProgressDialog();
 
@@ -209,7 +228,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                             }
                         }
                 )
-                .subscribe(o -> {
+                .subscribe(ignore -> {
                     if (getView().isBuySellPermitted()) {
                         initBuyService();
                     } else {
@@ -230,6 +249,24 @@ public class MainPresenter extends BasePresenter<MainView> {
                 });
     }
 
+    private Completable bchCompletable() {
+        return bchDataManager.initBchWallet(stringUtils.getString(R.string.bch_default_account_label))
+                .compose(RxUtil.addCompletableToCompositeDisposable(this));
+    }
+
+    private Completable ethCompletable(DeterministicKey node) {
+        // TODO: 20/02/2018 Eth shouldn't handle metadata - refactor
+        return ethDataManager.initEthereumWallet(node,
+                stringUtils.getString(R.string.eth_default_account_label))
+                .compose(RxUtil.addCompletableToCompositeDisposable(this));
+    }
+
+    private Completable shapeshiftCompletable(DeterministicKey node) {
+        // TODO: 20/02/2018 SS shouldn't handle metadata - refactor
+        return Completable.fromObservable(shapeShiftDataManager.initShapeshiftTradeData(node)
+                .compose(RxUtil.addObservableToCompositeDisposable(this)));
+    }
+
     private void logException(Throwable throwable) {
         Logging.INSTANCE.logException(throwable);
         getView().showMetadataNodeFailure();
@@ -242,8 +279,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .doOnNext(ethFeeOptions -> dynamicFeeCache.setEthFeeOptions(ethFeeOptions))
                 .flatMap(ignored -> feeDataManager.getBchFeeOptions())
                 .doOnNext(bchFeeOptions -> dynamicFeeCache.setBchFeeOptions(bchFeeOptions))
+                .flatMap(feeOptions -> exchangeRateFactory.updateTickers())
                 .compose(RxUtil.applySchedulersToObservable())
-                .flatMap(feeOptions -> exchangeRateFactory.updateTickers());
+                .compose(RxUtil.addObservableToCompositeDisposable(this));
     }
 
     private void checkForMessages() {

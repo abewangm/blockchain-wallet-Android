@@ -274,17 +274,9 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected MetadataManager provideMetadataManager(PayloadDataManager payloadDataManager,
-                                                     EthDataManager ethDataManager,
-                                                     BchDataManager bchDataManager,
-                                                     ShapeShiftDataManager shapeShiftDataManager,
-                                                     StringUtils stringUtils,
                                                      MetadataUtils metadataUtils,
                                                      RxBus rxBus) {
         return new MetadataManager(payloadDataManager,
-                ethDataManager,
-                bchDataManager,
-                shapeShiftDataManager,
-                stringUtils,
                 metadataUtils,
                 rxBus);
     }
@@ -297,6 +289,7 @@ public class DataManagerModule {
                                                    EnvironmentSettings environmentSettings,
                                                    BlockExplorer blockExplorer,
                                                    StringUtils stringUtils,
+                                                   MetadataManager metadataManager,
                                                    RxBus rxBus) {
         return new BchDataManager(payloadDataManager,
                 bchDataStore,
@@ -304,6 +297,7 @@ public class DataManagerModule {
                 environmentSettings,
                 blockExplorer,
                 stringUtils,
+                metadataManager,
                 rxBus);
     }
 }

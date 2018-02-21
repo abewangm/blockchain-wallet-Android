@@ -10,9 +10,9 @@ import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import io.reactivex.Observable
-import org.bitcoinj.crypto.DeterministicKey
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
@@ -33,6 +33,7 @@ class BchDataManager(
         private val environmentSettings: EnvironmentSettings,
         private val blockExplorer: BlockExplorer,
         private val stringUtils: StringUtils,
+        private val metadataManager: MetadataManager,
         rxBus: RxBus
 ) {
 
@@ -49,76 +50,76 @@ class BchDataManager(
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Completable]
      */
-    fun initBchWallet(metadataNode: DeterministicKey, defaultLabel: String): Completable =
+    fun initBchWallet(defaultLabel: String): Completable =
             rxPinning.call {
-                Observable.fromCallable {
-                    fetchOrCreateBchMetadata(metadataNode, defaultLabel)
-                    restoreBchWallet(bchDataStore.bchMetadata!!)
-                    correctBtcOffsetIfNeed(stringUtils.getString(R.string.default_wallet_name))
-                }.flatMapCompletable {
-                            if (it) {
-                                payloadDataManager.syncPayloadWithServer()
-                            } else {
-                                Completable.complete()
-                            }
-                        }.compose(RxUtil.applySchedulersToCompletable())
-            }
+                fetchOrCreateBchMetadata(defaultLabel)
+                        .flatMapCompletable {
+                            restoreBchWallet(it.first!!)
+                                    .mergeWith(
+                                            if (it.second)
+                                                metadataManager.saveToMetadata(bchDataStore.bchMetadata!!.toJson(), BitcoinCashWallet.METADATA_TYPE_EXTERNAL)
+                                            else
+                                                Completable.complete()
+                                    )
+                        }
+                        .andThen(correctBtcOffsetIfNeed(stringUtils.getString(R.string.default_wallet_name)))
+            }.compose(RxUtil.applySchedulersToCompletable())
 
     /**
      * Refreshes bitcoin cash metadata. Useful if another platform performed any changes to wallet state.
      * At this point metadataNodeFactory.metadata node will exist.
      */
-    fun refreshMetadataCompletable(): Completable =
-            payloadDataManager.metadataNodeFactory
-                    .flatMapCompletable {
-                        initBchWallet(it.metadataNode,
-                                stringUtils.getString(R.string.bch_default_account_label))
-                    }
+    fun refreshMetadataCompletable(): Completable = initBchWallet(stringUtils.getString(R.string.bch_default_account_label))
 
     fun serializeForSaving(): String = bchDataStore.bchMetadata!!.toJson()
 
     private fun fetchOrCreateBchMetadata(
-            metadataKey: DeterministicKey,
             defaultLabel: String
-    ) {
+    ) = metadataManager.fetchMetadata(BitcoinCashWallet.METADATA_TYPE_EXTERNAL)
+            .compose(RxUtil.applySchedulersToObservable())
+            .map { optional ->
 
-        val bchMetadataNode =
-                metadataUtils.getMetadataNode(metadataKey, BitcoinCashWallet.METADATA_TYPE_EXTERNAL)
-        val walletJson = bchMetadataNode.metadata
+                val walletJson = optional.value
 
-        val accountTotal = payloadDataManager.accounts.size
+                var needsSave = false
 
-        val metaData: GenericMetadataWallet
+                val accountTotal = payloadDataManager.accounts.size
 
-        if (walletJson != null) {
-            //Fetch wallet
-            metaData = GenericMetadataWallet.fromJson(walletJson)
+                val metaData: GenericMetadataWallet
 
-            //Sanity check (Add missing metadata accounts)
-            metaData?.accounts?.run {
-                val bchAccounts = getMetadataAccounts(defaultLabel, size, accountTotal)
-                addAll(bchAccounts)
+                if (walletJson.isNullOrEmpty()) {
+                    // Create
+                    val bchAccounts = getMetadataAccounts(defaultLabel, 0, accountTotal)
+
+                    metaData = GenericMetadataWallet().apply {
+                        accounts = bchAccounts
+                        isHasSeen = true
+                    }
+
+                    needsSave = true
+                } else {
+                    //Fetch wallet
+                    metaData = GenericMetadataWallet.fromJson(walletJson)
+
+                    //Sanity check (Add missing metadata accounts)
+                    metaData?.accounts?.run {
+                        val bchAccounts = getMetadataAccounts(defaultLabel, size, accountTotal)
+                        addAll(bchAccounts)
+                    }
+                }
+
+                if (bchDataStore.bchMetadata == null || !listContentEquals(bchDataStore.bchMetadata!!.accounts, metaData.accounts)) {
+                    bchDataStore.bchMetadata = metaData
+                } else {
+                    // metadata list unchanged
+                }
+
+                Timber.d("vos 2")
+
+                needsSave
+            }.map {
+                Pair(bchDataStore.bchMetadata, it)
             }
-
-        } else {
-            // Create
-            val bchAccounts = getMetadataAccounts(defaultLabel, 0, accountTotal)
-
-            metaData = GenericMetadataWallet().apply {
-                accounts = bchAccounts
-                isHasSeen = true
-            }
-
-            // TODO: This will be moved out to MetadataManager in future
-            bchMetadataNode.putMetadata(metaData.toJson())
-        }
-
-        if (bchDataStore.bchMetadata == null || !listContentEquals(bchDataStore.bchMetadata!!.accounts, metaData.accounts)) {
-            bchDataStore.bchMetadata = metaData
-        } else {
-            // metadata list unchanged
-        }
-    }
 
     fun listContentEquals(listA: MutableList<GenericMetadataAccount>, listB: MutableList<GenericMetadataAccount>): Boolean {
 
@@ -156,36 +157,38 @@ class BchDataManager(
     /**
      * Restore bitcoin cash wallet
      */
-    private fun restoreBchWallet(walletMetadata: GenericMetadataWallet) {
-        if (!payloadDataManager.isDoubleEncrypted) {
-            bchDataStore.bchWallet = BitcoinCashWallet.restore(
-                    blockExplorer,
-                    environmentSettings.bitcoinCashNetworkParameters,
-                    BitcoinCashWallet.BITCOIN_COIN_PATH,
-                    payloadDataManager.mnemonic,
-                    ""
-            )
+    private fun restoreBchWallet(walletMetadata: GenericMetadataWallet) =
+            Completable.fromCallable {
+                if (!payloadDataManager.isDoubleEncrypted) {
+                    bchDataStore.bchWallet = BitcoinCashWallet.restore(
+                            blockExplorer,
+                            environmentSettings.bitcoinCashNetworkParameters,
+                            BitcoinCashWallet.BITCOIN_COIN_PATH,
+                            payloadDataManager.mnemonic,
+                            ""
+                    )
 
-            // BCH Metadata does not store xpub - get from btc wallet since PATH is the same
-            payloadDataManager.accounts.forEachIndexed { i, account ->
-                bchDataStore.bchWallet?.addAccount()
-                walletMetadata.accounts[i].xpub = account.xpub
-            }
-        } else {
+                    // BCH Metadata does not store xpub - get from btc wallet since PATH is the same
+                    payloadDataManager.accounts.forEachIndexed { i, account ->
+                        bchDataStore.bchWallet?.addAccount()
+                        walletMetadata.accounts[i].xpub = account.xpub
+                    }
+                } else {
 
-            bchDataStore.bchWallet = BitcoinCashWallet.createWatchOnly(
-                    blockExplorer,
-                    environmentSettings.bitcoinCashNetworkParameters
-            )
+                    bchDataStore.bchWallet = BitcoinCashWallet.createWatchOnly(
+                            blockExplorer,
+                            environmentSettings.bitcoinCashNetworkParameters
+                    )
 
-            // NB! A watch-only account xpub != account xpub, then do however derive the same addresses.
-            // Only use this [DeterministicAccount] to derive receive/change addresses. Don't use xpub as multiaddr etc parameter.
-            payloadDataManager.accounts.forEachIndexed { i, account ->
-                bchDataStore.bchWallet?.addWatchOnlyAccount(account.xpub)
-                walletMetadata.accounts[i].xpub = account.xpub
-            }
-        }
-    }
+                    // NB! A watch-only account xpub != account xpub, they do however derive the same addresses.
+                    // Only use this [DeterministicAccount] to derive receive/change addresses. Don't use xpub as multiaddr etc parameter.
+                    payloadDataManager.accounts.forEachIndexed { i, account ->
+                        bchDataStore.bchWallet?.addWatchOnlyAccount(account.xpub)
+                        walletMetadata.accounts[i].xpub = account.xpub
+                    }
+                }
+
+            }.compose(RxUtil.applySchedulersToCompletable())
 
     /**
      * Create more btc accounts to catch up to BCH stored in metadata if required.
@@ -196,32 +199,38 @@ class BchDataManager(
      * @param Default bitcoin account label
      * @return Boolean value to indicate if bitcoin wallet payload needs to sync to the server
      */
-    fun correctBtcOffsetIfNeed(defaultBtcLabel: String): Boolean {
+    fun correctBtcOffsetIfNeed(defaultBtcLabel: String) =
+            Completable.fromCallable {
+                val startingAccountIndex = payloadDataManager.accounts.size
+                val accountTotal = bchDataStore.bchMetadata?.accounts?.size?.minus(startingAccountIndex)
+                        ?: 0
 
-        val startingAccountIndex = payloadDataManager.accounts.size
-        val accountTotal = bchDataStore.bchMetadata?.accounts?.size?.minus(startingAccountIndex)
-                ?: 0
+                if (accountTotal > 0) {
+                    (startingAccountIndex..accountTotal!!)
+                            .map {
+                                return@map defaultBtcLabel + " " + it
+                            }
+                            .forEachIndexed { i, s ->
 
-        if (accountTotal > 0) {
-            (startingAccountIndex..accountTotal!!)
-                    .map {
-                        return@map defaultBtcLabel + " " + it
-                    }
-                    .forEachIndexed { i, s ->
+                                val accountIndex = i + startingAccountIndex
+                                val accountNumber = i + startingAccountIndex + 1
 
-                        val accountIndex = i + startingAccountIndex
-                        val accountNumber = i + startingAccountIndex + 1
+                                val acc = payloadDataManager.wallet.hdWallets[0].addAccount(defaultBtcLabel + " " + accountNumber)
 
-                        val acc = payloadDataManager.wallet.hdWallets[0].addAccount(defaultBtcLabel + " " + accountNumber)
+                                bchDataStore.bchMetadata!!.accounts[accountIndex]?.apply {
+                                    this.xpub = acc.xpub
+                                }
+                            }
+                }
 
-                        bchDataStore.bchMetadata!!.accounts[accountIndex]?.apply {
-                            this.xpub = acc.xpub
-                        }
-                    }
-        }
+                val needsSave = accountTotal > 0
 
-        return accountTotal > 0
-    }
+                if (needsSave) {
+                    payloadDataManager.syncPayloadWithServer()
+                } else {
+                    Completable.complete()
+                }
+            }.compose(RxUtil.applySchedulersToCompletable())
 
     /**
      * Restore bitcoin cash wallet from mnemonic.
