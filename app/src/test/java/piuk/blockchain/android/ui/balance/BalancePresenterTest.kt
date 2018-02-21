@@ -1,13 +1,17 @@
 package piuk.blockchain.android.ui.balance
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.times
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
+import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.`should equal to`
 import org.junit.Before
 import org.junit.Test
-import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.access.AuthEvent
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
@@ -40,7 +44,6 @@ class BalancePresenterTest {
     private var buyDataManager: BuyDataManager = mock()
     private var stringUtils: StringUtils = mock()
     private var prefsUtil: PrefsUtil = mock()
-    private var accessState: AccessState = mock()
     private var currencyState: CurrencyState = mock()
     private var rxBus: RxBus = mock()
     private var ethDataManager: EthDataManager = mock()

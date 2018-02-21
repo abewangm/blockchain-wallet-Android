@@ -105,6 +105,7 @@ class ShapeShiftPresenter @Inject constructor(
 
     private fun handleTrades(shapeShiftTrades: ShapeShiftTrades): Single<List<Trade>> =
             Observable.fromIterable(shapeShiftTrades.trades)
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .flatMap { shapeShiftDataManager.getTradeStatusPair(it) }
                     .map {
                         handleState(it.tradeMetadata, it.tradeStatusResponse)
