@@ -99,10 +99,9 @@ class BalancePresenter @Inject constructor(
     @SuppressLint("VisibleForTests")
     private fun refreshAllCompletable(account: ItemAccount): Completable {
         return getUpdateTickerCompletable()
-                .andThen(updateBchWallet())
                 .andThen(updateEthAddress())
-                .andThen(updateBalancesCompletable())
                 .andThen(updateTransactionsListCompletable(account))
+                .andThen(updateBalancesCompletable())
                 .doOnError { view.setUiState(UiState.FAILURE) }
                 .doOnSubscribe { view.setUiState(UiState.LOADING) }
                 .doOnSubscribe { view.setDropdownVisibility(getAccounts().size > 1) }
@@ -167,7 +166,7 @@ class BalancePresenter @Inject constructor(
     /**
      * API call - Fetches latest transactions for selected currency and account, and updates UI tx list
      */
-    internal fun updateTransactionsListCompletable(account: ItemAccount): Completable {
+    private fun updateTransactionsListCompletable(account: ItemAccount): Completable {
         return Completable.fromObservable(
                 transactionListDataManager.fetchTransactions(account, 50, 0)
                         .doAfterTerminate(this::storeSwipeReceiveAddresses)
@@ -280,7 +279,7 @@ class BalancePresenter @Inject constructor(
     /*
     Fetch all active accounts for initial selected currency and set up account adapter
      */
-    internal fun onAccountsAdapterSetup() {
+    private fun onAccountsAdapterSetup() {
         view.setupAccountsAdapter(getAccounts())
     }
 
@@ -341,8 +340,7 @@ class BalancePresenter @Inject constructor(
     //endregion
 
     //region Adapter data
-
-    fun onTxFeedAdapterSetup() {
+    private fun onTxFeedAdapterSetup() {
         view.setupTxFeedAdapter(currencyState.isDisplayingCryptoCurrency)
     }
 
@@ -359,7 +357,7 @@ class BalancePresenter @Inject constructor(
     Don't over use this method. It's a bit hacky, but fast enough to work.
      */
     private fun getAccountAt(position: Int): ItemAccount {
-        return getAccounts()[if (position < 0) 0 else position]
+        return getAccounts()[if (position < 0 || position >= getAccounts().size) 0 else position]
     }
 
     private fun getShapeShiftTxNotesObservable() =
