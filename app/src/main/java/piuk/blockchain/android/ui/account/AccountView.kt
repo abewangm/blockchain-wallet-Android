@@ -7,8 +7,11 @@ import info.blockchain.wallet.payload.data.LegacyAddress
 
 import piuk.blockchain.android.ui.base.View
 import piuk.blockchain.android.ui.customviews.ToastCustom
+import java.util.*
 
 interface AccountView : View {
+
+    val locale: Locale
 
     fun onShowTransferableLegacyFundsWarning(isAutoPopup: Boolean)
 

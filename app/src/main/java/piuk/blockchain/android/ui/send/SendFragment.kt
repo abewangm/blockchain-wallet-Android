@@ -176,8 +176,9 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun onPause() {
-        LocalBroadcastManager.getInstance(activity!!).unregisterReceiver(receiver)
         super.onPause()
+        LocalBroadcastManager.getInstance(activity!!).unregisterReceiver(receiver)
+        currency_header?.close()
     }
 
     override fun createPresenter() = sendPresenter
@@ -224,6 +225,7 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun onKeypadOpen() {
+        currency_header?.close()
         // Hide bottom nav if applicable
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.hideBottomNavigation()
@@ -697,13 +699,17 @@ class SendFragment : BaseFragment<SendView, SendPresenter>(), SendView, NumericK
     }
 
     override fun updateWarning(message: String) {
-        arbitraryWarning.visible()
-        arbitraryWarning.text = message
+        arbitraryWarning?.apply {
+            visible()
+            text = message
+        }
     }
 
     override fun clearWarning() {
-        arbitraryWarning.gone()
-        arbitraryWarning.text = ""
+        arbitraryWarning?.apply {
+            gone()
+            text = ""
+        }
     }
 
     override fun updateFeeAmount(fee: String) {

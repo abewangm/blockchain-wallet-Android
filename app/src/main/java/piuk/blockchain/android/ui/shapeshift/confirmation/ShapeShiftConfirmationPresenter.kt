@@ -201,7 +201,6 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doOnSubscribe { view.showProgressDialog(R.string.please_wait) }
                 .doOnTerminate { view.dismissProgressDialog() }
-                .doOnError(Timber::e)
                 .flatMap {
                     if (payloadDataManager.isDoubleEncrypted) {
                         payloadDataManager.decryptHDWallet(verifiedSecondPassword)
@@ -216,6 +215,7 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
                 .flatMap { ethDataManager.pushEthTx(it) }
                 .flatMap { ethDataManager.setLastTxHashObservable(it, System.currentTimeMillis()) }
                 .flatMapCompletable { updateMetadata(it) }
+                .doOnError(Timber::e)
                 .subscribe(
                         { handleSuccess(depositAddress) },
                         { handleFailure() }
@@ -318,12 +318,16 @@ class ShapeShiftConfirmationPresenter @Inject constructor(
     ): Observable<RawTransaction> {
         require(FormatsUtil.isValidEthereumAddress(depositAddress)) { "Attempting to send ETH to a non-ETH address" }
 
-        return Observable.just(ethDataManager.getEthResponseModel()!!.getNonce())
-                .map {
+        val feeGwei = BigDecimal(gasPrice)
+        val feeWei = Convert.toWei(feeGwei, Convert.Unit.GWEI)
+
+        return ethDataManager.fetchEthAddress()
+                .map { ethDataManager.getEthResponseModel()!!.getNonce() }
+                .map { nonce ->
                     ethDataManager.createEthTransaction(
-                            nonce = it,
+                            nonce = nonce,
                             to = depositAddress,
-                            gasPrice = gasPrice,
+                            gasPrice = feeWei.toBigInteger(),
                             gasLimit = gasLimit,
                             weiValue = Convert.toWei(
                                     depositAmount,

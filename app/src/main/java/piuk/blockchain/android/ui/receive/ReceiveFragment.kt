@@ -680,8 +680,9 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun onPause() {
-        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
         super.onPause()
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(broadcastReceiver)
+        currency_header?.close()
     }
 
     override fun finishPage() {
@@ -748,6 +749,7 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
     }
 
     override fun onKeypadOpen() {
+        currency_header?.close()
         // Hide bottom nav if applicable
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.hideBottomNavigation()

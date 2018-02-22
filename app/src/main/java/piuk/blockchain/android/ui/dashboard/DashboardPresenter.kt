@@ -15,7 +15,6 @@ import piuk.blockchain.android.data.exchange.BuyDataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.balance.AnnouncementData
 import piuk.blockchain.android.ui.base.BasePresenter
@@ -47,11 +46,10 @@ class DashboardPresenter @Inject constructor(
         private val appUtil: AppUtil,
         private val buyDataManager: BuyDataManager,
         private val rxBus: RxBus,
-        private val swipeToReceiveHelper: SwipeToReceiveHelper,
-        private val walletOptionsDataManager: WalletOptionsDataManager
+        private val swipeToReceiveHelper: SwipeToReceiveHelper
 ) : BasePresenter<DashboardView>() {
 
-    private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
+    private lateinit var monetaryUtil: MonetaryUtil
     private val displayList by unsafeLazy {
         mutableListOf<Any>(
                 stringUtils.getString(R.string.dashboard_balances),
@@ -71,6 +69,7 @@ class DashboardPresenter @Inject constructor(
     @VisibleForTesting var ethBalance: BigInteger = BigInteger.ZERO
 
     override fun onViewReady() {
+        monetaryUtil = MonetaryUtil(getBtcUnitType())
         view.notifyItemAdded(displayList, 0)
         updatePrices()
 
@@ -91,9 +90,9 @@ class DashboardPresenter @Inject constructor(
         observable.flatMap { getOnboardingStatusObservable() }
                 // Clears subscription after single event
                 .firstOrError()
-                .doOnSuccess { swipeToReceiveHelper.storeEthAddress() }
                 .doOnSuccess { updateAllBalances() }
                 .doOnSuccess { checkLatestAnnouncements() }
+                .doOnSuccess { swipeToReceiveHelper.storeEthAddress() }
                 .compose(RxUtil.addSingleToCompositeDisposable(this))
                 .subscribe(
                         { /* No-op */ },
@@ -164,13 +163,12 @@ class DashboardPresenter @Inject constructor(
                 .flatMapCompletable { ethAddressResponse ->
                     payloadDataManager.updateAllBalances()
                             .andThen(
-                                    payloadDataManager.updateAllTransactions()
-                                            .doOnError { Timber.e(it) }
-                                            .onErrorComplete()
-                            )
-                            .andThen(
-                                    bchDataManager.updateAllBalances()
-                                            .doOnError { Timber.e(it) }
+                                    Completable.merge(
+                                            listOf(
+                                                    payloadDataManager.updateAllTransactions(),
+                                                    bchDataManager.updateAllBalances()
+                                            )
+                                    ).doOnError { Timber.e(it) }
                                             .onErrorComplete()
                             )
                             .doOnComplete {
@@ -242,7 +240,7 @@ class DashboardPresenter @Inject constructor(
         prefsUtil.setValue(prefKey, true)
         displayList.filterIsInstance<AnnouncementData>()
                 .forEachIndexed { index, any ->
-                    if (any.prefsKey.equals(prefKey)) {
+                    if (any.prefsKey == prefKey) {
                         displayList.remove(any)
                         view.notifyItemRemoved(displayList, index)
                     }
@@ -264,12 +262,13 @@ class DashboardPresenter @Inject constructor(
     private fun checkLatestAnnouncements() {
         // If user hasn't completed onboarding, ignore announcements
         if (isOnboardingComplete()) {
+            displayList.removeAll { it is AnnouncementData }
 
             val bchPrefKey = BITCOIN_CASH_ANNOUNCEMENT_DISMISSED
             if (!prefsUtil.getValue(bchPrefKey, false)) {
                 prefsUtil.setValue(bchPrefKey, true)
 
-                var announcementData = AnnouncementData(
+                val announcementData = AnnouncementData(
                         title = R.string.bitcoin_cash,
                         description = R.string.onboarding_bitcoin_cash_description,
                         link = R.string.onboarding_cta,
@@ -285,25 +284,25 @@ class DashboardPresenter @Inject constructor(
             val buyPrefKey = SFOX_ANNOUNCEMENT_DISMISSED
             buyDataManager.canBuy
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
-                    .subscribe({
-                        if (it && !prefsUtil.getValue(buyPrefKey,false)) {
-                            prefsUtil.setValue(buyPrefKey, true)
+                    .subscribe(
+                            {
+                                if (it && !prefsUtil.getValue(buyPrefKey, false)) {
+                                    prefsUtil.setValue(buyPrefKey, true)
 
-                            val announcementData = AnnouncementData(
-                                    title = R.string.announcement_trading_cta,
-                                    description = R.string.announcement_trading_description,
-                                    link = R.string.announcement_trading_link,
-                                    image = R.drawable.vector_buy_onboarding,
-                                    emoji = null,
-                                    closeFunction = { dismissAnnouncement(buyPrefKey) },
-                                    linkFunction = { view.startBuyActivity() },
-                                    prefsKey = buyPrefKey
-                            )
-                            showAnnouncement(1, announcementData)
-                        }
-                    }, {
-                        Timber.e(it)
-                    })
+                                    val announcementData = AnnouncementData(
+                                            title = R.string.announcement_trading_cta,
+                                            description = R.string.announcement_trading_description,
+                                            link = R.string.announcement_trading_link,
+                                            image = R.drawable.vector_buy_onboarding,
+                                            emoji = null,
+                                            closeFunction = { dismissAnnouncement(buyPrefKey) },
+                                            linkFunction = { view.startBuyActivity() },
+                                            prefsKey = buyPrefKey
+                                    )
+                                    showAnnouncement(1, announcementData)
+                                }
+                            }, { Timber.e(it) }
+                    )
         }
     }
 
@@ -480,6 +479,12 @@ class DashboardPresenter @Inject constructor(
 
     companion object {
 
+        @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED =
+                "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"
+
+        @VisibleForTesting const val SFOX_ANNOUNCEMENT_DISMISSED =
+                "SFOX_ANNOUNCEMENT_DISMISSED"
+
         /**
          * This field stores whether or not the presenter has been run for the first time across
          * all instances. This allows the page to load without a metadata set-up event, which won't
@@ -495,11 +500,11 @@ class DashboardPresenter @Inject constructor(
          */
         private var cachedData: PieChartsState.Data? = null
 
-        @VisibleForTesting const val BITCOIN_CASH_ANNOUNCEMENT_DISMISSED =
-                "BITCOIN_CASH_ANNOUNCEMENT_DISMISSED"
-
-        @VisibleForTesting const val SFOX_ANNOUNCEMENT_DISMISSED =
-                "SFOX_ANNOUNCEMENT_DISMISSED"
+        @JvmStatic
+        fun onLogout() {
+            firstRun = true
+            cachedData = null
+        }
 
     }
 }

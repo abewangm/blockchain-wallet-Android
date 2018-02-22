@@ -5,7 +5,11 @@ import android.os.Bundle
 import android.support.annotation.StringRes
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.LocalBroadcastManager
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.WindowManager
 import kotlinx.android.synthetic.main.dialog_transfer_funds.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
@@ -16,17 +20,19 @@ import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.AddressAdapter
 import piuk.blockchain.android.util.extensions.gone
-import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
+import java.util.*
 import javax.inject.Inject
 
-class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransferView, ConfirmFundsTransferPresenter>(),
-        ConfirmFundsTransferView {
+class ConfirmFundsTransferDialogFragment :
+    BaseDialogFragment<ConfirmFundsTransferView, ConfirmFundsTransferPresenter>(),
+    ConfirmFundsTransferView {
 
     @Inject lateinit var confirmFundsTransferPresenter: ConfirmFundsTransferPresenter
+    override val locale: Locale = Locale.getDefault()
 
     private var progressDialog: MaterialProgressDialog? = null
 
@@ -38,9 +44,14 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = container?.inflate(R.layout.dialog_transfer_funds)?.apply {
-        isFocusableInTouchMode = true
-        requestFocus()
+    ): View? {
+        dialog.apply { setCancelable(true) }
+
+        // You'd think we could use container?.inflate(...) here, but container is null at this point
+        return inflater.inflate(R.layout.dialog_transfer_funds, container, false).apply {
+            isFocusableInTouchMode = true
+            requestFocus()
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -52,7 +63,6 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
             params.height = WindowManager.LayoutParams.MATCH_PARENT
             window.attributes = params
         }
-        dialog.setCancelable(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -153,12 +163,12 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
         activity?.run {
             val intent = Intent(BalanceFragment.ACTION_INTENT)
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
-            dismiss()
         }
+        dismiss()
     }
 
     override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
-        activity?.toast(message, toastType)
+        toast(message, toastType)
     }
 
     override fun createPresenter() = confirmFundsTransferPresenter

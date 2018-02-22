@@ -72,7 +72,7 @@ class SwipeToReceivePresenter @Inject constructor(
             view.setUiState(UiState.EMPTY)
         } else {
             single.doOnSuccess { require(it.isNotEmpty()) { "Returned address is empty, no more addresses available" } }
-                    .doOnSuccess { view.displayReceiveAddress(it) }
+                    .doOnSuccess { view.displayReceiveAddress(it.replace("bitcoincash:", "")) }
                     .flatMapObservable { dataManager.generateQrCode(it, DIMENSION_QR_CODE) }
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(

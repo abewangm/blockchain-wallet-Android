@@ -158,7 +158,7 @@ class AccountEditPresenter @Inject internal constructor(
     }
 
     private fun renderBch(accountIndex: Int) {
-        bchAccount = bchDataManager.getAccounts()[accountIndex]
+        bchAccount = bchDataManager.getAccountMetadataList()[accountIndex]
         with(accountModel) {
             label = bchAccount!!.label
             labelHeader = stringUtils.getString(R.string.name)

@@ -39,7 +39,11 @@ import piuk.blockchain.android.ui.home.MainActivity
 import piuk.blockchain.android.ui.shapeshift.confirmation.ShapeShiftConfirmationActivity
 import piuk.blockchain.android.ui.shapeshift.models.ShapeShiftData
 import piuk.blockchain.android.util.AndroidUtils
-import piuk.blockchain.android.util.extensions.*
+import piuk.blockchain.android.util.extensions.createSpringAnimation
+import piuk.blockchain.android.util.extensions.disableSoftKeyboard
+import piuk.blockchain.android.util.extensions.invisible
+import piuk.blockchain.android.util.extensions.toast
+import piuk.blockchain.android.util.extensions.visible
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
@@ -291,6 +295,7 @@ class NewExchangeActivity : BaseMvpActivity<NewExchangeView, NewExchangePresente
                 .setNeutralButton(R.string.onboarding_get_bitcoin_cash) { _, _ ->
                     LocalBroadcastManager.getInstance(this)
                             .sendBroadcastSync(Intent(MainActivity.ACTION_RECEIVE_BCH))
+                    finish()
                 }
                 .setNegativeButton(R.string.onboarding_get_bitcoin) { _, _ ->
                     if (canBuy) {

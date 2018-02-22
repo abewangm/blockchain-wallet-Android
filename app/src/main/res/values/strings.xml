@@ -365,7 +365,7 @@
     <string name="transaction_surge">The Bitcoin mining network is currently experiencing a high volume of activity, resulting in recommended fees that are higher than usual.</string>
     <string name="unsupported_encryption_version">Wallet version %1$s not supported.</string>
     <string name="logout">Logout</string>
-    <string name="to_field_helper">Enter bitcoin address or select</string>
+    <string name="to_field_helper">Enter BTC address or select</string>
     <string name="to_field_helper_no_dropdown">Enter bitcoin address</string>
 
     <!-- SETTINGS -->
@@ -766,7 +766,7 @@
     <string name="eth_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to set up your Ether wallet.</string>
     <string name="ether">Ether</string>
     <string name="bitcoin">Bitcoin</string>
-    <string name="eth_to_field_helper">Enter ether address or select</string>
+    <string name="eth_to_field_helper">Enter ETH address or select</string>
     <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
     <string name="eth_invalid_address">Invalid Ether address</string>
     <string name="eth_support_contract_not_allowed">Contract addresses are not supported.</string>
@@ -808,7 +808,7 @@
     <string name="shapeshift_select_state">Select state</string>
     <string name="shapeshift_unavailable_in_state">This service is not yet available in your state.</string>
     <string name="shapeshift_deposit_from">Deposit from ShapeShift</string>
-    <string name="shapeshift_deposit_to">Deposit to ShapeShift</string>
+    <string name="shapeshift_deposit_to">Deposited to ShapeShift</string>
 
     <!-- SHAPESHIFT NEW TRADE -->
     <string name="shapeshift_use_minimum">Use minimum</string>
@@ -873,16 +873,19 @@
     <string name="bch_all_accounts">All Bitcoin Cash Wallets</string>
     <string name="bch_imported_addresses">Imported Bitcoin Cash Addresses</string>
     <string name="transaction_detail_verify_blockchair">Verify on Blockchair.com</string>
-    <string name="bch_to_field_helper">Enter bitcoin cash address or select</string>
+    <string name="bch_to_field_helper">Enter BCH address or select</string>
     <string name="bch_to_field_helper_no_dropdown">Enter bitcoin cash address</string>
     <string name="bch_address_warning">Are you sure this is a Bitcoin Cash address?</string>
     <string name="bch_address_warning_subtext">Sending funds to a bitcoin address by accident will result in loss of funds.</string>
+    <string name="bch_invalid_address">Invalid Bitcoin Cash address</string>
     <string name="invalid_address">Invalid address</string>
+    <string name="confirm_currency">Confirm currency</string>
+    <string name="confirm_currency_message">Please select which currency\'s QR code you are scanning.</string>
 
     <!--Buy & Sell-->
     <string name="announcement_trading_cta">The wait is over</string>
-    <string name="announcement_trading_description">Trade bitcoin directly from your Blockchain wallet. Start by creating an account in the Buy &amp; Sell tab</string>
-    <string name="announcement_trading_link">Start trading</string>
+    <string name="announcement_trading_description">Buy and sell bitcoin directly from your Blockchain wallet. Start by creating an account in the Buy &amp; Sell tab</string>
+    <string name="announcement_trading_link">Get started</string>
 
 
 </resources>

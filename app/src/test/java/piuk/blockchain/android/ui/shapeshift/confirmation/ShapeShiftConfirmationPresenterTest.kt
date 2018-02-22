@@ -10,6 +10,7 @@ import info.blockchain.wallet.payment.SpendableUnspentOutputs
 import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.any
+import org.amshove.kluent.mock
 import org.apache.commons.lang3.NotImplementedException
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.NetworkParameters
@@ -391,12 +392,14 @@ class ShapeShiftConfirmationPresenterTest : RxTest() {
         whenever(payloadDataManager.wallet.hdWallets[0].masterKey).thenReturn(deterministicKey)
         whenever(ethereumAccountWrapper.deriveECKey(deterministicKey, 0))
                 .thenReturn(ecKey)
+        whenever(ethDataManager.fetchEthAddress())
+                .thenReturn(Observable.just(mock(CombinedEthModel::class)))
         whenever(ethDataManager.getEthResponseModel()).thenReturn(combinedEthModel)
         whenever(
                 ethDataManager.createEthTransaction(
                         nonce,
                         fromEth.depositAddress,
-                        fromEth.gasPrice,
+                        Convert.toWei(BigDecimal(fromEth.gasPrice), Convert.Unit.GWEI).toBigInteger(),
                         fromEth.gasLimit,
                         Convert.toWei(
                                 fromEth.depositAmount,
@@ -418,11 +421,12 @@ class ShapeShiftConfirmationPresenterTest : RxTest() {
         verify(payloadDataManager, times(2)).isDoubleEncrypted
         verify(payloadDataManager, atLeastOnce()).wallet
         verifyNoMoreInteractions(payloadDataManager)
+        verify(ethDataManager).fetchEthAddress()
         verify(ethDataManager).getEthResponseModel()
         verify(ethDataManager).createEthTransaction(
                 nonce,
                 fromEth.depositAddress,
-                fromEth.gasPrice,
+                Convert.toWei(BigDecimal(fromEth.gasPrice), Convert.Unit.GWEI).toBigInteger(),
                 fromEth.gasLimit,
                 Convert.toWei(
                         fromEth.depositAmount,

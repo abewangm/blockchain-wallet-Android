@@ -20,8 +20,8 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.Logging;
-import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthService;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
 import piuk.blockchain.android.data.contacts.models.ContactsEvent;
@@ -41,6 +41,7 @@ import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.dashboard.DashboardPresenter;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
@@ -63,9 +64,9 @@ public class MainPresenter extends BasePresenter<MainView> {
     private ExchangeRateFactory exchangeRateFactory;
     private RxBus rxBus;
     private FeeDataManager feeDataManager;
-    private EnvironmentSettings environmentSettings;
     private PromptManager promptManager;
     private EthDataManager ethDataManager;
+    private BchDataManager bchDataManager;
     private CurrencyState currencyState;
     private WalletOptionsDataManager walletOptionsDataManager;
     private MetadataManager metadataManager;
@@ -84,9 +85,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                   ExchangeRateFactory exchangeRateFactory,
                   RxBus rxBus,
                   FeeDataManager feeDataManager,
-                  EnvironmentSettings environmentSettings,
                   PromptManager promptManager,
                   EthDataManager ethDataManager,
+                  BchDataManager bchDataManager,
                   CurrencyState currencyState,
                   WalletOptionsDataManager walletOptionsDataManager,
                   MetadataManager metadataManager) {
@@ -104,9 +105,9 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.exchangeRateFactory = exchangeRateFactory;
         this.rxBus = rxBus;
         this.feeDataManager = feeDataManager;
-        this.environmentSettings = environmentSettings;
         this.promptManager = promptManager;
         this.ethDataManager = ethDataManager;
+        this.bchDataManager = bchDataManager;
         this.currencyState = currencyState;
         this.walletOptionsDataManager = walletOptionsDataManager;
         this.metadataManager = metadataManager;
@@ -195,8 +196,6 @@ public class MainPresenter extends BasePresenter<MainView> {
 
                             initPrompts(getView().getActivityContext());
 
-                            rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
-
                             if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
                                 String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
                                 prefs.removeValue(PrefsUtil.KEY_SCHEME_URL);
@@ -210,6 +209,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                     } else {
                         getView().setBuySellEnabled(false);
                     }
+
+                    rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
                 }, throwable -> {
                     //noinspection StatementWithEmptyBody
                     if (throwable instanceof InvalidCredentialsException || throwable instanceof HDWalletException) {
@@ -266,6 +267,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         accessState.setPIN(null);
         buyDataManager.wipe();
         ethDataManager.clearEthAccountDetails();
+        bchDataManager.clearBchAccountDetails();
+        DashboardPresenter.onLogout();
     }
 
     PayloadManager getPayloadManager() {
@@ -276,13 +279,11 @@ public class MainPresenter extends BasePresenter<MainView> {
     @SuppressWarnings("unused")
     private void subscribeToNotifications() {
         notificationObservable = rxBus.register(NotificationPayload.class);
-
-        getCompositeDisposable().add(
-                notificationObservable
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(
-                                notificationPayload -> checkForMessages(),
-                                Throwable::printStackTrace));
+        notificationObservable.compose(RxUtil.addObservableToCompositeDisposable(this))
+                .compose(RxUtil.applySchedulersToObservable())
+                .subscribe(
+                        notificationPayload -> checkForMessages(),
+                        Throwable::printStackTrace);
     }
 
     @Override
@@ -317,7 +318,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     String getCurrentServerUrl() {
-        return environmentSettings.getExplorerUrl();
+        return walletOptionsDataManager.getBuyWebviewWalletLink();
     }
 
     // Usage commented out for now

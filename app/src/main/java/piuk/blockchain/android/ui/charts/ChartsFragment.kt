@@ -164,8 +164,19 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
             TimeSpan.DAY -> SimpleDateFormat("H:00")
         }
 
-        chart.xAxis.setValueFormatter { fl, _ ->
-            dateFormat.format(Date(fl.toLong() * 1000))
+        val granularity = when (timeSpan) {
+            TimeSpan.ALL_TIME -> 60 * 60 * 24 * 365F
+            TimeSpan.YEAR -> 60 * 60 * 24 * 30F
+            TimeSpan.MONTH, TimeSpan.WEEK -> 60 * 60 * 24 * 2F
+            TimeSpan.DAY -> 60 * 60 * 4F
+        }
+
+        chart.xAxis.apply {
+            // Minimum between values
+            this.granularity = granularity
+            setValueFormatter { fl, _ ->
+                dateFormat.format(Date(fl.toLong() * 1000))
+            }
         }
     }
 

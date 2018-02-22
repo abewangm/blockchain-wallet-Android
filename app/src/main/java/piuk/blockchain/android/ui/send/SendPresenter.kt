@@ -53,7 +53,11 @@ import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.chooser.AccountChooserActivity
 import piuk.blockchain.android.ui.receive.ReceiveCurrencyHelper
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
-import piuk.blockchain.android.util.*
+import piuk.blockchain.android.util.EditTextFormatUtil
+import piuk.blockchain.android.util.ExchangeRateFactory
+import piuk.blockchain.android.util.MonetaryUtil
+import piuk.blockchain.android.util.PrefsUtil
+import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
 import java.io.IOException
@@ -386,12 +390,9 @@ class SendPresenter @Inject constructor(
                 bchDataManager.decryptWatchOnlyWallet(payloadDataManager.mnemonic)
             }
 
-            val hdAccountList = bchDataManager.getAcc()
-            var acc = hdAccountList.find { it.node.serializePubB58(environmentSettings.bitcoinCashNetworkParameters) == account.xpub }
-
-            if (acc == null) {
-                throw HDWalletException("No matching private key found for ${account.xpub}")
-            }
+            val hdAccountList = bchDataManager.getAccountList()
+            val acc = hdAccountList.find { it.node.serializePubB58(environmentSettings.bitcoinCashNetworkParameters) == account.xpub }
+                    ?: throw HDWalletException("No matching private key found for ${account.xpub}")
 
             Observable.just(bchDataManager.getHDKeysForSigning(acc, pendingTransaction.unspentOutputBundle.spendableOutputs))
         } else {
@@ -472,7 +473,8 @@ class SendPresenter @Inject constructor(
         val feeGwei = BigDecimal.valueOf(feeOptions!!.regularFee)
         val feeWei = Convert.toWei(feeGwei, Convert.Unit.GWEI)
 
-        return Observable.just(ethDataManager.getEthResponseModel()!!.getNonce())
+        return ethDataManager.fetchEthAddress()
+                .map { ethDataManager.getEthResponseModel()!!.getNonce() }
                 .map {
                     ethDataManager.createEthTransaction(
                             nonce = it,
@@ -585,7 +587,7 @@ class SendPresenter @Inject constructor(
         }
 
         val outputs = HashMap<String, BigInteger>()
-        outputs.put(pendingTransaction.displayableReceivingLabel, pendingTransaction.bigIntAmount)
+        outputs[pendingTransaction.displayableReceivingLabel] = pendingTransaction.bigIntAmount
 
         val tx = TransactionSummary()
         tx.direction = TransactionSummary.Direction.SENT
@@ -664,7 +666,7 @@ class SendPresenter @Inject constructor(
         val details = PaymentConfirmationDetails()
 
         details.fromLabel = pendingTransaction.sendingObject.label
-        details.toLabel = pendingTransaction.displayableReceivingLabel
+        details.toLabel = pendingTransaction.displayableReceivingLabel.removeBchUri()
 
         details.cryptoUnit = currencyHelper.cryptoUnit
         details.fiatUnit = currencyHelper.fiatUnit
@@ -1048,6 +1050,13 @@ class SendPresenter @Inject constructor(
             feePerKb: BigInteger
     ) {
 
+        if (pendingTransaction.sendingObject == null
+                || pendingTransaction.sendingObject.address == null) {
+            // This shouldn't happen, but handle case anyway in case of low memory scenario
+            onBitcoinCashChosen()
+            return
+        }
+
         val address = pendingTransaction.sendingObject.address!!
 
         getUnspentApiResponse(address)
@@ -1082,6 +1091,13 @@ class SendPresenter @Inject constructor(
             amountToSendText: String?,
             feePerKb: BigInteger
     ) {
+
+        if (pendingTransaction.sendingObject == null
+                || pendingTransaction.sendingObject.address == null) {
+            // This shouldn't happen, but handle case anyway in case of low memory scenario
+            onBitcoinCashChosen()
+            return
+        }
 
         val address = pendingTransaction.sendingObject.address!!
 
@@ -1193,9 +1209,7 @@ class SendPresenter @Inject constructor(
 
         //Format for display
         if (!currencyState.isDisplayingCryptoCurrency) {
-            val fiatBalance = currencyHelper.lastPrice * availableEth.toLong()
-
-            val fiatBalanceFormatted = monetaryUtil.getFiatFormat(currencyHelper.fiatUnit).format(fiatBalance)
+            val fiatBalanceFormatted = currencyHelper.getFormattedFiatStringFromCrypto(availableEth.toDouble())
             view.updateMaxAvailable("${stringUtils.getString(R.string.max_available)} $fiatBalanceFormatted ${currencyHelper.fiatUnit}")
         } else {
             val number = currencyHelper.getFormattedEthString(availableEth)
@@ -1268,7 +1282,7 @@ class SendPresenter @Inject constructor(
         if (address != "") {
             pendingTransaction.receivingObject = null
             pendingTransaction.receivingAddress = address
-            view.updateReceivingAddress(address)
+            view.updateReceivingAddress(address.removeBchUri())
         }
     }
 
@@ -1463,7 +1477,7 @@ class SendPresenter @Inject constructor(
         )
         pendingTransaction.receivingAddress = cashAddress
 
-        view.updateReceivingAddress(label)
+        view.updateReceivingAddress(label.removeBchUri())
 
         if (legacyAddress.isWatchOnly && shouldWarnWatchOnly()) {
             view.showWatchOnlyWarning(cashAddress)
@@ -1673,8 +1687,13 @@ class SendPresenter @Inject constructor(
         var validated = true
         var errorMessage = R.string.unexpected_error
 
+
+        if (pendingTransaction.receivingAddress.isNullOrEmpty()) {
+            errorMessage = R.string.bch_invalid_address
+            validated = false
+
             //Same amount validation as bitcoin
-        if (pendingTransaction.bigIntAmount == null || !isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
+        } else if (pendingTransaction.bigIntAmount == null || !isValidBitcoinAmount(pendingTransaction.bigIntAmount)) {
             errorMessage = R.string.invalid_amount
             validated = false
 
@@ -1790,7 +1809,7 @@ class SendPresenter @Inject constructor(
 
     companion object {
 
-        private val PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend"
+        private const val PREF_WARN_WATCH_ONLY_SPEND = "pref_warn_watch_only_spend"
 
     }
 }

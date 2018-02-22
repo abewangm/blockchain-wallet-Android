@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.account
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -55,6 +56,8 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
 
     @Suppress("MemberVisibilityCanBePrivate")
     @Inject lateinit var accountPresenter: AccountPresenter
+
+    override val locale: Locale = Locale.getDefault()
 
     private val prefsUtil: PrefsUtil by unsafeLazy { PrefsUtil(this) }
     private val receiver = object : BroadcastReceiver() {
@@ -371,6 +374,7 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         }
     }
 
+    @SuppressLint("CommitTransaction")
     private fun transferSpendableFunds() {
         ConfirmFundsTransferDialogFragment.newInstance()
                 .show(supportFragmentManager, ConfirmFundsTransferDialogFragment.TAG)

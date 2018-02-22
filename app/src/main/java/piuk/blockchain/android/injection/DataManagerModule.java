@@ -99,14 +99,16 @@ public class DataManagerModule {
                                                              ExchangeRateFactory exchangeRateFactory,
                                                              CurrencyState currencyState,
                                                              EthDataManager ethDataManager,
-                                                             BchDataManager bchDataManager) {
+                                                             BchDataManager bchDataManager,
+                                                             EnvironmentSettings environmentSettings) {
         return new WalletAccountHelper(payloadManager,
                 stringUtils,
                 prefsUtil,
                 exchangeRateFactory,
                 currencyState,
                 ethDataManager,
-                bchDataManager);
+                bchDataManager,
+                environmentSettings);
     }
 
     @Provides
@@ -260,11 +262,13 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager,
-                                                                       SettingsDataManager settingsDataManager) {
+                                                                       SettingsDataManager settingsDataManager,
+                                                                       EnvironmentSettings environmentSettings) {
         return new WalletOptionsDataManager(authDataManager, WalletOptionsState.getInstance(
                 ReplaySubject.create(1),
                 ReplaySubject.create(1)),
-                settingsDataManager);
+                settingsDataManager,
+                environmentSettings);
     }
 
     @Provides

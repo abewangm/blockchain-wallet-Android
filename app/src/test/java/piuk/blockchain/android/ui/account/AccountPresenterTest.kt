@@ -34,6 +34,7 @@ import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
 import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -41,9 +42,11 @@ import piuk.blockchain.android.ui.account.AccountPresenter.Companion.KEY_WARN_TR
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.send.PendingTransaction
 import piuk.blockchain.android.util.AppUtil
+import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import java.math.BigInteger
+import java.util.*
 
 @Config(
         sdk = [23],
@@ -63,6 +66,8 @@ class AccountPresenterTest {
     private val appUtil: AppUtil = mock()
     private val environmentSettings: EnvironmentSettings = mock()
     private val privateKeyFactory = PrivateKeyFactory()
+    private val currencyState: CurrencyState = mock()
+    private val exchangeRateFactory: ExchangeRateFactory = mock()
 
     @Before
     @Throws(Exception::class)
@@ -77,13 +82,18 @@ class AccountPresenterTest {
                 prefsUtil,
                 appUtil,
                 privateKeyFactory,
-                environmentSettings
+                environmentSettings,
+                currencyState,
+                exchangeRateFactory
         )
 
         subject.initView(activity)
+        whenever(activity.locale).thenReturn(Locale.US)
+        // TODO: This is cheating for now to ensure all tests pass
+        whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
 
         // TODO: These will break things when fully testing onViewReady()
-        val btcAccount =  Account().apply {
+        val btcAccount = Account().apply {
             label = "LABEL"
             xpub = "X_PUB"
         }
@@ -93,7 +103,7 @@ class AccountPresenterTest {
         }
         whenever(payloadDataManager.accounts).thenReturn(listOf(btcAccount))
         whenever(payloadDataManager.legacyAddresses).thenReturn(emptyList())
-        whenever(bchDataManager.getAccounts()).thenReturn(listOf(bchAccount))
+        whenever(bchDataManager.getAccountMetadataList()).thenReturn(listOf(bchAccount))
         whenever(payloadDataManager.defaultAccountIndex).thenReturn(0)
         whenever(bchDataManager.getDefaultAccountPosition()).thenReturn(0)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC))
@@ -169,6 +179,7 @@ class AccountPresenterTest {
         subject.checkTransferableLegacyFunds(true, true)
         // Assert
         verify(activity).onSetTransferLegacyFundsMenuItemVisible(false)
+        verify(activity).dismissProgressDialog()
         verifyNoMoreInteractions(activity)
     }
 
@@ -480,6 +491,8 @@ class AccountPresenterTest {
         val legacyAddress = LegacyAddress()
         whenever(payloadDataManager.setKeyForLegacyAddress(mockECKey, null))
                 .thenReturn(Observable.just(legacyAddress))
+        whenever(fundsDataManager.transferableFundTransactionListForDefaultAccount)
+                .thenReturn(Observable.empty())
         // Act
         subject.handlePrivateKey(mockECKey, null)
         // Assert

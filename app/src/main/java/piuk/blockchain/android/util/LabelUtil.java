@@ -33,7 +33,7 @@ public final class LabelUtil {
             }
         }
 
-        for (GenericMetadataAccount account : bchDataManager.getAccounts()) {
+        for (GenericMetadataAccount account : bchDataManager.getAccountMetadataList()) {
             if (account.getLabel() != null
                     && account.getLabel().equalsIgnoreCase(newLabel)) {
                 return true;

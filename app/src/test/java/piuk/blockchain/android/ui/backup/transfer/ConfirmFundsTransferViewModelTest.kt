@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.backup.transfer
 
 import android.annotation.SuppressLint
+import com.nhaarman.mockito_kotlin.atLeastOnce
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.wallet.payload.data.LegacyAddress
@@ -22,8 +23,8 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
+import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.ui.account.ItemAccount
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.ui.receive.WalletAccountHelper
@@ -59,6 +60,8 @@ class ConfirmFundsTransferPresenterTest {
                 exchangeRateFactory
         )
         subject.initView(view)
+
+        whenever(view.locale).thenReturn(Locale.US)
     }
 
     @Test
@@ -106,11 +109,11 @@ class ConfirmFundsTransferPresenterTest {
         whenever(prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY))
                 .thenReturn("USD")
         whenever(exchangeRateFactory.getLastBtcPrice(anyString())).thenReturn(100.0)
-        whenever(exchangeRateFactory.getSymbol(anyString())).thenReturn("$")
         subject.pendingTransactions = mutableListOf()
         // Act
         subject.updateUi(100000000L, 10000L)
         // Assert
+        verify(view, atLeastOnce()).locale
         verify(view).updateFromLabel("test string")
         verify(view).updateTransferAmountBtc("1.0 BTC")
         verify(view).updateTransferAmountFiat("$100.00")

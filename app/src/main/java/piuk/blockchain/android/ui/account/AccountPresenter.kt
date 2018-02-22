@@ -22,6 +22,7 @@ import piuk.blockchain.android.data.answers.Logging
 import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.currency.CurrencyState
 import piuk.blockchain.android.data.datamanagers.TransferFundsDataManager
 import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
@@ -30,11 +31,13 @@ import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.ui.base.BasePresenter
 import piuk.blockchain.android.ui.customviews.ToastCustom
 import piuk.blockchain.android.util.AppUtil
+import piuk.blockchain.android.util.ExchangeRateFactory
 import piuk.blockchain.android.util.LabelUtil
 import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 import timber.log.Timber
+import java.math.BigInteger
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -46,7 +49,9 @@ class AccountPresenter @Inject internal constructor(
         private val prefsUtil: PrefsUtil,
         private val appUtil: AppUtil,
         private val privateKeyFactory: PrivateKeyFactory,
-        private val environmentSettings: EnvironmentSettings
+        private val environmentSettings: EnvironmentSettings,
+        private val currencyState: CurrencyState,
+        private val exchangeRateFactory: ExchangeRateFactory
 ) : BasePresenter<AccountView>() {
 
     private val monetaryUtil: MonetaryUtil by unsafeLazy {
@@ -66,6 +71,11 @@ class AccountPresenter @Inject internal constructor(
 
     override fun onViewReady() {
         view.updateAccountList(getDisplayList())
+        if (cryptoCurrency == CryptoCurrencies.BCH) {
+            view.onSetTransferLegacyFundsMenuItemVisible(false)
+        } else {
+            checkTransferableLegacyFunds(false, false)
+        }
     }
 
     /**
@@ -75,6 +85,7 @@ class AccountPresenter @Inject internal constructor(
     internal fun checkTransferableLegacyFunds(isAutoPopup: Boolean, showWarningDialog: Boolean) {
         fundsDataManager.transferableFundTransactionListForDefaultAccount
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .doAfterTerminate { view.dismissProgressDialog() }
                 .doOnError { Timber.e(it) }
                 .subscribe(
                         { triple ->
@@ -89,7 +100,6 @@ class AccountPresenter @Inject internal constructor(
                             } else {
                                 view.onSetTransferLegacyFundsMenuItemVisible(false)
                             }
-                            view.dismissProgressDialog()
                         },
                         { view.onSetTransferLegacyFundsMenuItemVisible(false) }
                 )
@@ -435,17 +445,19 @@ class AccountPresenter @Inject internal constructor(
             )
         }
 
-        // Import Address header, non clickable
-        accountsAndImportedList.add(AccountItem(AccountItem.TYPE_LEGACY_HEADER))
+        if (bchDataManager.getImportedAddressBalance() > BigInteger.ZERO) {
+            // Import Address header, non clickable
+            accountsAndImportedList.add(AccountItem(AccountItem.TYPE_LEGACY_HEADER))
 
-        val total = getLegacyAddresses()
-                .map { getBalanceFromBchAddress(it.address) }
-                .sum()
-
-        // Non-clickable
-        accountsAndImportedList.add(
-                AccountItem(AccountItem.TYPE_LEGACY_SUMMARY, getBchDisplayBalance(total))
-        )
+            val total = bchDataManager.getImportedAddressBalance()
+            // Non-clickable summary
+            accountsAndImportedList.add(
+                    AccountItem(
+                            AccountItem.TYPE_LEGACY_SUMMARY,
+                            getBchDisplayBalance(total.toLong())
+                    )
+            )
+        }
 
         return accountsAndImportedList
     }
@@ -453,7 +465,7 @@ class AccountPresenter @Inject internal constructor(
     //region Convenience functions
     private fun getBtcAccounts(): List<Account> = payloadDataManager.accounts
 
-    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getAccounts()
+    private fun getBchAccounts(): List<GenericMetadataAccount> = bchDataManager.getAccountMetadataList()
 
     private fun getLegacyAddresses(): List<LegacyAddress> = payloadDataManager.legacyAddresses
 
@@ -465,35 +477,39 @@ class AccountPresenter @Inject internal constructor(
     //region Balance and formatting functions
     private fun getBtcAccountBalance(xpub: String): String {
         val amount = getBalanceFromBtcAddress(xpub)
-        val unit = monetaryUtil.getBtcUnits()[getBtcFormat()]
-
-        return getFormattedDisplayString(amount, unit)
+        return getUiString(amount, monetaryUtil.getBtcUnits(), exchangeRateFactory::getLastBtcPrice)
     }
 
     private fun getBchAccountBalance(xpub: String): String {
         val amount = getBalanceFromBchAddress(xpub)
-        val unit = monetaryUtil.getBchUnits()[getBtcFormat()]
-
-        return getFormattedDisplayString(amount, unit)
+        return getUiString(amount, monetaryUtil.getBchUnits(), exchangeRateFactory::getLastBchPrice)
     }
 
     private fun getBtcAddressBalance(address: String): String {
         val amount = getBalanceFromBtcAddress(address)
-        val unit = monetaryUtil.getBtcUnits()[getBtcFormat()]
-
-        return getFormattedDisplayString(amount, unit)
+        return getUiString(amount, monetaryUtil.getBtcUnits(), exchangeRateFactory::getLastBtcPrice)
     }
 
     private fun getBchDisplayBalance(amount: Long): String {
-        val unit = monetaryUtil.getBchUnits()[getBtcFormat()]
-        return getFormattedDisplayString(amount, unit)
+        return getUiString(amount, monetaryUtil.getBchUnits(), exchangeRateFactory::getLastBchPrice)
     }
 
-    private fun getFormattedDisplayString(amount: Long, unit: String) =
-            """${monetaryUtil.getDisplayAmount(amount)} $unit"""
+    private fun getUiString(amount: Long, units: Array<String>, price: (String) -> Double): String {
+        return if (currencyState.isDisplayingCryptoCurrency) {
+            "${monetaryUtil.getDisplayAmount(amount)} ${units[getBtcFormat()]}"
+        } else {
+            val strFiat = getFiatFormat()
+            val fiatBalance = price(strFiat) * (amount / 1e8)
+            val fiatSymbol = monetaryUtil.getCurrencySymbol(strFiat, view.locale)
+            return "$fiatSymbol${monetaryUtil.getFiatFormat(strFiat).format(fiatBalance)}"
+        }
+    }
 
     private fun getBtcFormat(): Int =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
+
+    private fun getFiatFormat(): String =
+            prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
     private fun getBalanceFromBtcAddress(address: String): Long =
             payloadDataManager.getAddressBalance(address).toLong()

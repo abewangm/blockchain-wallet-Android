@@ -86,18 +86,8 @@ class MetadataManager(
 
     // TODO: Remove me and dependencies; DataManagers can be responsible for their own initialisation
     private fun loadMetadataElements(metadataNode: DeterministicKey): Completable = rxPinning.call {
-        ethDataManager.initEthereumWallet(
-                metadataNode,
-                stringUtils.getString(R.string.eth_default_account_label)
-        ).andThen(
-                bchDataManager.initBchWallet(
-                        metadataNode,
-                        stringUtils.getString(R.string.bch_default_account_label)
-                ).andThen(
-                        Completable.fromObservable(
-                                shapeShiftDataManager.initShapeshiftTradeData(metadataNode)
-                        )
-                )
-        )
+        ethDataManager.initEthereumWallet(metadataNode, stringUtils.getString(R.string.eth_default_account_label)
+        ).andThen(bchDataManager.initBchWallet(metadataNode, stringUtils.getString(R.string.bch_default_account_label))
+        ).andThen(Completable.fromObservable(shapeShiftDataManager.initShapeshiftTradeData(metadataNode)))
     }
 }

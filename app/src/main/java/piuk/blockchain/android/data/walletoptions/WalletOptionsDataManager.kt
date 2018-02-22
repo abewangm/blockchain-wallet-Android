@@ -5,6 +5,7 @@ import info.blockchain.wallet.api.data.WalletOptions
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
@@ -13,7 +14,8 @@ import piuk.blockchain.android.util.annotations.Mockable
 class WalletOptionsDataManager(
         private val authDataManager: AuthDataManager,
         private val walletOptionsState: WalletOptionsState,
-        private val settingsDataManager: SettingsDataManager
+        private val settingsDataManager: SettingsDataManager,
+        private val environmentSettings: EnvironmentSettings
 ) {
 
     /**
@@ -70,6 +72,12 @@ class WalletOptionsDataManager(
     fun getBchFee(): Int = walletOptionsState.walletOptionsSource.value.bchFeePerByte
 
     fun getShapeShiftLimit(): Int = walletOptionsState.walletOptionsSource.value.shapeshift.upperLimit
+
+    fun getBuyWebviewWalletLink(): String {
+        initWalletOptionsReplaySubjects()
+        return (walletOptionsState.walletOptionsSource.value.buyWebviewWalletLink ?:
+        environmentSettings.explorerUrl+"wallet") + "/#/intermediate"
+    }
 
     /**
      * Mobile info retrieved from wallet-options.json based on wallet setting
