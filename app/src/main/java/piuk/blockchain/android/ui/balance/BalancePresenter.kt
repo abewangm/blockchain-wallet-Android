@@ -100,7 +100,7 @@ class BalancePresenter @Inject constructor(
     private fun refreshAllCompletable(account: ItemAccount): Completable {
         return getUpdateTickerCompletable()
                 .andThen(updateEthAddress())
-                .andThen(updateBchWallet())
+//                .andThen(updateBchWallet())
                 .andThen(updateTransactionsListCompletable(account))
                 .andThen(updateBalancesCompletable())
                 .doOnError { view.setUiState(UiState.FAILURE) }
