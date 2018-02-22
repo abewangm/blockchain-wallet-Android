@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.account
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -373,6 +374,7 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         }
     }
 
+    @SuppressLint("CommitTransaction")
     private fun transferSpendableFunds() {
         ConfirmFundsTransferDialogFragment.newInstance()
                 .show(supportFragmentManager, ConfirmFundsTransferDialogFragment.TAG)

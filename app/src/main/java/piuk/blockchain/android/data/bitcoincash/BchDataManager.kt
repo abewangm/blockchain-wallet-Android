@@ -85,8 +85,11 @@ class BchDataManager(
     /**
      * Refreshes bitcoin cash metadata. Useful if another platform performed any changes to wallet state.
      * At this point metadataNodeFactory.metadata node will exist.
+     *
+     * Note that this clears the balances and transactions from [BitcoinCashWallet]
      */
-    fun refreshMetadataCompletable(): Completable = initBchWallet(stringUtils.getString(R.string.bch_default_account_label))
+    fun refreshMetadataCompletable(): Completable =
+            initBchWallet(stringUtils.getString(R.string.bch_default_account_label))
 
     fun serializeForSaving(): String = bchDataStore.bchMetadata!!.toJson()
 
@@ -108,7 +111,10 @@ class BchDataManager(
                             addAll(bchAccounts)
                         }
 
-                        if (bchDataStore.bchMetadata == null || !listContentEquals(bchDataStore.bchMetadata!!.accounts, metaData.accounts)) {
+                        if (bchDataStore.bchMetadata == null || !listContentEquals(
+                                        bchDataStore.bchMetadata!!.accounts,
+                                        metaData.accounts
+                                )) {
                             bchDataStore.bchMetadata = metaData
                         } else {
                             // metadata list unchanged
@@ -131,14 +137,17 @@ class BchDataManager(
         }
     }
 
-    fun listContentEquals(listA: MutableList<GenericMetadataAccount>, listB: MutableList<GenericMetadataAccount>): Boolean {
+    fun listContentEquals(
+            listA: MutableList<GenericMetadataAccount>,
+            listB: MutableList<GenericMetadataAccount>
+    ): Boolean {
 
-        listA.forEach{ accountA ->
+        listA.forEach { accountA ->
             val filteredItems = listB.filter { accountB ->
                 (accountB.label == accountA.label) && (accountB.isArchived == accountA.isArchived)
             }
 
-            if (filteredItems.size == 0) {
+            if (filteredItems.isEmpty()) {
                 return false
             }
         }
@@ -205,7 +214,7 @@ class BchDataManager(
      * BCH metadata might have more accounts than a restored BTC wallet. When a BTC wallet is restored
      * from mnemonic we will only look ahead 5 accounts to see if the account contains any transactions.
      *
-     * @param Default bitcoin account label
+     * @param defaultBtcLabel bitcoin account label
      * @return Boolean value to indicate if bitcoin wallet payload needs to sync to the server
      */
     fun correctBtcOffsetIfNeed(defaultBtcLabel: String): Boolean {
@@ -214,16 +223,17 @@ class BchDataManager(
                 ?: 0
 
         if (accountTotal > 0) {
-            (startingAccountIndex..accountTotal!!)
+            (startingAccountIndex..accountTotal)
                     .map {
                         return@map defaultBtcLabel + " " + it
                     }
-                    .forEachIndexed { i, s ->
+                    .forEachIndexed { i, _ ->
 
                         val accountIndex = i + startingAccountIndex
                         val accountNumber = i + startingAccountIndex + 1
 
-                        val acc = payloadDataManager.wallet.hdWallets[0].addAccount(defaultBtcLabel + " " + accountNumber)
+                        val acc =
+                                payloadDataManager.wallet.hdWallets[0].addAccount(defaultBtcLabel + " " + accountNumber)
 
                         bchDataStore.bchMetadata!!.accounts[accountIndex]?.apply {
                             this.xpub = acc.xpub
@@ -336,7 +346,8 @@ class BchDataManager(
         return getAccountMetadataList().filterNot { it.isArchived }
     }
 
-    fun getAccountMetadataList(): List<GenericMetadataAccount> =bchDataStore.bchMetadata?.accounts ?: emptyList()
+    fun getAccountMetadataList(): List<GenericMetadataAccount> =
+            bchDataStore.bchMetadata?.accounts ?: emptyList()
 
     fun getAccountList(): List<DeterministicAccount> = bchDataStore.bchWallet!!.accounts
 
@@ -350,7 +361,7 @@ class BchDataManager(
             bchDataStore.bchWallet?.accounts?.get(getDefaultAccountPosition())
 
     fun getDefaultGenericMetadataAccount(): GenericMetadataAccount? =
-            getAccountMetadataList()?.get(getDefaultAccountPosition())
+            getAccountMetadataList()[getDefaultAccountPosition()]
 
     /**
      * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain

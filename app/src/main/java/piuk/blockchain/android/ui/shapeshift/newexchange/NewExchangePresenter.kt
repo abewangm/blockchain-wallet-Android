@@ -703,7 +703,6 @@ class NewExchangePresenter @Inject constructor(
                 BigInteger.valueOf(feeOptions!!.priorityFee * 1000)
         )
     }.doOnError { view.showToast(R.string.confirm_payment_fee_sync_error, ToastCustom.TYPE_ERROR) }
-            .onErrorReturn { BigInteger.ZERO }
 
     /**
      * Returns the ETH fee in Wei

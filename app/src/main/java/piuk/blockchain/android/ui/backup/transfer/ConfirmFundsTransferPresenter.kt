@@ -100,10 +100,10 @@ class ConfirmFundsTransferPresenter @Inject constructor(
 
         view.updateTransferAmountBtc(
                 "${monetaryUtil.getDisplayAmountWithFormatting(totalToSend)} $btcUnit")
-        view.updateTransferAmountFiat("${exchangeRateFactory.getSymbol(fiatUnit)}$fiatAmount")
+        view.updateTransferAmountFiat("${monetaryUtil.getCurrencySymbol(fiatUnit, view.locale)}$fiatAmount")
         view.updateFeeAmountBtc(
                 "${monetaryUtil.getDisplayAmountWithFormatting(totalFee)} $btcUnit")
-        view.updateFeeAmountFiat("${exchangeRateFactory.getSymbol(fiatUnit)}$fiatFee")
+        view.updateFeeAmountFiat("${monetaryUtil.getCurrencySymbol(fiatUnit, view.locale)}$fiatFee")
         view.setPaymentButtonEnabled(true)
 
         view.onUiUpdated()
