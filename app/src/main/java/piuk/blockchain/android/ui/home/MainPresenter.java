@@ -251,7 +251,11 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     private Completable bchCompletable() {
         return bchDataManager.initBchWallet(stringUtils.getString(R.string.bch_default_account_label))
-                .compose(RxUtil.addCompletableToCompositeDisposable(this));
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError(throwable -> {
+                    // TODO: 21/02/2018 Reload or disable?
+                    Timber.e("Failed to load bch wallet");
+                });
     }
 
     private Completable ethCompletable(DeterministicKey node) {

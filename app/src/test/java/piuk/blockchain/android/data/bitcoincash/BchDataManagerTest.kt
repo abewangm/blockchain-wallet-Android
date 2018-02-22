@@ -1,12 +1,17 @@
 package piuk.blockchain.android.data.bitcoincash
 
+import com.google.common.base.Optional
 import com.nhaarman.mockito_kotlin.*
 import info.blockchain.api.blockexplorer.BlockExplorer
 import info.blockchain.wallet.coin.GenericMetadataAccount
+import info.blockchain.wallet.coin.GenericMetadataWallet
 import info.blockchain.wallet.metadata.Metadata
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.HDWallet
 import info.blockchain.wallet.payload.data.Wallet
+import io.reactivex.Completable
+import io.reactivex.Observable
+import junit.framework.Assert
 import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.params.BitcoinCashMainNetParams
 import org.junit.Before
@@ -56,6 +61,38 @@ class BchDataManagerTest : RxTest() {
         )
     }
 
+    private fun mockAbsentMetadata() {
+        whenever(metadataManager.fetchMetadata(any())).thenReturn(Observable.just(Optional.absent()))
+    }
+
+    private fun mockSingleMetadata(): String {
+        val metaData = GenericMetadataWallet()
+        val account = GenericMetadataAccount()
+        account.label = "account label"
+        metaData.addAccount(account)
+
+        whenever(metadataManager.fetchMetadata(any())).thenReturn(Observable.just(Optional.fromNullable(metaData.toJson())))
+
+        return metaData.toJson()
+    }
+
+    private fun mockRestoringSingleBchWallet(xpub: String): GenericMetadataWallet {
+
+        val mnemonic = split("all all all all all all all all all all all all")
+        whenever(payloadDataManager.mnemonic).thenReturn(mnemonic)
+
+        // 1 account
+        val btcAccount: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        whenever(payloadDataManager.accounts).thenReturn(mutableListOf(btcAccount))
+        whenever(btcAccount.xpub).thenReturn(xpub)
+
+        val metaData: GenericMetadataWallet = mock()
+        val bchMetaDataAccount: GenericMetadataAccount = mock()
+        whenever(metaData.accounts).thenReturn(mutableListOf(bchMetaDataAccount))
+
+        return metaData
+    }
+
     @Test
     @Throws(Exception::class)
     fun clearEthAccountDetails() {
@@ -70,28 +107,17 @@ class BchDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun `initBchWallet create new data payload wo second pw`() {
+    fun `initBchWallet create new metadata payload wo second pw`() {
         // Arrange
-        val key: DeterministicKey = mock()
-
-        //restoreBchWallet
         whenever(payloadDataManager.isDoubleEncrypted).thenReturn(false)
-        whenever(payloadDataManager.mnemonic).thenReturn(split("all all all all all all all all all all all all"))
+        mockAbsentMetadata()
+        mockRestoringSingleBchWallet("xpub")
 
-        val metadata: Metadata = mock()
-        whenever(metadataUtils.getMetadataNode(any(), any()))
-                .thenReturn(metadata)
-        whenever(metadata.metadata).thenReturn(null)//json is null = no metadata entry
-
-        // create 1 account
-        val account: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
-        val accounts = mutableListOf(account)
-        whenever(payloadDataManager.accounts).thenReturn(accounts)
-
-        whenever(stringUtils.getString(any())).thenReturn("label")
+        whenever(bchDataStore.bchMetadata!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
 
         // Act
-        val testObserver = subject.initBchWallet(key, "Bitcoin cash account").test()
+        val testObserver = subject.initBchWallet("Bitcoin cash account").test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
@@ -101,24 +127,13 @@ class BchDataManagerTest : RxTest() {
     @Throws(Exception::class)
     fun `initBchWallet retrieve existing data payload wo second pw`() {
         // Arrange
-        val key: DeterministicKey = mock()
         whenever(payloadDataManager.isDoubleEncrypted).thenReturn(false)
-        whenever(payloadDataManager.mnemonic).thenReturn(split("all all all all all all all all all all all all"))
-
-        val metadata: Metadata = mock()
-        whenever(metadataUtils.getMetadataNode(any(), any()))
-                .thenReturn(metadata)
-        whenever(metadata.metadata).thenReturn("{\"some\": \"data\"}")
-
-        // 1 account
-        val accounts: List<Account> = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
-        whenever(payloadDataManager.accounts).thenReturn(accounts)
-        whenever(accounts.size).thenReturn(1)
-
+        mockSingleMetadata()
+        mockRestoringSingleBchWallet("xpub")
         whenever(stringUtils.getString(any())).thenReturn("label")
 
         // Act
-        val testObserver = subject.initBchWallet(key, "Bitcoin cash account").test()
+        val testObserver = subject.initBchWallet("Bitcoin cash account").test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
@@ -126,28 +141,19 @@ class BchDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun `initBchWallet create new data payload with second pw`() {
+    fun `initBchWallet create new metadata payload with second pw`() {
         // Arrange
-        val key: DeterministicKey = mock()
         whenever(payloadDataManager.isDoubleEncrypted).thenReturn(true)
-        val mnemonic: List<String> = mock()
-        whenever(payloadDataManager.mnemonic).thenReturn(mnemonic)
 
-        val metadata: Metadata = mock()
-        whenever(metadataUtils.getMetadataNode(any(), any()))
-                .thenReturn(metadata)
-        whenever(metadata.metadata).thenReturn(null)//json is null = no metadata entry
+        // Arrange
+        mockAbsentMetadata()
+        mockRestoringSingleBchWallet("xpub")
 
-        whenever(stringUtils.getString(any())).thenReturn("label")
-
-        // 1 account
-        val account: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
-        val accounts = mutableListOf(account)
-        whenever(payloadDataManager.accounts).thenReturn(accounts)
-        whenever(account.xpub).thenReturn("xpub6BpNXEHYiYidePgYPQGEFSL46N5phqiddhdkfw5yibtcjr2o9DtMMEaLntH2wPLtFoUN8eW7MZfRA9VfVQju368cnisuPzdBvkEYVrFZ2s5")
+        whenever(bchDataStore.bchMetadata!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
 
         // Act
-        val testObserver = subject.initBchWallet(key, "Bitcoin cash account").test()
+        val testObserver = subject.initBchWallet("Bitcoin cash account").test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
@@ -157,28 +163,158 @@ class BchDataManagerTest : RxTest() {
     @Throws(Exception::class)
     fun `initBchWallet retrieve existing data payload with second pw`() {
         // Arrange
-        val key: DeterministicKey = mock()
         whenever(payloadDataManager.isDoubleEncrypted).thenReturn(true)
-        val mnemonic: List<String> = mock()
-        whenever(payloadDataManager.mnemonic).thenReturn(mnemonic)
-
-        val metadata: Metadata = mock()
-        whenever(metadataUtils.getMetadataNode(any(), any()))
-                .thenReturn(metadata)
-        whenever(metadata.metadata).thenReturn("{\"some\": \"data\"}")
-
-        // 1 account
-        val accounts: List<Account> = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
-        whenever(payloadDataManager.accounts).thenReturn(accounts)
-        whenever(accounts.size).thenReturn(1)
-
+        mockSingleMetadata()
+        mockRestoringSingleBchWallet("xpub")
         whenever(stringUtils.getString(any())).thenReturn("label")
 
         // Act
-        val testObserver = subject.initBchWallet(key, "Bitcoin cash account").test()
+        val testObserver = subject.initBchWallet("Bitcoin cash account").test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `fetchMetadata doesn't exist`() {
+
+        // Arrange
+        mockAbsentMetadata()
+
+        // Act
+        val testObserver = subject.fetchMetadata("label", 1).test()
+
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertValue(Optional.absent())
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `fetchMetadata exists`() {
+
+        // Arrange
+        val walletJson = mockSingleMetadata()
+
+        // Act
+        val testObserver = subject.fetchMetadata("label", 1).test()
+
+        // Assert
+        testObserver.assertComplete()
+        Assert.assertEquals(walletJson, testObserver.values()[0].orNull()!!.toJson())
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `restoreBchWallet with 2nd pw 1 account`() {
+
+        // Arrange
+        whenever(payloadDataManager.isDoubleEncrypted).thenReturn(true)
+        val xpub = "xpub"
+        val metaData = mockRestoringSingleBchWallet(xpub)
+
+        // Act
+        subject.restoreBchWallet(metaData)
+
+        // Assert
+        verify(bchDataStore.bchWallet)!!.addWatchOnlyAccount(xpub)
+        verify(metaData.accounts.get(0)).setXpub(xpub)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `restoreBchWallet with 2nd pw 2 account`() {
+
+        // Arrange
+        whenever(payloadDataManager.isDoubleEncrypted).thenReturn(true)
+        val mnemonic = split("all all all all all all all all all all all all")
+        whenever(payloadDataManager.mnemonic).thenReturn(mnemonic)
+
+        // 1 account
+        val xpub1 = "xpub1"
+        val xpub2 = "xpub2"
+        val btcAccount1: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        val btcAccount2: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        whenever(payloadDataManager.accounts).thenReturn(mutableListOf(btcAccount1, btcAccount2))
+        whenever(btcAccount1.xpub).thenReturn(xpub1)
+        whenever(btcAccount2.xpub).thenReturn(xpub2)
+
+
+        val metaData: GenericMetadataWallet = mock()
+        val bchMetaDataAccount1: GenericMetadataAccount = mock()
+        val bchMetaDataAccount2: GenericMetadataAccount = mock()
+        whenever(metaData.accounts).thenReturn(mutableListOf(bchMetaDataAccount1, bchMetaDataAccount2))
+
+        // Act
+        subject.restoreBchWallet(metaData)
+
+        // Assert
+        verify(bchDataStore.bchWallet)!!.addWatchOnlyAccount(xpub1)
+        verify(bchDataStore.bchWallet)!!.addWatchOnlyAccount(xpub2)
+        verify(metaData.accounts.get(0)).setXpub(xpub1)
+        verify(metaData.accounts.get(1)).setXpub(xpub2)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `restoreBchWallet no 2nd pw 1 account`() {
+
+        // Arrange
+        whenever(payloadDataManager.isDoubleEncrypted).thenReturn(false)
+        val mnemonic = split("all all all all all all all all all all all all")
+        whenever(payloadDataManager.mnemonic).thenReturn(mnemonic)
+
+        // 1 account
+        val xpub = "xpub"
+        val btcAccount: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        whenever(payloadDataManager.accounts).thenReturn(mutableListOf(btcAccount))
+        whenever(btcAccount.xpub).thenReturn(xpub)
+
+
+        val metaData: GenericMetadataWallet = mock()
+        val bchMetaDataAccount: GenericMetadataAccount = mock()
+        whenever(metaData.accounts).thenReturn(mutableListOf(bchMetaDataAccount))
+
+        // Act
+        subject.restoreBchWallet(metaData)
+
+        // Assert
+        verify(bchDataStore.bchWallet)!!.addAccount()
+        verify(metaData.accounts.get(0)).setXpub(xpub)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `restoreBchWallet no 2nd pw 2 account`() {
+
+        // Arrange
+        whenever(payloadDataManager.isDoubleEncrypted).thenReturn(false)
+        val mnemonic = split("all all all all all all all all all all all all")
+        whenever(payloadDataManager.mnemonic).thenReturn(mnemonic)
+
+        // 1 account
+        val xpub1 = "xpub1"
+        val xpub2 = "xpub2"
+        val btcAccount1: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        val btcAccount2: Account = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+        whenever(payloadDataManager.accounts).thenReturn(mutableListOf(btcAccount1, btcAccount2))
+        whenever(btcAccount1.xpub).thenReturn(xpub1)
+        whenever(btcAccount2.xpub).thenReturn(xpub2)
+
+
+        val metaData: GenericMetadataWallet = mock()
+        val bchMetaDataAccount1: GenericMetadataAccount = mock()
+        val bchMetaDataAccount2: GenericMetadataAccount = mock()
+        whenever(metaData.accounts).thenReturn(mutableListOf(bchMetaDataAccount1, bchMetaDataAccount2))
+
+        // Act
+        subject.restoreBchWallet(metaData)
+
+        // Assert
+        verify(bchDataStore.bchWallet, times(2))!!.addAccount()
+        verify(metaData.accounts.get(0)).setXpub(xpub1)
+        verify(metaData.accounts.get(1)).setXpub(xpub2)
     }
 
     @Test

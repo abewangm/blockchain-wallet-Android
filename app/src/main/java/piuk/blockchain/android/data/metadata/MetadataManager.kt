@@ -1,8 +1,8 @@
 package piuk.blockchain.android.data.metadata
 
+import com.google.common.base.Optional
 import info.blockchain.wallet.exceptions.InvalidCredentialsException
 import info.blockchain.wallet.metadata.MetadataNodeFactory
-import info.blockchain.wallet.metadata.Optional
 import io.reactivex.Completable
 import io.reactivex.Observable
 import piuk.blockchain.android.data.payload.PayloadDataManager

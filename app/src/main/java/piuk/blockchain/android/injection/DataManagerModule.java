@@ -162,8 +162,10 @@ public class DataManagerModule {
     protected EthDataManager provideEthDataManager(PayloadManager payloadManager,
                                                    EthDataStore ethDataStore,
                                                    WalletOptionsDataManager walletOptionsDataManager,
+                                                   MetadataManager metadataManager,
                                                    RxBus rxBus) {
-        return new EthDataManager(payloadManager, new EthAccountApi(), ethDataStore, walletOptionsDataManager, rxBus);
+        return new EthDataManager(payloadManager, new EthAccountApi(), ethDataStore,
+                walletOptionsDataManager, metadataManager, rxBus);
     }
 
     @Provides
