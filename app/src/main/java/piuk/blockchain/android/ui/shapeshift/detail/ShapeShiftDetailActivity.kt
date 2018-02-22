@@ -71,6 +71,13 @@ class ShapeShiftDetailActivity : BaseMvpActivity<ShapeShiftDetailView, ShapeShif
 
     override fun updateOrderId(displayString: String) {
         textview_order_id_amount.text = displayString
+        textview_order_id_amount.setOnClickListener {
+            val clipboard =
+                    getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("Send address", displayString)
+            clipboard.primaryClip = clip
+            toast(R.string.copied_to_clipboard)
+        }
     }
 
     override fun showProgressDialog(@StringRes message: Int) {
