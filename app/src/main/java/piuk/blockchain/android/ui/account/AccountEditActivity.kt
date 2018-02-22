@@ -177,6 +177,10 @@ class AccountEditActivity : BaseMvpActivity<AccountEditView, AccountEditPresente
         // No-op
     }
 
+    override fun hideMerchantCopy() {
+        binding.tvExtendedXpubDescription.setText(R.string.extended_public_key_description_bch_only)
+    }
+
     override fun onSendClicked() {
         presenter.submitPayment()
     }

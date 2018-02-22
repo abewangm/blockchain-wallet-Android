@@ -51,4 +51,6 @@ interface AccountEditView : View {
 
     fun updateAppShortcuts()
 
+    fun hideMerchantCopy()
+
 }

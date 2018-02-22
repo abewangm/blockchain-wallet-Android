@@ -169,6 +169,8 @@ class AccountEditPresenter @Inject internal constructor(
             setArchive(bchAccount!!.isArchived, ::isArchivableBch)
             setDefault(isDefaultBch(bchAccount))
         }
+
+        view.hideMerchantCopy()
     }
 
     internal fun areLauncherShortcutsEnabled(): Boolean =

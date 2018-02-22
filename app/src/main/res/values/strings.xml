@@ -322,6 +322,7 @@
         Blockchain Merchant app to receive funds safely and privately.\n\nKeep your xPub private.
         Someone with access to your xPub will be able to see all your funds and transactions.
     </string>
+    <string name="extended_public_key_description_bch_only">Keep your xPub private. Someone with access to your xPub will be able to see all your funds and transactions.</string>
     <string name="watch_only_description">This is a watch only address. To spend your funds from
         this wallet, please scan your private key.
     </string>
