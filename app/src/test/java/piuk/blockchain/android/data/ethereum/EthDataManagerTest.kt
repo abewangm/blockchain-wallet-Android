@@ -137,7 +137,7 @@ class EthDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions response not found`() {
+    fun `isLastTxPending response not found`() {
         // Arrange
         val ethHash = "HASH"
         whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(ethHash)
@@ -163,7 +163,7 @@ class EthDataManagerTest : RxTest() {
         whenever(ethDataStore.ethAddressResponse).thenReturn(combinedEthModel)
 
         // Act
-        val testObserver = subject.hasUnconfirmedEthTransactions().test()
+        val testObserver = subject.isLastTxPending().test()
         // Assert
         testObserver.assertNotComplete()
         verify(ethDataStore, atLeastOnce()).ethWallet
@@ -173,87 +173,95 @@ class EthDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions last tx hash not found`() {
-        // Arrange
-        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn("NEIN")
-        whenever(walletOptionsDataManager.getLastEthTransactionFuse()).thenReturn(Observable.just(600))
-        whenever(ethDataStore.ethWallet!!.lastTransactionTimestamp).thenReturn(0L)
+    fun `isLastTxPending last tx unprocessed, just submitted`() {
 
-        val ethAddress = "ADDRESS"
-        whenever(ethDataStore.ethWallet!!.account.address).thenReturn(ethAddress)
-        val ethAddressResponseMap: EthAddressResponseMap = mock()
-        whenever(ethAccountApi.getEthAddress(listOf(ethAddress)))
-                .thenReturn(Observable.just(ethAddressResponseMap))
+        val isProcessed = false
+        val sent = System.currentTimeMillis()
+        val shouldBePending = true
 
-        val ethAddressResponse: EthAddressResponse = mock()
-        whenever(ethAddressResponseMap.ethAddressResponseMap)
-                .thenReturn(mutableMapOf(Pair("",ethAddressResponse)))
-
-        val ethTransaction: EthTransaction = mock()
-        whenever(ethTransaction.hash).thenReturn("HASH")
-        whenever(ethAddressResponse.transactions)
-                .thenReturn(listOf(ethTransaction, ethTransaction, ethTransaction))
-
-        val combinedEthModel: CombinedEthModel = mock()
-        whenever(combinedEthModel.getTransactions()).thenReturn(listOf(ethTransaction, ethTransaction, ethTransaction))
-        whenever(ethDataStore.ethAddressResponse).thenReturn(combinedEthModel)
-
-        // Act
-        val testObserver = subject.hasUnconfirmedEthTransactions().test()
-        // Assert
-        testObserver.assertComplete()
-        testObserver.assertNoErrors()
-        testObserver.assertValue(false)
-        verify(ethDataStore, atLeastOnce()).ethWallet
-        verify(ethAccountApi, atLeastOnce()).getEthAddress(listOf(ethAddress))
-        verifyNoMoreInteractions(ethAccountApi)
+        isLastTxPending(isProcessed, sent, shouldBePending)
     }
 
     @Test
     @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions last tx hash found - tx pending1`() {
-        // sent now
-        hasUnconfirmedEthTransactions(System.currentTimeMillis(),
-                true)
+    fun `isLastTxPending last tx processed`() {
+
+        val isProcessed = true
+        val sent = System.currentTimeMillis() // irrelevant
+        val shouldBePending = false
+
+        isLastTxPending(isProcessed, sent, shouldBePending)
     }
 
     @Test
     @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions last tx hash found - tx pending2`() {
-        // 9 min ago
-        hasUnconfirmedEthTransactions(System.currentTimeMillis() - (599L * 1000),
-                true)
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions last tx hash found - tx dropped1`() {
+    fun `isLastTxPending last tx unprocessed, legacy processed`() {
         // legacy txs won't have last_tx_timestamp in metadata
-        hasUnconfirmedEthTransactions(0L, false)
+        val isProcessed = false
+        val sent = 0L // irrelevant
+        val shouldBePending = false
+        isLastTxPending(isProcessed, sent, shouldBePending)
     }
 
     @Test
     @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions last tx hash found - tx dropped2`() {
-        // 10 min ago
-        hasUnconfirmedEthTransactions(System.currentTimeMillis() - (600L * 1000),
-                false)
+    fun `isLastTxPending last tx unprocessed, legacy dropped`() {
+        // legacy txs won't have last_tx_timestamp in metadata
+        val isProcessed = false
+        val sent = 0L
+        val shouldBePending = false
+        isLastTxPending(isProcessed, sent, shouldBePending)
     }
 
     @Test
     @Throws(Exception::class)
-    fun `hasUnconfirmedEthTransactions last tx hash found - tx dropped3`() {
-        // long ago
-        hasUnconfirmedEthTransactions(System.currentTimeMillis() - (6000L * 1000),
-                false)
+    fun `isLastTxPending last tx unprocessed, 1min before being dropped`() {
+
+        // 23h59m - 1 min before drop time
+        val isProcessed = false
+        val sent = System.currentTimeMillis() - (86340L * 1000)
+        val shouldBePending = true
+
+        isLastTxPending(isProcessed, sent, shouldBePending)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isLastTxPending last tx unprocessed, just dropped`() {
+
+        // 24h - on drop time
+        val isProcessed = false
+        val sent = System.currentTimeMillis() - (86400L * 1000)
+        val shouldBePending = false
+
+        isLastTxPending(isProcessed, sent, shouldBePending)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isLastTxPending last tx unprocessed, 1min after being dropped`() {
+
+        // 24h01m - 1 min passed drop time
+        val txProcessed = true
+        val sent = System.currentTimeMillis() - (86460L * 1000)
+        val shouldBePending = false
+
+        isLastTxPending(txProcessed, sent, shouldBePending)
     }
 
     @Throws(Exception::class)
-    private fun hasUnconfirmedEthTransactions(timeLastTxSent: Long, hasUnconfirmedFunds: Boolean) {
+    private fun isLastTxPending(isProcessed: Boolean, timeLastTxSent: Long, hasPendingTransaction: Boolean) {
+
         // Arrange
-        val ethHash = "HASH"
-        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(ethHash)
-        whenever(walletOptionsDataManager.getLastEthTransactionFuse()).thenReturn(Observable.just(600))
+        val lastTxHash = "hash1"
+        var existingHash = "hash2"
+
+        if (isProcessed) {
+            //Server flagged last tx hash as processed
+            existingHash = lastTxHash
+        }
+        whenever(ethDataStore.ethWallet!!.lastTransactionHash).thenReturn(lastTxHash)
+        whenever(walletOptionsDataManager.getLastEthTransactionFuse()).thenReturn(Observable.just(86400L))
         whenever(ethDataStore.ethWallet!!.lastTransactionTimestamp).thenReturn(timeLastTxSent)
 
         val ethAddress = "ADDRESS"
@@ -267,7 +275,7 @@ class EthDataManagerTest : RxTest() {
                 .thenReturn(mutableMapOf(Pair("",ethAddressResponse)))
 
         val ethTransaction: EthTransaction = mock()
-        whenever(ethTransaction.hash).thenReturn(ethHash)
+        whenever(ethTransaction.hash).thenReturn(existingHash)
         whenever(ethAddressResponse.transactions)
                 .thenReturn(listOf(ethTransaction, ethTransaction, ethTransaction))
 
@@ -276,11 +284,11 @@ class EthDataManagerTest : RxTest() {
         whenever(ethDataStore.ethAddressResponse).thenReturn(combinedEthModel)
 
         // Act
-        val testObserver = subject.hasUnconfirmedEthTransactions().test()
+        val testObserver = subject.isLastTxPending().test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        testObserver.assertValue(hasUnconfirmedFunds)
+        testObserver.assertValue(hasPendingTransaction)
         verify(ethDataStore, atLeastOnce()).ethWallet
         verify(ethAccountApi, atLeastOnce()).getEthAddress(listOf(ethAddress))
         verifyNoMoreInteractions(ethAccountApi)
