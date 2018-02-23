@@ -322,6 +322,7 @@
         Blockchain Merchant app to receive funds safely and privately.\n\nKeep your xPub private.
         Someone with access to your xPub will be able to see all your funds and transactions.
     </string>
+    <string name="extended_public_key_description_bch_only">Keep your xPub private. Someone with access to your xPub will be able to see all your funds and transactions.</string>
     <string name="watch_only_description">This is a watch only address. To spend your funds from
         this wallet, please scan your private key.
     </string>
@@ -716,6 +717,7 @@
 
     <!-- BUY BITCOIN -->
     <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
+    <string name="onboarding_buy_and_sell_bitcoin">Buy &amp; Sell Bitcoin</string>
     <string name="onboarding_get_bitcoin">Get Bitcoin</string>
     <string name="onboarding_get_eth">Get Ether</string>
     <string name="onboarding_get_bitcoin_cash">Get Bitcoin Cash</string>

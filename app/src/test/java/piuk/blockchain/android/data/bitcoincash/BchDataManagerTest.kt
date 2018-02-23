@@ -1,6 +1,12 @@
 package piuk.blockchain.android.data.bitcoincash
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.atLeastOnce
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.times
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
+import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.api.blockexplorer.BlockExplorer
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.metadata.Metadata
@@ -195,7 +201,7 @@ class BchDataManagerTest : RxTest() {
 
         // Assert
         assertFalse(needsSync)
-        verify(payloadDataManager).accounts
+        verify(payloadDataManager, atLeastOnce()).accounts
         verify(bchDataStore.bchMetadata)!!.accounts
         verifyNoMoreInteractions(payloadDataManager)
         verifyNoMoreInteractions(bchDataStore.bchMetadata)
@@ -218,7 +224,7 @@ class BchDataManagerTest : RxTest() {
 
         // Assert
         assertFalse(needsSync)
-        verify(payloadDataManager).accounts
+        verify(payloadDataManager, atLeastOnce()).accounts
         verify(bchDataStore.bchMetadata)!!.accounts
         verifyNoMoreInteractions(payloadDataManager)
         verifyNoMoreInteractions(bchDataStore.bchMetadata)
@@ -252,7 +258,7 @@ class BchDataManagerTest : RxTest() {
 
         // Assert
         assertTrue(needsSync)
-        verify(payloadDataManager).accounts
+        verify(payloadDataManager, atLeastOnce()).accounts
         verify(bchDataStore.bchMetadata, times(btcAccountsNeeded + mockCallCount))!!.accounts
 
         verify(payloadDataManager, times(btcAccountsNeeded)).wallet
@@ -292,7 +298,7 @@ class BchDataManagerTest : RxTest() {
 
         // Assert
         assertTrue(needsSync)
-        verify(payloadDataManager).accounts
+        verify(payloadDataManager, atLeastOnce()).accounts
         verify(bchDataStore.bchMetadata, times(btcAccountsNeeded + mockCallCount))!!.accounts
 
         verify(payloadDataManager, times(btcAccountsNeeded)).wallet

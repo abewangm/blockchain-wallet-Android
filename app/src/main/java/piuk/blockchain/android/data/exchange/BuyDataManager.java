@@ -12,7 +12,6 @@ import piuk.blockchain.android.data.exchange.models.ExchangeData;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
-import timber.log.Timber;
 
 public class BuyDataManager {
 
@@ -74,7 +73,7 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    private Observable<Boolean> isSfoxAllowed() {
+    public Observable<Boolean> isSfoxAllowed() {
         return Observable.zip(isInSfoxCountry(), buyConditions.exchangeDataSource,
                 (sfoxCountry, exchangeData) -> sfoxCountry
                         || (exchangeData.getSfox() != null && exchangeData.getSfox().getUser() != null));
