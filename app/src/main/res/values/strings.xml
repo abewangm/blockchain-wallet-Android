@@ -717,6 +717,7 @@
 
     <!-- BUY BITCOIN -->
     <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
+    <string name="onboarding_buy_and_sell_bitcoin">Buy &amp; Sell Bitcoin</string>
     <string name="onboarding_get_bitcoin">Get Bitcoin</string>
     <string name="onboarding_get_eth">Get Ether</string>
     <string name="onboarding_get_bitcoin_cash">Get Bitcoin Cash</string>
