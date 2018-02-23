@@ -97,6 +97,7 @@ public class AccessState {
     }
 
     public void unpairWallet() {
+        pin = null;
         prefs.logOut();
         rxBus.emitEvent(AuthEvent.class, AuthEvent.UNPAIR);
     }

@@ -16,6 +16,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
@@ -23,6 +24,7 @@ import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
+import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -45,6 +47,8 @@ public class WebSocketService extends Service {
     @Inject protected SwipeToReceiveHelper swipeToReceiveHelper;
     @Inject protected OkHttpClient okHttpClient;
     @Inject protected RxBus rxBus;
+    @Inject protected AccessState accessState;
+    @Inject protected AppUtil appUtil;
     @Thunk WebSocketHandler webSocketHandler;
 
     protected BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -107,7 +111,9 @@ public class WebSocketService extends Service {
                 getXpubsBch(),
                 getAddressesBch(),
                 getEthAccount(),
-                rxBus);
+                rxBus,
+                accessState,
+                appUtil);
 
         webSocketHandler.start();
     }

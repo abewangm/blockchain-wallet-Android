@@ -5,9 +5,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import info.blockchain.wallet.exceptions.DecryptionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +33,7 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
@@ -41,6 +46,7 @@ import piuk.blockchain.android.data.websocket.models.EthWebsocketResponse;
 import piuk.blockchain.android.ui.balance.BalanceFragment;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.home.MainActivity;
+import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.NotificationsUtil;
 import piuk.blockchain.android.util.annotations.Thunk;
@@ -79,6 +85,8 @@ class WebSocketHandler {
     @Thunk PayloadDataManager payloadDataManager;
     @Thunk CompositeDisposable compositeDisposable = new CompositeDisposable();
     private RxBus rxBus;
+    private AccessState accessState;
+    private AppUtil appUtil;
 
     public WebSocketHandler(Context context,
                             OkHttpClient okHttpClient,
@@ -94,7 +102,9 @@ class WebSocketHandler {
                             String[] xpubsBch,
                             String[] addrsBch,
                             String ethAccount,
-                            RxBus rxBus) {
+                            RxBus rxBus,
+                            AccessState accessState,
+                            AppUtil appUtil) {
 
         this.context = context;
         this.okHttpClient = okHttpClient;
@@ -111,6 +121,8 @@ class WebSocketHandler {
         this.addrsBch = addrsBch;
         this.ethAccount = ethAccount;
         this.rxBus = rxBus;
+        this.accessState = accessState;
+        this.appUtil = appUtil;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -441,8 +453,8 @@ class WebSocketHandler {
                         // Download changed payload
                         //noinspection ThrowableResultOfMethodCallIgnored
                         downloadChangedPayload().subscribe(
-                                () -> showToast().subscribe(new IgnorableDefaultObserver<>()),
-                                throwable -> Timber.e(throwable, "downloadChangedPayload failed"));
+                                () -> showToast(R.string.wallet_updated).subscribe(new IgnorableDefaultObserver<>()),
+                                Timber::e);
                     }
 
                     btcOnChangeHashSet.add(message);
@@ -537,24 +549,32 @@ class WebSocketHandler {
         }
     }
 
-    private Completable showToast() {
+    private Completable showToast(@StringRes int message) {
         return Completable.fromRunnable(
                 () -> ToastCustom.makeText(
                         context,
-                        context.getString(R.string.wallet_updated),
+                        context.getString(message),
                         ToastCustom.LENGTH_SHORT,
                         ToastCustom.TYPE_GENERAL))
                 .subscribeOn(AndroidSchedulers.mainThread());
     }
 
     private Completable downloadChangedPayload() {
-        return Completable.fromCallable(() -> {
-            payloadDataManager.initializeAndDecrypt(
-                    payloadDataManager.getWallet().getSharedKey(),
-                    payloadDataManager.getWallet().getGuid(),
-                    payloadDataManager.getTempPassword()).subscribe(this::updateBtcBalancesAndTransactions);
-            return Void.TYPE;
-        }).compose(RxUtil.applySchedulersToCompletable());
+        return payloadDataManager.initializeAndDecrypt(
+                payloadDataManager.getWallet().getSharedKey(),
+                payloadDataManager.getWallet().getGuid(),
+                payloadDataManager.getTempPassword()
+        ).compose(RxUtil.applySchedulersToCompletable())
+                .doOnComplete(this::updateBtcBalancesAndTransactions)
+                .doOnError(throwable -> {
+                    if (throwable instanceof DecryptionException) {
+                        showToast(R.string.password_changed).subscribe(new IgnorableDefaultObserver<>());
+                        // Password was changed on web, logout to force re-entry of password when
+                        // app restarts
+                        accessState.unpairWallet();
+                        appUtil.restartApp();
+                    }
+                });
     }
 
     private Observable<CombinedEthModel> downloadEthTransactions() {
@@ -581,7 +601,7 @@ class WebSocketHandler {
 
     private class BchWebsocketListener extends BaseWebsocketListener {
         @Override
-        public void onMessage(WebSocket webSocket, String text) {
+        public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
             super.onMessage(webSocket, text);
             Timber.d("BchWebsocketListener onMessage %s", text);
 
@@ -599,7 +619,7 @@ class WebSocketHandler {
 
     private class EthWebsocketListener extends BaseWebsocketListener {
         @Override
-        public void onMessage(WebSocket webSocket, String text) {
+        public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
             super.onMessage(webSocket, text);
             Timber.d("EthWebsocketListener onMessage %s", text);
 
@@ -611,7 +631,7 @@ class WebSocketHandler {
 
     private class BtcWebsocketListener extends BaseWebsocketListener {
         @Override
-        public void onMessage(WebSocket webSocket, String text) {
+        public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
             super.onMessage(webSocket, text);
             Timber.d("BtcWebsocketListener onMessage %s", text);
 
@@ -630,13 +650,13 @@ class WebSocketHandler {
     private class BaseWebsocketListener extends WebSocketListener {
         @CallSuper
         @Override
-        public void onMessage(WebSocket webSocket, String text) {
+        public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
             super.onMessage(webSocket, text);
             sendBroadcast();
         }
 
         @Override
-        public void onOpen(WebSocket webSocket, Response response) {
+        public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
             super.onOpen(webSocket, response);
             connected = true;
             compositeDisposable.clear();
@@ -644,14 +664,14 @@ class WebSocketHandler {
         }
 
         @Override
-        public void onClosed(WebSocket webSocket, int code, String reason) {
+        public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
             super.onClosed(webSocket, code, reason);
             connected = false;
             attemptReconnection();
         }
 
         @Override
-        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+        public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, Response response) {
             super.onFailure(webSocket, t, response);
             connected = false;
             attemptReconnection();
