@@ -21,6 +21,7 @@ import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
+import timber.log.Timber
 import java.math.BigInteger
 import java.util.*
 
@@ -95,22 +96,28 @@ class EthDataManager(
      *
      * @return An [Observable] wrapping a [Boolean]
      */
-    fun hasUnconfirmedEthTransactions(): Observable<Boolean> {
+    fun isLastTxPending(): Observable<Boolean> {
 
         val lastTxHash = ethDataStore.ethWallet?.lastTransactionHash
 
-        //default 10min
-        val lastTxTimestamp = Math.max(ethDataStore.ethWallet?.lastTransactionTimestamp ?: 0L, 600L)
+        //default 1 day
+        val lastTxTimestamp = Math.max(ethDataStore.ethWallet?.lastTransactionTimestamp ?: 0L, 86400L)
 
         // No previous transactions
-        if (lastTxHash == null || ethDataStore.ethAddressResponse?.getTransactions()?.size ?: 0 == 0)
+        if (lastTxHash == null || ethDataStore.ethAddressResponse?.getTransactions()?.size ?: 0 == 0) {
             return Observable.just(false)
+        }
 
+        // If last transaction still hasn't been processed after x amount of time, assume dropped
         return Observable.zip(
-                hasMatchingTx(lastTxHash),
+                hasLastTxBeenProcessed(lastTxHash),
                 isTransactionDropped(lastTxTimestamp),
-                BiFunction({ hasMatch: Boolean, isDropped: Boolean ->
-                    hasMatch && !isDropped
+                BiFunction({ lastTxProcessed: Boolean, isDropped: Boolean ->
+                    if (lastTxProcessed) {
+                        false
+                    } else {
+                        !isDropped
+                    }
                 })
         )
     }
@@ -123,7 +130,7 @@ class EthDataManager(
             walletOptionsDataManager.getLastEthTransactionFuse()
                     .map { System.currentTimeMillis() > lastTxTimestamp + (it * 1000) }
 
-    private fun hasMatchingTx(lastTxHash: String) =
+    private fun hasLastTxBeenProcessed(lastTxHash: String) =
             fetchEthAddress().flatMapIterable { it.getTransactions() }
                     .filter { list -> list.hash == lastTxHash }
                     .toList()

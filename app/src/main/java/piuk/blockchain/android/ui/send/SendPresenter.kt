@@ -1225,7 +1225,13 @@ class SendPresenter @Inject constructor(
         }
 
         //Check if any pending ether txs exist and warn user
-        checkForUnconfirmedTx()
+        isLastEthTxPending()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe({
+                    //no-op
+                }, {
+                    Timber.e(it)
+                })
     }
 
     @Suppress("CascadeIf")
@@ -1721,10 +1727,8 @@ class SendPresenter @Inject constructor(
         if (pendingTransaction.receivingAddress == null) {
             return Observable.just(Pair.of(false, R.string.eth_invalid_address))
         } else {
-            return Observable.zip(
-                    ethDataManager.getIfContract(pendingTransaction.receivingAddress),
-                    ethDataManager.hasUnconfirmedEthTransactions(),
-                    BiFunction { isContract, hasUnconfirmedTransactions ->
+            return ethDataManager.getIfContract(pendingTransaction.receivingAddress)
+                    .map { isContract ->
                         var validated = true
                         var errorMessage = R.string.unexpected_error
 
@@ -1733,52 +1737,59 @@ class SendPresenter @Inject constructor(
                             errorMessage = R.string.eth_support_contract_not_allowed
                             validated = false
                         }
-
-                        //Validate address
-                        if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidEthereumAddress(pendingTransaction.receivingAddress)) {
-                            errorMessage = R.string.eth_invalid_address
-                            validated = false
-                        }
-
-                        //Validate amount
-                        if (!isValidEtherAmount(pendingTransaction.bigIntAmount) || pendingTransaction.bigIntAmount <= BigInteger.ZERO) {
-                            errorMessage = R.string.invalid_amount
-                            validated = false
-                        }
-
-                        // Validate sufficient funds
-                        if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
-                            errorMessage = R.string.insufficient_funds
-                            validated = false
-                        }
-
-                        //Validate address does not have unconfirmed funds
-                        if (hasUnconfirmedTransactions) {
-                            errorMessage = R.string.eth_unconfirmed_wait
-                            validated = false
-                        }
-
                         Pair.of(validated, errorMessage)
-                    })
+                    }.map { errorPair ->
+                        if (errorPair.left) {
+                            var validated = true
+                            var errorMessage = R.string.unexpected_error
+
+                            //Validate address
+                            if (pendingTransaction.receivingAddress == null || !FormatsUtil.isValidEthereumAddress(pendingTransaction.receivingAddress)) {
+                                errorMessage = R.string.eth_invalid_address
+                                validated = false
+                            }
+
+                            //Validate amount
+                            if (!isValidEtherAmount(pendingTransaction.bigIntAmount) || pendingTransaction.bigIntAmount <= BigInteger.ZERO) {
+                                errorMessage = R.string.invalid_amount
+                                validated = false
+                            }
+
+                            // Validate sufficient funds
+                            if (maxAvailable.compareTo(pendingTransaction.bigIntAmount) == -1) {
+                                errorMessage = R.string.insufficient_funds
+                                validated = false
+                            }
+                            Pair.of(validated, errorMessage)
+                        } else {
+                            errorPair
+                        }
+                    }.flatMap { errorPair ->
+                        if (errorPair.left) {
+                            //Validate address does not have unconfirmed funds
+                            isLastEthTxPending()
+                        } else {
+                            Observable.just(errorPair)
+                        }
+                    }
         }
     }
 
-    private fun checkForUnconfirmedTx() {
-        ethDataManager.hasUnconfirmedEthTransactions()
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .subscribe(
-                        { unconfirmed ->
-                            view?.setSendButtonEnabled(!unconfirmed)
-                            if (unconfirmed) {
-                                view?.disableInput()
-                                view?.updateMaxAvailable(stringUtils.getString(R.string.eth_unconfirmed_wait))
-                                view?.updateMaxAvailableColor(R.color.product_red_medium)
-                            } else {
-                                view.enableInput()
-                            }
-                        },
-                        { Timber.e(it) })
-    }
+    private fun isLastEthTxPending() =
+            ethDataManager.isLastTxPending()
+                    .map { hasUnconfirmed: Boolean ->
+
+                        if (hasUnconfirmed) {
+                            view?.disableInput()
+                            view?.updateMaxAvailable(stringUtils.getString(R.string.eth_unconfirmed_wait))
+                            view?.updateMaxAvailableColor(R.color.product_red_medium)
+                        } else {
+                            view.enableInput()
+                        }
+
+                        val errorMessage = R.string.eth_unconfirmed_wait
+                        Pair.of(!hasUnconfirmed, errorMessage)
+                    }
 
     /**
      * Returns true if bitcoin transaction is large by checking against 3 criteria:
