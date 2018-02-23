@@ -142,7 +142,7 @@ public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredVie
                                         payloadResponse);
                                 checkTwoFactor(password, Response.success(responseBody));
                             }, throwable -> {
-                                Timber.e("handleResponse: ", throwable);
+                                Timber.e(throwable);
                                 waitingForAuth = false;
                                 showErrorToastAndRestartApp(R.string.auth_failed);
                             }));
@@ -180,6 +180,7 @@ public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredVie
                             prefsUtil.setValue(PrefsUtil.KEY_GUID, payloadDataManager.getWallet().getGuid());
                             appUtil.setSharedKey(payloadDataManager.getWallet().getSharedKey());
                             prefsUtil.setValue(PrefsUtil.KEY_EMAIL_VERIFIED, true);
+                            prefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
                         })
                         .subscribe(() -> getView().goToPinPage(),
                                 throwable -> {

@@ -16,6 +16,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -476,16 +477,16 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
      * @param fallbackPassword The user's current password as a fallback
      */
     void updatePassword(@NonNull String password, @NonNull String fallbackPassword) {
-        getView().showProgressDialog(R.string.please_wait);
         payloadManager.setTempPassword(password);
 
-        getCompositeDisposable().add(
-                authDataManager.createPin(password, accessState.getPIN())
-                        .andThen(payloadDataManager.syncPayloadWithServer())
-                        .doAfterTerminate(() -> getView().hideProgressDialog())
-                        .subscribe(
-                                () -> getView().showToast(R.string.password_changed, ToastCustom.TYPE_OK),
-                                throwable -> showUpdatePasswordFailed(fallbackPassword)));
+        authDataManager.createPin(password, accessState.getPIN())
+                .doOnSubscribe(ignored -> getView().showProgressDialog(R.string.please_wait))
+                .doOnTerminate(() -> getView().hideProgressDialog())
+                .andThen(payloadDataManager.syncPayloadWithServer())
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .subscribe(
+                        () -> getView().showToast(R.string.password_changed, ToastCustom.TYPE_OK),
+                        throwable -> showUpdatePasswordFailed(fallbackPassword));
     }
 
     private void showUpdatePasswordFailed(@NonNull String fallbackPassword) {
