@@ -208,29 +208,24 @@ class BchDataManager(
     fun correctBtcOffsetIfNeed(defaultBtcLabel: String): Boolean {
 
         val startingAccountIndex = payloadDataManager.accounts.size
-        val accountTotal = bchDataStore.bchMetadata?.accounts?.size?.minus(startingAccountIndex)
-                ?: 0
+        val bchAccountSize = bchDataStore.bchMetadata?.accounts?.size ?: 0
+        val difference = bchAccountSize.minus(startingAccountIndex)
 
-        if (accountTotal > 0) {
-            (startingAccountIndex..accountTotal)
-                    .map {
-                        return@map defaultBtcLabel + " " + it
-                    }
-                    .forEachIndexed { i, _ ->
-
-                        val accountIndex = i + startingAccountIndex
-                        val accountNumber = i + startingAccountIndex + 1
+        if (difference > 0) {
+            (startingAccountIndex until bchAccountSize)
+                    .forEach {
+                        val accountNumber = it + 1
 
                         val acc =
                                 payloadDataManager.wallet.hdWallets[0].addAccount(defaultBtcLabel + " " + accountNumber)
 
-                        bchDataStore.bchMetadata!!.accounts[accountIndex]?.apply {
+                        bchDataStore.bchMetadata!!.accounts[it].apply {
                             this.xpub = acc.xpub
                         }
                     }
         }
 
-        return accountTotal > 0
+        return difference > 0
     }
 
     /**
