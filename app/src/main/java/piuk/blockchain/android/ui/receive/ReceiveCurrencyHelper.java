@@ -161,10 +161,10 @@ public class ReceiveCurrencyHelper {
 
         double cryptoAmount = fiatAmount / getLastPrice();
 
-        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
-            return getFormattedBtcString(cryptoAmount);
-        } else {
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.ETHER) {
             return getFormattedEthString(BigDecimal.valueOf(cryptoAmount));
+        } else {
+            return getFormattedBtcString(cryptoAmount);
         }
     }
     public String getFormattedFiatStringFromCrypto(double cryptoAmount) {
