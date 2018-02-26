@@ -883,6 +883,7 @@
     <string name="invalid_address">Invalid address</string>
     <string name="confirm_currency">Confirm currency</string>
     <string name="confirm_currency_message">Please select which currency\'s QR code you are scanning.</string>
+    <string name="error_bitpay_not_supported">Bitpay URIs are not currently supported</string>
 
     <!--Buy & Sell-->
     <string name="announcement_trading_cta">The wait is over</string>
