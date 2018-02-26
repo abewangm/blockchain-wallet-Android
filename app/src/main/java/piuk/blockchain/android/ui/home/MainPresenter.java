@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.BitcoinUnits;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
@@ -45,6 +46,7 @@ import piuk.blockchain.android.ui.dashboard.DashboardPresenter;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import timber.log.Timber;
 
@@ -143,6 +145,8 @@ public class MainPresenter extends BasePresenter<MainView> {
 
             doWalletOptionsChecks();
         }
+
+        Logging.INSTANCE.logCustom(new BitcoinUnits(prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)));
     }
 
     /*
