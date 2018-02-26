@@ -7,9 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 
 import javax.inject.Inject;
 
+import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.ethereum.EthDataManager;
+import piuk.blockchain.android.data.exchange.BuyConditions;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.injection.Injector;
@@ -50,6 +52,12 @@ public class LogoutActivity extends AppCompatActivity {
                 ethDataManager.clearEthAccountDetails();
                 bchDataManager.clearBchAccountDetails();
                 DashboardPresenter.onLogout();
+
+                BuyConditions.getInstance(
+                        ReplaySubject.create(1),
+                        ReplaySubject.create(1),
+                        ReplaySubject.create(1))
+                        .wipe();
 
                 AccessState.getInstance().setIsLoggedIn(false);
                 finishAffinity();

@@ -222,7 +222,7 @@ class DashboardPresenterTest: RxTest(){
                 .thenReturn(false)
         whenever(stringUtils.getString(any())).thenReturn("")
         whenever(bchDataManager.updateAllBalances()).thenReturn(Completable.complete())
-        whenever(buyDataManager.canBuy).thenReturn(Observable.just(true))
+        whenever(buyDataManager.isSfoxAllowed).thenReturn(Observable.just(true))
         // Act
         subject.onViewReady()
         // Assert
@@ -283,7 +283,7 @@ class DashboardPresenterTest: RxTest(){
                 .thenReturn(false)
         whenever(stringUtils.getString(any())).thenReturn("")
         whenever(bchDataManager.updateAllBalances()).thenReturn(Completable.complete())
-        whenever(buyDataManager.canBuy).thenReturn(Observable.just(false))
+        whenever(buyDataManager.isSfoxAllowed).thenReturn(Observable.just(false))
         // Act
         subject.onViewReady()
         // Assert
