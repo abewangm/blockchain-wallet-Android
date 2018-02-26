@@ -83,7 +83,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
 
-        setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.onboarding_buy_bitcoin);
+        setupToolbar(binding.toolbarContainer.toolbarGeneral, "");
 
         if (AndroidUtils.is21orHigher()) {
             CookieManager.getInstance().setAcceptThirdPartyCookies(binding.webview, true);
