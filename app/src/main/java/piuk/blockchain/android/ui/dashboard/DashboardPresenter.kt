@@ -282,7 +282,7 @@ class DashboardPresenter @Inject constructor(
             }
 
             val buyPrefKey = SFOX_ANNOUNCEMENT_DISMISSED
-            buyDataManager.canBuy
+            buyDataManager.isSfoxAllowed
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .subscribe(
                             {

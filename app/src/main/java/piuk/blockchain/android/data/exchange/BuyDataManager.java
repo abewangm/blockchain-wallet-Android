@@ -74,9 +74,17 @@ public class BuyDataManager {
      * @return An {@link Observable} wrapping a boolean value
      */
     public Observable<Boolean> isSfoxAllowed() {
-        return Observable.zip(isInSfoxCountry(), buyConditions.exchangeDataSource,
-                (sfoxCountry, exchangeData) -> sfoxCountry
-                        || (exchangeData.getSfox() != null && exchangeData.getSfox().getUser() != null));
+        return Observable.zip(isSfoxEnabled(), buyConditions.walletOptionsSource,
+                isInSfoxCountry(), buyConditions.exchangeDataSource,
+                (sfoxEnabled, walletOptions, sfoxCountry, exchangeData) ->
+                        sfoxEnabled &&
+                                (sfoxCountry || (exchangeData.getSfox() != null && exchangeData.getSfox().getUser() != null)));
+    }
+
+    private Observable<Boolean> isSfoxEnabled() {
+        return buyConditions.walletOptionsSource
+                .map(options -> options.getAndroidFlags().containsKey("showSfox")
+                        && options.getAndroidFlags().get("showSfox"));
     }
 
     /**
