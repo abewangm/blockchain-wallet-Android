@@ -15,8 +15,10 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -31,12 +33,13 @@ public class ReceiveQrPresenterTest {
     private ReceiveQrPresenter subject;
     @Mock private ReceiveQrView activity;
     @Mock private QrCodeDataManager qrCodeDataManager;
+    @Mock private PayloadDataManager payloadDataManager;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        subject = new ReceiveQrPresenter(qrCodeDataManager);
+        subject = new ReceiveQrPresenter(payloadDataManager, qrCodeDataManager);
         subject.initView(activity);
     }
 
@@ -104,6 +107,16 @@ public class ReceiveQrPresenterTest {
         subject.onCopyClicked();
         // Assert
         verify(activity).showClipboardWarning(address);
+    }
+
+    @Test
+    public void getPayloadManager() throws Exception {
+        // Arrange
+
+        // Act
+        PayloadDataManager result = subject.getPayloadDataManager();
+        // Assert
+        assertEquals(payloadDataManager, result);
     }
 
 }

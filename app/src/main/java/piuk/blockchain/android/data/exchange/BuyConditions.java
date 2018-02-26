@@ -30,4 +30,7 @@ public class BuyConditions {
         return instance;
     }
 
+    public void wipe() {
+        instance = null;
+    }
 }

@@ -20,7 +20,6 @@ import info.blockchain.wallet.util.PrivateKeyFactory
 import info.blockchain.wallet.util.Tools
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.PublishSubject
 import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.Address
@@ -1254,6 +1253,11 @@ class SendPresenter @Inject constructor(
             onBitcoinChosen()
             address = FormatsUtil.getBitcoinAddress(scanData)
             amount = FormatsUtil.getBitcoinAmount(scanData)
+
+            if (address.isEmpty() && amount == "0.0000" && scanData.contains("bitpay")) {
+                view.showSnackbar(R.string.error_bitpay_not_supported, Snackbar.LENGTH_LONG)
+                return
+            }
 
             // QR scan comes in as BTC - set current btc unit
             prefsUtil.setValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)
