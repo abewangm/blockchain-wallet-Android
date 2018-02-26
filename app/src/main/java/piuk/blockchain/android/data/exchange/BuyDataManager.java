@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.exchange;
 
+import android.support.annotation.VisibleForTesting;
+
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.WalletOptions;
 
@@ -62,7 +64,8 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    private Observable<Boolean> isBuyRolledOut() {
+    @VisibleForTesting
+    Observable<Boolean> isBuyRolledOut() {
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
                         .map(inCoinifyCountry -> isRolloutAllowed(walletOptions.getRolloutPercentage())));
@@ -105,7 +108,8 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    private Observable<Boolean> isCoinifyAllowed() {
+    @VisibleForTesting
+    Observable<Boolean> isCoinifyAllowed() {
         return Observable.zip(isInCoinifyCountry(), buyConditions.exchangeDataSource,
                 (coinifyCountry, exchangeData) -> coinifyCountry
                         || (exchangeData.getCoinify() != null && exchangeData.getCoinify().getUser() != 0));
@@ -148,7 +152,8 @@ public class BuyDataManager {
                         .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode())));
     }
 
-    private Observable<Boolean> isUnocoinAllowed() {
+    @VisibleForTesting
+    Observable<Boolean> isUnocoinAllowed() {
         return Observable.zip(isInUnocoinCountry(), isUnocoinWhitelisted(), isUnocoinEnabledOnAndroid(),
                 (unocoinCountry, whiteListed, androidEnabled) -> (unocoinCountry || whiteListed) && androidEnabled);
     }
