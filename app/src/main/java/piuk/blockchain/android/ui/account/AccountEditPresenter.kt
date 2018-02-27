@@ -487,11 +487,11 @@ class AccountEditPresenter @Inject internal constructor(
             payloadDataManager.wallet!!.hdWallets[0].defaultAccountIdx = accountIndex
         } else {
             revertDefault = bchDataManager.getDefaultAccountPosition()
+            bchDataManager.setDefaultAccountPosition(accountIndex)
             walletSync = metadataManager.saveToMetadata(
                     bchDataManager.serializeForSaving(),
                     BitcoinCashWallet.METADATA_TYPE_EXTERNAL
             )
-            bchDataManager.setDefaultAccountPosition(accountIndex)
         }
 
         walletSync.compose(RxUtil.addCompletableToCompositeDisposable(this))
