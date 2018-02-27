@@ -419,7 +419,7 @@ class SendPresenter @Inject constructor(
     private fun getBchChangeAddress(): Observable<String>? {
         return if (pendingTransaction.isHD(currencyState.cryptoCurrency)) {
             val account = pendingTransaction.sendingObject.accountObject as GenericMetadataAccount
-            val position = bchDataManager.getActiveAccounts().indexOfFirst { it.xpub == account.xpub }
+            val position = bchDataManager.getAccountMetadataList().indexOfFirst { it.xpub == account.xpub }
             bchDataManager.getNextChangeCashAddress(position)
         } else {
             val legacyAddress = pendingTransaction.sendingObject.accountObject as LegacyAddress
@@ -1545,7 +1545,7 @@ class SendPresenter @Inject constructor(
 
         view.updateReceivingAddress(label)
 
-        val position = bchDataManager.getActiveAccounts().indexOfFirst { it.xpub == account.xpub }
+        val position = bchDataManager.getAccountMetadataList().indexOfFirst { it.xpub == account.xpub }
 
         bchDataManager.getNextReceiveCashAddress(position)
                 .doOnNext { pendingTransaction.receivingAddress = it }
