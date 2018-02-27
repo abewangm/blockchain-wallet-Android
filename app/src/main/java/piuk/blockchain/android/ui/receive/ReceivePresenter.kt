@@ -194,7 +194,7 @@ class ReceivePresenter @Inject internal constructor(
         selectedAccount = null
         selectedBchAccount = account
         view.updateReceiveLabel(account.label)
-        val position = bchDataManager.getActiveAccounts().indexOfFirst { it.xpub == account.xpub }
+        val position = bchDataManager.getAccountMetadataList().indexOfFirst { it.xpub == account.xpub }
 
         bchDataManager.updateAllBalances()
                 .doOnSubscribe { view.showQrLoading() }
