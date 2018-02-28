@@ -289,12 +289,14 @@ class AccountEditActivity : BaseMvpActivity<AccountEditView, AccountEditPresente
                 .show()
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
-            presenter.handleIncomingScanIntent(data)
-        }
+        data?.let {
+            if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
+                presenter.handleIncomingScanIntent(data)
+            }
+        } ?: toast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
     }
 
     override fun onRequestPermissionsResult(
