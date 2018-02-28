@@ -4,13 +4,17 @@
 
     <TextView
         android:id="@+id/text"
-        fontPath="fonts/Montserrat-Light.ttf"
-        android:layout_width="match_parent"
+        fontPath="fonts/Montserrat-Regular.ttf"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:textColor="@color/white"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:textColor="@color/primary_gray_medium"
         android:textSize="16sp"
-        tools:background="@color/primary_blue_medium"
+        tools:background="@color/primary_gray_light"
         tools:ignore="MissingPrefix"
         tools:text="My Test Wallet" />
 

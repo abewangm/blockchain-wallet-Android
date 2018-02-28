@@ -1,29 +1,20 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+apply from: 'dependencies.gradle'
 
 buildscript {
-    ext {
-        pluginVersion = '3.0.1'
-        supportVersion = '26.1.0'
-        googleServicesVersion = '11.6.0'
-        rxJavaVersion = '2.1.5'
-        rxAndroidVersion = '2.0.1'
-        daggerVersion = '2.12'
-        retrofitVersion = '2.3.0'
-        okHttpVersion = '3.9.0'
-        mockitoVersion = '2.8.47'
-        kotlinVersion = '1.1.61'
-        constraintLayoutVersion = '1.0.2'
-    }
+    // Exposes dependencies.gradle.ext to all downstream modules
+    apply from: 'dependencies.gradle'
+
     repositories {
         jcenter()
         google()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:$pluginVersion"
+        classpath "com.android.tools.build:gradle:$versions.androidPlugin"
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1'
         classpath 'com.google.gms:google-services:3.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:$versions.kotlin"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

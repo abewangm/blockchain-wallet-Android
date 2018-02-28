@@ -3,6 +3,7 @@ package piuk.blockchain.android.ui.confirm;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
@@ -55,7 +56,7 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.dialog_confirm_transaction, container, false);
         binding.getRoot().setFocusableInTouchMode(true);
         binding.getRoot().requestFocus();
@@ -84,7 +85,7 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         binding.toolbar.setNavigationOnClickListener(v -> dismiss());
@@ -149,6 +150,17 @@ public class ConfirmPaymentDialog extends BaseDialogFragment<ConfirmPaymentView,
     @Override
     public String getContactNote() {
         return getArguments().getString(ARGUMENT_CONTACT_NOTE);
+    }
+
+    @Override
+    public void setWarning(String warning) {
+        binding.layoutWarning.setVisibility(View.VISIBLE);
+        binding.textviewWarning.setText(warning);
+    }
+
+    @Override
+    public void setWarningSubText(String warningSubText) {
+        binding.textviewWarningSub.setText(warningSubText);
     }
 
     @Override

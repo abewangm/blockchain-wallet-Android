@@ -29,7 +29,7 @@ class FctxDelegate<in T>(
         activity: Activity,
         private var btcExchangeRate: Double,
         private var isBtc: Boolean,
-        private val listClickListener: BalanceListClickListener
+        private val listClickListener: TxFeedClickListener
 ) : AdapterDelegate<T> {
 
     private val dateUtil = DateUtil(activity)

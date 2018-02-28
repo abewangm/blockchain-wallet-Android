@@ -27,6 +27,7 @@ task testEnvProdMinApi21DebugUnitTestCoverage(type: JacocoReport, dependsOn: "te
             '**/directory**',
             '**/adapter**',
             '**/models**',
+            '**/extensions**',
             '**/*$ViewInjector*.*',
             '**/*$ViewBinder*.*',
             '**/*_Factory.*',

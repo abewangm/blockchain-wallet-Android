@@ -632,7 +632,7 @@
     <string name="payment_request">Požadavek na platbu</string>
     <string name="restoring_wallet">Obnovování peněženky.</string>
     <string name="support_leaving_app_warning">Toto opustí aplikaci a vezme vás do prohlížeče. Pokračovat?</string>
-    <string name="addresses">Adresy bitcoinu</string>
+    <string name="addresses_bitcoin">Adresy bitcoinu</string>
     <string name="received_ethereum">Přijat ether</string>
     <string name="transaction_occur_when_bitcoin">K transakcím dochází při příjmu a odesílání bitcoinů.</string>
     <string name="transaction_occur_when_eth">K transakcím dochází při příjmu a odesílání ether.</string>
@@ -687,10 +687,5 @@
     <string name="dashboard_charts_error">Chyba při načítání dat grafu</string>
     <string name="dashboard_charts_price_error">Chyba při načítání cenových dat</string>
 
-    <string name="onboarding_ether_title">Nyní podporujeme ether</string>
-    <string name="onboarding_ether_description">Ptali jste se, poslouchali jsme. S radostí oznamujeme, že Vaše peněženka Blockchain Vám nyní umožňuje snadno odesílat a přijímat ether!</string>
-    <string name="onboarding_ether_cta">Začněte s ether</string>
-
     <string name="metadata_load_failure">Chyba při načítání plné funkčnosti peněženky. Služba možná není dočasně dostupná.</string>
-    <string name="fee_helper_message">Těžaři obdrží tento poplatek za zpracování této transakce.</string>
 </resources>

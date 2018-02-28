@@ -5,7 +5,11 @@ import android.os.Bundle
 import android.support.annotation.StringRes
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.LocalBroadcastManager
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.WindowManager
 import kotlinx.android.synthetic.main.dialog_transfer_funds.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.injection.Injector
@@ -20,12 +24,15 @@ import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils
 import uk.co.chrisjenx.calligraphy.TypefaceUtils
+import java.util.*
 import javax.inject.Inject
 
-class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransferView, ConfirmFundsTransferPresenter>(),
-        ConfirmFundsTransferView {
+class ConfirmFundsTransferDialogFragment :
+    BaseDialogFragment<ConfirmFundsTransferView, ConfirmFundsTransferPresenter>(),
+    ConfirmFundsTransferView {
 
     @Inject lateinit var confirmFundsTransferPresenter: ConfirmFundsTransferPresenter
+    override val locale: Locale = Locale.getDefault()
 
     private var progressDialog: MaterialProgressDialog? = null
 
@@ -34,12 +41,17 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ) = inflater?.inflate(R.layout.dialog_transfer_funds, container, false)?.apply {
-        isFocusableInTouchMode = true
-        requestFocus()
+    ): View? {
+        dialog.apply { setCancelable(true) }
+
+        // You'd think we could use container?.inflate(...) here, but container is null at this point
+        return inflater.inflate(R.layout.dialog_transfer_funds, container, false).apply {
+            isFocusableInTouchMode = true
+            requestFocus()
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -51,16 +63,15 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
             params.height = WindowManager.LayoutParams.MATCH_PARENT
             window.attributes = params
         }
-        dialog.setCancelable(true)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener { dismiss() }
         toolbar.title = CalligraphyUtils.applyTypefaceSpan(
                 getString(R.string.transfer_confirm),
-                TypefaceUtils.load(context.assets, "fonts/Montserrat-Regular.ttf")
+                TypefaceUtils.load(context!!.assets, "fonts/Montserrat-Regular.ttf")
         )
 
         val receiveToAdapter = AddressAdapter(
@@ -102,7 +113,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
 
     override fun showProgressDialog() {
         hideProgressDialog()
-        if (activity != null && !activity.isFinishing) {
+        if (activity != null && !activity!!.isFinishing) {
             progressDialog = MaterialProgressDialog(context).apply {
                 setMessage(getString(R.string.please_wait))
                 setCancelable(false)
@@ -149,13 +160,15 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
     override fun getIfArchiveChecked() = checkbox_archive.isChecked
 
     override fun dismissDialog() {
-        val intent = Intent(BalanceFragment.ACTION_INTENT)
-        LocalBroadcastManager.getInstance(activity).sendBroadcast(intent)
+        activity?.run {
+            val intent = Intent(BalanceFragment.ACTION_INTENT)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        }
         dismiss()
     }
 
     override fun showToast(@StringRes message: Int, @ToastCustom.ToastType toastType: String) {
-        activity?.toast(message, toastType)
+        toast(message, toastType)
     }
 
     override fun createPresenter() = confirmFundsTransferPresenter
@@ -172,5 +185,7 @@ class ConfirmFundsTransferDialogFragment : BaseDialogFragment<ConfirmFundsTransf
                 setStyle(DialogFragment.STYLE_NO_FRAME, R.style.FullscreenDialog)
             }
         }
+
     }
+
 }

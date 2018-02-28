@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.datamanagers.QrCodeDataManager;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
@@ -15,11 +16,13 @@ public class ReceiveQrPresenter extends BasePresenter<ReceiveQrView> {
 
     private static final int DIMENSION_QR_CODE = 600;
 
+    private PayloadDataManager payloadDataManager;
     private QrCodeDataManager qrCodeDataManager;
     @VisibleForTesting String receiveAddressString;
 
     @Inject
-    ReceiveQrPresenter(QrCodeDataManager qrCodeDataManager) {
+    ReceiveQrPresenter(PayloadDataManager payloadDataManager, QrCodeDataManager qrCodeDataManager) {
+        this.payloadDataManager = payloadDataManager;
         this.qrCodeDataManager = qrCodeDataManager;
     }
 
@@ -53,6 +56,10 @@ public class ReceiveQrPresenter extends BasePresenter<ReceiveQrView> {
 
     void onCopyClicked() {
         getView().showClipboardWarning(receiveAddressString);
+    }
+
+    PayloadDataManager getPayloadDataManager() {
+        return payloadDataManager;
     }
 
 }

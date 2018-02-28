@@ -3,15 +3,12 @@ package piuk.blockchain.android.data.notifications;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
-import android.util.Log;
-
 import javax.inject.Inject;
 
 import piuk.blockchain.android.injection.Injector;
+import timber.log.Timber;
 
 public class InstanceIdService extends FirebaseInstanceIdService {
-
-    private static final String TAG = InstanceIdService.class.getSimpleName();
 
     @Inject protected NotificationTokenManager notificationTokenManager;
 
@@ -20,14 +17,14 @@ public class InstanceIdService extends FirebaseInstanceIdService {
     }
 
     public InstanceIdService() {
-        Log.d(TAG, "InstanceIdService: constructor instantiated");
+        Timber.d("InstanceIdService: constructor instantiated");
     }
 
     @Override
     public void onTokenRefresh() {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        Log.d(TAG, "Refreshed token: " + refreshedToken);
+        Timber.d("Refreshed token: %s", refreshedToken);
 
         if (refreshedToken != null) {
             notificationTokenManager.storeAndUpdateToken(refreshedToken);

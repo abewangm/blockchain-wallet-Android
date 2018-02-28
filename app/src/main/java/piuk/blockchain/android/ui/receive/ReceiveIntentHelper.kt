@@ -53,6 +53,7 @@ class ReceiveIntentHelper(private val context: Context) {
             val emailIntent = Intent(Intent.ACTION_SENDTO).apply { setupIntentForImage(type, file) }
 
             when {
+                uri.startsWith("bitcoincash") -> emailIntent.apply { setupIntentForEmailBch(uri) }
                 uri.startsWith("bitcoin") -> emailIntent.apply { setupIntentForEmailBtc(uri) }
                 FormatsUtil.isValidEthereumAddress(uri) -> emailIntent.apply { setupIntentForEmailEth(uri) }
                 else -> throw IllegalArgumentException("Unknown URI $uri")
@@ -130,7 +131,7 @@ class ReceiveIntentHelper(private val context: Context) {
     ) {
         resolveInfo
                 .filterNot { intentHashMap.containsKey(it.activityInfo.name) }
-                .forEach { intentHashMap.put(it.activityInfo.name, Pair(it, Intent(intent))) }
+                .forEach { intentHashMap[it.activityInfo.name] = Pair(it, Intent(intent)) }
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -152,6 +153,14 @@ class ReceiveIntentHelper(private val context: Context) {
 
         putExtra(Intent.EXTRA_TEXT, body)
         putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.email_request_subject_eth))
+    }
+
+    private fun Intent.setupIntentForEmailBch(uri: String) {
+        val address = uri.removePrefix("bitcoincash:")
+        val body = String.format(context.getString(R.string.email_request_body_bch), address)
+
+        putExtra(Intent.EXTRA_TEXT, body)
+        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.email_request_subject_bch))
     }
 
     private fun Intent.setupIntentForImage(type: String?, file: File) {

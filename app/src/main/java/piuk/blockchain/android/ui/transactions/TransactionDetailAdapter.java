@@ -51,8 +51,8 @@ public class TransactionDetailAdapter extends BaseAdapter implements SpinnerAdap
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             convertView = inflater.inflate(R.layout.spinner_item_transaction_detail, null);
             viewholder = new ViewHolder();
-            viewholder.address = (TextView) convertView.findViewById(R.id.address);
-            viewholder.amount = (TextView) convertView.findViewById(R.id.amount);
+            viewholder.address = convertView.findViewById(R.id.address);
+            viewholder.amount = convertView.findViewById(R.id.amount);
 
             convertView.setTag(viewholder);
         } else {

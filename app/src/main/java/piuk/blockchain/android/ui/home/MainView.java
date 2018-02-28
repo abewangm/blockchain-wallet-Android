@@ -46,4 +46,6 @@ interface MainView extends View {
     void showShapeshift();
 
     void hideShapeshift();
+
+    void updateNavDrawerToBuyAndSell();
 }

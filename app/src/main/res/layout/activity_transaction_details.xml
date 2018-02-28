@@ -112,10 +112,13 @@
 
                 </RelativeLayout>
 
-                <include layout="@layout/divider_grey" />
+                <include
+                    android:id="@+id/description_layout_divider"
+                    layout="@layout/divider_grey" />
 
                 <!-- DESCRIPTION -->
                 <RelativeLayout
+                    android:id="@+id/description_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp">

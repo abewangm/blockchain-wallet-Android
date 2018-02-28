@@ -2,6 +2,7 @@ package piuk.blockchain.android.injection;
 
 import android.content.Context;
 
+import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.api.FeeApi;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.ethereum.EthAccountApi;
@@ -15,8 +16,11 @@ import dagger.Module;
 import dagger.Provides;
 import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.auth.AuthService;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
+import piuk.blockchain.android.data.bitcoincash.BchDataStore;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.charts.ChartsDataManager;
 import piuk.blockchain.android.data.contacts.ContactsDataManager;
@@ -34,6 +38,7 @@ import piuk.blockchain.android.data.exchange.BuyConditions;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.exchange.ExchangeService;
 import piuk.blockchain.android.data.fingerprint.FingerprintAuthImpl;
+import piuk.blockchain.android.data.metadata.MetadataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payload.PayloadService;
 import piuk.blockchain.android.data.payments.PaymentService;
@@ -56,6 +61,7 @@ import piuk.blockchain.android.util.AESUtilWrapper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.BackupWalletUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MetadataUtils;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 
@@ -92,24 +98,32 @@ public class DataManagerModule {
                                                              StringUtils stringUtils,
                                                              ExchangeRateFactory exchangeRateFactory,
                                                              CurrencyState currencyState,
-                                                             EthDataManager ethDataManager) {
+                                                             EthDataManager ethDataManager,
+                                                             BchDataManager bchDataManager,
+                                                             EnvironmentSettings environmentSettings) {
         return new WalletAccountHelper(payloadManager,
                 stringUtils,
                 prefsUtil,
                 exchangeRateFactory,
                 currencyState,
-                ethDataManager);
+                ethDataManager,
+                bchDataManager,
+                environmentSettings);
     }
 
     @Provides
     @PresenterScope
     protected TransactionListDataManager provideTransactionListDataManager(PayloadManager payloadManager,
                                                                            EthDataManager ethDataManager,
-                                                                           TransactionListStore transactionListStore) {
+                                                                           BchDataManager bchDataManager,
+                                                                           TransactionListStore transactionListStore,
+                                                                           CurrencyState currencyState) {
         return new TransactionListDataManager(
                 payloadManager,
                 ethDataManager,
-                transactionListStore);
+                bchDataManager,
+                transactionListStore,
+                currencyState);
     }
 
     @Provides
@@ -147,8 +161,9 @@ public class DataManagerModule {
     @PresenterScope
     protected EthDataManager provideEthDataManager(PayloadManager payloadManager,
                                                    EthDataStore ethDataStore,
+                                                   WalletOptionsDataManager walletOptionsDataManager,
                                                    RxBus rxBus) {
-        return new EthDataManager(payloadManager, new EthAccountApi(), ethDataStore, rxBus);
+        return new EthDataManager(payloadManager, new EthAccountApi(), ethDataStore, walletOptionsDataManager, rxBus);
     }
 
     @Provides
@@ -156,20 +171,28 @@ public class DataManagerModule {
     protected SwipeToReceiveHelper provideSwipeToReceiveHelper(PayloadDataManager payloadDataManager,
                                                                PrefsUtil prefsUtil,
                                                                EthDataManager ethDataManager,
-                                                               StringUtils stringUtils) {
-        return new SwipeToReceiveHelper(payloadDataManager, prefsUtil, ethDataManager, stringUtils);
+                                                               BchDataManager bchDataManager,
+                                                               StringUtils stringUtils,
+                                                               EnvironmentSettings environmentSettings) {
+        return new SwipeToReceiveHelper(payloadDataManager,
+                prefsUtil,
+                ethDataManager,
+                bchDataManager,
+                stringUtils,
+                environmentSettings);
     }
 
     @Provides
     @PresenterScope
-    protected SendDataManager provideSendDataManager(RxBus rxBus) {
-        return new SendDataManager(new PaymentService(new Payment()), rxBus);
+    protected SendDataManager provideSendDataManager(EnvironmentSettings environmentSettings, RxBus rxBus) {
+        return new SendDataManager(new PaymentService(environmentSettings, new Payment()), rxBus);
     }
 
     @Provides
     @PresenterScope
-    protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager) {
-        return new TransactionHelper(payloadDataManager);
+    protected TransactionHelper provideTransactionHelper(PayloadDataManager payloadDataManager,
+                                                         BchDataManager bchDataManager) {
+        return new TransactionHelper(payloadDataManager, bchDataManager);
     }
 
     @Provides
@@ -190,8 +213,8 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected FeeDataManager provideFeeDataManager(RxBus rxBus) {
-        return new FeeDataManager(new FeeApi(), rxBus);
+    protected FeeDataManager provideFeeDataManager(WalletOptionsDataManager walletOptionsDataManager, RxBus rxBus) {
+        return new FeeDataManager(new FeeApi(), walletOptionsDataManager, rxBus);
     }
 
     @Provides
@@ -239,11 +262,48 @@ public class DataManagerModule {
     @Provides
     @PresenterScope
     protected WalletOptionsDataManager provideWalletOptionsDataManager(AuthDataManager authDataManager,
-                                                                       SettingsDataManager settingsDataManager) {
+                                                                       SettingsDataManager settingsDataManager,
+                                                                       EnvironmentSettings environmentSettings) {
         return new WalletOptionsDataManager(authDataManager, WalletOptionsState.getInstance(
                 ReplaySubject.create(1),
                 ReplaySubject.create(1)),
-                settingsDataManager);
+                settingsDataManager,
+                environmentSettings);
     }
 
+    @Provides
+    @PresenterScope
+    protected MetadataManager provideMetadataManager(PayloadDataManager payloadDataManager,
+                                                     EthDataManager ethDataManager,
+                                                     BchDataManager bchDataManager,
+                                                     ShapeShiftDataManager shapeShiftDataManager,
+                                                     StringUtils stringUtils,
+                                                     MetadataUtils metadataUtils,
+                                                     RxBus rxBus) {
+        return new MetadataManager(payloadDataManager,
+                ethDataManager,
+                bchDataManager,
+                shapeShiftDataManager,
+                stringUtils,
+                metadataUtils,
+                rxBus);
+    }
+
+    @Provides
+    @PresenterScope
+    protected BchDataManager provideBchDataManager(PayloadDataManager payloadDataManager,
+                                                   BchDataStore bchDataStore,
+                                                   MetadataUtils metadataUtils,
+                                                   EnvironmentSettings environmentSettings,
+                                                   BlockExplorer blockExplorer,
+                                                   StringUtils stringUtils,
+                                                   RxBus rxBus) {
+        return new BchDataManager(payloadDataManager,
+                bchDataStore,
+                metadataUtils,
+                environmentSettings,
+                blockExplorer,
+                stringUtils,
+                rxBus);
+    }
 }

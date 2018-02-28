@@ -10,7 +10,7 @@ import io.reactivex.Observable
 import org.amshove.kluent.shouldEqual
 import org.apache.commons.lang3.tuple.Pair
 import org.bitcoinj.core.ECKey
-import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.params.BitcoinMainNetParams
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -34,7 +34,7 @@ class SendDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun submitPayment() {
+    fun `submitPayment BTC`() {
         // Arrange
         val mockOutputBundle: SpendableUnspentOutputs = mock()
         val mockKeys = listOf(mock<ECKey>())
@@ -43,29 +43,82 @@ class SendDataManagerTest : RxTest() {
         val mockFee: BigInteger = mock()
         val mockAmount: BigInteger = mock()
         val txHash = "TX_HASH"
-        whenever(mockPaymentService.submitPayment(mockOutputBundle,
-                mockKeys,
-                toAddress,
-                changeAddress,
-                mockFee,
-                mockAmount)).thenReturn(Observable.just(txHash))
+        whenever(
+                mockPaymentService.submitPayment(
+                        mockOutputBundle,
+                        mockKeys,
+                        toAddress,
+                        changeAddress,
+                        mockFee,
+                        mockAmount
+                )
+        ).thenReturn(Observable.just(txHash))
         // Act
-        val testObserver = subject.submitPayment(mockOutputBundle,
+        val testObserver = subject.submitBtcPayment(
+                mockOutputBundle,
                 mockKeys,
                 toAddress,
                 changeAddress,
                 mockFee,
-                mockAmount).test()
+                mockAmount
+        ).test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         testObserver.values()[0] shouldEqual txHash
-        verify(mockPaymentService).submitPayment(mockOutputBundle,
+        verify(mockPaymentService).submitPayment(
+                mockOutputBundle,
                 mockKeys,
                 toAddress,
                 changeAddress,
                 mockFee,
-                mockAmount)
+                mockAmount
+        )
+        verifyNoMoreInteractions(mockPaymentService)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `submitPayment BCH`() {
+        // Arrange
+        val mockOutputBundle: SpendableUnspentOutputs = mock()
+        val mockKeys = listOf(mock<ECKey>())
+        val toAddress = "TO_ADDRESS"
+        val changeAddress = "CHANGE_ADDRESS"
+        val mockFee: BigInteger = mock()
+        val mockAmount: BigInteger = mock()
+        val txHash = "TX_HASH"
+        whenever(
+                mockPaymentService.submitBchPayment(
+                        mockOutputBundle,
+                        mockKeys,
+                        toAddress,
+                        changeAddress,
+                        mockFee,
+                        mockAmount
+                )
+        ).thenReturn(Observable.just(txHash))
+        // Act
+        val testObserver = subject.submitBchPayment(
+                mockOutputBundle,
+                mockKeys,
+                toAddress,
+                changeAddress,
+                mockFee,
+                mockAmount
+        ).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.values()[0] shouldEqual txHash
+        verify(mockPaymentService).submitBchPayment(
+                mockOutputBundle,
+                mockKeys,
+                toAddress,
+                changeAddress,
+                mockFee,
+                mockAmount
+        )
         verifyNoMoreInteractions(mockPaymentService)
     }
 
@@ -73,6 +126,7 @@ class SendDataManagerTest : RxTest() {
     // not sure what's changed. The test passes now, but should be changed to assert success conditions
     // when the fix is discovered.
     // TODO: Fix me, and then test for success
+    // TODO: 08/01/2018 This will default to bitcoin network parameters
     @Ignore
     @Test
     @Throws(Exception::class)
@@ -80,7 +134,7 @@ class SendDataManagerTest : RxTest() {
         // Arrange
         val password = "thisisthepassword"
         val scanData = "6PYP4i7UyewqZWqdnpQwMdCyneXPaFDPkk8LArmVexqoGsy9Yx92SiLCPm"
-        val params = MainNetParams.get()
+        val params = BitcoinMainNetParams.get()
         // Act
         val testObserver = subject.getEcKeyFromBip38(password, scanData, params).test()
         // Assert
@@ -91,7 +145,7 @@ class SendDataManagerTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
-    fun getUnspentOutputs() {
+    fun `getUnspentOutputs BTC`() {
         // Arrange
         val address = "ADDRESS"
         val mockUnspentOutputs: UnspentOutputs = mock()
@@ -104,6 +158,24 @@ class SendDataManagerTest : RxTest() {
         testObserver.assertNoErrors()
         testObserver.values()[0] shouldEqual mockUnspentOutputs
         verify(mockPaymentService).getUnspentOutputs(address)
+        verifyNoMoreInteractions(mockPaymentService)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getUnspentOutputs BCH`() {
+        // Arrange
+        val address = "ADDRESS"
+        val mockUnspentOutputs: UnspentOutputs = mock()
+        whenever(mockPaymentService.getUnspentBchOutputs(address))
+                .thenReturn(Observable.just(mockUnspentOutputs))
+        // Act
+        val testObserver = subject.getUnspentBchOutputs(address).test()
+        // Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.values()[0] shouldEqual mockUnspentOutputs
+        verify(mockPaymentService).getUnspentBchOutputs(address)
         verifyNoMoreInteractions(mockPaymentService)
     }
 

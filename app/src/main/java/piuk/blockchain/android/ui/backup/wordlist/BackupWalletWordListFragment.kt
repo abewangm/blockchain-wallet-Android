@@ -39,12 +39,12 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?,
+            inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ) = container!!.inflate(R.layout.fragment_backup_word_list)
+    ): View? = container?.inflate(R.layout.fragment_backup_word_list)
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         onViewReady()
 
@@ -134,21 +134,25 @@ class BackupWalletWordListFragment : BaseFragment<BackupWalletWordListView, Back
             }
         }
 
-        fragmentManager.beginTransaction()
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .replace(R.id.content_frame, fragment)
-                .addToBackStack(null)
-                .commit()
+        fragmentManager?.run {
+            beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .replace(R.id.content_frame, fragment)
+                    .addToBackStack(null)
+                    .commit()
+        }
     }
 
     private fun getFormattedPositionString(): CharSequence? = "$word ${currentWordIndex + 1} $of 12"
 
     override fun onDestroyView() {
         super.onDestroyView()
-        val view = activity.currentFocus
-        if (view != null) {
-            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        activity?.run {
+            val view = currentFocus
+            if (view != null) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+            }
         }
     }
 

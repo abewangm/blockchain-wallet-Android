@@ -2,12 +2,14 @@ package piuk.blockchain.android.ui.send;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import info.blockchain.wallet.coin.GenericMetadataAccount;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 
 import java.math.BigInteger;
 
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.ui.account.ItemAccount;
 
 public class PendingTransaction {
@@ -23,6 +25,8 @@ public class PendingTransaction {
     public BigInteger bigIntFee;
     public BigInteger bigIntAmount;
     public int addressToReceiveIndex;
+    public String warningText;
+    public String warningSubText;
 
     @JsonIgnore
     public BigInteger getTotal() {
@@ -30,8 +34,12 @@ public class PendingTransaction {
     }
 
     @JsonIgnore
-    public boolean isHD() {
-        return (sendingObject.getAccountObject() instanceof Account);
+    public boolean isHD(CryptoCurrencies currency) {
+        if (currency == CryptoCurrencies.BTC) {
+            return (sendingObject.getAccountObject() instanceof Account);
+        } else {
+            return (sendingObject.getAccountObject() instanceof GenericMetadataAccount);
+        }
     }
 
     @JsonIgnore
@@ -65,6 +73,8 @@ public class PendingTransaction {
         receivingAddress = null;
         bigIntFee = null;
         bigIntAmount = null;
+        warningText = null;
+        warningSubText = null;
     }
 
     @Override
@@ -79,6 +89,8 @@ public class PendingTransaction {
                 ", bigIntFee=" + bigIntFee +
                 ", bigIntAmount=" + bigIntAmount +
                 ", addressToReceiveIndex=" + addressToReceiveIndex +
+                ", warningText=" + warningText +
+                ", warningSubText=" + warningSubText +
                 '}';
     }
 }

@@ -37,6 +37,11 @@
     <color name="product_green_medium">#00A76F</color>
     <color name="product_red_medium">#CA3A3C</color>
 
+    <!-- Color palette for currencys -->
+    <color name="color_bitcoin">@color/primary_navy_medium</color>
+    <color name="color_ether">@color/primary_blue_accent</color>
+    <color name="color_bitcoin_cash">@color/primary_blue_light</color>
+
     <!-- Specified in designs but not named in spec -->
     <color name="primary_gray_dark">#4c4c4c</color>
     <color name="primary_gray_medium">#FF808080</color>
@@ -50,6 +55,7 @@
     <color name="product_green_received_50">#800bbabc</color>
     <color name="product_gray_watch_only">#757575</color>
     <color name="product_gray_headers">#4B4D4E</color>
+    <color name="product_light_blue_background">#1A10ADE4</color>
     <!-- Used for hint/disclaimer/footnote text -->
     <color name="product_gray_hint">#B0B0B0</color>
 

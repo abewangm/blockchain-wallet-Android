@@ -632,7 +632,7 @@
     <string name="payment_request">Żądanie zapłaty</string>
     <string name="restoring_wallet">Przywracanie portfela.</string>
     <string name="support_leaving_app_warning">Spowoduje to wyjście z aplikacji i otworzenie przeglądarki. Kontynuować?</string>
-    <string name="addresses">Adresy Bitcoin</string>
+    <string name="addresses_bitcoin">Adresy Bitcoin</string>
     <string name="merchant_map">Mapa handlarzy Bitcoinami</string>
     <string name="received_ethereum">Otrzymane Ether</string>
     <string name="transaction_occur_when_bitcoin">Transakcje mają miejsce, gdy wysyłasz lub otrzymujesz bitcoiny.</string>

@@ -5,16 +5,29 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import javax.inject.Inject;
+
+import io.reactivex.subjects.ReplaySubject;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.bitcoincash.BchDataManager;
+import piuk.blockchain.android.data.ethereum.EthDataManager;
+import piuk.blockchain.android.data.exchange.BuyConditions;
+import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.websocket.WebSocketService;
+import piuk.blockchain.android.injection.Injector;
+import piuk.blockchain.android.ui.dashboard.DashboardPresenter;
 import piuk.blockchain.android.util.OSUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 
-/**
- * Created by adambennett on 04/08/2016.
- */
-
 public class LogoutActivity extends AppCompatActivity {
+
+    @Inject protected BuyDataManager buyDataManager;
+    @Inject protected EthDataManager ethDataManager;
+    @Inject protected BchDataManager bchDataManager;
+
+    {
+        Injector.getInstance().getPresenterComponent().inject(this);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,6 +44,20 @@ public class LogoutActivity extends AppCompatActivity {
                 if (new OSUtil(this).isServiceRunning(WebSocketService.class)) {
                     stopService(intent);
                 }
+
+                // TODO: 21/02/2018 I'm not sure this is a great way to reset things, but it'll
+                // do for now until we've had a rethink. Should individual datamanagers get
+                // Rx events and handle their own state during logout?
+                buyDataManager.wipe();
+                ethDataManager.clearEthAccountDetails();
+                bchDataManager.clearBchAccountDetails();
+                DashboardPresenter.onLogout();
+
+                BuyConditions.getInstance(
+                        ReplaySubject.create(1),
+                        ReplaySubject.create(1),
+                        ReplaySubject.create(1))
+                        .wipe();
 
                 AccessState.getInstance().setIsLoggedIn(false);
                 finishAffinity();

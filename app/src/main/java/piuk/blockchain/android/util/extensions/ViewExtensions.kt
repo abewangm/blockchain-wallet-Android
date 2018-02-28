@@ -34,6 +34,32 @@ fun View?.gone() {
 }
 
 /**
+ * Sets the visibility of a [View] to [View.GONE] depending on a predicate
+ *
+ * @param func If true, the visibility of the [View] will be set to [View.GONE], else [View.VISIBLE]
+ */
+fun View?.goneIf(func: () -> Boolean) {
+    if (func()) {
+        if (this != null) visibility = View.GONE
+    } else {
+        if (this != null) visibility = View.VISIBLE
+    }
+}
+
+/**
+ * Sets the visibility of a [View] to [View.INVISIBLE] depending on a predicate
+ *
+ * @param func If true, the visibility of the [View] will be set to [View.INVISIBLE], else [View.VISIBLE]
+ */
+fun View?.invisibleIf(func: () -> Boolean) {
+    if (func()) {
+        if (this != null) visibility = View.GONE
+    } else {
+        if (this != null) visibility = View.INVISIBLE
+    }
+}
+
+/**
  * Allows a [ViewGroup] to inflate itself without all of the unneeded ceremony of getting a
  * [LayoutInflater] and always passing the [ViewGroup] + false. True can optionally be passed if
  * needed.

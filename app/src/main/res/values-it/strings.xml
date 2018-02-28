@@ -634,7 +634,7 @@
     <string name="payment_request">Richiesta di pagamento</string>
     <string name="restoring_wallet">Ripristino del portafoglio in corso...</string>
     <string name="support_leaving_app_warning">Con questo passaggio uscirai dall\'app e sarai condotto sul tuo browser. Vuoi continuare?</string>
-    <string name="addresses">Indirizzi Bitcoin</string>
+    <string name="addresses_bitcoin">Indirizzi Bitcoin</string>
     <string name="merchant_map">Mappa commercianti Bitcoin</string>
     <string name="received_ethereum">Ether ricevuti</string>
     <string name="transaction_occur_when_bitcoin">Le transazioni sono effettuate quando ricevi e invii bitcoin.</string>

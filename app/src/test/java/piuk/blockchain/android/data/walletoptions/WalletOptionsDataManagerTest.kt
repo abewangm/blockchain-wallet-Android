@@ -11,10 +11,12 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import piuk.blockchain.android.RxTest
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import kotlin.test.assertEquals
 
+@Suppress("IllegalIdentifier")
 class WalletOptionsDataManagerTest : RxTest() {
 
     private lateinit var subject: WalletOptionsDataManager
@@ -24,6 +26,7 @@ class WalletOptionsDataManagerTest : RxTest() {
             ReplaySubject.create(1),
             ReplaySubject.create(1))
     private val mockSettingsDataManager: SettingsDataManager = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
+    private val environmentSettings: EnvironmentSettings = mock()
 
     @Before
     @Throws(Exception::class)
@@ -34,7 +37,7 @@ class WalletOptionsDataManagerTest : RxTest() {
         walletOptionsState = WalletOptionsState.getInstance(
                 ReplaySubject.create(1),
                 ReplaySubject.create(1))
-        subject = WalletOptionsDataManager(mockAuthDataManager, walletOptionsState, mockSettingsDataManager)
+        subject = WalletOptionsDataManager(mockAuthDataManager, walletOptionsState, mockSettingsDataManager, environmentSettings)
     }
 
     @Test
@@ -220,4 +223,40 @@ class WalletOptionsDataManagerTest : RxTest() {
         testObserver.assertValue(true)
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun `getBuyWebviewWalletLink wallet-options set`() {
+        // Arrange
+        val walletOptionsRoot = "https://blockchain.com/wallet"
+        val environmentRoot = "https://blockchain.info/"
+
+        val mockOptions: WalletOptions = mock()
+        whenever(mockOptions.buyWebviewWalletLink).thenReturn(walletOptionsRoot)
+        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockOptions))
+        whenever(environmentSettings.explorerUrl).thenReturn(environmentRoot)
+
+        // Act
+        val result = subject.getBuyWebviewWalletLink()
+
+        // Assert
+        assertEquals("https://blockchain.com/wallet/#/intermediate", result)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `getBuyWebviewWalletLink wallet-options unset`() {
+        // Arrange
+        val walletOptionsRoot = null
+        val environmentRoot = "https://blockchain.info/"
+
+        val mockOptions: WalletOptions = mock()
+        whenever(mockOptions.buyWebviewWalletLink).thenReturn(walletOptionsRoot)
+        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockOptions))
+        whenever(environmentSettings.explorerUrl).thenReturn(environmentRoot)
+        // Act
+        val result = subject.getBuyWebviewWalletLink()
+
+        // Assert
+        assertEquals("https://blockchain.info/wallet/#/intermediate", result)
+    }
 }

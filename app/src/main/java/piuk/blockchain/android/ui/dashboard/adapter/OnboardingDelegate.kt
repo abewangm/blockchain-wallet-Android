@@ -1,6 +1,6 @@
 package piuk.blockchain.android.ui.dashboard.adapter
 
-import android.app.Activity
+import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
@@ -20,14 +20,14 @@ import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.invisible
 import piuk.blockchain.android.util.extensions.visible
-import piuk.blockchain.android.util.helperfunctions.onPageChangeListener
+import piuk.blockchain.android.util.helperfunctions.setOnPageChangeListener
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
 
 class OnboardingDelegate<in T>(
-        private val activity: Activity
+        private val context: Context
 ) : AdapterDelegate<T> {
 
-    private val onboardingPagerAdapter by unsafeLazy { OnboardingPagerAdapter(activity) }
+    private val onboardingPagerAdapter by unsafeLazy { OnboardingPagerAdapter(context) }
 
     override fun isForViewType(items: List<T>, position: Int): Boolean =
             items[position] is OnboardingModel
@@ -48,29 +48,31 @@ class OnboardingDelegate<in T>(
         val pagerItems = data.pagerContent
 
         holder.viewPager.adapter = onboardingPagerAdapter
-        holder.viewPager.addOnPageChangeListener(onPageChangeListener { page, positionOffset ->
-            val count = onboardingPagerAdapter.count
-            if (page == count - 1) {
-                // Last page
-                holder.completeLayout.visible()
-                holder.viewPager.setPagingEnabled(false)
-                data.onboardingComplete()
-            } else if (page == count - 2) {
-                // Second to last page
-                holder.completeLayout.visible()
-                holder.indicator.alpha = 1 - positionOffset
-                holder.skipAll.alpha = 1 - positionOffset
-                holder.completeLayout.alpha = positionOffset
-                data.onboardingNotComplete()
-            } else {
-                holder.indicator.visible()
-                holder.skipAll.visible()
-                holder.completeLayout.invisible()
-                holder.indicator.alpha = 1.0f
-                holder.skipAll.alpha = 1.0f
-                data.onboardingNotComplete()
+        holder.viewPager.setOnPageChangeListener {
+            onPageScrolled { position, positionOffset ->
+                val count = onboardingPagerAdapter.count
+                if (position == count - 1) {
+                    // Last page
+                    holder.completeLayout.visible()
+                    holder.viewPager.setPagingEnabled(false)
+                    data.onboardingComplete()
+                } else if (position == count - 2) {
+                    // Second to last page
+                    holder.completeLayout.visible()
+                    holder.indicator.alpha = 1 - positionOffset
+                    holder.skipAll.alpha = 1 - positionOffset
+                    holder.completeLayout.alpha = positionOffset
+                    data.onboardingNotComplete()
+                } else {
+                    holder.indicator.visible()
+                    holder.skipAll.visible()
+                    holder.completeLayout.invisible()
+                    holder.indicator.alpha = 1.0f
+                    holder.skipAll.alpha = 1.0f
+                    data.onboardingNotComplete()
+                }
             }
-        })
+        }
 
         holder.skipAll.setOnClickListener { data.dismissOnboarding() }
         holder.closeButton.setOnClickListener { data.dismissOnboarding() }

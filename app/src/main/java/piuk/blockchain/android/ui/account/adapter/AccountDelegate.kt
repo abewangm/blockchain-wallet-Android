@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import kotlinx.android.synthetic.main.item_accounts_row.view.*
 import piuk.blockchain.android.R
+import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.ui.account.AccountItem
 import piuk.blockchain.android.ui.adapters.AdapterDelegate
+import piuk.blockchain.android.util.extensions.getContext
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.visible
@@ -27,89 +29,121 @@ class AccountDelegate<in T>(
             payloads: List<*>
     ) {
         val accountViewHolder = holder as AccountViewHolder
-
-        val accountItem = items[position] as AccountItem
-
-        // Normal account view
-        accountViewHolder.itemView.setOnClickListener {
-            listener.onAccountClicked(accountItem.correctedPosition)
-        }
-
-        accountViewHolder.title.text = accountItem.label
-
-        if (!accountItem.address.isNullOrEmpty()) {
-            accountViewHolder.address.apply {
-                visible()
-                text = accountItem.address
-            }
-        } else {
-            accountViewHolder.address.gone()
-        }
-
-        if (accountItem.isArchived) {
-            accountViewHolder.amount.apply {
-                setText(R.string.archived_label)
-                setTextColor(
-                        ContextCompat.getColor(
-                                accountViewHolder.itemView.context,
-                                R.color.product_gray_transferred
-                        ))
-            }
-        } else {
-            accountViewHolder.amount.apply {
-                text = accountItem.amount
-                setTextColor(
-                        ContextCompat.getColor(
-                                accountViewHolder.itemView.context,
-                                R.color.product_green_medium
-                        ))
-            }
-        }
-
-        if (accountItem.isWatchOnly) {
-            accountViewHolder.tag.apply {
-                setText(R.string.watch_only)
-                setTextColor(
-                        ContextCompat.getColor(
-                                accountViewHolder.itemView.context,
-                                R.color.product_red_medium
-                        ))
-            }
-        }
-
-        if (accountItem.isDefault) {
-            accountViewHolder.tag.apply {
-                setText(R.string.default_label)
-                setTextColor(
-                        ContextCompat.getColor(
-                                accountViewHolder.itemView.context,
-                                R.color.product_gray_transferred
-                        ))
-            }
-        }
-
-        if (!accountItem.isWatchOnly && !accountItem.isDefault) {
-            accountViewHolder.tag.gone()
-        } else {
-            accountViewHolder.tag.visible()
-        }
+        accountViewHolder.bind(items[position] as AccountItem, listener)
     }
 
-    override fun isForViewType(items: List<T>, position: Int): Boolean {
-        if (items[position] is AccountItem) {
-            return (items[position] as AccountItem).type == AccountItem.TYPE_ACCOUNT
-        } else {
-            return false
-        }
-    }
+    override fun isForViewType(items: List<T>, position: Int): Boolean =
+            if (items[position] is AccountItem) {
+                (items[position] as AccountItem).type == AccountItem.TYPE_ACCOUNT_BTC
+                        || (items[position] as AccountItem).type == AccountItem.TYPE_ACCOUNT_BCH
+                        || (items[position] as AccountItem).type == AccountItem.TYPE_LEGACY_SUMMARY
+            } else {
+                false
+            }
 
     private class AccountViewHolder internal constructor(
             itemView: View
     ) : RecyclerView.ViewHolder(itemView) {
-        internal var title: TextView = itemView.my_account_row_label
-        internal var address: TextView = itemView.my_account_row_address
-        internal var amount: TextView = itemView.my_account_row_amount
-        internal var tag: TextView = itemView.my_account_row_tag
+
+        private val title: TextView = itemView.my_account_row_label
+        private val address: TextView = itemView.my_account_row_address
+        private val amount: TextView = itemView.my_account_row_amount
+        private val tag: TextView = itemView.my_account_row_tag
+
+        internal fun bind(accountItem: AccountItem, listener: AccountHeadersListener) {
+
+            if (accountItem.type == AccountItem.TYPE_LEGACY_SUMMARY) {
+                itemView.setOnClickListener(null)
+                title.text = getContext().getString(R.string.imported_addresses)
+                address.gone()
+                tag.gone()
+                amount.apply {
+                    text = accountItem.amount
+                    setTextColor(
+                            ContextCompat.getColor(
+                                    itemView.context,
+                                    R.color.product_green_medium
+                            )
+                    )
+                }
+
+            } else {
+                // Normal account view
+                itemView.setOnClickListener {
+                    listener.onAccountClicked(
+                            if (accountItem.type == AccountItem.TYPE_ACCOUNT_BCH) {
+                                CryptoCurrencies.BCH
+                            } else {
+                                CryptoCurrencies.BTC
+                            },
+                            accountItem.correctedPosition
+                    )
+                }
+
+                title.text = accountItem.label
+
+                if (!accountItem.address.isNullOrEmpty()) {
+                    address.apply {
+                        visible()
+                        text = accountItem.address
+                    }
+                } else {
+                    address.gone()
+                }
+
+                if (accountItem.isArchived) {
+                    amount.apply {
+                        setText(R.string.archived_label)
+                        setTextColor(
+                                ContextCompat.getColor(
+                                        itemView.context,
+                                        R.color.product_gray_transferred
+                                )
+                        )
+                    }
+                } else {
+                    amount.apply {
+                        text = accountItem.amount
+                        setTextColor(
+                                ContextCompat.getColor(
+                                        itemView.context,
+                                        R.color.product_green_medium
+                                )
+                        )
+                    }
+                }
+
+                if (accountItem.isWatchOnly) {
+                    tag.apply {
+                        setText(R.string.watch_only)
+                        setTextColor(
+                                ContextCompat.getColor(
+                                        itemView.context,
+                                        R.color.product_red_medium
+                                )
+                        )
+                    }
+                }
+
+                if (accountItem.isDefault) {
+                    tag.apply {
+                        setText(R.string.default_label)
+                        setTextColor(
+                                ContextCompat.getColor(
+                                        itemView.context,
+                                        R.color.product_gray_transferred
+                                )
+                        )
+                    }
+                }
+
+                if (!accountItem.isWatchOnly && !accountItem.isDefault) {
+                    tag.gone()
+                } else {
+                    tag.visible()
+                }
+            }
+        }
     }
 
 }

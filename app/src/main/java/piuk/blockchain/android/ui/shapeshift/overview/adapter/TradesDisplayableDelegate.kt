@@ -4,8 +4,6 @@ import android.app.Activity
 import android.support.annotation.ColorRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.text.Spannable
-import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
@@ -29,6 +27,7 @@ class TradesDisplayableDelegate<in T>(
         activity: Activity,
         private var btcExchangeRate: Double,
         private var ethExchangeRate: Double,
+        private var bchExchangeRate: Double,
         private var showCrypto: Boolean,
         private val listClickListener: TradesListClickListener
 ) : AdapterDelegate<T> {
@@ -112,6 +111,7 @@ class TradesDisplayableDelegate<in T>(
                     viewHolder.status.setTextColor(getResolvedColor(viewHolder, R.color.product_gray_transferred))
                     R.string.shapeshift_in_progress_title
                 }
+                else -> throw IllegalStateException("Unknown status ${trade.status}")
             }
 
     private fun getDisplaySpannable(
@@ -122,30 +122,31 @@ class TradesDisplayableDelegate<in T>(
         val displayAmount: String
 
         if (showCrypto) {
-
-            var cryptoAmount = when (cryptoCurrency.toUpperCase()) {
+            val crypto = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> monetaryUtil.getEthFormat().format(cryptoAmount)
                 CryptoCurrencies.BTC.symbol -> btcFormat.format(cryptoAmount)
+                CryptoCurrencies.BCH.symbol -> btcFormat.format(cryptoAmount)
                 else -> monetaryUtil.getBtcFormat().format(cryptoAmount)//Coin type not specified
             }
 
-            displayAmount = "$cryptoAmount $cryptoCurrency"
+            displayAmount = "$crypto $cryptoCurrency"
         } else {
 
             val fiatAmount = when (cryptoCurrency.toUpperCase()) {
                 CryptoCurrencies.ETHER.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(ethExchangeRate))
                 CryptoCurrencies.BTC.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(btcExchangeRate))
+                CryptoCurrencies.BCH.symbol -> cryptoAmount.multiply(BigDecimal.valueOf(bchExchangeRate))
                 else -> BigDecimal.ZERO//Coin type not specified
             }
 
-            val unit = getPreferedFiatUnit();
+            val unit = getPreferredFiatUnit()
             displayAmount = "${monetaryUtil.getFiatFormat(unit).format(fiatAmount.abs())} $unit"
         }
 
         return displayAmount
     }
 
-    private fun getPreferedFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
+    private fun getPreferredFiatUnit() = prefsUtil.getValue(PrefsUtil.KEY_SELECTED_FIAT, PrefsUtil.DEFAULT_CURRENCY)
 
     private class TradeViewHolder internal constructor(
             itemView: View

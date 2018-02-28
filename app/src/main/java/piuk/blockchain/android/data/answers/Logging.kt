@@ -14,7 +14,7 @@ import piuk.blockchain.android.BuildConfig
 @Suppress("ConstantConditionIf")
 object Logging {
 
-    private val shouldLog = BuildConfig.USE_CRASHLYTICS || BuildConfig.DOGFOOD
+    private const val shouldLog = BuildConfig.USE_CRASHLYTICS || BuildConfig.DOGFOOD
 
     fun logCustom(customEvent: CustomEvent) {
         if (shouldLog) Answers.getInstance().logCustom(customEvent)

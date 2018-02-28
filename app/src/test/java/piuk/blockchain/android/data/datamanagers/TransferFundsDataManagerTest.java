@@ -25,7 +25,6 @@ import piuk.blockchain.android.RxTest;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.payments.SendDataManager;
-import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.account.ItemAccount;
 import piuk.blockchain.android.ui.send.PendingTransaction;
 
@@ -80,7 +79,7 @@ public class TransferFundsDataManagerTest extends RxTest {
     @Test
     public void sendPaymentSuccess() throws Exception {
         // Arrange
-        when(sendDataManager.submitPayment(
+        when(sendDataManager.submitBtcPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 anyString(),
@@ -116,7 +115,7 @@ public class TransferFundsDataManagerTest extends RxTest {
     @Test
     public void sendPaymentError() throws Exception {
         // Arrange
-        when(sendDataManager.submitPayment(
+        when(sendDataManager.submitBtcPayment(
                 any(SpendableUnspentOutputs.class),
                 anyList(),
                 anyString(),

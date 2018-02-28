@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.exchange;
 
+import android.support.annotation.VisibleForTesting;
+
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.WalletOptions;
 
@@ -8,6 +10,7 @@ import org.spongycastle.util.encoders.Hex;
 
 import io.reactivex.Observable;
 import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.exchange.models.ExchangeData;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
@@ -44,15 +47,16 @@ public class BuyDataManager {
         Observable<Settings> walletSettingsStream = settingsDataManager.getSettings();
         walletSettingsStream.subscribeWith(buyConditions.walletSettingsSource);
 
-        Observable<Boolean> coinifyWhitelistedStream = exchangeService.hasCoinifyAccount();
-        coinifyWhitelistedStream.subscribeWith(buyConditions.coinifyWhitelistedSource);
+        Observable<ExchangeData> exchangeDataStream = exchangeService.getExchangeMetaData();
+        exchangeDataStream.subscribeWith(buyConditions.exchangeDataSource);
     }
 
     public synchronized Observable<Boolean> getCanBuy() {
         initReplaySubjects();
 
-        return Observable.zip(isBuyRolledOut(), isCoinifyAllowed(), isUnocoinAllowed(),
-                (isBuyRolledOut, allowCoinify, allowUnocoin) -> isBuyRolledOut && (allowCoinify || allowUnocoin));
+        return Observable.zip(isBuyRolledOut(), isCoinifyAllowed(), isUnocoinAllowed(), isSfoxAllowed(),
+                (isBuyRolledOut, allowCoinify, allowUnocoin, allowSfox) ->
+                        isBuyRolledOut && (allowCoinify || allowUnocoin || allowSfox));
     }
 
     /**
@@ -60,10 +64,43 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    private Observable<Boolean> isBuyRolledOut() {
+    @VisibleForTesting
+    Observable<Boolean> isBuyRolledOut() {
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
                         .map(inCoinifyCountry -> isRolloutAllowed(walletOptions.getRolloutPercentage())));
+    }
+
+    /**
+     * Checks if user has whitelisted sfox account or in valid sfox country
+     *
+     * @return An {@link Observable} wrapping a boolean value
+     */
+    public Observable<Boolean> isSfoxAllowed() {
+        return Observable.zip(isSfoxEnabled(), buyConditions.walletOptionsSource,
+                isInSfoxCountry(), buyConditions.exchangeDataSource,
+                (sfoxEnabled, walletOptions, sfoxCountry, exchangeData) ->
+                        sfoxEnabled &&
+                                (sfoxCountry || (exchangeData.getSfox() != null && exchangeData.getSfox().getUser() != null)));
+    }
+
+    private Observable<Boolean> isSfoxEnabled() {
+        return buyConditions.walletOptionsSource
+                .map(options -> options.getAndroidFlags().containsKey("showSfox")
+                        && options.getAndroidFlags().get("showSfox"));
+    }
+
+    /**
+     * Checks whether or not a user is accessing their wallet from a Sfox country/state.
+     *
+     * @return An {@link Observable} wrapping a boolean value
+     */
+    private Observable<Boolean> isInSfoxCountry() {
+        return buyConditions.walletOptionsSource
+                .flatMap(walletOptions -> buyConditions.walletSettingsSource
+                        .map(settings ->
+                                walletOptions.getPartners().getSfox().getCountries().contains(settings.getCountryCode())
+                                        && walletOptions.getPartners().getSfox().getStates().contains(settings.getState())));
     }
 
     /**
@@ -71,9 +108,11 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    private Observable<Boolean> isCoinifyAllowed() {
-        return Observable.zip(isInCoinifyCountry(), buyConditions.coinifyWhitelistedSource,
-                (coinifyCountry, whiteListed) -> coinifyCountry || whiteListed);
+    @VisibleForTesting
+    Observable<Boolean> isCoinifyAllowed() {
+        return Observable.zip(isInCoinifyCountry(), buyConditions.exchangeDataSource,
+                (coinifyCountry, exchangeData) -> coinifyCountry
+                        || (exchangeData.getCoinify() != null && exchangeData.getCoinify().getUser() != 0));
     }
 
     /**
@@ -113,7 +152,8 @@ public class BuyDataManager {
                         .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode())));
     }
 
-    private Observable<Boolean> isUnocoinAllowed() {
+    @VisibleForTesting
+    Observable<Boolean> isUnocoinAllowed() {
         return Observable.zip(isInUnocoinCountry(), isUnocoinWhitelisted(), isUnocoinEnabledOnAndroid(),
                 (unocoinCountry, whiteListed, androidEnabled) -> (unocoinCountry || whiteListed) && androidEnabled);
     }

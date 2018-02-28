@@ -5,7 +5,7 @@ import android.support.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
@@ -20,12 +20,12 @@ import timber.log.Timber;
 public class RxBus {
 
     /**
-     * A threadsafe map of lists of {@link PublishSubject} objects, where their type is used as the
-     * key for lookups.
+     * A map of lists of {@link PublishSubject} objects, where their type is used as the
+     * key for lookups. This holds weak references, in order to prevent potential memory leaks.
      */
     @SuppressWarnings("WeakerAccess")
     @VisibleForTesting
-    ConcurrentHashMap<Object, List<Subject>> subjectsMap = new ConcurrentHashMap<>();
+    WeakHashMap<Object, List<Subject>> subjectsMap = new WeakHashMap<>();
 
     /**
      * Registers a new {@link PublishSubject} whose type matches the class {@code type} passed to

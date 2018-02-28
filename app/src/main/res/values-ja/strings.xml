@@ -632,7 +632,7 @@
     <string name="payment_request">決済リクエスト</string>
     <string name="restoring_wallet">ウォレットを復元しています。</string>
     <string name="support_leaving_app_warning">これによりアプリからブラウザに移動します。続行しますか？</string>
-    <string name="addresses">ビットコインアドレス</string>
+    <string name="addresses_bitcoin">ビットコインアドレス</string>
     <string name="merchant_map">ビットコイン商人マップ</string>
     <string name="received_ethereum">受信したEther</string>
     <string name="transaction_occur_when_bitcoin">ビットコインを送受信する際に取引が発生します。</string>
