@@ -71,17 +71,19 @@ public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredVie
     }
 
     void onForgetWalletClicked() {
-        getView().showForgetWalletWarning(new DialogButtonCallback() {
-            @Override
-            public void onPositiveClicked() {
-                appUtil.clearCredentialsAndRestart();
-            }
+        if (getView() != null) {
+            getView().showForgetWalletWarning(new DialogButtonCallback() {
+                @Override
+                public void onPositiveClicked() {
+                    appUtil.clearCredentialsAndRestart();
+                }
 
-            @Override
-            public void onNegativeClicked() {
-                // No-op
-            }
-        });
+                @Override
+                public void onNegativeClicked() {
+                    // No-op
+                }
+            });
+        }
     }
 
     void submitTwoFactorCode(JSONObject responseObject, String sessionId, String password, String code) {
