@@ -59,11 +59,14 @@ public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredVie
     }
 
     void onContinueClicked() {
-        if (getView().getPassword().length() > 1) {
-            verifyPassword(getView().getPassword());
-        } else {
-            getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
-            getView().restartPage();
+        // Seems that on low memory devices it's quite possible that the view is null here
+        if (getView() != null) {
+            if (getView().getPassword().length() > 1) {
+                verifyPassword(getView().getPassword());
+            } else {
+                getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
+                getView().restartPage();
+            }
         }
     }
 
