@@ -122,6 +122,11 @@ class AccountEditActivity : BaseMvpActivity<AccountEditView, AccountEditPresente
 
     override fun onSupportNavigateUp(): Boolean = consume { onBackPressed() }
 
+    override fun finishPage() {
+        setResult(Activity.RESULT_CANCELED)
+        finish()
+    }
+
     override fun sendBroadcast(key: String, data: String) {
         val intent = Intent(WebSocketService.ACTION_INTENT).apply { putExtra(key, data) }
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)

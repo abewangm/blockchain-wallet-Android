@@ -53,4 +53,6 @@ interface AccountEditView : View {
 
     fun hideMerchantCopy()
 
+    fun finishPage()
+
 }
