@@ -11,6 +11,7 @@ import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.util.annotations.Mockable
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
+import timber.log.Timber
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -45,16 +46,20 @@ class ExchangeRateFactory private constructor() {
         rxPinning = RxPinning(rxBus)
     }
 
-    fun updateTickers(): Observable<Map<String, PriceDatum>> = rxPinning.call<Map<String, PriceDatum>> {
-        getBtcTicker().mergeWith(getEthTicker())
-                .mergeWith(getBchTicker())
-    }
+    fun updateTickers(): Observable<Map<String, PriceDatum>> =
+            rxPinning.call<Map<String, PriceDatum>> {
+                getBtcTicker().mergeWith(getEthTicker())
+                        .mergeWith(getBchTicker())
+            }
 
-    fun getLastBtcPrice(currencyName: String) = getLastPrice(currencyName.toUpperCase(), CryptoCurrencies.BTC)
+    fun getLastBtcPrice(currencyName: String) =
+            getLastPrice(currencyName.toUpperCase(), CryptoCurrencies.BTC)
 
-    fun getLastBchPrice(currencyName: String) = getLastPrice(currencyName.toUpperCase(), CryptoCurrencies.BCH)
+    fun getLastBchPrice(currencyName: String) =
+            getLastPrice(currencyName.toUpperCase(), CryptoCurrencies.BCH)
 
-    fun getLastEthPrice(currencyName: String) = getLastPrice(currencyName.toUpperCase(), CryptoCurrencies.ETHER)
+    fun getLastEthPrice(currencyName: String) =
+            getLastPrice(currencyName.toUpperCase(), CryptoCurrencies.ETHER)
 
     @Deprecated(
             "use MonetaryUtil.getCurrencySymbol, as this method doesn't allow the passing of a locale",
@@ -166,7 +171,13 @@ class ExchangeRateFactory private constructor() {
         }
 
         var lastPrice: Double
-        val lastKnown = prefsUtil.getValue("$prefsKey$currency", "0.0").toDouble()
+        val lastKnown = try {
+            prefsUtil.getValue("$prefsKey$currency", "0.0").toDouble()
+        } catch (e: NumberFormatException) {
+            Timber.e(e)
+            prefsUtil.setValue("$prefsKey$currency", "0.0")
+            return 0.0
+        }
 
         if (tickerData == null) {
             lastPrice = lastKnown
