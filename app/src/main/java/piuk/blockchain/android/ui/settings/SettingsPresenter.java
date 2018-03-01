@@ -2,6 +2,9 @@ package piuk.blockchain.android.ui.settings;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.support.design.widget.Snackbar;
+
+import java.util.concurrent.TimeUnit;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -11,6 +14,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -133,7 +137,9 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         // SMS and Email notification status
         getView().setEmailNotificationPref(false);
 
-        getView().setPushNotificationPref(isPushNotificationEnabled());
+        // TODO: 01/03/2018 Token for Maros debugging
+        getView().setPushNotificationPref(isPushNotificationEnabled(),
+                prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "not set"));
 
         if (settings.isNotificationsOn() && !settings.getNotificationsType().isEmpty()) {
             for (int type : settings.getNotificationsType()) {
@@ -559,8 +565,10 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
 
         notificationTokenManager.enableNotifications()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .andThen(Completable.timer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread()))// TODO: 01/03/2018  Maros debugging
                 .doOnComplete(() -> {
-                    getView().setPushNotificationPref(isPushNotificationEnabled());
+                    getView().showFirebaseToken(prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, ""));
+                    updateUi();
                 })
                 .subscribe(() -> {
                             //no-op
@@ -575,7 +583,8 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         notificationTokenManager.disableNotifications()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnComplete(() -> {
-                    getView().setPushNotificationPref(isPushNotificationEnabled());
+                    getView().setPushNotificationPref(false, prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "not set"));
+                    updateUi();
                 })
                 .subscribe(() -> {
                             //no-op
