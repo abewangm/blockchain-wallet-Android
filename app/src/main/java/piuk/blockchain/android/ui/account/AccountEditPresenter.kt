@@ -112,7 +112,7 @@ class AccountEditPresenter @Inject internal constructor(
                 xpubDescriptionVisibility = View.VISIBLE
                 xpubText = stringUtils.getString(R.string.extended_public_key)
                 transferFundsVisibility = View.GONE
-                setArchive(account!!.isArchived, ::isArchivableBtc)
+                updateArchivedUi(account!!.isArchived, ::isArchivableBtc)
                 setDefault(isDefaultBtc(account))
             }
 
@@ -129,7 +129,7 @@ class AccountEditPresenter @Inject internal constructor(
                 xpubDescriptionVisibility = View.GONE
                 xpubText = stringUtils.getString(R.string.address)
                 defaultAccountVisibility = View.GONE//No default for V2
-                setArchive(legacyAddress!!.tag == LegacyAddress.ARCHIVED_ADDRESS, ::isArchivableBtc)
+                updateArchivedUi(legacyAddress!!.tag == LegacyAddress.ARCHIVED_ADDRESS, ::isArchivableBtc)
 
                 if (legacyAddress!!.isWatchOnly) {
                     scanPrivateKeyVisibility = View.VISIBLE
@@ -158,7 +158,14 @@ class AccountEditPresenter @Inject internal constructor(
     }
 
     private fun renderBch(accountIndex: Int) {
-        bchAccount = bchDataManager.getAccountMetadataList()[accountIndex]
+        val accountMetadataList = bchDataManager.getAccountMetadataList()
+        if (accountIndex >= accountMetadataList.size) {
+            view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
+            view.finishPage()
+            return
+        }
+
+        bchAccount = accountMetadataList[accountIndex]
         with(accountModel) {
             label = bchAccount!!.label
             labelHeader = stringUtils.getString(R.string.name)
@@ -166,7 +173,7 @@ class AccountEditPresenter @Inject internal constructor(
             xpubDescriptionVisibility = View.VISIBLE
             xpubText = stringUtils.getString(R.string.extended_public_key)
             transferFundsVisibility = View.GONE
-            setArchive(bchAccount!!.isArchived, ::isArchivableBch)
+            updateArchivedUi(bchAccount!!.isArchived, ::isArchivableBch)
             setDefault(isDefaultBch(bchAccount))
         }
 
@@ -199,7 +206,7 @@ class AccountEditPresenter @Inject internal constructor(
     private fun isDefaultBch(account: GenericMetadataAccount?): Boolean =
             bchDataManager.getDefaultGenericMetadataAccount() === account
 
-    private fun setArchive(isArchived: Boolean, archivable: () -> Boolean) {
+    private fun updateArchivedUi(isArchived: Boolean, archivable: () -> Boolean) {
         if (isArchived) {
             with(accountModel) {
                 archiveHeader = stringUtils.getString(R.string.unarchive)
@@ -373,7 +380,7 @@ class AccountEditPresenter @Inject internal constructor(
                 .subscribe(
                         {
                             legacyAddress.tag = LegacyAddress.ARCHIVED_ADDRESS
-                            setArchive(true, ::isArchivableBtc)
+                            updateArchivedUi(true, ::isArchivableBtc)
 
                             view.showTransactionSuccess()
 
@@ -487,11 +494,11 @@ class AccountEditPresenter @Inject internal constructor(
             payloadDataManager.wallet!!.hdWallets[0].defaultAccountIdx = accountIndex
         } else {
             revertDefault = bchDataManager.getDefaultAccountPosition()
+            bchDataManager.setDefaultAccountPosition(accountIndex)
             walletSync = metadataManager.saveToMetadata(
                     bchDataManager.serializeForSaving(),
                     BitcoinCashWallet.METADATA_TYPE_EXTERNAL
             )
-            bchDataManager.setDefaultAccountPosition(accountIndex)
         }
 
         walletSync.compose(RxUtil.addCompletableToCompositeDisposable(this))
@@ -748,7 +755,7 @@ class AccountEditPresenter @Inject internal constructor(
                         {
                             updateTransactions.subscribe(IgnorableDefaultObserver<Any>())
 
-                            setArchive(isArchived, archivable)
+                            updateArchivedUi(isArchived, archivable)
                             view.setActivityResult(Activity.RESULT_OK)
                         },
                         { view.showToast(R.string.remote_save_ko, ToastCustom.TYPE_ERROR) }

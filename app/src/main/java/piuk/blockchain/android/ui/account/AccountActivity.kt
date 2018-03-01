@@ -70,7 +70,7 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         }
     }
 
-    private lateinit var transferFundsMenuItem: MenuItem
+    private var transferFundsMenuItem: MenuItem? = null
     private val accountsAdapter: AccountAdapter by unsafeLazy { AccountAdapter(this) }
     private var progress: MaterialProgressDialog? = null
 
@@ -381,7 +381,7 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
     }
 
     override fun onSetTransferLegacyFundsMenuItemVisible(visible: Boolean) {
-        transferFundsMenuItem.isVisible = visible
+        transferFundsMenuItem?.isVisible = visible
     }
 
     override fun onRequestPermissionsResult(

@@ -93,7 +93,7 @@ class LauncherActivity : BaseMvpActivity<LauncherView, LauncherPresenter>(), Lau
     ) : Runnable {
 
         override fun run() {
-            activity.onViewReady()
+            if (!activity.isFinishing) activity.onViewReady()
         }
     }
 
