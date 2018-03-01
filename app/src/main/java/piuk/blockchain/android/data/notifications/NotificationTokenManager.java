@@ -17,7 +17,6 @@ import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.util.PrefsUtil;
-import timber.log.Timber;
 
 public class NotificationTokenManager {
 
@@ -25,19 +24,22 @@ public class NotificationTokenManager {
     private AccessState accessState;
     private PayloadManager payloadManager;
     private PrefsUtil prefsUtil;
+    private FirebaseInstanceId firebaseInstanceId;
     private RxBus rxBus;
 
-    Observable loginObservable;
+    private Observable loginObservable;
 
     public NotificationTokenManager(NotificationService notificationService,
                                     AccessState accessState,
                                     PayloadManager payloadManager,
                                     PrefsUtil prefsUtil,
+                                    FirebaseInstanceId firebaseInstanceId,
                                     RxBus rxBus) {
         this.notificationService = notificationService;
         this.accessState = accessState;
         this.payloadManager = payloadManager;
         this.prefsUtil = prefsUtil;
+        this.firebaseInstanceId = firebaseInstanceId;
         this.rxBus = rxBus;
     }
 
@@ -50,7 +52,8 @@ public class NotificationTokenManager {
     void storeAndUpdateToken(@NonNull String token) {
         if (accessState.isLoggedIn()) {
             // Send token
-            sendFirebaseToken(token);
+            sendFirebaseToken(token)
+                    .subscribeOn(Schedulers.io());
         } else {
             // Store token and send once login event happens
             registerAuthEvent();
@@ -68,8 +71,7 @@ public class NotificationTokenManager {
                         String storedToken = prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "");
 
                         if (!storedToken.isEmpty()) {
-                            sendFirebaseToken(storedToken);
-                            return Completable.complete();
+                            return sendFirebaseToken(storedToken);
                         } else {
                             return resendNotificationToken();
                         }
@@ -101,7 +103,7 @@ public class NotificationTokenManager {
             return Observable.just(Optional.of(storedToken));
         } else {
             return Observable.fromCallable(() -> {
-                FirebaseInstanceId.getInstance().getToken();
+                firebaseInstanceId.getToken();
                 return Optional.absent();
             });
         }
@@ -121,7 +123,7 @@ public class NotificationTokenManager {
      */
     private Completable revokeAccessToken() {
         return Completable.fromCallable(() -> {
-            FirebaseInstanceId.getInstance().deleteInstanceId();
+            firebaseInstanceId.deleteInstanceId();
             return Void.TYPE;
         })
                 .andThen(removeNotificationToken())
@@ -147,13 +149,14 @@ public class NotificationTokenManager {
      * and will be handled appropriately by {@link FcmCallbackService}
      */
     private Completable resendNotificationToken() {
-        return getStoredFirebaseToken().flatMapCompletable(optional -> {
-            if (optional.isPresent()) {
-                return sendFirebaseToken(optional.get());
-            } else {
-                return Completable.complete();
-            }
-        });
+        return getStoredFirebaseToken()
+                .flatMapCompletable(optional -> {
+                    if (optional.isPresent()) {
+                        return sendFirebaseToken(optional.get());
+                    } else {
+                        return Completable.complete();
+                    }
+                });
     }
 
     private Completable sendFirebaseToken(@NonNull String refreshedToken) {
@@ -165,8 +168,7 @@ public class NotificationTokenManager {
             String sharedKey = payload.getSharedKey();
 
             // TODO: 09/11/2016 Decide what to do if sending fails, perhaps retry?
-            return notificationService.sendNotificationToken(refreshedToken, guid, sharedKey)
-                    .subscribeOn(Schedulers.io());
+            return notificationService.sendNotificationToken(refreshedToken, guid, sharedKey);
         } else {
             return Completable.complete();
         }

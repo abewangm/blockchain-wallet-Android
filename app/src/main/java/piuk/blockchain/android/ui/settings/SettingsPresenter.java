@@ -560,7 +560,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         notificationTokenManager.enableNotifications()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnComplete(() -> {
-                    getView().setPushNotificationPref(isPushNotificationEnabled());
+                    getView().setPushNotificationPref(true);
                 })
                 .subscribe(() -> {
                             //no-op
@@ -575,7 +575,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         notificationTokenManager.disableNotifications()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnComplete(() -> {
-                    getView().setPushNotificationPref(isPushNotificationEnabled());
+                    getView().setPushNotificationPref(false);
                 })
                 .subscribe(() -> {
                             //no-op

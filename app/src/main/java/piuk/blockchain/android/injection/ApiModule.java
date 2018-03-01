@@ -2,6 +2,8 @@ package piuk.blockchain.android.injection;
 
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
@@ -62,6 +64,7 @@ public class ApiModule {
                 accessState,
                 payloadManager,
                 prefsUtil,
+                FirebaseInstanceId.getInstance(),
                 rxBus);
     }
 
