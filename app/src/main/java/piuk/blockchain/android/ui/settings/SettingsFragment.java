@@ -94,7 +94,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private Preference unitsPref;
     private Preference fiatPref;
     private SwitchPreferenceCompat emailNotificationPref;
-    private SwitchPreferenceCompat smsNotificationPref;
+    private SwitchPreferenceCompat pushNotificationPref;
 
     // Security
     @Thunk SwitchPreferenceCompat fingerprintPref;
@@ -159,8 +159,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
         emailNotificationPref = (SwitchPreferenceCompat) findPreference("email_notifications");
         emailNotificationPref.setOnPreferenceClickListener(this);
 
-        smsNotificationPref = (SwitchPreferenceCompat) findPreference("sms_notifications");
-        smsNotificationPref.setOnPreferenceClickListener(this);
+        pushNotificationPref = (SwitchPreferenceCompat) findPreference("push_notifications");
+        pushNotificationPref.setOnPreferenceClickListener(this);
 
         // Security
         fingerprintPref = (SwitchPreferenceCompat) findPreference("fingerprint");
@@ -321,18 +321,13 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     @Override
-    public void setSmsNotificationsVisibility(boolean visible) {
-        smsNotificationPref.setVisible(visible);
-    }
-
-    @Override
     public void setEmailNotificationPref(boolean enabled) {
         emailNotificationPref.setChecked(enabled);
     }
 
     @Override
-    public void setSmsNotificationPref(boolean enabled) {
-        smsNotificationPref.setChecked(enabled);
+    public void setPushNotificationPref(boolean enabled) {
+        pushNotificationPref.setChecked(enabled);
     }
 
     @Override
@@ -438,8 +433,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
             case "email_notifications":
                 showDialogEmailNotifications();
                 break;
-            case "sms_notifications":
-                showDialogSmsNotifications();
+            case "push_notifications":
+                showDialogPushNotifications();
                 break;
             case "mobile":
                 showDialogMobile();
@@ -713,17 +708,17 @@ public class SettingsFragment extends PreferenceFragmentCompat
         dialog.show();
     }
 
-    private void showDialogSmsNotifications() {
+    private void showDialogPushNotifications() {
         AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle(R.string.sms_notifications)
-                .setMessage(R.string.sms_notifications_summary)
+                .setTitle(R.string.push_notifications)
+                .setMessage(R.string.push_notifications_summary)
                 .setPositiveButton(R.string.enable, (dialogInterface, i) ->
-                        settingsPresenter.updateNotification(Settings.NOTIFICATION_TYPE_SMS, true))
+                        settingsPresenter.enablePushNotifications())
                 .setNegativeButton(R.string.disable, (dialogInterface, i) ->
-                        settingsPresenter.updateNotification(Settings.NOTIFICATION_TYPE_SMS, false))
+                        settingsPresenter.disablePushNotifications())
                 .create();
 
-        dialog.setOnCancelListener(dialogInterface -> smsNotificationPref.setChecked(!smsNotificationPref.isChecked()));
+        dialog.setOnCancelListener(dialogInterface -> pushNotificationPref.setChecked(!pushNotificationPref.isChecked()));
         dialog.show();
     }
 

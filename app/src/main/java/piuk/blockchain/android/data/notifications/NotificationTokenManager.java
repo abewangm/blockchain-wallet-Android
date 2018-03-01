@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.notifications;
 
+import com.google.common.base.Optional;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import android.support.annotation.NonNull;
@@ -9,6 +10,7 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.Wallet;
 
 import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.access.AuthEvent;
@@ -24,6 +26,8 @@ public class NotificationTokenManager {
     private PayloadManager payloadManager;
     private PrefsUtil prefsUtil;
     private RxBus rxBus;
+
+    Observable loginObservable;
 
     public NotificationTokenManager(NotificationService notificationService,
                                     AccessState accessState,
@@ -49,18 +53,38 @@ public class NotificationTokenManager {
             sendFirebaseToken(token);
         } else {
             // Store token and send once login event happens
-            rxBus.register(AuthEvent.class).subscribe(authEvent -> {
-                if (authEvent == AuthEvent.LOGIN) {
-                    // Send token
-                    sendFirebaseToken(token);
-                }
-            }, Throwable::printStackTrace);
+            registerAuthEvent();
         }
 
         prefsUtil.setValue(PrefsUtil.KEY_FIREBASE_TOKEN, token);
     }
 
-    // TODO: 28/11/2016 This may want to be transformed into an Observable?
+    private void registerAuthEvent() {
+        loginObservable = rxBus.register(AuthEvent.class);
+        loginObservable
+                .compose(RxUtil.applySchedulersToObservable())
+                .flatMapCompletable(authEvent -> {
+                    if (authEvent == AuthEvent.LOGIN) {
+                        String storedToken = prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "");
+
+                        if (!storedToken.isEmpty()) {
+                            sendFirebaseToken(storedToken);
+                            return Completable.complete();
+                        } else {
+                            return resendNotificationToken();
+                        }
+
+                    } else if (authEvent == AuthEvent.UNPAIR) {
+                        prefsUtil.removeValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED);
+                        return revokeAccessToken();
+                    } else {
+                        return Completable.complete();
+                    }
+                })
+                .subscribe(() -> {
+                    //no-op
+                });
+    }
 
     /**
      * Returns the stored Firebase token, otherwise attempts to trigger a refresh of the token which
@@ -69,45 +93,83 @@ public class NotificationTokenManager {
      * @return The Firebase token
      */
     @Nullable
-    private String getFirebaseToken() {
-        return !prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "").isEmpty()
-                ? prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "")
-                : FirebaseInstanceId.getInstance().getToken();
+    private Observable<Optional<String>> getStoredFirebaseToken() {
+
+        String storedToken = prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "");
+
+        if (!storedToken.isEmpty()) {
+            return Observable.just(Optional.of(storedToken));
+        } else {
+            return Observable.fromCallable(() -> {
+                FirebaseInstanceId.getInstance().getToken();
+                return Optional.absent();
+            });
+        }
     }
 
-    // TODO: 16/01/2017 Call me on logout?
+    /**
+     * Disables push notifications flag.
+     * Resets Instance ID and revokes all tokens. Clears stored token if successful
+     */
+    public Completable disableNotifications() {
+        prefsUtil.setValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, false);
+        return revokeAccessToken();
+    }
 
     /**
      * Resets Instance ID and revokes all tokens. Clears stored token if successful
      */
-    public Completable revokeAccessToken() {
+    private Completable revokeAccessToken() {
         return Completable.fromCallable(() -> {
             FirebaseInstanceId.getInstance().deleteInstanceId();
             return Void.TYPE;
-        }).doOnComplete(this::clearStoredToken)
+        })
+                .andThen(removeNotificationToken())
+                .doOnComplete(this::clearStoredToken)
                 .compose(RxUtil.applySchedulersToCompletable());
+    }
+
+    /**
+     * Enables push notifications flag.
+     * Resend stored notification token, or generate and send new token if no stored token exists.
+     */
+    public Completable enableNotifications() {
+        prefsUtil.setValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true);
+        return resendNotificationToken();
     }
 
     /**
      * Re-sends the notification token. The token is only ever generated on app installation, so it
      * may be preferable to store the token and resend it on startup rather than have an app end up
      * in a state where it may not have registered with the right endpoint or similar.
+     * <p>
+     * If no stored notification token exists, it will be refreshed
+     * and will be handled appropriately by {@link FcmCallbackService}
      */
-    public void resendNotificationToken() {
-        if (getFirebaseToken() != null) {
-            sendFirebaseToken(getFirebaseToken());
-        }
+    private Completable resendNotificationToken() {
+        return getStoredFirebaseToken().flatMapCompletable(optional -> {
+            if (optional.isPresent()) {
+                return sendFirebaseToken(optional.get());
+            } else {
+                return Completable.complete();
+            }
+        });
     }
 
-    private void sendFirebaseToken(String refreshedToken) {
-        Wallet payload = payloadManager.getPayload();
-        String guid = payload.getGuid();
-        String sharedKey = payload.getSharedKey();
+    private Completable sendFirebaseToken(@NonNull String refreshedToken) {
 
-        // TODO: 09/11/2016 Decide what to do if sending fails, perhaps retry?
-        notificationService.sendNotificationToken(refreshedToken, guid, sharedKey)
-                .subscribeOn(Schedulers.io())
-                .subscribe(() -> Timber.d("sendFirebaseToken: success"), Throwable::printStackTrace);
+        if (prefsUtil.getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true)) {
+
+            Wallet payload = payloadManager.getPayload();
+            String guid = payload.getGuid();
+            String sharedKey = payload.getSharedKey();
+
+            // TODO: 09/11/2016 Decide what to do if sending fails, perhaps retry?
+            return notificationService.sendNotificationToken(refreshedToken, guid, sharedKey)
+                    .subscribeOn(Schedulers.io());
+        } else {
+            return Completable.complete();
+        }
     }
 
     /**
@@ -117,4 +179,17 @@ public class NotificationTokenManager {
         prefsUtil.removeValue(PrefsUtil.KEY_FIREBASE_TOKEN);
     }
 
+    /**
+     * Removes the stored token from back end
+     */
+    private Completable removeNotificationToken() {
+
+        String token = prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "");
+
+        if (!token.isEmpty()) {
+            return notificationService.removeNotificationToken(token);
+        } else {
+            return Completable.complete();
+        }
+    }
 }
