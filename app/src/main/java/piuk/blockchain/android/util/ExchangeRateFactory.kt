@@ -176,7 +176,7 @@ class ExchangeRateFactory private constructor() {
         } catch (e: NumberFormatException) {
             Timber.e(e)
             prefsUtil.setValue("$prefsKey$currency", "0.0")
-            return 0.0
+            0.0
         }
 
         if (tickerData == null) {
@@ -205,19 +205,19 @@ class ExchangeRateFactory private constructor() {
 
     private fun getBtcTicker() = rxPinning.call<Map<String, PriceDatum>> {
         priceApi.getPriceIndexes(CryptoCurrencies.BTC.symbol)
-                .doOnNext { this.btcTickerData = it.toMap() }
+                .doOnNext { btcTickerData = it.toMap() }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
     private fun getEthTicker() = rxPinning.call<Map<String, PriceDatum>> {
         priceApi.getPriceIndexes(CryptoCurrencies.ETHER.symbol)
-                .doOnNext { this.ethTickerData = it.toMap() }
+                .doOnNext { ethTickerData = it.toMap() }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
     private fun getBchTicker() = rxPinning.call<Map<String, PriceDatum>> {
         priceApi.getPriceIndexes(CryptoCurrencies.BCH.symbol)
-                .doOnNext { this.bchTickerData = it.toMap() }
+                .doOnNext { bchTickerData = it.toMap() }
                 .compose(RxUtil.applySchedulersToObservable())
     }
 
