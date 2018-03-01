@@ -59,26 +59,31 @@ public class PasswordRequiredPresenter extends BasePresenter<PasswordRequiredVie
     }
 
     void onContinueClicked() {
-        if (getView().getPassword().length() > 1) {
-            verifyPassword(getView().getPassword());
-        } else {
-            getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
-            getView().restartPage();
+        // Seems that on low memory devices it's quite possible that the view is null here
+        if (getView() != null) {
+            if (getView().getPassword().length() > 1) {
+                verifyPassword(getView().getPassword());
+            } else {
+                getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
+                getView().restartPage();
+            }
         }
     }
 
     void onForgetWalletClicked() {
-        getView().showForgetWalletWarning(new DialogButtonCallback() {
-            @Override
-            public void onPositiveClicked() {
-                appUtil.clearCredentialsAndRestart();
-            }
+        if (getView() != null) {
+            getView().showForgetWalletWarning(new DialogButtonCallback() {
+                @Override
+                public void onPositiveClicked() {
+                    appUtil.clearCredentialsAndRestart();
+                }
 
-            @Override
-            public void onNegativeClicked() {
-                // No-op
-            }
-        });
+                @Override
+                public void onNegativeClicked() {
+                    // No-op
+                }
+            });
+        }
     }
 
     void submitTwoFactorCode(JSONObject responseObject, String sessionId, String password, String code) {

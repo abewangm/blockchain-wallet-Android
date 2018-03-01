@@ -10,7 +10,6 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.prices.data.PriceDatum;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -247,19 +246,20 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void checkForMessages() {
-        getCompositeDisposable().add(contactsDataManager.fetchContacts()
-                .andThen(contactsDataManager.getContactList())
-                .toList()
-                .flatMapObservable(contacts -> {
-                    if (!contacts.isEmpty()) {
-                        return contactsDataManager.getMessages(true);
-                    } else {
-                        return Observable.just(Collections.emptyList());
-                    }
-                })
-                .subscribe(messages -> {
-                    // No-op
-                }, Timber::e));
+        // TODO: 28/02/2018 There is no point in doing this currently
+//        getCompositeDisposable().add(contactsDataManager.fetchContacts()
+//                .andThen(contactsDataManager.getContactList())
+//                .toList()
+//                .flatMapObservable(contacts -> {
+//                    if (!contacts.isEmpty()) {
+//                        return contactsDataManager.getMessages(true);
+//                    } else {
+//                        return Observable.just(Collections.emptyList());
+//                    }
+//                })
+//                .subscribe(messages -> {
+//                    // No-op
+//                }, Timber::e));
     }
 
     void unPair() {
