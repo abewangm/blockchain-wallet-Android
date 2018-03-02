@@ -54,14 +54,12 @@ public class ApiModule {
 
     @Provides
     @Singleton
-    protected NotificationTokenManager provideNotificationTokenManager(AccessState accessState,
-                                                                       PayloadManager payloadManager,
+    protected NotificationTokenManager provideNotificationTokenManager(PayloadManager payloadManager,
                                                                        PrefsUtil prefsUtil,
                                                                        RxBus rxBus) {
 
         return new NotificationTokenManager(
                 new NotificationService(new WalletApi()),
-                accessState,
                 payloadManager,
                 prefsUtil,
                 FirebaseInstanceId.getInstance(),

@@ -12,7 +12,6 @@ import info.blockchain.wallet.payload.data.Wallet;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -22,7 +21,6 @@ import timber.log.Timber;
 public class NotificationTokenManager {
 
     private NotificationService notificationService;
-    private AccessState accessState;
     private PayloadManager payloadManager;
     private PrefsUtil prefsUtil;
     private FirebaseInstanceId firebaseInstanceId;
@@ -31,13 +29,11 @@ public class NotificationTokenManager {
     private Observable loginObservable;
 
     public NotificationTokenManager(NotificationService notificationService,
-                                    AccessState accessState,
                                     PayloadManager payloadManager,
                                     PrefsUtil prefsUtil,
                                     FirebaseInstanceId firebaseInstanceId,
                                     RxBus rxBus) {
         this.notificationService = notificationService;
-        this.accessState = accessState;
         this.payloadManager = payloadManager;
         this.prefsUtil = prefsUtil;
         this.firebaseInstanceId = firebaseInstanceId;
@@ -51,38 +47,24 @@ public class NotificationTokenManager {
      * @param token A Firebase access token
      */
     void storeAndUpdateToken(@NonNull String token) {
-        if (accessState.isLoggedIn()) {
-            // Send token
-            sendFirebaseToken(token)
-                    .subscribeOn(Schedulers.io());
-        } else {
-            // Store token and send once login event happens
-            registerAuthEvent();
-        }
-
-        Timber.d("vos storing1 "+token);
         prefsUtil.setValue(PrefsUtil.KEY_FIREBASE_TOKEN, token);
     }
 
-    private void registerAuthEvent() {
+    public void registerAuthEvent() {
         loginObservable = rxBus.register(AuthEvent.class);
         loginObservable
-                .compose(RxUtil.applySchedulersToObservable())
+                .subscribeOn(Schedulers.io())
                 .flatMapCompletable(authEvent -> {
                     if (authEvent == AuthEvent.LOGIN) {
-                        Timber.d("vos LOGIN");
                         String storedToken = prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "");
 
                         if (!storedToken.isEmpty()) {
-                            Timber.d("vos sendFirebaseToken");
                             return sendFirebaseToken(storedToken);
                         } else {
-                            Timber.d("vos resendNotificationToken");
                             return resendNotificationToken();
                         }
 
-                    } else if (authEvent == AuthEvent.UNPAIR) {
-                        Timber.d("vos UNPAIR");
+                    } else if (authEvent == AuthEvent.FORGET) {
                         prefsUtil.removeValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED);
                         return revokeAccessToken();
                     } else {
@@ -91,7 +73,7 @@ public class NotificationTokenManager {
                 })
                 .subscribe(() -> {
                     //no-op
-                });
+                }, throwable -> Timber.e(throwable));
     }
 
     /**
@@ -121,7 +103,8 @@ public class NotificationTokenManager {
      */
     public Completable disableNotifications() {
         prefsUtil.setValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, false);
-        return revokeAccessToken();
+        return revokeAccessToken()
+                .compose(RxUtil.applySchedulersToCompletable());
     }
 
     /**
@@ -134,7 +117,7 @@ public class NotificationTokenManager {
         })
                 .andThen(removeNotificationToken())
                 .doOnComplete(this::clearStoredToken)
-                .compose(RxUtil.applySchedulersToCompletable());
+                .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -174,8 +157,8 @@ public class NotificationTokenManager {
             String sharedKey = payload.getSharedKey();
 
             // TODO: 09/11/2016 Decide what to do if sending fails, perhaps retry?
-            Timber.d("vos sendNotificationToken "+refreshedToken);
-            return notificationService.sendNotificationToken(refreshedToken, guid, sharedKey);
+            return notificationService.sendNotificationToken(refreshedToken, guid, sharedKey)
+                    .subscribeOn(Schedulers.io());
         } else {
             return Completable.complete();
         }
