@@ -583,8 +583,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         notificationTokenManager.disableNotifications()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnComplete(() -> {
-                    getView().setPushNotificationPref(false, prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "not set"));
-                    updateUi();
+                    getView().setPushNotificationPref(false, "-");
                 })
                 .subscribe(() -> {
                             //no-op
