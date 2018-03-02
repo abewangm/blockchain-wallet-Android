@@ -158,7 +158,14 @@ class AccountEditPresenter @Inject internal constructor(
     }
 
     private fun renderBch(accountIndex: Int) {
-        bchAccount = bchDataManager.getAccountMetadataList()[accountIndex]
+        val accountMetadataList = bchDataManager.getAccountMetadataList()
+        if (accountIndex >= accountMetadataList.size) {
+            view.showToast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
+            view.finishPage()
+            return
+        }
+
+        bchAccount = accountMetadataList[accountIndex]
         with(accountModel) {
             label = bchAccount!!.label
             labelHeader = stringUtils.getString(R.string.name)

@@ -65,12 +65,12 @@ class WalletAccountHelper(
         CryptoCurrencies.BTC -> mutableListOf<ItemAccount>().apply {
             addAll(getHdAccounts())
             addAll(getLegacyAddresses())
-        }.toList()
+        }
         CryptoCurrencies.BCH -> mutableListOf<ItemAccount>().apply {
             addAll(getHdBchAccounts())
             addAll(getLegacyBchAddresses())
         }
-        else -> getEthAccount().toList()
+        else -> getEthAccount()
     }
 
     /**

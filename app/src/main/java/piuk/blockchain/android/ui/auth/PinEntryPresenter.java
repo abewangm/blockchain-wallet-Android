@@ -231,7 +231,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
 
     void clearPinBoxes() {
         mUserEnteredPin = "";
-        getView().clearPinBoxes();
+        if (getView() != null) getView().clearPinBoxes();
     }
 
     @VisibleForTesting

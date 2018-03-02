@@ -61,15 +61,18 @@ public class ManualPairingPresenter extends BasePresenter<ManualPairingView> {
     }
 
     void onContinueClicked() {
-        String guid = getView().getGuid();
-        String password = getView().getPassword();
+        // Seems that on low memory devices it's quite possible that the view is null here
+        if (getView() != null) {
+            String guid = getView().getGuid();
+            String password = getView().getPassword();
 
-        if (guid == null || guid.isEmpty()) {
-            showErrorToast(R.string.invalid_guid);
-        } else if (password == null || password.isEmpty()) {
-            showErrorToast(R.string.invalid_password);
-        } else {
-            verifyPassword(password, guid);
+            if (guid == null || guid.isEmpty()) {
+                showErrorToast(R.string.invalid_guid);
+            } else if (password == null || password.isEmpty()) {
+                showErrorToast(R.string.invalid_password);
+            } else {
+                verifyPassword(password, guid);
+            }
         }
     }
 

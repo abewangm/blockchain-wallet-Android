@@ -9,6 +9,8 @@ import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.Logging;
+import piuk.blockchain.android.data.answers.WalletUpgradeEvent;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
@@ -97,8 +99,15 @@ public class UpgradeWalletPresenter extends BasePresenter<UpgradeWalletView> {
                 .doOnComplete(() -> appUtil.setNewlyCreated(true))
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
-                        () -> getView().onUpgradeCompleted(),
-                        throwable -> getView().onUpgradeFailed());
+                        () -> {
+                            Logging.INSTANCE.logCustom(new WalletUpgradeEvent(true));
+                            getView().onUpgradeCompleted();
+                        },
+                        throwable -> {
+                            Logging.INSTANCE.logCustom(new WalletUpgradeEvent(false));
+                            Logging.INSTANCE.logException(throwable);
+                            getView().onUpgradeFailed();
+                        });
 
     }
 
