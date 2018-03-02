@@ -35,11 +35,9 @@ interface SettingsView extends View {
 
     void setEmailNotificationsVisibility(boolean visible);
 
-    void setSmsNotificationsVisibility(boolean visible);
-
     void setEmailNotificationPref(boolean enabled);
 
-    void setSmsNotificationPref(boolean enabled);
+    void setPushNotificationPref(boolean enabled);
 
     void setFingerprintVisibility(boolean visible);
 

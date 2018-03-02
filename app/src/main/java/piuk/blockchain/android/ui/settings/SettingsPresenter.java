@@ -2,6 +2,9 @@ package piuk.blockchain.android.ui.settings;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.support.design.widget.Snackbar;
+
+import java.util.concurrent.TimeUnit;
 
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.payload.PayloadManager;
@@ -11,10 +14,12 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.notifications.NotificationTokenManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
@@ -26,6 +31,7 @@ import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
+import timber.log.Timber;
 
 public class SettingsPresenter extends BasePresenter<SettingsView> {
 
@@ -39,6 +45,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
     private AccessState accessState;
     private MonetaryUtil monetaryUtil;
     private SwipeToReceiveHelper swipeToReceiveHelper;
+    private NotificationTokenManager notificationTokenManager;
     @VisibleForTesting Settings settings;
 
     @Inject
@@ -50,7 +57,8 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
                       StringUtils stringUtils,
                       PrefsUtil prefsUtil,
                       AccessState accessState,
-                      SwipeToReceiveHelper swipeToReceiveHelper) {
+                      SwipeToReceiveHelper swipeToReceiveHelper,
+                      NotificationTokenManager notificationTokenManager) {
 
         this.fingerprintHelper = fingerprintHelper;
         this.authDataManager = authDataManager;
@@ -61,6 +69,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         this.prefsUtil = prefsUtil;
         this.accessState = accessState;
         this.swipeToReceiveHelper = swipeToReceiveHelper;
+        this.notificationTokenManager = notificationTokenManager;
 
         monetaryUtil = new MonetaryUtil(prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC));
     }
@@ -125,25 +134,14 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         // Email notifications
         getView().setEmailNotificationsVisibility(settings.isEmailVerified());
 
-        // SMS notifications
-        getView().setSmsNotificationsVisibility(settings.isSmsVerified());
-
-        // SMS and Email notification status
+        // Push and Email notification status
         getView().setEmailNotificationPref(false);
-        getView().setSmsNotificationPref(false);
+
+        getView().setPushNotificationPref(isPushNotificationEnabled());
 
         if (settings.isNotificationsOn() && !settings.getNotificationsType().isEmpty()) {
             for (int type : settings.getNotificationsType()) {
-                if (type == Settings.NOTIFICATION_TYPE_EMAIL) {
-                    getView().setEmailNotificationPref(true);
-                }
-
-                if (type == Settings.NOTIFICATION_TYPE_SMS) {
-                    getView().setSmsNotificationPref(true);
-                }
-
-                if (type == Settings.NOTIFICATION_TYPE_ALL) {
-                    getView().setSmsNotificationPref(true);
+                if (type == Settings.NOTIFICATION_TYPE_EMAIL || type == Settings.NOTIFICATION_TYPE_ALL) {
                     getView().setEmailNotificationPref(true);
                     break;
                 }
@@ -557,4 +555,37 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         prefsUtil.removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ETH_ADDRESS);
     }
 
+    boolean isPushNotificationEnabled() {
+        return prefsUtil.getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true);
+    }
+
+    void enablePushNotifications() {
+
+        notificationTokenManager.enableNotifications()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnComplete(() -> {
+                    getView().setPushNotificationPref(true);
+                })
+                .subscribe(() -> {
+                            //no-op
+                        }
+                        , throwable -> {
+                            Timber.e(throwable);
+                        });
+    }
+
+    void disablePushNotifications() {
+
+        notificationTokenManager.disableNotifications()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnComplete(() -> {
+                    getView().setPushNotificationPref(false);
+                })
+                .subscribe(() -> {
+                            //no-op
+                        }
+                        , throwable -> {
+                            Timber.e(throwable);
+                        });
+    }
 }

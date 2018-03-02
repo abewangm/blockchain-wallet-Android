@@ -473,8 +473,8 @@
     <string name="large_tx_high_fee_warning">"This transaction requires a higher fee for dust consumption due to the small amount of change to be returned."</string>
     <string name="password_reveal_warning">Be careful! Revealing this text allows your password to be copied to the clipboard, which can then be read by all applications on your device. Also be aware of people standing behind you!</string>
 
-    <string name="sms_notifications">SMS Notifications</string>
-    <string name="sms_notifications_summary">Enable notifications to receive an SMS whenever you receive bitcoin.</string>
+    <string name="push_notifications">Push Notifications</string>
+    <string name="push_notifications_summary">Enable notifications to receive a popup notification whenever you receive bitcoin.</string>
 
     <!-- TRANSACTION DETAILS -->
     <string name="transaction_detail_title">Transaction</string>

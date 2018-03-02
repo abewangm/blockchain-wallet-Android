@@ -11,6 +11,7 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.ui.auth.LogoutActivity;
 import piuk.blockchain.android.ui.base.BaseAuthActivity;
 import piuk.blockchain.android.util.PrefsUtil;
+import timber.log.Timber;
 
 public class AccessState {
 
@@ -108,5 +109,9 @@ public class AccessState {
 
     public void enableAutoLogout() {
         canAutoLogout = true;
+    }
+
+    public void forgetWallet() {
+        rxBus.emitEvent(AuthEvent.class, AuthEvent.FORGET);
     }
 }

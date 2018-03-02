@@ -2,6 +2,8 @@ package piuk.blockchain.android.injection;
 
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
@@ -52,16 +54,15 @@ public class ApiModule {
 
     @Provides
     @Singleton
-    protected NotificationTokenManager provideNotificationTokenManager(AccessState accessState,
-                                                                       PayloadManager payloadManager,
+    protected NotificationTokenManager provideNotificationTokenManager(PayloadManager payloadManager,
                                                                        PrefsUtil prefsUtil,
                                                                        RxBus rxBus) {
 
         return new NotificationTokenManager(
                 new NotificationService(new WalletApi()),
-                accessState,
                 payloadManager,
                 prefsUtil,
+                FirebaseInstanceId.getInstance(),
                 rxBus);
     }
 
