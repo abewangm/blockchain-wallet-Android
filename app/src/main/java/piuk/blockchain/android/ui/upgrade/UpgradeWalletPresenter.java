@@ -100,7 +100,7 @@ public class UpgradeWalletPresenter extends BasePresenter<UpgradeWalletView> {
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .subscribe(
                         () -> {
-                            Logging.INSTANCE.logCustom(new WalletUpgradeEvent(false));
+                            Logging.INSTANCE.logCustom(new WalletUpgradeEvent(true));
                             getView().onUpgradeCompleted();
                         },
                         throwable -> {
