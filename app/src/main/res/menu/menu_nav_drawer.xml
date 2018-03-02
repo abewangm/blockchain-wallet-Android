@@ -4,7 +4,8 @@
     <item
         android:id="@+id/nav_buy"
         android:icon="@drawable/vector_buy"
-        android:title="@string/onboarding_buy_bitcoin" />
+        android:title="@string/onboarding_buy_bitcoin"
+        android:visible="false" />
 
     <item
         android:id="@+id/nav_exchange"
@@ -25,7 +26,8 @@
     <item
         android:id="@+id/nav_contacts"
         android:icon="@drawable/vector_user"
-        android:title="@string/contacts_title" />
+        android:title="@string/contacts_title"
+        android:visible="false" />
 
     <item
         android:id="@+id/login_web_wallet"
