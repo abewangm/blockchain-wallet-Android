@@ -310,6 +310,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     protected void onResume() {
         super.onResume();
+        // This can null out in low memory situations, so reset here
+        binding.navigationView.setNavigationItemSelectedListener(menuItem -> {
+            selectDrawerItem(menuItem);
+            return true;
+        });
         appUtil.deleteQR();
         getPresenter().updateTicker();
         if (!handlingResult) {
@@ -523,12 +528,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     public void resetNavigationDrawer() {
         // Called onResume from BalanceFragment
         toolbar.setTitle("");
-
-        binding.navigationView.setNavigationItemSelectedListener(
-                menuItem -> {
-                    selectDrawerItem(menuItem);
-                    return true;
-                });
 
         // Set selected appropriately.
         if (getCurrentFragment() instanceof DashboardFragment) {
