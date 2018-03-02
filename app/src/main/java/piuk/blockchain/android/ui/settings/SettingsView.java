@@ -37,7 +37,7 @@ interface SettingsView extends View {
 
     void setEmailNotificationPref(boolean enabled);
 
-    void setPushNotificationPref(boolean enabled, String token);
+    void setPushNotificationPref(boolean enabled);
 
     void setFingerprintVisibility(boolean visible);
 
@@ -58,6 +58,4 @@ interface SettingsView extends View {
     void setLauncherShortcutVisibility(boolean visible);
 
     void showWarningDialog(@StringRes int message);
-
-    void showFirebaseToken(String firebaseToken);
 }

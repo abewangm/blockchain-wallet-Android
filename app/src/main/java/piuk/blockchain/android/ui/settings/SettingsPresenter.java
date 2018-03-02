@@ -134,12 +134,10 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         // Email notifications
         getView().setEmailNotificationsVisibility(settings.isEmailVerified());
 
-        // SMS and Email notification status
+        // Push and Email notification status
         getView().setEmailNotificationPref(false);
 
-        // TODO: 01/03/2018 Token for Maros debugging
-        getView().setPushNotificationPref(isPushNotificationEnabled(),
-                prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "not set"));
+        getView().setPushNotificationPref(isPushNotificationEnabled());
 
         if (settings.isNotificationsOn() && !settings.getNotificationsType().isEmpty()) {
             for (int type : settings.getNotificationsType()) {
@@ -565,10 +563,8 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
 
         notificationTokenManager.enableNotifications()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .andThen(Completable.timer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread()))// TODO: 01/03/2018  Maros debugging
                 .doOnComplete(() -> {
-                    getView().showFirebaseToken(prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, ""));
-                    updateUi();
+                    getView().setPushNotificationPref(true);
                 })
                 .subscribe(() -> {
                             //no-op
@@ -583,7 +579,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         notificationTokenManager.disableNotifications()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnComplete(() -> {
-                    getView().setPushNotificationPref(false, "-");
+                    getView().setPushNotificationPref(false);
                 })
                 .subscribe(() -> {
                             //no-op

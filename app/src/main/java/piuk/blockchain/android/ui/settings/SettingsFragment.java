@@ -326,11 +326,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     @Override
-    public void setPushNotificationPref(boolean enabled, String token) {
+    public void setPushNotificationPref(boolean enabled) {
         pushNotificationPref.setChecked(enabled);
-
-        // TODO: 28/02/2018 For Maros debugging
-        pushNotificationPref.setSummary(token);
     }
 
     @Override
@@ -913,21 +910,4 @@ public class SettingsFragment extends PreferenceFragmentCompat
         hideProgressDialog();
         settingsPresenter.onViewDestroyed();
     }
-
-    // TODO: 28/02/2018 For Maros debugging
-    @Override
-    public void showFirebaseToken(String firebaseToken) {
-        new AlertDialog.Builder(getActivity(), R.style.AlertDialogStyle)
-                .setTitle("New Firebase Token")
-                .setMessage(firebaseToken)
-                .setCancelable(true)
-                .setPositiveButton("Copy", (dialog, which) -> {
-                    ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("firebaseToken", firebaseToken);
-                    showToast(R.string.copied_to_clipboard, ToastCustom.TYPE_OK);
-                    clipboard.setPrimaryClip(clip);
-                })
-                .show();
-    }
-
 }

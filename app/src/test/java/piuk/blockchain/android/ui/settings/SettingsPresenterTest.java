@@ -686,9 +686,9 @@ public class SettingsPresenterTest extends RxTest {
         subject.enablePushNotifications();
 
         // Assert
-//        verify(activity).setPushNotificationPref(true, "");
-//        verify(notificationTokenManager).enableNotifications();
-//        verifyNoMoreInteractions(notificationTokenManager);
+        verify(activity).setPushNotificationPref(true);
+        verify(notificationTokenManager).enableNotifications();
+        verifyNoMoreInteractions(notificationTokenManager);
     }
 
     @Test
@@ -700,8 +700,8 @@ public class SettingsPresenterTest extends RxTest {
         subject.disablePushNotifications();
 
         // Assert
-//        verify(activity).setPushNotificationPref(false, "-");
-//        verify(notificationTokenManager).disableNotifications();
-//        verifyNoMoreInteractions(notificationTokenManager);
+        verify(activity).setPushNotificationPref(false);
+        verify(notificationTokenManager).disableNotifications();
+        verifyNoMoreInteractions(notificationTokenManager);
     }
 }
