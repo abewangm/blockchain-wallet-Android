@@ -17,6 +17,7 @@ import org.mockito.Mockito
 import org.web3j.protocol.core.methods.request.RawTransaction
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager
 
@@ -28,6 +29,7 @@ class EthDataManagerTest : RxTest() {
     private val ethAccountApi: EthAccountApi = mock()
     private val ethDataStore: EthDataStore = mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)
     private val walletOptionsDataManager: WalletOptionsDataManager = mock()
+    private val metadataManager: MetadataManager = mock()
     private val rxBus = RxBus()
 
     @Before
@@ -38,6 +40,7 @@ class EthDataManagerTest : RxTest() {
                 ethAccountApi,
                 ethDataStore,
                 walletOptionsDataManager,
+                metadataManager,
                 rxBus
         )
     }
@@ -363,6 +366,7 @@ class EthDataManagerTest : RxTest() {
         val notes = "NOTES"
         val ethereumWallet: EthereumWallet = mock()
         whenever(ethDataStore.ethWallet).thenReturn(ethereumWallet)
+        whenever(ethDataStore.ethWallet!!.toJson()).thenReturn("{}")
         // Act
         val testObserver = subject.updateTransactionNotes(hash, notes).test()
         // Assert
@@ -456,6 +460,7 @@ class EthDataManagerTest : RxTest() {
         val timestamp = System.currentTimeMillis()
         val ethereumWallet: EthereumWallet = mock()
         whenever(ethDataStore.ethWallet).thenReturn(ethereumWallet)
+        whenever(ethDataStore.ethWallet!!.toJson()).thenReturn("{}")
         // Act
         val testObserver = subject.setLastTxHashObservable(hash, timestamp).test()
         // Assert
@@ -466,7 +471,7 @@ class EthDataManagerTest : RxTest() {
         verifyNoMoreInteractions(ethDataStore)
         verify(ethereumWallet).lastTransactionHash = hash
         verify(ethereumWallet).lastTransactionTimestamp = timestamp
-        verify(ethereumWallet).save()
+        verify(ethDataStore.ethWallet)!!.toJson()
         verifyNoMoreInteractions(ethereumWallet)
     }
 

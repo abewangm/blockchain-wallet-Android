@@ -247,7 +247,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     ViewUtils.hideKeyboard(this);
-                    getPresenter().generateMetadataNodes(editText.getText().toString());
+                    getPresenter().decryptAndGenerateMetadataNodes(editText.getText().toString());
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> finish())
                 .create()

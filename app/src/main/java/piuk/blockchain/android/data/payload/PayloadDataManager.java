@@ -524,16 +524,15 @@ public class PayloadDataManager {
     /**
      * Generates the metadata and shared metadata nodes if necessary.
      *
-     * @param secondPassword An optional second password.
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
-    public Completable generateNodes(@Nullable String secondPassword) {
-        return rxPinning.call(() -> payloadService.generateNodes(secondPassword))
+    public Completable generateNodes() {
+        return rxPinning.call(() -> payloadService.generateNodes())
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
-    public Observable<MetadataNodeFactory> generateAndReturnNodes(@Nullable String secondPassword) {
-        return rxPinning.call(() -> payloadService.generateNodes(secondPassword))
+    public Observable<MetadataNodeFactory> generateAndReturnNodes() {
+        return rxPinning.call(() -> payloadService.generateNodes())
                 .andThen(getMetadataNodeFactory())
                 .compose(RxUtil.applySchedulersToObservable());
     }

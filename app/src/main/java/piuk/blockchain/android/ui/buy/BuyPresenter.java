@@ -12,6 +12,7 @@ import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
+import timber.log.Timber;
 
 /**
  * Created by justin on 4/27/17.
@@ -67,24 +68,38 @@ public class BuyPresenter extends BasePresenter<BuyView> {
                             getView().showSecondPasswordDialog();
                             getView().setUiState(UiState.EMPTY);
                         } else {
-                            generateMetadataNodes(null);
+                            generateMetadataNodes();
                         }
                     }
                 }));
     }
 
-    void generateMetadataNodes(@Nullable String secondPassword) {
+    void decryptAndGenerateMetadataNodes(@Nullable String secondPassword) {
         if (!payloadDataManager.validateSecondPassword(secondPassword)) {
             getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
             getView().showSecondPasswordDialog();
             getView().setUiState(UiState.EMPTY);
         } else {
-            getCompositeDisposable().add(
-                    payloadDataManager.generateNodes(secondPassword)
-                            .subscribe(
-                                    this::attemptPageSetup,
-                                    throwable -> getView().setUiState(UiState.FAILURE)));
+
+            try {
+                payloadDataManager.decryptHDWallet(secondPassword);
+                getCompositeDisposable().add(
+                        payloadDataManager.generateNodes()
+                                .subscribe(
+                                        this::attemptPageSetup,
+                                        throwable -> getView().setUiState(UiState.FAILURE)));
+            } catch (Exception e) {
+                Timber.e(e);
+            }
         }
+    }
+
+    void generateMetadataNodes() {
+        getCompositeDisposable().add(
+                payloadDataManager.generateNodes()
+                        .subscribe(
+                                this::attemptPageSetup,
+                                throwable -> getView().setUiState(UiState.FAILURE)));
     }
 
     String getCurrentServerUrl() {

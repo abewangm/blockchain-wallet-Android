@@ -1,18 +1,15 @@
 package piuk.blockchain.android.data.metadata
 
+import com.google.common.base.Optional
 import info.blockchain.wallet.exceptions.InvalidCredentialsException
+import info.blockchain.wallet.metadata.MetadataNodeFactory
 import io.reactivex.Completable
-import org.bitcoinj.crypto.DeterministicKey
-import piuk.blockchain.android.R
-import piuk.blockchain.android.data.bitcoincash.BchDataManager
-import piuk.blockchain.android.data.ethereum.EthDataManager
+import io.reactivex.Observable
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
-import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.util.MetadataUtils
-import piuk.blockchain.android.util.StringUtils
 import piuk.blockchain.android.util.annotations.Mockable
 
 /**
@@ -32,20 +29,24 @@ import piuk.blockchain.android.util.annotations.Mockable
 @Mockable
 class MetadataManager(
         private val payloadDataManager: PayloadDataManager,
-        private val ethDataManager: EthDataManager,
-        private val bchDataManager: BchDataManager,
-        private val shapeShiftDataManager: ShapeShiftDataManager,
-        private val stringUtils: StringUtils,
         private val metadataUtils: MetadataUtils,
         rxBus: RxBus
 ) {
     private val rxPinning = RxPinning(rxBus)
 
-    fun attemptMetadataSetup(): Completable = initMetadataNodesObservable(null)
+    fun attemptMetadataSetup() = initMetadataNodesObservable()
 
-    fun generateAndSetupMetadata(secondPassword: String?): Completable =
-            payloadDataManager.generateNodes(secondPassword)
-                    .andThen(initMetadataNodesObservable(secondPassword))
+    fun decryptAndSetupMetadata(secondPassword: String): Completable {
+        payloadDataManager.decryptHDWallet(secondPassword)
+        return payloadDataManager.generateNodes()
+                .andThen(initMetadataNodesObservable())
+    }
+
+    fun fetchMetadata(metadataType: Int): Observable<Optional<String>> = rxPinning.call<Optional<String>> {
+        payloadDataManager.metadataNodeFactory.map { nodeFactory ->
+            metadataUtils.getMetadataNode(nodeFactory.metadataNode, metadataType).metadataOptional
+        }
+    }.compose(RxUtil.applySchedulersToObservable<Optional<String>>())
 
     fun saveToMetadata(data: String, metadataType: Int): Completable = rxPinning.call {
         payloadDataManager.metadataNodeFactory.flatMapCompletable {
@@ -60,7 +61,7 @@ class MetadataManager(
      *
      * @throws InvalidCredentialsException If nodes/keys cannot be derived because wallet is double encrypted
      */
-    private fun initMetadataNodesObservable(secondPassword: String?): Completable = rxPinning.call {
+    private fun initMetadataNodesObservable(): Completable = rxPinning.call {
         payloadDataManager.loadNodes()
                 .map { loaded ->
                     if (!loaded) {
@@ -75,19 +76,10 @@ class MetadataManager(
                 }
                 .flatMap { needsGeneration ->
                     if (needsGeneration) {
-                        payloadDataManager.generateAndReturnNodes(secondPassword)
+                        payloadDataManager.generateAndReturnNodes()
                     } else {
                         payloadDataManager.metadataNodeFactory
                     }
-                }
-                .flatMapCompletable { loadMetadataElements(it.metadataNode) }
-                .compose(RxUtil.applySchedulersToCompletable())
-    }
-
-    // TODO: Remove me and dependencies; DataManagers can be responsible for their own initialisation
-    private fun loadMetadataElements(metadataNode: DeterministicKey): Completable = rxPinning.call {
-        ethDataManager.initEthereumWallet(metadataNode, stringUtils.getString(R.string.eth_default_account_label)
-        ).andThen(bchDataManager.initBchWallet(metadataNode, stringUtils.getString(R.string.bch_default_account_label))
-        ).andThen(Completable.fromObservable(shapeShiftDataManager.initShapeshiftTradeData(metadataNode)))
-    }
+                }.flatMapCompletable { Completable.complete() }
+    }.compose(RxUtil.applySchedulersToCompletable())
 }

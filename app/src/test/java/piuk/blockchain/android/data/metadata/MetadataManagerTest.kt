@@ -27,10 +27,6 @@ class MetadataManagerTest : RxTest() {
 
     private lateinit var subject: MetadataManager
     private val payloadDataManager: PayloadDataManager = mock()
-    private val ethDataManager: EthDataManager = mock()
-    private val bchDataManager: BchDataManager = mock()
-    private val stringUtils: StringUtils = mock()
-    private val shapeShiftDataManager: ShapeShiftDataManager = mock()
     private val metadataUtils: MetadataUtils = mock()
     private val rxBus: RxBus = RxBus()
 
@@ -39,10 +35,6 @@ class MetadataManagerTest : RxTest() {
         super.setUp()
         subject = MetadataManager(
                 payloadDataManager,
-                ethDataManager,
-                bchDataManager,
-                shapeShiftDataManager,
-                stringUtils,
                 metadataUtils,
                 rxBus
         )
@@ -60,13 +52,6 @@ class MetadataManagerTest : RxTest() {
                 .thenReturn(Observable.just(metadataNodeFactory))
         whenever(metadataNodeFactory.metadataNode).thenReturn(key)
 
-        whenever(stringUtils.getString(any())).thenReturn("label")
-        whenever(ethDataManager.initEthereumWallet(key, "label"))
-                .thenReturn(Completable.complete())
-        whenever(bchDataManager.initBchWallet(key, "label"))
-                .thenReturn(Completable.complete())
-        whenever(shapeShiftDataManager.initShapeshiftTradeData(key))
-                .thenReturn(Observable.empty())
         // Act
         val testObserver = subject.attemptMetadataSetup().test()
         // Assert
@@ -74,9 +59,6 @@ class MetadataManagerTest : RxTest() {
         testObserver.assertNoErrors()
         verify(payloadDataManager).loadNodes()
         verify(payloadDataManager).metadataNodeFactory
-        verify(ethDataManager).initEthereumWallet(key, "label")
-        verify(bchDataManager).initBchWallet(key, "label")
-        verify(shapeShiftDataManager).initShapeshiftTradeData(key)
         verifyNoMoreInteractions(payloadDataManager)
     }
 
@@ -91,26 +73,17 @@ class MetadataManagerTest : RxTest() {
         val metadataNodeFactory: MetadataNodeFactory = mock()
         whenever(metadataNodeFactory.metadataNode).thenReturn(key)
 
-        whenever(payloadDataManager.generateAndReturnNodes(null))
+        whenever(payloadDataManager.generateAndReturnNodes())
                 .thenReturn(Observable.just(metadataNodeFactory))
-        whenever(stringUtils.getString(any())).thenReturn("label")
-        whenever(ethDataManager.initEthereumWallet(key, "label"))
-                .thenReturn(Completable.complete())
-        whenever(bchDataManager.initBchWallet(key, "label"))
-                .thenReturn(Completable.complete())
-        whenever(shapeShiftDataManager.initShapeshiftTradeData(key))
-                .thenReturn(Observable.empty())
+
         // Act
         val testObserver = subject.attemptMetadataSetup().test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
         verify(payloadDataManager).loadNodes()
-        verify(payloadDataManager).generateAndReturnNodes(null)
+        verify(payloadDataManager).generateAndReturnNodes()
         verify(payloadDataManager).isDoubleEncrypted
-        verify(ethDataManager).initEthereumWallet(key, "label")
-        verify(bchDataManager).initBchWallet(key, "label")
-        verify(shapeShiftDataManager).initShapeshiftTradeData(key)
     }
 
     @Test
@@ -133,28 +106,20 @@ class MetadataManagerTest : RxTest() {
         whenever(payloadDataManager.loadNodes()).thenReturn(Observable.just(true))
         val metadataNodeFactory: MetadataNodeFactory = mock()
         val key: DeterministicKey = mock()
-        whenever(payloadDataManager.generateNodes(any())).thenReturn(Completable.complete())
+        whenever(payloadDataManager.generateNodes()).thenReturn(Completable.complete())
         whenever(payloadDataManager.metadataNodeFactory)
                 .thenReturn(Observable.just(metadataNodeFactory))
         whenever(metadataNodeFactory.metadataNode).thenReturn(key)
 
-        whenever(stringUtils.getString(any())).thenReturn("label")
-        whenever(ethDataManager.initEthereumWallet(key, "label"))
-                .thenReturn(Completable.complete())
-        whenever(bchDataManager.initBchWallet(key, "label"))
-                .thenReturn(Completable.complete())
-        whenever(shapeShiftDataManager.initShapeshiftTradeData(key)).thenReturn(Observable.empty())
         // Act
-        val testObserver = subject.generateAndSetupMetadata("hello").test()
+        val testObserver = subject.decryptAndSetupMetadata("hello").test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        verify(payloadDataManager).generateNodes("hello")
+        verify(payloadDataManager).decryptHDWallet("hello")
+        verify(payloadDataManager).generateNodes()
         verify(payloadDataManager).loadNodes()
         verify(payloadDataManager).metadataNodeFactory
-        verify(ethDataManager).initEthereumWallet(key, "label")
-        verify(bchDataManager).initBchWallet(key, "label")
-        verify(shapeShiftDataManager).initShapeshiftTradeData(key)
         verifyNoMoreInteractions(payloadDataManager)
     }
 

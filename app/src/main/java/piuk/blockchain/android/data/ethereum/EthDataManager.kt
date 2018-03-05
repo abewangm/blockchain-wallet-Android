@@ -16,6 +16,7 @@ import org.bitcoinj.crypto.DeterministicKey
 import org.spongycastle.util.encoders.Hex
 import org.web3j.protocol.core.methods.request.RawTransaction
 import piuk.blockchain.android.data.ethereum.models.CombinedEthModel
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -30,6 +31,7 @@ class EthDataManager(
         private val ethAccountApi: EthAccountApi,
         private val ethDataStore: EthDataStore,
         private val walletOptionsDataManager: WalletOptionsDataManager,
+        private val metadataManager: MetadataManager,
         rxBus: RxBus
 ) {
 
@@ -174,7 +176,7 @@ class EthDataManager(
             if (ethDataStore.ethWallet != null) {
                 ethDataStore.ethWallet?.let {
                     it.txNotes[hash] = note
-                    it.save()
+                    save()
                 }
                 return@fromCallable Void.TYPE
             } else {
@@ -189,14 +191,19 @@ class EthDataManager(
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Completable]
      */
-    fun initEthereumWallet(metadataNode: DeterministicKey, defaultLabel: String): Completable =
+    fun initEthereumWallet(defaultLabel: String): Completable =
             rxPinning.call {
-                Completable.fromCallable {
-                    ethDataStore.ethWallet = fetchOrCreateEthereumWallet(metadataNode, defaultLabel)
-                    return@fromCallable Void.TYPE
+                fetchOrCreateEthereumWallet(defaultLabel)
+                        .flatMapCompletable {
+                            ethDataStore.ethWallet = it.first
 
+                            if (it.second) {
+                                save()
+                            } else {
+                                Completable.complete()
+                            }
+                        }
                 }.compose(RxUtil.applySchedulersToCompletable())
-            }
 
     /**
      * @param gasPrice Represents the fee the sender is willing to pay for gas. One unit of gas
@@ -239,30 +246,38 @@ class EthDataManager(
     private fun setLastTxHash(txHash: String, timestamp: Long): String {
         ethDataStore.ethWallet!!.lastTransactionHash = txHash
         ethDataStore.ethWallet!!.lastTransactionTimestamp = timestamp
-        ethDataStore.ethWallet!!.save()
+
+        save()
 
         return txHash
     }
 
     @Throws(Exception::class)
-    private fun fetchOrCreateEthereumWallet(
-            metadataNode: DeterministicKey,
-            defaultLabel: String
-    ): EthereumWallet {
+    private fun fetchOrCreateEthereumWallet(defaultLabel: String) =
+        metadataManager.fetchMetadata(EthereumWallet.METADATA_TYPE_EXTERNAL)
+                .compose(RxUtil.applySchedulersToObservable())
+                .map {optional ->
 
-        var ethWallet = EthereumWallet.load(metadataNode)
+                    val walletJson = optional.orNull()
 
-        if (ethWallet == null || ethWallet.account == null || !ethWallet.account.isCorrect) {
-            try {
-                val masterKey = payloadManager.payload.hdWallets[0].masterKey
-                ethWallet = EthereumWallet(masterKey, defaultLabel)
-                ethWallet.save()
-            } catch (e: HDWalletException) {
-                //Wallet private key unavailable. First decrypt with second password.
-                throw InvalidCredentialsException(e.message)
-            }
-        }
+                    var ethWallet = EthereumWallet.load(walletJson)
+                    var needsSave = false
 
-        return ethWallet
-    }
+                    if (ethWallet == null || ethWallet.account == null || !ethWallet.account.isCorrect) {
+                        try {
+                            val masterKey = payloadManager.payload.hdWallets[0].masterKey
+                            ethWallet = EthereumWallet(masterKey, defaultLabel)
+                            needsSave = true
+
+                        } catch (e: HDWalletException) {
+                            //Wallet private key unavailable. First decrypt with second password.
+                            throw InvalidCredentialsException(e.message)
+                        }
+                    }
+
+                    Pair(ethWallet, needsSave)
+                }
+
+    fun save() = metadataManager.saveToMetadata(ethDataStore.ethWallet!!.toJson(), EthereumWallet.METADATA_TYPE_EXTERNAL)
+
 }

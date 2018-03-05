@@ -1,12 +1,10 @@
 package piuk.blockchain.android.ui.shapeshift.overview
 
-import info.blockchain.wallet.shapeshift.ShapeShiftTrades
 import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import io.reactivex.Observable
 import io.reactivex.Single
 import piuk.blockchain.android.data.currency.CurrencyState
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.data.stores.Optional
@@ -24,7 +22,6 @@ import javax.inject.Inject
 @Mockable
 class ShapeShiftPresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager,
-        private val payloadDataManager: PayloadDataManager,
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState,
@@ -34,10 +31,10 @@ class ShapeShiftPresenter @Inject constructor(
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
     override fun onViewReady() {
-        payloadDataManager.metadataNodeFactory
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
+        shapeShiftDataManager.initShapeshiftTradeData()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .andThen(shapeShiftDataManager.getTradesList())
                 .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
-                .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
                 .flatMap { trades ->
                     walletOptionsDataManager.isInUsa()
                             .flatMap { usa ->
@@ -103,8 +100,8 @@ class ShapeShiftPresenter @Inject constructor(
                         })
     }
 
-    private fun handleTrades(shapeShiftTrades: ShapeShiftTrades): Single<List<Trade>> =
-            Observable.fromIterable(shapeShiftTrades.trades)
+    private fun handleTrades(tradeList: List<Trade>): Single<List<Trade>> =
+            Observable.fromIterable(tradeList)
                     .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .flatMap { shapeShiftDataManager.getTradeStatusPair(it) }
                     .map {

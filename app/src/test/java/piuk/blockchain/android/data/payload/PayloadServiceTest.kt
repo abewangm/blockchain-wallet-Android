@@ -19,6 +19,7 @@ import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import piuk.blockchain.android.RxTest
 import java.util.*
 
+@Suppress("IllegalIdentifier")
 class PayloadServiceTest : RxTest() {
 
     private lateinit var subject: PayloadService
@@ -362,11 +363,11 @@ class PayloadServiceTest : RxTest() {
     @Throws(Exception::class)
     fun generateNodes() {
         // Arrange
-        val secondPassword = "SECOND_PASSWORD"
+
         // Act
-        val testObserver = subject.generateNodes(secondPassword).test()
+        val testObserver = subject.generateNodes().test()
         // Assert
-        verify(mockPayloadManager).generateNodes(secondPassword)
+        verify(mockPayloadManager).generateNodes()
         verifyNoMoreInteractions(mockPayloadManager)
         testObserver.assertComplete()
     }

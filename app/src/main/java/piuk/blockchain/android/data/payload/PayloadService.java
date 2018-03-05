@@ -310,13 +310,12 @@ public class PayloadService {
     /**
      * Generates the metadata and shared metadata nodes if necessary.
      *
-     * @param secondPassword An optional second password.
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
     @WebRequest
-    Completable generateNodes(@Nullable String secondPassword) {
+    Completable generateNodes() {
         return Completable.fromCallable(() -> {
-            payloadManager.generateNodes(secondPassword);
+            payloadManager.generateNodes();
             return Void.TYPE;
         });
     }

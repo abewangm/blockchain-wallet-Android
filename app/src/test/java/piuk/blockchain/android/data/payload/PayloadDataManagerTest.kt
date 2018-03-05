@@ -26,6 +26,7 @@ import piuk.blockchain.android.data.rxjava.RxBus
 import java.math.BigInteger
 import kotlin.test.assertEquals
 
+@Suppress("IllegalIdentifier")
 class PayloadDataManagerTest : RxTest() {
 
     private lateinit var subject: PayloadDataManager
@@ -665,13 +666,12 @@ class PayloadDataManagerTest : RxTest() {
     @Throws(Exception::class)
     fun generateNodes() {
         // Arrange
-        val secondPassword = "SECOND_PASSWORD"
-        whenever(payloadService.generateNodes(secondPassword))
+        whenever(payloadService.generateNodes())
                 .thenReturn(Completable.complete())
         // Act
-        val testObserver = subject.generateNodes(secondPassword).test()
+        val testObserver = subject.generateNodes().test()
         // Assert
-        verify(payloadService).generateNodes(secondPassword)
+        verify(payloadService).generateNodes()
         verifyNoMoreInteractions(payloadService)
         testObserver.assertComplete()
     }

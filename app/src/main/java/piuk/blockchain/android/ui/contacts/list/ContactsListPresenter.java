@@ -67,10 +67,20 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
         attemptPageSetup(true);
     }
 
-    void initContactsService(@Nullable String secondPassword) {
+    void decryptHDWalletAndinitContactsService(@Nullable String secondPassword) {
+
+        try {
+            payloadDataManager.decryptHDWallet(secondPassword);
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+        initContactsService();
+    }
+
+    void initContactsService() {
         getView().setUiState(UiState.LOADING);
         getCompositeDisposable().add(
-                payloadDataManager.generateNodes(secondPassword)
+                payloadDataManager.generateNodes()
                         .andThen(payloadDataManager.getMetadataNodeFactory())
                         .flatMapCompletable(metadataNodeFactory -> contactsDataManager.initContactsService(
                                 metadataNodeFactory.getMetadataNode(),
@@ -248,7 +258,7 @@ public class ContactsListPresenter extends BasePresenter<ContactsListView> {
                                                 getView().showSecondPasswordDialog();
                                                 getView().setUiState(UiState.FAILURE);
                                             } else {
-                                                initContactsService(null);
+                                                initContactsService();
                                             }
                                         }
                                     }, throwable -> getView().setUiState(UiState.FAILURE)));

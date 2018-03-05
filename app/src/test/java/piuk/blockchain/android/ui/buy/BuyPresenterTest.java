@@ -60,7 +60,7 @@ public class BuyPresenterTest {
         when(buyDataManager.getWebViewLoginDetails()).thenReturn(
                 Observable.just(webViewLoginDetails));
         when(payloadDataManager.isDoubleEncrypted()).thenReturn(
-                false);
+                true);
 
         // Act
         subject.onViewReady();
