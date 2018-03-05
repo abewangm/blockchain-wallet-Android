@@ -1,20 +1,15 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-apply from: 'dependencies.gradle'
-
 buildscript {
-    // Exposes dependencies.gradle.ext to all downstream modules
-    apply from: 'dependencies.gradle'
-
     repositories {
         jcenter()
         google()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:$versions.androidPlugin"
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1'
-        classpath 'com.google.gms:google-services:3.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$versions.kotlin"
+        classpath Libraries.androidGradlePlugin
+        classpath Libraries.coveralls
+        classpath Libraries.googleServicesPlugin
+        classpath Libraries.kotlinGradlePlugin
+        classpath Libraries.kotlinAllOpen
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

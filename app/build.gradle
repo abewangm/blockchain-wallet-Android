@@ -7,20 +7,19 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'com.novoda.build-properties'
 apply from: '../quality/jacoco.gradle'
 apply from: '../quality/releasechecks.gradle'
-apply from: '../dependencies.gradle'
 
 buildProperties {
     secrets.file rootProject.file('app/secrets.properties')
 }
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion Versions.compileSdk
+    buildToolsVersion Versions.buildTools
     dexOptions.javaMaxHeapSize "3g"
 
     defaultConfig {
         applicationId "piuk.blockchain.android"
-        targetSdkVersion 27
+        targetSdkVersion Versions.targetSdk
         versionCode 299
         versionName "6.10.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -65,7 +64,7 @@ android {
          */
         minApi16 {
             dimension "minSdk"
-            minSdkVersion 16
+            minSdkVersion Versions.minSdk
         }
         minApi21 {
             // Specifically to avoid Multidexing on CI, which is causing OOM errors for now
@@ -174,80 +173,80 @@ dependencies {
     // Bitcoinj
     implementation files('libs/bitcoinj-core-0.15-SNAPSHOT.jar')
     // Kotlin
-    implementation libraries.kotlin
+    implementation Libraries.kotlin
     // Support Libs
-    implementation libraries.appCompat
-    implementation libraries.recyclerView
-    implementation libraries.cardView
-    implementation libraries.gridLayout
-    implementation libraries.design
-    implementation libraries.v13
-    implementation libraries.v14
-    implementation libraries.dynamicAnims
-    implementation libraries.constraintLayout
-    implementation libraries.multidex
-    kapt libraries.dataBindingKapt
+    implementation Libraries.appCompat
+    implementation Libraries.recyclerView
+    implementation Libraries.cardView
+    implementation Libraries.gridLayout
+    implementation Libraries.design
+    implementation Libraries.v13
+    implementation Libraries.v14
+    implementation Libraries.dynamicAnims
+    implementation Libraries.constraintLayout
+    implementation Libraries.multidex
+    kapt Libraries.dataBindingKapt
     // Google services
-    implementation libraries.firebaseMessaging
-    implementation libraries.googlePlayServicesBase
+    implementation Libraries.firebaseMessaging
+    implementation Libraries.googlePlayServicesBase
     // Utils
-    implementation libraries.web3j
-    implementation libraries.commonsCodec
-    implementation libraries.commonsLang
-    implementation libraries.urlBuilder
-    implementation libraries.yearclass
+    implementation Libraries.web3j
+    implementation Libraries.commonsCodec
+    implementation Libraries.commonsLang
+    implementation Libraries.urlBuilder
+    implementation Libraries.yearclass
     // Bitcoinj dependencies
-    implementation libraries.protobuf
-    implementation libraries.findbugs
-    implementation libraries.guava
+    implementation Libraries.protobuf
+    implementation Libraries.findbugs
+    implementation Libraries.guava
     // Networking and Core libs
-    implementation libraries.rxJava
-    implementation libraries.rxAndroid
-    implementation libraries.rxBinding
-    implementation libraries.rxFingerprint
-    implementation (libraries.retrofit) {
+    implementation Libraries.rxJava
+    implementation Libraries.rxAndroid
+    implementation Libraries.rxBinding
+    implementation Libraries.rxFingerprint
+    implementation(Libraries.retrofit) {
         exclude module: 'okhttp'
     }
-    implementation libraries.retrofitJacksonConverter
-    implementation libraries.retrofitRxJavaAdapter
-    implementation libraries.okHttp
-    implementation libraries.okHttpInterceptor
-    implementation libraries.dagger
-    kapt libraries.daggerKapt
+    implementation Libraries.retrofitJacksonConverter
+    implementation Libraries.retrofitRxJavaAdapter
+    implementation Libraries.okHttp
+    implementation Libraries.okHttpInterceptor
+    implementation Libraries.dagger
+    kapt Libraries.daggerKapt
     // Views
-    implementation libraries.calligraphy
-    implementation(libraries.zxing) { transitive = true }
-    implementation libraries.countryPicker
-    implementation libraries.bottomNav
-    implementation libraries.circleIndicator
-    implementation libraries.charts
+    implementation Libraries.calligraphy
+    implementation(Libraries.zxing) { transitive = true }
+    implementation Libraries.countryPicker
+    implementation Libraries.bottomNav
+    implementation Libraries.circleIndicator
+    implementation Libraries.charts
     // Logging
-    implementation libraries.timber
-    implementation(libraries.crashlytics) { transitive = true }
-    releaseImplementation libraries.slf4jNoOp
-    dogfoodImplementation libraries.slf4jNoOp
-    debugImplementation libraries.slf4j
+    implementation Libraries.timber
+    implementation(Libraries.crashlytics) { transitive = true }
+    releaseImplementation Libraries.slf4jNoOp
+    dogfoodImplementation Libraries.slf4jNoOp
+    debugImplementation Libraries.slf4j
     // UI/Instrumentation Tests
-    androidTestImplementation libraries.junit
-    androidTestImplementation libraries.mockito
-    androidTestImplementation libraries.annotations
-    androidTestImplementation libraries.testRules
-    androidTestImplementation(libraries.testRunner) {
+    androidTestImplementation Libraries.junit
+    androidTestImplementation Libraries.mockito
+    androidTestImplementation Libraries.annotations
+    androidTestImplementation Libraries.testRules
+    androidTestImplementation(Libraries.testRunner) {
         exclude module: 'support-annotations'
     }
-    androidTestImplementation(libraries.espresso) {
+    androidTestImplementation(Libraries.espresso) {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
     // Unit Tests
-    testImplementation libraries.json
-    testImplementation libraries.mockito
-    testImplementation libraries.hamcrestJunit
-    testImplementation libraries.kotlinJunit
-    testImplementation libraries.kluent
-    testImplementation(libraries.mockitoKotlin) {
+    testImplementation Libraries.json
+    testImplementation Libraries.mockito
+    testImplementation Libraries.hamcrestJunit
+    testImplementation Libraries.kotlinJunit
+    testImplementation Libraries.kluent
+    testImplementation(Libraries.mockitoKotlin) {
         exclude module: 'kotlin-stdlib'
     }
-    testImplementation(libraries.robolectric) {
+    testImplementation(Libraries.robolectric) {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }
@@ -261,14 +260,14 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.24.4'
-        classpath 'com.novoda:gradle-build-properties-plugin:0.3'
+        classpath Libraries.fabricTools
+        classpath Libraries.buildProperties
     }
 }
 
-// Required for CountryPicker
 repositories {
     jcenter()
+    // Required for CountryPicker
     maven { url "https://jitpack.io" }
     maven { url 'https://maven.fabric.io/public' }
 }

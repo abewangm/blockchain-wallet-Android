@@ -24,7 +24,11 @@ abstract class DelegationAdapter<T> constructor(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
             delegatesManager.onBindViewHolder(items, position, holder, null)
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: List<*>?) =
+    override fun onBindViewHolder(
+            holder: RecyclerView.ViewHolder,
+            position: Int,
+            payloads: MutableList<Any>
+    ) =
             delegatesManager.onBindViewHolder(items, position, holder, payloads)
 
     override fun getItemViewType(position: Int): Int =
