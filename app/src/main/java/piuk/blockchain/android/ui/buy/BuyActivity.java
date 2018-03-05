@@ -140,7 +140,6 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         binding.webview.removeJavascriptInterface(FrontendJavascriptManager.JS_INTERFACE_NAME);
         binding.webview.reload();
 
@@ -148,6 +147,8 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
             getPresenter().reloadExchangeDate();
         }
         dismissProgressDialog();
+        // Presenter nulled out here
+        super.onDestroy();
     }
 
     @Override

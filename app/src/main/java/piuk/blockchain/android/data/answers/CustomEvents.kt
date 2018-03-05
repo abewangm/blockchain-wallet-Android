@@ -152,10 +152,18 @@ class BitcoinUnits(@IntRange(from = 0L, to = 2L) unit: Int) : CustomEvent("Bitco
 
 }
 
-class LauncherShortcutEvent(type: String) : CustomEvent("Bitcoin Units") {
+class LauncherShortcutEvent(type: String) : CustomEvent("Launcher Shortcut") {
 
     init {
         putCustomAttribute("Launcher Shortcut used", type)
+    }
+
+}
+
+class WalletUpgradeEvent(successful: Boolean) : CustomEvent("Wallet Upgraded") {
+
+    init {
+        putCustomAttribute("Successful", if (successful) "true" else "false")
     }
 
 }
