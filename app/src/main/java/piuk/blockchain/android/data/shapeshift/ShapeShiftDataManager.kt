@@ -77,8 +77,7 @@ class ShapeShiftDataManager(
     fun setState(state: State?): Completable {
         shapeShiftDataStore.tradeData?.run {
             usState = state
-            return rxPinning.call { Completable.fromCallable { save() } }
-                    .compose(RxUtil.applySchedulersToCompletable())
+            return save()
         }
 
         throw IllegalStateException("ShapeShiftTrades not initialized")
@@ -129,10 +128,9 @@ class ShapeShiftDataManager(
     fun addTradeToList(trade: Trade): Completable {
         shapeShiftDataStore.tradeData?.run {
             trades.add(trade)
-            return rxPinning.call { Completable.fromCallable { save() } }
+            return save()
                     // Reset state on failure
                     .doOnError { trades.remove(trade) }
-                    .compose(RxUtil.applySchedulersToCompletable())
         }
 
         throw IllegalStateException("ShapeShiftTrades not initialized")
@@ -148,8 +146,7 @@ class ShapeShiftDataManager(
     fun clearAllTrades(): Completable {
         shapeShiftDataStore.tradeData?.run {
             trades?.clear()
-            return rxPinning.call { Completable.fromCallable { save() } }
-                    .compose(RxUtil.applySchedulersToCompletable())
+            return save()
         }
 
         throw IllegalStateException("ShapeShiftTrades not initialized")
@@ -171,13 +168,12 @@ class ShapeShiftDataManager(
             } else {
                 trades.remove(foundTrade)
                 trades.add(trade)
-                rxPinning.call { Completable.fromCallable { save() } }
+                save()
                         // Reset state on failure
                         .doOnError {
                             trades.remove(trade)
                             trades.add(foundTrade)
                         }
-                        .compose(RxUtil.applySchedulersToCompletable())
             }
         }
 
@@ -292,8 +288,10 @@ class ShapeShiftDataManager(
                     }
 
     fun save(): Completable {
-        shapeShiftDataStore.tradeData.run {
-            metadataManager.saveToMetadata(shapeShiftDataStore.tradeData!!.toJson(), ShapeShiftTrades.METADATA_TYPE_EXTERNAL)
+        shapeShiftDataStore.tradeData?.run {
+            return rxPinning.call {
+                metadataManager.saveToMetadata(shapeShiftDataStore.tradeData!!.toJson(), ShapeShiftTrades.METADATA_TYPE_EXTERNAL)
+            }.compose(RxUtil.applySchedulersToCompletable())
         }
 
         throw IllegalStateException("ShapeShiftTrades not initialized")

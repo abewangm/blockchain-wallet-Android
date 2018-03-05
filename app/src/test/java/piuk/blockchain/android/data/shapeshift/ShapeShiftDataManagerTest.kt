@@ -4,6 +4,7 @@ import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.shapeshift.ShapeShiftApi
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
 import info.blockchain.wallet.shapeshift.data.*
+import io.reactivex.Completable
 import io.reactivex.Observable
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should equal to`
@@ -103,6 +104,7 @@ class ShapeShiftDataManagerTest : RxTest() {
         val state = State("STATE", "STATE")
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
         whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.setState(state).test()
         // Assert
@@ -232,6 +234,7 @@ class ShapeShiftDataManagerTest : RxTest() {
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
         whenever(tradeData.trades).thenReturn(list)
         whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.addTradeToList(trade).test()
         // Assert
@@ -265,6 +268,7 @@ class ShapeShiftDataManagerTest : RxTest() {
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
         whenever(tradeData.trades).thenReturn(list)
         whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.clearAllTrades().test()
         // Assert
@@ -300,6 +304,7 @@ class ShapeShiftDataManagerTest : RxTest() {
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
         whenever(tradeData.trades).thenReturn(list)
         whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.updateTrade(updatedTrade).test()
         // Assert
