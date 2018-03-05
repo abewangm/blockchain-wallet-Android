@@ -14,8 +14,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
-import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
-import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
 import javax.inject.Inject;
 
@@ -27,7 +25,6 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectionEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
@@ -98,15 +95,7 @@ public class BaseAuthActivity extends AppCompatActivity {
      * @param title   The title for the page, as a String
      */
     public void setupToolbar(Toolbar toolbar, String title) {
-        // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
-        if (AndroidUtils.is18orHigher()) {
-            toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                    title,
-                    TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
-        } else {
-            toolbar.setTitle(title);
-        }
-
+        toolbar.setTitle(title);
         setSupportActionBar(toolbar);
     }
 
@@ -131,14 +120,7 @@ public class BaseAuthActivity extends AppCompatActivity {
      * @param title     The title for the page, as a String
      */
     public void setupToolbar(ActionBar actionBar, String title) {
-        // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
-        if (AndroidUtils.is18orHigher()) {
-            actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                    title,
-                    TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
-        } else {
-            actionBar.setTitle(title);
-        }
+        actionBar.setTitle(title);
     }
 
     @CallSuper

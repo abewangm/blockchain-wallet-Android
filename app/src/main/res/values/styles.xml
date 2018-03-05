@@ -427,4 +427,12 @@
         <item name="fontPath">fonts/Montserrat-Regular.ttf</item>
     </style>
 
+    <style name="ToolbarTitleTextAppearance" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:fontFamily">@font/montserrat</item>
+    </style>
+
+    <style name="NavDrawerTextAppearance" parent="Widget.Design.NavigationView">
+        <item name="android:fontFamily">@font/montserrat</item>
+    </style>
+
 </resources>
