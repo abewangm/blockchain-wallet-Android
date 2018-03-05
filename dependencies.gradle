@@ -1,10 +1,10 @@
 ext.versions = [
         androidPlugin   : '3.0.1',
 
-        kotlin          : '1.2.21',
+        kotlin          : '1.2.30',
 
-        supportLibs     : '27.0.2',
-        googleServices  : '11.6.2',
+        supportLibs     : '27.1.0',
+        googleServices  : '11.0.0',
         constraintLayout: '1.0.2',
         supportTesting  : '1.0.1',
         espresso        : '3.0.1',
@@ -12,10 +12,10 @@ ext.versions = [
 
         retrofit        : '2.3.0',
         okHttp          : '3.9.0',
-        dagger          : '2.12',
-        rxJava          : '2.1.9',
-        rxAndroid       : '2.0.1',
-        rxBinding       : '2.0.0',
+        dagger          : '2.14.1',
+        rxJava          : '2.1.10',
+        rxAndroid       : '2.0.2',
+        rxBinding       : '2.1.1',
         rxFingerprint   : '2.2.1',
 
         web3j           : '2.2.1',
@@ -44,7 +44,7 @@ ext.versions = [
         kluent          : '1.19',
         hamcrestJunit   : '2.0.0.0',
         junit           : '4.12',
-        robolectric     : '3.4.2',
+        robolectric     : '3.7.1',
         json            : '20140107',
 ]
 
