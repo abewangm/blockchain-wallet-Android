@@ -68,7 +68,7 @@ object Versions {
 
 }
 
-object Libs {
+object Libraries {
 
     // Build tools and languages
     const val androidGradlePlugin = "com.android.tools.build:gradle:${Versions.androidPlugin}"

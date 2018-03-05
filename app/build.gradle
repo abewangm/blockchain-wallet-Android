@@ -173,80 +173,80 @@ dependencies {
     // Bitcoinj
     implementation files('libs/bitcoinj-core-0.15-SNAPSHOT.jar')
     // Kotlin
-    implementation Libs.kotlin
+    implementation Libraries.kotlin
     // Support Libs
-    implementation Libs.appCompat
-    implementation Libs.recyclerView
-    implementation Libs.cardView
-    implementation Libs.gridLayout
-    implementation Libs.design
-    implementation Libs.v13
-    implementation Libs.v14
-    implementation Libs.dynamicAnims
-    implementation Libs.constraintLayout
-    implementation Libs.multidex
-    kapt Libs.dataBindingKapt
+    implementation Libraries.appCompat
+    implementation Libraries.recyclerView
+    implementation Libraries.cardView
+    implementation Libraries.gridLayout
+    implementation Libraries.design
+    implementation Libraries.v13
+    implementation Libraries.v14
+    implementation Libraries.dynamicAnims
+    implementation Libraries.constraintLayout
+    implementation Libraries.multidex
+    kapt Libraries.dataBindingKapt
     // Google services
-    implementation Libs.firebaseMessaging
-    implementation Libs.googlePlayServicesBase
+    implementation Libraries.firebaseMessaging
+    implementation Libraries.googlePlayServicesBase
     // Utils
-    implementation Libs.web3j
-    implementation Libs.commonsCodec
-    implementation Libs.commonsLang
-    implementation Libs.urlBuilder
-    implementation Libs.yearclass
+    implementation Libraries.web3j
+    implementation Libraries.commonsCodec
+    implementation Libraries.commonsLang
+    implementation Libraries.urlBuilder
+    implementation Libraries.yearclass
     // Bitcoinj dependencies
-    implementation Libs.protobuf
-    implementation Libs.findbugs
-    implementation Libs.guava
+    implementation Libraries.protobuf
+    implementation Libraries.findbugs
+    implementation Libraries.guava
     // Networking and Core libs
-    implementation Libs.rxJava
-    implementation Libs.rxAndroid
-    implementation Libs.rxBinding
-    implementation Libs.rxFingerprint
-    implementation(Libs.retrofit) {
+    implementation Libraries.rxJava
+    implementation Libraries.rxAndroid
+    implementation Libraries.rxBinding
+    implementation Libraries.rxFingerprint
+    implementation(Libraries.retrofit) {
         exclude module: 'okhttp'
     }
-    implementation Libs.retrofitJacksonConverter
-    implementation Libs.retrofitRxJavaAdapter
-    implementation Libs.okHttp
-    implementation Libs.okHttpInterceptor
-    implementation Libs.dagger
-    kapt Libs.daggerKapt
+    implementation Libraries.retrofitJacksonConverter
+    implementation Libraries.retrofitRxJavaAdapter
+    implementation Libraries.okHttp
+    implementation Libraries.okHttpInterceptor
+    implementation Libraries.dagger
+    kapt Libraries.daggerKapt
     // Views
-    implementation Libs.calligraphy
-    implementation(Libs.zxing) { transitive = true }
-    implementation Libs.countryPicker
-    implementation Libs.bottomNav
-    implementation Libs.circleIndicator
-    implementation Libs.charts
+    implementation Libraries.calligraphy
+    implementation(Libraries.zxing) { transitive = true }
+    implementation Libraries.countryPicker
+    implementation Libraries.bottomNav
+    implementation Libraries.circleIndicator
+    implementation Libraries.charts
     // Logging
-    implementation Libs.timber
-    implementation(Libs.crashlytics) { transitive = true }
-    releaseImplementation Libs.slf4jNoOp
-    dogfoodImplementation Libs.slf4jNoOp
-    debugImplementation Libs.slf4j
+    implementation Libraries.timber
+    implementation(Libraries.crashlytics) { transitive = true }
+    releaseImplementation Libraries.slf4jNoOp
+    dogfoodImplementation Libraries.slf4jNoOp
+    debugImplementation Libraries.slf4j
     // UI/Instrumentation Tests
-    androidTestImplementation Libs.junit
-    androidTestImplementation Libs.mockito
-    androidTestImplementation Libs.annotations
-    androidTestImplementation Libs.testRules
-    androidTestImplementation(Libs.testRunner) {
+    androidTestImplementation Libraries.junit
+    androidTestImplementation Libraries.mockito
+    androidTestImplementation Libraries.annotations
+    androidTestImplementation Libraries.testRules
+    androidTestImplementation(Libraries.testRunner) {
         exclude module: 'support-annotations'
     }
-    androidTestImplementation(Libs.espresso) {
+    androidTestImplementation(Libraries.espresso) {
         exclude group: 'javax.inject', module: 'support-annotations'
     }
     // Unit Tests
-    testImplementation Libs.json
-    testImplementation Libs.mockito
-    testImplementation Libs.hamcrestJunit
-    testImplementation Libs.kotlinJunit
-    testImplementation Libs.kluent
-    testImplementation(Libs.mockitoKotlin) {
+    testImplementation Libraries.json
+    testImplementation Libraries.mockito
+    testImplementation Libraries.hamcrestJunit
+    testImplementation Libraries.kotlinJunit
+    testImplementation Libraries.kluent
+    testImplementation(Libraries.mockitoKotlin) {
         exclude module: 'kotlin-stdlib'
     }
-    testImplementation(Libs.robolectric) {
+    testImplementation(Libraries.robolectric) {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.protobuf'
     }
@@ -260,8 +260,8 @@ buildscript {
     }
 
     dependencies {
-        classpath Libs.fabricTools
-        classpath Libs.buildProperties
+        classpath Libraries.fabricTools
+        classpath Libraries.buildProperties
     }
 }
 
