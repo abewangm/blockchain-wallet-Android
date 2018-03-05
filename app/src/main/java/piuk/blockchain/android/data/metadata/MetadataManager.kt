@@ -39,7 +39,7 @@ class MetadataManager(
     fun decryptAndSetupMetadata(secondPassword: String): Completable {
         payloadDataManager.decryptHDWallet(secondPassword)
         return payloadDataManager.generateNodes()
-                .andThen(Completable.fromObservable(initMetadataNodesObservable()))
+                .andThen(initMetadataNodesObservable())
     }
 
     fun fetchMetadata(metadataType: Int): Observable<Optional<String>> = rxPinning.call<Optional<String>> {
@@ -61,7 +61,7 @@ class MetadataManager(
      *
      * @throws InvalidCredentialsException If nodes/keys cannot be derived because wallet is double encrypted
      */
-    private fun initMetadataNodesObservable(): Observable<MetadataNodeFactory> = rxPinning.call<MetadataNodeFactory> {
+    private fun initMetadataNodesObservable(): Completable = rxPinning.call {
         payloadDataManager.loadNodes()
                 .map { loaded ->
                     if (!loaded) {
@@ -80,6 +80,6 @@ class MetadataManager(
                     } else {
                         payloadDataManager.metadataNodeFactory
                     }
-                }
-    }.compose(RxUtil.applySchedulersToObservable())
+                }.flatMapCompletable { Completable.complete() }
+    }.compose(RxUtil.applySchedulersToCompletable())
 }

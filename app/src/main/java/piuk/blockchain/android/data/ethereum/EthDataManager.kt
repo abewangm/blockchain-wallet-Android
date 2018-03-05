@@ -191,7 +191,7 @@ class EthDataManager(
      * @param defaultLabel The ETH address default label to be used if metadata entry doesn't exist
      * @return An [Completable]
      */
-    fun initEthereumWallet(metadataNode: DeterministicKey, defaultLabel: String): Completable =
+    fun initEthereumWallet(defaultLabel: String): Completable =
             rxPinning.call {
                 fetchOrCreateEthereumWallet(defaultLabel)
                         .flatMapCompletable {

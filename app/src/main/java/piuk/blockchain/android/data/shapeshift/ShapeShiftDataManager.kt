@@ -1,6 +1,5 @@
 package piuk.blockchain.android.data.shapeshift
 
-import info.blockchain.wallet.payload.PayloadManager
 import info.blockchain.wallet.shapeshift.ShapeShiftApi
 import info.blockchain.wallet.shapeshift.ShapeShiftPairs
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
@@ -8,7 +7,7 @@ import info.blockchain.wallet.shapeshift.data.*
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import org.bitcoinj.crypto.DeterministicKey
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.rxjava.RxPinning
 import piuk.blockchain.android.data.rxjava.RxUtil
@@ -23,7 +22,7 @@ import piuk.blockchain.android.util.annotations.WebRequest
 class ShapeShiftDataManager(
         private val shapeShiftApi: ShapeShiftApi,
         private val shapeShiftDataStore: ShapeShiftDataStore,
-        private val payloadManager: PayloadManager,
+        private val metadataManager: MetadataManager,
         rxBus: RxBus
 ) {
 
@@ -36,11 +35,18 @@ class ShapeShiftDataManager(
      * [piuk.blockchain.android.data.payload.PayloadDataManager.getMetadataNodeFactory]
      * @return A [Completable] object
      */
-    fun initShapeshiftTradeData(metadataNode: DeterministicKey): Observable<ShapeShiftTrades> =
-            rxPinning.call<ShapeShiftTrades> {
-                Observable.fromCallable { fetchOrCreateShapeShiftTradeData(metadataNode) }
-                        .doOnNext { shapeShiftDataStore.tradeData = it }
-                        .compose(RxUtil.applySchedulersToObservable())
+    fun initShapeshiftTradeData(): Completable =
+            rxPinning.call {
+                fetchOrCreateShapeShiftTradeData()
+                        .flatMapCompletable {
+                            shapeShiftDataStore.tradeData = it.first
+                            if (it.second) {
+                                save()
+                            } else {
+                                Completable.complete()
+                            }
+                        }
+                        .compose(RxUtil.applySchedulersToCompletable())
             }
 
     /**
@@ -268,17 +274,29 @@ class ShapeShiftDataManager(
      */
     @WebRequest
     @Throws(Exception::class)
-    private fun fetchOrCreateShapeShiftTradeData(metadataHDNode: DeterministicKey): ShapeShiftTrades {
+    private fun fetchOrCreateShapeShiftTradeData() =
+            metadataManager.fetchMetadata(ShapeShiftTrades.METADATA_TYPE_EXTERNAL)
+                    .compose(RxUtil.applySchedulersToObservable())
+                    .map { optional ->
 
-        var shapeShiftData = ShapeShiftTrades.load(metadataHDNode)
+                        val json = optional.orNull()
+                        var shapeShiftData = ShapeShiftTrades.load(json)
+                        var needsSave = false
 
-        if (shapeShiftData == null) {
-            val masterKey = payloadManager.payload.hdWallets[0].masterKey
-            shapeShiftData = ShapeShiftTrades(masterKey)
-            shapeShiftData.save()
+                        if (shapeShiftData == null) {
+                            shapeShiftData = ShapeShiftTrades()
+                            needsSave = true
+                        }
+
+                        Pair(shapeShiftData, needsSave)
+                    }
+
+    fun save(): Completable {
+        shapeShiftDataStore.tradeData.run {
+            metadataManager.saveToMetadata(shapeShiftDataStore.tradeData!!.toJson(), ShapeShiftTrades.METADATA_TYPE_EXTERNAL)
         }
 
-        return shapeShiftData
+        throw IllegalStateException("ShapeShiftTrades not initialized")
     }
 
     data class TradeStatusPair(val tradeMetadata: Trade, val tradeStatusResponse: TradeStatusResponse)

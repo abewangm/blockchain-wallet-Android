@@ -204,15 +204,11 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     void initMetadataElements() {
         metadataManager.attemptMetadataSetup()
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
-                .flatMapCompletable(metadataNodeFactory ->
-                        // TODO: 21/02/2018  eth and ss metadata extraction
-                    ethCompletable(metadataNodeFactory.getMetadataNode())
-                            .mergeWith(shapeshiftCompletable(metadataNodeFactory.getMetadataNode()))
-                )
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .andThen(ethCompletable())
+                .andThen(shapeshiftCompletable())
                 .andThen(bchCompletable())
                 .andThen(feesCompletable())
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .doAfterTerminate(() -> {
                             getView().hideProgressDialog();
 
@@ -257,17 +253,23 @@ public class MainPresenter extends BasePresenter<MainView> {
                 });
     }
 
-    private Completable ethCompletable(DeterministicKey node) {
-        // TODO: 20/02/2018 Eth shouldn't handle metadata - refactor
-        return ethDataManager.initEthereumWallet(node,
+    private Completable ethCompletable() {
+        return ethDataManager.initEthereumWallet(
                 stringUtils.getString(R.string.eth_default_account_label))
-                .compose(RxUtil.addCompletableToCompositeDisposable(this));
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError(throwable -> {
+                    // TODO: 21/02/2018 Reload or disable?
+                    Timber.e("Failed to load eth wallet");
+                });
     }
 
-    private Completable shapeshiftCompletable(DeterministicKey node) {
-        // TODO: 20/02/2018 SS shouldn't handle metadata - refactor
-        return Completable.fromObservable(shapeShiftDataManager.initShapeshiftTradeData(node)
-                .compose(RxUtil.addObservableToCompositeDisposable(this)));
+    private Completable shapeshiftCompletable() {
+        return shapeShiftDataManager.initShapeshiftTradeData()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError(throwable -> {
+                    // TODO: 21/02/2018 Reload or disable?
+                    Timber.e("Failed to load shape shift trades");
+                });
     }
 
     private void logException(Throwable throwable) {
