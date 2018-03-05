@@ -76,8 +76,7 @@ public class BaseAuthActivity extends AppCompatActivity {
 
     /**
      * Applies the title to the {@link Toolbar} which is then set as the Activity's
-     * SupportActionBar. Also applies the Montserrat-Regular font, as this cannot be done elsewhere
-     * for now.
+     * SupportActionBar.
      *
      * @param toolbar The {@link Toolbar} for the current activity
      * @param title   The title for the page, as a StringRes
@@ -88,8 +87,7 @@ public class BaseAuthActivity extends AppCompatActivity {
 
     /**
      * Applies the title to the {@link Toolbar} which is then set as the Activity's
-     * SupportActionBar. Also applies the Montserrat-Regular font, as this cannot be done elsewhere
-     * for now.
+     * SupportActionBar.
      *
      * @param toolbar The {@link Toolbar} for the current activity
      * @param title   The title for the page, as a String
@@ -101,8 +99,7 @@ public class BaseAuthActivity extends AppCompatActivity {
 
     /**
      * Applies the title to the Activity's {@link ActionBar}. This method is the fragment equivalent
-     * of {@link #setupToolbar(Toolbar, int)} Also applies the Montserrat-Regular font, as this
-     * cannot be done elsewhere for now.
+     * of {@link #setupToolbar(Toolbar, int)}.
      *
      * @param actionBar The {@link ActionBar} for the current activity
      * @param title     The title for the page, as a StringRes
@@ -113,8 +110,7 @@ public class BaseAuthActivity extends AppCompatActivity {
 
     /**
      * Applies the title to the Activity's {@link ActionBar}. This method is the fragment equivalent
-     * of {@link #setupToolbar(Toolbar, int)} Also applies the Montserrat-Regular font, as this
-     * cannot be done elsewhere for now.
+     * of {@link #setupToolbar(Toolbar, int)}.
      *
      * @param actionBar The {@link ActionBar} for the current activity
      * @param title     The title for the page, as a String

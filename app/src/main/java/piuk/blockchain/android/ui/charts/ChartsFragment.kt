@@ -41,15 +41,18 @@ import javax.inject.Inject
 
 class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
 
+    @Suppress("MemberVisibilityCanBePrivate")
     @Inject lateinit var chartsPresenter: ChartsPresenter
 
     override val locale: Locale = Locale.getDefault()
     override val cryptoCurrency: CryptoCurrencies by unsafeLazy {
         arguments!!.getSerializable(ARGUMENT_CRYPTOCURRENCY) as CryptoCurrencies
     }
+    // STOPSHIP: Remove me
     private val typefaceRegular by unsafeLazy {
         TypefaceUtils.load(context!!.assets, "fonts/Montserrat-Regular.ttf")
     }
+    // STOPSHIP: Remove me
     private val typefaceLight by unsafeLazy {
         TypefaceUtils.load(context!!.assets, "fonts/Montserrat-Light.ttf")
     }

@@ -32,34 +32,32 @@
 
             <TextView
                 android:id="@+id/textview_current_stage"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center"
                 android:textColor="@color/black"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageview_progress"
-                tools:ignore="MissingPrefix"
                 tools:text="Exchange in Progress" />
 
             <TextView
                 android:id="@+id/textview_current_word_step"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="8dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center"
                 android:textColor="@color/product_gray_hint"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textview_current_stage"
-                tools:ignore="MissingPrefix"
                 tools:text="Step 1 of 3" />
 
             <include

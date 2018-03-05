@@ -46,10 +46,10 @@
             <TextView
                 android:id="@+id/textNoTransactionsYet"
                 style="@style/Base.DialogWindowTitle.AppCompat"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center_horizontal"
                 android:text="@string/contacts_detail_transactions_empty"
                 android:textColor="@color/primary_navy_medium"
@@ -60,10 +60,10 @@
 
             <TextView
                 android:id="@+id/textNoTransactionsHelper"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center_horizontal"
                 android:text="@string/contacts_transaction_helper_text_1"
                 android:textColor="@color/product_gray_hint"

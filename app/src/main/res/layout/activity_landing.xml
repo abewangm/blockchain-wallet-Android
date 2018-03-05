@@ -77,12 +77,12 @@
 
     <TextView
         android:id="@+id/recoverFunds"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="48dp"
         android:layout_marginRight="48dp"
         android:layout_marginTop="8dp"
+        android:fontFamily="@font/montserrat"
         android:gravity="center"
         android:paddingLeft="48dp"
         android:paddingRight="48dp"
@@ -93,8 +93,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login"
-        tools:ignore="MissingPrefix" />
+        app:layout_constraintTop_toBottomOf="@+id/login" />
 
     <ImageView
         android:id="@+id/buttonSettings"

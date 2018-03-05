@@ -53,19 +53,18 @@
 
             <TextView
                 android:id="@+id/textview_receive_helper"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="16dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center_horizontal|top"
                 android:text="@string/share_instructions"
                 android:textColor="@color/primary_gray_dark"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="MissingPrefix" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
                 android:id="@+id/progressbar"
@@ -95,13 +94,13 @@
 
             <TextView
                 android:id="@+id/textview_receiving_address"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal|center_vertical"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="-8dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center_horizontal|center_vertical"
                 android:padding="8dp"
                 android:textColor="@color/primary_gray_dark"
@@ -109,7 +108,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/image_qr"
-                tools:ignore="MissingPrefix"
                 tools:text="Some bitcoin address" />
 
             <View

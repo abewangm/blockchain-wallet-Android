@@ -34,6 +34,7 @@ public class CustomCheckBoxPreference extends CheckBoxPreference {
     }
 
     private void init() {
+        // STOPSHIP: 05/03/2018 Remove me
         typeface = TypefaceUtils.load(getContext().getAssets(), "fonts/Montserrat-Regular.ttf");
         // Forces setting fonts when Summary or Title are set via XMl
         setTitle(getTitle());

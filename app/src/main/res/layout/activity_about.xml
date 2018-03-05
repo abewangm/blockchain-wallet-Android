@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,29 +14,29 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginRight="24dp"
             android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:layout_marginTop="24dp"
             android:gravity="center_horizontal"
             app:srcCompat="@drawable/vector_logo" />
 
         <TextView
             android:id="@+id/about"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/montserrat"
             android:gravity="center_horizontal"
             android:textColor="@color/primary_navy_medium"
             android:textSize="16sp" />
 
         <TextView
             android:id="@+id/rate_us"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:layout_marginTop="20dp"
+            android:fontFamily="@font/montserrat"
             android:gravity="center"
             android:text="@string/rate_us"
             android:textColor="@color/primary_navy_medium"
@@ -44,10 +44,10 @@
 
         <TextView
             android:id="@+id/licenses"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
+            android:fontFamily="@font/montserrat"
             android:gravity="center"
             android:text="@string/licenses"
             android:textColor="@color/primary_navy_medium"
@@ -56,10 +56,10 @@
 
         <TextView
             android:id="@+id/free_wallet"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
+            android:fontFamily="@font/montserrat"
             android:gravity="center"
             android:text="@string/merchant_download"
             android:textColor="@color/primary_navy_medium"

@@ -10,35 +10,33 @@
 
     <TextView
         android:id="@+id/toTextView"
-        fontPath="fonts/Montserrat-Light.ttf"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
+        android:fontFamily="@font/montserrat_light"
         android:text="@string/to"
         android:textColor="@color/primary_gray_dark"
         app:layout_constraintEnd_toStartOf="@+id/toArrowImage"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingPrefix" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/toAddressTextView"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="8dp"
+        android:fontFamily="@font/montserrat"
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/toArrowImage"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toTextView"
-        tools:ignore="MissingPrefix"
         tools:text="@string/default_wallet_name" />
 
     <ImageView
