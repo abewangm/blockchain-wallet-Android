@@ -122,6 +122,11 @@ class AccountEditActivity : BaseMvpActivity<AccountEditView, AccountEditPresente
 
     override fun onSupportNavigateUp(): Boolean = consume { onBackPressed() }
 
+    override fun finishPage() {
+        setResult(Activity.RESULT_CANCELED)
+        finish()
+    }
+
     override fun sendBroadcast(key: String, data: String) {
         val intent = Intent(WebSocketService.ACTION_INTENT).apply { putExtra(key, data) }
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
@@ -175,6 +180,10 @@ class AccountEditActivity : BaseMvpActivity<AccountEditView, AccountEditPresente
 
     override fun onChangeFeeClicked() {
         // No-op
+    }
+
+    override fun hideMerchantCopy() {
+        binding.tvExtendedXpubDescription.setText(R.string.extended_public_key_description_bch_only)
     }
 
     override fun onSendClicked() {
@@ -280,12 +289,14 @@ class AccountEditActivity : BaseMvpActivity<AccountEditView, AccountEditPresente
                 .show()
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
-            presenter.handleIncomingScanIntent(data)
-        }
+        data?.let {
+            if (requestCode == SCAN_PRIVX && resultCode == Activity.RESULT_OK) {
+                presenter.handleIncomingScanIntent(data)
+            }
+        } ?: toast(R.string.unexpected_error, ToastCustom.TYPE_ERROR)
     }
 
     override fun onRequestPermissionsResult(

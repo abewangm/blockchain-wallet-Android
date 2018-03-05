@@ -1,5 +1,7 @@
 package piuk.blockchain.android.data.exchange;
 
+import android.support.annotation.VisibleForTesting;
+
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.WalletOptions;
 
@@ -12,7 +14,6 @@ import piuk.blockchain.android.data.exchange.models.ExchangeData;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
-import timber.log.Timber;
 
 public class BuyDataManager {
 
@@ -63,7 +64,8 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    private Observable<Boolean> isBuyRolledOut() {
+    @VisibleForTesting
+    Observable<Boolean> isBuyRolledOut() {
         return buyConditions.walletOptionsSource
                 .flatMap(walletOptions -> buyConditions.walletSettingsSource
                         .map(inCoinifyCountry -> isRolloutAllowed(walletOptions.getRolloutPercentage())));
@@ -74,10 +76,18 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    private Observable<Boolean> isSfoxAllowed() {
-        return Observable.zip(isInSfoxCountry(), buyConditions.exchangeDataSource,
-                (sfoxCountry, exchangeData) -> sfoxCountry
-                        || (exchangeData.getSfox() != null && exchangeData.getSfox().getUser() != null));
+    public Observable<Boolean> isSfoxAllowed() {
+        return Observable.zip(isSfoxEnabled(), buyConditions.walletOptionsSource,
+                isInSfoxCountry(), buyConditions.exchangeDataSource,
+                (sfoxEnabled, walletOptions, sfoxCountry, exchangeData) ->
+                        sfoxEnabled &&
+                                (sfoxCountry || (exchangeData.getSfox() != null && exchangeData.getSfox().getUser() != null)));
+    }
+
+    private Observable<Boolean> isSfoxEnabled() {
+        return buyConditions.walletOptionsSource
+                .map(options -> options.getAndroidFlags().containsKey("showSfox")
+                        && options.getAndroidFlags().get("showSfox"));
     }
 
     /**
@@ -98,7 +108,8 @@ public class BuyDataManager {
      *
      * @return An {@link Observable} wrapping a boolean value
      */
-    private Observable<Boolean> isCoinifyAllowed() {
+    @VisibleForTesting
+    Observable<Boolean> isCoinifyAllowed() {
         return Observable.zip(isInCoinifyCountry(), buyConditions.exchangeDataSource,
                 (coinifyCountry, exchangeData) -> coinifyCountry
                         || (exchangeData.getCoinify() != null && exchangeData.getCoinify().getUser() != 0));
@@ -141,7 +152,8 @@ public class BuyDataManager {
                         .map(settings -> walletOptions.getPartners().getUnocoin().getCountries().contains(settings.getCountryCode())));
     }
 
-    private Observable<Boolean> isUnocoinAllowed() {
+    @VisibleForTesting
+    Observable<Boolean> isUnocoinAllowed() {
         return Observable.zip(isInUnocoinCountry(), isUnocoinWhitelisted(), isUnocoinEnabledOnAndroid(),
                 (unocoinCountry, whiteListed, androidEnabled) -> (unocoinCountry || whiteListed) && androidEnabled);
     }

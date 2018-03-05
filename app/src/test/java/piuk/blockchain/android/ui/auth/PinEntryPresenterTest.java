@@ -502,6 +502,7 @@ public class PinEntryPresenterTest {
         //noinspection WrongConstant
         verify(activity).showToast(anyInt(), anyString());
         verify(prefsUtil, times(2)).removeValue(anyString());
+        verify(accessState).setPIN(null);
         verify(activity).restartPageAndClearTop();
     }
 

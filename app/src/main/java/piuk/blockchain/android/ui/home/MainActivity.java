@@ -41,9 +41,10 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.aurelhubert.ahbottomnavigation.notification.AHNotification;
 
+import info.blockchain.wallet.util.FormatsUtil;
+
 import org.jetbrains.annotations.NotNull;
 
-import info.blockchain.wallet.util.FormatsUtil;
 import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
 import uk.co.chrisjenx.calligraphy.TypefaceUtils;
 
@@ -309,6 +310,11 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     protected void onResume() {
         super.onResume();
+        // This can null out in low memory situations, so reset here
+        binding.navigationView.setNavigationItemSelectedListener(menuItem -> {
+            selectDrawerItem(menuItem);
+            return true;
+        });
         appUtil.deleteQR();
         getPresenter().updateTicker();
         if (!handlingResult) {
@@ -523,12 +529,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         // Called onResume from BalanceFragment
         toolbar.setTitle("");
 
-        binding.navigationView.setNavigationItemSelectedListener(
-                menuItem -> {
-                    selectDrawerItem(menuItem);
-                    return true;
-                });
-
         // Set selected appropriately.
         if (getCurrentFragment() instanceof DashboardFragment) {
             binding.bottomNavigation.setCurrentItem(1);
@@ -702,6 +702,14 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
 
         frontendJavascriptManager = new FrontendJavascriptManager(this, buyWebView);
         buyWebView.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
+    }
+
+    @Override
+    public void updateNavDrawerToBuyAndSell() {
+        Menu menu = binding.navigationView.getMenu();
+        MenuItem buy = menu.findItem(R.id.nav_buy);
+        buy.setTitle(R.string.onboarding_buy_and_sell_bitcoin);
+        applyFontToMenuItem(buy);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)

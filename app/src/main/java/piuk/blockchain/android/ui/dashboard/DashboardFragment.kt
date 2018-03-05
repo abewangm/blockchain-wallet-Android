@@ -89,6 +89,8 @@ class DashboardFragment : BaseFragment<DashboardView, DashboardPresenter>(), Das
         }
         LocalBroadcastManager.getInstance(context!!)
                 .registerReceiver(receiver, IntentFilter(BalanceFragment.ACTION_INTENT))
+
+        recycler_view?.scrollToPosition(0)
     }
 
     override fun onPause() {

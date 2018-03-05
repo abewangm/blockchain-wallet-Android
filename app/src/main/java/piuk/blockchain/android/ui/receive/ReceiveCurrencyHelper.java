@@ -140,11 +140,10 @@ public class ReceiveCurrencyHelper {
      * @return The amount of BTC/mBits/bits as a double
      */
     public double getUndenominatedAmount(double amount) {
-        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
-            return monetaryUtil.getUndenominatedAmount(amount);
-        } else {
-            // TODO: 01/09/2017 Currently ontly handling Ether
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.ETHER) {
             return amount;
+        } else {
+            return monetaryUtil.getUndenominatedAmount(amount);
         }
     }
 
@@ -162,10 +161,10 @@ public class ReceiveCurrencyHelper {
 
         double cryptoAmount = fiatAmount / getLastPrice();
 
-        if (currencyState.getCryptoCurrency() == CryptoCurrencies.BTC) {
-            return getFormattedBtcString(cryptoAmount);
-        } else {
+        if (currencyState.getCryptoCurrency() == CryptoCurrencies.ETHER) {
             return getFormattedEthString(BigDecimal.valueOf(cryptoAmount));
+        } else {
+            return getFormattedBtcString(cryptoAmount);
         }
     }
     public String getFormattedFiatStringFromCrypto(double cryptoAmount) {

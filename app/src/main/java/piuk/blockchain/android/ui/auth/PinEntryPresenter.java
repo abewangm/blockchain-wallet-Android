@@ -231,7 +231,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
 
     void clearPinBoxes() {
         mUserEnteredPin = "";
-        getView().clearPinBoxes();
+        if (getView() != null) getView().clearPinBoxes();
     }
 
     @VisibleForTesting
@@ -322,6 +322,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                             getView().showToast(R.string.pin_4_strikes_password_accepted, ToastCustom.TYPE_OK);
                             mPrefsUtil.removeValue(PrefsUtil.KEY_PIN_FAILS);
                             mPrefsUtil.removeValue(PrefsUtil.KEY_PIN_IDENTIFIER);
+                            mAccessState.setPIN(null);
                             getView().restartPageAndClearTop();
                         }, throwable -> {
 

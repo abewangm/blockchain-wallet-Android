@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
@@ -24,20 +23,17 @@ public class BuyPresenter extends BasePresenter<BuyView> {
     private AppUtil appUtil;
     private BuyDataManager buyDataManager;
     private PayloadDataManager payloadDataManager;
-    private EnvironmentSettings environmentSettings;
     private WalletOptionsDataManager walletOptionsDataManager;
 
     @Inject
     BuyPresenter(AppUtil appUtil,
                  BuyDataManager buyDataManager,
                  PayloadDataManager payloadDataManager,
-                 EnvironmentSettings environmentSettings,
                  WalletOptionsDataManager walletOptionsDataManager) {
 
         this.appUtil = appUtil;
         this.buyDataManager = buyDataManager;
         this.payloadDataManager = payloadDataManager;
-        this.environmentSettings = environmentSettings;
         this.walletOptionsDataManager = walletOptionsDataManager;
     }
 

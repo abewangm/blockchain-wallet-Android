@@ -322,6 +322,7 @@
         Blockchain Merchant app to receive funds safely and privately.\n\nKeep your xPub private.
         Someone with access to your xPub will be able to see all your funds and transactions.
     </string>
+    <string name="extended_public_key_description_bch_only">Keep your xPub private. Someone with access to your xPub will be able to see all your funds and transactions.</string>
     <string name="watch_only_description">This is a watch only address. To spend your funds from
         this wallet, please scan your private key.
     </string>
@@ -472,8 +473,8 @@
     <string name="large_tx_high_fee_warning">"This transaction requires a higher fee for dust consumption due to the small amount of change to be returned."</string>
     <string name="password_reveal_warning">Be careful! Revealing this text allows your password to be copied to the clipboard, which can then be read by all applications on your device. Also be aware of people standing behind you!</string>
 
-    <string name="sms_notifications">SMS Notifications</string>
-    <string name="sms_notifications_summary">Enable notifications to receive an SMS whenever you receive bitcoin.</string>
+    <string name="push_notifications">Push Notifications</string>
+    <string name="push_notifications_summary">Enable notifications to receive a popup notification whenever you receive bitcoin.</string>
 
     <!-- TRANSACTION DETAILS -->
     <string name="transaction_detail_title">Transaction</string>
@@ -716,6 +717,7 @@
 
     <!-- BUY BITCOIN -->
     <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
+    <string name="onboarding_buy_and_sell_bitcoin">Buy &amp; Sell Bitcoin</string>
     <string name="onboarding_get_bitcoin">Get Bitcoin</string>
     <string name="onboarding_get_eth">Get Ether</string>
     <string name="onboarding_get_bitcoin_cash">Get Bitcoin Cash</string>
@@ -881,6 +883,7 @@
     <string name="invalid_address">Invalid address</string>
     <string name="confirm_currency">Confirm currency</string>
     <string name="confirm_currency_message">Please select which currency\'s QR code you are scanning.</string>
+    <string name="error_bitpay_not_supported">Bitpay URIs are not currently supported</string>
 
     <!--Buy & Sell-->
     <string name="announcement_trading_cta">The wait is over</string>

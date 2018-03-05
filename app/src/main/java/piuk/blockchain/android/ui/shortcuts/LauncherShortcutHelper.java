@@ -12,10 +12,16 @@ import java.util.Arrays;
 
 import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
+import piuk.blockchain.android.data.answers.LauncherShortcutEvent;
+import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.ui.receive.ReceiveQrActivity;
 
 public class LauncherShortcutHelper {
+
+    @SuppressWarnings("WeakerAccess")
+    public static final String SHORTCUT_ID_COPY = "SHORTCUT_ID_COPY";
+    public static final String SHORTCUT_ID_QR = "SHORTCUT_ID_QR";
 
     private Context context;
     private PayloadDataManager payloadDataManager;
@@ -41,7 +47,7 @@ public class LauncherShortcutHelper {
                     copyIntent.setType("text/plain");
                     copyIntent.putExtra(Intent.EXTRA_TEXT, receiveAddress);
 
-                    ShortcutInfo copyShortcut = new ShortcutInfo.Builder(context, "receive")
+                    ShortcutInfo copyShortcut = new ShortcutInfo.Builder(context, SHORTCUT_ID_COPY)
                             .setShortLabel(context.getString(R.string.shortcut_receive_copy_short))
                             .setLongLabel(context.getString(R.string.shortcut_receive_copy_long))
                             .setIcon(Icon.createWithResource(context, R.drawable.ic_receive_copy))
@@ -53,7 +59,7 @@ public class LauncherShortcutHelper {
                     qrIntent.putExtra(ReceiveQrActivity.INTENT_EXTRA_ADDRESS, receiveAddress);
                     qrIntent.putExtra(ReceiveQrActivity.INTENT_EXTRA_LABEL, receiveAccountName);
 
-                    ShortcutInfo qrShortcut = new ShortcutInfo.Builder(context, "qr")
+                    ShortcutInfo qrShortcut = new ShortcutInfo.Builder(context, SHORTCUT_ID_QR)
                             .setShortLabel(context.getString(R.string.shortcut_receive_qr_short))
                             .setLongLabel(context.getString(R.string.shortcut_receive_qr_long))
                             .setIcon(Icon.createWithResource(context, R.drawable.ic_receive_scan))
@@ -63,6 +69,12 @@ public class LauncherShortcutHelper {
                     shortcutManager.setDynamicShortcuts(Arrays.asList(copyShortcut, qrShortcut));
 
                 }, Throwable::printStackTrace);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N_MR1)
+    public void logShortcutUsed(String shortcutId) {
+        shortcutManager.reportShortcutUsed(shortcutId);
+        Logging.INSTANCE.logCustom(new LauncherShortcutEvent(shortcutId));
     }
 
 }

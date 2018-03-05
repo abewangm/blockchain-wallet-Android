@@ -21,8 +21,8 @@ android {
     defaultConfig {
         applicationId "piuk.blockchain.android"
         targetSdkVersion 27
-        versionCode 295
-        versionName "6.10.0-rc2"
+        versionCode 299
+        versionName "6.10.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         archivesBaseName = "blockchain-$versionName"

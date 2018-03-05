@@ -83,7 +83,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
 
-        setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.onboarding_buy_bitcoin);
+        setupToolbar(binding.toolbarContainer.toolbarGeneral, "");
 
         if (AndroidUtils.is21orHigher()) {
             CookieManager.getInstance().setAcceptThirdPartyCookies(binding.webview, true);
@@ -140,7 +140,6 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         binding.webview.removeJavascriptInterface(FrontendJavascriptManager.JS_INTERFACE_NAME);
         binding.webview.reload();
 
@@ -148,6 +147,8 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
             getPresenter().reloadExchangeDate();
         }
         dismissProgressDialog();
+        // Presenter nulled out here
+        super.onDestroy();
     }
 
     @Override

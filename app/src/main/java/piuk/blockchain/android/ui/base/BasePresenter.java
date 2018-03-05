@@ -30,6 +30,7 @@ public abstract class BasePresenter<VIEW extends View> implements Presenter<VIEW
 
     @Override
     public VIEW getView() {
+        // TODO: 28/02/2018 In the future, migrate this to Kotlin and mark as nullable
         return view;
     }
 

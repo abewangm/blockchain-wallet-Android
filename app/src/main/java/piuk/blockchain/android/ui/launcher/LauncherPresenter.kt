@@ -5,6 +5,7 @@ import info.blockchain.wallet.api.data.Settings
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.notifications.FcmCallbackService.EXTRA_CONTACT_ACCEPTED
+import piuk.blockchain.android.data.notifications.NotificationTokenManager
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.settings.SettingsDataManager
@@ -19,7 +20,8 @@ class LauncherPresenter @Inject constructor(
         private val payloadDataManager: PayloadDataManager,
         private val prefsUtil: PrefsUtil,
         private val accessState: AccessState,
-        private val settingsDataManager: SettingsDataManager
+        private val settingsDataManager: SettingsDataManager,
+        private val notificationTokenManager: NotificationTokenManager
 ) : BasePresenter<LauncherView>() {
 
     override fun onViewReady() {
@@ -84,6 +86,7 @@ class LauncherPresenter @Inject constructor(
                 payloadDataManager.wallet.guid,
                 payloadDataManager.wallet.sharedKey)
                 .doOnComplete { accessState.setIsLoggedIn(true) }
+                .doOnNext { notificationTokenManager.registerAuthEvent() }
                 .compose(RxUtil.addObservableToCompositeDisposable(this))
                 .subscribe({ settings ->
                     checkOnboardingStatus(settings)

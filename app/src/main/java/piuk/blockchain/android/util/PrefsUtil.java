@@ -95,10 +95,12 @@ public class PrefsUtil implements PersistentPrefs {
     @Override
     public void logOut() {
         String guid = getValue(PrefsUtil.KEY_GUID, "");
+        String notificationsToken = getValue(PrefsUtil.KEY_FIREBASE_TOKEN, "");
         clear();
 
         setValue(PrefsUtil.LOGGED_OUT, true);
         setValue(PrefsUtil.KEY_GUID, guid);
+        setValue(PrefsUtil.KEY_FIREBASE_TOKEN, notificationsToken);
     }
 
     /**

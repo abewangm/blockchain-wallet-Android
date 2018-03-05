@@ -13,7 +13,6 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.prices.data.PriceDatum;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -23,6 +22,7 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.BitcoinUnits;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
@@ -50,6 +50,7 @@ import piuk.blockchain.android.ui.dashboard.DashboardPresenter;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 import timber.log.Timber;
@@ -155,6 +156,8 @@ public class MainPresenter extends BasePresenter<MainView> {
 
             doWalletOptionsChecks();
         }
+
+        Logging.INSTANCE.logCustom(new BitcoinUnits(prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)));
     }
 
     /*
@@ -285,19 +288,20 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     private void checkForMessages() {
-        getCompositeDisposable().add(contactsDataManager.fetchContacts()
-                .andThen(contactsDataManager.getContactList())
-                .toList()
-                .flatMapObservable(contacts -> {
-                    if (!contacts.isEmpty()) {
-                        return contactsDataManager.getMessages(true);
-                    } else {
-                        return Observable.just(Collections.emptyList());
-                    }
-                })
-                .subscribe(messages -> {
-                    // No-op
-                }, Timber::e));
+        // TODO: 28/02/2018 There is no point in doing this currently
+//        getCompositeDisposable().add(contactsDataManager.fetchContacts()
+//                .andThen(contactsDataManager.getContactList())
+//                .toList()
+//                .flatMapObservable(contacts -> {
+//                    if (!contacts.isEmpty()) {
+//                        return contactsDataManager.getMessages(true);
+//                    } else {
+//                        return Observable.just(Collections.emptyList());
+//                    }
+//                })
+//                .subscribe(messages -> {
+//                    // No-op
+//                }, Timber::e));
     }
 
     void unPair() {
@@ -401,6 +405,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                         .subscribe(isEnabled -> {
                             getView().setBuySellEnabled(isEnabled);
                             if (isEnabled) {
+                                checkBuyAndSellEnabled();
                                 buyDataManager.watchPendingTrades()
                                         .compose(RxUtil.applySchedulersToObservable())
                                         .subscribe(getView()::onTradeCompleted, Throwable::printStackTrace);
@@ -412,6 +417,14 @@ public class MainPresenter extends BasePresenter<MainView> {
                             Timber.e(throwable);
                             getView().setBuySellEnabled(false);
                         }));
+    }
+
+    private void checkBuyAndSellEnabled() {
+        buyDataManager.isSfoxAllowed()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(allowed -> {
+                    if (allowed) getView().updateNavDrawerToBuyAndSell();
+                }, Timber::e);
     }
 
     private void dismissAnnouncementIfOnboardingCompleted() {

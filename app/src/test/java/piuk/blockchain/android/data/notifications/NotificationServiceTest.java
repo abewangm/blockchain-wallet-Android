@@ -45,4 +45,17 @@ public class NotificationServiceTest extends RxTest {
         verifyNoMoreInteractions(mockWalletApi);
     }
 
+
+    @Test
+    public void removeNotificationToken() throws Exception {
+
+        // TODO: 01/03/2018 Once backend has created this endpoint
+
+        // Arrange
+
+        // Act
+        TestObserver<Void> testObserver = subject.removeNotificationToken("").test();
+
+        // Assert
+    }
 }
