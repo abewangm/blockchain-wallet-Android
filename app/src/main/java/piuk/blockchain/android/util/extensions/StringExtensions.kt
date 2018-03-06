@@ -12,7 +12,7 @@ import piuk.blockchain.android.ui.settings.customprefs.CustomTypefaceSpan
 /**
  * Applies a [Typeface] to a [CharSequence] and returns a [SpannableStringBuilder]
  *
- * @param typeface The font to be applied to the entire [CharSequence]. This is deliberate nullable,
+ * @param typeface The font to be applied to the entire [CharSequence]. This is deliberately nullable,
  * and if null is passed the default system font will be applied instead.
  */
 fun CharSequence.applyFont(typeface: Typeface?): SpannableStringBuilder =
