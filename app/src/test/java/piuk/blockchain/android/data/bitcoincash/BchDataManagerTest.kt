@@ -2,24 +2,15 @@ package piuk.blockchain.android.data.bitcoincash
 
 import com.google.common.base.Optional
 import com.nhaarman.mockito_kotlin.*
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.atLeastOnce
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.times
-import com.nhaarman.mockito_kotlin.verify
-import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
-import com.nhaarman.mockito_kotlin.whenever
 import info.blockchain.api.blockexplorer.BlockExplorer
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.coin.GenericMetadataWallet
-import info.blockchain.wallet.metadata.Metadata
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.HDWallet
 import info.blockchain.wallet.payload.data.Wallet
 import io.reactivex.Completable
 import io.reactivex.Observable
 import junit.framework.Assert
-import org.bitcoinj.crypto.DeterministicKey
 import org.bitcoinj.params.BitcoinCashMainNetParams
 import org.junit.Before
 import org.junit.Test

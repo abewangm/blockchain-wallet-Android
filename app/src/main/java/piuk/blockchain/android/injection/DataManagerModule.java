@@ -163,9 +163,10 @@ public class DataManagerModule {
                                                    EthDataStore ethDataStore,
                                                    WalletOptionsDataManager walletOptionsDataManager,
                                                    MetadataManager metadataManager,
+                                                   EnvironmentSettings environmentSettings,
                                                    RxBus rxBus) {
         return new EthDataManager(payloadManager, new EthAccountApi(), ethDataStore,
-                walletOptionsDataManager, metadataManager, rxBus);
+                walletOptionsDataManager, metadataManager, environmentSettings, rxBus);
     }
 
     @Provides
