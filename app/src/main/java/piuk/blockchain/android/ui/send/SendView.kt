@@ -117,4 +117,6 @@ interface SendView : View {
     fun dismissConfirmationDialog()
 
     fun finishPage()
+
+    fun hideCurrencyHeader()
 }

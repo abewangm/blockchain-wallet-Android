@@ -1,6 +1,7 @@
 package piuk.blockchain.android.ui.receive
 
 import android.support.annotation.VisibleForTesting
+import info.blockchain.wallet.api.Environment
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.payload.data.Account
 import info.blockchain.wallet.payload.data.LegacyAddress
@@ -69,6 +70,11 @@ class ReceivePresenter @Inject internal constructor(
                 view.showContactsIntroduction()
             }
         } else view.hideContactsIntroduction()
+
+        if (environmentSettings.environment.equals(Environment.TESTNET)) {
+            currencyState.cryptoCurrency = CryptoCurrencies.BTC
+            view.disableCurrencyHeader()
+        }
     }
 
     internal fun onResume(defaultAccountPosition: Int) {

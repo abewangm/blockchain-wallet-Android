@@ -54,4 +54,6 @@ interface PinEntryView extends View {
     void showCustomPrompt(AppCompatDialogFragment alertFragment);
 
     void forceUpgrade();
+
+    void showTestnetWarning();
 }

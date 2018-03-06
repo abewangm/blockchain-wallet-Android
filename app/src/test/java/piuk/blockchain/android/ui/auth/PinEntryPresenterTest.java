@@ -32,6 +32,7 @@ import io.reactivex.Observable;
 import piuk.blockchain.android.BlockchainTestApplication;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
@@ -74,6 +75,7 @@ public class PinEntryPresenterTest {
     @Mock private FingerprintHelper fingerprintHelper;
     @Mock private AccessState accessState;
     @Mock private WalletOptionsDataManager walletOptionsDataManager;
+    @Mock private EnvironmentSettings environmentSettings;
 
     @Before
     public void setUp() throws Exception {
@@ -91,7 +93,8 @@ public class PinEntryPresenterTest {
                 stringUtils,
                 fingerprintHelper,
                 accessState,
-                walletOptionsDataManager);
+                walletOptionsDataManager,
+                environmentSettings);
         subject.initView(activity);
     }
 

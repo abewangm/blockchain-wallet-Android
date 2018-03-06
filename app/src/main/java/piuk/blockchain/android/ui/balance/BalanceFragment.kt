@@ -8,6 +8,8 @@ import android.content.IntentFilter
 import android.content.pm.ShortcutManager
 import android.os.Build
 import android.os.Bundle
+import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SimpleItemAnimator
@@ -17,6 +19,8 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
+import kotlinx.android.synthetic.main.view_expanding_currency_header.*
+import kotlinx.android.synthetic.main.view_expanding_currency_header.view.*
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.currency.CryptoCurrencies
@@ -113,6 +117,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         onViewReady()
 
         presenter.onRefreshRequested()
+    }
+
+    override fun disableCurrencyHeader() {
+        textview_selected_currency?.apply {
+            isClickable = false
+        }
     }
 
     fun refreshSelectedCurrency() {

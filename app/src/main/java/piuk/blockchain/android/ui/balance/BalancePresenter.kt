@@ -2,6 +2,7 @@ package piuk.blockchain.android.ui.balance
 
 import android.annotation.SuppressLint
 import android.support.annotation.VisibleForTesting
+import info.blockchain.wallet.api.Environment
 import info.blockchain.wallet.ethereum.data.EthAddressResponse
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -9,6 +10,7 @@ import io.reactivex.schedulers.Schedulers
 import org.web3j.utils.Convert
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AuthEvent
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
@@ -48,7 +50,8 @@ class BalancePresenter @Inject constructor(
         private val currencyState: CurrencyState,
         private val shapeShiftDataManager: ShapeShiftDataManager,
         private val bchDataManager: BchDataManager,
-        private val walletAccountHelper: WalletAccountHelper
+        private val walletAccountHelper: WalletAccountHelper,
+        private val environmentSettings: EnvironmentSettings
 ) : BasePresenter<BalanceView>() {
 
     @VisibleForTesting var notificationObservable: Observable<NotificationPayload>? = null
@@ -63,6 +66,10 @@ class BalancePresenter @Inject constructor(
         onAccountsAdapterSetup()
         onTxFeedAdapterSetup()
         subscribeToEvents()
+        if (environmentSettings.environment.equals(Environment.TESTNET)) {
+            currencyState.cryptoCurrency = CryptoCurrencies.BTC
+            view.disableCurrencyHeader()
+        }
     }
 
     override fun onViewDestroyed() {

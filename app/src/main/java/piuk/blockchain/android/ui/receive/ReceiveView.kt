@@ -47,4 +47,5 @@ interface ReceiveView : View {
 
     fun finishPage()
 
+    fun disableCurrencyHeader()
 }

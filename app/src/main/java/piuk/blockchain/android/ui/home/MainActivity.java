@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -189,6 +190,9 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     };
 
     private AHBottomNavigation.OnTabSelectedListener tabSelectedListener = (position, wasSelected) -> {
+
+        getPresenter().doTestnetCheck();
+
         if (!wasSelected) {
             switch (position) {
                 case 0:
@@ -839,6 +843,19 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private void startDashboardFragment() {
         DashboardFragment fragment = DashboardFragment.newInstance();
         addFragmentToBackStack(fragment);
+    }
+
+    public void showTestnetWarning() {
+        if (getActivity() != null) {
+            Snackbar snack = Snackbar.make(
+                    binding.coordinatorLayout,
+                    R.string.testnet_warning,
+                    Snackbar.LENGTH_SHORT
+            );
+            View view = snack.getView();
+            view.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.product_red_medium));
+            snack.show();
+        }
     }
 
     private int getSelectedAccountFromFragments() {

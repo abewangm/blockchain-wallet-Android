@@ -6,6 +6,7 @@ import android.text.Editable
 import android.widget.EditText
 import com.fasterxml.jackson.databind.ObjectMapper
 import info.blockchain.api.data.UnspentOutputs
+import info.blockchain.wallet.api.Environment
 import info.blockchain.wallet.api.WalletApi
 import info.blockchain.wallet.api.data.FeeOptions
 import info.blockchain.wallet.coin.GenericMetadataAccount
@@ -119,6 +120,11 @@ class SendPresenter @Inject constructor(
         setupTextChangeSubject()
         updateTicker()
         updateCurrencyUnits()
+
+        if (environmentSettings.environment.equals(Environment.TESTNET)) {
+            currencyState.cryptoCurrency = CryptoCurrencies.BTC
+            view.hideCurrencyHeader()
+        }
     }
 
     internal fun onResume() {

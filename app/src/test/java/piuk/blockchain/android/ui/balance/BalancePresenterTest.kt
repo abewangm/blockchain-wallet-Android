@@ -13,6 +13,7 @@ import org.amshove.kluent.`should equal to`
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.data.access.AuthEvent
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
@@ -50,6 +51,7 @@ class BalancePresenterTest {
     private var shapeShiftDataManager: ShapeShiftDataManager = mock()
     private val bchDataManager: BchDataManager = mock()
     private val walletAccountHelper: WalletAccountHelper = mock()
+    private val environmentSettings: EnvironmentSettings = mock()
 
     @Before
     fun setUp() {
@@ -67,7 +69,8 @@ class BalancePresenterTest {
                 currencyState,
                 shapeShiftDataManager,
                 bchDataManager,
-                walletAccountHelper
+                walletAccountHelper,
+                environmentSettings
         )
         subject.initView(view)
     }

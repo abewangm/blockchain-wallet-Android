@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.crashlytics.android.answers.LoginEvent;
 
+import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -30,7 +31,9 @@ import javax.inject.Inject;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.Logging;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthDataManager;
+import piuk.blockchain.android.data.currency.CryptoCurrencies;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
@@ -60,6 +63,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
     private FingerprintHelper mFingerprintHelper;
     private AccessState mAccessState;
     private WalletOptionsDataManager walletOptionsDataManager;
+    private EnvironmentSettings environmentSettings;
 
     @VisibleForTesting boolean mCanShowFingerprintDialog = true;
     @VisibleForTesting boolean mValidatingPinForResult = false;
@@ -75,7 +79,8 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
                       StringUtils mStringUtils,
                       FingerprintHelper mFingerprintHelper,
                       AccessState mAccessState,
-                      WalletOptionsDataManager walletOptionsDataManager) {
+                      WalletOptionsDataManager walletOptionsDataManager,
+                      EnvironmentSettings environmentSettings) {
 
         this.mAuthDataManager = mAuthDataManager;
         this.mAppUtil = mAppUtil;
@@ -85,6 +90,7 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
         this.mFingerprintHelper = mFingerprintHelper;
         this.mAccessState = mAccessState;
         this.walletOptionsDataManager = walletOptionsDataManager;
+        this.environmentSettings = environmentSettings;
     }
 
     @Override
@@ -103,6 +109,13 @@ public class PinEntryPresenter extends BasePresenter<PinEntryView> {
 
         checkPinFails();
         checkFingerprintStatus();
+        doTestnetCheck();
+    }
+
+    private void doTestnetCheck() {
+        if (environmentSettings.getEnvironment().equals(Environment.TESTNET)) {
+            getView().showTestnetWarning();
+        }
     }
 
     void checkFingerprintStatus() {

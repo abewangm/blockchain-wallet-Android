@@ -1,5 +1,6 @@
 package piuk.blockchain.android.data.datamanagers;
 
+import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.Transaction;
 import org.web3j.tx.Transfer;
 
@@ -80,8 +81,8 @@ public class FeeDataManager {
 
     private FeeOptions createTestnetFeeOptions() {
         FeeOptions feeOptions = new FeeOptions();
-        feeOptions.setRegularFee(Transaction.DEFAULT_TX_FEE.longValue());
-        feeOptions.setPriorityFee(Transaction.DEFAULT_TX_FEE.longValue());
+        feeOptions.setRegularFee(Coin.SATOSHI.longValue());
+        feeOptions.setPriorityFee(Coin.SATOSHI.longValue());
         feeOptions.setLimits(new FeeLimits(23, 23));
         feeOptions.setGasLimit(Transfer.GAS_LIMIT.longValue());
         return feeOptions;

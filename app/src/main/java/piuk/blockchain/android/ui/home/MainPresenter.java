@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 
 import org.bitcoinj.crypto.DeterministicKey;
 
+import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
@@ -24,6 +25,7 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.answers.BitcoinUnits;
 import piuk.blockchain.android.data.answers.Logging;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthService;
 import piuk.blockchain.android.data.bitcoincash.BchDataManager;
 import piuk.blockchain.android.data.cache.DynamicFeeCache;
@@ -79,6 +81,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     private MetadataManager metadataManager;
     private StringUtils stringUtils;
     private ShapeShiftDataManager shapeShiftDataManager;
+    private EnvironmentSettings environmentSettings;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -101,7 +104,8 @@ public class MainPresenter extends BasePresenter<MainView> {
                   WalletOptionsDataManager walletOptionsDataManager,
                   MetadataManager metadataManager,
                   StringUtils stringUtils,
-                  ShapeShiftDataManager shapeShiftDataManager) {
+                  ShapeShiftDataManager shapeShiftDataManager,
+                  EnvironmentSettings environmentSettings) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -124,6 +128,7 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.metadataManager = metadataManager;
         this.stringUtils = stringUtils;
         this.shapeShiftDataManager = shapeShiftDataManager;
+        this.environmentSettings = environmentSettings;
     }
 
     private void initPrompts(Context context) {
@@ -158,6 +163,13 @@ public class MainPresenter extends BasePresenter<MainView> {
         }
 
         Logging.INSTANCE.logCustom(new BitcoinUnits(prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)));
+    }
+
+    public void doTestnetCheck() {
+        if (environmentSettings.getEnvironment().equals(Environment.TESTNET)) {
+            currencyState.setCryptoCurrency(CryptoCurrencies.BTC);
+            getView().showTestnetWarning();
+        }
     }
 
     /*

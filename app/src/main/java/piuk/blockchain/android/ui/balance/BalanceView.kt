@@ -37,4 +37,5 @@ interface BalanceView : View {
 
     fun setDropdownVisibility(visible: Boolean)
 
+    fun disableCurrencyHeader()
 }
