@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
 import com.nhaarman.mockito_kotlin.whenever
+import info.blockchain.wallet.api.Environment
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -80,6 +81,7 @@ class BalancePresenterTest {
     fun onViewReady() {
 
         // Arrange
+        whenever(environmentSettings.environment).thenReturn(Environment.PRODUCTION)
         val account: ItemAccount = mock()
         whenever(walletAccountHelper.getAccountItemsForOverview()).thenReturn(mutableListOf(account))
         whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)

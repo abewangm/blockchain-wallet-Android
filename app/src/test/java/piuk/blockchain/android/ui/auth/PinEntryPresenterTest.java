@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.ImageView;
 
+import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -101,6 +102,7 @@ public class PinEntryPresenterTest {
     @Test
     public void onViewReadyValidatingPinForResult() throws Exception {
         // Arrange
+        when(environmentSettings.getEnvironment()).thenReturn(Environment.PRODUCTION);
         Intent intent = new Intent();
         intent.putExtra(KEY_VALIDATING_PIN_FOR_RESULT, true);
         when(activity.getPageIntent()).thenReturn(intent);
@@ -113,6 +115,7 @@ public class PinEntryPresenterTest {
     @Test
     public void onViewReadyMaxAttemptsExceeded() throws Exception {
         // Arrange
+        when(environmentSettings.getEnvironment()).thenReturn(Environment.PRODUCTION);
         when(activity.getPageIntent()).thenReturn(new Intent());
         when(prefsUtil.getValue(PrefsUtil.KEY_PIN_FAILS, 0)).thenReturn(4);
         when(payloadManager.getWallet()).thenReturn(mock(Wallet.class));

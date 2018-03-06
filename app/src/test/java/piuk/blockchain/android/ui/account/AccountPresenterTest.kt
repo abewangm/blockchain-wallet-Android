@@ -5,6 +5,7 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.eq
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
+import info.blockchain.wallet.api.Environment
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.exceptions.DecryptionException
 import info.blockchain.wallet.exceptions.PayloadException
@@ -486,6 +487,7 @@ class AccountPresenterTest {
     @Throws(Exception::class)
     fun handlePrivateKeyExistingAddressSuccess() {
         // Arrange
+        whenever(environmentSettings.environment).thenReturn(Environment.PRODUCTION)
         val mockECKey = mock(ECKey::class.java)
         whenever(mockECKey.hasPrivKey()).thenReturn(true)
         val legacyAddress = LegacyAddress()
