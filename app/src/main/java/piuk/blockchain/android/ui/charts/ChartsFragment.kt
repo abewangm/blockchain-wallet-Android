@@ -140,13 +140,13 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
     private fun setTextViewSelected(selected: TextView) {
         with(selected) {
             paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG
-            setCustomFont(CustomFont.MontserratRegular)
+            setCustomFont(CustomFont.MONTSERRAT_REGULAR)
         }
         buttonsList.filterNot { it === selected }
                 .map {
                     with(it) {
                         paintFlags = paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
-                        setCustomFont(CustomFont.MontserratLight)
+                        setCustomFont(CustomFont.MONTSERRAT_LIGHT)
                     }
                 }
     }
@@ -272,7 +272,7 @@ class ChartsFragment : BaseFragment<ChartsView, ChartsPresenter>(), ChartsView {
             xAxis.isGranularityEnabled = true
             setExtraOffsets(8f, 0f, 0f, 10f)
             setNoDataTextColor(ContextCompat.getColor(context, R.color.primary_gray_medium))
-            loadFont(context, CustomFont.MontserratLight) {
+            loadFont(context, CustomFont.MONTSERRAT_LIGHT) {
                 xAxis.typeface = it
                 axisLeft.typeface = it
             }

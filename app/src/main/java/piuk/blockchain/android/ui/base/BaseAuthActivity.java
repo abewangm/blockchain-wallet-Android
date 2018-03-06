@@ -13,8 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
-
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
@@ -162,14 +160,6 @@ public class BaseAuthActivity extends AppCompatActivity {
         if (mAlertDialog != null) {
             mAlertDialog.dismiss();
         }
-    }
-
-    /**
-     * Init font library by passing in base Context.
-     */
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     /**

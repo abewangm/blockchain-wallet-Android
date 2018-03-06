@@ -22,7 +22,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -53,6 +52,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import kotlin.Unit;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -92,6 +92,8 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+import piuk.blockchain.android.util.helperfunctions.CustomFont;
+import piuk.blockchain.android.util.helperfunctions.FontHelpersKt;
 import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
@@ -293,10 +295,10 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.primary_gray_dark));
         binding.bottomNavigation.setForceTint(true);
         binding.bottomNavigation.setUseElevation(true);
-        // STOPSHIP: 05/03/2018 This isn't entirely safe, use callback
-        // https://developer.android.com/guide/topics/ui/look-and-feel/downloadable-fonts.html#via-support-lib
-//        Typeface typeface = ResourcesCompat.getFont(this, R.font.montserrat_light);
-//        binding.bottomNavigation.setTitleTypeface(typeface);
+        FontHelpersKt.loadFont(this, CustomFont.MONTSERRAT_LIGHT, typeface -> {
+            binding.bottomNavigation.setTitleTypeface(typeface);
+            return Unit.INSTANCE;
+        });
 
         // Select Dashboard by default
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);

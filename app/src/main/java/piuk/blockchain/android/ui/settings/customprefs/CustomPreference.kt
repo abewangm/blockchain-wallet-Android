@@ -39,7 +39,7 @@ class CustomPreference : Preference {
     }
 
     private fun init() {
-        loadFont(context, CustomFont.MontserratRegular) { typeface = it }
+        loadFont(context, CustomFont.MONTSERRAT_REGULAR) { typeface = it }
         // Forces setting fonts when Summary or Title are set via XMl
         this.title = title
         this.summary = summary

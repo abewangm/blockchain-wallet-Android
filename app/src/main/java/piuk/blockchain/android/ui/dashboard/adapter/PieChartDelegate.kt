@@ -160,7 +160,7 @@ class PieChartDelegate<in T>(
     private fun configureChart(empty: Boolean) {
         viewHolder?.chart?.apply {
             setDrawCenterText(true)
-            loadFont(context, CustomFont.MontserratRegular) { setCenterTextTypeface(it) }
+            loadFont(context, CustomFont.MONTSERRAT_REGULAR) { setCenterTextTypeface(it) }
             setCenterTextColor(ContextCompat.getColor(context, R.color.primary_gray_dark))
             setCenterTextSize(16f)
 

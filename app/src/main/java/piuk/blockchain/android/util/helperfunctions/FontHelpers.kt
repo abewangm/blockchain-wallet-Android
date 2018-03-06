@@ -46,10 +46,10 @@ fun loadFont(context: Context, font: CustomFont, func: (Typeface) -> Unit) {
     )
 }
 
-sealed class CustomFont(val query: String) {
+enum class CustomFont(val query: String) {
 
-    object MontserratRegular : CustomFont("Montserrat")
-    object MontserratLight : CustomFont("name=Montserrat&amp;weight=300")
-    object MonstserratSemiBold : CustomFont("name=Montserrat&amp;weight=600")
+    MONTSERRAT_REGULAR("Montserrat"),
+    MONTSERRAT_LIGHT("name=Montserrat&weight=300"),
+    MONTSERRAT_SEMI_BOLD("name=Montserrat&weight=600"),
 
 }
