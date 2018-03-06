@@ -22,8 +22,7 @@ import timber.log.Timber
 fun loadFont(context: Context, font: CustomFont, func: (Typeface) -> Unit) {
 
     // If font is cached, return here to prevent unnecessary loading
-    val cachedFont = FontCache.getCachedFont(font)
-    cachedFont?.let {
+    FontCache.getCachedFont(font)?.let {
         func.invoke(it)
         return
     }
