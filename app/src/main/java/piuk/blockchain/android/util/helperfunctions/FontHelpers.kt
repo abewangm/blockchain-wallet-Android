@@ -10,16 +10,25 @@ import piuk.blockchain.android.R
 import timber.log.Timber
 
 /**
- * Loads a font via the AppCompat downloadable font system and returns a [Typeface] via a function
- * if present. If this call fails, it will do so silently and never return.
+ * Loads a font via the AppCompat downloadable font system and supplies a [Typeface] via a function
+ * if present. If this call fails, it will do so silently and never invoke the supplied function,
+ * so don't do any UI setup other than setting a typeface and invalidating in the returning function.
+ * The typefaces are cached to speed up retrieval as [FontsContractCompat] doesn't appear to do this.
  *
  * @param context The current [Context]
  * @param font A [CustomFont] object that encapsulates the query to be sent to the fonts provider
  * @param func A function that accepts a [Typeface], used to return the loaded [Typeface] object
  */
 fun loadFont(context: Context, font: CustomFont, func: (Typeface) -> Unit) {
-    val handlerThread = HandlerThread("fonts")
-    handlerThread.start()
+
+    // If font is cached, return here to prevent unnecessary loading
+    val cachedFont = FontCache.getCachedFont(font)
+    cachedFont?.let {
+        func.invoke(it)
+        return
+    }
+
+    val handlerThread = HandlerThread("fonts").apply { start() }
     val handler = Handler(handlerThread.looper)
 
     val request = FontRequest(
@@ -33,8 +42,8 @@ fun loadFont(context: Context, font: CustomFont, func: (Typeface) -> Unit) {
             context,
             request,
             object : FontsContractCompat.FontRequestCallback() {
-
                 override fun onTypefaceRetrieved(typeface: Typeface) {
+                    FontCache.cacheFont(font, typeface)
                     func.invoke(typeface)
                 }
 
@@ -51,5 +60,24 @@ enum class CustomFont(val query: String) {
     MONTSERRAT_REGULAR("Montserrat"),
     MONTSERRAT_LIGHT("name=Montserrat&weight=300"),
     MONTSERRAT_SEMI_BOLD("name=Montserrat&weight=600"),
+
+}
+
+/**
+ * A simple cache for [Typeface] objects keyed to their associated [CustomFont] objects.
+ */
+class FontCache {
+
+    companion object {
+
+        private val fontMap = mutableMapOf<CustomFont, Typeface>()
+
+        fun cacheFont(customFont: CustomFont, typeface: Typeface) {
+            fontMap[customFont] = typeface
+        }
+
+        fun getCachedFont(customFont: CustomFont): Typeface? = fontMap[customFont]
+
+    }
 
 }
