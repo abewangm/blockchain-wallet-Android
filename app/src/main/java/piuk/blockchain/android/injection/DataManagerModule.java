@@ -215,8 +215,10 @@ public class DataManagerModule {
 
     @Provides
     @PresenterScope
-    protected FeeDataManager provideFeeDataManager(WalletOptionsDataManager walletOptionsDataManager, RxBus rxBus) {
-        return new FeeDataManager(new FeeApi(), walletOptionsDataManager, rxBus);
+    protected FeeDataManager provideFeeDataManager(WalletOptionsDataManager walletOptionsDataManager,
+                                                   EnvironmentSettings environmentSettings, RxBus rxBus) {
+        return new FeeDataManager(new FeeApi(), walletOptionsDataManager,
+                environmentSettings, rxBus);
     }
 
     @Provides
