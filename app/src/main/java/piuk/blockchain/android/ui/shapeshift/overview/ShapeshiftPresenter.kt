@@ -1,12 +1,10 @@
 package piuk.blockchain.android.ui.shapeshift.overview
 
-import info.blockchain.wallet.shapeshift.ShapeShiftTrades
 import info.blockchain.wallet.shapeshift.data.Trade
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse
 import io.reactivex.Observable
 import io.reactivex.Single
 import piuk.blockchain.android.data.currency.CurrencyState
-import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.rxjava.RxUtil
 import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager
 import piuk.blockchain.android.data.stores.Optional
@@ -24,7 +22,6 @@ import javax.inject.Inject
 @Mockable
 class ShapeShiftPresenter @Inject constructor(
         private val shapeShiftDataManager: ShapeShiftDataManager,
-        private val payloadDataManager: PayloadDataManager,
         private val prefsUtil: PrefsUtil,
         private val exchangeRateFactory: ExchangeRateFactory,
         private val currencyState: CurrencyState,
@@ -34,10 +31,10 @@ class ShapeShiftPresenter @Inject constructor(
     private val monetaryUtil: MonetaryUtil by unsafeLazy { MonetaryUtil(getBtcUnitType()) }
 
     override fun onViewReady() {
-        payloadDataManager.metadataNodeFactory
-                .compose(RxUtil.addObservableToCompositeDisposable(this))
+        shapeShiftDataManager.initShapeshiftTradeData()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .andThen(shapeShiftDataManager.getTradesList())
                 .doOnSubscribe { view.onStateUpdated(ShapeShiftState.Loading) }
-                .flatMap { shapeShiftDataManager.initShapeshiftTradeData(it.metadataNode) }
                 .flatMap { trades ->
                     walletOptionsDataManager.isInUsa()
                             .flatMap { usa ->
@@ -49,7 +46,7 @@ class ShapeShiftPresenter @Inject constructor(
                                                     is Optional.Some -> handleTrades(trades)
                                                     else -> {
                                                         view.showStateSelection()
-                                                        Single.just(emptyList<Trade>())
+                                                        Single.just(emptyList())
                                                     }
                                                 }
                                             }
@@ -74,6 +71,7 @@ class ShapeShiftPresenter @Inject constructor(
         view.onExchangeRateUpdated(
                 getLastBtcPrice(getFiatCurrency()),
                 getLastEthPrice(getFiatCurrency()),
+                getLastBchPrice(getFiatCurrency()),
                 currencyState.isDisplayingCryptoCurrency
         )
         view.onViewTypeChanged(currencyState.isDisplayingCryptoCurrency, btcUnitType)
@@ -102,8 +100,9 @@ class ShapeShiftPresenter @Inject constructor(
                         })
     }
 
-    private fun handleTrades(shapeShiftTrades: ShapeShiftTrades): Single<MutableList<Trade>> =
-            Observable.fromIterable(shapeShiftTrades.trades)
+    private fun handleTrades(tradeList: List<Trade>): Single<List<Trade>> =
+            Observable.fromIterable(tradeList)
+                    .compose(RxUtil.addObservableToCompositeDisposable(this))
                     .flatMap { shapeShiftDataManager.getTradeStatusPair(it) }
                     .map {
                         handleState(it.tradeMetadata, it.tradeStatusResponse)
@@ -118,8 +117,6 @@ class ShapeShiftPresenter @Inject constructor(
                             pollForStatus(trades)
                             val sortedTrades = trades.sortedWith(compareBy<Trade> { it.timestamp })
                                     .reversed()
-                                    // TODO: Remove me when BCH added otherwise you won't see any transactions
-                                    .filterNot { it.quote?.pair?.contains("bch", ignoreCase = true) ?: false }
                             view.onStateUpdated(ShapeShiftState.Data(sortedTrades))
                         }
                     }
@@ -159,7 +156,8 @@ class ShapeShiftPresenter @Inject constructor(
         }
 
         if (tradeResponse.incomingType.equals("bch", true)
-                || tradeResponse.outgoingType.equals("bch", true)) {
+            || tradeResponse.outgoingType.equals("bch", true)
+        ) {
             //no-op
         } else {
             view.onTradeUpdate(trade, tradeResponse)
@@ -185,6 +183,8 @@ class ShapeShiftPresenter @Inject constructor(
     private fun getLastBtcPrice(fiat: String) = exchangeRateFactory.getLastBtcPrice(fiat)
 
     private fun getLastEthPrice(fiat: String) = exchangeRateFactory.getLastEthPrice(fiat)
+
+    private fun getLastBchPrice(fiat: String) = exchangeRateFactory.getLastBchPrice(fiat)
 
     private fun getBtcUnitType() =
             prefsUtil.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)

@@ -12,21 +12,34 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tabs"
-            fontPath="fonts/Montserrat-Regular.ttf"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_gravity="bottom"
-            android:background="@color/primary_navy_medium"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:tabContentStart="72dp"
-            app:tabGravity="fill"
-            app:tabIndicatorColor="@android:color/white"
-            app:tabIndicatorHeight="4dp"
-            app:tabMode="fixed" />
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:fitsSystemWindows="true"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-        <ScrollView
+            <android.support.design.widget.CollapsingToolbarLayout
+                android:id="@+id/toolbar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animateLayoutChanges="true"
+                android:fitsSystemWindows="true"
+                app:contentScrim="?attr/colorPrimary"
+                app:layout_scrollFlags="snap"
+                app:titleEnabled="false">
+
+                <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader
+                    android:id="@+id/currency_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top" />
+
+            </android.support.design.widget.CollapsingToolbarLayout>
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v4.widget.NestedScrollView
             android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -34,7 +47,8 @@
             android:animateLayoutChanges="true"
             android:background="@color/white"
             android:focusable="true"
-            android:focusableInTouchMode="true">
+            android:focusableInTouchMode="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <LinearLayout
                 android:id="@+id/sendMainContent"
@@ -115,15 +129,14 @@
                     app:layout_constraintTop_toBottomOf="@+id/divider3">
 
                     <TextView
-                        fontPath="fonts/Montserrat-Light.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="16dp"
+                        android:fontFamily="@font/montserrat_light"
                         android:gravity="center|left"
                         android:paddingLeft="16dp"
                         android:text="@string/fee"
-                        android:textColor="@color/primary_gray_dark"
-                        tools:ignore="MissingPrefix" />
+                        android:textColor="@color/primary_gray_dark" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -142,40 +155,37 @@
 
                             <TextView
                                 android:id="@+id/textviewFeeType"
-                                fontPath="fonts/Montserrat-Regular.ttf"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:fontFamily="@font/montserrat"
                                 android:textColor="@color/black"
                                 android:textSize="14sp"
-                                tools:ignore="MissingPrefix"
                                 tools:text="Priority" />
 
                             <TextView
                                 android:id="@+id/textviewFeeTime"
-                                fontPath="fonts/Montserrat-Regular.ttf"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:fontFamily="@font/montserrat"
                                 android:textSize="14sp"
-                                tools:ignore="MissingPrefix"
                                 tools:text="~ 60 min" />
 
                         </LinearLayout>
 
                         <TextView
                             android:id="@+id/textviewFeeAbsolute"
-                            fontPath="fonts/Montserrat-Regular.ttf"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginLeft="8dp"
                             android:layout_marginRight="16dp"
                             android:layout_weight="0.9"
+                            android:fontFamily="@font/montserrat"
                             android:gravity="right"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            tools:ignore="MissingPrefix"
                             tools:text="0.000081BTC (0.43 USD)" />
 
                         <android.support.design.widget.TextInputLayout
@@ -191,17 +201,16 @@
 
                             <EditText
                                 android:id="@+id/edittextCustomFee"
-                                fontPath="fonts/Montserrat-Regular.ttf"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:digits="1234567890"
                                 android:focusable="true"
                                 android:focusableInTouchMode="true"
+                                android:fontFamily="@font/montserrat"
                                 android:imeOptions="actionDone"
                                 android:inputType="number"
-                                android:textSize="16sp"
-                                tools:ignore="MissingPrefix" />
+                                android:textSize="16sp" />
 
                         </android.support.design.widget.TextInputLayout>
 
@@ -229,13 +238,13 @@
 
                     <TextView
                         android:id="@+id/arbitraryWarning"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:layout_marginLeft="16dp"
                         android:layout_marginRight="16dp"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/montserrat"
                         android:gravity="center"
                         android:textColor="@color/product_red_medium"
                         android:visibility="gone"
@@ -244,7 +253,6 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/divider4"
                         app:layout_constraintVertical_bias="0.0"
-                        tools:ignore="MissingPrefix"
                         tools:text="@string/insufficient_funds"
                         tools:visibility="visible" />
 
@@ -266,7 +274,7 @@
 
                 </LinearLayout>
             </LinearLayout>
-        </ScrollView>
+        </android.support.v4.widget.NestedScrollView>
     </LinearLayout>
 
     <piuk.blockchain.android.ui.customviews.NumericKeyboard

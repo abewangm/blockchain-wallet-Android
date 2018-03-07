@@ -168,7 +168,7 @@ class ContactsListPresenterTest {
         // Arrange
         whenever(mockPayloadDataManager.loadNodes()).thenReturn(Observable.just(false))
         whenever(mockPayloadDataManager.isDoubleEncrypted).thenReturn(false)
-        whenever(mockPayloadDataManager.generateNodes(isNull())).thenReturn(Completable.complete())
+        whenever(mockPayloadDataManager.generateNodes()).thenReturn(Completable.complete())
         val mockNodeFactory: MetadataNodeFactory = mock()
         whenever(mockPayloadDataManager.metadataNodeFactory)
                 .thenReturn(Observable.just(mockNodeFactory))
@@ -189,7 +189,7 @@ class ContactsListPresenterTest {
         verify(mockActivity).setUiState(UiState.FAILURE)
         // There will be other interactions with the mocks, but they are not tested here
         verify(mockPayloadDataManager).isDoubleEncrypted
-        verify(mockPayloadDataManager).generateNodes(isNull())
+        verify(mockPayloadDataManager).generateNodes()
         verify(mockPayloadDataManager).metadataNodeFactory
         verify(mockContactsManager).initContactsService(any(), any())
         verify(mockPayloadDataManager).registerMdid()
@@ -294,7 +294,7 @@ class ContactsListPresenterTest {
     fun initContactsServiceShouldThrowDecryptionException() {
         // Arrange
         val password = "PASSWORD"
-        whenever(mockPayloadDataManager.generateNodes(password))
+        whenever(mockPayloadDataManager.generateNodes())
                 .thenReturn(Completable.error { DecryptionException() })
         val mockNodeFactory: MetadataNodeFactory = mock()
         whenever(mockPayloadDataManager.metadataNodeFactory)
@@ -304,13 +304,13 @@ class ContactsListPresenterTest {
         whenever(mockContactsManager.initContactsService(any(), any()))
                 .thenReturn(Completable.complete())
         // Act
-        subject.initContactsService(password)
+        subject.initContactsService()
         // Assert
         verify(mockActivity).setUiState(UiState.LOADING)
         verify(mockActivity).setUiState(UiState.FAILURE)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verifyNoMoreInteractions(mockActivity)
-        verify(mockPayloadDataManager).generateNodes(password)
+        verify(mockPayloadDataManager).generateNodes()
         verify(mockPayloadDataManager).metadataNodeFactory
         verifyNoMoreInteractions(mockContactsManager)
     }
@@ -320,7 +320,7 @@ class ContactsListPresenterTest {
     fun initContactsServiceShouldThrowException() {
         // Arrange
         val password = "PASSWORD"
-        whenever(mockPayloadDataManager.generateNodes(password))
+        whenever(mockPayloadDataManager.generateNodes())
                 .thenReturn(Completable.error { Throwable() })
         val mockNodeFactory: MetadataNodeFactory = mock()
         whenever(mockPayloadDataManager.metadataNodeFactory)
@@ -330,13 +330,13 @@ class ContactsListPresenterTest {
         whenever(mockContactsManager.initContactsService(any(), any()))
                 .thenReturn(Completable.complete())
         // Act
-        subject.initContactsService(password)
+        subject.initContactsService()
         // Assert
         verify(mockActivity).setUiState(UiState.LOADING)
         verify(mockActivity).setUiState(UiState.FAILURE)
         verify(mockActivity).showToast(any(), eq(ToastCustom.TYPE_ERROR))
         verifyNoMoreInteractions(mockActivity)
-        verify(mockPayloadDataManager).generateNodes(password)
+        verify(mockPayloadDataManager).generateNodes()
         verify(mockPayloadDataManager).metadataNodeFactory
         verifyNoMoreInteractions(mockContactsManager)
     }

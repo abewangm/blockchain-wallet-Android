@@ -11,12 +11,12 @@
 
     <TextView
         android:id="@+id/fromTextView"
-        fontPath="fonts/Montserrat-Light.ttf"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
+        android:fontFamily="@font/montserrat_light"
         android:text="@string/from"
         android:textColor="@color/primary_gray_dark"
         app:layout_constraintEnd_toStartOf="@+id/fromArrowImage"
@@ -26,13 +26,13 @@
 
     <TextView
         android:id="@+id/fromAddressTextView"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="8dp"
+        android:fontFamily="@font/montserrat"
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/fromArrowImage"

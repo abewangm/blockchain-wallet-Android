@@ -19,6 +19,7 @@ import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import piuk.blockchain.android.RxTest
 import java.util.*
 
+@Suppress("IllegalIdentifier")
 class PayloadServiceTest : RxTest() {
 
     private lateinit var subject: PayloadService
@@ -247,6 +248,27 @@ class PayloadServiceTest : RxTest() {
 
     @Test
     @Throws(Exception::class)
+    fun getBalanceOfBchAddresses() {
+        // Arrange
+        val addresses = listOf("address_one", "address_two", "address_three")
+        val map = mapOf(Pair(
+                "address_one", Balance()),
+                Pair("address_two", Balance()),
+                Pair("address_three", Balance()))
+        val linkedMap = LinkedHashMap(map)
+        whenever(mockPayloadManager.getBalanceOfBchAddresses(addresses))
+                .thenReturn(linkedMap)
+        // Act
+        val testObserver = subject.getBalanceOfBchAddresses(addresses).test()
+        // Assert
+        verify(mockPayloadManager).getBalanceOfBchAddresses(addresses)
+        verifyNoMoreInteractions(mockPayloadManager)
+        testObserver.assertComplete()
+        testObserver.assertValue(linkedMap)
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun updateTransactionNotes() {
         // Arrange
         val txHash = "TX_HASH"
@@ -341,11 +363,11 @@ class PayloadServiceTest : RxTest() {
     @Throws(Exception::class)
     fun generateNodes() {
         // Arrange
-        val secondPassword = "SECOND_PASSWORD"
+
         // Act
-        val testObserver = subject.generateNodes(secondPassword).test()
+        val testObserver = subject.generateNodes().test()
         // Assert
-        verify(mockPayloadManager).generateNodes(secondPassword)
+        verify(mockPayloadManager).generateNodes()
         verifyNoMoreInteractions(mockPayloadManager)
         testObserver.assertComplete()
     }

@@ -1,239 +1,557 @@
 package piuk.blockchain.android.data.exchange
 
+import com.nhaarman.mockito_kotlin.atLeastOnce
 import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.whenever
+import info.blockchain.wallet.api.data.Settings
+import info.blockchain.wallet.api.data.WalletOptions
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.subjects.ReplaySubject
 import org.junit.Before
-import org.mockito.Mockito.RETURNS_DEEP_STUBS
+import org.mockito.Mockito.*
 import piuk.blockchain.android.RxTest
 import piuk.blockchain.android.data.auth.AuthDataManager
+import piuk.blockchain.android.data.exchange.models.ExchangeData
 import piuk.blockchain.android.data.payload.PayloadDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
+import kotlin.test.Test
 
-// TODO: Fix this test please
+@Suppress("IllegalIdentifier")
 class BuyDataManagerTest : RxTest() {
 
     private lateinit var subject: BuyDataManager
     private val mockSettingsDataManager: SettingsDataManager = mock(defaultAnswer = RETURNS_DEEP_STUBS)
     private val mockAuthDataManager: AuthDataManager = mock()
     private val mockPayloadDataManager: PayloadDataManager = mock(defaultAnswer = RETURNS_DEEP_STUBS)
-    private val mockBuyConditions: BuyConditions = mock()
     private val mockExchangeService: ExchangeService = mock()
+
+    private val mockWalletOptions: WalletOptions = mock(defaultAnswer = RETURNS_DEEP_STUBS)
+    private val mockSettings: Settings = mock(defaultAnswer = RETURNS_DEEP_STUBS)
+    private val mockExchangeData: ExchangeData = mock(defaultAnswer = RETURNS_DEEP_STUBS)
 
     @Before
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
 
+        BuyConditions.getInstance(
+                ReplaySubject.create(1),
+                ReplaySubject.create(1),
+                ReplaySubject.create(1))
+                .wipe()
+
+        val walletOptionsSource = mockWalletOptionsReplay()
+        val exchangeDataSource = mockExchangeDataReplay()
+        val walletSettingsSource = mockWalletSettingsReplay()
+
+        val buyConditions = BuyConditions.getInstance(
+                walletOptionsSource,
+                walletSettingsSource,
+                exchangeDataSource)
+
         subject = BuyDataManager(mockSettingsDataManager,
                 mockAuthDataManager,
                 mockPayloadDataManager,
-                mockBuyConditions,
+                buyConditions,
                 mockExchangeService)
     }
 
-//    @Test
-//    @Throws(Exception::class)
-//    fun `getCanBuy is sepa, no account and rolled out`() {
-//        // Arrange
-//        val mockWalletOptions: WalletOptions = mock()
-//        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
-//
-//
-//        val mockSettings: Settings = mock()
-//        val rolloutPercent = 1.0
-//        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
-//        whenever(mockSettingsDataManager.settings)
-//                .thenReturn(Observable.just(mockSettings))
-//        whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
-//        whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
-//        whenever(mockSettings.countryCode).thenReturn("GB")
-//        whenever(mockExchangeService.hasCoinifyAccount()).thenReturn(Observable.just(false))
-//        // Act
-//        val testObserver = subject.canBuy.test()
-//        // Assert
-//        verify(mockAuthDataManager).walletOptions
-//        verifyNoMoreInteractions(mockAuthDataManager)
-//        verify(mockSettingsDataManager).settings
-//        verifyNoMoreInteractions(mockSettingsDataManager)
-//        verify(mockAccessState).inSepaCountry = true
-//        verify(mockAccessState).buySellRolloutPercent = rolloutPercent
-//        testObserver.assertComplete()
-//        testObserver.assertNoErrors()
-//        testObserver.assertValue(true)
-//    }
-//
-//    @Test
-//    @Throws(Exception::class)
-//    fun `getCanBuy is sepa, no account and rolled out`() {
-//        // Arrange
-//        val mockWalletOptions: WalletOptions = mock()
-//        val mockSettings: Settings = mock()
-//        val rolloutPercent = 1.0
-//        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
-//        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
-//        whenever(mockSettingsDataManager.settings)
-//                .thenReturn(Observable.just(mockSettings))
-//        whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
-//        whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
-//        whenever(mockSettings.countryCode).thenReturn("GB")
-//        whenever(mockAccessState.buySellRolloutPercent).thenReturn(1.0)
-//        whenever(mockExchangeService.hasCoinifyAccount()).thenReturn(Observable.just(false))
-//        // Act
-//        val testObserver = subject.canBuy.test()
-//        // Assert
-//        verify(mockAuthDataManager).walletOptions
-//        verifyNoMoreInteractions(mockAuthDataManager)
-//        verify(mockSettingsDataManager).settings
-//        verifyNoMoreInteractions(mockSettingsDataManager)
-//        verify(mockAccessState).inSepaCountry = true
-//        verify(mockAccessState).buySellRolloutPercent = rolloutPercent
-//        testObserver.assertComplete()
-//        testObserver.assertNoErrors()
-//        testObserver.assertValue(true)
-//    }
-//
-//
-//    @Test
-//    @Throws(Exception::class)
-//    fun `getCanBuy is sepa, no account, not rolled out`() {
-//        // Arrange
-//        val mockWalletOptions: WalletOptions = mock()
-//        val mockSettings: Settings = mock()
-//        val rolloutPercent = 0.0
-//        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
-//        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
-//        whenever(mockSettingsDataManager.settings)
-//                .thenReturn(Observable.just(mockSettings))
-//        whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
-//        whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
-//        whenever(mockSettings.countryCode).thenReturn("GB")
-//        whenever(mockAccessState.buySellRolloutPercent).thenReturn(0.0)
-//        whenever(mockExchangeService.hasCoinifyAccount()).thenReturn(Observable.just(false))
-//        // Act
-//        val testObserver = subject.canBuy.test()
-//        // Assert
-//        verify(mockAuthDataManager).walletOptions
-//        verifyNoMoreInteractions(mockAuthDataManager)
-//        verify(mockSettingsDataManager).settings
-//        verifyNoMoreInteractions(mockSettingsDataManager)
-//        verify(mockAccessState).inSepaCountry = true
-//        verify(mockAccessState).buySellRolloutPercent = rolloutPercent
-//        testObserver.assertComplete()
-//        testObserver.assertNoErrors()
-//        testObserver.assertValue(false)
-//    }
-//
-//
-//    @Test
-//    @Throws(Exception::class)
-//    fun `getCanBuy account is whitelisted`() {
-//        // Arrange
-//        val mockWalletOptions: WalletOptions = mock()
-//        val mockSettings: Settings = mock()
-//        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
-//        whenever(mockSettingsDataManager.settings)
-//                .thenReturn(Observable.just(mockSettings))
-//        whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
-//        whenever(mockSettings.countryCode).thenReturn("GB")
-//        whenever(mockExchangeService.hasCoinifyAccount()).thenReturn(Observable.just(true))
-//        // Act
-//        val testObserver = subject.canBuy.test()
-//        // Assert
-//        verify(mockAuthDataManager).walletOptions
-//        verifyNoMoreInteractions(mockAuthDataManager)
-//        verify(mockSettingsDataManager).settings
-//        verifyNoMoreInteractions(mockSettingsDataManager)
-//        verify(mockAccessState).inSepaCountry = true
-//        testObserver.assertComplete()
-//        testObserver.assertNoErrors()
-//        testObserver.assertValue(true)
-//    }
-//
-//
-//    @Test
-//    @Throws(Exception::class)
-//    fun `getCanBuy not sepa, no account, rolled out`() {
-//        // Arrange
-//        val mockWalletOptions: WalletOptions = mock()
-//        val mockSettings: Settings = mock()
-//        val rolloutPercent = 1.0
-//        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
-//        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
-//        whenever(mockSettingsDataManager.settings)
-//                .thenReturn(Observable.just(mockSettings))
-//        whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
-//        whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
-//        whenever(mockSettings.countryCode).thenReturn("US")
-//        whenever(mockAccessState.buySellRolloutPercent).thenReturn(1.0)
-//        whenever(mockExchangeService.hasCoinifyAccount()).thenReturn(Observable.just(false))
-//        // Act
-//        val testObserver = subject.canBuy.test()
-//        // Assert
-//        verify(mockAuthDataManager).walletOptions
-//        verifyNoMoreInteractions(mockAuthDataManager)
-//        verify(mockSettingsDataManager).settings
-//        verifyNoMoreInteractions(mockSettingsDataManager)
-//        verify(mockAccessState).inSepaCountry = false
-//        verify(mockAccessState).buySellRolloutPercent = rolloutPercent
-//        testObserver.assertComplete()
-//        testObserver.assertNoErrors()
-//        testObserver.assertValue(false)
-//    }
-//
-//    @Test
-//    fun `allowRollout should return true for guid`() {
-//        // Arrange
-//        val rolloutPercentage = 0.5
-//        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
-//        whenever(mockAccessState.buySellRolloutPercent).thenReturn(rolloutPercentage)
-//        // Act
-//        val rollout = subject.isRolloutAllowed
-//        // Assert
-//        verify(mockAccessState).buySellRolloutPercent
-//        verifyNoMoreInteractions(mockAccessState)
-//        Assert.assertTrue(rollout)
-//    }
-//
-//    @Test
-//    fun `allowRollout should return false for guid`() {
-//        // Arrange
-//        val rolloutPercentage = 0.5
-//        whenever(mockPayloadDataManager.wallet.guid).thenReturn("99617f39-0f7d-41ae-8b8f-4f8984a73606")
-//        whenever(mockAccessState.buySellRolloutPercent).thenReturn(rolloutPercentage)
-//        // Act
-//        val rollout = subject.isRolloutAllowed
-//        // Assert
-//        verify(mockAccessState).buySellRolloutPercent
-//        verifyNoMoreInteractions(mockAccessState)
-//        Assert.assertFalse(rollout)
-//    }
-//
-//    @Test
-//    @Throws(Exception::class)
-//    fun getIfSepaCountry() {
-//        // Arrange
-//        val mockWalletOptions: WalletOptions = mock()
-//        val mockSettings: Settings = mock()
-//        val rolloutPercent = 0.5
-//        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
-//        whenever(mockSettingsDataManager.settings)
-//                .thenReturn(Observable.just(mockSettings))
-//        whenever(mockWalletOptions.buySellCountries).thenReturn(listOf("GB"))
-//        whenever(mockWalletOptions.rolloutPercentage).thenReturn(rolloutPercent)
-//        whenever(mockSettings.countryCode).thenReturn("GB")
-//        // Act
-//        val testObserver = subject.isCoinifyAllowed.test()
-//        // Assert
-//        verify(mockAuthDataManager).walletOptions
-//        verifyNoMoreInteractions(mockAuthDataManager)
-//        verify(mockSettingsDataManager).settings
-//        verifyNoMoreInteractions(mockSettingsDataManager)
-//        verify(mockAccessState).inSepaCountry = true
-//        verify(mockAccessState).buySellRolloutPercent = rolloutPercent
-//        verifyNoMoreInteractions(mockAccessState)
-//        verifyZeroInteractions(mockPayloadDataManager)
-//        testObserver.assertComplete()
-//        testObserver.assertNoErrors()
-//        testObserver.assertValue(true)
-//    }
+    private fun mockWalletOptionsReplay(): ReplaySubject<WalletOptions>? {
+        val source = ReplaySubject.create<WalletOptions>()
+        val o1: Observer<WalletOptions> = mock()
+        source.subscribe(o1)
 
+        source.onNext(mockWalletOptions)
+        source.onComplete()
+
+        whenever(mockAuthDataManager.walletOptions).thenReturn(Observable.just(mockWalletOptions))
+
+        return source
+    }
+
+    private fun mockWalletSettingsReplay(): ReplaySubject<Settings>? {
+        val source = ReplaySubject.create<Settings>()
+        val o1: Observer<Settings> = mock()
+        source.subscribe(o1)
+
+        source.onNext(mockSettings)
+        source.onComplete()
+
+        whenever(mockSettingsDataManager.settings).thenReturn(Observable.just(mockSettings))
+
+        return source
+    }
+
+    private fun mockExchangeDataReplay(): ReplaySubject<ExchangeData>? {
+        val source = ReplaySubject.create<ExchangeData>()
+        val o1: Observer<ExchangeData> = mock()
+        source.subscribe(o1)
+
+        source.onNext(mockExchangeData)
+        source.onComplete()
+
+        whenever(mockExchangeService.exchangeMetaData).thenReturn(Observable.just(mockExchangeData))
+
+        return source
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun isBuyRolledOut() {
+        isBuyRolledOut(0.0, false)
+        isBuyRolledOut(0.3, false)
+        isBuyRolledOut(0.5, true)
+        isBuyRolledOut(1.0, true)
+    }
+
+    private fun isBuyRolledOut(percentage: Double, expectedResult: Boolean) {
+        // Arrange
+        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
+        whenever(mockWalletOptions.rolloutPercentage).thenReturn(percentage)
+
+        // Act
+        val testObserver = subject.isBuyRolledOut.test()
+
+        // Assert
+        verify(mockPayloadDataManager, atLeastOnce()).wallet
+        verify(mockWalletOptions, atLeastOnce()).rolloutPercentage
+        verifyNoMoreInteractions(mockPayloadDataManager)
+        verifyNoMoreInteractions(mockWalletOptions)
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(expectedResult)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isCoinifyAllowed is sepa country, no account`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.coinify.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("GB")
+        whenever(mockExchangeData.coinify.user).thenReturn(0)
+
+        // Act
+        val testObserver = subject.isCoinifyAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isCoinifyAllowed is sepa country, with account`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.coinify.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("GB")
+        whenever(mockExchangeData.coinify.user).thenReturn(100)
+
+        // Act
+        val testObserver = subject.isCoinifyAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isCoinifyAllowed not sepa country, no account`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.coinify.countries).thenReturn(listOf("RSA"))
+        whenever(mockSettings.countryCode).thenReturn("GB")
+        whenever(mockExchangeData.coinify.user).thenReturn(0)
+
+        // Act
+        val testObserver = subject.isCoinifyAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isCoinifyAllowed not sepa country, with account`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.coinify.countries).thenReturn(listOf("RSA"))
+        whenever(mockSettings.countryCode).thenReturn("GB")
+        whenever(mockExchangeData.coinify.user).thenReturn(100)
+
+        // Act
+        val testObserver = subject.isCoinifyAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isUnocoinAllowed is india country, is invited, has account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.unocoin.countries).thenReturn(listOf("IND"))
+        whenever(mockSettings.countryCode).thenReturn("IND")
+        whenever(mockSettings.invited.get("unocoin")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.containsKey("showUnocoin")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showUnocoin")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isUnocoinAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isUnocoinAllowed not india country, is invited, has account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.unocoin.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("IND")
+        whenever(mockSettings.invited.get("unocoin")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.containsKey("showUnocoin")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showUnocoin")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isUnocoinAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isUnocoinAllowed not india country, not invited, has account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.unocoin.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("IND")
+        whenever(mockSettings.invited.get("unocoin")).thenReturn(false)
+        whenever(mockWalletOptions.androidFlags.containsKey("showUnocoin")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showUnocoin")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isUnocoinAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isUnocoinAllowed not india country, not invited, no account, androidDisabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.unocoin.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("IND")
+        whenever(mockSettings.invited.get("unocoin")).thenReturn(false)
+        whenever(mockWalletOptions.androidFlags.containsKey("showUnocoin")).thenReturn(false)
+        whenever(mockWalletOptions.androidFlags.get("showUnocoin")).thenReturn(false)
+
+        // Act
+        val testObserver = subject.isUnocoinAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed is USA country and state, has account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("USA"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("NY")
+
+        whenever(mockExchangeData.sfox.user).thenReturn("some-user-id")
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed is USA country, wrong state, has account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("USA"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("TX")
+
+        whenever(mockExchangeData.sfox.user).thenReturn("some-user-id")
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed not USA country, has account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("NY")
+
+        whenever(mockExchangeData.sfox.user).thenReturn("some-user-id")
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed is USA country and state, no account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("USA"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("NY")
+
+        whenever(mockExchangeData.sfox.user).thenReturn(null)
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed is USA country, wrong state, no account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("USA"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("TX")
+
+        whenever(mockExchangeData.sfox.user).thenReturn(null)
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed not USA country, no account, androidEnabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("NY")
+
+        whenever(mockExchangeData.sfox.user).thenReturn(null)
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed is USA country and state, no account, androidDisabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("USA"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("NY")
+
+        whenever(mockExchangeData.sfox.user).thenReturn(null)
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(false)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed is USA country, wrong state, no account, androidDisabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("USA"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("TX")
+
+        whenever(mockExchangeData.sfox.user).thenReturn(null)
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(false)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `isSfoxAllowed not USA country, no account, androidDisabled`() {
+        // Arrange
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("NY")
+
+        whenever(mockExchangeData.sfox.user).thenReturn(null)
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(false)
+
+        // Act
+        val testObserver = subject.isSfoxAllowed.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `canBuy isAllowed and androidEnabled`() {
+
+        //individual cases have been tested above
+
+        // Arrange
+        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
+        whenever(mockWalletOptions.rolloutPercentage).thenReturn(1.0)
+
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("USA"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("NY")
+
+        whenever(mockExchangeData.sfox.user).thenReturn("some-user-id")
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.canBuy.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(true)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `canBuy isAllowed but not rolled out`() {
+
+        //individual cases have been tested above
+
+        // Arrange
+        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
+        whenever(mockWalletOptions.rolloutPercentage).thenReturn(0.0)
+
+        whenever(mockWalletOptions.partners.coinify.countries).thenReturn(listOf("GB"))
+        whenever(mockSettings.countryCode).thenReturn("GB")
+
+        whenever(mockExchangeData.coinify.user).thenReturn(100)
+
+        // Act
+        val testObserver = subject.canBuy.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun `canBuy notAllowed and androidEnabled`() {
+
+        //individual cases have been tested above
+
+        // Arrange
+        whenever(mockPayloadDataManager.wallet.guid).thenReturn("7279615c-23eb-4a1c-92df-2440acea8e1a")
+        whenever(mockWalletOptions.rolloutPercentage).thenReturn(1.0)
+
+        whenever(mockWalletOptions.partners.sfox.countries).thenReturn(listOf("USA"))
+        whenever(mockSettings.countryCode).thenReturn("USA")
+        whenever(mockWalletOptions.partners.sfox.states).thenReturn(listOf("NY"))
+        whenever(mockSettings.state).thenReturn("TX")
+
+        whenever(mockExchangeData.sfox.user).thenReturn(null)
+
+        whenever(mockWalletOptions.androidFlags.containsKey("showSfox")).thenReturn(true)
+        whenever(mockWalletOptions.androidFlags.get("showSfox")).thenReturn(true)
+
+        // Act
+        val testObserver = subject.canBuy.test()
+
+        //Assert
+        testObserver.assertComplete()
+        testObserver.assertNoErrors()
+        testObserver.assertValue(false)
+    }
 }

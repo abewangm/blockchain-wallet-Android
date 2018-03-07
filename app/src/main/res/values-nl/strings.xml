@@ -632,7 +632,7 @@
     <string name="payment_request">Betaalverzoek</string>
     <string name="restoring_wallet">Portemonnee aan het herstellen.</string>
     <string name="support_leaving_app_warning">Dit zal de app afsluiten en u naar uw browser brengen. Doorgaan?</string>
-    <string name="addresses">Bitcoin-adressen</string>
+    <string name="addresses_bitcoin">Bitcoin-adressen</string>
     <string name="merchant_map">Bitcoin-verkoperskaart</string>
     <string name="received_ethereum">Ontvangen Ether</string>
     <string name="transaction_occur_when_bitcoin">Transacties vinden plaats wanneer u Bitcoins ontvangt en verzendt.</string>

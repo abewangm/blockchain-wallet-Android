@@ -20,13 +20,12 @@
             android:orientation="vertical">
 
             <TextView
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
                 android:text="@string/backup_header_complete"
                 android:textColor="@color/black"
-                android:textSize="20sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/subheading_date"

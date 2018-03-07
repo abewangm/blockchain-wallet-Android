@@ -10,6 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
+import piuk.blockchain.android.util.helperfunctions.CustomFont
+import piuk.blockchain.android.util.helperfunctions.loadFont
 import timber.log.Timber
 
 /**
@@ -31,6 +34,32 @@ fun View?.invisible() {
  */
 fun View?.gone() {
     if (this != null) visibility = View.GONE
+}
+
+/**
+ * Sets the visibility of a [View] to [View.GONE] depending on a predicate
+ *
+ * @param func If true, the visibility of the [View] will be set to [View.GONE], else [View.VISIBLE]
+ */
+fun View?.goneIf(func: () -> Boolean) {
+    if (func()) {
+        if (this != null) visibility = View.GONE
+    } else {
+        if (this != null) visibility = View.VISIBLE
+    }
+}
+
+/**
+ * Sets the visibility of a [View] to [View.INVISIBLE] depending on a predicate
+ *
+ * @param func If true, the visibility of the [View] will be set to [View.INVISIBLE], else [View.VISIBLE]
+ */
+fun View?.invisibleIf(func: () -> Boolean) {
+    if (func()) {
+        if (this != null) visibility = View.GONE
+    } else {
+        if (this != null) visibility = View.INVISIBLE
+    }
 }
 
 /**
@@ -85,5 +114,17 @@ fun View.createSpringAnimation(
     spring = SpringForce(finalPosition).apply {
         this.stiffness = stiffness
         this.dampingRatio = dampingRatio
+    }
+}
+
+/**
+ * Loads a font via the AppCompat downloadable font system and applies it to a TextView. If this
+ * call fails, it will do so silently.
+ *
+ * @param customFont A [CustomFont] object that encapsulates the query to be sent to the fonts provider
+ */
+fun TextView.setCustomFont(customFont: CustomFont) {
+    loadFont(context, customFont) {
+        this.typeface = it
     }
 }

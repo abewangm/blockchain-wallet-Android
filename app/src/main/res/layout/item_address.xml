@@ -14,10 +14,10 @@
 
         <TextView
             android:id="@+id/tvLabel"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
+            android:fontFamily="@font/montserrat"
             android:gravity="center_vertical"
             android:marqueeRepeatLimit="marquee_forever"
             android:maxLines="1"
@@ -28,9 +28,9 @@
 
         <TextView
             android:id="@+id/tvBalance"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
+            android:fontFamily="@font/montserrat"
             android:gravity="center_vertical|right"
             android:textColor="@color/primary_gray"
             android:textSize="16sp"
@@ -38,11 +38,11 @@
 
         <TextView
             android:id="@+id/tvTag"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:background="@drawable/rounded_view_grey"
+            android:fontFamily="@font/montserrat"
             android:gravity="center"
             android:padding="4dp"
             android:textColor="@color/white"

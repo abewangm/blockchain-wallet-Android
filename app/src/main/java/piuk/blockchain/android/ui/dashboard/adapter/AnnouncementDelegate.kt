@@ -32,7 +32,7 @@ class AnnouncementDelegate<in T> : AdapterDelegate<T> {
         val context = (holder as AnnouncementViewHolder).itemView.context
 
         if (AndroidUtils.is21orHigher()) {
-            holder.title.text = "${context.getString(announcement.title)} ${announcement.emoji}"
+            holder.title.text = "${context.getString(announcement.title)} ${announcement.emoji ?: ""}"
         } else {
             holder.title.setText(announcement.title)
         }

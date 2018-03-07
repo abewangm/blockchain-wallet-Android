@@ -13,10 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
-import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
-import uk.co.chrisjenx.calligraphy.TypefaceUtils;
-
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
@@ -27,7 +23,6 @@ import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.data.connectivity.ConnectionEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.injection.Injector;
-import piuk.blockchain.android.util.AndroidUtils;
 import piuk.blockchain.android.util.ApplicationLifeCycle;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.SSLVerifyUtil;
@@ -53,7 +48,7 @@ public class BaseAuthActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        lockScreenOrientation();
 
         compositeDisposable = new CompositeDisposable();
 
@@ -71,9 +66,15 @@ public class BaseAuthActivity extends AppCompatActivity {
     }
 
     /**
+     * Allows you to disable Portrait orientation lock on a per-Activity basis.
+     */
+    protected void lockScreenOrientation() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    /**
      * Applies the title to the {@link Toolbar} which is then set as the Activity's
-     * SupportActionBar. Also applies the Montserrat-Regular font, as this cannot be done elsewhere
-     * for now.
+     * SupportActionBar.
      *
      * @param toolbar The {@link Toolbar} for the current activity
      * @param title   The title for the page, as a StringRes
@@ -84,29 +85,19 @@ public class BaseAuthActivity extends AppCompatActivity {
 
     /**
      * Applies the title to the {@link Toolbar} which is then set as the Activity's
-     * SupportActionBar. Also applies the Montserrat-Regular font, as this cannot be done elsewhere
-     * for now.
+     * SupportActionBar.
      *
      * @param toolbar The {@link Toolbar} for the current activity
      * @param title   The title for the page, as a String
      */
     public void setupToolbar(Toolbar toolbar, String title) {
-        // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
-        if (AndroidUtils.is18orHigher()) {
-            toolbar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                    title,
-                    TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
-        } else {
-            toolbar.setTitle(title);
-        }
-
+        toolbar.setTitle(title);
         setSupportActionBar(toolbar);
     }
 
     /**
      * Applies the title to the Activity's {@link ActionBar}. This method is the fragment equivalent
-     * of {@link #setupToolbar(Toolbar, int)} Also applies the Montserrat-Regular font, as this
-     * cannot be done elsewhere for now.
+     * of {@link #setupToolbar(Toolbar, int)}.
      *
      * @param actionBar The {@link ActionBar} for the current activity
      * @param title     The title for the page, as a StringRes
@@ -117,21 +108,13 @@ public class BaseAuthActivity extends AppCompatActivity {
 
     /**
      * Applies the title to the Activity's {@link ActionBar}. This method is the fragment equivalent
-     * of {@link #setupToolbar(Toolbar, int)} Also applies the Montserrat-Regular font, as this
-     * cannot be done elsewhere for now.
+     * of {@link #setupToolbar(Toolbar, int)}.
      *
      * @param actionBar The {@link ActionBar} for the current activity
      * @param title     The title for the page, as a String
      */
     public void setupToolbar(ActionBar actionBar, String title) {
-        // Fix for bug with formatted ActionBars https://android-review.googlesource.com/#/c/47831/
-        if (AndroidUtils.is18orHigher()) {
-            actionBar.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                    title,
-                    TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf")));
-        } else {
-            actionBar.setTitle(title);
-        }
+        actionBar.setTitle(title);
     }
 
     @CallSuper
@@ -177,14 +160,6 @@ public class BaseAuthActivity extends AppCompatActivity {
         if (mAlertDialog != null) {
             mAlertDialog.dismiss();
         }
-    }
-
-    /**
-     * Init font library by passing in base Context.
-     */
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     /**

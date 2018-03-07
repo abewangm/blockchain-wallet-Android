@@ -20,19 +20,17 @@
 
             <TextView
                 android:id="@+id/stateSelectTitle"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="8dp"
-                android:layout_marginLeft="16dp"
                 android:layout_marginTop="32dp"
+                android:fontFamily="@font/montserrat"
                 android:text="@string/shapeshift_select_state_residency"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="MissingPrefix" />
+                tools:ignore="RtlHardcoded" />
 
             <android.support.v7.widget.AppCompatSpinner
                 android:id="@+id/spinnerState"
@@ -47,18 +45,17 @@
 
             <TextView
                 android:id="@+id/stateSelectError"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                tools:text="@string/shapeshift_unavailable_in_state"
+                android:fontFamily="@font/montserrat"
                 android:textColor="@color/product_red_medium"
                 android:textSize="14sp"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/spinnerState"
-                android:visibility="invisible"
-                tools:ignore="MissingPrefix" />
+                tools:text="@string/shapeshift_unavailable_in_state" />
 
             <Button
                 android:id="@+id/btnConfirm"
@@ -73,8 +70,8 @@
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
                 android:text="@string/ok_cap"
-                android:visibility="gone"
                 android:theme="@style/ButtonLightBlueTheme"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.498"
@@ -85,6 +82,4 @@
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
-
-
 </LinearLayout>

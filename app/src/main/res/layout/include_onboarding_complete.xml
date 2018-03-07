@@ -36,46 +36,43 @@
     <TextView
         android:id="@+id/onboarding_complete_title"
         style="@style/Base.DialogWindowTitle.AppCompat"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/onboarding_complete_check"
         android:layout_centerHorizontal="true"
+        android:fontFamily="@font/montserrat"
         android:text="@string/onboarding_complete_title"
         android:textColor="@color/primary_navy_medium"
-        android:textSize="18sp"
-        tools:ignore="MissingPrefix" />
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/onboarding_complete_content"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/onboarding_complete_title"
         android:layout_centerHorizontal="true"
+        android:fontFamily="@font/montserrat"
         android:gravity="center_horizontal"
         android:paddingLeft="72dp"
         android:paddingRight="72dp"
         android:paddingTop="8dp"
         android:text="@string/onboarding_complete_content"
-        android:textSize="14sp"
-        tools:ignore="MissingPrefix" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/button_start_over"
         style="@style/Base.DialogWindowTitle.AppCompat"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/onboarding_complete_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp"
         android:background="?attr/selectableItemBackground"
+        android:fontFamily="@font/montserrat"
         android:padding="16dp"
         android:text="@string/onboarding_start_over"
         android:textColor="@color/primary_blue_accent"
         android:textSize="16sp"
-        android:theme="@style/PlainTheme"
-        tools:ignore="MissingPrefix" />
+        android:theme="@style/PlainTheme" />
 
 </RelativeLayout>

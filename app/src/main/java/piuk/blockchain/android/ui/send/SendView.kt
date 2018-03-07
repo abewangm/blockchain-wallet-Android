@@ -38,7 +38,7 @@ interface SendView : View {
     //Set property
     fun setCryptoMaxLength(length: Int)
 
-    fun setTabSelection(tabIndex: Int)
+    fun setSelectedCurrency(cryptoCurrency: CryptoCurrencies)
 
     fun setFeePrioritySelection(index: Int)
 
@@ -117,4 +117,6 @@ interface SendView : View {
     fun dismissConfirmationDialog()
 
     fun finishPage()
+
+    fun hideCurrencyHeader()
 }

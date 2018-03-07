@@ -28,26 +28,24 @@
             <TextView
                 android:id="@+id/no_tx_title"
                 style="@style/Base.DialogWindowTitle.AppCompat"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center_horizontal"
                 android:text="@string/your_transactions"
                 android:textColor="@color/primary_navy_medium"
-                android:textSize="18sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/description"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center_horizontal"
                 android:text="@string/transaction_occur_when_bitcoin"
                 android:textColor="@color/primary_gray_dark"
-                android:textSize="14sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/button_get_bitcoin"

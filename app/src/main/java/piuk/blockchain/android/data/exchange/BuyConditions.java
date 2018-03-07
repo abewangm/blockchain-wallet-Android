@@ -4,6 +4,7 @@ import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.WalletOptions;
 
 import io.reactivex.subjects.ReplaySubject;
+import piuk.blockchain.android.data.exchange.models.ExchangeData;
 
 public class BuyConditions {
 
@@ -11,22 +12,25 @@ public class BuyConditions {
 
     ReplaySubject<WalletOptions> walletOptionsSource;
     ReplaySubject<Settings> walletSettingsSource;
-    ReplaySubject<Boolean> coinifyWhitelistedSource;//Only coinify whitelisted like this. Other partners whitelisted in wallet settings
+    ReplaySubject<ExchangeData> exchangeDataSource;
 
     private BuyConditions(ReplaySubject<WalletOptions> walletOptionsSource,
                           ReplaySubject<Settings> walletSettingsSource,
-                          ReplaySubject<Boolean> coinifyWhitelistedSource) {
+                          ReplaySubject<ExchangeData> exchangeDataSource) {
         this.walletOptionsSource = walletOptionsSource;
         this.walletSettingsSource = walletSettingsSource;
-        this.coinifyWhitelistedSource = coinifyWhitelistedSource;
+        this.exchangeDataSource = exchangeDataSource;
     }
 
     public static BuyConditions getInstance(ReplaySubject<WalletOptions> walletOptionsSubject,
                                             ReplaySubject<Settings> walletSettingsSubject,
-                                            ReplaySubject<Boolean> coinifyWhitelistedSubject) {
+                                            ReplaySubject<ExchangeData> coinifyWhitelistedSubject) {
         if (instance == null)
             instance = new BuyConditions(walletOptionsSubject, walletSettingsSubject, coinifyWhitelistedSubject);
         return instance;
     }
 
+    public void wipe() {
+        instance = null;
+    }
 }

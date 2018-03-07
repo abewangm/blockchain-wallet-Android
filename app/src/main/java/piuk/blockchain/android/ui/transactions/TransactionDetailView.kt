@@ -43,4 +43,6 @@ interface TransactionDetailView : View {
     fun onDataLoaded()
 
     fun showTransactionAsPaid()
+
+    fun hideDescriptionField()
 }

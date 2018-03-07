@@ -28,7 +28,8 @@ public class SendDataManager {
     }
 
     /**
-     * Submits a payment to a specified address and returns the transaction hash if successful
+     * Submits a Bitcoin payment to a specified BTC address and returns the transaction hash if
+     * successful
      *
      * @param unspentOutputBundle UTXO object
      * @param keys                A List of elliptic curve keys
@@ -38,14 +39,43 @@ public class SendDataManager {
      * @param bigIntAmount        The actual transaction amount
      * @return An {@link Observable<String>} where the String is the transaction hash
      */
-    public Observable<String> submitPayment(SpendableUnspentOutputs unspentOutputBundle,
-                                            List<ECKey> keys,
-                                            String toAddress,
-                                            String changeAddress,
-                                            BigInteger bigIntFee,
-                                            BigInteger bigIntAmount) {
+    public Observable<String> submitBtcPayment(SpendableUnspentOutputs unspentOutputBundle,
+                                               List<ECKey> keys,
+                                               String toAddress,
+                                               String changeAddress,
+                                               BigInteger bigIntFee,
+                                               BigInteger bigIntAmount) {
 
         return rxPinning.call(() -> paymentService.submitPayment(
+                unspentOutputBundle,
+                keys,
+                toAddress,
+                changeAddress,
+                bigIntFee,
+                bigIntAmount))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
+     * Submits a Bitcoin Cash payment to a specified BCH address and returns the transaction hash if
+     * successful
+     *
+     * @param unspentOutputBundle UTXO object
+     * @param keys                A List of elliptic curve keys
+     * @param toAddress           The address to send the funds to
+     * @param changeAddress       A change address
+     * @param bigIntFee           The specified fee amount
+     * @param bigIntAmount        The actual transaction amount
+     * @return An {@link Observable<String>} where the String is the transaction hash
+     */
+    public Observable<String> submitBchPayment(SpendableUnspentOutputs unspentOutputBundle,
+                                               List<ECKey> keys,
+                                               String toAddress,
+                                               String changeAddress,
+                                               BigInteger bigIntFee,
+                                               BigInteger bigIntAmount) {
+
+        return rxPinning.call(() -> paymentService.submitBchPayment(
                 unspentOutputBundle,
                 keys,
                 toAddress,
@@ -72,13 +102,27 @@ public class SendDataManager {
 
     /**
      * Returns an {@link UnspentOutputs} object containing all the unspent outputs for a given
-     * address.
+     * Bitcoin address.
      *
-     * @param address The address you wish to query, as a String
+     * @param address The Bitcoin address you wish to query, as a String
      * @return An {@link Observable<UnspentOutputs>}
      */
     public Observable<UnspentOutputs> getUnspentOutputs(String address) {
         return rxPinning.call(() -> paymentService.getUnspentOutputs(address))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+
+    /**
+     * Returns an {@link UnspentOutputs} object containing all the unspent outputs for a given
+     * Bitcoin Cash address. Please note that this method only accepts a valid Base58 (ie Legacy)
+     * BCH address. BECH32 is not accepted by the endpoint.
+     *
+     * @param address The Bitcoin Cash address you wish to query, as a Base58 address String
+     * @return An {@link Observable<UnspentOutputs>}
+     */
+    public Observable<UnspentOutputs> getUnspentBchOutputs(String address) {
+        return rxPinning.call(() -> paymentService.getUnspentBchOutputs(address))
                 .compose(RxUtil.applySchedulersToObservable());
     }
 

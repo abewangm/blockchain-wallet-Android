@@ -19,10 +19,11 @@
                 android:id="@+id/appbar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:elevation="0dp">
+                android:elevation="4dp"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
                 <include
+                    android:id="@+id/toolbar_main"
                     layout="@layout/toolbar_general"
                     android:fitsSystemWindows="true" />
 
@@ -33,14 +34,15 @@
                 android:id="@+id/content_frame"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/white"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+                android:layout_marginTop="@dimen/action_bar_height"
+                android:background="@color/white" />
 
             <!--The bottom navigation panel -->
             <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
                 android:id="@+id/bottom_navigation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
                 android:layout_gravity="bottom" />
 
         </android.support.design.widget.CoordinatorLayout>
@@ -56,8 +58,8 @@
             app:headerLayout="@layout/navigation_drawer_header"
             app:insetForeground="@color/primary_navy_dark"
             app:itemIconTint="@color/primary_gray_dark"
+            app:itemTextAppearance="@style/NavDrawerTextAppearance"
             app:itemTextColor="@color/primary_gray_dark"
-
             app:menu="@menu/menu_nav_drawer" />
     </android.support.v4.widget.DrawerLayout>
 </layout>

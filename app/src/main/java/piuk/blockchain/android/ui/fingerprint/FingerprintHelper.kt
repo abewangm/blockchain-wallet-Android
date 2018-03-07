@@ -24,7 +24,8 @@ class FingerprintHelper(
      * Returns true only if there is appropriate hardware available && there are enrolled
      * fingerprints
      */
-    fun isFingerprintAvailable(): Boolean = fingerprintAuth.isFingerprintAvailable(applicationContext)
+    fun isFingerprintAvailable(): Boolean =
+            fingerprintAuth.isFingerprintAvailable(applicationContext)
 
     /**
      * Returns true if the device has the appropriate hardware for fingerprint authentication
@@ -34,7 +35,8 @@ class FingerprintHelper(
     /**
      * Returns if any fingerprints are registered
      */
-    fun areFingerprintsEnrolled(): Boolean = fingerprintAuth.areFingerprintsEnrolled(applicationContext)
+    fun areFingerprintsEnrolled(): Boolean =
+            fingerprintAuth.areFingerprintsEnrolled(applicationContext)
 
     /**
      * Returns true if the user has previously enabled fingerprint login
@@ -105,14 +107,18 @@ class FingerprintHelper(
     fun authenticateFingerprint(callback: AuthCallback) {
         compositeDisposable.add(
                 fingerprintAuth.authenticate(applicationContext)
-                        .subscribe({
-                            when (it.result) {
-                                FingerprintResult.FAILED -> callback.onFailure()
-                                FingerprintResult.HELP -> callback.onHelp(it.message)
-                                FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(null)
-                                else -> throw RuntimeException("$it.result was null")
-                            }
-                        }, { _ -> callback.onFatalError() }))
+                        .subscribe(
+                                {
+                                    when (it.result) {
+                                        FingerprintResult.FAILED -> callback.onFailure()
+                                        FingerprintResult.HELP -> callback.onHelp(it.message ?: "")
+                                        FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(
+                                                null
+                                        )
+                                        else -> throw RuntimeException("$it.result was null")
+                                    }
+                                }, { _ -> callback.onFatalError() })
+        )
     }
 
     /**
@@ -127,14 +133,18 @@ class FingerprintHelper(
     fun encryptString(key: String, stringToEncrypt: String, callback: AuthCallback) {
         compositeDisposable.add(
                 fingerprintAuth.encrypt(applicationContext, key, stringToEncrypt)
-                        .subscribe({
-                            when (it.result) {
-                                FingerprintResult.FAILED -> callback.onFailure()
-                                FingerprintResult.HELP -> callback.onHelp(it.message)
-                                FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(it.encrypted)
-                                else -> throw RuntimeException("$it.result was null")
-                            }
-                        }, { _ -> callback.onFatalError() }))
+                        .subscribe(
+                                {
+                                    when (it.result) {
+                                        FingerprintResult.FAILED -> callback.onFailure()
+                                        FingerprintResult.HELP -> callback.onHelp(it.message ?: "")
+                                        FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(
+                                                it.encrypted
+                                        )
+                                        else -> throw RuntimeException("$it.result was null")
+                                    }
+                                }, { _ -> callback.onFatalError() })
+        )
     }
 
     /**
@@ -149,14 +159,17 @@ class FingerprintHelper(
     fun decryptString(key: String, encryptedString: String, callback: AuthCallback) {
         compositeDisposable.add(
                 fingerprintAuth.decrypt(applicationContext, key, encryptedString)
-                        .subscribe({
-                            when (it.result) {
-                                FingerprintResult.FAILED -> callback.onFailure()
-                                FingerprintResult.HELP -> callback.onHelp(it.message)
-                                FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(it.decrypted)
-                                else -> throw RuntimeException("$it.result was null")
-                            }
-                        }, { throwable ->
+                        .subscribe(
+                                {
+                                    when (it.result) {
+                                        FingerprintResult.FAILED -> callback.onFailure()
+                                        FingerprintResult.HELP -> callback.onHelp(it.message ?: "")
+                                        FingerprintResult.AUTHENTICATED -> callback.onAuthenticated(
+                                                it.decrypted
+                                        )
+                                        else -> throw RuntimeException("$it.result was null")
+                                    }
+                                }, { throwable ->
                             if (RxFingerprint.keyInvalidated(throwable)) {
                                 // The keys you wanted to use are invalidated because the user has turned off his
                                 // secure lock screen or changed the fingerprints stored on the device
@@ -165,7 +178,8 @@ class FingerprintHelper(
                             } else {
                                 callback.onFatalError()
                             }
-                        }))
+                        })
+        )
     }
 
     /**

@@ -8,7 +8,8 @@ data class AnnouncementData(
         @StringRes val description: Int,
         @StringRes val link: Int,
         @DrawableRes val image: Int,
-        val emoji: String,
+        val emoji: String?,
         val closeFunction: () -> Unit,
-        val linkFunction: () -> Unit
+        val linkFunction: () -> Unit,
+        val prefsKey: String
 )

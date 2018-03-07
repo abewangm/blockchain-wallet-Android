@@ -1,15 +1,26 @@
 package piuk.blockchain.android.util.extensions
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.json.JSONException
+import android.graphics.Typeface
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import piuk.blockchain.android.ui.settings.customprefs.CustomTypefaceSpan
 
 /**
- * Converts a deserialized object from a [String] without needing the KClass passed to it.
- *
- * @throws JSONException
+ * Contains Extension Functions related to [String] and [CharSequence] classes.
  */
-@Throws(JSONException::class)
-inline fun <reified T> String.toKotlinObject(): T {
-    val mapper = ObjectMapper()
-    return mapper.readValue(this, T::class.java)
-}
+
+/**
+ * Applies a [Typeface] to a [CharSequence] and returns a [SpannableStringBuilder]
+ *
+ * @param typeface The font to be applied to the entire [CharSequence]. This is deliberately nullable,
+ * and if null is passed the default system font will be applied instead.
+ */
+fun CharSequence.applyFont(typeface: Typeface?): SpannableStringBuilder =
+        SpannableStringBuilder(this).apply {
+            setSpan(
+                    CustomTypefaceSpan(typeface),
+                    0,
+                    this.length,
+                    Spanned.SPAN_EXCLUSIVE_INCLUSIVE
+            )
+        }

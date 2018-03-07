@@ -9,17 +9,22 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import javax.inject.Inject;
@@ -27,6 +32,7 @@ import javax.inject.Inject;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.connectivity.ConnectivityStatus;
 import piuk.blockchain.android.databinding.FragmentPinEntryBinding;
 import piuk.blockchain.android.injection.Injector;
@@ -38,6 +44,7 @@ import piuk.blockchain.android.ui.fingerprint.FingerprintDialog;
 import piuk.blockchain.android.ui.fingerprint.FingerprintStage;
 import piuk.blockchain.android.ui.upgrade.UpgradeWalletActivity;
 import piuk.blockchain.android.util.DialogButtonCallback;
+import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
 
@@ -80,7 +87,8 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_pin_entry, container, false);
 
@@ -123,6 +131,22 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
                 getPresenter().onDeleteClicked();
             }
         });
+
+        EnvironmentSettings environmentSettings = new EnvironmentSettings();
+
+        if (environmentSettings.shouldShowDebugMenu()) {
+            ToastCustom.makeText(
+                    getActivity(),
+                    "Current environment: "
+                            + environmentSettings.getEnvironment().getName(),
+                    ToastCustom.LENGTH_SHORT,
+                    ToastCustom.TYPE_GENERAL);
+
+            binding.buttonSettings.setVisibility(View.VISIBLE);
+            binding.buttonSettings.setOnClickListener(view ->
+                    new EnvironmentSwitcher(getActivity(), new PrefsUtil(getActivity()))
+                            .showDebugMenu());
+        }
 
         return binding.getRoot();
     }
@@ -468,6 +492,20 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
     public void showCustomPrompt(AppCompatDialogFragment alertFragments) {
         if (!getActivity().isFinishing()) {
             alertFragments.show(getFragmentManager(), alertFragments.getTag());
+        }
+    }
+
+    @Override
+    public void showTestnetWarning() {
+        if (getActivity() != null) {
+            Snackbar snack = Snackbar.make(
+                    getActivity().findViewById(android.R.id.content),
+                    R.string.testnet_warning,
+                    Snackbar.LENGTH_LONG
+            );
+            View view = snack.getView();
+            view.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.product_red_medium));
+            snack.show();
         }
     }
 

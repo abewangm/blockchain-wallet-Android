@@ -3,10 +3,10 @@
 
     <android.support.v7.widget.AppCompatSpinner
         android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="?attr/selectableItemBackground"
         android:divider="@null"
         android:dropDownSelector="?attr/selectableItemBackground"
-        android:layout_width="match_parent"
-        fontPath="fonts/Montserrat-Regular.ttf"
-        android:layout_height="match_parent" />
+        android:fontFamily="@font/montserrat" />
 </layout>

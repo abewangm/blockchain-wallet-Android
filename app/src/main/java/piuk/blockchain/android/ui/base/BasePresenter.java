@@ -30,6 +30,7 @@ public abstract class BasePresenter<VIEW extends View> implements Presenter<VIEW
 
     @Override
     public VIEW getView() {
+        // TODO: 28/02/2018 In the future, migrate this to Kotlin and mark as nullable
         return view;
     }
 
@@ -48,6 +49,11 @@ public abstract class BasePresenter<VIEW extends View> implements Presenter<VIEW
          * {@link piuk.blockchain.android.injection.ViewModelScope} annotation for GC
          */
         Injector.getInstance().releaseViewModelScope();
+
+        /*
+         * Being explicit here prevents holding onto a View reference unnecessarily
+         */
+        view = null;
     }
 
     public abstract void onViewReady();

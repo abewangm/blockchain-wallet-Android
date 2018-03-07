@@ -6,10 +6,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import io.reactivex.Observable;
-import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
-import piuk.blockchain.android.data.payload.PayloadDataManager;
 import piuk.blockchain.android.data.exchange.models.WebViewLoginDetails;
+import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.util.AppUtil;
 
@@ -24,13 +24,13 @@ public class BuyPresenterTest {
     @Mock private PayloadDataManager payloadDataManager;
     @Mock private BuyDataManager buyDataManager;
     @Mock private AppUtil appUtil;
-    @Mock private EnvironmentSettings environmentSettings;
+    @Mock private WalletOptionsDataManager walletOptionsDataManager;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        subject = new BuyPresenter(appUtil, buyDataManager, payloadDataManager, environmentSettings);
+        subject = new BuyPresenter(appUtil, buyDataManager, payloadDataManager, walletOptionsDataManager);
         subject.initView(activity);
     }
 
@@ -60,7 +60,7 @@ public class BuyPresenterTest {
         when(buyDataManager.getWebViewLoginDetails()).thenReturn(
                 Observable.just(webViewLoginDetails));
         when(payloadDataManager.isDoubleEncrypted()).thenReturn(
-                false);
+                true);
 
         // Act
         subject.onViewReady();

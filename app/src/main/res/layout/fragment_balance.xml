@@ -20,7 +20,6 @@
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:animateLayoutChanges="true"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="snap|scroll|exitUntilCollapsed"
@@ -29,22 +28,21 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:animateLayoutChanges="true"
+                android:elevation="4dp"
                 android:orientation="vertical"
                 app:layout_collapseMode="pin">
 
                 <TextView
                     android:id="@+id/textview_balance"
-                    fontPath="fonts/Montserrat-Light.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
+                    android:fontFamily="@font/montserrat"
                     android:textColor="@color/white"
-                    android:textSize="32sp"
+                    android:textSize="24sp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="MissingPrefix"
                     tools:text="1.03252623 BTC" />
 
                 <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader
@@ -57,6 +55,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/primary_gray_lightest"
+                    android:elevation="4dp"
                     android:visibility="gone"
                     tools:visibility="visible">
 

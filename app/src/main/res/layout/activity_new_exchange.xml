@@ -27,29 +27,29 @@
 
             <!-- FROM LAYOUT -->
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/text_view_from_header"
                 style="@style/ExchangeBitcoinTitle"
                 android:layout_marginTop="16dp"
                 android:text="@string/from"
-                app:layout_constraintEnd_toEndOf="@+id/textView7"
-                app:layout_constraintStart_toEndOf="@+id/textView7"
+                app:layout_constraintEnd_toEndOf="@+id/text_view_to_header"
+                app:layout_constraintStart_toEndOf="@+id/text_view_to_header"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="MissingPrefix" />
 
             <TextView
                 android:id="@+id/textview_from_address"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="8dp"
+                android:fontFamily="@font/montserrat"
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/textView6"
+                app:layout_constraintBaseline_toBaselineOf="@+id/text_view_from_header"
                 app:layout_constraintEnd_toStartOf="@+id/imageview_from_dropdown"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/textView6"
-                tools:ignore="MissingPrefix,RtlHardcoded"
+                app:layout_constraintStart_toEndOf="@+id/text_view_from_header"
+                tools:ignore="RtlHardcoded"
                 tools:text="Bitcoin" />
 
             <ImageView
@@ -70,29 +70,29 @@
 
             <!-- TO LAYOUT -->
             <TextView
-                android:id="@+id/textView7"
+                android:id="@+id/text_view_to_header"
                 style="@style/ExchangeBitcoinTitle"
                 android:layout_marginLeft="16dp"
-                android:layout_marginTop="25dp"
+                android:layout_marginTop="12dp"
                 android:text="@string/to"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView6"
+                app:layout_constraintTop_toBottomOf="@+id/divider1"
                 tools:ignore="MissingPrefix,RtlHardcoded" />
 
             <TextView
                 android:id="@+id/textview_to_address"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="22dp"
+                android:fontFamily="@font/montserrat"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toStartOf="@+id/imageview_to_dropdown"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/textview_from_address"
                 app:layout_constraintTop_toBottomOf="@+id/textview_from_address"
-                tools:ignore="MissingPrefix,RtlHardcoded"
+                tools:ignore="RtlHardcoded"
                 tools:text="Ethereum" />
 
             <ImageView
@@ -138,27 +138,27 @@
                 style="@style/ExchangeBitcoinTitle"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="12dp"
-                app:layout_constraintEnd_toEndOf="@+id/textView7"
+                app:layout_constraintEnd_toEndOf="@+id/text_view_to_header"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="@+id/textView7"
+                app:layout_constraintStart_toStartOf="@+id/text_view_to_header"
                 app:layout_constraintTop_toBottomOf="@+id/divider2"
-                tools:ignore="MissingPrefix,RtlHardcoded"
+                tools:ignore="RtlHardcoded"
                 tools:text="BTC" />
 
             <EditText
                 android:id="@+id/edittext_from_crypto"
                 style="@style/EditTextNumberField"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="8dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="left"
                 app:layout_constraintBottom_toBottomOf="@+id/textview_unit_from"
                 app:layout_constraintEnd_toStartOf="@+id/textview_arrow_symbol"
                 app:layout_constraintStart_toStartOf="@+id/textview_to_address"
                 app:layout_constraintTop_toTopOf="@+id/textview_unit_from"
                 tools:hint="0.0"
-                tools:ignore="MissingPrefix,RtlHardcoded" />
+                tools:ignore="RtlHardcoded" />
 
             <TextView
                 android:id="@+id/textview_arrow_symbol"
@@ -171,8 +171,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/edittext_from_crypto"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/edittext_from_crypto"
-                tools:ignore="MissingPrefix" />
+                app:layout_constraintTop_toTopOf="@+id/edittext_from_crypto" />
 
             <TextView
                 android:id="@+id/textview_unit_to"
@@ -185,16 +184,16 @@
                 app:layout_constraintStart_toEndOf="@+id/textview_arrow_symbol"
                 app:layout_constraintTop_toTopOf="@+id/textview_arrow_symbol"
                 app:layout_constraintVertical_bias="0.5"
-                tools:ignore="MissingPrefix,RtlHardcoded"
+                tools:ignore="RtlHardcoded"
                 tools:text="ETH" />
 
             <EditText
                 android:id="@+id/edittext_to_crypto"
                 style="@style/EditTextNumberField"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="16dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="right"
                 app:layout_constraintBottom_toBottomOf="@+id/textview_unit_to"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -202,7 +201,7 @@
                 app:layout_constraintStart_toEndOf="@+id/textview_unit_to"
                 app:layout_constraintTop_toTopOf="@+id/textview_unit_to"
                 tools:hint="0.0"
-                tools:ignore="MissingPrefix,RtlHardcoded" />
+                tools:ignore="RtlHardcoded" />
 
             <include
                 android:id="@+id/divider3"
@@ -219,33 +218,33 @@
             <EditText
                 android:id="@+id/edittext_from_fiat"
                 style="@style/EditTextNumberField"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="16dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="left"
                 app:layout_constraintEnd_toEndOf="@+id/textview_arrow_symbol"
                 app:layout_constraintStart_toStartOf="@+id/textview_to_address"
                 app:layout_constraintTop_toBottomOf="@+id/edittext_from_crypto"
                 tools:hint="0.0"
-                tools:ignore="MissingPrefix,RtlHardcoded" />
+                tools:ignore="RtlHardcoded" />
 
             <EditText
                 android:id="@+id/edittext_to_fiat"
                 style="@style/EditTextNumberField"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="16dp"
+                android:fontFamily="@font/montserrat"
                 android:gravity="right"
                 app:layout_constraintEnd_toEndOf="@+id/edittext_to_crypto"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/textview_arrow_symbol"
                 app:layout_constraintTop_toBottomOf="@+id/edittext_to_crypto"
                 tools:hint="0.0"
-                tools:ignore="MissingPrefix,RtlHardcoded" />
+                tools:ignore="RtlHardcoded" />
 
             <include
                 android:id="@+id/divider3"
@@ -281,18 +280,17 @@
 
             <TextView
                 android:id="@+id/textview_error"
-                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
+                android:fontFamily="@font/montserrat_light"
                 android:textColor="@color/product_red_medium"
                 android:textSize="14sp"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="@+id/textview_use_max"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textview_use_min"
-                tools:ignore="MissingPrefix"
                 tools:text="Amount too low"
                 tools:visibility="visible" />
 

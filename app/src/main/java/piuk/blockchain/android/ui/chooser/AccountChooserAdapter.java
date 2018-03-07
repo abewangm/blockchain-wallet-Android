@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import info.blockchain.wallet.coin.GenericMetadataAccount;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.ethereum.EthereumAccount;
 import info.blockchain.wallet.payload.data.Account;
@@ -23,6 +24,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
     private static final int VIEW_TYPE_ACCOUNT = 2;
     private static final int VIEW_TYPE_LEGACY = 3;
     private static final int VIEW_TYPE_ETHEREUM = 4;
+    private static final int VIEW_TYPE_SUMMARY = 5;
 
     private List<ItemAccount> items;
     private AccountClickListener clickListener;
@@ -43,6 +45,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
                 return new ContactViewHolder(contact);
             case VIEW_TYPE_ACCOUNT:
             case VIEW_TYPE_LEGACY:
+            case VIEW_TYPE_SUMMARY:
                 View account = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_accounts_row, parent, false);
                 return new AccountViewHolder(account);
             case VIEW_TYPE_ETHEREUM:
@@ -55,6 +58,7 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ItemAccount itemAccount = items.get(position);
+        Object accountObject = itemAccount.getAccountObject();
         switch (getItemViewType(position)) {
             case VIEW_TYPE_HEADER:
                 HeaderViewHolder headerViewHolder = ((HeaderViewHolder) holder);
@@ -63,18 +67,19 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
                 break;
             case VIEW_TYPE_CONTACT:
                 ContactViewHolder contactViewHolder = (ContactViewHolder) holder;
-                contactViewHolder.name.setText(((Contact) itemAccount.getAccountObject()).getName());
-                holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.getAccountObject()));
+                contactViewHolder.name.setText(((Contact) accountObject).getName());
+                holder.itemView.setOnClickListener(v -> clickListener.onClick(accountObject));
                 break;
             case VIEW_TYPE_ACCOUNT:
             case VIEW_TYPE_LEGACY:
+            case VIEW_TYPE_SUMMARY:
                 AccountViewHolder accountViewHolder = ((AccountViewHolder) holder);
                 accountViewHolder.label.setText(itemAccount.getLabel());
                 accountViewHolder.balance.setText(itemAccount.getDisplayBalance());
 
-                if (itemAccount.getAccountObject() instanceof LegacyAddress) {
-                    accountViewHolder.address.setText(((LegacyAddress) itemAccount.getAccountObject()).getAddress());
-                    if (((LegacyAddress) itemAccount.getAccountObject()).isWatchOnly()) {
+                if (accountObject != null && accountObject instanceof LegacyAddress) {
+                    accountViewHolder.address.setText(itemAccount.getAddress());
+                    if (((LegacyAddress) accountObject).isWatchOnly()) {
                         accountViewHolder.tag.setText(holder.itemView.getContext().getString(R.string.watch_only));
                         accountViewHolder.tag.setVisibility(View.VISIBLE);
                     } else {
@@ -86,13 +91,13 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
                     accountViewHolder.tag.setVisibility(View.GONE);
                     accountViewHolder.address.setVisibility(View.GONE);
                 }
-                holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.getAccountObject()));
+                holder.itemView.setOnClickListener(v -> clickListener.onClick(accountObject));
                 break;
             case VIEW_TYPE_ETHEREUM:
                 EthereumViewHolder ethereumViewHolder = ((EthereumViewHolder) holder);
                 ethereumViewHolder.label.setText(itemAccount.getLabel());
                 ethereumViewHolder.balance.setText(itemAccount.getDisplayBalance());
-                holder.itemView.setOnClickListener(v -> clickListener.onClick(itemAccount.getAccountObject()));
+                holder.itemView.setOnClickListener(v -> clickListener.onClick(accountObject));
                 break;
         }
     }
@@ -110,10 +115,15 @@ class AccountChooserAdapter extends RecyclerView.Adapter {
             return VIEW_TYPE_CONTACT;
         } else if (object.getAccountObject() instanceof Account) {
             return VIEW_TYPE_ACCOUNT;
+        }else if (object.getAccountObject() instanceof GenericMetadataAccount) {
+                return VIEW_TYPE_ACCOUNT;
         } else if (object.getAccountObject() instanceof LegacyAddress) {
             return VIEW_TYPE_LEGACY;
         } else if (object.getAccountObject() instanceof EthereumAccount) {
             return VIEW_TYPE_ETHEREUM;
+        } else if (object.getType() == ItemAccount.TYPE.ALL_ACCOUNTS_AND_LEGACY
+                || object.getType() == ItemAccount.TYPE.ALL_LEGACY) {
+            return VIEW_TYPE_SUMMARY;
         } else {
             return VIEW_TYPE_HEADER;
         }

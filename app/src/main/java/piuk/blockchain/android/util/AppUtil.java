@@ -8,19 +8,19 @@ import android.hardware.Camera;
 import android.support.v7.app.AlertDialog;
 import android.view.MotionEvent;
 
-import info.blockchain.wallet.payload.PayloadManager;
-
 import java.io.File;
 import java.security.Security;
 
 import javax.inject.Inject;
 
 import dagger.Lazy;
+import info.blockchain.wallet.payload.PayloadManager;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.ui.launcher.LauncherActivity;
+import timber.log.Timber;
 
 import static piuk.blockchain.android.util.PersistentPrefs.KEY_OVERLAY_TRUSTED;
 
@@ -31,6 +31,7 @@ public class AppUtil {
 
     @Inject PrefsUtil prefs;
     @Inject Lazy<PayloadManager> payloadManager;
+    @Inject Lazy<AccessState> accessState;
     private Context context;
     private AlertDialog alertDialog;
 
@@ -42,6 +43,7 @@ public class AppUtil {
     public void clearCredentials() {
         payloadManager.get().wipe();
         prefs.clear();
+        accessState.get().forgetWallet();
     }
 
     public void clearCredentialsAndRestart() {

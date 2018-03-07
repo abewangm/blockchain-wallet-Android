@@ -43,6 +43,12 @@ public class ConfirmPaymentPresenter extends BasePresenter<ConfirmPaymentView> {
                 paymentDetails.fiatFee));
         getView().setTotalBtc(paymentDetails.cryptoTotal + " " + paymentDetails.cryptoUnit);
         getView().setTotalFiat(paymentDetails.fiatSymbol + paymentDetails.fiatTotal);
+
+        if (paymentDetails.warningText != null) {
+            getView().setWarning(paymentDetails.warningText);
+            getView().setWarningSubText(paymentDetails.warningSubtext);
+        }
+
         getView().setUiState(UiState.CONTENT);
     }
 

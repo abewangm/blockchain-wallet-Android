@@ -1,10 +1,13 @@
 package piuk.blockchain.android.ui.receive;
 
+import android.annotation.TargetApi;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -19,6 +22,8 @@ import piuk.blockchain.android.R;
 import piuk.blockchain.android.injection.Injector;
 import piuk.blockchain.android.ui.base.BaseMvpActivity;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper;
+import piuk.blockchain.android.util.AndroidUtils;
 
 public class ReceiveQrActivity extends BaseMvpActivity<ReceiveQrView, ReceiveQrPresenter>
         implements ReceiveQrView {
@@ -47,9 +52,15 @@ public class ReceiveQrActivity extends BaseMvpActivity<ReceiveQrView, ReceiveQrP
         Button copyAddress = findViewById(R.id.action_copy);
 
         onViewReady();
+        logShortcutUse();
 
         done.setOnClickListener(view -> finish());
         copyAddress.setOnClickListener(view -> getPresenter().onCopyClicked());
+    }
+
+    @Override
+    protected void lockScreenOrientation() {
+        // No-op
     }
 
     @Override
@@ -112,4 +123,16 @@ public class ReceiveQrActivity extends BaseMvpActivity<ReceiveQrView, ReceiveQrP
     protected ReceiveQrView getView() {
         return this;
     }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void logShortcutUse() {
+        if (AndroidUtils.is25orHigher()) {
+            LauncherShortcutHelper launcherShortcutHelper = new LauncherShortcutHelper(this,
+                    getPresenter().getPayloadDataManager(),
+                    getSystemService(ShortcutManager.class));
+
+            launcherShortcutHelper.logShortcutUsed(LauncherShortcutHelper.SHORTCUT_ID_QR);
+        }
+    }
+
 }

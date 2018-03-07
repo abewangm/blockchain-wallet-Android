@@ -87,7 +87,7 @@ public class ExchangeService {
 
         return getPendingTradeAddresses()
                 .doOnNext(address ->
-                        Timber.d("watchPendingTrades: watching receive address: " + address))
+                        Timber.d("watchPendingTrades: watching receive address: %s", address))
                 .flatMap(address -> receiveEvents
                         .filter(event -> event.getAddress().equals(address))
                         .map(WebSocketReceiveEvent::getHash));
@@ -152,7 +152,7 @@ public class ExchangeService {
         ).compose(RxUtil.applySchedulersToObservable());
     }
 
-    Observable<Boolean> hasCoinifyAccount() {
+    Observable<ExchangeData> getExchangeMetaData() {
         return getExchangeData()
                 .flatMap(metadata -> Observable
                         .fromCallable(() -> {
@@ -161,12 +161,11 @@ public class ExchangeService {
                         })
                         .compose(RxUtil.applySchedulersToObservable()))
                 .map(exchangeData -> {
-                    if (exchangeData.isEmpty()) return false;
+                    if (exchangeData.isEmpty()) return new ExchangeData();
 
                     ObjectMapper mapper = new ObjectMapper();
-                    ExchangeData data = mapper.readValue(exchangeData, ExchangeData.class);
 
-                    return data.getCoinify().getUser() != 0;
+                    return mapper.readValue(exchangeData, ExchangeData.class);
                 });
     }
 

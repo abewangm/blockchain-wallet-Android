@@ -18,7 +18,7 @@
         app:contentInsetStart="72dp"
         app:navigationIcon="@drawable/ic_clear_white_24dp"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:titleTextAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title" />
+        app:titleTextAppearance="@style/ToolbarTitleTextAppearance" />
 
     <!-- LOADING LAYOUT -->
     <RelativeLayout
@@ -48,23 +48,21 @@
             android:padding="16dp">
 
             <TextView
-                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:fontFamily="@font/montserrat_light"
                 android:paddingBottom="8dp"
                 android:text="@string/from"
                 android:textColor="@color/primary_gray_dark"
-                android:textSize="14sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/label_from"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                tools:ignore="MissingPrefix"
                 tools:text="2 imported addresses" />
 
         </LinearLayout>
@@ -79,24 +77,23 @@
             android:padding="16dp">
 
             <TextView
-                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:fontFamily="@font/montserrat_light"
                 android:paddingBottom="8dp"
                 android:text="@string/to"
                 android:textColor="@color/primary_gray_medium"
-                android:textSize="14sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="14sp" />
 
             <android.support.v7.widget.AppCompatSpinner
                 android:id="@+id/spinner_destination"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="-16dp"
                 android:background="?attr/selectableItemBackground"
                 android:divider="@null"
-                android:dropDownSelector="?attr/selectableItemBackground" />
+                android:dropDownSelector="?attr/selectableItemBackground"
+                android:fontFamily="@font/montserrat" />
 
         </LinearLayout>
 
@@ -117,73 +114,67 @@
 
             <!-- To transfer -->
             <TextView
-                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
                 android:layout_marginBottom="8dp"
                 android:layout_marginRight="16dp"
+                android:fontFamily="@font/montserrat_light"
                 android:text="@string/transfer_amount"
                 android:textColor="@color/primary_gray_dark"
-                android:textSize="14sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/label_transfer_amount_btc"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="8dp"
+                android:fontFamily="@font/montserrat"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                tools:ignore="MissingPrefix"
                 tools:text="0.0011242 BTC" />
 
             <TextView
                 android:id="@+id/label_transfer_amount_fiat"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginBottom="8dp"
+                android:fontFamily="@font/montserrat"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                tools:ignore="MissingPrefix"
                 tools:text="$6.22" />
 
             <!-- Fees -->
             <TextView
-                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
                 android:layout_marginRight="16dp"
+                android:fontFamily="@font/montserrat_light"
                 android:text="@string/fee"
                 android:textColor="@color/primary_gray_dark"
-                android:textSize="14sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/label_fee_amount_btc"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:fontFamily="@font/montserrat"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                tools:ignore="MissingPrefix"
                 tools:text="0.0003685 BTC" />
 
             <TextView
                 android:id="@+id/label_fee_amount_fiat"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
+                android:fontFamily="@font/montserrat"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                tools:ignore="MissingPrefix"
                 tools:text="$0.23" />
 
         </GridLayout>

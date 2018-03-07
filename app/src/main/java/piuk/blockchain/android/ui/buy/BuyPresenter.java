@@ -5,13 +5,14 @@ import android.support.annotation.Nullable;
 import javax.inject.Inject;
 
 import piuk.blockchain.android.R;
-import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.exchange.BuyDataManager;
 import piuk.blockchain.android.data.payload.PayloadDataManager;
+import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.base.UiState;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
 import piuk.blockchain.android.util.AppUtil;
+import timber.log.Timber;
 
 /**
  * Created by justin on 4/27/17.
@@ -22,18 +23,18 @@ public class BuyPresenter extends BasePresenter<BuyView> {
     private AppUtil appUtil;
     private BuyDataManager buyDataManager;
     private PayloadDataManager payloadDataManager;
-    private EnvironmentSettings environmentSettings;
+    private WalletOptionsDataManager walletOptionsDataManager;
 
     @Inject
     BuyPresenter(AppUtil appUtil,
                  BuyDataManager buyDataManager,
                  PayloadDataManager payloadDataManager,
-                 EnvironmentSettings environmentSettings) {
+                 WalletOptionsDataManager walletOptionsDataManager) {
 
         this.appUtil = appUtil;
         this.buyDataManager = buyDataManager;
         this.payloadDataManager = payloadDataManager;
-        this.environmentSettings = environmentSettings;
+        this.walletOptionsDataManager = walletOptionsDataManager;
     }
 
     @Override
@@ -67,27 +68,41 @@ public class BuyPresenter extends BasePresenter<BuyView> {
                             getView().showSecondPasswordDialog();
                             getView().setUiState(UiState.EMPTY);
                         } else {
-                            generateMetadataNodes(null);
+                            generateMetadataNodes();
                         }
                     }
                 }));
     }
 
-    void generateMetadataNodes(@Nullable String secondPassword) {
+    void decryptAndGenerateMetadataNodes(@Nullable String secondPassword) {
         if (!payloadDataManager.validateSecondPassword(secondPassword)) {
             getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
             getView().showSecondPasswordDialog();
             getView().setUiState(UiState.EMPTY);
         } else {
-            getCompositeDisposable().add(
-                    payloadDataManager.generateNodes(secondPassword)
-                            .subscribe(
-                                    this::attemptPageSetup,
-                                    throwable -> getView().setUiState(UiState.FAILURE)));
+
+            try {
+                payloadDataManager.decryptHDWallet(secondPassword);
+                getCompositeDisposable().add(
+                        payloadDataManager.generateNodes()
+                                .subscribe(
+                                        this::attemptPageSetup,
+                                        throwable -> getView().setUiState(UiState.FAILURE)));
+            } catch (Exception e) {
+                Timber.e(e);
+            }
         }
     }
 
+    void generateMetadataNodes() {
+        getCompositeDisposable().add(
+                payloadDataManager.generateNodes()
+                        .subscribe(
+                                this::attemptPageSetup,
+                                throwable -> getView().setUiState(UiState.FAILURE)));
+    }
+
     String getCurrentServerUrl() {
-        return environmentSettings.getExplorerUrl();
+        return walletOptionsDataManager.getBuyWebviewWalletLink();
     }
 }

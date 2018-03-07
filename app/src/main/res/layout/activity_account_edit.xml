@@ -33,7 +33,6 @@
 
                 <TextView
                     android:id="@+id/tv_transfer"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -41,6 +40,7 @@
                     android:alpha="@{viewModel.accountModel.transferFundsAlpha}"
                     android:background="?attr/selectableItemBackground"
                     android:duplicateParentState="true"
+                    android:fontFamily="@font/montserrat"
                     android:gravity="center_vertical"
                     android:minHeight="72dp"
                     android:paddingLeft="16dp"
@@ -72,10 +72,10 @@
 
                     <TextView
                         android:id="@+id/tv_label"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:duplicateParentState="true"
+                        android:fontFamily="@font/montserrat"
                         android:paddingLeft="16dp"
                         android:text="@{viewModel.accountModel.labelHeader}"
                         android:textColor="@color/black"
@@ -84,11 +84,11 @@
 
                     <TextView
                         android:id="@+id/account_name"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:alpha="0.7"
                         android:duplicateParentState="true"
+                        android:fontFamily="@font/montserrat"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="@{viewModel.accountModel.label}"
@@ -107,13 +107,13 @@
 
                 <TextView
                     android:id="@+id/tv_default"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:alpha="@{viewModel.accountModel.defaultAlpha}"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="@{viewModel.accountModel.defaultClickable}"
+                    android:fontFamily="@font/montserrat"
                     android:gravity="center_vertical"
                     android:minHeight="72dp"
                     android:onClick="@{viewModel::onClickDefault}"
@@ -153,11 +153,11 @@
                         tools:ignore="UseCompoundDrawables">
 
                         <TextView
-                            fontPath="fonts/Montserrat-Regular.ttf"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:duplicateParentState="true"
+                            android:fontFamily="@font/montserrat"
                             android:gravity="center_vertical"
                             android:paddingLeft="16dp"
                             android:text="@string/scan_private_key"
@@ -181,12 +181,12 @@
                     </LinearLayout>
 
                     <TextView
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginBottom="8dp"
                         android:alpha="0.7"
                         android:duplicateParentState="true"
+                        android:fontFamily="@font/montserrat"
                         android:gravity="center_vertical"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
@@ -225,11 +225,11 @@
 
                         <TextView
                             android:id="@+id/tv_xpub"
-                            fontPath="fonts/Montserrat-Regular.ttf"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:duplicateParentState="true"
+                            android:fontFamily="@font/montserrat"
                             android:gravity="center_vertical"
                             android:paddingLeft="16dp"
                             android:text="@{viewModel.accountModel.xpubText}"
@@ -255,13 +255,13 @@
 
                     <TextView
                         android:id="@+id/tv_extended_xpub_description"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_marginBottom="8dp"
                         android:layout_weight="1"
                         android:alpha="0.7"
                         android:duplicateParentState="true"
+                        android:fontFamily="@font/montserrat"
                         android:gravity="center_vertical"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
@@ -297,10 +297,10 @@
 
                     <TextView
                         android:id="@+id/tv_archive"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:duplicateParentState="true"
+                        android:fontFamily="@font/montserrat"
                         android:paddingBottom="8dp"
                         android:paddingLeft="16dp"
                         android:text="@{viewModel.accountModel.archiveHeader}"
@@ -310,12 +310,12 @@
 
                     <TextView
                         android:id="@+id/tv_archive_description"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
                         android:alpha="0.7"
                         android:duplicateParentState="true"
+                        android:fontFamily="@font/montserrat"
                         android:paddingBottom="16dp"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"

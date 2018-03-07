@@ -48,8 +48,8 @@ class ShapeShiftStateSelectionActivity : BaseMvpActivity<ShapeShiftStateSelectio
                 val v = super.getView(position, convertView, parent)
 
                 if (position == count) {
-                    (v.findViewById<TextView>(android.R.id.text1) as TextView).text = ""
-                    (v.findViewById<TextView>(android.R.id.text1) as TextView).hint = getItem(count)
+                    (v.findViewById(android.R.id.text1) as TextView).text = ""
+                    (v.findViewById(android.R.id.text1) as TextView).hint = getItem(count)
                 }
 
                 return v
@@ -63,7 +63,7 @@ class ShapeShiftStateSelectionActivity : BaseMvpActivity<ShapeShiftStateSelectio
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerState.adapter = adapter
-        spinnerState.setSelection(adapter.count)
+        spinnerState.setSelection(0)
 
         spinnerState.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: android.view.View, position: Int, id: Long) {

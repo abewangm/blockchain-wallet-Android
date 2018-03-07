@@ -1,22 +1,19 @@
 package piuk.blockchain.android.ui.home;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.Nullable;
 
+import org.bitcoinj.crypto.DeterministicKey;
+
+import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.coin.GenericMetadataAccount;
-import info.blockchain.wallet.ethereum.EthereumWallet;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.prices.data.PriceDatum;
 
-import org.bitcoinj.crypto.DeterministicKey;
-
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -24,9 +21,9 @@ import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
+import piuk.blockchain.android.data.answers.BitcoinUnits;
 import piuk.blockchain.android.data.answers.Logging;
 import piuk.blockchain.android.data.api.EnvironmentSettings;
 import piuk.blockchain.android.data.auth.AuthService;
@@ -47,23 +44,21 @@ import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.data.rxjava.RxUtil;
 import piuk.blockchain.android.data.services.EventService;
 import piuk.blockchain.android.data.settings.SettingsDataManager;
+import piuk.blockchain.android.data.shapeshift.ShapeShiftDataManager;
 import piuk.blockchain.android.data.walletoptions.WalletOptionsDataManager;
-import piuk.blockchain.android.data.websocket.WebSocketService;
 import piuk.blockchain.android.ui.base.BasePresenter;
 import piuk.blockchain.android.ui.customviews.ToastCustom;
+import piuk.blockchain.android.ui.dashboard.DashboardPresenter;
 import piuk.blockchain.android.ui.home.models.MetadataEvent;
-import piuk.blockchain.android.ui.swipetoreceive.SwipeToReceiveHelper;
 import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.ExchangeRateFactory;
-import piuk.blockchain.android.util.OSUtil;
+import piuk.blockchain.android.util.MonetaryUtil;
 import piuk.blockchain.android.util.PrefsUtil;
 import piuk.blockchain.android.util.StringUtils;
 import timber.log.Timber;
 
 public class MainPresenter extends BasePresenter<MainView> {
 
-    private OSUtil osUtil;
-    private SwipeToReceiveHelper swipeToReceiveHelper;
     private Observable<NotificationPayload> notificationObservable;
     private PrefsUtil prefs;
     private AppUtil appUtil;
@@ -72,20 +67,21 @@ public class MainPresenter extends BasePresenter<MainView> {
     private PayloadDataManager payloadDataManager;
     private ContactsDataManager contactsDataManager;
     private Context applicationContext;
-    private StringUtils stringUtils;
     private SettingsDataManager settingsDataManager;
     private BuyDataManager buyDataManager;
     private DynamicFeeCache dynamicFeeCache;
     private ExchangeRateFactory exchangeRateFactory;
     private RxBus rxBus;
     private FeeDataManager feeDataManager;
-    private EnvironmentSettings environmentSettings;
     private PromptManager promptManager;
     private EthDataManager ethDataManager;
+    private BchDataManager bchDataManager;
     private CurrencyState currencyState;
     private WalletOptionsDataManager walletOptionsDataManager;
     private MetadataManager metadataManager;
-    private BchDataManager bchDataManager;
+    private StringUtils stringUtils;
+    private ShapeShiftDataManager shapeShiftDataManager;
+    private EnvironmentSettings environmentSettings;
 
     @Inject
     MainPresenter(PrefsUtil prefs,
@@ -95,21 +91,21 @@ public class MainPresenter extends BasePresenter<MainView> {
                   PayloadDataManager payloadDataManager,
                   ContactsDataManager contactsDataManager,
                   Context applicationContext,
-                  StringUtils stringUtils,
                   SettingsDataManager settingsDataManager,
                   BuyDataManager buyDataManager,
                   DynamicFeeCache dynamicFeeCache,
                   ExchangeRateFactory exchangeRateFactory,
                   RxBus rxBus,
                   FeeDataManager feeDataManager,
-                  EnvironmentSettings environmentSettings,
                   PromptManager promptManager,
                   EthDataManager ethDataManager,
-                  SwipeToReceiveHelper swipeToReceiveHelper,
+                  BchDataManager bchDataManager,
                   CurrencyState currencyState,
                   WalletOptionsDataManager walletOptionsDataManager,
                   MetadataManager metadataManager,
-                  BchDataManager bchDataManager) {
+                  StringUtils stringUtils,
+                  ShapeShiftDataManager shapeShiftDataManager,
+                  EnvironmentSettings environmentSettings) {
 
         this.prefs = prefs;
         this.appUtil = appUtil;
@@ -118,22 +114,21 @@ public class MainPresenter extends BasePresenter<MainView> {
         this.payloadDataManager = payloadDataManager;
         this.contactsDataManager = contactsDataManager;
         this.applicationContext = applicationContext;
-        this.stringUtils = stringUtils;
         this.settingsDataManager = settingsDataManager;
         this.buyDataManager = buyDataManager;
         this.dynamicFeeCache = dynamicFeeCache;
         this.exchangeRateFactory = exchangeRateFactory;
         this.rxBus = rxBus;
         this.feeDataManager = feeDataManager;
-        this.environmentSettings = environmentSettings;
         this.promptManager = promptManager;
         this.ethDataManager = ethDataManager;
-        this.swipeToReceiveHelper = swipeToReceiveHelper;
+        this.bchDataManager = bchDataManager;
         this.currencyState = currencyState;
         this.walletOptionsDataManager = walletOptionsDataManager;
         this.metadataManager = metadataManager;
-        this.bchDataManager = bchDataManager;
-        osUtil = new OSUtil(applicationContext);
+        this.stringUtils = stringUtils;
+        this.shapeShiftDataManager = shapeShiftDataManager;
+        this.environmentSettings = environmentSettings;
     }
 
     private void initPrompts(Context context) {
@@ -158,8 +153,6 @@ public class MainPresenter extends BasePresenter<MainView> {
             // activity, which handles all login/auth/corruption scenarios itself
             getView().kickToLauncherPage();
         } else {
-
-            startWebSocketService();
             logEvents();
 
             getView().showProgressDialog(R.string.please_wait);
@@ -167,6 +160,15 @@ public class MainPresenter extends BasePresenter<MainView> {
             initMetadataElements();
 
             doWalletOptionsChecks();
+        }
+
+        Logging.INSTANCE.logCustom(new BitcoinUnits(prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)));
+    }
+
+    public void doTestnetCheck() {
+        if (environmentSettings.getEnvironment().equals(Environment.TESTNET)) {
+            currencyState.setCryptoCurrency(CryptoCurrencies.BTC);
+            getView().showTestnetWarning();
         }
     }
 
@@ -215,14 +217,14 @@ public class MainPresenter extends BasePresenter<MainView> {
     void initMetadataElements() {
         metadataManager.attemptMetadataSetup()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .andThen(ethCompletable())
+                .andThen(shapeshiftCompletable())
+                .andThen(bchCompletable())
                 .andThen(feesCompletable())
                 .doAfterTerminate(() -> {
                             getView().hideProgressDialog();
 
                             initPrompts(getView().getActivityContext());
-                            storeSwipeReceiveAddresses();
-
-                            rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
 
                             if (!prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "").isEmpty()) {
                                 String strUri = prefs.getValue(PrefsUtil.KEY_SCHEME_URL, "");
@@ -231,12 +233,14 @@ public class MainPresenter extends BasePresenter<MainView> {
                             }
                         }
                 )
-                .subscribe(o -> {
+                .subscribe(ignore -> {
                     if (getView().isBuySellPermitted()) {
                         initBuyService();
                     } else {
                         getView().setBuySellEnabled(false);
                     }
+
+                    rxBus.emitEvent(MetadataEvent.class, MetadataEvent.SETUP_COMPLETE);
                 }, throwable -> {
                     //noinspection StatementWithEmptyBody
                     if (throwable instanceof InvalidCredentialsException || throwable instanceof HDWalletException) {
@@ -252,19 +256,37 @@ public class MainPresenter extends BasePresenter<MainView> {
                 });
     }
 
+    private Completable bchCompletable() {
+        return bchDataManager.initBchWallet(stringUtils.getString(R.string.bch_default_account_label))
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError(throwable -> {
+                    // TODO: 21/02/2018 Reload or disable?
+                    Timber.e("Failed to load bch wallet");
+                });
+    }
+
+    private Completable ethCompletable() {
+        return ethDataManager.initEthereumWallet(
+                stringUtils.getString(R.string.eth_default_account_label))
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError(throwable -> {
+                    // TODO: 21/02/2018 Reload or disable?
+                    Timber.e("Failed to load eth wallet");
+                });
+    }
+
+    private Completable shapeshiftCompletable() {
+        return shapeShiftDataManager.initShapeshiftTradeData()
+                .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .doOnError(throwable -> {
+                    // TODO: 21/02/2018 Reload or disable?
+                    Timber.e("Failed to load shape shift trades");
+                });
+    }
+
     private void logException(Throwable throwable) {
         Logging.INSTANCE.logException(throwable);
         getView().showMetadataNodeFailure();
-    }
-
-    private void storeSwipeReceiveAddresses() {
-        // Defer to background thread as deriving addresses is quite processor intensive
-        Completable.fromCallable(() -> {
-            swipeToReceiveHelper.updateAndStoreBitcoinAddresses();
-            return Void.TYPE;
-        }).subscribeOn(Schedulers.computation())
-                .compose(RxUtil.addCompletableToCompositeDisposable(this))
-                .subscribe(() -> { /* No-op*/ }, Timber::e);
     }
 
     private Observable<Map<String, PriceDatum>> feesCompletable() {
@@ -272,24 +294,28 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .doOnNext(btcFeeOptions -> dynamicFeeCache.setBtcFeeOptions(btcFeeOptions))
                 .flatMap(ignored -> feeDataManager.getEthFeeOptions())
                 .doOnNext(ethFeeOptions -> dynamicFeeCache.setEthFeeOptions(ethFeeOptions))
+                .flatMap(ignored -> feeDataManager.getBchFeeOptions())
+                .doOnNext(bchFeeOptions -> dynamicFeeCache.setBchFeeOptions(bchFeeOptions))
+                .flatMap(feeOptions -> exchangeRateFactory.updateTickers())
                 .compose(RxUtil.applySchedulersToObservable())
-                .flatMap(feeOptions -> exchangeRateFactory.updateTickers());
+                .compose(RxUtil.addObservableToCompositeDisposable(this));
     }
 
     private void checkForMessages() {
-        getCompositeDisposable().add(contactsDataManager.fetchContacts()
-                .andThen(contactsDataManager.getContactList())
-                .toList()
-                .flatMapObservable(contacts -> {
-                    if (!contacts.isEmpty()) {
-                        return contactsDataManager.getMessages(true);
-                    } else {
-                        return Observable.just(Collections.emptyList());
-                    }
-                })
-                .subscribe(messages -> {
-                    // No-op
-                }, Timber::e));
+        // TODO: 28/02/2018 There is no point in doing this currently
+//        getCompositeDisposable().add(contactsDataManager.fetchContacts()
+//                .andThen(contactsDataManager.getContactList())
+//                .toList()
+//                .flatMapObservable(contacts -> {
+//                    if (!contacts.isEmpty()) {
+//                        return contactsDataManager.getMessages(true);
+//                    } else {
+//                        return Observable.just(Collections.emptyList());
+//                    }
+//                })
+//                .subscribe(messages -> {
+//                    // No-op
+//                }, Timber::e));
     }
 
     void unPair() {
@@ -301,6 +327,8 @@ public class MainPresenter extends BasePresenter<MainView> {
         accessState.setPIN(null);
         buyDataManager.wipe();
         ethDataManager.clearEthAccountDetails();
+        bchDataManager.clearBchAccountDetails();
+        DashboardPresenter.onLogout();
     }
 
     PayloadManager getPayloadManager() {
@@ -311,13 +339,11 @@ public class MainPresenter extends BasePresenter<MainView> {
     @SuppressWarnings("unused")
     private void subscribeToNotifications() {
         notificationObservable = rxBus.register(NotificationPayload.class);
-
-        getCompositeDisposable().add(
-                notificationObservable
-                        .compose(RxUtil.applySchedulersToObservable())
-                        .subscribe(
-                                notificationPayload -> checkForMessages(),
-                                Throwable::printStackTrace));
+        notificationObservable.compose(RxUtil.addObservableToCompositeDisposable(this))
+                .compose(RxUtil.applySchedulersToObservable())
+                .subscribe(
+                        notificationPayload -> checkForMessages(),
+                        Throwable::printStackTrace);
     }
 
     @Override
@@ -336,19 +362,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                                 Throwable::printStackTrace));
     }
 
-    private void startWebSocketService() {
-        Intent intent = new Intent(applicationContext, WebSocketService.class);
-
-        if (!osUtil.isServiceRunning(WebSocketService.class)) {
-            applicationContext.startService(intent);
-        } else {
-            // Restarting this here ensures re-subscription after app restart - the service may remain
-            // running, but the subscription to the WebSocket won't be restarted unless onCreate called
-            applicationContext.stopService(intent);
-            applicationContext.startService(intent);
-        }
-    }
-
     private void logEvents() {
         EventService handler = new EventService(prefs, new AuthService(new WalletApi()));
         handler.log2ndPwEvent(payloadManager.getPayload().isDoubleEncryption());
@@ -365,7 +378,7 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     String getCurrentServerUrl() {
-        return environmentSettings.getExplorerUrl();
+        return walletOptionsDataManager.getBuyWebviewWalletLink();
     }
 
     // Usage commented out for now
@@ -406,6 +419,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                         .subscribe(isEnabled -> {
                             getView().setBuySellEnabled(isEnabled);
                             if (isEnabled) {
+                                checkBuyAndSellEnabled();
                                 buyDataManager.watchPendingTrades()
                                         .compose(RxUtil.applySchedulersToObservable())
                                         .subscribe(getView()::onTradeCompleted, Throwable::printStackTrace);
@@ -419,6 +433,14 @@ public class MainPresenter extends BasePresenter<MainView> {
                         }));
     }
 
+    private void checkBuyAndSellEnabled() {
+        buyDataManager.isSfoxAllowed()
+                .compose(RxUtil.addObservableToCompositeDisposable(this))
+                .subscribe(allowed -> {
+                    if (allowed) getView().updateNavDrawerToBuyAndSell();
+                }, Timber::e);
+    }
+
     private void dismissAnnouncementIfOnboardingCompleted() {
         if (prefs.getValue(PrefsUtil.KEY_ONBOARDING_COMPLETE, false)
                 && prefs.getValue(PrefsUtil.KEY_LATEST_ANNOUNCEMENT_SEEN, false)) {
@@ -426,19 +448,15 @@ public class MainPresenter extends BasePresenter<MainView> {
         }
     }
 
-    void generateAndSetupMetadata(@Nullable String secondPassword) {
+    void decryptAndSetupMetadata(String secondPassword) {
         if (!payloadDataManager.validateSecondPassword(secondPassword)) {
             getView().showToast(R.string.invalid_password, ToastCustom.TYPE_ERROR);
             getView().showSecondPasswordDialog();
         } else {
-            metadataManager.generateAndSetupMetadata(secondPassword)
+            metadataManager.decryptAndSetupMetadata(secondPassword)
                     .compose(RxUtil.addCompletableToCompositeDisposable(this))
                     .subscribe(() -> appUtil.restartApp(), Throwable::printStackTrace);
         }
-    }
-
-    CryptoCurrencies getCurrentCryptoCurrency() {
-        return currencyState.getCryptoCurrency();
     }
 
     void setCryptoCurrency(CryptoCurrencies cryptoCurrency) {

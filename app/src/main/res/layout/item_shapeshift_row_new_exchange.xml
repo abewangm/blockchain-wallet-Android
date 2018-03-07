@@ -15,19 +15,19 @@
             android:id="@+id/iv_exchange"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:scaleType="fitXY"
             android:layout_centerVertical="true"
             android:layout_marginLeft="16dp"
+            android:scaleType="fitXY"
             android:tint="@color/primary_gray_dark"
             app:srcCompat="@drawable/vector_exchange" />
 
         <TextView
             android:id="@+id/header_name"
-            android:layout_toRightOf="@+id/iv_exchange"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/iv_exchange"
+            android:fontFamily="@font/montserrat"
             android:padding="16dp"
             android:text="@string/shapeshift_new_exchange"
             android:textSize="16sp" />

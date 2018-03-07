@@ -1,37 +1,40 @@
 package piuk.blockchain.android.data.shapeshift
 
-import com.nhaarman.mockito_kotlin.verify
-import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
-import com.nhaarman.mockito_kotlin.whenever
-import info.blockchain.wallet.payload.PayloadManager
+import com.nhaarman.mockito_kotlin.*
 import info.blockchain.wallet.shapeshift.ShapeShiftApi
 import info.blockchain.wallet.shapeshift.ShapeShiftTrades
 import info.blockchain.wallet.shapeshift.data.*
+import io.reactivex.Completable
 import io.reactivex.Observable
-import org.amshove.kluent.*
+import org.amshove.kluent.`should be`
+import org.amshove.kluent.`should equal to`
+import org.amshove.kluent.`should contain`
+import org.amshove.kluent.`should not contain`
 import org.json.JSONException
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.RxTest
+import piuk.blockchain.android.data.metadata.MetadataManager
 import piuk.blockchain.android.data.rxjava.RxBus
 import piuk.blockchain.android.data.shapeshift.datastore.ShapeShiftDataStore
 import piuk.blockchain.android.data.stores.Either
 import piuk.blockchain.android.data.stores.Optional
 import piuk.blockchain.android.ui.shapeshift.models.CoinPairings
 
+@Suppress("IllegalIdentifier")
 class ShapeShiftDataManagerTest : RxTest() {
 
     private lateinit var subject: ShapeShiftDataManager
     private val shapeShiftApi: ShapeShiftApi = mock()
     private val shapeShiftDataStore: ShapeShiftDataStore = mock()
-    private val payloadManager: PayloadManager = mock()
+    private val metadataManager: MetadataManager = mock()
     private val rxBus: RxBus = RxBus()
 
     @Before
     @Throws(Exception::class)
     override fun setUp() {
         super.setUp()
-        subject = ShapeShiftDataManager(shapeShiftApi, shapeShiftDataStore, payloadManager, rxBus)
+        subject = ShapeShiftDataManager(shapeShiftApi, shapeShiftDataStore, metadataManager, rxBus)
     }
 
     @Test
@@ -100,14 +103,16 @@ class ShapeShiftDataManagerTest : RxTest() {
         val tradeData: ShapeShiftTrades = mock()
         val state = State("STATE", "STATE")
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
+        whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.setState(state).test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        verify(shapeShiftDataStore).tradeData
+        verify(shapeShiftDataStore, atLeastOnce()).tradeData
+        verify(metadataManager).saveToMetadata(tradeData.toJson(), ShapeShiftTrades.METADATA_TYPE_EXTERNAL)
         verifyNoMoreInteractions(shapeShiftDataStore)
-        verify(tradeData).save()
     }
 
     @Test(expected = IllegalStateException::class)
@@ -228,12 +233,14 @@ class ShapeShiftDataManagerTest : RxTest() {
         val tradeData: ShapeShiftTrades = mock()
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
         whenever(tradeData.trades).thenReturn(list)
+        whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.addTradeToList(trade).test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        verify(shapeShiftDataStore).tradeData
+        verify(shapeShiftDataStore, atLeastOnce()).tradeData
         verifyNoMoreInteractions(shapeShiftDataStore)
         tradeData.trades.size `should equal to` 1
     }
@@ -260,12 +267,14 @@ class ShapeShiftDataManagerTest : RxTest() {
         val tradeData: ShapeShiftTrades = mock()
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
         whenever(tradeData.trades).thenReturn(list)
+        whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.clearAllTrades().test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        verify(shapeShiftDataStore).tradeData
+        verify(shapeShiftDataStore, atLeastOnce()).tradeData
         verifyNoMoreInteractions(shapeShiftDataStore)
         tradeData.trades.size `should equal to` 0
     }
@@ -294,12 +303,14 @@ class ShapeShiftDataManagerTest : RxTest() {
         val tradeData: ShapeShiftTrades = mock()
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
         whenever(tradeData.trades).thenReturn(list)
+        whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenReturn(Completable.complete())
         // Act
         val testObserver = subject.updateTrade(updatedTrade).test()
         // Assert
         testObserver.assertComplete()
         testObserver.assertNoErrors()
-        verify(shapeShiftDataStore).tradeData
+        verify(shapeShiftDataStore, atLeastOnce()).tradeData
         verifyNoMoreInteractions(shapeShiftDataStore)
         tradeData.trades.size `should equal to` 1
         tradeData.trades `should contain` updatedTrade
@@ -317,13 +328,14 @@ class ShapeShiftDataManagerTest : RxTest() {
         val tradeData: ShapeShiftTrades = mock()
         whenever(shapeShiftDataStore.tradeData).thenReturn(tradeData)
         whenever(tradeData.trades).thenReturn(list)
-        whenever(tradeData.save()).thenThrow(JSONException::class.java)
+        whenever(shapeShiftDataStore.tradeData!!.toJson()).thenReturn("{}")
+        whenever(metadataManager.saveToMetadata(any(), any())).thenThrow(JSONException::class.java)
         // Act
         val testObserver = subject.updateTrade(updatedTrade).test()
         // Assert
         testObserver.assertNotComplete()
         testObserver.assertError(JSONException::class.java)
-        verify(shapeShiftDataStore).tradeData
+        verify(shapeShiftDataStore, atLeastOnce()).tradeData
         verifyNoMoreInteractions(shapeShiftDataStore)
         tradeData.trades.size `should equal to` 1
         tradeData.trades `should contain` trade

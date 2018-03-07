@@ -20,9 +20,9 @@
 
         <TextView
             android:id="@+id/upgrade_page_title"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
             android:gravity="center"
             android:paddingLeft="48dp"
             android:paddingRight="48dp"
@@ -32,9 +32,9 @@
 
         <TextSwitcher
             android:id="@+id/upgrade_page_header"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
             android:gravity="center"
             android:paddingBottom="10dp"
             android:paddingLeft="48dp"

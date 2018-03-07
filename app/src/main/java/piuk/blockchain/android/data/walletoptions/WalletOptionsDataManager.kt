@@ -5,6 +5,7 @@ import info.blockchain.wallet.api.data.WalletOptions
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.auth.AuthDataManager
 import piuk.blockchain.android.data.settings.SettingsDataManager
 import piuk.blockchain.android.util.annotations.Mockable
@@ -13,7 +14,8 @@ import piuk.blockchain.android.util.annotations.Mockable
 class WalletOptionsDataManager(
         private val authDataManager: AuthDataManager,
         private val walletOptionsState: WalletOptionsState,
-        private val settingsDataManager: SettingsDataManager
+        private val settingsDataManager: SettingsDataManager,
+        private val environmentSettings: EnvironmentSettings
 ) {
 
     /**
@@ -42,16 +44,20 @@ class WalletOptionsDataManager(
         initWalletOptionsReplaySubjects()
         initSettingsReplaySubjects(guid, sharedKey)
 
-        return Observable.zip(walletOptionsState.walletOptionsSource, walletOptionsState.walletSettingsSource,
+        return Observable.zip(walletOptionsState.walletOptionsSource,
+                walletOptionsState.walletSettingsSource,
                 BiFunction({ options, settings ->
                     isShapeshiftAllowed(options, settings)
-                }))
+                })
+        )
     }
 
     private fun isShapeshiftAllowed(options: WalletOptions, settings: Settings): Boolean {
 
         val isShapeShiftAllowed = options.androidFlags.let { it?.get(SHOW_SHAPESHIFT) ?: false }
-        val blacklistedCountry = options.shapeshift.countriesBlacklist.let { it?.contains(settings.countryCode) ?: false }
+        val blacklistedCountry = options.shapeshift.countriesBlacklist.let {
+            it?.contains(settings.countryCode) ?: false
+        }
 
         return isShapeShiftAllowed && !blacklistedCountry
     }
@@ -59,8 +65,19 @@ class WalletOptionsDataManager(
     fun isInUsa(): Observable<Boolean> =
             walletOptionsState.walletSettingsSource.map { it.countryCode == "US" }
 
-    fun isStateWhitelisted(state: String): Observable<Boolean> = walletOptionsState.walletOptionsSource
-            .map { it.shapeshift.statesWhitelist.let { it?.contains(state) ?: true } }
+    fun isStateWhitelisted(state: String): Observable<Boolean> =
+            walletOptionsState.walletOptionsSource
+                    .map { it.shapeshift.statesWhitelist.let { it?.contains(state) ?: true } }
+
+    fun getBchFee(): Int = walletOptionsState.walletOptionsSource.value.bchFeePerByte
+
+    fun getShapeShiftLimit(): Int = walletOptionsState.walletOptionsSource.value.shapeshift.upperLimit
+
+    fun getBuyWebviewWalletLink(): String {
+        initWalletOptionsReplaySubjects()
+        return (walletOptionsState.walletOptionsSource.value.buyWebviewWalletLink ?:
+        environmentSettings.explorerUrl+"wallet") + "/#/intermediate"
+    }
 
     /**
      * Mobile info retrieved from wallet-options.json based on wallet setting
@@ -132,8 +149,13 @@ class WalletOptionsDataManager(
         return result
     }
 
+    fun getLastEthTransactionFuse(): Observable<Long> {
+        return walletOptionsState.walletOptionsSource
+                .map { return@map it.ethereum.lastTxFuse }
+    }
+
     companion object {
-        private val SHOW_SHAPESHIFT = "showShapeshift"
+        private const val SHOW_SHAPESHIFT = "showShapeshift"
     }
 
 }

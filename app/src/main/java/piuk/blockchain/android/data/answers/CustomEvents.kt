@@ -1,7 +1,9 @@
 package piuk.blockchain.android.data.answers
 
+import android.support.annotation.IntRange
 import com.crashlytics.android.answers.CustomEvent
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.util.extensions.getAmountRangeBch
 import piuk.blockchain.android.util.extensions.getAmountRangeBtc
 import piuk.blockchain.android.util.extensions.getAmountRangeEth
 import java.math.BigInteger
@@ -43,11 +45,14 @@ class PaymentSentEvent : CustomEvent("Payment Sent") {
         return this
     }
 
-    fun putAmountForRange(amountSent: BigInteger, cryptoCurrencies: CryptoCurrencies): PaymentSentEvent {
-        val amountRange = when(cryptoCurrencies) {
+    fun putAmountForRange(
+            amountSent: BigInteger,
+            cryptoCurrencies: CryptoCurrencies
+    ): PaymentSentEvent {
+        val amountRange = when (cryptoCurrencies) {
             CryptoCurrencies.BTC -> amountSent.getAmountRangeBtc()
             CryptoCurrencies.ETHER -> amountSent.getAmountRangeEth()
-            else -> throw IllegalArgumentException("BCH not yet supported")
+            CryptoCurrencies.BCH -> amountSent.getAmountRangeBch()
         }
 
         putCustomAttribute("Amount", amountRange)
@@ -94,7 +99,10 @@ class AppLaunchEvent(playServicesFound: Boolean) : CustomEvent("App Launched") {
 class SecondPasswordEvent(secondPasswordEnabled: Boolean) : CustomEvent("Second password event") {
 
     init {
-        putCustomAttribute("Second password enabled", if (secondPasswordEnabled) "true" else "false")
+        putCustomAttribute(
+                "Second password enabled",
+                if (secondPasswordEnabled) "true" else "false"
+        )
     }
 
 }
@@ -126,6 +134,36 @@ class ShapeShiftEvent : CustomEvent("ShapeShift Used") {
     fun putSuccess(successful: Boolean): ShapeShiftEvent {
         putCustomAttribute("Success", if (successful) "true" else "false")
         return this
+    }
+
+}
+
+class BitcoinUnits(@IntRange(from = 0L, to = 2L) unit: Int) : CustomEvent("Bitcoin Units") {
+
+    init {
+        val selectedUnit = when (unit) {
+            0 -> "BTC"
+            1 -> "mBTC"
+            2 -> "Bits"
+            else -> "Unknown type $unit"
+        }
+        putCustomAttribute("Bitcoin Units", selectedUnit)
+    }
+
+}
+
+class LauncherShortcutEvent(type: String) : CustomEvent("Launcher Shortcut") {
+
+    init {
+        putCustomAttribute("Launcher Shortcut used", type)
+    }
+
+}
+
+class WalletUpgradeEvent(successful: Boolean) : CustomEvent("Wallet Upgraded") {
+
+    init {
+        putCustomAttribute("Successful", if (successful) "true" else "false")
     }
 
 }

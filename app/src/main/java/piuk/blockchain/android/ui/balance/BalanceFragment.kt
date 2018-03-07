@@ -1,43 +1,46 @@
 package piuk.blockchain.android.ui.balance
 
 import android.annotation.TargetApi
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ShortcutManager
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.StringRes
+import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.AppCompatSpinner
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SimpleItemAnimator
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.fragment_balance.*
 import kotlinx.android.synthetic.main.include_no_transaction_message.*
-import piuk.blockchain.android.BuildConfig
+import kotlinx.android.synthetic.main.view_expanding_currency_header.*
+import kotlinx.android.synthetic.main.view_expanding_currency_header.view.*
 import piuk.blockchain.android.R
-import piuk.blockchain.android.data.contacts.models.ContactTransactionDisplayModel
+import piuk.blockchain.android.data.access.AccessState
 import piuk.blockchain.android.data.currency.CryptoCurrencies
+import piuk.blockchain.android.data.websocket.WebSocketService
 import piuk.blockchain.android.injection.Injector
 import piuk.blockchain.android.ui.account.ItemAccount
-import piuk.blockchain.android.ui.balance.adapter.BalanceAdapter
-import piuk.blockchain.android.ui.balance.adapter.BalanceListClickListener
+import piuk.blockchain.android.ui.balance.adapter.AccountsAdapter
+import piuk.blockchain.android.ui.balance.adapter.TxFeedAdapter
+import piuk.blockchain.android.ui.balance.adapter.TxFeedClickListener
 import piuk.blockchain.android.ui.base.BaseFragment
 import piuk.blockchain.android.ui.base.UiState
 import piuk.blockchain.android.ui.customviews.BottomSpacerDecoration
-import piuk.blockchain.android.ui.customviews.MaterialProgressDialog
+import piuk.blockchain.android.ui.customviews.callbacks.OnTouchOutsideViewListener
 import piuk.blockchain.android.ui.home.MainActivity
-import piuk.blockchain.android.ui.receive.ReceiveFragment
 import piuk.blockchain.android.ui.shortcuts.LauncherShortcutHelper
 import piuk.blockchain.android.ui.transactions.TransactionDetailActivity
 import piuk.blockchain.android.util.AndroidUtils
-import piuk.blockchain.android.util.MonetaryUtil
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.gone
+import piuk.blockchain.android.util.extensions.goneIf
 import piuk.blockchain.android.util.extensions.inflate
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.extensions.visible
@@ -45,31 +48,34 @@ import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
 import javax.inject.Inject
 
 @Suppress("MemberVisibilityCanPrivate")
-class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView, BalanceListClickListener {
+class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceView,
+    TxFeedClickListener {
 
-    override val isContactsEnabled = BuildConfig.CONTACTS_ENABLED
-    override val shouldShowBuy = AndroidUtils.is19orHigher()
+    private var accountsAdapter: AccountsAdapter? = null
+    private var txFeedAdapter: TxFeedAdapter? = null
 
+    @Suppress("MemberVisibilityCanBePrivate")
     @Inject lateinit var balancePresenter: BalancePresenter
-    // Adapters
-    private var accountsAdapter: BalanceHeaderAdapter? = null
-    private var balanceAdapter: BalanceAdapter? = null
 
-    private var progressDialog: MaterialProgressDialog? = null
     private var interactionListener: OnFragmentInteractionListener? = null
     private var spacerDecoration: BottomSpacerDecoration? = null
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == ACTION_INTENT && activity != null) {
-                updateSelectedCurrency(CryptoCurrencies.BTC)
-                recyclerview?.scrollToPosition(0)
-                presenter.onViewReady()
-            }
-        }
+    private var backPressed: Long = 0
+    private val itemSelectedListener = onItemSelectedListener {
+        presenter.onAccountSelected(it)
+        recyclerview.scrollToPosition(0)
     }
 
     init {
         Injector.getInstance().presenterComponent.inject(this)
+    }
+
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_INTENT && activity != null) {
+                recyclerview?.scrollToPosition(0)
+                presenter.onRefreshRequested()
+            }
+        }
     }
 
     override fun onCreateView(
@@ -78,8 +84,21 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             savedInstanceState: Bundle?
     ) = container?.inflate(R.layout.fragment_balance)
 
+    override fun createPresenter() = balancePresenter
+
+    override fun getMvpView() = this
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        activity?.apply {
+            (activity as MainActivity).setOnTouchOutsideViewListener(app_bar,
+                    object : OnTouchOutsideViewListener {
+                        override fun onTouchOutside(view: View, event: MotionEvent) {
+                            currency_header.close()
+                        }
+                    })
+        }
 
         swipe_container.setProgressViewEndTarget(
                 false,
@@ -92,140 +111,30 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 R.color.product_red_medium
         )
 
-        textview_balance.setOnClickListener { presenter.invertViewType() }
-        currency_header.setSelectionListener { presenter.updateSelectedCurrency(it) }
+        textview_balance.setOnClickListener { presenter.onBalanceClick() }
+        currency_header.setSelectionListener { presenter.onCurrencySelected(it) }
 
-        setUiState(UiState.LOADING)
         onViewReady()
-        presenter.chooseDefaultAccount()
+
+        presenter.onRefreshRequested()
     }
 
-    override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
-        currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
-    }
-
-    override fun showAccountSpinner() {
-        if (accountsAdapter?.count ?: 1 > 1) {
-            layout_spinner.visible()
-        } else if (accountsAdapter?.count ?: 1 == 1) {
-            accounts_spinner.setSelection(0, false)
-            layout_spinner.gone()
+    override fun disableCurrencyHeader() {
+        textview_selected_currency?.apply {
+            isClickable = false
         }
     }
 
-    override fun hideAccountSpinner() {
-        layout_spinner.gone()
-    }
-
-    override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
-        goToTransactionDetail(correctedPosition)
-    }
-
-    override fun onValueClicked(isBtc: Boolean) {
-        presenter.setViewType(isBtc)
-    }
-
-    override fun onFctxClicked(fctxId: String) {
-        presenter.onPendingTransactionClicked(fctxId)
-    }
-
-    override fun onFctxLongClicked(fctxId: String) {
-        presenter.onPendingTransactionLongClicked(fctxId)
-    }
-
-    override fun onViewTypeChanged(isBtc: Boolean, btcFormat: Int) {
-        balanceAdapter?.onViewFormatUpdated(isBtc, btcFormat)
-        accountsAdapter?.notifyBtcChanged(isBtc, btcFormat)
-    }
-
-    override fun setUiState(uiState: Int) {
-        when (uiState) {
-            UiState.FAILURE, UiState.EMPTY -> onEmptyState()
-            UiState.CONTENT -> onContentLoaded()
-            UiState.LOADING -> setShowRefreshing(true)
-        }
-    }
-
-    override fun onAccountsUpdated(
-            accounts: List<ItemAccount>,
-            lastBtcPrice: Double,
-            fiat: String,
-            monetaryUtil: MonetaryUtil,
-            isBtc: Boolean
-    ) {
-        if (accountsAdapter == null) {
-            accountsAdapter = BalanceHeaderAdapter(
-                    context,
-                    R.layout.spinner_balance_header,
-                    accounts,
-                    isBtc,
-                    monetaryUtil,
-                    fiat,
-                    lastBtcPrice
-            ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
-
-            accounts_spinner.adapter = accountsAdapter
-        }
-
-        if (accounts.isNotEmpty()) accounts_spinner.setSelection(0, false)
-
-        if (accounts.size > 1) {
-            layout_spinner.visible()
-        } else if (accounts.isNotEmpty()) {
-            layout_spinner.gone()
-        }
-        accounts_spinner.setOnTouchListener({ _, event ->
-            event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
-        })
-
-        accounts_spinner.onItemSelectedListener = onItemSelectedListener {
-            presenter.onAccountChosen(it)
-            recyclerview.scrollToPosition(0)
-        }
-    }
-
-    override fun onTotalBalanceUpdated(balance: String) {
-        textview_balance.text = balance
-    }
-
-    override fun onTransactionsUpdated(displayObjects: List<Any>) {
-        balanceAdapter?.items = displayObjects
-
-        if (spacerDecoration == null) {
-            spacerDecoration = BottomSpacerDecoration(
-                    ViewUtils.convertDpToPixel(56f, context).toInt()
-            )
-        }
-        recyclerview?.apply {
-            removeItemDecoration(spacerDecoration)
-            addItemDecoration(spacerDecoration)
-        }
-
-        generateLauncherShortcuts()
-    }
-
-    override fun onContactsHashMapUpdated(
-            transactionDisplayMap: MutableMap<String, ContactTransactionDisplayModel>
-    ) {
-        balanceAdapter?.onContactsMapChanged(transactionDisplayMap)
-    }
-
-    override fun onExchangeRateUpdated(
-            btcExchangeRate: Double,
-            ethExchangeRate: Double,
-            isBtc: Boolean,
-            txNoteMap: MutableMap<String, String>
-    ) {
-        if (balanceAdapter == null) {
-            setUpRecyclerView(btcExchangeRate, ethExchangeRate, isBtc, txNoteMap)
-        } else {
-            balanceAdapter?.onPriceUpdated(btcExchangeRate, ethExchangeRate)
+    fun refreshSelectedCurrency() {
+        currency_header?.getCurrentlySelectedCurrency()?.run {
+            if (presenter.getCurrentCurrency() != this) {
+                presenter.onCurrencySelected(presenter.getCurrentCurrency())
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        presenter.onResume()
         if (activity is MainActivity) {
             (activity as MainActivity).bottomNavigationView.restoreBottomNavigation()
         }
@@ -243,6 +152,8 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
             swipe_container.destroyDrawingCache()
             swipe_container.clearAnimation()
         }
+
+        currency_header?.close()
     }
 
     override fun onAttach(context: Context?) {
@@ -250,191 +161,141 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         interactionListener = activity as OnFragmentInteractionListener?
     }
 
-    override fun showFctxRequiringAttention(number: Int) {
-        activity?.let { (activity as MainActivity).setMessagesCount(number) }
-    }
+    override fun shouldShowBuy() = AndroidUtils.is19orHigher()
 
-    override fun showToast(message: Int, toastType: String) = toast(message, toastType)
-
-    override fun showPayOrDeclineDialog(fctxId: String, amount: String, name: String, note: String?) {
-        val message: String = if (!note.isNullOrEmpty()) {
-            getString(R.string.contacts_balance_dialog_description_pr_note, name, amount, note)
-        } else {
-            getString(R.string.contacts_balance_dialog_description_pr_no_note, name, amount)
+    override fun setupAccountsAdapter(accountsList: List<ItemAccount>) {
+        if (accountsAdapter == null) {
+            accountsAdapter = AccountsAdapter(
+                    context,
+                    R.layout.spinner_balance_header,
+                    accountsList
+            ).apply { setDropDownViewResource(R.layout.item_balance_account_dropdown) }
         }
 
-        activity?.run {
-            AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.contacts_balance_dialog_payment_requested)
-                    .setMessage(message)
-                    .setPositiveButton(
-                            R.string.contacts_balance_dialog_accept,
-                            { _, _ -> presenter.onPaymentRequestAccepted(fctxId) }
-                    )
-                    .setNegativeButton(
-                            R.string.contacts_balance_dialog_decline,
-                            { _, _ -> presenter.declineTransaction(fctxId) }
-                    )
-                    .setNeutralButton(android.R.string.cancel, null)
-                    .create()
-                    .show()
+        accounts_spinner.apply {
+            adapter = accountsAdapter
+            onItemSelectedListener = itemSelectedListener
+            setOnTouchListener { _, event ->
+                event.action == MotionEvent.ACTION_UP && (activity as MainActivity).drawerOpen
+            }
         }
     }
 
-    override fun showSendAddressDialog(
-            fctxId: String,
-            amount: String,
-            name: String,
-            note: String?
-    ) {
-        val message: String = if (!note.isNullOrEmpty()) {
-            getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
-        } else {
-            getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
-        }
+    override fun setupTxFeedAdapter(isCrypto: Boolean) {
+        if (txFeedAdapter == null) {
+            txFeedAdapter = TxFeedAdapter(activity!!, isCrypto, this)
 
-        activity?.run {
-            AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.contacts_balance_dialog_receiving_payment)
-                    .setMessage(message)
-                    .setPositiveButton(
-                            R.string.contacts_balance_dialog_accept,
-                            { _, _ -> presenter.onAccountChosen(0, fctxId) }
-                    )
-                    .setNegativeButton(
-                            R.string.contacts_balance_dialog_decline,
-                            { _, _ -> presenter.declineTransaction(fctxId) }
-                    )
-                    .setNeutralButton(android.R.string.cancel, null)
-                    .create()
-                    .show()
+            recyclerview.layoutManager = LayoutManager(context!!)
+            recyclerview.adapter = txFeedAdapter
+            // Disable blinking animations in RecyclerView
+            val animator = recyclerview.itemAnimator
+            if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
         }
     }
 
-    override fun showWaitingForPaymentDialog() =
-            showDialog(R.string.app_name, R.string.contacts_waiting_for_payment_message, null, false)
-
-    override fun showWaitingForAddressDialog() =
-            showDialog(R.string.app_name, R.string.contacts_waiting_for_address_message, null, false)
-
-    override fun showTransactionDeclineDialog(fctxId: String) = showDialog(
-            R.string.contacts_balance_dialog_decline_title,
-            R.string.contacts_decline_pending_transaction,
-            DialogInterface.OnClickListener { _, _ -> presenter.confirmDeclineTransaction(fctxId) },
-            true
-    )
-
-    override fun showTransactionCancelDialog(fctxId: String) = showDialog(
-            R.string.contacts_balance_dialog_cancel_title,
-            R.string.contacts_cancel_pending_transaction,
-            DialogInterface.OnClickListener { _, _ -> presenter.confirmCancelTransaction(fctxId) },
-            true
-    )
-
-    override fun showAccountChoiceDialog(
-            accounts: List<String>,
-            fctxId: String,
-            amount: String,
-            name: String,
-            note: String?
-    ) {
-        val spinner = AppCompatSpinner(activity)
-        spinner.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, accounts)
-        val selection = intArrayOf(0)
-
-        spinner.onItemSelectedListener = onItemSelectedListener { selection[0] = it }
-
-        var message: String = if (!note.isNullOrEmpty()) {
-            getString(R.string.contacts_balance_dialog_description_rpr_note, name, amount, note)
-        } else {
-            getString(R.string.contacts_balance_dialog_description_rpr_no_note, name, amount)
-        }
-
-        message += "\n\n${getString(R.string.contacts_balance_dialog_choose_account_message)}\n"
-
-        activity?.run {
-            AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(R.string.contacts_balance_dialog_receiving_payment)
-                    .setMessage(message)
-                    .setView(ViewUtils.getAlertDialogPaddedView(context, spinner))
-                    .setPositiveButton(
-                            R.string.contacts_balance_dialog_accept,
-                            { _, _ -> presenter.onAccountChosen(selection[0], fctxId) }
-                    )
-                    .setNegativeButton(
-                            R.string.contacts_balance_dialog_decline,
-                            { _, _ -> presenter.declineTransaction(fctxId) }
-                    )
-                    .setNeutralButton(android.R.string.cancel, null)
-                    .create()
-                    .show()
+    override fun selectDefaultAccount() {
+        if (accountsAdapter?.isNotEmpty == true) {
+            accounts_spinner.apply {
+                onItemSelectedListener = null
+                setSelection(0, false)
+                onItemSelectedListener = itemSelectedListener
+            }
         }
     }
 
-    override fun initiatePayment(uri: String, recipientId: String, mdid: String, fctxId: String) {
-        interactionListener?.onPaymentInitiated(uri, recipientId, mdid, fctxId)
+    override fun updateAccountsDataSet(accountsList: List<ItemAccount>) {
+        accountsAdapter?.updateAccountList(accountsList)
     }
 
-    override fun startBuyActivity() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_BUY))
-        }
+    override fun updateTransactionDataSet(isCrypto: Boolean, displayObjects: List<Any>) {
+        setupTxFeedAdapter(isCrypto)
+        txFeedAdapter!!.items = displayObjects
+        addBottomNavigationBarSpace()
     }
-
-    override fun startReceiveFragment() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE))
-        }
-    }
-
-    override fun showProgressDialog() {
-        progressDialog = MaterialProgressDialog(activity).apply {
-            setCancelable(false)
-            setMessage(R.string.please_wait)
-            show()
-        }
-    }
-
-    override fun dismissProgressDialog() {
-        progressDialog?.apply {
-            dismiss()
-            progressDialog = null
-        }
-    }
-
-    override fun createPresenter() = balancePresenter
-
-    override fun getMvpView() = this
 
     /**
-     * Position is offset to account for first item being "All Wallets". If returned result is -1,
-     * [SendFragment] and [ReceiveFragment] can safely ignore and choose the defaults
-     * instead.
+     * Adds space to bottom of tx feed recyclerview to make room for bottom navigation bar
      */
-    fun getSelectedAccountPosition(): Int {
-        var position = accounts_spinner.selectedItemPosition
-        if (position >= accounts_spinner.count - 1) {
-            // End of list is imported addresses, ignore
-            position = 0
+    private fun addBottomNavigationBarSpace() {
+        if (spacerDecoration == null) {
+            spacerDecoration = BottomSpacerDecoration(
+                    ViewUtils.convertDpToPixel(56f, context).toInt()
+            )
         }
+        recyclerview?.apply {
+            removeItemDecoration(spacerDecoration)
+            addItemDecoration(spacerDecoration)
+        }
+    }
 
-        return position - 1
+    /**
+     * Updates launcher shortcuts with latest receive address
+     */
+    @TargetApi(Build.VERSION_CODES.M)
+    override fun generateLauncherShortcuts() {
+        if (AndroidUtils.is25orHigher() && presenter.areLauncherShortcutsEnabled()) {
+            val launcherShortcutHelper = LauncherShortcutHelper(
+                    activity,
+                    presenter.payloadDataManager,
+                    activity!!.getSystemService(ShortcutManager::class.java)
+            )
+
+            launcherShortcutHelper.generateReceiveShortcuts()
+        }
+    }
+
+    override fun updateTransactionValueType(showCrypto: Boolean) {
+        txFeedAdapter?.onViewFormatUpdated(showCrypto)
+    }
+
+    fun onBackPressed() {
+        if (currency_header.isOpen()) {
+            currency_header.close()
+        } else {
+            if (backPressed + COOL_DOWN_MILLIS > System.currentTimeMillis()) {
+                AccessState.getInstance().logout(context)
+                return
+            } else {
+                toast(R.string.exit_confirm)
+            }
+
+            backPressed = System.currentTimeMillis()
+        }
     }
 
     private fun setShowRefreshing(showRefreshing: Boolean) {
         swipe_container.isRefreshing = showRefreshing
     }
 
+    override fun setDropdownVisibility(visible: Boolean) {
+        layout_spinner.goneIf { !visible }
+    }
+
+    override fun setUiState(uiState: Int) {
+        when (uiState) {
+            UiState.FAILURE, UiState.EMPTY -> onEmptyState()
+            UiState.CONTENT -> onContentLoaded()
+            UiState.LOADING -> {
+                textview_balance.text = ""
+                setShowRefreshing(true)
+            }
+        }
+    }
+
     private fun onEmptyState() {
         setShowRefreshing(false)
         no_transaction_include.visible()
 
-        when (currency_header.selectedCurrency) {
+        when (presenter.getCurrentCurrency()) {
             CryptoCurrencies.BTC -> {
                 button_get_bitcoin.setText(R.string.onboarding_get_bitcoin)
-                button_get_bitcoin.setOnClickListener { presenter.getBitcoinClicked() }
+                button_get_bitcoin.setOnClickListener {
+                    if (shouldShowBuy()) {
+                        presenter.onGetBitcoinClicked()
+                    } else {
+                        startReceiveFragmentBtc()
+                    }
+                }
                 description.setText(R.string.transaction_occur_when_bitcoin)
             }
             CryptoCurrencies.ETHER -> {
@@ -447,21 +308,12 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
                 button_get_bitcoin.setOnClickListener { startReceiveFragmentBch() }
                 description.setText(R.string.transaction_occur_when_bitcoin_cash)
             }
+            else -> throw IllegalArgumentException("Cryptocurrency ${presenter.getCurrentCurrency().unit} not supported")
         }
     }
 
-    private fun startReceiveFragmentEth() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_ETH))
-        }
-    }
-
-    private fun startReceiveFragmentBch() {
-        activity?.run {
-            LocalBroadcastManager.getInstance(this)
-                    .sendBroadcast(Intent(MainActivity.ACTION_RECEIVE_BCH))
-        }
+    override fun updateBalanceHeader(balance: String) {
+        textview_balance.text = balance
     }
 
     private fun onContentLoaded() {
@@ -469,75 +321,48 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
         no_transaction_include.gone()
     }
 
-    private fun setUpRecyclerView(btcExchangeRate: Double, ethExchangeRate: Double, isBtc: Boolean, txNoteMap: MutableMap<String, String>) {
-        balanceAdapter = BalanceAdapter(
-                activity!!,
-                btcExchangeRate,
-                ethExchangeRate,
-                isBtc,
-                txNoteMap,
-                this
-        )
+    override fun startReceiveFragmentBtc() = broadcastIntent(MainActivity.ACTION_RECEIVE)
 
-        recyclerview.layoutManager = LinearLayoutManager(context)
-        recyclerview.adapter = balanceAdapter
-        // Disable blinking animations in RecyclerView
-        val animator = recyclerview.itemAnimator
-        if (animator is SimpleItemAnimator) animator.supportsChangeAnimations = false
-    }
+    private fun startReceiveFragmentEth() = broadcastIntent(MainActivity.ACTION_RECEIVE_ETH)
 
-    private fun goToTransactionDetail(position: Int) {
+    private fun startReceiveFragmentBch() = broadcastIntent(MainActivity.ACTION_RECEIVE_BCH)
+
+    override fun startBuyActivity() = broadcastIntent(MainActivity.ACTION_BUY)
+
+    override fun onTransactionClicked(correctedPosition: Int, absolutePosition: Int) {
         val bundle = Bundle()
-        bundle.putInt(KEY_TRANSACTION_LIST_POSITION, position)
+        bundle.putInt(KEY_TRANSACTION_LIST_POSITION, correctedPosition)
         TransactionDetailActivity.start(activity, bundle)
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    private fun generateLauncherShortcuts() {
-        if (AndroidUtils.is25orHigher() && presenter.areLauncherShortcutsEnabled()) {
-            val launcherShortcutHelper = LauncherShortcutHelper(
-                    activity,
-                    presenter.payloadDataManager,
-                    activity!!.getSystemService(ShortcutManager::class.java)
-            )
-
-            launcherShortcutHelper.generateReceiveShortcuts()
-        }
+    /*
+    Toggle between fiat - crypto currency
+     */
+    override fun onValueClicked(isBtc: Boolean) {
+        presenter.setViewType(isBtc)
     }
 
-    private fun showDialog(
-            @StringRes title: Int,
-            message: String,
-            clickListener: DialogInterface.OnClickListener?,
-            showNegativeButton: Boolean
-    ) {
+    override fun updateSelectedCurrency(cryptoCurrency: CryptoCurrencies) {
+        currency_header?.setCurrentlySelectedCurrency(cryptoCurrency)
+    }
+
+    private fun broadcastIntent(action: String) {
         activity?.run {
-            val builder = AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle(title)
-                    .setMessage(message)
-                    .setPositiveButton(android.R.string.ok, clickListener)
-                    .setNegativeButton(android.R.string.cancel, null)
-
-            if (showNegativeButton) {
-                builder.setNegativeButton(android.R.string.cancel, null)
-            }
-            builder.show()
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(Intent(action))
         }
     }
 
-    private fun showDialog(
-            @StringRes title: Int,
-            @StringRes message: Int,
-            clickListener: DialogInterface.OnClickListener?,
-            showNegativeButton: Boolean
-    ) = showDialog(title, getString(message), clickListener, showNegativeButton)
+    override fun getCurrentAccountPosition() = accounts_spinner.selectedItemPosition
 
     companion object {
 
-        const val ACTION_INTENT = "info.blockchain.wallet.ui.BalanceFragment.REFRESH"
+        const val ACTION_INTENT = WebSocketService.ACTION_INTENT
         const val KEY_TRANSACTION_LIST_POSITION = "transaction_list_position"
         const val KEY_TRANSACTION_HASH = "transaction_hash"
+
         private const val ARGUMENT_BROADCASTING_PAYMENT = "broadcasting_payment"
+        private const val COOL_DOWN_MILLIS = 2 * 1000
 
         @JvmStatic
         fun newInstance(broadcastingPayment: Boolean): BalanceFragment {
@@ -551,11 +376,11 @@ class BalanceFragment : BaseFragment<BalanceView, BalancePresenter>(), BalanceVi
     }
 
     interface OnFragmentInteractionListener {
-
         fun resetNavigationDrawer()
+    }
 
-        fun onPaymentInitiated(uri: String, recipientId: String, mdid: String, fctxId: String)
-
+    private inner class LayoutManager(context: Context) : LinearLayoutManager(context) {
+        override fun supportsPredictiveItemAnimations() = false
     }
 
 }

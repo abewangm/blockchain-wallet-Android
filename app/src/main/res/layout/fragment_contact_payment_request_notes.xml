@@ -103,53 +103,49 @@
                 android:padding="24dp">
 
                 <TextView
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
+                    android:fontFamily="@font/montserrat"
                     android:text="@string/total"
                     android:textColor="@color/product_red_medium"
-                    android:textSize="14sp"
-                    tools:ignore="MissingPrefix" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/textview_total_btc"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
+                    android:fontFamily="@font/montserrat"
                     android:textColor="@color/product_red_medium"
                     android:textSize="20sp"
-                    tools:ignore="MissingPrefix"
                     tools:text="0.0082444 BTC" />
 
                 <TextView
                     android:id="@+id/textview_total_fiat"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
+                    android:fontFamily="@font/montserrat"
                     android:textColor="@color/product_red_medium"
                     android:textSize="14sp"
-                    tools:ignore="MissingPrefix"
                     tools:text="$10.64" />
 
             </LinearLayout>
 
             <TextView
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
+                android:fontFamily="@font/montserrat"
                 android:text="@string/contacts_confirm_explanation"
                 android:textColor="@color/product_gray_hint"
-                android:textSize="14sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/button_send"

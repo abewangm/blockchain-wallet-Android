@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.net.MailTo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,6 +20,7 @@ import android.text.InputType;
 import android.webkit.CookieManager;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -80,18 +83,16 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_buy);
 
-        setupToolbar(binding.toolbarContainer.toolbarGeneral, R.string.onboarding_buy_bitcoin);
+        setupToolbar(binding.toolbarContainer.toolbarGeneral, "");
 
         if (AndroidUtils.is21orHigher()) {
             CookieManager.getInstance().setAcceptThirdPartyCookies(binding.webview, true);
-        }
-        if (AndroidUtils.is21orHigher()) {
             WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
 
         frontendJavascriptManager = new FrontendJavascriptManager(this, binding.webview);
 
-        binding.webview.setWebViewClient(new WebViewClient());
+        binding.webview.setWebViewClient(new EmailAwareWebViewClient());
         binding.webview.setWebChromeClient(new WebChromeClient() {
             @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             @Override
@@ -102,7 +103,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
         });
         binding.webview.addJavascriptInterface(frontendJavascriptManager, FrontendJavascriptManager.JS_INTERFACE_NAME);
         binding.webview.getSettings().setJavaScriptEnabled(true);
-        binding.webview.loadUrl(getPresenter().getCurrentServerUrl() + "wallet/#/intermediate");
+        binding.webview.loadUrl(getPresenter().getCurrentServerUrl());
         onViewReady();
     }
 
@@ -139,7 +140,6 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         binding.webview.removeJavascriptInterface(FrontendJavascriptManager.JS_INTERFACE_NAME);
         binding.webview.reload();
 
@@ -147,11 +147,13 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
             getPresenter().reloadExchangeDate();
         }
         dismissProgressDialog();
+        // Presenter nulled out here
+        super.onDestroy();
     }
 
     @Override
     public void onReceiveValue(String value) {
-        Timber.d("Received JS value: " + value);
+        Timber.d("Received JS value: %s", value);
     }
 
     public void setWebViewLoginDetails(WebViewLoginDetails webViewLoginDetails) {
@@ -211,7 +213,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
         int message = R.string.please_wait;
 
         int year = YearClass.get(this);
-        if (year < 2013) {
+        if (year < 2014) {
             // Phone too slow, show performance warning
             message = R.string.onboarding_buy_performance_warning;
         }
@@ -245,7 +247,7 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     ViewUtils.hideKeyboard(this);
-                    getPresenter().generateMetadataNodes(editText.getText().toString());
+                    getPresenter().decryptAndGenerateMetadataNodes(editText.getText().toString());
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> finish())
                 .create()
@@ -289,6 +291,35 @@ public class BuyActivity extends BaseMvpActivity<BuyView, BuyPresenter>
     @Override
     protected BuyView getView() {
         return this;
+    }
+
+    private static class EmailAwareWebViewClient extends WebViewClient {
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            return checkIfEmail(view, url) || super.shouldOverrideUrlLoading(view, url);
+        }
+
+        @TargetApi(Build.VERSION_CODES.N)
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            final String url = request.getUrl().toString();
+            return checkIfEmail(view, url) || super.shouldOverrideUrlLoading(view, request);
+        }
+
+        private boolean checkIfEmail(WebView view, String url) {
+            if (MailTo.isMailTo(url)) {
+                final Context context = view.getContext();
+                if (context != null) {
+                    Intent i = new Intent(Intent.ACTION_SENDTO, Uri.parse(url));
+                    context.startActivity(i);
+                    view.reload();
+                    return true;
+                }
+            }
+            return false;
+        }
+
     }
 
 }

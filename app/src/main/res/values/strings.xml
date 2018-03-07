@@ -165,7 +165,9 @@
     <string name="change_pin_code">Change PIN</string>
     <string name="enter_current_pin">Please enter current PIN.</string>
 
-    <string name="addresses">Bitcoin Addresses</string>
+    <string name="addresses_bitcoin">Bitcoin Addresses</string>
+    <string name="addresses_bitcoin_cash">Bitcoin Cash Addresses</string>
+    <string name="drawer_addresses">Addresses</string>
     <string name="create_new">Create New</string>
     <string name="import_address">Import Address</string>
     <string name="wallets">Wallets</string>
@@ -184,6 +186,7 @@
 
     <string name="received_bitcoin">Received Bitcoin</string>
     <string name="received_ethereum">Received Ether</string>
+    <string name="received_bitcoin_cash">Received Bitcoin Cash</string>
 
     <string-array name="mnemonic_word_requests">
         <item>first word</item>
@@ -319,6 +322,7 @@
         Blockchain Merchant app to receive funds safely and privately.\n\nKeep your xPub private.
         Someone with access to your xPub will be able to see all your funds and transactions.
     </string>
+    <string name="extended_public_key_description_bch_only">Keep your xPub private. Someone with access to your xPub will be able to see all your funds and transactions.</string>
     <string name="watch_only_description">This is a watch only address. To spend your funds from
         this wallet, please scan your private key.
     </string>
@@ -362,7 +366,7 @@
     <string name="transaction_surge">The Bitcoin mining network is currently experiencing a high volume of activity, resulting in recommended fees that are higher than usual.</string>
     <string name="unsupported_encryption_version">Wallet version %1$s not supported.</string>
     <string name="logout">Logout</string>
-    <string name="to_field_helper">Enter bitcoin address or select</string>
+    <string name="to_field_helper">Enter BTC address or select</string>
     <string name="to_field_helper_no_dropdown">Enter bitcoin address</string>
 
     <!-- SETTINGS -->
@@ -438,8 +442,10 @@
     <!-- SHARE RECEIVE ADDRESS -->
     <string name="email_request_subject">Bitcoin payment request</string>
     <string name="email_request_subject_eth">Ether payment request</string>
+    <string name="email_request_subject_bch">Bitcoin Cash payment request</string>
     <string name="email_request_body">Please send%1$s BTC to the Bitcoin address %2$s.</string>
     <string name="email_request_body_eth">Please send ETH to the Ether address %1$s.</string>
+    <string name="email_request_body_bch">Please send BCH to the Bitcoin Cash address %1$s.</string>
     <string name="email_request_body_fallback">attached</string>
     <string name="share_instructions">Tap to copy this address. Share it with the sender via email or text.</string>
 
@@ -467,8 +473,8 @@
     <string name="large_tx_high_fee_warning">"This transaction requires a higher fee for dust consumption due to the small amount of change to be returned."</string>
     <string name="password_reveal_warning">Be careful! Revealing this text allows your password to be copied to the clipboard, which can then be read by all applications on your device. Also be aware of people standing behind you!</string>
 
-    <string name="sms_notifications">SMS Notifications</string>
-    <string name="sms_notifications_summary">Enable notifications to receive an SMS whenever you receive bitcoin.</string>
+    <string name="push_notifications">Push Notifications</string>
+    <string name="push_notifications_summary">Enable notifications to receive a popup notification whenever you receive bitcoin.</string>
 
     <!-- TRANSACTION DETAILS -->
     <string name="transaction_detail_title">Transaction</string>
@@ -691,6 +697,7 @@
     <string name="swipe_receive_preference_summary">Reveal a receive address when you swipe left on the PIN screen, making receiving funds even faster.</string>
     <string name="swipe_receive_address_info">Five addresses will be loaded consecutively, after which logging in is required to show new addresses.</string>
     <string name="swipe_receive_no_addresses">No more addresses can be loaded right now. Log in to the app to load more.</string>
+    <string name="swipe_receive_request">Request %1$s</string>
 
     <!-- ONBOARDING -->
     <string name="onboarding_fingerprint_title">Fingerprint Login</string>
@@ -710,6 +717,7 @@
 
     <!-- BUY BITCOIN -->
     <string name="onboarding_buy_bitcoin">Buy Bitcoin</string>
+    <string name="onboarding_buy_and_sell_bitcoin">Buy &amp; Sell Bitcoin</string>
     <string name="onboarding_get_bitcoin">Get Bitcoin</string>
     <string name="onboarding_get_eth">Get Ether</string>
     <string name="onboarding_get_bitcoin_cash">Get Bitcoin Cash</string>
@@ -760,7 +768,7 @@
     <string name="eth_second_password_prompt">To use this service, we require you to enter your second password. You should only need to enter this once to set up your Ether wallet.</string>
     <string name="ether">Ether</string>
     <string name="bitcoin">Bitcoin</string>
-    <string name="eth_to_field_helper">Enter ether address or select</string>
+    <string name="eth_to_field_helper">Enter ETH address or select</string>
     <string name="eth_to_field_helper_no_dropdown">Enter ether address</string>
     <string name="eth_invalid_address">Invalid Ether address</string>
     <string name="eth_support_contract_not_allowed">Contract addresses are not supported.</string>
@@ -779,11 +787,15 @@
     <string name="dashboard_ether_price">Ether price</string>
     <string name="dashboard_charts_error">Error loading chart data</string>
     <string name="dashboard_charts_price_error">Error fetching price data</string>
+    <string name="dashboard_charts_balance_error">Error fetching balance data</string>
+    <string name="dashboard_balances">Balances</string>
+    <string name="dashboard_price_charts">Price charts</string>
+    <string name="dashboard_see_charts">See charts</string>
+    <string name="dashboard_price">%1$s price</string>
 
-    <!-- SHAPESHIFT ONBOARDING -->
-    <string translatable="false" name="onboarding_shapeshift_title">@string/onboarding_available_now</string>
-    <string name="onboarding_shapeshift_description">You can now exchange your bitcoin for ether and vice versa directly from your Blockchain wallet!</string>
-    <string name="onboarding_shapeshift_cta">Get Started</string>
+    <!-- ONBOARDING -->
+    <string name="onboarding_cta">Get Started</string>
+    <string name="onboarding_bitcoin_cash_description">We are excited to announce that your Blockchain wallet will allow to seamlessly send, receive and exchange Bitcoin Cash!</string>
 
     <!-- KV STORE -->
     <string name="metadata_load_failure">Error loading full wallet functionality. Service might temporarily be unavailable.</string>
@@ -798,7 +810,7 @@
     <string name="shapeshift_select_state">Select state</string>
     <string name="shapeshift_unavailable_in_state">This service is not yet available in your state.</string>
     <string name="shapeshift_deposit_from">Deposit from ShapeShift</string>
-    <string name="shapeshift_deposit_to">Deposit to ShapeShift</string>
+    <string name="shapeshift_deposit_to">Deposited to ShapeShift</string>
 
     <!-- SHAPESHIFT NEW TRADE -->
     <string name="shapeshift_use_minimum">Use minimum</string>
@@ -808,6 +820,7 @@
     <string name="shapeshift_getting_information_failed">Loading ShapeShift information failed</string>
     <string name="shapeshift_btc">Bitcoin</string>
     <string name="shapeshift_eth">Ether</string>
+    <string name="shapeshift_bch">Bitcoin Cash</string>
     <string name="shapeshift_switch_currency_description">Invert currency pair</string>
     <string name="shapeshift_getting_fees_failed">Error fetching fees</string>
     <string name="shapeshift_fetching_unspent_outputs_failed">Error fetching unspent outputs</string>
@@ -815,7 +828,7 @@
     <string name="shapeshift_deriving_address_failed">Error deriving address</string>
     <string name="shapeshift_new_exchange">New Exchange</string>
     <string name="shapeshift_no_funds_title">No funds to exchange</string>
-    <string name="shapeshift_no_funds_message">You have no funds to exchange. Why not get started by getting some coins into your wallet?</string>
+    <string name="shapeshift_no_funds_message">You currently don\'t have enough of a balance to exchange. Get started by requesting some funds to your wallet.</string>
 
     <!-- SHAPESHIFT CONFIRMATION -->
     <string name="shapeshift_confirmation_agree">Agree to ShapeShift&#160;</string>
@@ -859,5 +872,25 @@
     <string name="ethereum" translatable="false">Ethereum</string>
     <string name="bitcoin_cash" translatable="false">Bitcoin Cash</string>
     <string name="bch_default_account_label">My Bitcoin Cash Wallet</string>
+    <string name="bch_all_accounts">All Bitcoin Cash Wallets</string>
+    <string name="bch_imported_addresses">Imported Bitcoin Cash Addresses</string>
+    <string name="transaction_detail_verify_blockchair">Verify on Blockchair.com</string>
+    <string name="bch_to_field_helper">Enter BCH address or select</string>
+    <string name="bch_to_field_helper_no_dropdown">Enter bitcoin cash address</string>
+    <string name="bch_address_warning">Are you sure this is a Bitcoin Cash address?</string>
+    <string name="bch_address_warning_subtext">Sending funds to a bitcoin address by accident will result in loss of funds.</string>
+    <string name="bch_invalid_address">Invalid Bitcoin Cash address</string>
+    <string name="invalid_address">Invalid address</string>
+    <string name="confirm_currency">Confirm currency</string>
+    <string name="confirm_currency_message">Please select which currency\'s QR code you are scanning.</string>
+    <string name="error_bitpay_not_supported">Bitpay URIs are not currently supported</string>
+
+    <!--Buy & Sell-->
+    <string name="announcement_trading_cta">The wait is over</string>
+    <string name="announcement_trading_description">Buy and sell bitcoin directly from your Blockchain wallet. Start by creating an account in the Buy &amp; Sell tab</string>
+    <string name="announcement_trading_link">Get started</string>
+
+    <!-- TESTNET -->
+    <string name="testnet_warning">Warning! This is the testnet3 blockchain.</string>
 
 </resources>

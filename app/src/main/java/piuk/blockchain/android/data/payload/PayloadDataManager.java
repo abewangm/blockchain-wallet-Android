@@ -220,6 +220,18 @@ public class PayloadDataManager {
     }
 
     /**
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their Bitcoin Cash
+     * addresses.
+     *
+     * @param addresses A List of Bitcoin cash addresses as Strings
+     * @return A {@link LinkedHashMap}
+     */
+    public Observable<LinkedHashMap<String, Balance>> getBalanceOfBchAddresses(List<String> addresses) {
+        return rxPinning.call(() -> payloadService.getBalanceOfBchAddresses(addresses))
+                .compose(RxUtil.applySchedulersToObservable());
+    }
+
+    /**
      * Converts any address to a label.
      *
      * @param address Accepts account receive or change chain address, as well as legacy address.
@@ -380,6 +392,16 @@ public class PayloadDataManager {
         return getWallet() != null ? getWallet().getLegacyAddressList() : Collections.emptyList();
     }
 
+    @NonNull
+    public List<String> getLegacyAddressStringList() {
+        return getWallet() != null ? getWallet().getLegacyAddressStringList() : Collections.emptyList();
+    }
+
+    @NonNull
+    public List<String> getWatchOnlyAddressStringList() {
+        return getWallet() != null ? getWallet().getWatchOnlyAddressStringList() : Collections.emptyList();
+    }
+
     /**
      * Returns the balance of an address. If the address isn't found in the address map object, the
      * method will return {@link BigInteger#ZERO} instead of a null object.
@@ -502,16 +524,15 @@ public class PayloadDataManager {
     /**
      * Generates the metadata and shared metadata nodes if necessary.
      *
-     * @param secondPassword An optional second password.
      * @return A {@link Completable} object, ie an asynchronous void operation
      */
-    public Completable generateNodes(@Nullable String secondPassword) {
-        return rxPinning.call(() -> payloadService.generateNodes(secondPassword))
+    public Completable generateNodes() {
+        return rxPinning.call(() -> payloadService.generateNodes())
                 .compose(RxUtil.applySchedulersToCompletable());
     }
 
-    public Observable<MetadataNodeFactory> generateAndReturnNodes(@Nullable String secondPassword) {
-        return rxPinning.call(() -> payloadService.generateNodes(secondPassword))
+    public Observable<MetadataNodeFactory> generateAndReturnNodes() {
+        return rxPinning.call(() -> payloadService.generateNodes())
                 .andThen(getMetadataNodeFactory())
                 .compose(RxUtil.applySchedulersToObservable());
     }
