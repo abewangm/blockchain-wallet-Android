@@ -35,4 +35,5 @@ interface AccountView : View {
 
     fun updateAccountList(displayAccounts: List<AccountItem>)
 
+    fun hideCurrencyHeader()
 }

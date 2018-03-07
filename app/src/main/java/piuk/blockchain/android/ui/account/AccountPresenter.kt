@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.support.annotation.VisibleForTesting
 import info.blockchain.wallet.BitcoinCashWallet
+import info.blockchain.wallet.api.Environment
 import info.blockchain.wallet.coin.GenericMetadataAccount
 import info.blockchain.wallet.exceptions.DecryptionException
 import info.blockchain.wallet.exceptions.PayloadException
@@ -70,6 +71,12 @@ class AccountPresenter @Inject internal constructor(
     }
 
     override fun onViewReady() {
+
+        if (environmentSettings.environment.equals(Environment.TESTNET)) {
+            currencyState.cryptoCurrency = CryptoCurrencies.BTC
+            view.hideCurrencyHeader()
+        }
+
         view.updateAccountList(getDisplayList())
         if (cryptoCurrency == CryptoCurrencies.BCH) {
             view.onSetTransferLegacyFundsMenuItemVisible(false)

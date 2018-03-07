@@ -76,6 +76,7 @@ class ReceivePresenterTest {
     @Throws(Exception::class)
     fun `onViewReady hide contacts introduction`() {
         // Arrange
+        whenever(environmentSettings.environment).thenReturn(Environment.PRODUCTION)
         whenever(activity.isContactsEnabled).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false))
                 .thenReturn(true)
@@ -93,6 +94,7 @@ class ReceivePresenterTest {
     @Throws(Exception::class)
     fun `onViewReady show contacts introduction`() {
         // Arrange
+        whenever(environmentSettings.environment).thenReturn(Environment.PRODUCTION)
         whenever(activity.isContactsEnabled).thenReturn(true)
         whenever(prefsUtil.getValue(PrefsUtil.KEY_CONTACTS_INTRODUCTION_COMPLETE, false))
                 .thenReturn(false)
@@ -110,6 +112,7 @@ class ReceivePresenterTest {
     @Throws(Exception::class)
     fun `onViewReady don't show contacts`() {
         // Arrange
+        whenever(environmentSettings.environment).thenReturn(Environment.PRODUCTION)
         whenever(activity.isContactsEnabled).thenReturn(false)
         // Act
         subject.onViewReady()

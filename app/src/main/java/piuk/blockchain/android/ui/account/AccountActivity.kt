@@ -45,6 +45,7 @@ import piuk.blockchain.android.util.PermissionUtil
 import piuk.blockchain.android.util.PrefsUtil
 import piuk.blockchain.android.util.ViewUtils
 import piuk.blockchain.android.util.extensions.getTextString
+import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.consume
 import piuk.blockchain.android.util.helperfunctions.unsafeLazy
@@ -415,6 +416,12 @@ class AccountActivity : BaseMvpActivity<AccountView, AccountPresenter>(), Accoun
         if (progress?.isShowing == true) {
             progress!!.dismiss()
             progress = null
+        }
+    }
+
+    override fun hideCurrencyHeader() {
+        currency_header?.apply {
+            gone()
         }
     }
 

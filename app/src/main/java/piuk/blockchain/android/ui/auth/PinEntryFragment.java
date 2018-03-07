@@ -12,15 +12,19 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import javax.inject.Inject;
@@ -488,6 +492,20 @@ public class PinEntryFragment extends BaseFragment<PinEntryView, PinEntryPresent
     public void showCustomPrompt(AppCompatDialogFragment alertFragments) {
         if (!getActivity().isFinishing()) {
             alertFragments.show(getFragmentManager(), alertFragments.getTag());
+        }
+    }
+
+    @Override
+    public void showTestnetWarning() {
+        if (getActivity() != null) {
+            Snackbar snack = Snackbar.make(
+                    getActivity().findViewById(android.R.id.content),
+                    R.string.testnet_warning,
+                    Snackbar.LENGTH_LONG
+            );
+            View view = snack.getView();
+            view.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.product_red_medium));
+            snack.show();
         }
     }
 

@@ -41,6 +41,7 @@ import kotlinx.android.synthetic.main.include_amount_row.view.*
 import kotlinx.android.synthetic.main.include_from_row.*
 import kotlinx.android.synthetic.main.include_from_row.view.*
 import kotlinx.android.synthetic.main.include_to_row.*
+import kotlinx.android.synthetic.main.view_expanding_currency_header.*
 import piuk.blockchain.android.BuildConfig
 import piuk.blockchain.android.R
 import piuk.blockchain.android.data.access.AccessState
@@ -161,6 +162,12 @@ class ReceiveFragment : BaseFragment<ReceiveView, ReceivePresenter>(), ReceiveVi
             )
         } else {
             finishPage()
+        }
+    }
+
+    override fun disableCurrencyHeader() {
+        textview_selected_currency?.apply {
+            isClickable = false
         }
     }
 

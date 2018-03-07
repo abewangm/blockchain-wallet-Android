@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.verifyNoMoreInteractions
 import com.nhaarman.mockito_kotlin.whenever
+import info.blockchain.wallet.api.Environment
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -13,6 +14,7 @@ import org.amshove.kluent.`should equal to`
 import org.junit.Before
 import org.junit.Test
 import piuk.blockchain.android.data.access.AuthEvent
+import piuk.blockchain.android.data.api.EnvironmentSettings
 import piuk.blockchain.android.data.bitcoincash.BchDataManager
 import piuk.blockchain.android.data.currency.CryptoCurrencies
 import piuk.blockchain.android.data.currency.CurrencyState
@@ -50,6 +52,7 @@ class BalancePresenterTest {
     private var shapeShiftDataManager: ShapeShiftDataManager = mock()
     private val bchDataManager: BchDataManager = mock()
     private val walletAccountHelper: WalletAccountHelper = mock()
+    private val environmentSettings: EnvironmentSettings = mock()
 
     @Before
     fun setUp() {
@@ -67,7 +70,8 @@ class BalancePresenterTest {
                 currencyState,
                 shapeShiftDataManager,
                 bchDataManager,
-                walletAccountHelper
+                walletAccountHelper,
+                environmentSettings
         )
         subject.initView(view)
     }
@@ -77,6 +81,7 @@ class BalancePresenterTest {
     fun onViewReady() {
 
         // Arrange
+        whenever(environmentSettings.environment).thenReturn(Environment.PRODUCTION)
         val account: ItemAccount = mock()
         whenever(walletAccountHelper.getAccountItemsForOverview()).thenReturn(mutableListOf(account))
         whenever(currencyState.isDisplayingCryptoCurrency).thenReturn(true)
