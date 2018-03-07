@@ -26,16 +26,15 @@
 
             <TextView
                 android:id="@+id/my_account_row_label"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="2dp"
                 android:layout_weight="5"
                 android:ellipsize="end"
+                android:fontFamily="@font/montserrat"
                 android:maxLines="2"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                tools:ignore="MissingPrefix"
                 tools:text="Savings Account" />
 
             <LinearLayout
@@ -46,25 +45,23 @@
 
                 <TextView
                     android:id="@+id/my_account_row_tag"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/montserrat"
                     android:gravity="right"
                     android:paddingRight="8dp"
                     android:textColor="@color/product_red_sent"
                     android:textSize="14sp"
-                    tools:ignore="MissingPrefix"
                     tools:text="@string/watch_only" />
 
                 <TextView
                     android:id="@+id/my_account_row_amount"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/montserrat"
                     android:gravity="right"
                     android:textColor="@color/product_green_medium"
                     android:textSize="14sp"
-                    tools:ignore="MissingPrefix"
                     tools:text="0.00065 BTC" />
 
             </LinearLayout>
@@ -73,17 +70,16 @@
 
         <TextView
             android:id="@+id/my_account_row_address"
-            fontPath="fonts/Montserrat-Light.ttf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:alpha="0.5"
             android:ellipsize="end"
+            android:fontFamily="@font/montserrat_light"
             android:marqueeRepeatLimit="marquee_forever"
             android:maxLines="1"
             android:textColor="@color/primary_gray_dark"
             android:textSize="12sp"
-            tools:ignore="MissingPrefix"
             tools:text="1M4gfd9q9iTCGRQLatoRzcJRETyTpJLCya" />
 
     </LinearLayout>

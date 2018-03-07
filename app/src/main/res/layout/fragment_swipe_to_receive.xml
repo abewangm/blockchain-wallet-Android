@@ -113,9 +113,9 @@
 
     <TextView
         android:id="@+id/textview_error"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:fontFamily="@font/montserrat"
         android:gravity="center"
         android:padding="16dp"
         android:text="@string/swipe_receive_no_addresses"
@@ -125,14 +125,13 @@
         app:layout_constraintBottom_toTopOf="@+id/textview_account"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/indicator"
-        tools:ignore="MissingPrefix" />
+        app:layout_constraintTop_toBottomOf="@+id/indicator" />
 
     <TextView
         android:id="@+id/textview_account"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
         android:gravity="center"
         android:paddingBottom="8dp"
         android:paddingLeft="16dp"
@@ -145,16 +144,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_qr"
         app:layout_constraintVertical_bias="0.0"
-        tools:ignore="MissingPrefix"
         tools:text="My Bitcoin Wallet" />
 
     <TextView
         android:id="@+id/textview_address"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textview_account"
         android:layout_marginBottom="16dp"
+        android:fontFamily="@font/montserrat"
         android:gravity="center"
         android:inputType="none"
         android:paddingBottom="8dp"
@@ -167,7 +165,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_account"
-        tools:ignore="MissingPrefix"
         tools:text="1rfMgXAGLmbJoaQmtJGbszuZoYsBAadWx" />
 
 </android.support.constraint.ConstraintLayout>

@@ -58,16 +58,15 @@
 
                 <TextView
                     android:id="@+id/button_later"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/montserrat"
                     android:gravity="center"
                     android:padding="16dp"
                     android:text="@string/onboarding_complete_later"
                     android:textColor="@color/product_gray_hint"
-                    android:textSize="16sp"
-                    tools:ignore="MissingPrefix" />
+                    android:textSize="16sp" />
 
             </LinearLayout>
         </LinearLayout>

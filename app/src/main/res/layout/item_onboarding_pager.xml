@@ -45,50 +45,46 @@
                     <TextView
                         android:id="@+id/tv_heading_1"
                         style="@style/TextAppearance.AppCompat.Subhead"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat"
                         android:text="@string/onboarding_current_price"
-                        android:textColor="@color/primary_blue_accent"
-                        tools:ignore="MissingPrefix" />
+                        android:textColor="@color/primary_blue_accent" />
 
                     <TextView
                         android:id="@+id/tv_heading_2"
                         style="@style/TextAppearance.AppCompat.Subhead"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat"
                         android:textColor="@color/primary_blue_accent"
-                        tools:ignore="MissingPrefix"
                         tools:text="1 BTC = $1 240.13" />
 
                     <TextView
                         android:id="@+id/tv_content"
                         style="@style/TextAppearance.AppCompat.Body1"
-                        fontPath="fonts/Montserrat-Regular.ttf"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat"
                         android:paddingTop="4dp"
                         android:text="@string/onboarding_buy_content"
-                        android:textColor="@color/primary_gray_dark"
-                        tools:ignore="MissingPrefix" />
+                        android:textColor="@color/primary_gray_dark" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_link"
                     style="@style/TextAppearance.AppCompat.Subhead"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_below="@+id/layout_main"
                     android:layout_toEndOf="@+id/iv_icon"
                     android:layout_toRightOf="@+id/iv_icon"
+                    android:fontFamily="@font/montserrat"
                     android:gravity="center_horizontal|bottom"
                     android:paddingBottom="16dp"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:textColor="@color/primary_blue_accent"
-                    tools:ignore="MissingPrefix"
                     tools:text="@string/onboarding_buy_bitcoin" />
 
             </RelativeLayout>

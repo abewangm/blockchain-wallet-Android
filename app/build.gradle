@@ -214,7 +214,6 @@ dependencies {
     implementation Libraries.dagger
     kapt Libraries.daggerKapt
     // Views
-    implementation Libraries.calligraphy
     implementation(Libraries.zxing) { transitive = true }
     implementation Libraries.countryPicker
     implementation Libraries.bottomNav

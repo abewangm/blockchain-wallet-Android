@@ -34,16 +34,15 @@
 
                 <TextView
                     android:id="@+id/textview_balance"
-                    fontPath="fonts/Montserrat-Regular.ttf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
+                    android:fontFamily="@font/montserrat"
                     android:textColor="@color/white"
                     android:textSize="24sp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="MissingPrefix"
                     tools:text="1.03252623 BTC" />
 
                 <piuk.blockchain.android.ui.customviews.ExpandableCurrencyHeader

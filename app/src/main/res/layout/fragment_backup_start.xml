@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -10,12 +9,11 @@
     <TextView
         android:id="@+id/backup_header"
         style="@style/TextAppearance.AppCompat.Headline"
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
         android:paddingBottom="24dp"
-        android:text="@string/backup_header"
-        tools:ignore="MissingPrefix" />
+        android:text="@string/backup_header" />
 
     <TextView
         android:id="@+id/backup_subheader"

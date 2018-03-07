@@ -10,6 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
+import piuk.blockchain.android.util.helperfunctions.CustomFont
+import piuk.blockchain.android.util.helperfunctions.loadFont
 import timber.log.Timber
 
 /**
@@ -111,5 +114,17 @@ fun View.createSpringAnimation(
     spring = SpringForce(finalPosition).apply {
         this.stiffness = stiffness
         this.dampingRatio = dampingRatio
+    }
+}
+
+/**
+ * Loads a font via the AppCompat downloadable font system and applies it to a TextView. If this
+ * call fails, it will do so silently.
+ *
+ * @param customFont A [CustomFont] object that encapsulates the query to be sent to the fonts provider
+ */
+fun TextView.setCustomFont(customFont: CustomFont) {
+    loadFont(context, customFont) {
+        this.typeface = it
     }
 }

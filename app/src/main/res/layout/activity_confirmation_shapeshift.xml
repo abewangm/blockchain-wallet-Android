@@ -19,17 +19,17 @@
 
             <TextView
                 android:id="@+id/textview_time_remaining"
-                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="8dp"
+                android:fontFamily="@font/montserrat_light"
                 android:textColor="@color/product_gray_hint"
                 android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="MissingPrefix,RtlHardcoded"
+                tools:ignore="RtlHardcoded"
                 tools:text="Quote expires in 4:36" />
 
             <include

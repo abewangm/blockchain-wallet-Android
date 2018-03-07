@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -109,15 +108,14 @@
 
             <TextView
                 android:id="@+id/tv_warning"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:alpha="0.7"
+                android:fontFamily="@font/montserrat"
                 android:gravity="center"
                 android:paddingTop="32dp"
                 android:text="@string/pairing_code_warning_1"
-                android:textSize="14sp"
-                tools:ignore="MissingPrefix" />
+                android:textSize="14sp" />
 
             <FrameLayout
                 android:id="@+id/qr_layout"

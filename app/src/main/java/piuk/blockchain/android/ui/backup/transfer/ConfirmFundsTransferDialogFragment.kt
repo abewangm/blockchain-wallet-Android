@@ -22,8 +22,6 @@ import piuk.blockchain.android.ui.send.AddressAdapter
 import piuk.blockchain.android.util.extensions.gone
 import piuk.blockchain.android.util.extensions.toast
 import piuk.blockchain.android.util.helperfunctions.onItemSelectedListener
-import uk.co.chrisjenx.calligraphy.CalligraphyUtils
-import uk.co.chrisjenx.calligraphy.TypefaceUtils
 import java.util.*
 import javax.inject.Inject
 
@@ -69,10 +67,7 @@ class ConfirmFundsTransferDialogFragment :
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener { dismiss() }
-        toolbar.title = CalligraphyUtils.applyTypefaceSpan(
-                getString(R.string.transfer_confirm),
-                TypefaceUtils.load(context!!.assets, "fonts/Montserrat-Regular.ttf")
-        )
+        toolbar.title = getString(R.string.transfer_confirm)
 
         val receiveToAdapter = AddressAdapter(
                 activity,

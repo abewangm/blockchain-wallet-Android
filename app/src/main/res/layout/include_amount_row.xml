@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -20,22 +19,21 @@
 
             <TextView
                 android:id="@+id/currencyCrypto"
-                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:fontFamily="@font/montserrat_light"
                 android:gravity="center_vertical"
                 android:text="BTC"
-                android:textColor="@color/primary_gray_dark"
-                tools:ignore="MissingPrefix" />
+                android:textColor="@color/primary_gray_dark" />
 
             <EditText
                 android:id="@+id/amountCrypto"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:fontFamily="@font/montserrat"
                 android:hint="0.00"
                 android:imeOptions="actionDone"
                 android:inputType="numberDecimal|number"
@@ -43,8 +41,7 @@
                 android:paddingRight="8dp"
                 android:selectAllOnFocus="true"
                 android:textAppearance="?android:attr/textAppearanceMediumInverse"
-                android:textColor="@color/black"
-                tools:ignore="MissingPrefix">
+                android:textColor="@color/black">
 
                 <requestFocus />
             </EditText>
@@ -59,22 +56,21 @@
 
             <TextView
                 android:id="@+id/currencyFiat"
-                fontPath="fonts/Montserrat-Light.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:fontFamily="@font/montserrat_light"
                 android:gravity="center_vertical"
                 android:text="USD"
-                android:textColor="@color/primary_gray_dark"
-                tools:ignore="MissingPrefix" />
+                android:textColor="@color/primary_gray_dark" />
 
             <EditText
                 android:id="@+id/amountFiat"
-                fontPath="fonts/Montserrat-Regular.ttf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:fontFamily="@font/montserrat"
                 android:hint="0.00"
                 android:imeOptions="actionDone"
                 android:inputType="numberDecimal|number"
@@ -82,8 +78,7 @@
                 android:paddingRight="8dp"
                 android:selectAllOnFocus="true"
                 android:textAppearance="?android:attr/textAppearanceMediumInverse"
-                android:textColor="@color/black"
-                tools:ignore="MissingPrefix" />
+                android:textColor="@color/black" />
 
         </LinearLayout>
     </LinearLayout>

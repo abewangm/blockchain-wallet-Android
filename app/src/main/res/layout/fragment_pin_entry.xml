@@ -38,10 +38,10 @@
 
         <TextView
             android:id="@+id/titleBox"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            android:fontFamily="@font/montserrat"
             android:padding="@dimen/pinentry_padding"
             android:text="@string/pin_entry"
             android:textColor="@color/primary_navy_medium"
@@ -138,7 +138,7 @@
             tools:ignore="RtlHardcoded">
 
             <TextView
-                fontPath="fonts/Montserrat-Regular.ttf"
+                android:fontFamily="@font/montserrat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"

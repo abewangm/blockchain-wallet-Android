@@ -46,9 +46,6 @@ import info.blockchain.wallet.util.FormatsUtil;
 
 import org.jetbrains.annotations.NotNull;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyUtils;
-import uk.co.chrisjenx.calligraphy.TypefaceUtils;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +53,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import kotlin.Unit;
 import piuk.blockchain.android.BuildConfig;
 import piuk.blockchain.android.R;
 import piuk.blockchain.android.data.access.AccessState;
@@ -95,6 +93,8 @@ import piuk.blockchain.android.util.AppUtil;
 import piuk.blockchain.android.util.PermissionUtil;
 import piuk.blockchain.android.util.ViewUtils;
 import piuk.blockchain.android.util.annotations.Thunk;
+import piuk.blockchain.android.util.helperfunctions.CustomFont;
+import piuk.blockchain.android.util.helperfunctions.FontHelpersKt;
 import timber.log.Timber;
 
 import static piuk.blockchain.android.ui.contacts.list.ContactsListActivity.EXTRA_METADATA_URI;
@@ -299,15 +299,16 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         binding.bottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.primary_gray_dark));
         binding.bottomNavigation.setForceTint(true);
         binding.bottomNavigation.setUseElevation(true);
-        Typeface typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
-        binding.bottomNavigation.setTitleTypeface(typeface);
+        FontHelpersKt.loadFont(this, CustomFont.MONTSERRAT_LIGHT, typeface -> {
+            binding.bottomNavigation.setTitleTypeface(typeface);
+            return Unit.INSTANCE;
+        });
 
         // Select Dashboard by default
         binding.bottomNavigation.setOnTabSelectedListener(tabSelectedListener);
         binding.bottomNavigation.setCurrentItem(1);
 
         handleIncomingIntent();
-        applyFontToNavDrawer();
     }
 
     @SuppressLint("NewApi")
@@ -652,14 +653,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         return binding.bottomNavigation;
     }
 
-    private void applyFontToNavDrawer() {
-        Menu menu = binding.navigationView.getMenu();
-        for (int i = 0; i < menu.size(); i++) {
-            MenuItem menuItem = menu.getItem(i);
-            applyFontToMenuItem(menuItem);
-        }
-    }
-
     @SuppressWarnings("ConstantConditions")
     @Override
     public boolean isBuySellPermitted() {
@@ -713,7 +706,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
         Menu menu = binding.navigationView.getMenu();
         MenuItem buy = menu.findItem(R.id.nav_buy);
         buy.setTitle(R.string.onboarding_buy_and_sell_bitcoin);
-        applyFontToMenuItem(buy);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -756,15 +748,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     @Override
     public void onShowTx(String txHash) {
         Timber.d("onShowTx: %s", txHash);
-    }
-
-    private void applyFontToMenuItem(MenuItem menuItem) {
-        if (typeface == null) {
-            typeface = TypefaceUtils.load(getAssets(), "fonts/Montserrat-Regular.ttf");
-        }
-        menuItem.setTitle(CalligraphyUtils.applyTypefaceSpan(
-                menuItem.getTitle(),
-                typeface));
     }
 
     @Override

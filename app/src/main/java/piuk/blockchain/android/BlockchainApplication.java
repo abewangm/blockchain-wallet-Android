@@ -9,8 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.widget.AppCompatButton;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
@@ -20,8 +18,6 @@ import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.Environment;
 
 import org.bitcoinj.core.NetworkParameters;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -73,12 +69,6 @@ public class BlockchainApplication extends Application implements FrameworkInter
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
 
-        CalligraphyConfig.initDefault(
-                new CalligraphyConfig.Builder()
-                        .addCustomStyle(AppCompatButton.class, R.attr.buttonStyle)
-                        .setFontAttrId(R.attr.fontPath)
-                        .build());
-
         if (BuildConfig.DEBUG && !AndroidUtils.is21orHigher()) {
             MultiDex.install(base);
         }
@@ -104,7 +94,7 @@ public class BlockchainApplication extends Application implements FrameworkInter
 
         new LoggingExceptionHandler();
 
-        RxJavaPlugins.setErrorHandler(throwable -> Log.e(RX_ERROR_TAG, throwable.getMessage(), throwable));
+        RxJavaPlugins.setErrorHandler(throwable -> Timber.tag(RX_ERROR_TAG).e(throwable));
 
         AccessState.getInstance().initAccessState(this, prefsUtil, rxBus);
         CurrencyState.getInstance().init(prefsUtil);

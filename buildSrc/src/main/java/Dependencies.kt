@@ -44,7 +44,6 @@ object Versions {
 
     // Custom Views
     const val charts = "3.0.3"
-    const val calligraphy = "2.2.0"
     const val circleIndicator = "1.2.2"
     const val bottomNav = "2.2.0"
     const val countryPicker = "1.1.7"
@@ -127,7 +126,6 @@ object Libraries {
 
     // Custom Views
     const val charts = "com.github.PhilJay:MPAndroidChart:v${Versions.charts}"
-    const val calligraphy = "uk.co.chrisjenx:calligraphy:${Versions.calligraphy}"
     const val circleIndicator = "me.relex:circleindicator:${Versions.circleIndicator}@aar"
     const val bottomNav = "com.aurelhubert:ahbottomnavigation:${Versions.bottomNav}"
     const val countryPicker =

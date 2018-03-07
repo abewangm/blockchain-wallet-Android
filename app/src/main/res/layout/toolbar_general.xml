@@ -9,6 +9,7 @@
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:minHeight="?attr/actionBarSize"
+        app:titleTextAppearance="@style/ToolbarTitleTextAppearance"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:contentInsetLeft="72dp"
         app:contentInsetStart="72dp"

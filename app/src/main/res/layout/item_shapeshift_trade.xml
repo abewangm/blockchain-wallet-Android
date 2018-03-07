@@ -25,47 +25,44 @@
         <!-- DATE -->
         <TextView
             android:id="@+id/date"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|left"
             android:layout_marginTop="16dp"
+            android:fontFamily="@font/montserrat"
             android:maxLines="1"
             android:textColor="@color/product_gray_hint"
             android:textSize="14sp"
-            tools:ignore="MissingPrefix"
             tools:text="September 29, 2015" />
 
         <TextView
             android:id="@+id/status"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/date"
             android:ellipsize="end"
+            android:fontFamily="@font/montserrat"
             android:maxLines="1"
             android:textAllCaps="true"
             android:textColor="@color/primary_gray"
             android:textSize="16sp"
-            tools:ignore="MissingPrefix"
             tools:text="@string/RECEIVED" />
 
 
         <!-- VALUE -->
         <TextView
             android:id="@+id/result"
-            fontPath="fonts/Montserrat-Regular.ttf"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="@drawable/rounded_view_green"
+            android:fontFamily="@font/montserrat"
             android:gravity="center_horizontal|center_vertical"
             android:minWidth="140dp"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="14sp"
-            tools:ignore="MissingPrefix"
             tools:text="0.1234567890 BTC" />
 
     </RelativeLayout>

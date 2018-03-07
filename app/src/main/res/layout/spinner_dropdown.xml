@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <TextView
-        fontPath="fonts/Montserrat-Regular.ttf"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="@drawable/selector_white"
+        android:fontFamily="@font/montserrat"
         android:gravity="left|center_vertical"
         android:marqueeRepeatLimit="marquee_forever"
         android:maxLines="1"
@@ -14,5 +15,6 @@
         android:paddingRight="16dp"
         android:paddingTop="8dp"
         android:textColor="@color/black"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        tools:text="My Bitcoin Wallet" />
 </layout>
