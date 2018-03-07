@@ -893,4 +893,7 @@
     <!-- TESTNET -->
     <string name="testnet_warning">Warning! This is the testnet3 blockchain.</string>
 
+
+    <string name="wait_5_sec">Give it 5 seconds Maros...</string>
+
 </resources>

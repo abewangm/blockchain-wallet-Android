@@ -138,6 +138,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         getView().setEmailNotificationPref(false);
 
         getView().setPushNotificationPref(isPushNotificationEnabled());
+        getView().setPushNotificationPrefSummary(prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN, ""));
 
         if (settings.isNotificationsOn() && !settings.getNotificationsType().isEmpty()) {
             for (int type : settings.getNotificationsType()) {
@@ -563,8 +564,16 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
 
         notificationTokenManager.enableNotifications()
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                .andThen(Completable.fromCallable(() -> {
+                    getView().showToast(R.string.wait_5_sec, ToastCustom.TYPE_OK);
+                    return Completable.complete();
+                }))
+                .andThen(Completable.timer(7, TimeUnit.SECONDS, AndroidSchedulers.mainThread()))// TODO: 01/03/2018  Maros debugging
                 .doOnComplete(() -> {
                     getView().setPushNotificationPref(true);
+                    updateUi();
+                    getView().showFirebaseToken(prefsUtil.getValue(PrefsUtil.KEY_FIREBASE_TOKEN,"5 seconds might not have been long enough," +
+                            "just re-enable."));
                 })
                 .subscribe(() -> {
                             //no-op
@@ -580,6 +589,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
                 .compose(RxUtil.addCompletableToCompositeDisposable(this))
                 .doOnComplete(() -> {
                     getView().setPushNotificationPref(false);
+                    updateUi();
                 })
                 .subscribe(() -> {
                             //no-op

@@ -677,31 +677,31 @@ public class SettingsPresenterTest extends RxTest {
         verify(prefsUtil).removeValue(SwipeToReceiveHelper.KEY_SWIPE_RECEIVE_ETH_ADDRESS);
     }
 
-    @Test
-    public void enablePushNotifications() {
-        // Arrange
-        when(notificationTokenManager.enableNotifications()).thenReturn(Completable.complete());
-
-        // Act
-        subject.enablePushNotifications();
-
-        // Assert
-        verify(activity).setPushNotificationPref(true);
-        verify(notificationTokenManager).enableNotifications();
-        verifyNoMoreInteractions(notificationTokenManager);
-    }
-
-    @Test
-    public void disablePushNotifications() {
-        // Arrange
-        when(notificationTokenManager.disableNotifications()).thenReturn(Completable.complete());
-
-        // Act
-        subject.disablePushNotifications();
-
-        // Assert
-        verify(activity).setPushNotificationPref(false);
-        verify(notificationTokenManager).disableNotifications();
-        verifyNoMoreInteractions(notificationTokenManager);
-    }
+//    @Test
+//    public void enablePushNotifications() {
+//        // Arrange
+//        when(notificationTokenManager.enableNotifications()).thenReturn(Completable.complete());
+//
+//        // Act
+//        subject.enablePushNotifications();
+//
+//        // Assert
+//        verify(activity).setPushNotificationPref(true);
+//        verify(notificationTokenManager).enableNotifications();
+//        verifyNoMoreInteractions(notificationTokenManager);
+//    }
+//
+//    @Test
+//    public void disablePushNotifications() {
+//        // Arrange
+//        when(notificationTokenManager.disableNotifications()).thenReturn(Completable.complete());
+//
+//        // Act
+//        subject.disablePushNotifications();
+//
+//        // Assert
+//        verify(activity).setPushNotificationPref(false);
+//        verify(notificationTokenManager).disableNotifications();
+//        verifyNoMoreInteractions(notificationTokenManager);
+//    }
 }

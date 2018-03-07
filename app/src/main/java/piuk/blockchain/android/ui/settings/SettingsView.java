@@ -58,4 +58,8 @@ interface SettingsView extends View {
     void setLauncherShortcutVisibility(boolean visible);
 
     void showWarningDialog(@StringRes int message);
+
+    void setPushNotificationPrefSummary(String summary);
+
+    void showFirebaseToken(String token);
 }
