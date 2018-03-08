@@ -28,16 +28,21 @@ platform :android do
         text: "Enter APK version name: "
       )
 
+      # Retrieves arguments from the command line
       unit_tests = options[:unit_tests]
       bump_version = options[:bump_version]
+      vcs = options[:vcs]
       tag = options[:tag]
       generate_changelog = options[:generate_changelog]
       upload_to_drive = options[:upload_to_drive]
       upload_to_alpha = options[:upload_to_alpha]
       slack = options[:slack]
 
+      # Sets arguments to true if params weren't passed, allowing us to selectively disable steps
+      # eg. "fastlane build_tag_and_upload_release unit_tests:false"
       unit_tests = true if unit_tests.nil?
       bump_version = true if bump_version.nil?
+      vcs = true if vcs.nil?
       tag = true if tag.nil?
       generate_changelog = true if generate_changelog.nil?
       upload_to_drive = true if upload_to_drive.nil?
@@ -48,6 +53,7 @@ platform :android do
         version_name_update: name,
         unit_tests: unit_tests,
         bump_version: bump_version,
+        vcs: vcs,
         tag: tag,
         generate_changelog: generate_changelog,
         upload_to_drive: upload_to_drive,
@@ -61,34 +67,34 @@ platform :android do
     private_lane :pipeline do |options|
 
         # Ensure that all changes are committed before build
-        # TODO: Re-enable me when committed
-        # ensure_git_status_clean
+        ensure_git_status_clean
 
-        # Unit tests
+        # Runs all unit tests
         if options[:unit_tests]
             test
         end
 
-       # Bump version code
+       # Increment version code, update version name via param: version_name_update
         if options[:bump_version]
-          bump_version_code(version_name_update: options[:version_name_update])
+#          bump_version_code(version_name_update: options[:version_name_update])
         end
 
-        # Commit bump
+        # Commit and push the new version code + name
         if options[:vcs]
           git_commit(
-            path: "../app/build.gradle",
+            path: "app/build.gradle",
             message: "Increment version code: " + options[:version_name_update]
           )
 
           push_to_git_remote(
             local_branch: git_branch,
             remote_branch: git_branch,
-            remote: git_repo
           )
         end
 
-        # Generate changelog using script
+        # Generate changelog using git-changelog. This compares the changes between the last tag
+        # and the current version on this branch. This file can be read programmatically via
+        # read_changelog, but we can't currently upload this to GitHub.
         if options[:generate_changelog]
           current_version = get_version_code(
             app_folder_name: "app",
@@ -99,23 +105,25 @@ platform :android do
           sh("cd .. && git-changelog -t #{Shellwords.escape last_git_tag} -a \"v#{Shellwords.escape current_version}\"")
         end
 
-        # Tag release
+        # Tag + sign release, push the tag to remote
         if options[:tag]
           add_git_tag(
             tag: current_version,
             sign: true
           )
 
-        # TODO There doesn't appear to be any way to push a release note??
-        # message: read_changelog
           push_git_tags(
             tag: last_git_tag
           )
         end
 
-        # Generate actual APKs, both Staging and Prod
+        # Clean workspace
+        gradle(task: "clean")
+
+        # Generate and sign actual APKs, both Staging and Prod, with production keystore.
         generate_apks
 
+        # Ping slack with a link to the new tag
         if options[:slack]
           slack(
             message: "New build available",
@@ -124,11 +132,13 @@ platform :android do
               'App' => 'Blockchain Android',
               'Version' => current_version,
               'Built by' => 'Fastlane',
+              'View release on GitHub' => 'https://github.com/blockchain/My-Wallet-V3-Android/releases/tag/' + current_version
             },
             default_payloads: [:git_branch, :git_author]
           )
         end
 
+        # Upload artifacts to Google Drive
         if options[:upload_to_drive]
             archive
         end
@@ -142,6 +152,7 @@ platform :android do
     end
 
 
+    desc "Increments the app's Version Code, and replaces the current Version Name with whatever is supplied via `version_name_update`."
     private_lane :bump_version_code do |options|
       path = '../app/build.gradle'
       code = /versionCode\s+(\d+)/
@@ -208,11 +219,9 @@ platform :android do
 
     end
 
+    private_lane :generate_apk do | options |
 
-    desc "Generate release build for staging"
-    private_lane :generate_staging do
-
-      gradle(task: "clean")
+      environment = options[:environment]
 
       apiToken = ENV["FABRIC_API_KEY"]
       buildSecret = ENV["FABRIC_BUILD_SECRET"]
@@ -224,34 +233,7 @@ platform :android do
       gradle(
         task: 'assemble',
         build_type: 'Release',
-        flavor: 'EnvStagingMinApi16',
-        print_command: false,
-        properties: {
-          "android.injected.signing.store.file" => "#{storeFile}",
-          "android.injected.signing.store.password" => "#{storePassword}",
-          "android.injected.signing.key.alias" => "#{keyAlias}",
-          "android.injected.signing.key.password" => "#{keyPassword}"
-        }
-      )
-
-    end
-
-    desc "Generate release build for production"
-    private_lane :generate_production do
-
-      gradle(task: "clean")
-
-      apiToken = ENV["FABRIC_API_KEY"]
-      buildSecret = ENV["FABRIC_BUILD_SECRET"]
-      storeFile = ENV["STORE_FILE"]
-      storePassword = ENV["STORE_PASSWORD"]
-      keyAlias = ENV["KEY_ALIAS"]
-      keyPassword = ENV["KEY_PASSWORD"]
-
-      gradle(
-        task: 'assemble',
-        build_type: 'Release',
-        flavor: 'EnvProdMinApi16',
+        flavor: 'Env' + environment + 'MinApi16',
         print_command: false,
         properties: {
           "android.injected.signing.store.file" => "#{storeFile}",
@@ -267,8 +249,8 @@ platform :android do
     desc "Generate release builds for both staging and production"
     lane :generate_apks do
 
-      generate_staging
-      generate_production
+      generate_apk(environment: "Staging")
+      generate_apk(environment: "Prod")
 
     end
 
@@ -287,7 +269,7 @@ platform :android do
 
       gradle(task: "clean")
 
-      generate_production
+      generate_apk(environment: "Prod")
 
       # TODO
 
