@@ -160,9 +160,30 @@ public class MainPresenter extends BasePresenter<MainView> {
             initMetadataElements();
 
             doWalletOptionsChecks();
+
+            doPushNotifications();
         }
 
         Logging.INSTANCE.logCustom(new BitcoinUnits(prefs.getValue(PrefsUtil.KEY_BTC_UNITS, MonetaryUtil.UNIT_BTC)));
+    }
+
+    /**
+     * Initial setup of push notifications.
+     * We don't subscribe to addresses for notifications when creating a new wallet.
+     * To accommodate existing wallets we need subscribe to the next available addresses.
+     */
+    private void doPushNotifications() {
+        if (!prefs.has(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED)) {
+            prefs.setValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true);
+        }
+
+        if (prefs.getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true)) {
+            payloadDataManager.syncPayloadAndPublicKeys()
+                    .compose(RxUtil.addCompletableToCompositeDisposable(this))
+                    .subscribe(() -> {
+                        //no-op
+                    }, throwable -> Timber.e(throwable));
+        }
     }
 
     public void doTestnetCheck() {
