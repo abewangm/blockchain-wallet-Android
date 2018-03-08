@@ -127,7 +127,7 @@ platform :android do
         if options[:slack]
           slack(
             message: "New build available",
-            channel: "mobile_test_channel",
+            channel: "mobile",
             payload: {
               'App' => 'Blockchain Android',
               'Version' => current_version,
