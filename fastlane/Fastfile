@@ -76,7 +76,7 @@ platform :android do
 
        # Increment version code, update version name via param: version_name_update
         if options[:bump_version]
-#          bump_version_code(version_name_update: options[:version_name_update])
+          bump_version_code(version_name_update: options[:version_name_update])
         end
 
         # Commit and push the new version code + name
