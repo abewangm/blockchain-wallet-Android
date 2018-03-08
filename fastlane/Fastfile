@@ -11,21 +11,158 @@
 
 # This is the minimum version number required.
 # Update this, if you use features of a newer version
-fastlane_version "2.75.1"
+fastlane_version "2.84.0"
 fastlane_require 'dotenv'
 
 default_platform :android
 
 platform :android do
-  before_all do
-    # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
-  end
+
+
+    desc "Runs our entire release process from start to finish. Tests the app, increments version code and updates version name, commits changes to build.gradle, and then tags + signs + generates changelog, uploads to Drive, uploads to Alpha, posts to Slack."
+    lane :build_tag_and_upload_release do |options|
+
+      # Prompt for new version name
+      UI.header "Version Name"
+      name = prompt(
+        text: "Enter APK version name: "
+      )
+
+      unit_tests = options[:unit_tests]
+      bump_version = options[:bump_version]
+      tag = options[:tag]
+      generate_changelog = options[:generate_changelog]
+      upload_to_drive = options[:upload_to_drive]
+      upload_to_alpha = options[:upload_to_alpha]
+      slack = options[:slack]
+
+      unit_tests = true if unit_tests.nil?
+      bump_version = true if bump_version.nil?
+      tag = true if tag.nil?
+      generate_changelog = true if generate_changelog.nil?
+      upload_to_drive = true if upload_to_drive.nil?
+      upload_to_alpha = true if upload_to_alpha.nil?
+      slack = true if slack.nil?
+
+      pipeline(
+        version_name_update: name,
+        unit_tests: unit_tests,
+        bump_version: bump_version,
+        tag: tag,
+        generate_changelog: generate_changelog,
+        upload_to_drive: upload_to_drive,
+        upload_to_alpha: upload_to_alpha,
+        slack: slack
+      )
+
+    end
+
+
+    private_lane :pipeline do |options|
+
+        # Ensure that all changes are committed before build
+        # TODO: Re-enable me when committed
+        # ensure_git_status_clean
+
+        # Unit tests
+        if options[:unit_tests]
+            test
+        end
+
+       # Bump version code
+        if options[:bump_version]
+          bump_version_code(version_name_update: options[:version_name_update])
+        end
+
+        # Commit bump
+        if options[:vcs]
+          git_commit(
+            path: "../app/build.gradle",
+            message: "Increment version code: " + options[:version_name_update]
+          )
+
+          push_to_git_remote(
+            local_branch: git_branch,
+            remote_branch: git_branch,
+            remote: git_repo
+          )
+        end
+
+        # Generate changelog using script
+        if options[:generate_changelog]
+          current_version = get_version_code(
+            app_folder_name: "app",
+            gradle_file_path: "app/build.gradle",
+            ext_constant_name: "versionName"
+          )
+
+          sh("cd .. && git-changelog -t #{Shellwords.escape last_git_tag} -a \"v#{Shellwords.escape current_version}\"")
+        end
+
+        # Tag release
+        if options[:tag]
+          add_git_tag(
+            tag: current_version,
+            sign: true
+          )
+
+        # TODO There doesn't appear to be any way to push a release note??
+        # message: read_changelog
+          push_git_tags(
+            tag: last_git_tag
+          )
+        end
+
+        # Generate actual APKs, both Staging and Prod
+        generate_apks
+
+        if options[:slack]
+          slack(
+            message: "New build available",
+            channel: "mobile_test_channel",
+            payload: {
+              'App' => 'Blockchain Android',
+              'Version' => current_version,
+              'Built by' => 'Fastlane',
+            },
+            default_payloads: [:git_branch, :git_author]
+          )
+        end
+
+        if options[:upload_to_drive]
+            archive
+        end
+
+        # Upload to Google Play Alpha, but don't deploy
+        if options[:upload_to_alpha]
+            # TODO Need to create user with API access for Play Store
+        end
+
+
+    end
+
+
+    private_lane :bump_version_code do |options|
+      path = '../app/build.gradle'
+      code = /versionCode\s+(\d+)/
+      name = /versionName\s+(["'])(?:(?=(\\?))\2.)*?\1/
+
+      newName = options[:version_name_update]
+
+      s = File.read(path)
+      versionCode = s[code, 1].to_i
+      s[code, 1] = (versionCode + 1).to_s
+      s.sub!(name, "versionName " + '"' + newName + '"')
+
+      f = File.new(path, 'w')
+      f.write(s)
+      f.close
+    end
 
 
     desc "Runs all tests"
     lane :test do
       gradle(task: "testEnvProdMinApi21DebugUnitTestCoverage")
-
     end
 
 
@@ -152,52 +289,19 @@ platform :android do
 
       generate_production
 
-    # generate changelog
-    # Commit the version bump to git, and tag the commit with the release version and push
-#    git_commit(
-#        path: File.dirname(ENV["GRADLE_PATH"])
-#        message: "HockeyApp deployment version #"
-#    )
-#    add_git_tag(
-#        tag: "v#{lane_context[SharedValues::ANDROID_VERSION_NAME]}"
-#    )
-#    push_to_git_remote
+      # TODO
 
-  end
+    end
 
-
-  desc "Deploy a new version to the Google Play"
-  lane :deploy do
-    gradle(task: "clear")
-
-    generate_production
-
-    supply
-
-  end
-
-
-  # You can define as many lanes as you want
 
   after_all do |lane|
     # This block is called, only if the executed lane was successful
-
-    # slack(
-    #   message: "Successfully deployed new App Update to Play Store Alpha and Crashlytics Beta."
-    # )
   end
 
 
   error do |lane, exception|
-    # slack(
-    #   message: exception.message,
-    #   success: false
-    # )
+    # This block is called, only if the executed lane failed with an exception
   end
+
+
 end
-
-# More information about multiple platforms in fastlane: https://docs.fastlane.tools/advanced/#control-configuration-by-lane-and-by-platform
-# All available actions: https://docs.fastlane.tools/actions
-
-# fastlane reports which actions are used. No personal data is recorded.
-# Learn more at https://docs.fastlane.tools/#metrics

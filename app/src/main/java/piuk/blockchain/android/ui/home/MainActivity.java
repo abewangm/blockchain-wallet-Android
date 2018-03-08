@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.databinding.DataBindingUtil;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -144,7 +143,6 @@ public class MainActivity extends BaseMvpActivity<MainView, MainPresenter> imple
     private long backPressed;
     private Toolbar toolbar;
     @Thunk boolean paymentMade = false;
-    private Typeface typeface;
     private BalanceFragment balanceFragment;
     private FrontendJavascriptManager frontendJavascriptManager;
     private WebViewLoginDetails webViewLoginDetails;

@@ -8,16 +8,19 @@ Make sure you have the latest version of the Xcode command line tools installed:
 xcode-select --install
 ```
 
-## Choose your installation method:
-
-| Method                     | OS support                              | Description                                                                                                                           |
-|----------------------------|-----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| [Homebrew](http://brew.sh) | macOS                                   | `brew cask install fastlane`                                                                                                          |
-| Installer Script           | macOS                                   | [Download the zip file](https://download.fastlane.tools). Then double click on the `install` script (or run it in a terminal window). |
-| RubyGems                   | macOS or Linux with Ruby 2.0.0 or above | `sudo gem install fastlane -NV`                                                                                                       |
+Install _fastlane_ using
+```
+[sudo] gem install fastlane -NV
+```
+or alternatively using `brew cask install fastlane`
 
 # Available Actions
 ## Android
+### android build_tag_and_upload_release
+```
+fastlane android build_tag_and_upload_release
+```
+Runs our entire release process from start to finish. Tests the app, increments version code and updates version name, commits changes to build.gradle, and then tags + signs + generates changelog, uploads to Crashlytics, uploads to Drive, uploads to Alpha, posts to Slack.
 ### android test
 ```
 fastlane android test
@@ -43,11 +46,6 @@ Upload APKs to Google Drive
 fastlane android alpha
 ```
 Submit a release Alpha build to the Play Store
-### android deploy
-```
-fastlane android deploy
-```
-Deploy a new version to the Google Play
 
 ----
 
