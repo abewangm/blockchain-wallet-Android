@@ -148,6 +148,9 @@ platform :android do
             # TODO Need to create user with API access for Play Store
         end
 
+        # Ship it
+        ship_it
+
 
     end
 
@@ -257,9 +260,17 @@ platform :android do
 
     desc "Upload APKs to Google Drive"
     lane :archive do
+      # Check that Drive is available
+      drive_folder = File.expand_path("~/Google\ Drive\ File\ Stream/My\ Drive/Android\ APKs")
+      if !File.exist? drive_folder
+        # Warn user but don't fail
+        puts "Google Drive path not found - please upload the APKs to archive manually"
+        next
+      end
+
       # This is nasty but there's no integration to allow access to GDrive just yet
-      sh 'mv ../app/build/outputs/apk/envProdMinApi16/release/*.apk ~/Google\ Drive\ File\ Stream/My\ Drive/Android\ APKs'
-      sh 'mv ../app/build/outputs/apk/envStagingMinApi16/release/*.apk ~/Google\ Drive\ File\ Stream/My\ Drive/Android\ APKs'
+      sh("mv ../app/build/outputs/apk/envProdMinApi16/release/*.apk #{Shellwords.escape drive_folder}")
+      sh("mv ../app/build/outputs/apk/envStagingMinApi16/release/*.apk #{Shellwords.escape drive_folder}")
 
     end
 
@@ -273,6 +284,42 @@ platform :android do
 
       # TODO
 
+    end
+
+    private_lane :ship_it do
+      rand = Random.rand(0..1)
+      if rand == 0
+        squirrel
+      elsif rand == 1
+        boat
+      end
+    end
+
+    def squirrel
+      puts "
+        !!!!
+      !!!!!!!!
+    !!!!!!!!!!!   O_O
+    !!!  !!!!!!! /@ @\\
+          !!!!!! \\ x /
+          !!!!!!/ m  !m
+           !!!!/ __  |
+           !!!!|/  \\__
+            !!!\\______\\
+      "
+    end
+
+    def boat
+      puts "
+         .  o ..
+         o . o o.o
+              ...oo
+                __[]__
+             __|_o_o_o\__
+             \\\"\"\"\"\"\"\"\"\"\"/
+              \\. ..  . /
+         ^^^^^^^^^^^^^^^^^^^^
+      "
     end
 
 
