@@ -1,6 +1,5 @@
 # Built application files
 *.apk
-*.ap_
 
 # Gradle files
 .gradle/
@@ -28,11 +27,18 @@ captures
 # Firebase config
 google-services.json
 
-# App secrets
-secrets.properties
+# App secrets and release key
+fastlane/.env.default
+app/secrets.properties
+# Just in case
+*.keystore
 
 # Fabric API Key
 fabric.properties
 
-# Release output
-app/**/release/output.json
+# fastlane specific
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+.env.default

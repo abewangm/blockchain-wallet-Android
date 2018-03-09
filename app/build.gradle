@@ -50,7 +50,6 @@ android {
             initWith release
             debuggable true
             buildConfigBoolean "DOGFOOD", true
-            signingConfig signingConfigs.debug
             applicationIdSuffix ".dogfood"
             versionNameSuffix '-DOGFOOD'
         }

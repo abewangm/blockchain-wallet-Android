@@ -1,0 +1,336 @@
+# Customize this file, documentation can be found here:
+# https://docs.fastlane.tools/actions/
+# All available actions: https://docs.fastlane.tools/actions
+# can also be listed using the `fastlane actions` command
+
+# Change the syntax highlighting to Ruby
+# All lines starting with a # are ignored when running `fastlane`
+
+# If you want to automatically update fastlane if a new version is available:
+# update_fastlane
+
+# This is the minimum version number required.
+# Update this, if you use features of a newer version
+fastlane_version "2.84.0"
+fastlane_require 'dotenv'
+
+default_platform :android
+
+platform :android do
+
+
+    desc "Runs our entire release process from start to finish. Tests the app, increments version code and updates version name, commits changes to build.gradle, and then tags + signs + generates changelog, uploads to Drive, uploads to Alpha, posts to Slack."
+    lane :build_tag_and_upload_release do |options|
+
+      # Prompt for new version name
+      UI.header "Version Name"
+      name = prompt(
+        text: "Enter APK version name: "
+      )
+
+      # Retrieves arguments from the command line
+      unit_tests = options[:unit_tests]
+      bump_version = options[:bump_version]
+      vcs = options[:vcs]
+      tag = options[:tag]
+      generate_changelog = options[:generate_changelog]
+      upload_to_drive = options[:upload_to_drive]
+      upload_to_alpha = options[:upload_to_alpha]
+      slack = options[:slack]
+
+      # Sets arguments to true if params weren't passed, allowing us to selectively disable steps
+      # eg. "fastlane build_tag_and_upload_release unit_tests:false"
+      unit_tests = true if unit_tests.nil?
+      bump_version = true if bump_version.nil?
+      vcs = true if vcs.nil?
+      tag = true if tag.nil?
+      generate_changelog = true if generate_changelog.nil?
+      upload_to_drive = true if upload_to_drive.nil?
+      upload_to_alpha = true if upload_to_alpha.nil?
+      slack = true if slack.nil?
+
+      pipeline(
+        version_name_update: name,
+        unit_tests: unit_tests,
+        bump_version: bump_version,
+        vcs: vcs,
+        tag: tag,
+        generate_changelog: generate_changelog,
+        upload_to_drive: upload_to_drive,
+        upload_to_alpha: upload_to_alpha,
+        slack: slack
+      )
+
+    end
+
+
+    private_lane :pipeline do |options|
+
+        # Ensure that all changes are committed before build
+        ensure_git_status_clean
+
+        # Runs all unit tests
+        if options[:unit_tests]
+            test
+        end
+
+       # Increment version code, update version name via param: version_name_update
+        if options[:bump_version]
+          bump_version_code(version_name_update: options[:version_name_update])
+        end
+
+        # Commit and push the new version code + name
+        if options[:vcs]
+          git_commit(
+            path: "app/build.gradle",
+            message: "Increment version code: " + options[:version_name_update]
+          )
+
+          push_to_git_remote(
+            local_branch: git_branch,
+            remote_branch: git_branch,
+          )
+        end
+
+        # Generate changelog using git-changelog. This compares the changes between the last tag
+        # and the current version on this branch. This file can be read programmatically via
+        # read_changelog, but we can't currently upload this to GitHub.
+        if options[:generate_changelog]
+          current_version = get_version_code(
+            app_folder_name: "app",
+            gradle_file_path: "app/build.gradle",
+            ext_constant_name: "versionName"
+          )
+
+          sh("cd .. && git-changelog -t #{Shellwords.escape last_git_tag} -a \"v#{Shellwords.escape current_version}\"")
+        end
+
+        # Tag + sign release, push the tag to remote
+        if options[:tag]
+          add_git_tag(
+            tag: current_version,
+            sign: true
+          )
+
+          push_git_tags(
+            tag: last_git_tag
+          )
+        end
+
+        # Clean workspace
+        gradle(task: "clean")
+
+        # Generate and sign actual APKs, both Staging and Prod, with production keystore.
+        generate_apks
+
+        # Ping slack with a link to the new tag
+        if options[:slack]
+          slack(
+            message: "New build available",
+            channel: "mobile",
+            payload: {
+              'App' => 'Blockchain Android',
+              'Version' => current_version,
+              'Built by' => 'Fastlane',
+              'View release on GitHub' => 'https://github.com/blockchain/My-Wallet-V3-Android/releases/tag/' + current_version
+            },
+            default_payloads: [:git_branch, :git_author]
+          )
+        end
+
+        # Upload artifacts to Google Drive
+        if options[:upload_to_drive]
+            archive
+        end
+
+        # Upload to Google Play Alpha, but don't deploy
+        if options[:upload_to_alpha]
+            # TODO Need to create user with API access for Play Store
+        end
+
+        # Ship it
+        ship_it
+
+
+    end
+
+
+    desc "Increments the app's Version Code, and replaces the current Version Name with whatever is supplied via `version_name_update`."
+    private_lane :bump_version_code do |options|
+      path = '../app/build.gradle'
+      code = /versionCode\s+(\d+)/
+      name = /versionName\s+(["'])(?:(?=(\\?))\2.)*?\1/
+
+      newName = options[:version_name_update]
+
+      s = File.read(path)
+      versionCode = s[code, 1].to_i
+      s[code, 1] = (versionCode + 1).to_s
+      s.sub!(name, "versionName " + '"' + newName + '"')
+
+      f = File.new(path, 'w')
+      f.write(s)
+      f.close
+    end
+
+
+    desc "Runs all tests"
+    lane :test do
+      gradle(task: "testEnvProdMinApi21DebugUnitTestCoverage")
+    end
+
+
+    desc "Submit a Dogfood Beta build to Crashlytics Beta"
+    lane :beta do
+      UI.header "Changelog"
+      notes = prompt(
+        text: "Enter changelog: ",
+        multi_line_end_keyword: "END"
+      )
+
+      apiToken = ENV["FABRIC_API_KEY"]
+      buildSecret = ENV["FABRIC_BUILD_SECRET"]
+      storeFile = ENV["STORE_FILE"]
+      storePassword = ENV["STORE_PASSWORD"]
+      keyAlias = ENV["KEY_ALIAS"]
+      keyPassword = ENV["KEY_PASSWORD"]
+
+      gradle(task: "clean")
+
+      gradle(
+        task: 'assemble',
+        build_type: 'Dogfood',
+        flavor: 'EnvProdMinApi16',
+        print_command: false,
+        properties: {
+          "android.injected.signing.store.file" => "#{storeFile}",
+          "android.injected.signing.store.password" => "#{storePassword}",
+          "android.injected.signing.key.alias" => "#{keyAlias}",
+          "android.injected.signing.key.password" => "#{keyPassword}"
+        }
+      )
+
+      crashlytics(
+        api_token: "#{apiToken}",
+        build_secret: "#{buildSecret}",
+        notes: "#{notes}"
+      )
+
+      slack(message: "Dogfood build uploaded to Crashlytics Beta")
+
+      UI.success "Successfully uploaded beta build to Crashlytics"
+
+    end
+
+    private_lane :generate_apk do | options |
+
+      environment = options[:environment]
+
+      apiToken = ENV["FABRIC_API_KEY"]
+      buildSecret = ENV["FABRIC_BUILD_SECRET"]
+      storeFile = ENV["STORE_FILE"]
+      storePassword = ENV["STORE_PASSWORD"]
+      keyAlias = ENV["KEY_ALIAS"]
+      keyPassword = ENV["KEY_PASSWORD"]
+
+      gradle(
+        task: 'assemble',
+        build_type: 'Release',
+        flavor: 'Env' + environment + 'MinApi16',
+        print_command: false,
+        properties: {
+          "android.injected.signing.store.file" => "#{storeFile}",
+          "android.injected.signing.store.password" => "#{storePassword}",
+          "android.injected.signing.key.alias" => "#{keyAlias}",
+          "android.injected.signing.key.password" => "#{keyPassword}"
+        }
+      )
+
+    end
+
+
+    desc "Generate release builds for both staging and production"
+    lane :generate_apks do
+
+      generate_apk(environment: "Staging")
+      generate_apk(environment: "Prod")
+
+    end
+
+
+    desc "Upload APKs to Google Drive"
+    lane :archive do
+      # Check that Drive is available
+      drive_folder = File.expand_path("~/Google\ Drive\ File\ Stream/My\ Drive/Android\ APKs")
+      if !File.exist? drive_folder
+        # Warn user but don't fail
+        puts "Google Drive path not found - please upload the APKs to archive manually"
+        next
+      end
+
+      # This is nasty but there's no integration to allow access to GDrive just yet
+      sh("mv ../app/build/outputs/apk/envProdMinApi16/release/*.apk #{Shellwords.escape drive_folder}")
+      sh("mv ../app/build/outputs/apk/envStagingMinApi16/release/*.apk #{Shellwords.escape drive_folder}")
+
+    end
+
+
+    desc "Submit a release Alpha build to the Play Store"
+    lane :alpha do
+
+      gradle(task: "clean")
+
+      generate_apk(environment: "Prod")
+
+      # TODO
+
+    end
+
+    private_lane :ship_it do
+      rand = Random.rand(0..1)
+      if rand == 0
+        squirrel
+      elsif rand == 1
+        boat
+      end
+    end
+
+    def squirrel
+      puts "
+        !!!!
+      !!!!!!!!
+    !!!!!!!!!!!   O_O
+    !!!  !!!!!!! /@ @\\
+          !!!!!! \\ x /
+          !!!!!!/ m  !m
+           !!!!/ __  |
+           !!!!|/  \\__
+            !!!\\______\\
+      "
+    end
+
+    def boat
+      puts "
+         .  o ..
+         o . o o.o
+              ...oo
+                __[]__
+             __|_o_o_o\__
+             \\\"\"\"\"\"\"\"\"\"\"/
+              \\. ..  . /
+         ^^^^^^^^^^^^^^^^^^^^
+      "
+    end
+
+
+  after_all do |lane|
+    # This block is called, only if the executed lane was successful
+  end
+
+
+  error do |lane, exception|
+    # This block is called, only if the executed lane failed with an exception
+  end
+
+
+end
