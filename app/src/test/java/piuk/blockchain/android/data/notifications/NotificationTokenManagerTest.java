@@ -16,8 +16,11 @@ import piuk.blockchain.android.data.access.AuthEvent;
 import piuk.blockchain.android.data.rxjava.RxBus;
 import piuk.blockchain.android.util.PrefsUtil;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -40,13 +43,51 @@ public class NotificationTokenManagerTest extends RxTest{
     }
 
     @Test
-    public void storeAndUpdateToken() throws Exception {
+    public void storeAndUpdateToken_disabledNotifications() throws Exception {
         // Arrange
+        when(prefsUtil.getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true)).thenReturn(false);
+        when(payloadManager.getPayload()).thenReturn(null);
 
         // Act
         subject.storeAndUpdateToken("token");
         // Assert
+        verify(prefsUtil).getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true);
         verify(prefsUtil).setValue(PrefsUtil.KEY_FIREBASE_TOKEN, "token");
+        verifyNoMoreInteractions(prefsUtil);
+    }
+
+    @Test
+    public void storeAndUpdateToken_enabledNotifications_notSignedIn() throws Exception {
+        // Arrange
+        when(prefsUtil.getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true)).thenReturn(true);
+        when(payloadManager.getPayload()).thenReturn(null);
+
+        // Act
+        subject.storeAndUpdateToken("token");
+        // Assert
+        verify(prefsUtil).getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true);
+        verify(prefsUtil).setValue(PrefsUtil.KEY_FIREBASE_TOKEN, "token");
+        verifyNoMoreInteractions(prefsUtil);
+    }
+
+    @Test
+    public void storeAndUpdateToken_enabledNotifications_signedIn() throws Exception {
+        // Arrange
+        when(prefsUtil.getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true)).thenReturn(true);
+
+        Wallet mockPayload = mock(Wallet.class);
+        when(mockPayload.getGuid()).thenReturn("guid");
+        when(mockPayload.getSharedKey()).thenReturn("sharedKey");
+        when(payloadManager.getPayload()).thenReturn(mockPayload);
+
+        when(notificationService.sendNotificationToken(anyString(), anyString(), anyString())).thenReturn(Completable.complete());
+
+        // Act
+        subject.storeAndUpdateToken("token");
+        // Assert
+        verify(prefsUtil).getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true);
+        verify(prefsUtil).setValue(PrefsUtil.KEY_FIREBASE_TOKEN, "token");
+        verify(notificationService).sendNotificationToken("token","guid","sharedKey");
         verifyNoMoreInteractions(prefsUtil);
     }
 
@@ -83,7 +124,7 @@ public class NotificationTokenManagerTest extends RxTest{
         testObservable.assertComplete();
         testObservable.assertNoErrors();
         verify(prefsUtil).setValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true);
-        verify(payloadManager).getPayload();
+        verify(payloadManager, atLeastOnce()).getPayload();
         verify(notificationService).sendNotificationToken(anyString(), anyString(), anyString());
         verifyNoMoreInteractions(notificationService);
     }

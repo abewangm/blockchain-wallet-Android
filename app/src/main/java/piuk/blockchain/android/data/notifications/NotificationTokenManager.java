@@ -48,6 +48,13 @@ public class NotificationTokenManager {
      */
     void storeAndUpdateToken(@NonNull String token) {
         prefsUtil.setValue(PrefsUtil.KEY_FIREBASE_TOKEN, token);
+        if (!token.isEmpty()) {
+            sendFirebaseToken(token)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(() -> {
+                        //no-op
+                    }, throwable -> Timber.e(throwable));
+        }
     }
 
     public void registerAuthEvent() {
@@ -149,8 +156,8 @@ public class NotificationTokenManager {
     }
 
     private Completable sendFirebaseToken(@NonNull String refreshedToken) {
-
-        if (prefsUtil.getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true)) {
+        if (prefsUtil.getValue(PrefsUtil.KEY_PUSH_NOTIFICATION_ENABLED, true)
+                && payloadManager.getPayload() != null) {
 
             Wallet payload = payloadManager.getPayload();
             String guid = payload.getGuid();
